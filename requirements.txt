@@ -1,0 +1,4 @@
+paddlepaddle-gpu>=2.0.0.rc
+tqdm
+PyYAML>=5.1
+numpy
