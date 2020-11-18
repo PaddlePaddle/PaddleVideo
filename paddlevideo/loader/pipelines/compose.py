@@ -16,6 +16,7 @@ from collections.abc import Sequence
 from ..registry import PIPELINES
 import traceback
 from ...utils import build
+from ...utils import get_logger
 
 
 @PIPELINES.register()
@@ -68,6 +69,7 @@ class Compose(object):
                 data = p(data)
             except Exception as e:
                 stack_info = traceback.format_exc()
+                logger = get_logger("paddlevideo")
                 logger.info("fail to perform transform [{}] with error: "
                       "{} and stack:\n{}".format(p, e, str(stack_info)))
                 raise e

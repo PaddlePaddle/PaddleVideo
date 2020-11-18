@@ -54,3 +54,12 @@ class VideoDecoder(object):
         results['format'] = 'video'
         return results
 
+@PIPELINES.register()
+class FrameDecoder(object):
+    """just parse results
+    """
+    def __init__(self):
+        pass
+    def __call__(self, results):
+        results['format'] = 'frame'
+        return results

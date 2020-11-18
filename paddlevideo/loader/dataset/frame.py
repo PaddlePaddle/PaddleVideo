@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import os.path as osp
+import copy
+import numpy as np
 
 from ..registry import DATASETS
 from .base import BaseDataset 
@@ -48,7 +50,7 @@ class FrameDataset(BaseDataset):
         #unique attribute in frames dataset.
         self.suffix = suffix
 
-        super.__init__(
+        super().__init__(
                  file_path,
                  pipeline,
                  data_prefix,
@@ -60,7 +62,9 @@ class FrameDataset(BaseDataset):
         with open(self.file_path, 'r') as fin:
             for line in fin:
                 line_split = line.strip().split()
-                frame_dir, total_frames, labels = line_split
+                frame_dir, frames_len, labels = line_split
+                if self.data_prefix is not None:
+                    frame_dir = osp.join(self.data_prefix, frame_dir)
                 info.append(dict(frame_dir=frame_dir, frames_len=frames_len, labels=int(labels)))
         return info
 
@@ -68,11 +72,18 @@ class FrameDataset(BaseDataset):
         """Prepare the frames for training given index. """
         results = copy.deepcopy(self.info[idx])
         results['suffix'] = self.suffix
-        return self.pipeline(results)
+        #Note: For now, paddle.io.DataLoader cannot support dict type retval, so convert to list here
+        to_list =  self.pipeline(results)
+        #XXX have to unsqueeze label here or before calc metric!
+        return [to_list['imgs'], np.array([to_list['labels']])]
 
 
     def prepare_valid(self, idx):
-        """Prepare the frames for testing given the index."""
+        """Prepare the frames for training given index. """
         results = copy.deepcopy(self.info[idx])
         results['suffix'] = self.suffix
-        return self.pipeline(results)
+        #Note: For now, paddle.io.DataLoader cannot support dict type retval, so convert to list here
+        to_list =  self.pipeline(results)
+        #XXX have to unsqueeze label here or before calc metric!
+        return [to_list['imgs'], np.array([to_list['labels']])]
+
