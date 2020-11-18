@@ -19,7 +19,7 @@ from .augmentations import (Scale,
 			Image2Array, 
 			Normalization)
 from .compose import Compose
-from .decode import VideoDecoder
+from .decode import VideoDecoder, FrameDecoder
 from .sample import Sampler
 
 __all__ = ['Scale',
@@ -30,5 +30,6 @@ __all__ = ['Scale',
            'Normalization',
            'Compose',
            'VideoDecoder',
+           'FrameDecoder',
            'Sample',]
 
