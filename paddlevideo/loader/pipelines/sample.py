@@ -41,9 +41,9 @@ class Sampler(object):
         if data_format == "frame":
             frame_dir = results['frame_dir']
             imgs = []
-            img = Image.open(os.path.join(frame_dir, results['suffix'].format(
-                        jj + 1))).convert('RGB')
-            imgs.append(img)
+            for idx in frames_idx:
+                img = Image.open(os.path.join(frame_dir, results['suffix'].format(idx))).convert('RGB')
+                imgs.append(img)
 
         elif data_format == "video":
 
@@ -55,7 +55,7 @@ class Sampler(object):
                 imgs.append(img)
         else:
             # XXX error typp ????
-            raise TypeError
+            raise NotImplementedError
         results['imgs'] = imgs
         return results
 
@@ -68,7 +68,7 @@ class Sampler(object):
             sampling id.
         """
         frames_len = results['frames_len']
-        average_dur = int(frames_len / self.num_seg)
+        average_dur = int(int(frames_len) / self.num_seg)
         frames_idx = []
         for i in range(self.num_seg):
             idx = 0
@@ -89,6 +89,11 @@ class Sampler(object):
                 else:
                     idx = i
             for jj in range(idx, idx+self.seg_len):
-                frames_idx.append(int(jj%frames_len))
+                if results['format'] == 'video':
+                    frames_idx.append(int(jj%frames_len))
+                elif results['format'] == 'frame':
+                    frames_idx.append(jj+1)
+                else:
+                    raise NotImplementedError
 
         return self._get(frames_idx, results)

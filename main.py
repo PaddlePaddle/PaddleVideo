@@ -64,8 +64,8 @@ def main():
     #        logger.error(i)
 
     dataset = [build_dataset((cfg.DATASET.train, cfg.PIPELINE.train))]
-    if args.validate:
-        dataset.append(build_dataset((cfg.DATASET.valid, cfg.PIPELINE.valid)))
+    #if args.validate:
+    #    dataset.append(build_dataset((cfg.DATASET.valid, cfg.PIPELINE.valid)))
      
     train_model(model,
 		dataset, 
