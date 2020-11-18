@@ -58,6 +58,11 @@ def main():
         paddle.distributed.init_parallel_env()
 
     model = build_model(cfg.MODEL)
+
+    #NOTE: To debug dataloader or wanna inspect your data, please try to print(dataset) here.
+    #    for i in dataset[0]:
+    #        logger.error(i)
+
     dataset = [build_dataset((cfg.DATASET.train, cfg.PIPELINE.train))]
     #if args.validate:
     #    dataset.append(build_dataset((cfg.DATASET.valid, cfg.PIPELINE.valid)))

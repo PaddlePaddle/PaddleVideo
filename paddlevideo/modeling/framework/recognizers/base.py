@@ -81,7 +81,7 @@ class BaseRecognizer(nn.Layer):
         return loss_metrics
 
     def val_step(self, data_batch, **kwargs):
-        """Interface to valid
+        """Validating setp.
         """
         imgs = data_batch[0]
         labels = data_batch[1]

@@ -27,7 +27,7 @@ def train_model(model,
                 dataset,
                 cfg,
                 parallel=True,
-	        validate=False):
+	        validate=True):
     """Train model entry
 
     Args:
@@ -63,7 +63,9 @@ def train_model(model,
         model = paddle.DataParallel(model)
 
     train_loader = data_loaders[0]
-    
+    if  validate:
+        valid_loader = data_loaders[1]
+
     metric_list = [
         ("loss", AverageMeter('loss', '7.5f')),
         ("lr", AverageMeter(
@@ -116,17 +118,47 @@ def train_model(model,
             if i == 20:
                 break
 
-        """
-        Note: validate is not ready now!
 
-        """
-    end_str = ' '.join([str(m.mean) for m in metric_list.values()] +
+        end_str = ' '.join([str(m.mean) for m in metric_list.values()] +
                        [metric_list['batch_time'].total])
-    end_epoch_str = "END epoch:{:<3d}".format(epoch)
+        end_epoch_str = "END epoch:{:<3d}".format(epoch)
 
-    logger.info("{:s} {:s} {:s}s".format(
+        logger.info("{:s} {:s} {:s}s".format(
             coloring(end_epoch_str, "RED"),
             coloring("TRAIN", "PURPLE"),
             coloring(end_str, "OKGREEN")))
 
-    logger.info('[TRAIN] training finished')
+        if validate:
+            model.eval()
+            tic = time.time()
+            for i, data in enumerate(valid_loader):
+                if parallel:
+                    outputs = model._layers.val_step(data)
+                else:
+                    outputs = model.val_step(data)
+                for name, value in outputs.items():
+                    metric_list[name].update(value.numpy()[0], batch_size)
+                metric_list['batch_time'].update(time.time() - tic)
+                tic = time.time()
+
+
+                if i % cfg.get("log_interval", 10) == 0:
+                    fetchs_str = ' '.join([str(m.value) for m in metric_list.values()])
+                    epoch_str = "epoch:[{:>3d}/{:<3d}]".format(epoch, cfg.epochs)
+                    step_str = "{:s} step:{:<4d}".format("valid", i)
+                    logger.info("{:s} {:s} {:s}s".format(
+                        coloring(epoch_str, "HEADER")
+                        if i == 0 else epoch_str,
+                        coloring(step_str, "PURPLE"),
+                        coloring(fetchs_str, 'OKGREEN')))
+                if i == 20:
+                    break
+
+        logger.info("{:s} {:s} {:s}s".format(
+            coloring(end_epoch_str, "RED"),
+            coloring("VALID", "PURPLE"),
+            coloring(end_str, "OKGREEN")))
+
+    #save and resume is not ready!!!
+
+    logger.info('training finished') #info of yaml
