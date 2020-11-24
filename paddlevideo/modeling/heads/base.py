@@ -87,8 +87,8 @@ class BaseHead(nn.Layer):
         losses['top1'] = top1
         losses['top5'] = top5
         if type(loss) is dict:
-            losses.update(loss)
+            losses.update(avg_loss)
         else:
-            losses['loss'] = loss
+            losses['loss'] = avg_loss
 
         return losses

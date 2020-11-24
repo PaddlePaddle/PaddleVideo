@@ -34,7 +34,7 @@ class BaseRecognizer(nn.Layer):
 
     def init_weights(self):
         """Initialize the model network weights. """
-        pass
+        
         self.backbone.init_weights()
         self.head.init_weights()
 

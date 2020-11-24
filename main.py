@@ -53,20 +53,23 @@ def main():
     args = parse_args()
 
     cfg = get_config(args.config, overrides=args.override)
-    # use cfg.model or cfg?
     if args.parallel:
         paddle.distributed.init_parallel_env()
 
     model = build_model(cfg.MODEL)
 
-    #NOTE: To debug dataloader or wanna inspect your data, please try to print(dataset) here.
-    #    for i in dataset[0]:
-    #        logger.error(i)
-
     dataset = [build_dataset((cfg.DATASET.train, cfg.PIPELINE.train))]
-    #if args.validate:
-    #    dataset.append(build_dataset((cfg.DATASET.valid, cfg.PIPELINE.valid)))
-     
+
+    #NOTE: To debug dataloader or inspect data, please try to call dataset so that errors can be catched.
+    try:
+        from collections import Iterable
+        isinstance(dataset[0], Iterable)
+    except TypeError:
+        print("TypeError: 'dataset' is not iterable")
+
+    if args.validate:
+        dataset.append(build_dataset((cfg.DATASET.valid, cfg.PIPELINE.valid)))
+
     train_model(model,
 		dataset, 
 		cfg,
@@ -76,4 +79,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-    #spawn(train, args=(args, ), nprocs=4)

@@ -14,8 +14,6 @@
 
 import os
 import cv2
-import random
-from PIL import Image
 
 from ..registry import PIPELINES
 

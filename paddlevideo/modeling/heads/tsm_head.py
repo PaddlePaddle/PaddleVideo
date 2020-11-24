@@ -33,10 +33,11 @@ class TSMHead(TSNHead):
     """
 
     def __init__(self,
-                 num_class:int,
-                 in_channels:int,
-                 std:float,
+                 num_classes,
+                 in_channels,
+                 drop_ratio,
+                 std,
                  **kwargs)->None:
 
 
-        super().__init__(num_classes, in_channels, loss_cfg, loss_cfg, drop_ratio, std, **kwargs)
+        super().__init__(num_classes, in_channels, drop_ratio=drop_ratio, std=std, **kwargs)
