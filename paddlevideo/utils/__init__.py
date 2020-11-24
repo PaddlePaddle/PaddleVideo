@@ -16,5 +16,5 @@ from .registry import Registry
 from .build_utils import build
 from .config import *
 from .logger import setup_logger, coloring, get_logger
-from .average import AverageMeter
+from .metric import AverageMeter, build_metric, log_batch, log_epoch
 __all__ = ['Registry', 'build']

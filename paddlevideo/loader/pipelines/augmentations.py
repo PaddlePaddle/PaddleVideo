@@ -143,6 +143,101 @@ class CenterCrop(object):
 
 
 @PIPELINES.register()
+class MultiScaleCrop(object):
+    def __init__(self, 
+            target_size, #NOTE: named target size now, but still pass short size in it!
+                 scales=None,
+                 max_distort=1,
+                 fix_crop=True,
+                 more_fix_crop=True):
+        self.target_size = target_size
+        self.scales = scales if scales else [1, .875, .75, .66]
+        self.max_distort = max_distort
+        self.fix_crop = fix_crop
+        self.more_fix_crop = more_fix_crop
+    def __call__(self, results):
+        """
+        Performs MultiScaleCrop operations.
+        Args:
+            imgs: List where wach item is a PIL.Image.
+            XXX:
+        results:
+
+        """
+        imgs = results['imgs']
+
+        input_size = [self.target_size, self.target_size]
+
+        im_size = imgs[0].size
+
+        # get random crop offset
+        def _sample_crop_size(im_size):
+            image_w, image_h = im_size[0], im_size[1]
+
+            base_size = min(image_w, image_h)
+            crop_sizes = [int(base_size * x) for x in self.scales]
+            crop_h = [
+                input_size[1] if abs(x - input_size[1]) < 3 else x
+                for x in crop_sizes
+            ]
+            crop_w = [
+                input_size[0] if abs(x - input_size[0]) < 3 else x
+                for x in crop_sizes
+            ]
+
+            pairs = []
+            for i, h in enumerate(crop_h):
+                for j, w in enumerate(crop_w):
+                    if abs(i - j) <= self.max_distort:
+                        pairs.append((w, h))
+            crop_pair = random.choice(pairs)
+            if not self.fix_crop:
+                w_offset = random.randint(0, image_w - crop_pair[0])
+                h_offset = random.randint(0, image_h - crop_pair[1])
+            else:
+                w_step = (image_w - crop_pair[0]) / 4
+                h_step = (image_h - crop_pair[1]) / 4
+
+                ret = list()
+                ret.append((0, 0))  # upper left
+                if w_step != 0:
+                    ret.append((4 * w_step, 0))  # upper right
+                if h_step != 0:
+                    ret.append((0, 4 * h_step))  # lower left
+                if h_step != 0 and w_step != 0:
+                    ret.append((4 * w_step, 4 * h_step))  # lower right
+                if h_step != 0 or w_step != 0:
+                    ret.append((2 * w_step, 2 * h_step))  # center
+
+                if self.more_fix_crop:
+                    ret.append((0, 2 * h_step))  # center left
+                    ret.append((4 * w_step, 2 * h_step))  # center right
+                    ret.append((2 * w_step, 4 * h_step))  # lower center
+                    ret.append((2 * w_step, 0 * h_step))  # upper center
+
+                    ret.append((1 * w_step, 1 * h_step))  # upper left quarter
+                    ret.append((3 * w_step, 1 * h_step))  # upper right quarter
+                    ret.append((1 * w_step, 3 * h_step))  # lower left quarter
+                    ret.append((3 * w_step, 3 * h_step))  # lower righ quarter
+
+                w_offset, h_offset = random.choice(ret)
+
+            return crop_pair[0], crop_pair[1], w_offset, h_offset
+
+        crop_w, crop_h, offset_w, offset_h = _sample_crop_size(im_size)
+        crop_img_group = [
+            img.crop((offset_w, offset_h, offset_w + crop_w, offset_h + crop_h))
+            for img in imgs
+        ]
+        ret_img_group = [
+            img.resize((input_size[0], input_size[1]), Image.BILINEAR)
+            for img in crop_img_group
+        ]
+        results['imgs'] = ret_img_group
+        return results
+
+
+@PIPELINES.register()
 class RandomFlip(object):
     """
     Random Flip images.

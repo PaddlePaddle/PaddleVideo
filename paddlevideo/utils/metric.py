@@ -12,7 +12,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-__all__ = ['AverageMeter']
+
+from collections import OrderedDict
+from .logger import get_logger, coloring
+logger = get_logger("paddlevideo")
+
+__all__ = ['AverageMeter', 'build_metric', 'log_batch', 'log_epoch']
+
+def build_metric():
+    metric_list = [
+        ("loss", AverageMeter('loss', '7.5f')),
+        ("lr", AverageMeter(
+            'lr', 'f', need_avg=False)),
+        ("top1", AverageMeter("top1", '.5f')),
+        ("top5", AverageMeter("top5", '.5f')),
+        ("batch_time", AverageMeter('elapse', '.3f')),
+        ("reader_time", AverageMeter('reader ', '.3f')),
+    ]
+    metric_list = OrderedDict(metric_list)
+    return metric_list
+
 
 
 class AverageMeter(object):
@@ -20,7 +39,7 @@ class AverageMeter(object):
     Computes and stores the average and current value
     """
 
-    def __init__(self, name='', fmt='f', need_avg=False):
+    def __init__(self, name='', fmt='f', need_avg=True):
         self.name = name
         self.fmt = fmt
         self.need_avg = need_avg
@@ -57,3 +76,25 @@ class AverageMeter(object):
     @property
     def value(self):
         return '{self.name}: {self.val:{self.fmt}}'.format(self=self)
+
+
+def log_batch(metric_list, batch_id, epoch_id, total_epoch, mode):
+    metric_str = ' '.join([str(m.value) for m in metric_list.values()])
+    epoch_str = "epoch:[{:>3d}/{:<3d}]".format(epoch_id, total_epoch)
+    step_str = "{:s} step:{:<4d}".format(mode, batch_id)
+    logger.info("{:s} {:s} {:s}s".format(
+        coloring(epoch_str, "HEADER") if batch_id == 0 else epoch_str,
+        coloring(step_str, "PURPLE"),
+        coloring(metric_str, 'OKGREEN')))
+
+
+def log_epoch(metric_list, epoch, mode):
+    metric_avg = ' '.join([str(m.mean) for m in metric_list.values()] +[metric_list['batch_time'].total])
+        
+    end_epoch_str = "END epoch:{:<3d}".format(epoch)
+
+    logger.info("{:s} {:s} {:s}s".format(
+        coloring(end_epoch_str, "RED"),
+        coloring(mode, "PURPLE"),
+        coloring(metric_avg, "OKGREEN")))
+

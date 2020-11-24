@@ -47,7 +47,7 @@ def build_dataloader(dataset,
                      num_workers,
                      places,
                      shuffle=True,
-                     drop_last=False,
+                     drop_last=True,
                      **kwargs):
     """Build Paddle Dataloader.
 
@@ -70,7 +70,7 @@ def build_dataloader(dataset,
             dataset,
             batch_size=batch_size,
             shuffle=shuffle,
-            drop_last=True)
+            drop_last=drop_last)
 
 
     data_loader = DataLoader(

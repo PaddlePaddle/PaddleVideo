@@ -13,4 +13,5 @@
 # limitations under the License.
 
 from .resnet import ResNet
-__all__ = ['ResNet']
+from .resnet_tsm import ResNetTSM
+__all__ = ['ResNet', 'ResNetTSM']

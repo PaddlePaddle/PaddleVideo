@@ -21,6 +21,7 @@ import numpy as np
 class Sampler(object):
     """
     Sample frames id.
+    NOTE: Use PIL to read image here, has diff with CV2
     Args:
         num_seg(int): number of segments.
         seg_len(int): number of sampled frames in each segment.
@@ -54,7 +55,6 @@ class Sampler(object):
                 img = Image.fromarray(imgbuf, mode='RGB')
                 imgs.append(img)
         else:
-            # XXX error typp ????
             raise NotImplementedError
         results['imgs'] = imgs
         return results
