@@ -59,13 +59,6 @@ def build_dataloader(dataset,
         num_worker (int): num_worker
         shuffle(bool): whether to shuffle the data at every epoch.
     """
-    logger.debug("=========================")
-    logger.debug(dataset)
-    logger.debug(batch_size)
-    logger.debug(shuffle)
-    logger.debug(places)
-    logger.debug(num_workers)
-    logger.debug("=========================")
     sampler = DistributedBatchSampler(
             dataset,
             batch_size=batch_size,

@@ -27,7 +27,7 @@ def build_metric():
         ("top1", AverageMeter("top1", '.5f')),
         ("top5", AverageMeter("top5", '.5f')),
         ("batch_time", AverageMeter('elapse', '.3f')),
-        ("reader_time", AverageMeter('reader ', '.3f')),
+        ("reader_time", AverageMeter('reader', '.3f')),
     ]
     metric_list = OrderedDict(metric_list)
     return metric_list
@@ -78,23 +78,26 @@ class AverageMeter(object):
         return '{self.name}: {self.val:{self.fmt}}'.format(self=self)
 
 
-def log_batch(metric_list, batch_id, epoch_id, total_epoch, mode):
+def log_batch(metric_list, batch_id, epoch_id, total_epoch, mode, ips):
     metric_str = ' '.join([str(m.value) for m in metric_list.values()])
     epoch_str = "epoch:[{:>3d}/{:<3d}]".format(epoch_id, total_epoch)
     step_str = "{:s} step:{:<4d}".format(mode, batch_id)
-    logger.info("{:s} {:s} {:s}s".format(
+    logger.info("{:s} {:s} {:s}s {}".format(
         coloring(epoch_str, "HEADER") if batch_id == 0 else epoch_str,
         coloring(step_str, "PURPLE"),
-        coloring(metric_str, 'OKGREEN')))
+        coloring(metric_str, 'OKGREEN'),
+        ips))
 
 
-def log_epoch(metric_list, epoch, mode):
+def log_epoch(metric_list, epoch, mode, ips):
     metric_avg = ' '.join([str(m.mean) for m in metric_list.values()] +[metric_list['batch_time'].total])
         
     end_epoch_str = "END epoch:{:<3d}".format(epoch)
 
-    logger.info("{:s} {:s} {:s}s".format(
+    logger.info("{:s} {:s} {:s}s {}".format(
         coloring(end_epoch_str, "RED"),
         coloring(mode, "PURPLE"),
-        coloring(metric_avg, "OKGREEN")))
+        coloring(metric_avg, "OKGREEN"),
+        ips))
+
 

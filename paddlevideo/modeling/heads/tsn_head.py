@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+import math
 
 import paddle
 import paddle.nn.functional as F
@@ -48,6 +48,7 @@ class TSNHead(BaseHead):
         super().__init__(num_classes, in_channels, loss_cfg, **kwargs)
         self.drop_ratio = drop_ratio
         self.std = std
+        self.stdv = 1.0/math.sqrt(self.in_channels * 1.0)
 
         #NOTE: global pool performance
         self.avgpool2d = AdaptiveAvgPool2D((1,1))
@@ -63,7 +64,10 @@ class TSNHead(BaseHead):
 
     def init_weight(self):
         """Initiate the FC layer parameters"""
-        weight_init_(self.fc, 'Normal','fc_0.w_0', 'fc_0.b_0', std=self.std)
+
+        weight_init_(self.fc, 'Uniform', 'fc_0.w_0', 'fc_0.b_0', low=-self.stdv, high=self.stdv )
+        self.fc.learning_rate = 2.0
+        self.fc.regularizer = paddle.regularizer.L2Decay(0.)
 
     def forward(self, x, seg_num):
         
