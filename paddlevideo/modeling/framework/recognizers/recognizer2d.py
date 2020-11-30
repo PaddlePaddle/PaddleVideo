@@ -22,7 +22,7 @@ logger = get_logger("paddlevideo")
 class Recognizer2D(BaseRecognizer):
     """2D recognizer model framework."""
 
-    def forward_train(self, imgs, labels, **kwargs):
+    def forward_train(self, imgs, labels, reducesum, **kwargs):
         """Define how the model is going to train, from input to output.
         """
         # As the num_segs is an attribute of dataset phase, and didn't pass to build_head phase, should obtain it from imgs(paddle.Tensor) now, then call self.head method.
@@ -34,7 +34,7 @@ class Recognizer2D(BaseRecognizer):
         cls_score = self.head(feature, num_segs)
         #labels = labels.squeeze()
         #XXX: unsqueeze label to [label] ?
-        loss_metrics = self.head.loss(cls_score, labels, **kwargs)
+        loss_metrics = self.head.loss(cls_score, labels, reducesum, **kwargs)
         return loss_metrics
 
     def forward_valid(self, imgs):

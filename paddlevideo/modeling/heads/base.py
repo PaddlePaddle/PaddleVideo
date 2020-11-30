@@ -21,7 +21,7 @@ import paddle.nn as nn
 import paddle.nn.functional as F
 
 from ..builder import build_loss
-from paddlevideo.utils import get_logger 
+from paddlevideo.utils import get_logger, get_dist_info 
 
 logger = get_logger("paddlevideo")
 class BaseHead(nn.Layer):
@@ -63,7 +63,7 @@ class BaseHead(nn.Layer):
         """
         pass
 
-    def loss(self, scores, labels, **kwargs):
+    def loss(self, scores, labels, reducesum=False, **kwargs):
         """Calculate the loss accroding to the model output ```score```, 
            and the target ```labels```.
 
@@ -80,9 +80,16 @@ class BaseHead(nn.Layer):
         #XXX: F.crossentropy include logsoftmax and nllloss 
         loss = self.loss_func(scores, labels, **kwargs)
         avg_loss = paddle.mean(loss)
-        softmax_out = F.softmax(scores)         
+        softmax_out = F.softmax(scores)    
         top1 = paddle.metric.accuracy(input=softmax_out, label=labels, k=1)
         top5 = paddle.metric.accuracy(input=softmax_out, label=labels, k=5)
+
+        _, world_size = get_dist_info()
+
+        #deal with multi cards validate
+        if world_size > 1:
+            top1 = paddle.distributed.all_reduce(top1, op=paddle.distributed.ReduceOp.SUM)/ world_size
+            top5 = paddle.distributed.all_reduce(top5, op=paddle.distributed.ReduceOp.SUM)/ world_size
 
         losses['top1'] = top1
         losses['top5'] = top5

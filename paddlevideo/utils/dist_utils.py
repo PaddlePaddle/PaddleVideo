@@ -11,12 +11,20 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import functools
 
-from .registry import Registry
-from .build_utils import build
-from .config import *
-from .logger import setup_logger, coloring, get_logger
-from .record import AverageMeter, build_metric, log_batch, log_epoch
-from .dist_utils import get_dist_info, main_only
-from .save_load import save, load_ckpt
-__all__ = ['Registry', 'build']
+import paddle
+import paddle.distributed as dist
+
+def get_dist_info():
+    world_size = dist.get_world_size()
+    rank = dist.get_rank()
+    return rank, world_size
+
+def main_only(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        rank, _ = get_dist_info()
+        if rank == 0:
+            return func(*args, **kwargs)
+    return wrapper
