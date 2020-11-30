@@ -64,11 +64,11 @@ class BaseHead(nn.Layer):
         pass
 
     def loss(self, scores, labels, reducesum=False, **kwargs):
-        """Calculate the loss accroding to the model output ```score```, 
+        """Calculate the loss accroding to the model output ```scores```, 
            and the target ```labels```.
 
         Args:
-            score (paddle.Tensor): The output of the model.
+            scores (paddle.Tensor): The output of the model.
             labels (paddle.Tensor): The target output of the model.
 
         Returns:
@@ -80,9 +80,8 @@ class BaseHead(nn.Layer):
         #XXX: F.crossentropy include logsoftmax and nllloss 
         loss = self.loss_func(scores, labels, **kwargs)
         avg_loss = paddle.mean(loss)
-        softmax_out = F.softmax(scores)    
-        top1 = paddle.metric.accuracy(input=softmax_out, label=labels, k=1)
-        top5 = paddle.metric.accuracy(input=softmax_out, label=labels, k=5)
+        top1 = paddle.metric.accuracy(input=scores, label=labels, k=1)
+        top5 = paddle.metric.accuracy(input=scores, label=labels, k=5)
 
         _, world_size = get_dist_info()
 
