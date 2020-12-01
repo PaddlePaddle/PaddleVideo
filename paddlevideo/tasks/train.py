@@ -97,7 +97,7 @@ def train_model(model,
         log_epoch(metric_list, epoch, "train", ips)
 
 
-        def test():
+        def evaluate():
             model.eval()
             metric_list = build_metric()
             tic = time.time()
@@ -121,7 +121,7 @@ def train_model(model,
             log_epoch(metric_list, epoch, "val", ips)
 
         if validate:
-            test()
+            evaluate()
 
         if metric_list['top1'].avg > best:
             best = metric_list['top1'].avg

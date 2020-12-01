@@ -63,7 +63,7 @@ class BaseHead(nn.Layer):
         """
         pass
 
-    def loss(self, scores, labels, reducesum=False, **kwargs):
+    def loss(self, scores, labels, reduce_sum=False, **kwargs):
         """Calculate the loss accroding to the model output ```scores```, 
            and the target ```labels```.
 

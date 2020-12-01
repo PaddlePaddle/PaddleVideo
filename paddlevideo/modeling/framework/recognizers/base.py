@@ -60,13 +60,13 @@ class BaseRecognizer(nn.Layer):
         pass
 
 
-    def forward(self, imgs, labels=None, return_loss=True, reducesum=False, **kwargs):
+    def forward(self, imgs, labels=None, return_loss=True, reduce_sum=False, **kwargs):
         """Define how the model is going to run, from input to output.
         """
         if return_loss:
             if labels is None:
                 raise ValueError("Label should not be None.")
-            return self.forward_train(imgs, labels, reducesum=reducesum, **kwargs)
+            return self.forward_train(imgs, labels, reduce_sum=reduce_sum, **kwargs)
         else:
             return self.forward_valid(imgs)
 
