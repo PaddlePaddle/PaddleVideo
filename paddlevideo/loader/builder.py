@@ -20,6 +20,7 @@ from paddlevideo.utils import get_logger
 
 logger = get_logger("paddlevideo")
 
+
 def build_pipeline(cfg):
     """Build pipeline.
     Args:
@@ -30,7 +31,7 @@ def build_pipeline(cfg):
 
 def build_dataset(cfg):
     """Build dataset.
-    Args: 
+    Args:
         cfg (dict): root config dict.
 
     Returns:
@@ -39,8 +40,9 @@ def build_dataset(cfg):
     #XXX: ugly code here!
     cfg_dataset, cfg_pipeline = cfg
     cfg_dataset.pipeline = build_pipeline(cfg_pipeline)
-    dataset = build(cfg_dataset, DATASETS, key="format")
+    dataset = build(cfg_dataset, DATASETS)
     return dataset
+
 
 def build_dataloader(dataset,
                      batch_size,
@@ -52,26 +54,23 @@ def build_dataloader(dataset,
     """Build Paddle Dataloader.
 
     XXX explain how the dataloader work!
-       
+
     Args:
         dataset (paddle.dataset): A PaddlePaddle dataset object.
         batch_size (int): batch size on single card.
         num_worker (int): num_worker
         shuffle(bool): whether to shuffle the data at every epoch.
     """
-    sampler = DistributedBatchSampler(
-            dataset,
-            batch_size=batch_size,
-            shuffle=shuffle,
-            drop_last=drop_last)
+    sampler = DistributedBatchSampler(dataset,
+                                      batch_size=batch_size,
+                                      shuffle=shuffle,
+                                      drop_last=drop_last)
 
-
-    data_loader = DataLoader(
-            dataset,
-            batch_sampler=sampler,
-            places=places,
-            num_workers=num_workers,
-            return_list=True,
-            **kwargs)
+    data_loader = DataLoader(dataset,
+                             batch_sampler=sampler,
+                             places=places,
+                             num_workers=num_workers,
+                             return_list=True,
+                             **kwargs)
 
     return data_loader

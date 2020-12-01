@@ -22,11 +22,7 @@ from paddlevideo.utils import get_logger, coloring
 from paddlevideo.utils import AverageMeter, build_metric, log_batch, log_epoch
 
 
-def train_model(model,
-                dataset,
-                cfg,
-                parallel=True,
-	        validate=True):
+def train_model(model, dataset, cfg, parallel=True, validate=True):
     """Train model entry
 
     Args:
@@ -44,19 +40,26 @@ def train_model(model,
     places = paddle.CUDAPlace(paddle.distributed.ParallelEnv().dev_id)
 
     dataloader_setting = dict(
-        batch_size = batch_size,
+        batch_size=batch_size,
         # default num worker: 0, which means no subprocess will be created
-        num_workers = cfg.DATASET.get('num_workers', 0),
-        places = places)
-    data_loaders = [build_dataloader(ds, **dataloader_setting) for ds in dataset]
+        num_workers=cfg.DATASET.get('num_workers', 0),
+        places=places)
+    data_loaders = [
+        build_dataloader(ds, **dataloader_setting) for ds in dataset
+    ]
 
     #build optimizer, refer to the field ```OPTIMIZER``` in the configuration for more details.
     train_loader = data_loaders[0]
     if validate:
         valid_loader = data_loaders[1]
 
+    #slowfast
+    cfg.OPTIMIZER.learning_rate.data_size = len(train_loader)
+
     lr = build_lr(cfg.OPTIMIZER.learning_rate)
-    optimizer = build_optimizer(cfg.OPTIMIZER, lr, parameter_list=model.parameters())
+    optimizer = build_optimizer(cfg.OPTIMIZER,
+                                lr,
+                                parameter_list=model.parameters())
 
     if parallel:
         model = paddle.DataParallel(model)
@@ -88,15 +91,17 @@ def train_model(model,
             tic = time.time()
 
             if i % cfg.get("log_interval", 10) == 0:
-                ips = "ips: {:.5f} instance/sec.".format(batch_size / metric_list["batch_time"].val)
+                ips = "ips: {:.5f} instance/sec.".format(
+                    batch_size / metric_list["batch_time"].val)
                 log_batch(metric_list, i, epoch, cfg.epochs, "train", ips)
-        
+
         # learning scheduler step
         lr.step()
 
-        ips = "ips: {:.5f} instance/sec.".format(batch_size * metric_list["batch_time"].count / metric_list["batch_time"].sum)
+        ips = "ips: {:.5f} instance/sec.".format(
+            batch_size * metric_list["batch_time"].count /
+            metric_list["batch_time"].sum)
         log_epoch(metric_list, epoch, "train", ips)
-
 
         if validate:
             model.eval()
@@ -113,12 +118,15 @@ def train_model(model,
                     metric_list[name].update(value.numpy()[0], batch_size)
                 metric_list['batch_time'].update(time.time() - tic)
                 tic = time.time()
-                
+
                 if i % cfg.get("log_interval", 10) == 0:
-                    ips = "ips: {:.5f} instance/sec.".format(batch_size / metric_list["batch_time"].val)
+                    ips = "ips: {:.5f} instance/sec.".format(
+                        batch_size / metric_list["batch_time"].val)
                     log_batch(metric_list, i, epoch, cfg.epochs, "val", ips)
 
-            ips = "ips: {:.5f} instance/sec.".format(batch_size * metric_list["batch_time"].count / metric_list["batch_time"].sum)
+            ips = "ips: {:.5f} instance/sec.".format(
+                batch_size * metric_list["batch_time"].count /
+                metric_list["batch_time"].sum)
             log_epoch(metric_list, epoch, "val", ips)
 
         if metric_list['top1'].avg > best:
@@ -127,6 +135,8 @@ def train_model(model,
             opt_name = cfg['OPTIMIZER']['name']
             paddle.save(opt_state_dict, f"{opt_name}.pdopt")
             paddle.save(model.state_dict(), "best.pdparams")
-            logger.info(f"Already save the best model (top1 acc){best} weights and optimizer params in epoch {epoch}")
+            logger.info(
+                f"Already save the best model (top1 acc){best} weights and optimizer params in epoch {epoch}"
+            )
 
-    logger.info('training finished') #info of yaml
+    logger.info('training finished')  #info of yaml

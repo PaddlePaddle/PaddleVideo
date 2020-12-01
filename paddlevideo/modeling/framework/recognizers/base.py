@@ -7,7 +7,7 @@ import paddle.nn.functional as F
 
 class BaseRecognizer(nn.Layer):
     """Base class for recognizers.
-       
+
     All recognizers should subclass it.
     All subclass should overwrite:
 
@@ -19,28 +19,26 @@ class BaseRecognizer(nn.Layer):
         head (dict): Classification head to process feature.
         #XXX cfg keep or not????
         train_cfg (dict): Config for training. Default: None.
-        test_cfg (dict): Config for testing. Default: None. 
- 
+        test_cfg (dict): Config for testing. Default: None.
+
     """
-    def __init__(self,
-		 backbone,
-		 head):
+    def __init__(self, backbone, head):
 
         super().__init__()
         self.backbone = builder.build_backbone(backbone)
         self.head = builder.build_head(head)
         self.init_weights()
 
-
     def init_weights(self):
         """Initialize the model network weights. """
-        
-        self.backbone.init_weights()
+
+        self.backbone.init_weights(
+        )  #hj: required? while backbone without base class
         self.head.init_weights()
 
     def extract_feature(self, imgs):
         """Extract features through a backbone.
-	
+
 	Args:
 	    imgs (paddle.Tensor) : The input images.
 
@@ -50,7 +48,6 @@ class BaseRecognizer(nn.Layer):
         feature = self.backbone(imgs)
         return feature
 
-
     @abstractmethod
     def forward_train(self, imgs, labels, **kwargs):
         pass
@@ -58,7 +55,6 @@ class BaseRecognizer(nn.Layer):
     @abstractmethod
     def forward_valid(self, imgs):
         pass
-
 
     def forward(self, imgs, labels=None, return_loss=True, **kwargs):
         """Define how the model is going to run, from input to output.

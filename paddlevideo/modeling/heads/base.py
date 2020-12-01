@@ -12,18 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 import numpy as np
-from abc import  abstractmethod
+from abc import abstractmethod
 
 import paddle
 import paddle.nn as nn
 import paddle.nn.functional as F
 
 from ..builder import build_loss
-from paddlevideo.utils import get_logger 
+from paddlevideo.utils import get_logger
 
 logger = get_logger("paddlevideo")
+
+
 class BaseHead(nn.Layer):
     """Base class for head part.
 
@@ -38,13 +39,11 @@ class BaseHead(nn.Layer):
         in_channels (int): The number of channels in input feature.
         loss_cfg (dict): Config for building loss. Default: dict(type='CrossEntropyLoss').
 
-    """ 
-
+    """
     def __init__(self,
-		 num_classes,
-		 in_channels,
-                 loss_cfg=dict(name="CrossEntropyLoss")
-	         ):
+                 num_classes,
+                 in_channels,
+                 loss_cfg=dict(name="CrossEntropyLoss")):
 
         super().__init__()
         self.num_classes = num_classes
@@ -64,7 +63,7 @@ class BaseHead(nn.Layer):
         pass
 
     def loss(self, scores, labels, **kwargs):
-        """Calculate the loss accroding to the model output ```score```, 
+        """Calculate the loss accroding to the model output ```score```,
            and the target ```labels```.
 
         Args:
@@ -75,12 +74,12 @@ class BaseHead(nn.Layer):
             losses (dict): A dict containing field 'loss'(mandatory) and 'top1_acc', 'top5_acc'(optional).
 
         """
-        labels.stop_gradient=True #XXX: check necessary
+        labels.stop_gradient = True  #XXX: check necessary
         losses = dict()
-        #XXX: F.crossentropy include logsoftmax and nllloss 
+        #XXX: F.crossentropy include logsoftmax and nllloss
         loss = self.loss_func(scores, labels, **kwargs)
         avg_loss = paddle.mean(loss)
-        softmax_out = F.softmax(scores)         
+        softmax_out = F.softmax(scores)  #hj: redundant ?
         top1 = paddle.metric.accuracy(input=softmax_out, label=labels, k=1)
         top5 = paddle.metric.accuracy(input=softmax_out, label=labels, k=5)
 

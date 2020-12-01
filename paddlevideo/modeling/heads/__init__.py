@@ -15,5 +15,6 @@
 from .base import BaseHead
 from .tsn_head import TSNHead
 from .tsm_head import TSMHead
+from .slowfast_head import SlowfastHead
 
-__all__ = ['BaseHead','TSNHead','TSMHead']
+__all__ = ['BaseHead', 'TSNHead', 'TSMHead', 'SlowfastHead']

@@ -12,8 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import copy
 import paddle
+from .slowfast_lr_policy import get_epoch_lr
+
 
 def build_lr(cfg):
     """
@@ -23,10 +24,14 @@ def build_lr(cfg):
 
     learning_rate:
         name: 'PiecewiseDecay'
-        boundaries: [20, 60]
-        values: [0.00025, 0.000025, 0.0000025]
- 
-    
+        boundaries: None  # cal in lr.py
+        values: None #cal in lr.py
+        data_size: None #get from train.py
+        max_epoch:
+        warmup_epochs:
+        warmup_start_lr:
+        base_lr:
+
     Returns:
         A paddle.optimizer.lr instance.
     """
@@ -35,5 +40,28 @@ def build_lr(cfg):
     cfg_copy = cfg.copy()
 
     lr_name = cfg_copy.pop('name')
-    
+
+    #  get slowfast lr
+    max_epoch = cfg_copy.pop('max_epoch')
+    data_size = cfg_copy.pop('data_size')
+    warmup_epochs = cfg_copy.pop('warmup_epochs')
+    warmup_start_lr = cfg_copy.pop('warmup_start_lr')
+    base_lr = cfg_copy.pop('base_lr')
+    lr_list = []
+    bd_list = []
+    cur_bd = 1
+    for cur_epoch in range(max_epoch):
+        for cur_iter in range(data_size):
+            cur_lr = get_epoch_lr(cur_epoch + float(cur_iter) / data_size,
+                                  warmup_epochs, warmup_start_lr, base_lr,
+                                  max_epoch)
+            lr_list.append(cur_lr)
+            bd_list.append(cur_bd)
+            cur_bd += 1
+    bd_list.pop()
+
+    cfg_copy['boundaries'] = bd_list
+    cfg_copy['values'] = lr_list
+    #########
+
     return getattr(paddle.optimizer.lr, lr_name)(**cfg_copy)

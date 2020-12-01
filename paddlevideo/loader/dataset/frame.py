@@ -16,7 +16,8 @@ import copy
 import numpy as np
 
 from ..registry import DATASETS
-from .base import BaseDataset 
+from .base import BaseDataset
+
 
 @DATASETS.register()
 class FrameDataset(BaseDataset):
@@ -50,11 +51,7 @@ class FrameDataset(BaseDataset):
         #unique attribute in frames dataset.
         self.suffix = suffix
 
-        super().__init__(
-                 file_path,
-                 pipeline,
-                 data_prefix,
-                 valid_mode)
+        super().__init__(file_path, pipeline, data_prefix, valid_mode)
 
     def load_file(self):
         """Load index file to get video information."""
@@ -65,7 +62,10 @@ class FrameDataset(BaseDataset):
                 frame_dir, frames_len, labels = line_split
                 if self.data_prefix is not None:
                     frame_dir = osp.join(self.data_prefix, frame_dir)
-                info.append(dict(frame_dir=frame_dir, frames_len=frames_len, labels=int(labels)))
+                info.append(
+                    dict(frame_dir=frame_dir,
+                         frames_len=frames_len,
+                         labels=int(labels)))
         return info
 
     def prepare_train(self, idx):
@@ -73,17 +73,15 @@ class FrameDataset(BaseDataset):
         results = copy.deepcopy(self.info[idx])
         results['suffix'] = self.suffix
         #Note: For now, paddle.io.DataLoader cannot support dict type retval, so convert to list here
-        to_list =  self.pipeline(results)
+        to_list = self.pipeline(results)  #hj: to_list rename to output?
         #XXX have to unsqueeze label here or before calc metric!
         return [to_list['imgs'], np.array([to_list['labels']])]
-
 
     def prepare_valid(self, idx):
         """Prepare the frames for training given index. """
         results = copy.deepcopy(self.info[idx])
         results['suffix'] = self.suffix
         #Note: For now, paddle.io.DataLoader cannot support dict type retval, so convert to list here
-        to_list =  self.pipeline(results)
+        to_list = self.pipeline(results)
         #XXX have to unsqueeze label here or before calc metric!
         return [to_list['imgs'], np.array([to_list['labels']])]
-
