@@ -11,14 +11,18 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import paddle
-import os.path as osp
-from paddlevideo.utils import get_logger
-import pickle
 import os
-from tqdm import tqdm
+import os.path as osp
 import time
 
+import pickle
+from tqdm import tqdm
+import paddle
+
+from paddlevideo.utils import get_logger
+from paddlevideo.utils import main_only
+
+@main_only
 def load_ckpt(model, weight_path):
     """
     """
@@ -52,7 +56,7 @@ def makedirs(dir):
         except:
             pass
 
-
+"""
 def save(state_dicts, file_name):
     def convert(state_dict):
         model_dict = {}
@@ -81,6 +85,11 @@ def save(state_dicts, file_name):
 
     with open(file_name, 'wb') as f:
         pickle.dump(final_dict, f, protocol=2)
+"""
+
+@main_only
+def save(obj, path):
+    paddle.save(obj, path)
 
 
 def load(file_name):

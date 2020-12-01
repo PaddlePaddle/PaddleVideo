@@ -17,6 +17,7 @@ from paddlevideo.utils import get_config
 from paddlevideo.loader.builder import build_dataloader, build_dataset
 from paddlevideo.modeling.builder import build_model
 from paddlevideo.tasks import train_model
+from paddlevideo.utils import get_dist_info
 def parse_args():
     parser = argparse.ArgumentParser("PaddleVideo train script")
     parser.add_argument(
@@ -36,10 +37,6 @@ def parse_args():
         action='store_true',
         help='whether to evaluate the checkpoint during training')
     parser.add_argument(
-        '--parallel',
-        action='store_true',
-        help='use data parallel or not')
-    parser.add_argument(
         '--seed',
         type=int,
         default=None,
@@ -53,7 +50,9 @@ def main():
     args = parse_args()
 
     cfg = get_config(args.config, overrides=args.override)
-    if args.parallel:
+    _, world_size = get_dist_info()
+    parallel = world_size != 1
+    if parallel:
         paddle.distributed.init_parallel_env()
 
     model = build_model(cfg.MODEL)
@@ -73,7 +72,7 @@ def main():
     train_model(model,
 		dataset, 
 		cfg,
-                parallel=args.parallel,
+                parallel=parallel,
                 validate=args.validate)
 
 

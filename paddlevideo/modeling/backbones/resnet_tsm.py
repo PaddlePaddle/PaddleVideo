@@ -24,7 +24,7 @@ import paddle.nn.functional as F
 
 from ..registry import BACKBONES
 from ..weight_init import weight_init_
-from ...utils.save_load import load_ckpt
+from ...utils import load_ckpt
 
 
 class ConvBNLayer(nn.Layer):
