@@ -37,6 +37,7 @@ class ConvBNLayer(nn.Layer):
         kernel_size (int): Kernel size.
         stride (int): Stride in the Conv2D layer. Default: 1.
         groups (int): Groups in the Conv2D, Default: 1.
+        is_tweaks_mode (bool): switch for tweaks. Default: False.
         act (str): Indicate activation after BatchNorm2D layer.
         name (str): the name of an instance of ConvBNLayer.
 
@@ -55,7 +56,8 @@ class ConvBNLayer(nn.Layer):
                  name=None):
         super(ConvBNLayer, self).__init__()
         self.is_tweaks_mode = is_tweaks_mode
-        #ResNet-D 1/2:在Path B的1 x 1卷积前面，加入2 x 2 stride 2的pooling层，将下采样提前，避免了3/4的信息丢失。
+        #ResNet-D 1/2:add a 2×2 average pooling layer with a stride of 2 before the convolution, 
+        #             whose stride is changed to 1, works well in practice. 
         self._pool2d_avg = AvgPool2D(kernel_size=2, stride=2, padding=0, ceil_mode=True)
 
         self._conv = Conv2D(
@@ -125,7 +127,8 @@ class BottleneckBlock(nn.Layer):
                 in_channels=in_channels,
                 out_channels=out_channels * 4,
                 kernel_size=1,
-                stride=1, #ResNet-D 2/2, Path B的1 x 1卷积 stride改为1
+                stride=1, #ResNet-D 2/2:add a 2×2 average pooling layer with a stride of 2 before the convolution, 
+                          #             whose stride is changed to 1, works well in practice. 
                 is_tweaks_mode=False if if_first else True,
                 name=name + "_branch1")
 
@@ -266,7 +269,6 @@ class ResNetTweaksTSM(nn.Layer):
                             conv_name = "res" + str(block + 2) + "b" + str(i)
                     else:
                         conv_name = "res" + str(block + 2) + chr(97 + i)
-                    print("block:",block,"i:",i,"conv_name:",conv_name)
                     bottleneck_block = self.add_sublayer(
                         'bb_%d_%d' % (block, i), #same with PaddleClas, for loading pretrain
                         BottleneckBlock(
@@ -309,9 +311,7 @@ class ResNetTweaksTSM(nn.Layer):
         #XXX: check bias!!! check pretrained!!!
 
         if isinstance(self.pretrained, str) and self.pretrained.strip() != "":
-            print("chaj beg load_ckpt in ResNetTSM", __file__,sys._getframe().f_lineno)
             load_ckpt(self, self.pretrained)
-            print("chaj end load_ckpt in ResNetTSM", __file__,sys._getframe().f_lineno)
         elif self.pretrained is None or self.pretrained.strip() == "":
             for layer in self.sublayers():
                 if isinstance(layer, nn.Conv2D):
