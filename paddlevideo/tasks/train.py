@@ -19,7 +19,7 @@ import paddle
 from ..loader import build_dataset, build_dataloader
 from ..solver import build_lr, build_optimizer
 from paddlevideo.utils import get_logger, coloring
-from paddlevideo.utils import AverageMeter, build_metric, log_batch, log_epoch
+from paddlevideo.utils import AverageMeter, build_metric, log_batch, log_epoch, save
 
 
 def train_model(model, dataset, cfg, parallel=True, validate=True):
@@ -37,7 +37,7 @@ def train_model(model, dataset, cfg, parallel=True, validate=True):
     dataset = dataset if isinstance(dataset, (list, tuple)) else [dataset]
     #build data loader, refer to the field ```DATASET``` in the configuration for more details.
     batch_size = cfg.DATASET.get('batch_size', 2)
-    places = paddle.CUDAPlace(paddle.distributed.ParallelEnv().dev_id)
+    places = paddle.set_device('gpu')
 
     dataloader_setting = dict(
         batch_size=batch_size,
@@ -103,7 +103,7 @@ def train_model(model, dataset, cfg, parallel=True, validate=True):
             metric_list["batch_time"].sum)
         log_epoch(metric_list, epoch, "train", ips)
 
-        if validate:
+        def evaluate():
             model.eval()
             metric_list = build_metric()
             tic = time.time()
@@ -129,12 +129,16 @@ def train_model(model, dataset, cfg, parallel=True, validate=True):
                 metric_list["batch_time"].sum)
             log_epoch(metric_list, epoch, "val", ips)
 
+        if validate:
+            evaluate()
+
         if metric_list['top1'].avg > best:
             best = metric_list['top1'].avg
             opt_state_dict = optimizer.state_dict()
             opt_name = cfg['OPTIMIZER']['name']
-            paddle.save(opt_state_dict, f"{opt_name}.pdopt")
-            paddle.save(model.state_dict(), "best.pdparams")
+
+            save(opt_state_dict, f"{opt_name}.pdopt")
+            save(model.state_dict(), "best.pdparams")
             logger.info(
                 f"Already save the best model (top1 acc){best} weights and optimizer params in epoch {epoch}"
             )

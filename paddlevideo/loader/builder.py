@@ -11,6 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import signal
+import os
 import paddle
 from paddle.io import DataLoader, DistributedBatchSampler
 from .registry import DATASETS, PIPELINES
@@ -74,3 +76,17 @@ def build_dataloader(dataset,
                              **kwargs)
 
     return data_loader
+
+
+def term_mp(sig_num, frame):
+    """ kill all child processes
+    """
+    pid = os.getpid()
+    pgid = os.getpgid(os.getpid())
+    logger.info("main proc {} exit, kill process group " "{}".format(pid, pgid))
+    os.killpg(pgid, signal.SIGKILL)
+    return
+
+
+signal.signal(signal.SIGINT, term_mp)
+signal.signal(signal.SIGTERM, term_mp)
