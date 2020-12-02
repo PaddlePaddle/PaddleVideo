@@ -87,5 +87,5 @@ class BaseRecognizer(nn.Layer):
         labels = data_batch[1]
 
         # call forward
-        loss_metrics = self(imgs, labels, reducesum=True, return_loss=True)
+        loss_metrics = self(imgs, labels, reduce_sum=True, return_loss=True)
         return loss_metrics
