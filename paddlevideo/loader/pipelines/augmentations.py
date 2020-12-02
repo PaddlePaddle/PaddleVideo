@@ -14,15 +14,16 @@
 
 import random
 import numpy as np
+import math
 from PIL import Image
 from ..registry import PIPELINES
 from collections.abc import Sequence
-
 
 #TODO
 #1. add type annotations and type hints
 #2. add input check
 #3. move to paddle.vision(need discusss)
+
 
 @PIPELINES.register()
 class Scale(object):
@@ -31,7 +32,6 @@ class Scale(object):
     Args:
         short_size(float | int): Short size of an image will be scaled to the short_size.
     """
-
     def __init__(self, short_size):
         self.short_size = short_size
 
@@ -49,8 +49,8 @@ class Scale(object):
         for i in range(len(imgs)):
             img = imgs[i]
             w, h = img.size
-            if (w <= h and w == self.short_size) or (h <= w and
-                                                     h == self.short_size):
+            if (w <= h and w == self.short_size) or (h <= w
+                                                     and h == self.short_size):
                 resized_imgs.append(img)
                 continue
 
@@ -73,7 +73,6 @@ class RandomCrop(object):
     Args:
         target_size(int): Random crop a square with the target_size from an image.
     """
-
     def __init__(self, target_size):
         self.target_size = target_size
 
@@ -114,7 +113,6 @@ class CenterCrop(object):
     Args:
         target_size(int): Center crop a square with the target_size from an image.
     """
-
     def __init__(self, target_size):
         self.target_size = target_size
 
@@ -144,17 +142,19 @@ class CenterCrop(object):
 
 @PIPELINES.register()
 class MultiScaleCrop(object):
-    def __init__(self, 
-            target_size, #NOTE: named target size now, but still pass short size in it!
-                 scales=None,
-                 max_distort=1,
-                 fix_crop=True,
-                 more_fix_crop=True):
+    def __init__(
+            self,
+            target_size,  #NOTE: named target size now, but still pass short size in it!
+            scales=None,
+            max_distort=1,
+            fix_crop=True,
+            more_fix_crop=True):
         self.target_size = target_size
         self.scales = scales if scales else [1, .875, .75, .66]
         self.max_distort = max_distort
         self.fix_crop = fix_crop
         self.more_fix_crop = more_fix_crop
+
     def __call__(self, results):
         """
         Performs MultiScaleCrop operations.
@@ -244,7 +244,6 @@ class RandomFlip(object):
     Args:
         p(float): Random flip images with the probability p.
     """
-
     def __init__(self, p=0.5):
         self.p = p
 
@@ -260,7 +259,9 @@ class RandomFlip(object):
         imgs = results['imgs']
         v = random.random()
         if v < self.p:
-            results['imgs'] = [img.transpose(Image.FLIP_LEFT_RIGHT) for img in imgs]
+            results['imgs'] = [
+                img.transpose(Image.FLIP_LEFT_RIGHT) for img in imgs
+            ]
         else:
             results['imgs'] = imgs
         return results
@@ -270,10 +271,11 @@ class RandomFlip(object):
 class Image2Array(object):
     """
     transfer PIL.Image to Numpy array and transpose dimensions from 'dhwc' to 'dchw'.
+    Args:
+        transpose: whether to transpose or not, default False. True for tsn.
     """
-
-    def __init__(self):
-        self.format = "dhwc"
+    def __init__(self, transpose=True):
+        self.transpose = transpose
 
     def __call__(self, results):
         """
@@ -285,9 +287,11 @@ class Image2Array(object):
             np_imgs: Numpy array.
         """
         imgs = results['imgs']
-        np_imgs = np.array(
-            [np.array(img).astype('float32') for img in imgs])  #nhwc
-        np_imgs = np_imgs.transpose(0, 3, 1, 2)  #nchw
+        np_imgs = (np.stack(imgs)).astype('float32')
+        # np_imgs = np.array(
+        #     [np.array(img).astype('float32') for img in imgs])  #nhwc
+        if self.transpose:
+            np_imgs = np_imgs.transpose(0, 3, 1, 2)  #nchw
         results['imgs'] = np_imgs
         return results
 
@@ -299,18 +303,17 @@ class Normalization(object):
     Args:
         mean(Sequence[float]): mean values of different channels.
         std(Sequence[float]): std values of different channels.
+        tensor_shape(list): size of mean, default [3,1,1]. For slowfast, [1,1,1,3]
     """
-
-    def __init__(self, mean, std):
+    def __init__(self, mean, std, tensor_shape=[3, 1, 1]):
         if not isinstance(mean, Sequence):
             raise TypeError(
-                f'Mean must be list, tuple or np.ndarray, but got {type(mean)}'
-            )
+                f'Mean must be list, tuple or np.ndarray, but got {type(mean)}')
         if not isinstance(std, Sequence):
             raise TypeError(
                 f'Std must be list, tuple or np.ndarray, but got {type(std)}')
-        self.mean = np.array(mean).reshape([3,1,1]).astype(np.float32)
-        self.std = np.array(std).reshape([3,1,1]).astype(np.float32)
+        self.mean = np.array(mean).reshape(tensor_shape).astype(np.float32)
+        self.std = np.array(std).reshape(tensor_shape).astype(np.float32)
 
     def __call__(self, results):
         """
@@ -321,8 +324,152 @@ class Normalization(object):
             np_imgs: Numpy array after normalization.
         """
         imgs = results['imgs']
-        norm_imgs = imgs / 255
+        norm_imgs = imgs / 255.
         norm_imgs -= self.mean
         norm_imgs /= self.std
         results['imgs'] = norm_imgs
+        return results
+
+
+@PIPELINES.register()
+class JitterScale(object):
+    """
+    Scale image, while the target short size is randomly select between min_size and max_size.
+    Args:
+        min_size: Lower bound for random sampler.
+        max_size: Higher bound for random sampler.
+    """
+    def __init__(self, min_size, max_size):
+        self.min_size = min_size
+        self.max_size = max_size
+
+    def __call__(self, results):
+        """
+        Performs jitter resize operations.
+        Args:
+            imgs (Sequence[PIL.Image]): List where each item is a PIL.Image.
+            For example, [PIL.Image0, PIL.Image1, PIL.Image2, ...]
+        return:
+            resized_imgs: List where each item is a PIL.Image after scaling.
+        """
+        imgs = results['imgs']
+        size = int(round(np.random.uniform(self.min_size, self.max_size)))
+        assert (len(imgs) >= 1) , \
+            "len(imgs):{} should be larger than 1".format(len(imgs))
+        width, height = imgs[0].size
+        if (width <= height and width == size) or (height <= width
+                                                   and height == size):
+            return results
+
+        new_width = size
+        new_height = size
+        if width < height:
+            new_height = int(math.floor((float(height) / width) * size))
+        else:
+            new_width = int(math.floor((float(width) / height) * size))
+
+        frames_resize = []
+        for j in range(len(imgs)):
+            img = imgs[j]
+            scale_img = img.resize((new_width, new_height), Image.BILINEAR)
+            frames_resize.append(scale_img)
+
+        results['imgs'] = frames_resize
+        return results
+
+
+@PIPELINES.register()
+class MultiCrop(object):
+    """
+    Random crop image.
+    This operation can perform multi-crop during multi-clip test, as in slowfast model.
+    Args:
+        target_size(int): Random crop a square with the target_size from an image.
+    """
+    def __init__(self, target_size, eval_mode=False):
+        self.target_size = target_size
+        self.eval_mode = eval_mode
+
+    def __call__(self, results):
+        """
+        Performs random crop operations.
+        Args:
+            imgs: List where each item is a PIL.Image.
+            For example, [PIL.Image0, PIL.Image1, PIL.Image2, ...]
+        return:
+            crop_imgs: List where each item is a PIL.Image after random crop.
+        """
+        imgs = results['imgs']
+        spatial_sample_index = results['spatial_sample_index']
+        spatial_num_clips = results['spatial_num_clips']
+
+        w, h = imgs[0].size
+        if w == self.target_size and h == self.target_size:
+            return results
+
+        assert (w >= self.target_size) and (h >= self.target_size), \
+            "image width({}) and height({}) should be larger than crop size({},{})".format(w, h, self.target_size, self.target_size)
+        frames_crop = []
+        if not self.eval_mode:
+            x_offset = random.randint(0, w - self.target_size)
+            y_offset = random.randint(0, h - self.target_size)
+        else:  #multi-crop
+            x_gap = int(
+                math.ceil((w - self.target_size) / (spatial_num_clips - 1)))
+            y_gap = int(
+                math.ceil((h - self.target_size) / (spatial_num_clips - 1)))
+            if h > w:
+                x_offset = int(math.ceil((w - self.target_size) / 2))
+                if spatial_sample_index == 0:
+                    y_offset = 0
+                elif spatial_sample_index == spatial_num_clips - 1:
+                    y_offset = h - self.target_size
+                else:
+                    y_offset = y_gap * spatial_sample_index
+            else:
+                y_offset = int(math.ceil((h - self.target_size) / 2))
+                if spatial_sample_index == 0:
+                    x_offset = 0
+                elif spatial_sample_index == spatial_num_clips - 1:
+                    x_offset = w - self.target_size
+                else:
+                    x_offset = x_gap * spatial_sample_index
+
+        for img in imgs:
+            nimg = img.crop((x_offset, y_offset, x_offset + self.target_size,
+                             y_offset + self.target_size))
+            frames_crop.append(nimg)
+        results['imgs'] = frames_crop
+        return results
+
+
+@PIPELINES.register()
+class PackOutput(object):
+    """
+    In slowfast model, we want to get slow pathway from fast pathway based on
+    alpha factor.
+    Args:
+        alpha(int): temporal length of fast/slow
+    """
+    def __init__(self, alpha):
+        self.alpha = alpha
+
+    def __call__(self, results):
+        fast_pathway = results['imgs']
+
+        # sample num points between start and end
+        slow_idx_start = 0
+        slow_idx_end = fast_pathway.shape[0] - 1
+        slow_idx_num = fast_pathway.shape[0] // self.alpha
+        slow_idxs_select = np.linspace(slow_idx_start, slow_idx_end,
+                                       slow_idx_num).astype("int64")
+        slow_pathway = fast_pathway[slow_idxs_select]
+
+        # T H W C -> C T H W.
+        slow_pathway = slow_pathway.transpose(3, 0, 1, 2)
+        fast_pathway = fast_pathway.transpose(3, 0, 1, 2)
+
+        # slow + fast
+        frames_list = [slow_pathway, fast_pathway]
+        results['imgs'] = frames_list
         return results

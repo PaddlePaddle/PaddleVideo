@@ -12,30 +12,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from ..registry import DATASETS
-from .base import BaseDataset 
+from .base import BaseDataset
 import os.path as osp
+
 
 @DATASETS.register()
 class VideoDataset(BaseDataset):
     """Video dataset for action recognition
        The dataset loads raw videos and apply specified transforms on them.
-
        The index file is a file with multiple lines, and each line indicates
        a sample video with the filepath and label, which are split with a whitesapce.
        Example of a inde file:
-
        .. code-block:: txt
-
            path/000.mp4 1
            path/001.mp4 1
            path/002.mp4 2
-           path/003.mp4 2 
-
+           path/003.mp4 2
        Args:
            file_path(str): Path to the index file.
            pipeline(XXX): A sequence of data transforms.
            **kwargs: Keyword arguments for ```BaseDataset```.
-
     """
     def __init__(self, file_path, pipeline, **kwargs):
         super().__init__(file_path, pipeline, **kwargs)
@@ -50,7 +46,5 @@ class VideoDataset(BaseDataset):
                 filename = filename + '.avi'
                 if self.data_prefix is not None:
                     filename = osp.join(self.data_prefix, filename)
-                info.append(dict(
-                    filename=filename, labels=int(labels)))
+                info.append(dict(filename=filename, labels=int(labels)))
         return info
-

@@ -18,6 +18,8 @@ from .base import BaseHead
 import paddle
 import paddle.nn.functional as F
 
+from ..weight_init import weight_init_
+
 
 @HEADS.register()
 class SlowfastHead(BaseHead):
@@ -85,16 +87,18 @@ class SlowfastHead(BaseHead):
         self.num_pathways = len(self.pool_size)
 
         self.dropout = paddle.nn.Dropout(p=self.dropout_rate)
-        fc_init_std = 0.01
-        initializer_tmp = paddle.nn.initializer.Normal(mean=0.0,
-                                                       std=fc_init_std)
+
         self.projection = paddle.nn.Linear(
             in_features=sum(self.dim_in),
             out_features=self.num_classes,
-            weight_attr=paddle.ParamAttr(initializer=initializer_tmp),
-            bias_attr=paddle.ParamAttr(
-                initializer=paddle.nn.initializer.Constant(0.0)),
         )
+
+    def init_weights(self):
+        weight_init_(self.projection,
+                     "Normal",
+                     bias_value=0.0,
+                     mean=0.0,
+                     std=0.01)
 
     def forward(self, inputs):
         assert (len(inputs) == self.num_pathways

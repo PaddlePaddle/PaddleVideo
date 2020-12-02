@@ -25,11 +25,6 @@ class Recognizer3D(BaseRecognizer):
     def forward_train(self, imgs, labels, **kwargs):
         """Define how the model is going to train, from input to output.
         """
-        # As the num_segs is an attribute of dataset phase, and didn't pass to build_head phase, should obtain it from imgs(paddle.Tensor) now, then call self.head method.
-
-        # imgs: [slow, fast]
-        # imgs and label need to tensor???
-
         feature = self.extract_feature(imgs)
         cls_score = self.head(feature)
         loss_metrics = self.head.loss(cls_score, labels, **kwargs)
@@ -37,7 +32,6 @@ class Recognizer3D(BaseRecognizer):
 
     def forward_valid(self, imgs):
         """Define how the model is going to valid, from input to output."""
-        #XXX add testing code.
         feature = self.extract_feature(imgs)
         cls_score = self.head(feature)
         return cls_score

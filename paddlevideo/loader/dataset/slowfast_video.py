@@ -19,10 +19,12 @@ import os.path as osp
 import copy
 import numpy as np
 import random
+from ...utils import get_logger
+logger = get_logger("paddlevideo")
 
 
 @DATASETS.register()
-class SlowfastVideoDataset(BaseDataset):
+class SFVideoDataset(BaseDataset):
     """Video dataset for action recognition
        The dataset loads raw videos and apply specified transforms on them.
 
@@ -40,6 +42,8 @@ class SlowfastVideoDataset(BaseDataset):
        Args:
            file_path(str): Path to the index file.
            pipeline(XXX): A sequence of data transforms.
+           num_ensemble_views(int): temporal segment when multi-crop test
+           num_spatial_crops(int): spatial crop number when multi-crop test
            **kwargs: Keyword arguments for ```BaseDataset```.
 
     """
@@ -47,25 +51,17 @@ class SlowfastVideoDataset(BaseDataset):
         self,
         file_path,
         pipeline,
-        #                 data_prefix=None,
-        #                 valid_mode=False,
         num_ensemble_views=1,
         num_spatial_crops=1,
         num_retries=5,
         **kwargs,
     ):
         super().__init__(file_path, pipeline, **kwargs)
-        #        self.file_path = file_path
-        #        self.data_prefix = osp.realpath(data_prefix) if \
-        #            osp.isdir(data_prefix) else data_prefix
-        #        self.valid_mode = valid_mode
-
-        self.num_ensemble_views = num_ensemble_views  #diff in infer
-        self.num_spatial_crops = num_spatial_crops  #diff in infer
+        self.num_ensemble_views = num_ensemble_views
+        self.num_spatial_crops = num_spatial_crops
         self._num_clips = (self.num_ensemble_views * self.num_spatial_crops)
 
         self.num_retries = num_retries
-        #        self.pipeline = pipeline
         self.info = self.load_file()
 
     def load_file(self):
@@ -75,18 +71,18 @@ class SlowfastVideoDataset(BaseDataset):
             for line in fin:
                 line_split = line.strip().split()
                 filename, labels = line_split
-                #if self.data_prefix is not None:
-                #    filename = osp.join(self.data_prefix, filename)
+                #TODO:
+                # Required suffix format: may mp4/avi/wmv
+                if self.data_prefix is not None:
+                    filename = osp.join(self.data_prefix, filename)
                 for tidx in range(self.num_ensemble_views):
                     for sidx in range(self.num_spatial_crops):
                         info.append(
                             dict(
                                 filename=filename,
                                 labels=int(labels),
-                                temporal_sample_index=tidx if self.valid_mode
-                                else -1,  # to move to yaml file
-                                spatial_sample_index=sidx
-                                if self.valid_mode else -1,
+                                temporal_sample_index=tidx,
+                                spatial_sample_index=sidx,
                                 temporal_num_clips=self.num_ensemble_views,
                                 spatial_num_clips=self.num_spatial_crops,
                             ))
@@ -100,34 +96,30 @@ class SlowfastVideoDataset(BaseDataset):
         for ir in range(self.num_retries):
             try:
                 results = copy.deepcopy(self.info[idx])
-                #Note: For now, paddle.io.DataLoader cannot support dict type retval, so convert to list here
-                result = self.pipeline(results)  #hj: try except??
+                results = self.pipeline(results)
             except Exception as e:
-                print(e)  # hj: log error
+                logger.info(e)  # TODO: log error
                 if ir < self.num_retries - 1:
-                    print("Error when loading {}, have {} trys, will try again".
-                          format(results['filename'], ir))
+                    logger.info(
+                        "Error when loading {}, have {} trys, will try again".
+                        format(results['filename'], ir))
                 idx = random.randint(0, len(self.info) - 1)
                 continue
-        #XXX have to unsqueeze label here or before calc metric!
         return results['imgs'][0], results['imgs'][1], np.array(
-            [results['labels']])  #hj: when to unpack
+            [results['labels']])
 
     def prepare_valid(self, idx):
         """Prepare the frames for valid given the index."""
-        #        results = copy.deepcopy(self.info[idx])
-        #        #Note: For now, paddle.io.DataLoader cannot support dict type retval, so convert to list here
-        #        results = self.pipeline(results)
         for ir in range(self.num_retries):
             try:
                 results = copy.deepcopy(self.info[idx])
-                #Note: For now, paddle.io.DataLoader cannot support dict type retval, so convert to list here
-                result = self.pipeline(results)  #hj: try except??
+                results = self.pipeline(results)
             except Exception as e:
-                print(e)  # hj: log error
+                logger.info(e)  # TODO: log error
                 if ir < self.num_retries - 1:
-                    print("Error when loading {}, have {} trys, will try again".
-                          format(results['filename'], ir))
+                    logger.info(
+                        "Error when loading {}, have {} trys, will try again".
+                        format(results['filename'], ir))
                 idx = random.randint(0, len(self.info) - 1)
                 continue
         return results['imgs'][0], results['imgs'][1], np.array(

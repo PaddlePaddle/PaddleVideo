@@ -19,15 +19,11 @@ from .augmentations import (
     RandomFlip,
     Image2Array,
     Normalization,
+    JitterScale,
+    MultiCrop,
+    PackOutput,
 )
 
-from .slowfast_augmentations import (
-    SFScale,
-    SFCrop,
-    SFlip,
-    SFColorNorm,
-    SFPackOutput,
-)
 from .compose import Compose
 from .decode import VideoDecoder, FrameDecoder
 from .sample import Sampler
@@ -44,10 +40,8 @@ __all__ = [
     'VideoDecoder',
     'FrameDecoder',
     'Sample',
-    'SFScale',
-    'SFCrop',
-    'SFlip',
-    'SFColorNorm',
-    'SFPackOutput',
+    'JitterScale',
+    'MultiCrop',
+    'PackOutput',
     'DecodeSampler',
 ]

@@ -18,11 +18,17 @@ import time
 import paddle
 from ..loader import build_dataset, build_dataloader
 from ..solver import build_lr, build_optimizer
+from ..utils import do_preciseBN
 from paddlevideo.utils import get_logger, coloring
 from paddlevideo.utils import AverageMeter, build_metric, log_batch, log_epoch, save
 
 
-def train_model(model, dataset, cfg, parallel=True, validate=True):
+def train_model(model,
+                dataset,
+                cfg,
+                parallel=True,
+                preciseBN=False,
+                validate=True):
     """Train model entry
 
     Args:
@@ -128,6 +134,12 @@ def train_model(model, dataset, cfg, parallel=True, validate=True):
                 batch_size * metric_list["batch_time"].count /
                 metric_list["batch_time"].sum)
             log_epoch(metric_list, epoch, "val", ips)
+
+        if cfg.get("PRECISEBN") and (epoch -
+                                     1) % cfg.PRECISEBN.preciseBN_interval == 0:
+            do_preciseBN(
+                model, train_loader, parallel,
+                min(cfg.PRECISEBN.num_iters_preciseBN, len(train_loader)))
 
         if validate:
             evaluate()
