@@ -75,7 +75,7 @@ OPTIMIZER: #OPTIMIZER field
         values: [0.01, 0.001, 0.0001]  #4 cards * 16 batch size
     weight_decay:
         name: 'L2'
-        value: 1e-4
+        value: 2e-4
 
 EVALUATION:
     interval: 5
