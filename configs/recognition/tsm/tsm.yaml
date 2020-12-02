@@ -14,7 +14,7 @@ MODEL: #MODEL field
 DATASET: #DATASET field
     batch_size: 16 #Mandatory, bacth size
     num_workers: 4 #Mandatory, XXX the number of subprocess on each GPU.
-    train: 
+    train:
         format: "FrameDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
         data_prefix: "" #Mandatory, train data root path
         file_path: "data/ucf101/ucf101_train_split_1_rawframes.txt" #Mandatory, train data index file path
@@ -68,7 +68,7 @@ PIPELINE: #PIPELINE field
 
 OPTIMIZER: #OPTIMIZER field
     name: 'Momentum' #Mandatory, the type of optimizer, associate to the 'paddlevideo/solver/'
-    momentum: 0.9 
+    momentum: 0.9
     learning_rate: #Mandatory, the type of learning rate scheduler, associate to the 'paddlevideo/solver/'
         name: 'PiecewiseDecay'
         boundaries: [40, 60]
@@ -81,6 +81,10 @@ EVALUATION:
     interval: 5
     function: "topk"
     topk: (1,5)
+
+PRECISEBN:
+  preciseBN_interval: 10
+  num_iters_preciseBN: 200  #default
 
 log_interval: 20 #Optional, the interal of logger, default:10
 epochs: 80 #Mandatory, total epoch
