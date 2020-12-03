@@ -82,10 +82,6 @@ EVALUATION:
     function: "topk"
     topk: (1,5)
 
-PRECISEBN:
-  preciseBN_interval: 10
-  num_iters_preciseBN: 200  #default
-
 log_interval: 20 #Optional, the interal of logger, default:10
 epochs: 80 #Mandatory, total epoch
 log_level: "DEBUG" #Optional, the logger level. default: "INFO"
