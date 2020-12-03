@@ -12,56 +12,37 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import copy
 import paddle
-from .slowfast_lr_policy import get_epoch_lr
+from . import custom_lr
 
 
 def build_lr(cfg):
     """
     Build a learning rate scheduler accroding to ```OPTIMIZER``` configuration, and it always pass into the optimizer.
-
     In configuration:
-
     learning_rate:
         name: 'PiecewiseDecay'
-        boundaries: None  # cal in lr.py
-        values: None #cal in lr.py
-        data_size: None #get from train.py
-        max_epoch:
-        warmup_epochs:
-        warmup_start_lr:
-        base_lr:
+        boundaries: [20, 60]
+        values: [0.00025, 0.000025, 0.0000025]
+
 
     Returns:
         A paddle.optimizer.lr instance.
     """
 
-    # XXX use build?
     cfg_copy = cfg.copy()
 
+    #when learning_rate is LRScheduler
+    if cfg_copy.get('learning_rate') and isinstance(cfg_copy['learning_rate'],
+                                                    dict):
+        #when learning_rate.learning_rate is iter_step
+        #        if cfg_copy['learning_rate'].get("iter_step") and cfg_copy['learning_rate']["iter_step"] == True:
+        #            cfg_copy['learning_rate']['num_iters'] = cfg_copy['num_iters']  #paste num_iters
+        #not support inner LRSchedule use iter_step
+        cfg_copy['learning_rate'] = build_lr(cfg_copy['learning_rate'])
+
     lr_name = cfg_copy.pop('name')
-
-    #  get slowfast lr
-    max_epoch = cfg_copy.pop('max_epoch')
-    data_size = cfg_copy.pop('data_size')
-    warmup_epochs = cfg_copy.pop('warmup_epochs')
-    warmup_start_lr = cfg_copy.pop('warmup_start_lr')
-    base_lr = cfg_copy.pop('base_lr')
-    lr_list = []
-    bd_list = []
-    cur_bd = 1
-    for cur_epoch in range(max_epoch):
-        for cur_iter in range(data_size):
-            cur_lr = get_epoch_lr(cur_epoch + float(cur_iter) / data_size,
-                                  warmup_epochs, warmup_start_lr, base_lr,
-                                  max_epoch)
-            lr_list.append(cur_lr)
-            bd_list.append(cur_bd)
-            cur_bd += 1
-    bd_list.pop()
-
-    cfg_copy['boundaries'] = bd_list
-    cfg_copy['values'] = lr_list
-    #########
-
-    return getattr(paddle.optimizer.lr, lr_name)(**cfg_copy)
+    if cfg_copy.get('iter_step'):
+        cfg_copy.pop('iter_step')
+    return getattr(custom_lr, lr_name)(**cfg_copy)

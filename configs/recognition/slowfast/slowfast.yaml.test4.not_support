@@ -102,12 +102,18 @@ OPTIMIZER: #OPTIMIZER field
   name: 'Momentum'
   momentum: 0.9
   learning_rate:
-    iter_step: True
-    name: 'CustomWarmupCosineDecay'
-    max_epoch: 196
-    warmup_epochs: 34
-    warmup_start_lr: 0.01
-    cosine_base_lr: 0.1
+      iter_step: True
+      name: 'LinearWarmup'
+      warmup_steps: 1
+      start_lr: 0.01
+      end_lr: 0.1
+      learning_rate:
+        iter_step: True
+        name: 'CustomWarmupCosineDecay'
+        max_epoch: 196
+        warmup_epochs: 34
+        warmup_start_lr: 0.01
+        cosine_base_lr: 0.1
   weight_decay:
     name: 'L2'
     value: 1e-4

@@ -60,7 +60,9 @@ def train_model(model,
         valid_loader = data_loaders[1]
 
     #slowfast
-    cfg.OPTIMIZER.learning_rate.data_size = len(train_loader)
+    if cfg.OPTIMIZER.learning_rate.get(
+            "iter_step") and cfg.OPTIMIZER.learning_rate.iter_step == True:
+        cfg.OPTIMIZER.learning_rate.num_iters = len(train_loader)
 
     lr = build_lr(cfg.OPTIMIZER.learning_rate)
     optimizer = build_optimizer(cfg.OPTIMIZER,
@@ -101,8 +103,16 @@ def train_model(model,
                     batch_size / metric_list["batch_time"].val)
                 log_batch(metric_list, i, epoch, cfg.epochs, "train", ips)
 
-        # learning scheduler step
-        lr.step()
+            # learning scheduler iter step
+            if cfg.OPTIMIZER.learning_rate.get(
+                    "iter_step"
+            ) and cfg.OPTIMIZER.learning_rate.iter_step == True:
+                lr.step()
+
+        # learning scheduler epoch step
+        if not cfg.OPTIMIZER.learning_rate.get(
+                "iter_step") or cfg.OPTIMIZER.learning_rate.iter_step == False:
+            lr.step()
 
         ips = "ips: {:.5f} instance/sec.".format(
             batch_size * metric_list["batch_time"].count /

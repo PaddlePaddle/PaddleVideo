@@ -102,12 +102,14 @@ OPTIMIZER: #OPTIMIZER field
   name: 'Momentum'
   momentum: 0.9
   learning_rate:
-    iter_step: True
-    name: 'CustomWarmupCosineDecay'
+    name: 'PiecewiseDecay'
+    boundaries: None  # cal in lr.py
+    values: None #cal in lr.py
+    data_size: None #get from train.py
     max_epoch: 196
     warmup_epochs: 34
     warmup_start_lr: 0.01
-    cosine_base_lr: 0.1
+    base_lr: 0.1
   weight_decay:
     name: 'L2'
     value: 1e-4
