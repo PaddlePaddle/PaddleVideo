@@ -15,7 +15,16 @@
 import numpy as np
 import paddle.nn.initializer as init
 
-def weight_init_(layer, func, weight_name=None, bias_name=None, bias_value=0.0, **kwargs):
+#import paddle
+#paddle.framework.seed(0)
+
+
+def weight_init_(layer,
+                 func,
+                 weight_name=None,
+                 bias_name=None,
+                 bias_value=0.0,
+                 **kwargs):
     """
     In-place params init function.
     Usage:
@@ -28,7 +37,7 @@ def weight_init_(layer, func, weight_name=None, bias_name=None, bias_value=0.0, 
         linear = paddle.nn.Linear(4, 4)
         input = paddle.to_tensor(data)
         print(linear.weight)
-        linear(input) 
+        linear(input)
 
         weight_init_(linear, 'Normal', 'fc_w0', 'fc_b0', std=0.01, mean=0.1)
         print(linear.weight)
@@ -37,11 +46,11 @@ def weight_init_(layer, func, weight_name=None, bias_name=None, bias_value=0.0, 
     if hasattr(layer, 'weight') and layer.weight is not None:
         getattr(init, func)(**kwargs)(layer.weight)
         if weight_name is not None:
-        # override weight name
+            # override weight name
             layer.weight.name = weight_name
 
     if hasattr(layer, 'bias') and layer.bias is not None:
         init.Constant(bias_value)(layer.bias)
         if bias_name is not None:
-        # override bias name
+            # override bias name
             layer.bias.name = bias_name

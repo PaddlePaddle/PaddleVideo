@@ -14,6 +14,7 @@
 
 import numpy as np
 import time
+import random
 
 import paddle
 from ..loader import build_dataset, build_dataloader
@@ -71,6 +72,10 @@ def train_model(model,
 
     if parallel:
         model = paddle.DataParallel(model)
+
+    random.seed(0)
+    np.random.seed(0)
+    paddle.framework.seed(0)
 
     best = 0
     for epoch in range(1, cfg.epochs + 1):
@@ -154,13 +159,15 @@ def train_model(model,
         if validate:
             evaluate()
 
-        if metric_list['top1'].avg > best:
+        #if metric_list['top1'].avg > best:
+        if 1:  #metric_list['top1'].avg > best:
             best = metric_list['top1'].avg
             opt_state_dict = optimizer.state_dict()
             opt_name = cfg['OPTIMIZER']['name']
 
             save(opt_state_dict, f"{opt_name}.pdopt")
-            save(model.state_dict(), "best.pdparams")
+            #save(model.state_dict(), "best.pdparams")
+            save(model.state_dict(), "slowfast_{}.pdparams".format(epoch))
             logger.info(
                 f"Already save the best model (top1 acc){best} weights and optimizer params in epoch {epoch}"
             )

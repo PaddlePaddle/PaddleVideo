@@ -22,13 +22,13 @@ DATASET: #DATASET field
   num_workers: 8
   train:
     name: "SFVideoDataset"
-    file_path: "/workspace/huangjun12/PaddleProject/PaddleVideo/Experiment/PaddleVideo/data/k400/part-10cls/train.csv" #Mandatory, train data index file path
+    file_path: "/workspace/huangjun12/PaddleProject/PaddleVideo/Pr/PaddleVideo/data/k400/part-10cls/train.csv" #Mandatory, train data index file path
   valid:
     name: "SFVideoDataset"
-    file_path: "/workspace/huangjun12/PaddleProject/PaddleVideo/Experiment/PaddleVideo/data/k400/part-10cls/val.csv" #Mandatory, valid data index file path
+    file_path: "/workspace/huangjun12/PaddleProject/PaddleVideo/Pr/PaddleVideo/data/k400/part-10cls/val.csv" #Mandatory, valid data index file path
   eval:
     name: "SFVideoDataset"
-    file_path: "/workspace/huangjun12/PaddleProject/PaddleVideo/Experiment/PaddleVideo/data/k400/part-10cls/val.csv" #Mandatory, valid data index file path
+    file_path: "/workspace/huangjun12/PaddleProject/PaddleVideo/Pr/PaddleVideo/data/k400/part-10cls/val.csv" #Mandatory, valid data index file path
     valid_mode: True
     num_ensemble_views: 3
     num_spatial_crops: 10
@@ -101,22 +101,13 @@ PIPELINE: #PIPELINE field
 OPTIMIZER: #OPTIMIZER field
   name: 'Momentum'
   momentum: 0.9
-##  learning_rate:
-##      name: 'LinearWarmup'
-##      warmup_steps: 1
-##      start_lr: 0.01
-##      end_lr: 0.1
-##      learning_rate: 0.1 #Mandatory, the type of learning rate scheduler, associate to the 'paddlevideo/solver/'
-  learning_rate: #Mandatory, the type of learning rate scheduler, associate to the 'paddlevideo/solver/'
-    name: 'PiecewiseDecay'
-    boundaries: [1, 3]
-    values: [0.01, 0.001, 0.0001]  #4 cards * 16 batch size
-#  learning_rate:
-#    name: 'CustomWarmupCosineDecay'
-#    max_epoch: 196
-#    warmup_epochs: 34
-#    warmup_start_lr: 0.01
-#    cosine_base_lr: 0.1
+  learning_rate:
+    iter_step: True
+    name: 'CustomWarmupCosineDecay'
+    max_epoch: 196
+    warmup_epochs: 34
+    warmup_start_lr: 0.01
+    cosine_base_lr: 0.1
   weight_decay:
     name: 'L2'
     value: 1e-4

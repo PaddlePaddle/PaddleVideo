@@ -13,45 +13,7 @@
 # limitations under the License.
 
 import math
-
-from paddle.optimizer.lr import *  #LRScheduler
-
-#class PiecewiseDecay(LRScheduler):
-#    """
-#    We overwrite get_lr method of PiecewiseDecay to support lr.step() at each iter.
-#    The algorithm can be described as the code below:
-#    .. code-block:: text
-#        boundaries = [100, 200]
-#        values = [1.0, 0.5, 0.1]
-#        if epoch < 100:
-#            learning_rate = 1.0
-#        elif 100 <= global_step < 200:
-#            learning_rate = 0.5
-#        else:
-#            learning_rate = 0.1
-#    Args:
-#        boundaries(list): A list of steps numbers. The type of element in the list is python int.
-#        values(list): A list of learning rate values that will be picked during different epoch boundaries.
-#            The type of element in the list is python float.
-#        num_iters(int): number iterations of each epoch.
-#        last_epoch (int, optional):  The index of last epoch. Can be set to restart training. Default: -1, means initial learning rate.
-#        verbose (bool, optional): If ``True``, prints a message to stdout for each update. Default: ``False`` .
-#    Returns:
-#        ``PiecewiseDecay`` instance to schedule learning rate.
-#    """
-#
-#    def __init__(self, boundaries, values, num_iters, last_epoch=-1, verbose=False):
-#        self.boundaries = boundaries
-#        self.values = values
-#        self.num_iters = num_iters
-#        super(PiecewiseDecay, self).__init__(
-#            last_epoch=last_epoch, verbose=verbose)
-#
-#    def get_lr(self):
-#        for i in range(len(self.boundaries)):
-#            if self.last_epoch < self.boundaries[i]*self.num_iters:  #calculate total num_iters
-#                return self.values[i]
-#        return self.values[len(self.values) - 1]
+from paddle.optimizer.lr import *
 
 
 class CustomWarmupCosineDecay(LRScheduler):

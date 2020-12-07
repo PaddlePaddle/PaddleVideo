@@ -12,23 +12,23 @@ MODEL: #MODEL field
     width_per_group: 64
     alpha: 4
     beta: 8
-    num_classes: 400
+    num_classes: 10 #400
     num_frames: 32
     crop_size: 224  #independent to test or train mode
     dropout_rate: 0.5
 
 DATASET: #DATASET field
-  batch_size: 6 #single bacth size
+  batch_size: 4 #6 #single bacth size
   num_workers: 8
   train:
     name: "SFVideoDataset"
-    file_path: "/workspace/huangjun12/PaddleProject/PaddleVideo/Experiment/PaddleVideo/data/k400/part-10cls/train.csv" #Mandatory, train data index file path
+    file_path: "/workspace/huangjun12/PaddleProject/PaddleVideo/Pr/PaddleVideo/data/k400/part-10cls/train.csv" #Mandatory, train data index file path
   valid:
     name: "SFVideoDataset"
-    file_path: "/workspace/huangjun12/PaddleProject/PaddleVideo/Experiment/PaddleVideo/data/k400/part-10cls/val.csv" #Mandatory, valid data index file path
+    file_path: "/workspace/huangjun12/PaddleProject/PaddleVideo/Pr/PaddleVideo/data/k400/part-10cls/val.csv" #Mandatory, valid data index file path
   eval:
     name: "SFVideoDataset"
-    file_path: "/workspace/huangjun12/PaddleProject/PaddleVideo/Experiment/PaddleVideo/data/k400/part-10cls/val.csv" #Mandatory, valid data index file path
+    file_path: "/workspace/huangjun12/PaddleProject/PaddleVideo/Pr/PaddleVideo/data/k400/part-10cls/val.csv" #Mandatory, valid data index file path
     valid_mode: True
     num_ensemble_views: 3
     num_spatial_crops: 10
@@ -104,8 +104,8 @@ OPTIMIZER: #OPTIMIZER field
   learning_rate:
     iter_step: True
     name: 'CustomWarmupCosineDecay'
-    max_epoch: 196
-    warmup_epochs: 34
+    max_epoch: 10 #196
+    warmup_epochs: 1 #34
     warmup_start_lr: 0.01
     cosine_base_lr: 0.1
   weight_decay:
@@ -123,6 +123,6 @@ PRECISEBN:
   num_iters_preciseBN: 200  #default
 
 log_interval: 1 #Optional, the interal of logger, default:10
-epochs: 196 #Mandatory, total epoch  TODO delete??
+epochs: 10 #196 #Mandatory, total epoch  TODO delete??
 log_level: "INFO"
 resume_from: "" #checkpoint path.

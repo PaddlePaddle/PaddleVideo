@@ -14,29 +14,17 @@
 
 from ..registry import BACKBONES
 
+import numpy as np
 import paddle
 import paddle.nn.functional as F
-from paddle.nn.initializer import KaimingNormal
 
-#random.seed(0)
-#np.random.seed(0)
-paddle.framework.seed(0)
-
-
-# get init parameters for conv layer
-def get_conv_init(fan_out):
-    return KaimingNormal(fan_in=fan_out)
-
-
-def get_bn_param_attr(bn_weight=1.0, coeff=0.0):
-    param_attr = paddle.ParamAttr(
-        initializer=paddle.nn.initializer.Constant(bn_weight),
-        regularizer=paddle.regularizer.L2Decay(coeff))
-    return param_attr
-
-
+from ..weight_init import weight_init_
+from ...utils.save_load import load_ckpt
 """Video models."""
 
+#random.seed(0)
+np.random.seed(0)
+paddle.framework.seed(0)
 
 class BottleneckTransform(paddle.nn.Layer):
     """
@@ -86,61 +74,48 @@ class BottleneckTransform(paddle.nn.Layer):
                    dilation):
         str1x1, str3x3 = (stride, 1) if self._stride_1x1 else (1, stride)
 
-        fan = (dim_inner) * (self.temp_kernel_size * 1 * 1)
-        initializer_tmp = get_conv_init(fan)
-
         self.a = paddle.nn.Conv3D(
             in_channels=dim_in,
             out_channels=dim_inner,
             kernel_size=[self.temp_kernel_size, 1, 1],
             stride=[1, str1x1, str1x1],
             padding=[int(self.temp_kernel_size // 2), 0, 0],
-            weight_attr=paddle.ParamAttr(initializer=initializer_tmp),
             bias_attr=False)
-        self.a_bn = self.norm_module(num_features=dim_inner,
-                                     epsilon=self._eps,
-                                     weight_attr=get_bn_param_attr(),
-                                     bias_attr=get_bn_param_attr(bn_weight=0.0))
+        self.a_bn = self.norm_module(
+            num_features=dim_inner,
+            epsilon=self._eps,
+        )
 
         # 1x3x3, BN, ReLU.
-        fan = (dim_inner) * (1 * 3 * 3)
-        initializer_tmp = get_conv_init(fan)
-
-        self.b = paddle.nn.Conv3D(
-            in_channels=dim_inner,
-            out_channels=dim_inner,
-            kernel_size=[1, 3, 3],
-            stride=[1, str3x3, str3x3],
-            padding=[0, dilation, dilation],
-            groups=num_groups,
-            dilation=[1, dilation, dilation],
-            weight_attr=paddle.ParamAttr(initializer=initializer_tmp),
-            bias_attr=False)
-        self.b_bn = self.norm_module(num_features=dim_inner,
-                                     epsilon=self._eps,
-                                     weight_attr=get_bn_param_attr(),
-                                     bias_attr=get_bn_param_attr(bn_weight=0.0))
+        self.b = paddle.nn.Conv3D(in_channels=dim_inner,
+                                  out_channels=dim_inner,
+                                  kernel_size=[1, 3, 3],
+                                  stride=[1, str3x3, str3x3],
+                                  padding=[0, dilation, dilation],
+                                  groups=num_groups,
+                                  dilation=[1, dilation, dilation],
+                                  bias_attr=False)
+        self.b_bn = self.norm_module(
+            num_features=dim_inner,
+            epsilon=self._eps,
+        )
 
         # 1x1x1, BN.
-        fan = (dim_out) * (1 * 1 * 1)
-        initializer_tmp = get_conv_init(fan)
-
-        self.c = paddle.nn.Conv3D(
-            in_channels=dim_inner,
-            out_channels=dim_out,
-            kernel_size=[1, 1, 1],
-            stride=[1, 1, 1],
-            padding=[0, 0, 0],
-            weight_attr=paddle.ParamAttr(initializer=initializer_tmp),
-            bias_attr=False)
+        self.c = paddle.nn.Conv3D(in_channels=dim_inner,
+                                  out_channels=dim_out,
+                                  kernel_size=[1, 1, 1],
+                                  stride=[1, 1, 1],
+                                  padding=[0, 0, 0],
+                                  bias_attr=False)
         self.c_bn = self.norm_module(
             num_features=dim_out,
             epsilon=self._eps,
-            weight_attr=get_bn_param_attr(bn_weight=0.0),
-            bias_attr=get_bn_param_attr(bn_weight=0.0))
+        )
 
     def forward(self, x):
         # Branch2a.
+        #print("====my branch2a===", self.a.weight[0:10, 0,0,0,0])
+        #exit()
         x = self.a(x)
         x = self.a_bn(x)
         x = F.relu(x)
@@ -226,22 +201,17 @@ class ResBlock(paddle.nn.Layer):
     ):
         # Use skip connection with projection if dim or res change.
         if (dim_in != dim_out) or (stride != 1):
-            fan = (dim_out) * (1 * 1 * 1)
-            initializer_tmp = get_conv_init(fan)
-            self.branch1 = paddle.nn.Conv3D(
-                in_channels=dim_in,
-                out_channels=dim_out,
-                kernel_size=1,
-                stride=[1, stride, stride],
-                padding=0,
-                weight_attr=paddle.ParamAttr(initializer=initializer_tmp),
-                bias_attr=False,
-                dilation=1)
+            self.branch1 = paddle.nn.Conv3D(in_channels=dim_in,
+                                            out_channels=dim_out,
+                                            kernel_size=1,
+                                            stride=[1, stride, stride],
+                                            padding=0,
+                                            bias_attr=False,
+                                            dilation=1)
             self.branch1_bn = self.norm_module(
                 num_features=dim_out,
                 epsilon=self._eps,
-                weight_attr=get_bn_param_attr(),
-                bias_attr=get_bn_param_attr(bn_weight=0.0))
+            )
 
         self.branch2 = BottleneckTransform(dim_in,
                                            dim_out,
@@ -414,21 +384,17 @@ class ResNetBasicStem(paddle.nn.Layer):
         self._construct_stem(dim_in, dim_out)
 
     def _construct_stem(self, dim_in, dim_out):
-        fan = (dim_out) * (self.kernel[0] * self.kernel[1] * self.kernel[2])
-        initializer_tmp = get_conv_init(fan)
 
-        self._conv = paddle.nn.Conv3D(
-            in_channels=dim_in,
-            out_channels=dim_out,
-            kernel_size=self.kernel,
-            stride=self.stride,
-            padding=self.padding,
-            weight_attr=paddle.ParamAttr(initializer=initializer_tmp),
-            bias_attr=False)
-        self._bn = self.norm_module(num_features=dim_out,
-                                    epsilon=self.eps,
-                                    weight_attr=get_bn_param_attr(),
-                                    bias_attr=get_bn_param_attr(bn_weight=0.0))
+        self._conv = paddle.nn.Conv3D(in_channels=dim_in,
+                                      out_channels=dim_out,
+                                      kernel_size=self.kernel,
+                                      stride=self.stride,
+                                      padding=self.padding,
+                                      bias_attr=False)
+        self._bn = self.norm_module(
+            num_features=dim_out,
+            epsilon=self.eps,
+        )
 
     def forward(self, x):
         x = self._conv(x)
@@ -534,21 +500,18 @@ class FuseFastToSlow(paddle.nn.Layer):
             eps (float): epsilon for batch norm.
         """
         super(FuseFastToSlow, self).__init__()
-        fan = (dim_in * fusion_conv_channel_ratio) * (fusion_kernel * 1 * 1)
-        initializer_tmp = get_conv_init(fan)
 
-        self._conv_f2s = paddle.nn.Conv3D(
-            in_channels=dim_in,
-            out_channels=dim_in * fusion_conv_channel_ratio,
-            kernel_size=[fusion_kernel, 1, 1],
-            stride=[alpha, 1, 1],
-            padding=[fusion_kernel // 2, 0, 0],
-            weight_attr=paddle.ParamAttr(initializer=initializer_tmp),
-            bias_attr=False)
-        self._bn = norm_module(num_features=dim_in * fusion_conv_channel_ratio,
-                               epsilon=eps,
-                               weight_attr=get_bn_param_attr(),
-                               bias_attr=get_bn_param_attr(bn_weight=0.0))
+        self._conv_f2s = paddle.nn.Conv3D(in_channels=dim_in,
+                                          out_channels=dim_in *
+                                          fusion_conv_channel_ratio,
+                                          kernel_size=[fusion_kernel, 1, 1],
+                                          stride=[alpha, 1, 1],
+                                          padding=[fusion_kernel // 2, 0, 0],
+                                          bias_attr=False)
+        self._bn = norm_module(
+            num_features=dim_in * fusion_conv_channel_ratio,
+            epsilon=eps,
+        )
 
     def forward(self, x):
         x_s = x[0]
@@ -583,6 +546,7 @@ class ResNetSlowFast(paddle.nn.Layer):
         fusion_conv_channel_ratio=2,
         fusion_kernel_sz=7,  #5?
         pool_size_ratio=[[1, 1, 1], [1, 1, 1]],
+        pretrained=None,
     ):
         """
         Args:
@@ -602,7 +566,7 @@ class ResNetSlowFast(paddle.nn.Layer):
         self.fusion_conv_channel_ratio = fusion_conv_channel_ratio
         self.fusion_kernel_sz = fusion_kernel_sz  #TODO NOTE: modify to 7, not 5
         self.pool_size_ratio = pool_size_ratio
-        #        self.dropout_rate = dropout_rate
+        self.pretrained = pretrained
         self._construct_network()
 
     def _construct_network(self):
@@ -753,7 +717,38 @@ class ResNetSlowFast(paddle.nn.Layer):
         )
 
     def init_weights(self):
-        pass
+        """Initiate the parameters.
+        Note:
+            1. when indicate pretrained loading path, will load it to initiate backbone.
+            2. when not indicating pretrained loading path, will follow specific initialization initiate backbone. Always, Conv2D layer will be initiated by KaimingNormal function, and BatchNorm2d will be initiated by Constant function.
+            Please refer to https://www.paddlepaddle.org.cn/documentation/docs/en/develop/api/paddle/nn/initializer/kaiming/KaimingNormal_en.html
+        """
+        if isinstance(self.pretrained, str) and self.pretrained.strip() != "":
+            load_ckpt(self, self.pretrained)
+        elif self.pretrained is None or self.pretrained.strip() == "":
+            for layer in self.sublayers():
+                if isinstance(layer, paddle.nn.Conv3D):  #init conv
+                    #print("===init conv3d====")
+                    #print(layer.full_name())
+                    #print("np.prod(layer._kernel_size)", layer._out_channels,  np.prod(layer._kernel_size))
+                    #print("fan_out", layer._out_channels * np.prod(layer._kernel_size))
+                    #print(layer.weight[0:10, 0,0,0,0])
+                    weight_init_(layer,
+                                 'KaimingNormal',
+                                 fan_in=layer._out_channels *
+                                 np.prod(layer._kernel_size))  #fan_out
+                    #print(layer.weight[0:10, 0,0,0,0])
+                    #exit()
+                elif isinstance(layer, paddle.nn.BatchNorm3D):  #init bn
+                    #print("===init BN====")
+                    weight_init_(layer, 'Constant', value=1.0,
+                                 bias_value=0.0)  #weight, bias
+                    layer.weight.regularizer = paddle.regularizer.L2Decay(0.0)
+                    layer.bias.regularizer = paddle.regularizer.L2Decay(0.0)
+                if isinstance(layer,
+                              BottleneckTransform):  #init transform final bn
+                    #print("*****init last BN*****")
+                    weight_init_(layer.c_bn, 'Constant', value=0.0)
 
     def forward(self, x):
         x = self.s1(x)  #VideoModelStem

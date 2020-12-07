@@ -36,13 +36,12 @@ def build_lr(cfg):
     #when learning_rate is LRScheduler
     if cfg_copy.get('learning_rate') and isinstance(cfg_copy['learning_rate'],
                                                     dict):
-        #when learning_rate.learning_rate is iter_step
-        #        if cfg_copy['learning_rate'].get("iter_step") and cfg_copy['learning_rate']["iter_step"] == True:
-        #            cfg_copy['learning_rate']['num_iters'] = cfg_copy['num_iters']  #paste num_iters
-        #not support inner LRSchedule use iter_step
-        cfg_copy['learning_rate'] = build_lr(cfg_copy['learning_rate'])
+        cfg_copy['learning_rate'] = build_lr(
+            cfg_copy['learning_rate']
+        )  #not support inner LRSchedule use iter_step
 
     lr_name = cfg_copy.pop('name')
     if cfg_copy.get('iter_step'):
         cfg_copy.pop('iter_step')
+
     return getattr(custom_lr, lr_name)(**cfg_copy)
