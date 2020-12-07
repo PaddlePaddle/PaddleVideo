@@ -22,7 +22,8 @@ from ..loader import build_dataloader
 from ..solver import build_lr, build_optimizer
 from ..utils import do_preciseBN
 from paddlevideo.utils import get_logger, coloring
-from paddlevideo.utils import AverageMeter, build_metric, log_batch, log_epoch, save
+from paddlevideo.utils import (AverageMeter, build_metric, log_batch, log_epoch,
+                               save, mkdir)
 
 
 def train_model(model, dataset, cfg, parallel=True, validate=True):
@@ -36,36 +37,27 @@ def train_model(model, dataset, cfg, parallel=True, validate=True):
 
     """
     logger = get_logger("paddlevideo")
-
-    dataset = dataset if isinstance(dataset, (list, tuple)) else [dataset]
-    #build data loader, refer to the field ```DATASET``` in the configuration for more details.
     batch_size = cfg.DATASET.get('batch_size', 2)
     places = paddle.set_device('gpu')
 
+    train_dataset = dataset[0]
     train_dataloader_setting = dict(
         batch_size=batch_size,
         # default num worker: 0, which means no subprocess will be created
         num_workers=cfg.DATASET.get('num_workers', 0),
         places=places)
-    dataloader_setting = [train_dataloader_setting]
+    train_loader = build_dataloader(train_dataset, **train_dataloader_setting)
+
     if validate:
+        valid_dataset = dataset[1]
         validate_dataloader_setting = dict(batch_size=batch_size,
-                                           num_worker=cfg.DATASET.get(
+                                           num_workers=cfg.DATASET.get(
                                                'num_workers', 0),
-                                           palces=places,
+                                           places=places,
                                            drop_last=False,
                                            shuffle=False)
-        dataloader_setting.append(validate_dataloader_setting)
-
-    data_loaders = [
-        build_dataloader(ds, **setting)
-        for ds, setting in zip(dataset, dataloader_setting)
-    ]
-
-    #build optimizer, refer to the field ```OPTIMIZER``` in the configuration for more details.
-    train_loader = data_loaders[0]
-    if validate:
-        valid_loader = data_loaders[1]
+        valid_loader = build_dataloader(valid_dataset,
+                                        **validate_dataloader_setting)
 
     lr = build_lr(cfg.OPTIMIZER.learning_rate)
     optimizer = build_optimizer(cfg.OPTIMIZER,
@@ -74,7 +66,6 @@ def train_model(model, dataset, cfg, parallel=True, validate=True):
 
     if parallel:
         model = paddle.DataParallel(model)
-
     best = 0.
     for epoch in range(1, cfg.epochs + 1):
         model.train()
@@ -133,7 +124,6 @@ def train_model(model, dataset, cfg, parallel=True, validate=True):
                     ips = "ips: {:.5f} instance/sec.".format(
                         batch_size / metric_list["batch_time"].val)
                     log_batch(metric_list, i, epoch, cfg.epochs, "val", ips)
-
             ips = "ips: {:.5f} instance/sec.".format(
                 batch_size * metric_list["batch_time"].count /
                 metric_list["batch_time"].sum)
@@ -145,11 +135,9 @@ def train_model(model, dataset, cfg, parallel=True, validate=True):
 
         model_name = cfg.model_name
         output_dir = cfg.get("output_dir", f"./output/{model_name}")
-        if not osp.exists(output_dir):
-            os.makedirs(output_dir)
+        mkdir(output_dir)
         opt_state_dict = optimizer.state_dict()
         opt_name = cfg['OPTIMIZER']['name']
-        timestamp = time.strftime("%m%d_%H", time.localtime())
 
         if cfg.get("PRECISEBN") and (epoch -
                                      1) % cfg.PRECISEBN.preciseBN_interval == 0:
@@ -162,20 +150,16 @@ def train_model(model, dataset, cfg, parallel=True, validate=True):
 
             # save best
             save(opt_state_dict, osp.join(output_dir, f"{opt_name}.pdopt"))
-            save(
-                model.state_dict(),
-                osp.join(output_dir,
-                         model_name + "_best_" + timestamp + ".pdparams"))
+            save(model.state_dict(),
+                 osp.join(output_dir, model_name + "_best.pdparams"))
+            best = int(best * 10000) / 10000
             logger.info(
                 f"Already save the best model (top1 acc){best} weights and optimizer params in epoch {epoch}"
             )
 
         if not validate and epoch % cfg.get("save_interval", 10) == 0:
             save(opt_state_dict, osp.join(output_dir, f"{opt_name}.pdopt"))
-            save(
-                model.state_dict(),
-                osp.join(
-                    output_dir,
-                    model_name + f"_epoch {epoch}_" + timestamp + ".pdparams"))
+            save(model.state_dict(),
+                 osp.join(output_dir, model_name + f"_epoch_{epoch}.pdparams"))
 
     logger.info(f'training {cfg.model_name} finished')

@@ -18,39 +18,31 @@ from paddlevideo.loader.builder import build_dataloader, build_dataset
 from paddlevideo.modeling.builder import build_model
 from paddlevideo.tasks import train_model
 from paddlevideo.utils import get_dist_info
-from paddlevideo.utils import setup_logger
+
 
 def parse_args():
     parser = argparse.ArgumentParser("PaddleVideo train script")
-    parser.add_argument(
-        '-c',
-        '--config',
-        type=str,
-        default='configs/example.yaml',
-        help='config file path')
-    parser.add_argument(
-        '-o',
-        '--override',
-        action='append',
-        default=[],
-        help='config options to be overridden')
+    parser.add_argument('-c',
+                        '--config',
+                        type=str,
+                        default='configs/example.yaml',
+                        help='config file path')
+    parser.add_argument('-o',
+                        '--override',
+                        action='append',
+                        default=[],
+                        help='config options to be overridden')
     parser.add_argument(
         '--validate',
         action='store_true',
         help='whether to evaluate the checkpoint during training')
-    parser.add_argument(
-        '--seed',
-        type=int,
-        default=None,
-        help='random seed')
+    parser.add_argument('--seed', type=int, default=None, help='random seed')
 
     args = parser.parse_args()
     return args
 
 
 def main():
-
-    logger = setup_logger("./", name="paddlevideo", level="INFO")
 
     args = parse_args()
 
@@ -74,11 +66,7 @@ def main():
     if args.validate:
         dataset.append(build_dataset((cfg.DATASET.valid, cfg.PIPELINE.valid)))
 
-    train_model(model,
-		dataset, 
-		cfg,
-                parallel=parallel,
-                validate=args.validate)
+    train_model(model, dataset, cfg, parallel=parallel, validate=args.validate)
 
 
 if __name__ == '__main__':
