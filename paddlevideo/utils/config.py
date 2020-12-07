@@ -17,8 +17,10 @@ from paddlevideo.utils.logger import coloring, get_logger, setup_logger
 
 __all__ = ['get_config']
 
-logger = setup_logger("./", name="paddlevideo", level="INFO")
+#ogger = setup_logger("./", name="paddlevideo", level="INFO")
 
+
+logger = get_logger("paddlevideo")
 class AttrDict(dict):
     def __getattr__(self, key):
         return self[key]

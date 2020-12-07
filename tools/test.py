@@ -11,22 +11,30 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import paddle
+
+import os
+import sys
 import argparse
+import paddle
+
+
+__dir__ = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.abspath(os.path.join(__dir__, '../')))
+
 from paddlevideo.utils import get_config
 from paddlevideo.loader.builder import build_dataloader, build_dataset
 from paddlevideo.modeling.builder import build_model
-from paddlevideo.tasks import train_model
+from paddlevideo.tasks import test_model
 from paddlevideo.utils import get_dist_info
-from paddlevideo.utils import setup_logger
+
 
 def parse_args():
-    parser = argparse.ArgumentParser("PaddleVideo train script")
+    parser = argparse.ArgumentParser("PaddleVideo test script")
     parser.add_argument(
         '-c',
         '--config',
         type=str,
-        default='configs/example.yaml',
+        default='configs/recognition/tsm/tsm.yaml',
         help='config file path')
     parser.add_argument(
         '-o',
@@ -35,26 +43,20 @@ def parse_args():
         default=[],
         help='config options to be overridden')
     parser.add_argument(
-        '--validate',
-        action='store_true',
-        help='whether to evaluate the checkpoint during training')
-    parser.add_argument(
-        '--seed',
-        type=int,
-        default=None,
-        help='random seed')
+        '-w',
+        '--weight',
+        default='',
+        help='weight path')
 
     args = parser.parse_args()
     return args
 
 
 def main():
-
-    logger = setup_logger("./", name="paddlevideo", level="INFO")
-
     args = parse_args()
+    cfg = get_config(args.config)
 
-    cfg = get_config(args.config, overrides=args.override)
+    dataset = build_dataset((cfg.DATASET.test, cfg.PIPELINE.test))
     _, world_size = get_dist_info()
     parallel = world_size != 1
     if parallel:
@@ -62,24 +64,10 @@ def main():
 
     model = build_model(cfg.MODEL)
 
-    dataset = [build_dataset((cfg.DATASET.train, cfg.PIPELINE.train))]
-
-    #NOTE: To debug dataloader or inspect data, please try to call dataset so that errors can be catched.
-    try:
-        from collections import Iterable
-        isinstance(dataset[0], Iterable)
-    except TypeError:
-        print("TypeError: 'dataset' is not iterable")
-
-    if args.validate:
-        dataset.append(build_dataset((cfg.DATASET.valid, cfg.PIPELINE.valid)))
-
-    train_model(model,
-		dataset, 
-		cfg,
-                parallel=parallel,
-                validate=args.validate)
+    test_model(model, dataset, cfg, weight, parallel)
 
 
 if __name__ == '__main__':
     main()
+
+
