@@ -19,4 +19,5 @@ from .logger import setup_logger, coloring, get_logger
 from .record import AverageMeter, build_metric, log_batch, log_epoch
 from .dist_utils import get_dist_info, main_only
 from .save_load import save, load_ckpt
+from .precise_bn import do_preciseBN
 __all__ = ['Registry', 'build']
