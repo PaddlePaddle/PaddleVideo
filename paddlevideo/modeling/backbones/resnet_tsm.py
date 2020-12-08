@@ -294,10 +294,15 @@ class ResNetTSM(nn.Layer):
         """Define how the backbone is going to run.
         
         """
-        #NOTE: Already merge axis 0(batches) and axis 1(channels) before extracting feature phase, 
+        #NOTE: (deprecated design) Already merge axis 0(batches) and axis 1(clips) before extracting feature phase, 
         # please refer to paddlevideo/modeling/framework/recognizers/recognizer2d.py#L27
         #y = paddle.reshape(
         #    inputs, [-1, inputs.shape[2], inputs.shape[3], inputs.shape[4]])
+
+        #NOTE: As paddlepaddle to_static method need a "pure" model to trim. It means from 
+        #  1. the phase of generating data[images, label] from dataloader 
+        #     to 
+        #  2. last layer of a model, always is FC layer
 
         y = self.conv(inputs)
         y = self.pool2D_max(y)
