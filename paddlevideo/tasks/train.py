@@ -107,6 +107,7 @@ def train_model(model, dataset, cfg, parallel=True, validate=True):
         def evaluate(best):
             model.eval()
             metric_list = build_metric()
+            metric_list.pop('lr')
             tic = time.time()
             for i, data in enumerate(valid_loader):
                 if parallel:
@@ -116,6 +117,7 @@ def train_model(model, dataset, cfg, parallel=True, validate=True):
 
                 # log_metric
                 for name, value in outputs.items():
+
                     metric_list[name].update(value.numpy()[0], batch_size)
                 metric_list['batch_time'].update(time.time() - tic)
                 tic = time.time()
@@ -153,9 +155,7 @@ def train_model(model, dataset, cfg, parallel=True, validate=True):
             save(model.state_dict(),
                  osp.join(output_dir, model_name + "_best.pdparams"))
             best = int(best * 10000) / 10000
-            logger.info(
-                f"Already save the best model (top1 acc){best} weights and optimizer params in epoch {epoch}"
-            )
+            logger.info(f"Already save the best model (top1 acc){best}")
 
         if not validate and epoch % cfg.get("save_interval", 10) == 0:
             save(opt_state_dict, osp.join(output_dir, f"{opt_name}.pdopt"))
