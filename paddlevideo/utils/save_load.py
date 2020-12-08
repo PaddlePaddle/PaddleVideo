@@ -22,13 +22,14 @@ import paddle
 from paddlevideo.utils import get_logger
 from paddlevideo.utils import main_only
 
+
+#XXX(shipping): maybe need load N times because of different cards have different params.
 @main_only
 def load_ckpt(model, weight_path):
     """
     """
     #model.set_state_dict(state_dict)
-    
-    
+
     if not osp.isfile(weight_path):
         raise IOError(f'{weight_path} is not a checkpoint file')
     #state_dicts = load(weight_path)
@@ -37,24 +38,29 @@ def load_ckpt(model, weight_path):
     state_dicts = paddle.load(weight_path)
     tmp = {}
     total_len = len(model.state_dict())
-    with tqdm(total=total_len, position=1, bar_format='{desc}', desc="Loading weights") as desc:
+    with tqdm(total=total_len,
+              position=1,
+              bar_format='{desc}',
+              desc="Loading weights") as desc:
         for item in tqdm(model.state_dict(), total=total_len, position=0):
             name = item
             desc.set_description('Loading %s' % name)
             tmp[name] = state_dicts[name]
             time.sleep(0.01)
-        ret_str = "loading {:<20d} weights completed.".format(len(model.state_dict()))
+        ret_str = "loading {:<20d} weights completed.".format(
+            len(model.state_dict()))
         desc.set_description(ret_str)
         model.set_state_dict(tmp)
-    
 
-def makedirs(dir):
+
+def mkdir(dir):
     if not os.path.exists(dir):
         # avoid error when train with multiple gpus
         try:
             os.makedirs(dir)
         except:
             pass
+
 
 """
 def save(state_dicts, file_name):
@@ -86,6 +92,7 @@ def save(state_dicts, file_name):
     with open(file_name, 'wb') as f:
         pickle.dump(final_dict, f, protocol=2)
 """
+
 
 @main_only
 def save(obj, path):

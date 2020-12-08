@@ -14,14 +14,16 @@
 
 import numpy as np
 import time
-import random
+import os
+import os.path as osp
 
 import paddle
-from ..loader import build_dataset, build_dataloader
+from ..loader import build_dataloader
 from ..solver import build_lr, build_optimizer
 from ..utils import do_preciseBN
 from paddlevideo.utils import get_logger, coloring
-from paddlevideo.utils import AverageMeter, build_metric, log_batch, log_epoch, save
+from paddlevideo.utils import (AverageMeter, build_metric, log_batch, log_epoch,
+                               save, mkdir)
 
 
 def train_model(model,
@@ -40,25 +42,27 @@ def train_model(model,
 
     """
     logger = get_logger("paddlevideo")
-
-    dataset = dataset if isinstance(dataset, (list, tuple)) else [dataset]
-    #build data loader, refer to the field ```DATASET``` in the configuration for more details.
     batch_size = cfg.DATASET.get('batch_size', 2)
     places = paddle.set_device('gpu')
 
-    dataloader_setting = dict(
+    train_dataset = dataset[0]
+    train_dataloader_setting = dict(
         batch_size=batch_size,
         # default num worker: 0, which means no subprocess will be created
         num_workers=cfg.DATASET.get('num_workers', 0),
         places=places)
-    data_loaders = [
-        build_dataloader(ds, **dataloader_setting) for ds in dataset
-    ]
+    train_loader = build_dataloader(train_dataset, **train_dataloader_setting)
 
-    #build optimizer, refer to the field ```OPTIMIZER``` in the configuration for more details.
-    train_loader = data_loaders[0]
     if validate:
-        valid_loader = data_loaders[1]
+        valid_dataset = dataset[1]
+        validate_dataloader_setting = dict(batch_size=batch_size,
+                                           num_workers=cfg.DATASET.get(
+                                               'num_workers', 0),
+                                           places=places,
+                                           drop_last=False,
+                                           shuffle=False)
+        valid_loader = build_dataloader(valid_dataset,
+                                        **validate_dataloader_setting)
 
     #slowfast
     if cfg.OPTIMIZER.learning_rate.get(
@@ -72,8 +76,7 @@ def train_model(model,
 
     if parallel:
         model = paddle.DataParallel(model)
-
-    best = 0
+    best = 0.
     for epoch in range(1, cfg.epochs + 1):
         model.train()
         metric_list = build_metric()
@@ -120,9 +123,10 @@ def train_model(model,
             metric_list["batch_time"].sum)
         log_epoch(metric_list, epoch, "train", ips)
 
-        def evaluate():
+        def evaluate(best):
             model.eval()
             metric_list = build_metric()
+            metric_list.pop('lr')
             tic = time.time()
             for i, data in enumerate(valid_loader):
                 if parallel:
@@ -132,6 +136,7 @@ def train_model(model,
 
                 # log_metric
                 for name, value in outputs.items():
+
                     metric_list[name].update(value.numpy()[0], batch_size)
                 metric_list['batch_time'].update(time.time() - tic)
                 tic = time.time()
@@ -146,27 +151,36 @@ def train_model(model,
                 metric_list["batch_time"].sum)
             log_epoch(metric_list, epoch, "val", ips)
 
+            if metric_list['top1'].avg > best:
+                best = metric_list['top1'].avg
+            return best
+
+        model_name = cfg.model_name
+        output_dir = cfg.get("output_dir", f"./output/{model_name}")
+        mkdir(output_dir)
+        opt_state_dict = optimizer.state_dict()
+        opt_name = cfg['OPTIMIZER']['name']
+
         if cfg.get("PRECISEBN") and (
             (epoch - 1) % cfg.PRECISEBN.preciseBN_interval == 0
                 or epoch == cfg.epochs):
             do_preciseBN(
                 model, train_loader, parallel,
                 min(cfg.PRECISEBN.num_iters_preciseBN, len(train_loader)))
+        if validate:
+            with paddle.fluid.dygraph.no_grad():
+                best = evaluate(best)
 
-        if validate:  #TODO: set valid interval
-            evaluate()
+            # save best
+            save(opt_state_dict, osp.join(output_dir, f"{opt_name}.pdopt"))
+            save(model.state_dict(),
+                 osp.join(output_dir, model_name + "_best.pdparams"))
+            best = int(best * 10000) / 10000
+            logger.info(f"Already save the best model (top1 acc){best}")
 
-        #if metric_list['top1'].avg > best:
-        if epoch % 1 == 0:  #TODO: Decompose train and eval, just valid; Set save interval
-            best = metric_list['top1'].avg
-            opt_state_dict = optimizer.state_dict()
-            opt_name = cfg['OPTIMIZER']['name']
+        if epoch % cfg.get("save_interval", 10) == 0 or epoch == cfg.epochs:
+            save(opt_state_dict, osp.join(output_dir, f"{opt_name}.pdopt"))
+            save(model.state_dict(),
+                 osp.join(output_dir, model_name + f"_epoch_{epoch}.pdparams"))
 
-            save(opt_state_dict, f"{opt_name}.pdopt")
-            #save(model.state_dict(), "best.pdparams")
-            save(model.state_dict(), "slowfast_{}.pdparams".format(epoch))
-            logger.info(
-                f"Already save the best model (top1 acc){best} weights and optimizer params in epoch {epoch}"
-            )
-
-    logger.info('training finished')  #info of yaml
+    logger.info(f'training {cfg.model_name} finished')

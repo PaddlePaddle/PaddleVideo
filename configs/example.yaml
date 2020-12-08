@@ -78,6 +78,7 @@ EVALUATION:
     function: "topk"
     topk: (1,5)
 
+model_name: "example"
 log_interval: 20 #Optional, the interal of logger
 epochs: 2 #Mandatory, total epoch
 log_level: "DEBUG" #Optional, the logger level.

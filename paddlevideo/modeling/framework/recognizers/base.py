@@ -48,31 +48,31 @@ class BaseRecognizer(nn.Layer):
         feature = self.backbone(imgs)
         return feature
 
+    def average_clip(self, cls_score, num_segs=1):
+        batch_size = cls_score.shape[0]
+        cls_score = paddle.reshape(batch_size // num_segs, num_segs, -1)
+        softmax_out = F.softmax(cls_score)
+        return softmax_out
+
     @abstractmethod
-    def forward_train(self, imgs, labels, **kwargs):
+    def forward_train(self, imgs, labels, reduce_sum, **kwargs):
         pass
 
     @abstractmethod
-    def forward_valid(self, imgs):
+    def forward_test(self, imgs, labels, reduce_sum, **kwargs):
         pass
 
-    def forward(self,
-                imgs,
-                labels=None,
-                return_loss=True,
-                reduce_sum=False,
-                **kwargs):
+    def forward(self, imgs, **kwargs):
         """Define how the model is going to run, from input to output.
         """
-        if return_loss:
-            if labels is None:
-                raise ValueError("Label should not be None.")
-            return self.forward_train(imgs,
-                                      labels,
-                                      reduce_sum=reduce_sum,
-                                      **kwargs)
-        else:
-            return self.forward_valid(imgs)
+        batches = imgs.shape[0]
+        num_segs = imgs.shape[1]
+        imgs = paddle.reshape(imgs, [-1] + list(imgs.shape[2:]))
+
+        feature = self.extract_feature(imgs)
+        cls_score = self.head(feature, num_segs)
+
+        return cls_score
 
     def train_step(self, data_batch, **kwargs):
         """Training step.
@@ -81,7 +81,11 @@ class BaseRecognizer(nn.Layer):
         labels = data_batch[1]
 
         # call forward
-        loss_metrics = self(imgs, labels, return_loss=True)
+        loss_metrics = self.forward_train(imgs,
+                                          labels,
+                                          reduce_sum=False,
+                                          **kwargs)
+
         return loss_metrics
 
     def val_step(self, data_batch, **kwargs):
@@ -91,5 +95,15 @@ class BaseRecognizer(nn.Layer):
         labels = data_batch[1]
 
         # call forward
-        loss_metrics = self(imgs, labels, reducesum=True, return_loss=True)
+        loss_metrics = self.forward_train(imgs,
+                                          labels,
+                                          reduce_sum=True,
+                                          **kwargs)
         return loss_metrics
+
+    def test_step(self, data_batch, **kwargs):
+        imgs = data_batch[0]
+        labels = data_batch[1]
+
+        metrics = self.forward_test(imgs, labels, reduce_sum=True, **kwargs)
+        return metrics

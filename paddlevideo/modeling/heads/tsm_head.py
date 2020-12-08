@@ -37,7 +37,7 @@ class TSMHead(TSNHead):
                  in_channels,
                  drop_ratio,
                  std,
-                 **kwargs)->None:
+                 **kwargs):
 
 
         super().__init__(num_classes, in_channels, drop_ratio=drop_ratio, std=std, **kwargs)

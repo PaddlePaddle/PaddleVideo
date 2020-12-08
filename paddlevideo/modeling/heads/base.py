@@ -62,7 +62,12 @@ class BaseHead(nn.Layer):
         """
         pass
 
-    def loss(self, scores, labels, reduce_sum=False, **kwargs):
+    def loss(self,
+             scores,
+             labels,
+             reduce_sum=False,
+             return_loss=True,
+             **kwargs):
         """Calculate the loss accroding to the model output ```scores```,
            and the target ```labels```.
 
@@ -76,9 +81,10 @@ class BaseHead(nn.Layer):
         """
         labels.stop_gradient = True  #XXX: check necessary
         losses = dict()
-        #XXX: F.crossentropy include logsoftmax and nllloss
-        loss = self.loss_func(scores, labels, **kwargs)
-        avg_loss = paddle.mean(loss)
+        if return_loss:
+            #XXX: F.crossentropy include logsoftmax and nllloss
+            loss = self.loss_func(scores, labels, **kwargs)
+            avg_loss = paddle.mean(loss)
         top1 = paddle.metric.accuracy(input=scores, label=labels, k=1)
         top5 = paddle.metric.accuracy(input=scores, label=labels, k=5)
 
@@ -93,9 +99,10 @@ class BaseHead(nn.Layer):
 
         losses['top1'] = top1
         losses['top5'] = top5
-        if type(loss) is dict:
-            losses.update(avg_loss)
-        else:
-            losses['loss'] = avg_loss
+        if return_loss:
+            if type(loss) is dict:
+                losses.update(avg_loss)
+            else:
+                losses['loss'] = avg_loss
 
         return losses

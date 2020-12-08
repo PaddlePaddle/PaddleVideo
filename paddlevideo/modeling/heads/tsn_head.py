@@ -62,12 +62,12 @@ class TSNHead(BaseHead):
                     self.in_channels,
                     self.num_classes)
 
-    def init_weight(self):
+    def init_weights(self):
         """Initiate the FC layer parameters"""
 
         weight_init_(self.fc, 'Uniform', 'fc_0.w_0', 'fc_0.b_0', low=-self.stdv, high=self.stdv )
-        self.fc.learning_rate = 2.0
-        self.fc.regularizer = paddle.regularizer.L2Decay(0.)
+        self.fc.bias.learning_rate = 2.0
+        self.fc.bias.regularizer = paddle.regularizer.L2Decay(0.)
 
     def forward(self, x, seg_num):
         

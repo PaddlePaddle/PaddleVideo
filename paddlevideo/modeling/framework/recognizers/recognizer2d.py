@@ -24,23 +24,26 @@ class Recognizer2D(BaseRecognizer):
     def forward_train(self, imgs, labels, reduce_sum, **kwargs):
         """Define how the model is going to train, from input to output.
         """
-        # As the num_segs is an attribute of dataset phase, and didn't pass to build_head phase, should obtain it from imgs(paddle.Tensor) now, then call self.head method.
+        #NOTE: As the num_segs is an attribute of dataset phase, and didn't pass to build_head phase, should obtain it from imgs(paddle.Tensor) now, then call self.head method.
 
-        batches = imgs.shape[0]
-        imgs = paddle.reshape(imgs, [-1] + imgs.shape[2:])
-        num_segs = imgs.shape[0] // batches
-        feature = self.extract_feature(imgs)
-        cls_score = self.head(feature, num_segs)
+        #labels = labels.squeeze()
+        #XXX: unsqueeze label to [label] ?
+
+        cls_score = self(imgs)
         loss_metrics = self.head.loss(cls_score, labels, reduce_sum, **kwargs)
         return loss_metrics
 
-    def forward_valid(self, imgs):
-        """Define how the model is going to valid, from input to output."""
-        #XXX add testing code.
-        batches = imgs.shape[0]
-        imgs = paddle.reshape(imgs, [-1] + imgs.shape[2:])
-        num_segs = imgs.shape[0] // batches
-        feature = self.extract_feature(imgs)
-        cls_score = self.head(feature, num_segs)
+    def forward_test(self, imgs, labels, reduce_sum, **kwargs):
+        """Define how the model is going to test, from input to output."""
+        #XXX
+        num_segs = imgs.shape[1]
+        cls_score = self(imgs)
 
-        return cls_score
+        # calculate num_crops automatically
+        cls_score = self.average_clip(cls_score, num_segs)
+        metrics = self.head.loss(cls_score,
+                                 labels,
+                                 reduce_sum,
+                                 return_loss=False**kwargs)
+
+        return metrics
