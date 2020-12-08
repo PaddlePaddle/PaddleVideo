@@ -73,10 +73,6 @@ def train_model(model,
     if parallel:
         model = paddle.DataParallel(model)
 
-    random.seed(0)
-    np.random.seed(0)
-    paddle.framework.seed(0)
-
     best = 0
     for epoch in range(1, cfg.epochs + 1):
         model.train()
@@ -150,17 +146,18 @@ def train_model(model,
                 metric_list["batch_time"].sum)
             log_epoch(metric_list, epoch, "val", ips)
 
-        if cfg.get("PRECISEBN") and (epoch -
-                                     1) % cfg.PRECISEBN.preciseBN_interval == 0:
+        if cfg.get("PRECISEBN") and (
+            (epoch - 1) % cfg.PRECISEBN.preciseBN_interval == 0
+                or epoch == cfg.epochs):
             do_preciseBN(
                 model, train_loader, parallel,
                 min(cfg.PRECISEBN.num_iters_preciseBN, len(train_loader)))
 
-        if validate:
+        if validate:  #TODO: set valid interval
             evaluate()
 
         #if metric_list['top1'].avg > best:
-        if 1:  #metric_list['top1'].avg > best:
+        if epoch % 1 == 0:  #TODO: Decompose train and eval, just valid; Set save interval
             best = metric_list['top1'].avg
             opt_state_dict = optimizer.state_dict()
             opt_name = cfg['OPTIMIZER']['name']

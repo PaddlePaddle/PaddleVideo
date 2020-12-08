@@ -73,7 +73,7 @@ class FrameDataset(BaseDataset):
         results = copy.deepcopy(self.info[idx])
         results['suffix'] = self.suffix
         #Note: For now, paddle.io.DataLoader cannot support dict type retval, so convert to list here
-        to_list = self.pipeline(results)  #hj: to_list rename to output?
+        to_list = self.pipeline(results)  #TODO: to_list rename to output?
         #XXX have to unsqueeze label here or before calc metric!
         return [to_list['imgs'], np.array([to_list['labels']])]
 

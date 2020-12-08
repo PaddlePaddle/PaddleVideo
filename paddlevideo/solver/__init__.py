@@ -14,5 +14,3 @@
 
 from .optimizer import build_optimizer
 from .lr import build_lr
-
-#from .slowfast_lr_policy import get_epoch_lr

@@ -21,13 +21,13 @@ DATASET: #DATASET field
   batch_size: 6 #single bacth size
   num_workers: 8
   train:
-    name: "SFVideoDataset"
+    format: "SFVideoDataset"
     file_path: "/workspace/huangjun12/PaddleProject/PaddleVideo/Pr/PaddleVideo/data/k400/part-10cls/train.csv" #Mandatory, train data index file path
   valid:
-    name: "SFVideoDataset"
+    format: "SFVideoDataset"
     file_path: "/workspace/huangjun12/PaddleProject/PaddleVideo/Pr/PaddleVideo/data/k400/part-10cls/val.csv" #Mandatory, valid data index file path
   eval:
-    name: "SFVideoDataset"
+    format: "SFVideoDataset"
     file_path: "/workspace/huangjun12/PaddleProject/PaddleVideo/Pr/PaddleVideo/data/k400/part-10cls/val.csv" #Mandatory, valid data index file path
     valid_mode: True
     num_ensemble_views: 3

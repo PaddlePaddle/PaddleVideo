@@ -15,9 +15,6 @@
 import numpy as np
 import paddle.nn.initializer as init
 
-#import paddle
-#paddle.framework.seed(0)
-
 
 def weight_init_(layer,
                  func,

@@ -42,7 +42,7 @@ def build_dataset(cfg):
     #XXX: ugly code here!
     cfg_dataset, cfg_pipeline = cfg
     cfg_dataset.pipeline = build_pipeline(cfg_pipeline)
-    dataset = build(cfg_dataset, DATASETS)
+    dataset = build(cfg_dataset, DATASETS, key="format")
     return dataset
 
 

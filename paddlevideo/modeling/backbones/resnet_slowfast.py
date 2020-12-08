@@ -18,8 +18,7 @@ import paddle
 import paddle.nn.functional as F
 from paddle.nn.initializer import KaimingNormal
 
-#random.seed(0)
-#np.random.seed(0)
+# seed random seed
 paddle.framework.seed(0)
 
 
@@ -600,9 +599,8 @@ class ResNetSlowFast(paddle.nn.Layer):
         self.input_channel_num = input_channel_num
         self.width_per_group = width_per_group
         self.fusion_conv_channel_ratio = fusion_conv_channel_ratio
-        self.fusion_kernel_sz = fusion_kernel_sz  #TODO NOTE: modify to 7, not 5
+        self.fusion_kernel_sz = fusion_kernel_sz  # NOTE: modify to 7 in 8*8, 5 in old implement
         self.pool_size_ratio = pool_size_ratio
-        #        self.dropout_rate = dropout_rate
         self._construct_network()
 
     def _construct_network(self):

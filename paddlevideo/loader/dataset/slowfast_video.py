@@ -22,6 +22,10 @@ import random
 from ...utils import get_logger
 logger = get_logger("paddlevideo")
 
+#set random seed
+random.seed(0)
+np.random.seed(0)
+
 
 @DATASETS.register()
 class SFVideoDataset(BaseDataset):
@@ -71,8 +75,6 @@ class SFVideoDataset(BaseDataset):
             for line in fin:
                 line_split = line.strip().split()
                 filename, labels = line_split
-                #TODO:
-                # Required suffix format: may mp4/avi/wmv
                 if self.data_prefix is not None:
                     filename = osp.join(self.data_prefix, filename)
                 for tidx in range(self.num_ensemble_views):
@@ -88,17 +90,14 @@ class SFVideoDataset(BaseDataset):
                             ))
         return info
 
-    def prepare_train(
-        self,
-        idx,
-    ):
+    def prepare_train(self, idx):
         """Prepare the frames for training given the index."""
         for ir in range(self.num_retries):
             try:
                 results = copy.deepcopy(self.info[idx])
                 results = self.pipeline(results)
             except Exception as e:
-                logger.info(e)  # TODO: log error
+                logger.info(e)
                 if ir < self.num_retries - 1:
                     logger.info(
                         "Error when loading {}, have {} trys, will try again".
@@ -115,7 +114,7 @@ class SFVideoDataset(BaseDataset):
                 results = copy.deepcopy(self.info[idx])
                 results = self.pipeline(results)
             except Exception as e:
-                logger.info(e)  # TODO: log error
+                logger.info(e)
                 if ir < self.num_retries - 1:
                     logger.info(
                         "Error when loading {}, have {} trys, will try again".

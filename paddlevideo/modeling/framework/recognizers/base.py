@@ -33,7 +33,7 @@ class BaseRecognizer(nn.Layer):
         """Initialize the model network weights. """
 
         self.backbone.init_weights(
-        )  #hj: required? while backbone without base class
+        )  #TODO: required? while backbone without base class
         self.head.init_weights()
 
     def extract_feature(self, imgs):
