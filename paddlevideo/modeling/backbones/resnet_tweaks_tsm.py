@@ -25,7 +25,7 @@ import paddle.nn.functional as F
 
 from ..registry import BACKBONES
 from ..weight_init import weight_init_
-from ...utils.save_load import load_ckpt
+from ...utils.save_load import load_pretrain_pptsm
 
 
 class ConvBNLayer(nn.Layer):
@@ -311,7 +311,7 @@ class ResNetTweaksTSM(nn.Layer):
         #XXX: check bias!!! check pretrained!!!
 
         if isinstance(self.pretrained, str) and self.pretrained.strip() != "":
-            load_ckpt(self, self.pretrained)
+            load_pretrain_pptsm(self, self.pretrained)
         elif self.pretrained is None or self.pretrained.strip() == "":
             for layer in self.sublayers():
                 if isinstance(layer, nn.Conv2D):

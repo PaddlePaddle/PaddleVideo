@@ -52,6 +52,23 @@ def load_ckpt(model, weight_path):
         desc.set_description(ret_str)
         model.set_state_dict(tmp)
 
+#XXX(shipping): maybe need load N times because of different cards have different params.
+@main_only
+def load_pretrain_pptsm(model, weight_path):
+    """
+    """
+    #load param from pretrained r50(for improve)
+    assert os.path.exists(weight_path), "Given dir {} not exist.".format(weight_path)
+    pre_state_dict = paddle.load(weight_path)
+    param_state_dict = {}
+    model_dict = model.state_dict()
+    for key in model_dict.keys():
+        weight_name = model_dict[key].name
+        if weight_name in pre_state_dict.keys() and weight_name != "fc_0.w_0" and weight_name != "fc_0.b_0":
+            param_state_dict[key] = pre_state_dict[weight_name]
+        else:
+            param_state_dict[key] = model_dict[key]
+    model.set_dict(param_state_dict)
 
 def mkdir(dir):
     if not os.path.exists(dir):
