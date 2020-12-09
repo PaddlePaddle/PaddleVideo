@@ -9,6 +9,7 @@ MODEL: #MODEL field
         num_classes: 101 #Optional, the number of classes to be classified.
         in_channels: 2048 #input channel of the extracted feature.
         drop_ratio: 0.5 #the ratio of dropout
+        ls_eps: 0. # label smoothing epsilon
         std: 0.01 #std value in params initialization
 
 DATASET: #DATASET field

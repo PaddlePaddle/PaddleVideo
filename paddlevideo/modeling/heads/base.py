@@ -38,36 +38,45 @@ class BaseHead(nn.Layer):
         num_classes (int): The number of classes to be classified.
         in_channels (int): The number of channels in input feature.
         loss_cfg (dict): Config for building loss. Default: dict(type='CrossEntropyLoss').
+        ls_eps (float): label smoothing epsilon. Default: 0. .
 
     """
-    def __init__(self,
-                 num_classes,
-                 in_channels,
-                 loss_cfg=dict(name="CrossEntropyLoss")):
+    def __init__(
+        self,
+        num_classes,
+        in_channels,
+        loss_cfg=dict(
+            name="CrossEntropyLoss"
+        ),  #TODO(shipping): only pass a name or standard build cfg format.
+        #multi_class=False, NOTE(shipping): not supported now.
+        ls_eps=0.):
 
         super().__init__()
         self.num_classes = num_classes
         self.in_channels = in_channels
         self.loss_func = build_loss(loss_cfg)
+        #self.multi_class = multi_class NOTE(shipping): not supported now
+        self.ls_eps = ls_eps
 
     @abstractmethod
     def init_weights(self):
         """Initiate the parameters.
         """
-        pass
+        raise NotImplemented
 
     @abstractmethod
     def forward(self, x):
         """Define how the head is going to run.
         """
-        pass
+        raise NotImplemented
 
-    def loss(self,
-             scores,
-             labels,
-             reduce_sum=False,
-             return_loss=True,
-             **kwargs):
+    def loss(
+        self,
+        scores,
+        labels,
+        reduce_sum=False,
+        return_loss=True,  #NOTE(shipping): Design for testing a model. will refactor in metrics.
+        **kwargs):
         """Calculate the loss accroding to the model output ```scores```,
            and the target ```labels```.
 
@@ -79,10 +88,14 @@ class BaseHead(nn.Layer):
             losses (dict): A dict containing field 'loss'(mandatory) and 'top1_acc', 'top5_acc'(optional).
 
         """
-        labels.stop_gradient = True  #XXX: check necessary
+        if self.ls_eps != 0.:
+            labels = F.one_hot(labels, self.num_classes)
+            labels = F.label_smooth(labels, epsilon=self.ls_eps)
+        labels.stop_gradient = True  #XXX(shipping): check necessary
         losses = dict()
         if return_loss:
-            #XXX: F.crossentropy include logsoftmax and nllloss
+            #NOTE(shipping): F.crossentropy include logsoftmax and nllloss !
+            #NOTE(shipping): check the performance of F.crossentropy
             loss = self.loss_func(scores, labels, **kwargs)
             avg_loss = paddle.mean(loss)
         top1 = paddle.metric.accuracy(input=scores, label=labels, k=1)
@@ -90,7 +103,7 @@ class BaseHead(nn.Layer):
 
         _, world_size = get_dist_info()
 
-        #deal with multi cards validate
+        #NOTE(shipping): deal with multi cards validate
         if world_size > 1:
             top1 = paddle.distributed.all_reduce(
                 top1, op=paddle.distributed.ReduceOp.SUM) / world_size
