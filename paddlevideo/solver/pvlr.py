@@ -14,6 +14,10 @@
 
 import math
 from paddle.optimizer.lr import *
+"""
+You can use paddle.optimizer.lr
+or define your custom_lr in this file.
+"""
 
 
 class CustomWarmupCosineDecay(LRScheduler):

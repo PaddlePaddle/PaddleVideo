@@ -14,7 +14,7 @@
 
 import copy
 import paddle
-from . import custom_lr
+from . import pvlr
 
 
 def build_lr(cfg):
@@ -44,4 +44,4 @@ def build_lr(cfg):
     if cfg_copy.get('iter_step'):
         cfg_copy.pop('iter_step')
 
-    return getattr(custom_lr, lr_name)(**cfg_copy)
+    return getattr(pvlr, lr_name)(**cfg_copy)

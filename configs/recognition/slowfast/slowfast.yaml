@@ -122,7 +122,9 @@ PRECISEBN:
   preciseBN_interval: 10
   num_iters_preciseBN: 200  #default
 
+model_name: SlowFast
 log_interval: 1 #Optional, the interal of logger, default:10
+save_interval: 1
 epochs: 10 #196 #Mandatory, total epoch  TODO delete??
 log_level: "INFO"
 resume_from: "" #checkpoint path.

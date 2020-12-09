@@ -12,33 +12,30 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 from collections import OrderedDict
 from .logger import get_logger, coloring
 logger = get_logger("paddlevideo")
 
-__all__ = ['AverageMeter', 'build_metric', 'log_batch', 'log_epoch']
+__all__ = ['AverageMeter', 'build_recorder', 'log_batch', 'log_epoch']
 
-def build_metric():
-    metric_list = [
+
+def build_recorder():
+    recorder_list = [
         ("loss", AverageMeter('loss', '7.5f')),
-        ("lr", AverageMeter(
-            'lr', 'f', need_avg=False)),
+        ("lr", AverageMeter('lr', 'f', need_avg=False)),
         ("top1", AverageMeter("top1", '.5f')),
         ("top5", AverageMeter("top5", '.5f')),
         ("batch_time", AverageMeter('elapse', '.3f')),
         ("reader_time", AverageMeter('reader', '.3f')),
     ]
-    metric_list = OrderedDict(metric_list)
-    return metric_list
-
+    recorder_list = OrderedDict(recorder_list)
+    return recorder_list
 
 
 class AverageMeter(object):
     """
     Computes and stores the average and current value
     """
-
     def __init__(self, name='', fmt='f', need_avg=True):
         self.name = name
         self.fmt = fmt
@@ -65,8 +62,8 @@ class AverageMeter(object):
 
     @property
     def total_minute(self):
-        return '{self.name}_sum: {s:{self.fmt}} min'.format(
-            s=self.sum / 60, self=self)
+        return '{self.name}_sum: {s:{self.fmt}} min'.format(s=self.sum / 60,
+                                                            self=self)
 
     @property
     def mean(self):
@@ -84,20 +81,16 @@ def log_batch(metric_list, batch_id, epoch_id, total_epoch, mode, ips):
     step_str = "{:s} step:{:<4d}".format(mode, batch_id)
     logger.info("{:s} {:s} {:s}s {}".format(
         coloring(epoch_str, "HEADER") if batch_id == 0 else epoch_str,
-        coloring(step_str, "PURPLE"),
-        coloring(metric_str, 'OKGREEN'),
-        ips))
+        coloring(step_str, "PURPLE"), coloring(metric_str, 'OKGREEN'), ips))
 
 
 def log_epoch(metric_list, epoch, mode, ips):
-    metric_avg = ' '.join([str(m.mean) for m in metric_list.values()] +[metric_list['batch_time'].total])
-        
+    metric_avg = ' '.join([str(m.mean) for m in metric_list.values()] +
+                          [metric_list['batch_time'].total])
+
     end_epoch_str = "END epoch:{:<3d}".format(epoch)
 
-    logger.info("{:s} {:s} {:s}s {}".format(
-        coloring(end_epoch_str, "RED"),
-        coloring(mode, "PURPLE"),
-        coloring(metric_avg, "OKGREEN"),
-        ips))
-
-
+    logger.info("{:s} {:s} {:s}s {}".format(coloring(end_epoch_str, "RED"),
+                                            coloring(mode, "PURPLE"),
+                                            coloring(metric_avg, "OKGREEN"),
+                                            ips))

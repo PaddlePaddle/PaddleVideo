@@ -12,15 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import paddle
-from paddlevideo.utils import get_logger 
+from paddlevideo.utils import get_logger
 from ..loader import build_dataloader
+import numpy as np
 
 logger = get_logger("paddlevideo")
-def test_model(model,
-               dataset,
-               cfg,
-               weight,
-               parallel=False):
+
+
+def test_model(model, dataset, cfg, weight, parallel=False):
     """Test model entry
 
     Args:
@@ -32,12 +31,11 @@ def test_model(model,
     batch_size = cfg.DATASET.get("batch_size", 2)
     places = paddle.set_device('gpu')
 
-    dataloader_setting = dict(
-        batch_size = batch_size,
-        num_worker = cfg.DATASET.get("num_worker", 0)
-        places = places,
-        drop_last = False,
-        shuffle = False)
+    dataloader_setting = dict(batch_size=batch_size,
+                              num_worker=cfg.DATASET.get("num_worker", 0),
+                              places=places,
+                              drop_last=False,
+                              shuffle=False)
 
     data_loader = build_dataloader(dataset, **dataloader_setting)
 
@@ -58,5 +56,3 @@ def test_model(model,
         top1.append(outputs('top1'))
         logger.info(outputs)
     logger.info(np.mean(top1))
-
-        

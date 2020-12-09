@@ -44,6 +44,7 @@ class Recognizer2D(BaseRecognizer):
         metrics = self.head.loss(cls_score,
                                  labels,
                                  reduce_sum,
-                                 return_loss=False**kwargs)
+                                 return_loss=False,
+                                 **kwargs)
 
         return metrics

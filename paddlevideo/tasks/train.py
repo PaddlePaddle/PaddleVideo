@@ -12,9 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import numpy as np
 import time
-import os
 import os.path as osp
 
 import paddle
@@ -22,16 +20,11 @@ from ..loader import build_dataloader
 from ..solver import build_lr, build_optimizer
 from ..utils import do_preciseBN
 from paddlevideo.utils import get_logger, coloring
-from paddlevideo.utils import (AverageMeter, build_metric, log_batch, log_epoch,
-                               save, mkdir)
+from paddlevideo.utils import (AverageMeter, build_recorder, log_batch,
+                               log_epoch, save, mkdir)
 
 
-def train_model(model,
-                dataset,
-                cfg,
-                parallel=True,
-                preciseBN=False,
-                validate=True):
+def train_model(model, dataset, cfg, parallel=True, validate=True):
     """Train model entry
 
     Args:
@@ -64,7 +57,6 @@ def train_model(model,
         valid_loader = build_dataloader(valid_dataset,
                                         **validate_dataloader_setting)
 
-    #slowfast
     if cfg.OPTIMIZER.learning_rate.get(
             "iter_step") and cfg.OPTIMIZER.learning_rate.iter_step == True:
         cfg.OPTIMIZER.learning_rate.num_iters = len(train_loader)
@@ -76,13 +68,14 @@ def train_model(model,
 
     if parallel:
         model = paddle.DataParallel(model)
+
     best = 0.
     for epoch in range(1, cfg.epochs + 1):
         model.train()
-        metric_list = build_metric()
+        recorder_list = build_recorder()
         tic = time.time()
         for i, data in enumerate(train_loader):
-            metric_list['reader_time'].update(time.time() - tic)
+            recorder_list['reader_time'].update(time.time() - tic)
             if parallel:
                 outputs = model._layers.train_step(data)
             else:
@@ -94,18 +87,18 @@ def train_model(model,
             optimizer.step()
             optimizer.clear_grad()
 
-            # log metric
-            metric_list['lr'].update(
+            # log recorder
+            recorder_list['lr'].update(
                 optimizer._global_learning_rate().numpy()[0], batch_size)
             for name, value in outputs.items():
-                metric_list[name].update(value.numpy()[0], batch_size)
-            metric_list['batch_time'].update(time.time() - tic)
+                recorder_list[name].update(value.numpy()[0], batch_size)
+            recorder_list['batch_time'].update(time.time() - tic)
             tic = time.time()
 
             if i % cfg.get("log_interval", 10) == 0:
                 ips = "ips: {:.5f} instance/sec.".format(
-                    batch_size / metric_list["batch_time"].val)
-                log_batch(metric_list, i, epoch, cfg.epochs, "train", ips)
+                    batch_size / recorder_list["batch_time"].val)
+                log_batch(recorder_list, i, epoch, cfg.epochs, "train", ips)
 
             # learning scheduler iter step
             if cfg.OPTIMIZER.learning_rate.get(
@@ -119,14 +112,14 @@ def train_model(model,
             lr.step()
 
         ips = "ips: {:.5f} instance/sec.".format(
-            batch_size * metric_list["batch_time"].count /
-            metric_list["batch_time"].sum)
-        log_epoch(metric_list, epoch, "train", ips)
+            batch_size * recorder_list["batch_time"].count /
+            recorder_list["batch_time"].sum)
+        log_epoch(recorder_list, epoch, "train", ips)
 
         def evaluate(best):
             model.eval()
-            metric_list = build_metric()
-            metric_list.pop('lr')
+            recorder_list = build_recorder()
+            recorder_list.pop('lr')
             tic = time.time()
             for i, data in enumerate(valid_loader):
                 if parallel:
@@ -134,25 +127,25 @@ def train_model(model,
                 else:
                     outputs = model.val_step(data)
 
-                # log_metric
+                # log_recorder
                 for name, value in outputs.items():
+                    recorder_list[name].update(value.numpy()[0], batch_size)
 
-                    metric_list[name].update(value.numpy()[0], batch_size)
-                metric_list['batch_time'].update(time.time() - tic)
+                recorder_list['batch_time'].update(time.time() - tic)
                 tic = time.time()
 
                 if i % cfg.get("log_interval", 10) == 0:
                     ips = "ips: {:.5f} instance/sec.".format(
-                        batch_size / metric_list["batch_time"].val)
-                    log_batch(metric_list, i, epoch, cfg.epochs, "val", ips)
+                        batch_size / recorder_list["batch_time"].val)
+                    log_batch(recorder_list, i, epoch, cfg.epochs, "val", ips)
 
             ips = "ips: {:.5f} instance/sec.".format(
-                batch_size * metric_list["batch_time"].count /
-                metric_list["batch_time"].sum)
-            log_epoch(metric_list, epoch, "val", ips)
+                batch_size * recorder_list["batch_time"].count /
+                recorder_list["batch_time"].sum)
+            log_epoch(recorder_list, epoch, "val", ips)
 
-            if metric_list['top1'].avg > best:
-                best = metric_list['top1'].avg
+            if recorder_list['top1'].avg > best:
+                best = recorder_list['top1'].avg
             return best
 
         model_name = cfg.model_name
