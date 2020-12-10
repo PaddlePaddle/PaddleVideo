@@ -83,6 +83,7 @@ class BaseRecognizer(nn.Layer):
         loss_metrics = self.forward_train(imgs,
                                           labels,
                                           reduce_sum=False,
+                                          use_mixup = 1,
                                           **kwargs)
 
         return loss_metrics
@@ -97,6 +98,7 @@ class BaseRecognizer(nn.Layer):
         loss_metrics = self.forward_train(imgs,
                                           labels,
                                           reduce_sum=True,
+                                          use_mixup = 0,
                                           **kwargs)
         return loss_metrics
 
