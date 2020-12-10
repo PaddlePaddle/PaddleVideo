@@ -503,8 +503,7 @@ class VideoModelStem(paddle.nn.Layer):
 
         for pathway in range(len(x)):
             m = getattr(self, "pathway{}_stem".format(pathway))
-            x[pathway] = m(paddle.to_tensor(
-                x[pathway]))  #hj: where use paddle.to_tensor
+            x[pathway] = m(x[pathway])
 
         return x
 

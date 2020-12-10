@@ -26,12 +26,12 @@ DATASET: #DATASET field
   valid:
     format: "SFVideoDataset"
     file_path: "/workspace/huangjun12/PaddleProject/PaddleVideo/Pr/PaddleVideo/data/k400/part-10cls/val.csv" #Mandatory, valid data index file path
-  eval:
+  test:
     format: "SFVideoDataset"
-    file_path: "/workspace/huangjun12/PaddleProject/PaddleVideo/Pr/PaddleVideo/data/k400/part-10cls/val.csv" #Mandatory, valid data index file path
-    valid_mode: True
-    num_ensemble_views: 3
-    num_spatial_crops: 10
+    file_path: "/workspace/huangjun12/PaddleProject/PaddleVideo/Pr/PaddleVideo/data/k400/part-10cls/val.csv" #Mandatory, test data index file path
+    test_mode: True
+    num_ensemble_views: 10
+    num_spatial_crops: 3
 
 PIPELINE: #PIPELINE field
   train: #Mandotary, indicate the pipeline to deal with the training data, associate to the 'paddlevideo/loader/pipelines/'
@@ -55,7 +55,7 @@ PIPELINE: #PIPELINE field
       - PackOutput:
           alpha: 4
 
-  valid: #Mandotary, indicate the pipeline to deal with the training data, associate to the 'paddlevideo/loader/pipelines/'
+  valid: #Mandotary, indicate the pipeline to deal with the validation data, associate to the 'paddlevideo/loader/pipelines/'
     decode_sampler:
       name: "DecodeSampler"
       num_frames: 32
@@ -76,19 +76,19 @@ PIPELINE: #PIPELINE field
       - PackOutput:
           alpha: 4
 
-  eval: #Mandatory, indicate the pipeline to deal with the validing data. associate to the 'paddlevideo/loader/pipelines/'
+  test: #Mandatory, indicate the pipeline to deal with the test data. associate to the 'paddlevideo/loader/pipelines/'
     decode_sampler:
       name: "DecodeSampler"
       num_frames: 32
       sampling_rate: 2
-      eval_mode: True
+      test_mode: True
     transform: #Mandotary, image transfrom operator
       - JitterScale:
           min_size: 224  #orig 256
           max_size: 224  # orig 256
       - MultiCrop:
           target_size: 224  # orig 256
-          eval_mode: True
+          test_mode: True
       - Image2Array:
           transpose: False
       - Normalization:
@@ -113,10 +113,11 @@ OPTIMIZER: #OPTIMIZER field
     value: 1e-4
   use_nesterov: True
 
-EVALUATION:
-  interval: 1
-  function: "topk"
-  topk: (1,5)
+METRIC:
+  name: 'MultiCropMetric'
+  num_ensemble_views: 10
+  num_spatial_crops: 3
+  num_cls: 10
 
 PRECISEBN:
   preciseBN_interval: 10

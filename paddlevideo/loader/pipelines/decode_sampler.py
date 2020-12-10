@@ -29,22 +29,22 @@ class DecodeSampler(object):
         num_frames(int): the number of frames we want to sample.
         sampling_rate(int): sampling rate for video data.
         target_fps(int): desired fps, default 30
-        eval_mode(bool): whether eval or train/valid. In slowfast, we use multicrop when eval.
+        test_mode(bool): whether test or train/valid. In slowfast, we use multicrop when test.
     """
     def __init__(self,
                  num_frames,
                  sampling_rate,
                  target_fps=30,
-                 eval_mode=False):
+                 test_mode=False):
         self.num_frames = num_frames
         self.sampling_rate = sampling_rate
         self.target_fps = target_fps
-        self.eval_mode = eval_mode
+        self.test_mode = test_mode
 
     def get_start_end_idx(self, video_size, clip_size, clip_idx,
                           temporal_num_clips):
         delta = max(video_size - clip_size, 0)
-        if not self.eval_mode:
+        if not self.test_mode:
             # Random temporal sampling.
             start_idx = random.uniform(0, delta)
         else:

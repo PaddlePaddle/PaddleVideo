@@ -386,9 +386,9 @@ class MultiCrop(object):
     Args:
         target_size(int): Random crop a square with the target_size from an image.
     """
-    def __init__(self, target_size, eval_mode=False):
+    def __init__(self, target_size, test_mode=False):
         self.target_size = target_size
-        self.eval_mode = eval_mode
+        self.test_mode = test_mode
 
     def __call__(self, results):
         """
@@ -410,7 +410,7 @@ class MultiCrop(object):
         assert (w >= self.target_size) and (h >= self.target_size), \
             "image width({}) and height({}) should be larger than crop size({},{})".format(w, h, self.target_size, self.target_size)
         frames_crop = []
-        if not self.eval_mode:
+        if not self.test_mode:
             x_offset = random.randint(0, w - self.target_size)
             y_offset = random.randint(0, h - self.target_size)
         else:  #multi-crop

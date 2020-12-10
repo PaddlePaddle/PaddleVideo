@@ -37,7 +37,7 @@ class FrameDataset(BaseDataset):
         file_path (str): Path to the index file.
         pipeline(XXX):
         data_prefix (str): directory path of the data. Default: None.
-        valid_mode (bool): Whether to bulid the valid dataset. Default: False.
+        test_mode (bool): Whether to bulid the test dataset. Default: False.
         suffix (str): suffix of file. Default: 'img_{:05}.jpg'.
 
     """
@@ -45,13 +45,13 @@ class FrameDataset(BaseDataset):
                  file_path,
                  pipeline,
                  data_prefix=None,
-                 valid_mode=False,
+                 test_mode=False,
                  suffix='img_{:05}.jpg'):
 
         #unique attribute in frames dataset.
         self.suffix = suffix
 
-        super().__init__(file_path, pipeline, data_prefix, valid_mode)
+        super().__init__(file_path, pipeline, data_prefix, test_mode)
 
     def load_file(self):
         """Load index file to get video information."""
@@ -77,8 +77,8 @@ class FrameDataset(BaseDataset):
         #XXX have to unsqueeze label here or before calc metric!
         return [to_list['imgs'], np.array([to_list['labels']])]
 
-    def prepare_valid(self, idx):
-        """Prepare the frames for training given index. """
+    def prepare_test(self, idx):
+        """Prepare the frames for test given index. """
         results = copy.deepcopy(self.info[idx])
         results['suffix'] = self.suffix
         #Note: For now, paddle.io.DataLoader cannot support dict type retval, so convert to list here

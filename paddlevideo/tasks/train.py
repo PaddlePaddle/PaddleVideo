@@ -160,6 +160,7 @@ def train_model(model, dataset, cfg, parallel=True, validate=True):
             do_preciseBN(
                 model, train_loader, parallel,
                 min(cfg.PRECISEBN.num_iters_preciseBN, len(train_loader)))
+
         if validate:
             with paddle.fluid.dygraph.no_grad():
                 best = evaluate(best)

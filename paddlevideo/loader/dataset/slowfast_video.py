@@ -63,7 +63,6 @@ class SFVideoDataset(BaseDataset):
         super().__init__(file_path, pipeline, **kwargs)
         self.num_ensemble_views = num_ensemble_views
         self.num_spatial_crops = num_spatial_crops
-        self._num_clips = (self.num_ensemble_views * self.num_spatial_crops)
 
         self.num_retries = num_retries
         self.info = self.load_file()
@@ -104,11 +103,11 @@ class SFVideoDataset(BaseDataset):
                         format(results['filename'], ir))
                 idx = random.randint(0, len(self.info) - 1)
                 continue
-        return results['imgs'][0], results['imgs'][1], np.array(
-            [results['labels']])
+            return results['imgs'][0], results['imgs'][1], np.array(
+                [results['labels']])
 
-    def prepare_valid(self, idx):
-        """Prepare the frames for valid given the index."""
+    def prepare_test(self, idx):
+        """Prepare the frames for test given the index."""
         for ir in range(self.num_retries):
             try:
                 results = copy.deepcopy(self.info[idx])
@@ -121,5 +120,5 @@ class SFVideoDataset(BaseDataset):
                         format(results['filename'], ir))
                 idx = random.randint(0, len(self.info) - 1)
                 continue
-        return results['imgs'][0], results['imgs'][1], np.array(
-            [results['labels']])
+            return results['imgs'][0], results['imgs'][1], np.array(
+                [results['labels']]), np.array([idx])

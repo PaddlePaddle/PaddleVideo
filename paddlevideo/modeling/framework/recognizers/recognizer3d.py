@@ -40,8 +40,9 @@ class Recognizer3D(BaseRecognizer):
         loss_metrics = self.head.loss(cls_score, labels, reduce_sum, **kwargs)
         return loss_metrics
 
-    def forward_test(self, imgs, labels, reduce_sum, **kwargs):
-        pass
+    def forward_test(self, imgs, **kwargs):
+        cls_score = self(imgs)
+        return cls_score
 
     def forward(self, imgs, **kwargs):
         """Define how the model is going to run, from input to output.
@@ -78,4 +79,11 @@ class Recognizer3D(BaseRecognizer):
         return loss_metrics
 
     def test_step(self, data_batch, **kwargs):
-        pass
+        """Test step.
+        """
+        imgs = [data_batch[0], data_batch[1]]
+
+        # call forward
+        loss_metrics = self.forward_test(imgs, **kwargs)
+
+        return loss_metrics
