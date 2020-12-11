@@ -22,7 +22,7 @@ DATASET: #DATASET field
     valid:
         format: "FrameDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
         data_prefix: "" #Mandatory, valid data root path
-        file_path: "data/ucf101/ucf-101/datalist/ucf101_val_split_1_rawframes.txt" #Mandatory, valid data index file path
+        file_path: "data/ucf101/ucf101_val_split_1_rawframes.txt" #Mandatory, valid data index file path
         suffix: 'img_{:05}.jpg'
     test:
         format: "FrameDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
