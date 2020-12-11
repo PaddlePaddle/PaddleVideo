@@ -50,8 +50,7 @@ class BaseDataset(Dataset, ABC):
 
         self.pipeline = pipeline
 
-        # TODO: not do this in base class, when overwrite the method in subclass, attribute may not match
-        # self.info = self.load_file()
+        self.info = self.load_file()
 
     @abstractmethod
     def load_file(self):

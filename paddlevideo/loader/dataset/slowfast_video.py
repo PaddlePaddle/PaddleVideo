@@ -60,12 +60,10 @@ class SFVideoDataset(BaseDataset):
         num_retries=5,
         **kwargs,
     ):
-        super().__init__(file_path, pipeline, **kwargs)
         self.num_ensemble_views = num_ensemble_views
         self.num_spatial_crops = num_spatial_crops
-
         self.num_retries = num_retries
-        self.info = self.load_file()
+        super().__init__(file_path, pipeline, **kwargs)
 
     def load_file(self):
         """Load index file to get video information."""
