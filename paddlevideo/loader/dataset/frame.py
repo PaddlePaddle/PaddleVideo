@@ -17,6 +17,8 @@ import numpy as np
 
 from ..registry import DATASETS
 from .base import BaseDataset 
+import random
+import sys
 
 @DATASETS.register()
 class FrameDataset(BaseDataset):
@@ -70,12 +72,33 @@ class FrameDataset(BaseDataset):
 
     def prepare_train(self, idx):
         """Prepare the frames for training given index. """
-        results = copy.deepcopy(self.info[idx])
-        results['suffix'] = self.suffix
-        #Note: For now, paddle.io.DataLoader cannot support dict type retval, so convert to list here
-        to_list =  self.pipeline(results)
-        #XXX have to unsqueeze label here or before calc metric!
-        return [to_list['imgs'], np.array([to_list['labels']])]
+        num_retries = 5
+        for ir in range(num_retries):
+            try:
+                results = copy.deepcopy(self.info[idx])
+                results['suffix'] = self.suffix
+                #Note: For now, paddle.io.DataLoader cannot support dict type retval, so convert to list here
+                to_list =  self.pipeline(results)
+                if to_list == -1:
+                    print("pipeline return -1 for idx:",idx, "self.info[idx]:",self.info[idx])
+                    if ir < num_retries - 1:
+                        print("Error when loading {}, have {} trys, will try again".format(idx,ir),__file__,sys._getframe().f_lineno)
+                        idx = random.randint(0, len(self.info) - 1)
+                        continue
+                    else:
+                        print("Error when loading {}, have {} trys, will not try again'".format(idx,ir),__file__,sys._getframe().f_lineno)
+                        return -1
+                #XXX have to unsqueeze label here or before calc metric!
+                return [to_list['imgs'], np.array([to_list['labels']])]
+            except:
+                if ir < num_retries - 1:
+                    print("Error when loading {}, have {} trys, will try again".format(idx,ir),__file__,sys._getframe().f_lineno)
+                    idx = random.randint(0, len(self.info) - 1)
+                    continue
+                else:
+                    print("Error when loading {}, have {} trys, will not try again'".format(idx,ir))
+                    return -1
+                  
 
 
     def prepare_valid(self, idx):

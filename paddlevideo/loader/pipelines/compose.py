@@ -67,6 +67,8 @@ class Compose(object):
         for p in self.pipelines:
             try:
                 data = p(data)
+                if data == -1:
+                    return -1
             except Exception as e:
                 stack_info = traceback.format_exc()
                 logger = get_logger("paddlevideo")

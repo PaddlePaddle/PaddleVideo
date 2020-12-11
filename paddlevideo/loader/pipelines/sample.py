@@ -39,24 +39,29 @@ class Sampler(object):
     def _get(self, frames_idx, results):
         data_format =results['format']
 
-        if data_format == "frame":
-            frame_dir = results['frame_dir']
-            imgs = []
-            for idx in frames_idx:
-                img = Image.open(os.path.join(frame_dir, results['suffix'].format(idx))).convert('RGB')
-                imgs.append(img)
+        try:
+            if data_format == "frame":
+                frame_dir = results['frame_dir']
+                imgs = []
+                for idx in frames_idx:
+                    img = Image.open(os.path.join(frame_dir, results['suffix'].format(idx))).convert('RGB')
+                    imgs.append(img)
 
-        elif data_format == "video":
+            elif data_format == "video":
 
-            frames = np.array(results['frames'])
-            imgs = []
-            for idx in frames_idx:
-                imgbuf = frames[idx]
-                img = Image.fromarray(imgbuf, mode='RGB')
-                imgs.append(img)
-        else:
-            raise NotImplementedError
-        results['imgs'] = imgs
+                frames = np.array(results['frames'])
+                imgs = []
+                for idx in frames_idx:
+                    imgbuf = frames[idx]
+                    img = Image.fromarray(imgbuf, mode='RGB')
+                    imgs.append(img)
+            else:
+                raise NotImplementedError
+            results['imgs'] = imgs
+        except:
+            print('Error when loading {}'.format(frame_dir))
+            return -1
+        
         return results
 
 
