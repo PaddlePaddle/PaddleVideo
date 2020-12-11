@@ -59,7 +59,7 @@ class BaseDataset(Dataset, ABC):
         pass
 
     def prepare_train(self, idx):
-        """TRAIN & VALID. Prepare the frames for training given the index."""
+        """TRAIN & VALID. Prepare the data for training given the index."""
         results = copy.deepcopy(self.info[idx])
         #Note: For now, paddle.io.DataLoader cannot support dict type retval, so convert to list here
         to_list = self.pipeline(results)
@@ -67,7 +67,7 @@ class BaseDataset(Dataset, ABC):
         return [to_list['imgs'], np.array([to_list['labels']])]
 
     def prepare_test(self, idx):
-        """TEST: Prepare the frames for test given the index."""
+        """TEST: Prepare the data for test given the index."""
         results = copy.deepcopy(self.info[idx])
         #Note: For now, paddle.io.DataLoader cannot support dict type retval, so convert to list here
         to_list = self.pipeline(results)

@@ -161,7 +161,8 @@ def train_model(model, dataset, cfg, parallel=True, validate=True):
                 model, train_loader, parallel,
                 min(cfg.PRECISEBN.num_iters_preciseBN, len(train_loader)))
 
-        if validate:
+        if validate and (epoch - 1) % cfg.get("val_interval",
+                                              1) == 0 or epoch == cfg.epochs:
             with paddle.fluid.dygraph.no_grad():
                 best = evaluate(best)
 
@@ -172,7 +173,8 @@ def train_model(model, dataset, cfg, parallel=True, validate=True):
             best = int(best * 10000) / 10000
             logger.info(f"Already save the best model (top1 acc){best}")
 
-        if epoch % cfg.get("save_interval", 10) == 0 or epoch == cfg.epochs:
+        if (epoch - 1) % cfg.get("save_interval",
+                                 10) == 0 or epoch == cfg.epochs:
             save(opt_state_dict, osp.join(output_dir, f"{opt_name}.pdopt"))
             save(model.state_dict(),
                  osp.join(output_dir, model_name + f"_epoch_{epoch}.pdparams"))

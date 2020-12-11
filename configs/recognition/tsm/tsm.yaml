@@ -2,7 +2,7 @@ MODEL: #MODEL field
     framework: "Recognizer2D" #Mandatory, indicate the type of network, associate to the 'paddlevideo/modeling/framework/' .
     backbone: #Mandatory, indicate the type of backbone, associate to the 'paddlevideo/modeling/backbones/' .
         name: "ResNetTSM" #Mandatory, The name of backbone.
-        pretrained: "/workspace/huangjun12/PaddleProject/PaddleVideo/Experiment/PaddleVideo/data/ResNet50/best_model/ppcls.pdparams" #Optional, pretrained model path.
+        pretrained: "/work/data/pretrained_dygraph/ResNet50/best_model/ppcls.pdparams" #Optional, pretrained model path.
         depth: 50 #Optional, the depth of backbone architecture.
     head:
         name: "TSMHead" #Mandatory, indicate the type of head, associate to the 'paddlevideo/modeling/heads'
@@ -17,12 +17,12 @@ DATASET: #DATASET field
     train:
         format: "FrameDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
         data_prefix: "" #Mandatory, train data root path
-        file_path: "/workspace/huangjun12/DATA/ucf-101/datalist/ucf101_train_split_1_rawframes.txt" #Mandatory, train data index file path
+        file_path: "data/ucf101/ucf101_train_split_1_rawframes.txt" #Mandatory, train data index file path
         suffix: 'img_{:05}.jpg'
     valid:
         format: "FrameDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
         data_prefix: "" #Mandatory, valid data root path
-        file_path: "/workspace/huangjun12/DATA/ucf-101/datalist/ucf101_val_split_1_rawframes.txt" #Mandatory, valid data index file path
+        file_path: "data/ucf101/ucf-101/datalist/ucf101_val_split_1_rawframes.txt" #Mandatory, valid data index file path
         suffix: 'img_{:05}.jpg'
     test:
         format: "FrameDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
@@ -111,5 +111,5 @@ EVALUATION:
 model_name: "TSM"
 log_interval: 20 #Optional, the interal of logger, default:10
 epochs: 80 #Mandatory, total epoch
-log_level: "INFO" #"DEBUG" #Optional, the logger level. default: "INFO"
+log_level: "DEBUG" #Optional, the logger level. default: "INFO"
 resume_from: "" #checkpoint path.

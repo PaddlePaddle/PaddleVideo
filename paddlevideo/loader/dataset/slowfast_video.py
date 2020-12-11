@@ -90,7 +90,7 @@ class SFVideoDataset(BaseDataset):
         return info
 
     def prepare_train(self, idx):
-        """Prepare the frames for training given the index."""
+        """TRAIN & VALID. Prepare the data for training given the index."""
         for ir in range(self.num_retries):
             try:
                 results = copy.deepcopy(self.info[idx])
@@ -107,7 +107,7 @@ class SFVideoDataset(BaseDataset):
                 [results['labels']])
 
     def prepare_test(self, idx):
-        """Prepare the frames for test given the index."""
+        """TEST. Prepare the data for test given the index."""
         for ir in range(self.num_retries):
             try:
                 results = copy.deepcopy(self.info[idx])

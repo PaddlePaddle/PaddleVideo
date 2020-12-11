@@ -1,2 +1,2 @@
-export CUDA_VISIBLE_DEVICES=0,1,2,3
-python3 -B -m paddle.distributed.launch --selected_gpus="2"  test.py  --validate -c configs/recognition/tsm/tsm.yaml -o log_level="INFO" -o DATASET.batch_size=16 -o MODEL.backbone.pretrained=""
+export CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7
+python3.7 -B -m paddle.distributed.launch --selected_gpus="0,1,2,3,4,5,6,7"  test.py  -c ../configs/recognition/slowfast/slowfast.yaml -w "../output/SlowFast/SlowFast_epoch_196.pdparams"

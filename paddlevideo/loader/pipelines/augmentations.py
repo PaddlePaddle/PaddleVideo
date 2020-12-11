@@ -288,8 +288,6 @@ class Image2Array(object):
         """
         imgs = results['imgs']
         np_imgs = (np.stack(imgs)).astype('float32')
-        # np_imgs = np.array(
-        #     [np.array(img).astype('float32') for img in imgs])  #nhwc
         if self.transpose:
             np_imgs = np_imgs.transpose(0, 3, 1, 2)  #nchw
         results['imgs'] = np_imgs
