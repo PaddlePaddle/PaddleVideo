@@ -20,8 +20,8 @@ from ..loader import build_dataloader
 from ..solver import build_lr, build_optimizer
 from ..utils import do_preciseBN
 from paddlevideo.utils import get_logger, coloring
-from paddlevideo.utils import (AverageMeter, build_recorder, log_batch,
-                               log_epoch, save, mkdir)
+from paddlevideo.utils import (AverageMeter, build_record, log_batch, log_epoch,
+                               save, mkdir)
 
 
 def train_model(model, dataset, cfg, parallel=True, validate=True):
@@ -72,10 +72,10 @@ def train_model(model, dataset, cfg, parallel=True, validate=True):
     best = 0.
     for epoch in range(1, cfg.epochs + 1):
         model.train()
-        recorder_list = build_recorder()
+        record_list = build_record()
         tic = time.time()
         for i, data in enumerate(train_loader):
-            recorder_list['reader_time'].update(time.time() - tic)
+            record_list['reader_time'].update(time.time() - tic)
             if parallel:
                 outputs = model._layers.train_step(data)
             else:
@@ -87,23 +87,21 @@ def train_model(model, dataset, cfg, parallel=True, validate=True):
             optimizer.step()
             optimizer.clear_grad()
 
-            # log recorder
-            recorder_list['lr'].update(
+            # log record
+            record_list['lr'].update(
                 optimizer._global_learning_rate().numpy()[0], batch_size)
             for name, value in outputs.items():
-                recorder_list[name].update(value.numpy()[0], batch_size)
-            recorder_list['batch_time'].update(time.time() - tic)
+                record_list[name].update(value.numpy()[0], batch_size)
+            record_list['batch_time'].update(time.time() - tic)
             tic = time.time()
 
             if i % cfg.get("log_interval", 10) == 0:
                 ips = "ips: {:.5f} instance/sec.".format(
-                    batch_size / recorder_list["batch_time"].val)
-                log_batch(recorder_list, i, epoch, cfg.epochs, "train", ips)
+                    batch_size / record_list["batch_time"].val)
+                log_batch(record_list, i, epoch, cfg.epochs, "train", ips)
 
             # learning scheduler iter step
-            if cfg.OPTIMIZER.learning_rate.get(
-                    "iter_step"
-            ) and cfg.OPTIMIZER.learning_rate.iter_step == True:
+            if cfg.OPTIMIZER.learning_rate.get("iter_step") == True:
                 lr.step()
 
         # learning scheduler epoch step
@@ -112,14 +110,14 @@ def train_model(model, dataset, cfg, parallel=True, validate=True):
             lr.step()
 
         ips = "ips: {:.5f} instance/sec.".format(
-            batch_size * recorder_list["batch_time"].count /
-            recorder_list["batch_time"].sum)
-        log_epoch(recorder_list, epoch, "train", ips)
+            batch_size * record_list["batch_time"].count /
+            record_list["batch_time"].sum)
+        log_epoch(record_list, epoch, "train", ips)
 
         def evaluate(best):
             model.eval()
-            recorder_list = build_recorder()
-            recorder_list.pop('lr')
+            record_list = build_record()
+            record_list.pop('lr')
             tic = time.time()
             for i, data in enumerate(valid_loader):
                 if parallel:
@@ -127,25 +125,25 @@ def train_model(model, dataset, cfg, parallel=True, validate=True):
                 else:
                     outputs = model.val_step(data)
 
-                # log_recorder
+                # log_record
                 for name, value in outputs.items():
-                    recorder_list[name].update(value.numpy()[0], batch_size)
+                    record_list[name].update(value.numpy()[0], batch_size)
 
-                recorder_list['batch_time'].update(time.time() - tic)
+                record_list['batch_time'].update(time.time() - tic)
                 tic = time.time()
 
                 if i % cfg.get("log_interval", 10) == 0:
                     ips = "ips: {:.5f} instance/sec.".format(
-                        batch_size / recorder_list["batch_time"].val)
-                    log_batch(recorder_list, i, epoch, cfg.epochs, "val", ips)
+                        batch_size / record_list["batch_time"].val)
+                    log_batch(record_list, i, epoch, cfg.epochs, "val", ips)
 
             ips = "ips: {:.5f} instance/sec.".format(
-                batch_size * recorder_list["batch_time"].count /
-                recorder_list["batch_time"].sum)
-            log_epoch(recorder_list, epoch, "val", ips)
+                batch_size * record_list["batch_time"].count /
+                record_list["batch_time"].sum)
+            log_epoch(record_list, epoch, "val", ips)
 
-            if recorder_list['top1'].avg > best:
-                best = recorder_list['top1'].avg
+            if record_list['top1'].avg > best:
+                best = record_list['top1'].avg
             return best
 
         model_name = cfg.model_name

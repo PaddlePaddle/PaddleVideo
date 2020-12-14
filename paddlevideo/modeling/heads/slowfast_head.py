@@ -22,7 +22,7 @@ from ..weight_init import weight_init_
 
 
 @HEADS.register()
-class SlowfastHead(BaseHead):
+class SlowFastHead(BaseHead):
     """
     ResNe(X)t 3D head.
     This layer performs a fully-connected projection during training, when the

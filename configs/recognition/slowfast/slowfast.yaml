@@ -2,13 +2,13 @@ MODEL: #MODEL field
   framework: "Recognizer3D"
   backbone:
     name: "ResNetSlowFast"
-    res_depth: 50 # Not Optional, only 50 now.
+    depth: 50 # Not Optional, only 50 now.
     alpha: 8
     beta: 8
     width_per_group: 64
     fusion_kernel_sz: 5
   head:
-    name: "SlowfastHead"
+    name: "SlowFastHead"
     width_per_group: 64
     alpha: 8
     beta: 8
@@ -28,7 +28,7 @@ DATASET: #DATASET field
     file_path: "./data/k400/val.csv" #Mandatory, valid data index file path
   test:
     format: "SFVideoDataset"
-    file_path: "./data/k400/val.csv" #Mandatory, test data index file path
+    file_path: "../data/k400/val.csv" #Mandatory, test data index file path
     test_mode: True
     num_ensemble_views: 10
     num_spatial_crops: 3

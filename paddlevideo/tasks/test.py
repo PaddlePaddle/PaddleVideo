@@ -20,7 +20,7 @@ from ..metrics import build_metric
 logger = get_logger("paddlevideo")
 
 
-def test_model(model, dataset, cfg, weight, world_size, parallel=False):
+def test_model(model, dataset, cfg, weight, world_size):
     """Test model entry
 
     Args:
@@ -44,6 +44,7 @@ def test_model(model, dataset, cfg, weight, world_size, parallel=False):
     state_dicts = paddle.load(weight)
     model.set_state_dict(state_dicts)
 
+    parallel = world_size != 1
     if parallel:
         model = paddle.DataParallel(model)
 

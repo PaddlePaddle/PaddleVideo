@@ -16,11 +16,11 @@ from collections import OrderedDict
 from .logger import get_logger, coloring
 logger = get_logger("paddlevideo")
 
-__all__ = ['AverageMeter', 'build_recorder', 'log_batch', 'log_epoch']
+__all__ = ['AverageMeter', 'build_record', 'log_batch', 'log_epoch']
 
 
-def build_recorder():
-    recorder_list = [
+def build_record():
+    record_list = [
         ("loss", AverageMeter('loss', '7.5f')),
         ("lr", AverageMeter('lr', 'f', need_avg=False)),
         ("top1", AverageMeter("top1", '.5f')),
@@ -28,8 +28,8 @@ def build_recorder():
         ("batch_time", AverageMeter('elapse', '.3f')),
         ("reader_time", AverageMeter('reader', '.3f')),
     ]
-    recorder_list = OrderedDict(recorder_list)
-    return recorder_list
+    record_list = OrderedDict(record_list)
+    return record_list
 
 
 class AverageMeter(object):

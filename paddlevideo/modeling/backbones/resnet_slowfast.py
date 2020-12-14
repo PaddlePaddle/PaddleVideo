@@ -574,7 +574,7 @@ class ResNetSlowFast(paddle.nn.Layer):
         beta,
         norm_module=paddle.nn.BatchNorm3D,
         num_pathways=2,
-        res_depth=50,
+        depth=50,
         num_groups=1,
         input_channel_num=[3, 3],
         width_per_group=64,
@@ -593,7 +593,7 @@ class ResNetSlowFast(paddle.nn.Layer):
         self.beta = beta  #8
         self.norm_module = norm_module
         self.num_pathways = num_pathways
-        self.res_depth = res_depth
+        self.depth = depth
         self.num_groups = num_groups
         self.input_channel_num = input_channel_num
         self.width_per_group = width_per_group
@@ -639,7 +639,7 @@ class ResNetSlowFast(paddle.nn.Layer):
 
         # ResNet backbone
         MODEL_STAGE_DEPTH = {50: (3, 4, 6, 3)}
-        (d2, d3, d4, d5) = MODEL_STAGE_DEPTH[self.res_depth]
+        (d2, d3, d4, d5) = MODEL_STAGE_DEPTH[self.depth]
 
         num_block_temp_kernel = [[3, 3], [4, 4], [6, 6], [3, 3]]
         spatial_dilations = [[1, 1], [1, 1], [1, 1], [1, 1]]
