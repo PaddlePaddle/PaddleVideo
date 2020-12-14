@@ -14,4 +14,6 @@
 
 from .video import VideoDataset
 from .frame import FrameDataset
-__all__ = ['VideoDataset', 'FrameDataset']
+from .slowfast_video import SFVideoDataset
+
+__all__ = ['VideoDataset', 'FrameDataset', 'SFVideoDataset']

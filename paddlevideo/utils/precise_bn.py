@@ -79,4 +79,4 @@ def do_preciseBN(model, data_loader, parallel, num_iters=200):
     for i, bn in enumerate(bn_layers_list):
         bn._mean.set_value(running_mean[i])
         bn._variance.set_value(running_var[i])
-        bn._momentum = momentum_actual[i]  #
+        bn._momentum = momentum_actual[i]
