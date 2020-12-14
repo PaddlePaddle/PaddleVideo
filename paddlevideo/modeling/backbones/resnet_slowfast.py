@@ -12,11 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from ..registry import BACKBONES
-
 import paddle
 import paddle.nn.functional as F
 from paddle.nn.initializer import KaimingNormal
+from ..registry import BACKBONES
 
 # seed random seed
 paddle.framework.seed(0)

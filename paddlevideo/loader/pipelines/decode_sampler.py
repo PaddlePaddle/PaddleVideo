@@ -12,12 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from ..registry import PIPELINES
-
-import decord as de
 import random
 import numpy as np
 from PIL import Image
+import decord as de
+from ..registry import PIPELINES
 
 
 @PIPELINES.register()

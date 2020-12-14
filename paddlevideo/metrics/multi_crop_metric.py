@@ -31,7 +31,7 @@ class MultiCropMetric(object):
                  world_size,
                  num_ensemble_views,
                  num_spatial_crops,
-                 num_cls,
+                 num_classes,
                  log_interval=1):
         """prepare for metrics
         """
@@ -40,12 +40,12 @@ class MultiCropMetric(object):
         self.world_size = world_size
         self.num_ensemble_views = num_ensemble_views
         self.num_spatial_crops = num_spatial_crops
-        self.num_cls = num_cls
+        self.num_classes = num_classes
         self.log_interval = log_interval
 
         self.num_clips = self.num_ensemble_views * self.num_spatial_crops
         num_videos = self.data_size // self.num_clips
-        self.video_preds = np.zeros((num_videos, self.num_cls))
+        self.video_preds = np.zeros((num_videos, self.num_classes))
         self.video_labels = np.zeros((num_videos, 1), dtype="int64")
         self.clip_count = {}
 
@@ -74,7 +74,7 @@ class MultiCropMetric(object):
                 self.clip_count[vid_id] = []
             if ts_idx in self.clip_count[vid_id]:
                 logger.info(
-                    "[EVAL] Passed!! read video {} clip index {} / {} repeatedly."
+                    "[TEST] Passed!! read video {} clip index {} / {} repeatedly."
                     .format(vid_id, ts_idx, clip_ids[ind]))
             else:
                 self.clip_count[vid_id].append(ts_idx)
@@ -83,7 +83,7 @@ class MultiCropMetric(object):
                     assert self.video_labels[vid_id] == labels[ind]
                 self.video_labels[vid_id] = labels[ind]
         if batch_id % self.log_interval == 0:
-            logger.info("[EVAL] Processing batch {}/{} ...".format(
+            logger.info("[TEST] Processing batch {}/{} ...".format(
                 batch_id,
                 self.data_size // (self.batch_size * self.world_size)))
 
@@ -96,7 +96,7 @@ class MultiCropMetric(object):
                     self.clip_count[key]) != self.num_clips * (self.num_clips -
                                                                1) / 2:
                 logger.info(
-                    "[EVAL] Count Error!! video [{}] clip count [{}] not match number clips {}"
+                    "[TEST] Count Error!! video [{}] clip count [{}] not match number clips {}"
                     .format(key, self.clip_count[key], self.num_clips))
 
         video_preds = paddle.to_tensor(self.video_preds)
@@ -107,5 +107,5 @@ class MultiCropMetric(object):
         acc_top5 = paddle.metric.accuracy(input=video_preds,
                                           label=video_labels,
                                           k=5)
-        logger.info('[EVAL] eval finished, avg_acc1= {}, avg_acc5= {} '.format(
+        logger.info('[TEST] eval finished, avg_acc1= {}, avg_acc5= {} '.format(
             acc_top1.numpy(), acc_top5.numpy()))

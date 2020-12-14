@@ -117,7 +117,7 @@ METRIC:
   name: 'MultiCropMetric'
   num_ensemble_views: 10
   num_spatial_crops: 3
-  num_cls: 400
+  num_classes: 400
 
 PRECISEBN:
   preciseBN_interval: 10
