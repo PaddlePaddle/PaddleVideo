@@ -12,9 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import numpy as np
 import time
-import os
 import os.path as osp
 
 import paddle
@@ -22,7 +20,7 @@ from ..loader import build_dataloader
 from ..solver import build_lr, build_optimizer
 from ..utils import do_preciseBN
 from paddlevideo.utils import get_logger, coloring
-from paddlevideo.utils import (AverageMeter, build_metric, log_batch, log_epoch,
+from paddlevideo.utils import (AverageMeter, build_record, log_batch, log_epoch,
                                save, mkdir)
 
 
@@ -59,6 +57,10 @@ def train_model(model, dataset, cfg, parallel=True, validate=True):
         valid_loader = build_dataloader(valid_dataset,
                                         **validate_dataloader_setting)
 
+    if cfg.OPTIMIZER.learning_rate.get(
+            "iter_step") and cfg.OPTIMIZER.learning_rate.iter_step == True:
+        cfg.OPTIMIZER.learning_rate.num_iters = len(train_loader)
+
     lr = build_lr(cfg.OPTIMIZER.learning_rate)
     optimizer = build_optimizer(cfg.OPTIMIZER,
                                 lr,
@@ -66,13 +68,14 @@ def train_model(model, dataset, cfg, parallel=True, validate=True):
 
     if parallel:
         model = paddle.DataParallel(model)
+
     best = 0.
     for epoch in range(1, cfg.epochs + 1):
         model.train()
-        metric_list = build_metric()
+        record_list = build_record()
         tic = time.time()
         for i, data in enumerate(train_loader):
-            metric_list['reader_time'].update(time.time() - tic)
+            record_list['reader_time'].update(time.time() - tic)
             if parallel:
                 outputs = model._layers.train_step(data)
             else:
@@ -84,30 +87,37 @@ def train_model(model, dataset, cfg, parallel=True, validate=True):
             optimizer.step()
             optimizer.clear_grad()
 
-            # log metric
-            metric_list['lr'].update(
+            # log record
+            record_list['lr'].update(
                 optimizer._global_learning_rate().numpy()[0], batch_size)
             for name, value in outputs.items():
-                metric_list[name].update(value.numpy()[0], batch_size)
-            metric_list['batch_time'].update(time.time() - tic)
+                record_list[name].update(value.numpy()[0], batch_size)
+            record_list['batch_time'].update(time.time() - tic)
             tic = time.time()
 
             if i % cfg.get("log_interval", 10) == 0:
                 ips = "ips: {:.5f} instance/sec.".format(
-                    batch_size / metric_list["batch_time"].val)
-                log_batch(metric_list, i, epoch, cfg.epochs, "train", ips)
-        # learning scheduler step
-        lr.step()
+                    batch_size / record_list["batch_time"].val)
+                log_batch(record_list, i, epoch, cfg.epochs, "train", ips)
+
+            # learning scheduler iter step
+            if cfg.OPTIMIZER.learning_rate.get("iter_step") == True:
+                lr.step()
+
+        # learning scheduler epoch step
+        if not cfg.OPTIMIZER.learning_rate.get(
+                "iter_step") or cfg.OPTIMIZER.learning_rate.iter_step == False:
+            lr.step()
 
         ips = "ips: {:.5f} instance/sec.".format(
-            batch_size * metric_list["batch_time"].count /
-            metric_list["batch_time"].sum)
-        log_epoch(metric_list, epoch, "train", ips)
+            batch_size * record_list["batch_time"].count /
+            record_list["batch_time"].sum)
+        log_epoch(record_list, epoch, "train", ips)
 
         def evaluate(best):
             model.eval()
-            metric_list = build_metric()
-            metric_list.pop('lr')
+            record_list = build_record()
+            record_list.pop('lr')
             tic = time.time()
             for i, data in enumerate(valid_loader):
                 if parallel:
@@ -115,24 +125,25 @@ def train_model(model, dataset, cfg, parallel=True, validate=True):
                 else:
                     outputs = model.val_step(data)
 
-                # log_metric
+                # log_record
                 for name, value in outputs.items():
+                    record_list[name].update(value.numpy()[0], batch_size)
 
-                    metric_list[name].update(value.numpy()[0], batch_size)
-                metric_list['batch_time'].update(time.time() - tic)
+                record_list['batch_time'].update(time.time() - tic)
                 tic = time.time()
 
                 if i % cfg.get("log_interval", 10) == 0:
                     ips = "ips: {:.5f} instance/sec.".format(
-                        batch_size / metric_list["batch_time"].val)
-                    log_batch(metric_list, i, epoch, cfg.epochs, "val", ips)
-            ips = "ips: {:.5f} instance/sec.".format(
-                batch_size * metric_list["batch_time"].count /
-                metric_list["batch_time"].sum)
-            log_epoch(metric_list, epoch, "val", ips)
+                        batch_size / record_list["batch_time"].val)
+                    log_batch(record_list, i, epoch, cfg.epochs, "val", ips)
 
-            if metric_list['top1'].avg > best:  #TODO: no top1 when localizer
-                best = metric_list['top1'].avg
+            ips = "ips: {:.5f} instance/sec.".format(
+                batch_size * record_list["batch_time"].count /
+                record_list["batch_time"].sum)
+            log_epoch(record_list, epoch, "val", ips)
+
+            if record_list['top1'].avg > best:  #TODO: no top1 when localizer
+                best = record_list['top1'].avg
             return best
 
         model_name = cfg.model_name
@@ -141,12 +152,15 @@ def train_model(model, dataset, cfg, parallel=True, validate=True):
         opt_state_dict = optimizer.state_dict()
         opt_name = cfg['OPTIMIZER']['name']
 
-        if cfg.get("PRECISEBN") and (epoch -
-                                     1) % cfg.PRECISEBN.preciseBN_interval == 0:
+        if cfg.get("PRECISEBN") and (
+            (epoch - 1) % cfg.PRECISEBN.preciseBN_interval == 0
+                or epoch == cfg.epochs):
             do_preciseBN(
                 model, train_loader, parallel,
                 min(cfg.PRECISEBN.num_iters_preciseBN, len(train_loader)))
-        if validate:
+
+        if validate and (epoch - 1) % cfg.get("val_interval",
+                                              1) == 0 or epoch == cfg.epochs:
             with paddle.fluid.dygraph.no_grad():
                 best = evaluate(best)
 
@@ -157,7 +171,8 @@ def train_model(model, dataset, cfg, parallel=True, validate=True):
             best = int(best * 10000) / 10000
             logger.info(f"Already save the best model (top1 acc){best}")
 
-        if (epoch - 1) % cfg.get("save_interval", 10) == 0:
+        if (epoch - 1) % cfg.get("save_interval",
+                                 10) == 0 or epoch == cfg.epochs:
             save(opt_state_dict, osp.join(output_dir, f"{opt_name}.pdopt"))
             save(model.state_dict(),
                  osp.join(output_dir, model_name + f"_epoch_{epoch}.pdparams"))

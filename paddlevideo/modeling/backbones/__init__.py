@@ -14,7 +14,8 @@
 
 from .resnet import ResNet
 from .resnet_tsm import ResNetTSM
+from .resnet_slowfast import ResNetSlowFast
 from .resnet_tweaks_tsm import ResNetTweaksTSM
 from .bmn import BMN
 
-__all__ = ['ResNet', 'ResNetTSM', 'ResNetTweaksTSM', 'BMN']
+__all__ = ['ResNet', 'ResNetTSM', 'ResNetTweaksTSM', 'ResNetSlowFast', 'BMN']

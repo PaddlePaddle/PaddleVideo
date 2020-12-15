@@ -17,7 +17,6 @@ import sys
 import argparse
 import paddle
 
-
 __dir__ = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.abspath(os.path.join(__dir__, '../')))
 
@@ -30,23 +29,17 @@ from paddlevideo.utils import get_dist_info
 
 def parse_args():
     parser = argparse.ArgumentParser("PaddleVideo test script")
-    parser.add_argument(
-        '-c',
-        '--config',
-        type=str,
-        default='configs/recognition/tsm/tsm.yaml',
-        help='config file path')
-    parser.add_argument(
-        '-o',
-        '--override',
-        action='append',
-        default=[],
-        help='config options to be overridden')
-    parser.add_argument(
-        '-w',
-        '--weight',
-        default='',
-        help='weight path')
+    parser.add_argument('-c',
+                        '--config',
+                        type=str,
+                        default='configs/recognition/tsm/tsm.yaml',
+                        help='config file path')
+    parser.add_argument('-o',
+                        '--override',
+                        action='append',
+                        default=[],
+                        help='config options to be overridden')
+    parser.add_argument('-w', '--weight', default='', help='weight path')
 
     args = parser.parse_args()
     return args
@@ -64,10 +57,8 @@ def main():
 
     model = build_model(cfg.MODEL)
 
-    test_model(model, dataset, cfg, weight, parallel)
+    test_model(model, dataset, cfg, args.weight, world_size)
 
 
 if __name__ == '__main__':
     main()
-
-

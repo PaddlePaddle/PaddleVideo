@@ -30,24 +30,23 @@ class BaseDataset(Dataset, ABC):
 
     - Method: `load_file`, load info from index file.
     - Method: `prepare_train`, providing train data.
-    - Method: `prepare_valid`, providing valid data.
+    - Method: `prepare_test`, providing test data.
 
     Args:
         file_path (str): index file path.
         pipeline (Sequence XXX)
         data_prefix (str): directory path of the data. Default: None.
-        valid_mode (bool): whether to build valid dataset. Default: False.
+        test_mode (bool): whether to build test dataset. Default: False.
 
     """
-    def __init__(self, file_path, pipeline, data_prefix=None, valid_mode=False):
+    def __init__(self, file_path, pipeline, data_prefix=None, test_mode=False):
 
         super().__init__()
 
         self.file_path = file_path
         self.data_prefix = osp.realpath(data_prefix) if \
             data_prefix is not None and osp.isdir(data_prefix) else data_prefix
-        self.valid_mode = valid_mode
-
+        self.test_mode = test_mode
         self.pipeline = pipeline
         self.info = self.load_file()
 
@@ -57,15 +56,15 @@ class BaseDataset(Dataset, ABC):
         pass
 
     def prepare_train(self, idx):
-        """Prepare the frames for training given the index."""
+        """TRAIN & VALID. Prepare the data for training given the index."""
         results = copy.deepcopy(self.info[idx])
         #Note: For now, paddle.io.DataLoader cannot support dict type retval, so convert to list here
         to_list = self.pipeline(results)
         #XXX have to unsqueeze label here or before calc metric!
         return [to_list['imgs'], np.array([to_list['labels']])]
 
-    def prepare_valid(self, idx):
-        """Prepare the frames for valid given the index."""
+    def prepare_test(self, idx):
+        """TEST: Prepare the data for test given the index."""
         results = copy.deepcopy(self.info[idx])
         #Note: For now, paddle.io.DataLoader cannot support dict type retval, so convert to list here
         to_list = self.pipeline(results)
@@ -77,7 +76,7 @@ class BaseDataset(Dataset, ABC):
 
     def __getitem__(self, idx):
         """ Get the sample for either training or testing given index"""
-        if self.valid_mode:
-            return self.prepare_valid(idx)
+        if self.test_mode:
+            return self.prepare_test(idx)
         else:
             return self.prepare_train(idx)

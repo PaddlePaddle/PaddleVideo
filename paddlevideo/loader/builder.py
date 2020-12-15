@@ -22,6 +22,7 @@ from paddlevideo.utils import get_logger
 
 logger = get_logger("paddlevideo")
 
+
 def build_pipeline(cfg):
     """Build pipeline.
     Args:
@@ -32,7 +33,7 @@ def build_pipeline(cfg):
 
 def build_dataset(cfg):
     """Build dataset.
-    Args: 
+    Args:
         cfg (dict): root config dict.
 
     Returns:
@@ -44,6 +45,7 @@ def build_dataset(cfg):
     dataset = build(cfg_dataset, DATASETS, key="format")
     return dataset
 
+
 def build_dataloader(dataset,
                      batch_size,
                      num_workers,
@@ -54,27 +56,24 @@ def build_dataloader(dataset,
     """Build Paddle Dataloader.
 
     XXX explain how the dataloader work!
-       
+
     Args:
         dataset (paddle.dataset): A PaddlePaddle dataset object.
         batch_size (int): batch size on single card.
         num_worker (int): num_worker
         shuffle(bool): whether to shuffle the data at every epoch.
     """
-    sampler = DistributedBatchSampler(
-            dataset,
-            batch_size=batch_size,
-            shuffle=shuffle,
-            drop_last=drop_last)
+    sampler = DistributedBatchSampler(dataset,
+                                      batch_size=batch_size,
+                                      shuffle=shuffle,
+                                      drop_last=drop_last)
 
-
-    data_loader = DataLoader(
-            dataset,
-            batch_sampler=sampler,
-            places=places,
-            num_workers=num_workers,
-            return_list=True,
-            **kwargs)
+    data_loader = DataLoader(dataset,
+                             batch_sampler=sampler,
+                             places=places,
+                             num_workers=num_workers,
+                             return_list=True,
+                             **kwargs)
 
     return data_loader
 
@@ -84,11 +83,10 @@ def term_mp(sig_num, frame):
     """
     pid = os.getpid()
     pgid = os.getpgid(os.getpid())
-    logger.info("main proc {} exit, kill process group "
-                "{}".format(pid, pgid))
+    logger.info("main proc {} exit, kill process group " "{}".format(pid, pgid))
     os.killpg(pgid, signal.SIGKILL)
     return
 
- 
+
 signal.signal(signal.SIGINT, term_mp)
 signal.signal(signal.SIGTERM, term_mp)

@@ -12,11 +12,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .augmentations import (Scale, RandomCrop, CenterCrop, RandomFlip,
-                            Image2Array, Normalization)
+from .augmentations import (
+    Scale,
+    RandomCrop,
+    CenterCrop,
+    RandomFlip,
+    Image2Array,
+    Normalization,
+    JitterScale,
+    MultiCrop,
+    PackOutput,
+)
+
 from .compose import Compose
 from .decode import VideoDecoder, FrameDecoder
 from .sample import Sampler
+from .decode_sampler import DecodeSampler
 from .anet_pipeline import LoadFeat, GetMatchMap, GetVideoLabel
 
 __all__ = [
@@ -30,6 +41,10 @@ __all__ = [
     'VideoDecoder',
     'FrameDecoder',
     'Sample',
+    'JitterScale',
+    'MultiCrop',
+    'PackOutput',
+    'DecodeSampler',
     'LoadFeat',
     'GetMatchMap',
     'GetVideoLabel',
