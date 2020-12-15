@@ -12,24 +12,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .augmentations import (Scale, 
-			RandomCrop, 
-			CenterCrop, 
-			RandomFlip, 
-			Image2Array, 
-			Normalization)
+from .augmentations import (Scale, RandomCrop, CenterCrop, RandomFlip,
+                            Image2Array, Normalization)
 from .compose import Compose
 from .decode import VideoDecoder, FrameDecoder
 from .sample import Sampler
+from .mix import Mixup, Cutmix
 
-__all__ = ['Scale',
-	   'RandomCrop',
-           'CenterCrop',
-           'RandomFlip',
-           'Image2Array',
-           'Normalization',
-           'Compose',
-           'VideoDecoder',
-           'FrameDecoder',
-           'Sample',]
-
+__all__ = [
+    'Scale',
+    'RandomCrop',
+    'CenterCrop',
+    'RandomFlip',
+    'Image2Array',
+    'Normalization',
+    'Compose',
+    'VideoDecoder',
+    'FrameDecoder',
+    'Sampler',
+    'Mixup',
+    'Cutmix',
+]

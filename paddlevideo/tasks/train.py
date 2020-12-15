@@ -37,22 +37,27 @@ def train_model(model, dataset, cfg, parallel=True, validate=True):
 
     """
     logger = get_logger("paddlevideo")
-    batch_size = cfg.DATASET.get('batch_size', 2)
+    #single card batch size
+    batch_size = cfg.DATASET.get('batch_size', 8)
     places = paddle.set_device('gpu')
+    mix = cfg.PIPELINE.get("mix", None)
+    num_workers = cfg.DATASET.get('num_workers', 0)
 
     train_dataset = dataset[0]
+
     train_dataloader_setting = dict(
         batch_size=batch_size,
         # default num worker: 0, which means no subprocess will be created
-        num_workers=cfg.DATASET.get('num_workers', 0),
+        num_workers=num_workers,
+        collate_fn=cfg.get('MIX', None),
         places=places)
+
     train_loader = build_dataloader(train_dataset, **train_dataloader_setting)
 
     if validate:
         valid_dataset = dataset[1]
         validate_dataloader_setting = dict(batch_size=batch_size,
-                                           num_workers=cfg.DATASET.get(
-                                               'num_workers', 0),
+                                           num_workers=num_workers,
                                            places=places,
                                            drop_last=False,
                                            shuffle=False)
@@ -110,6 +115,7 @@ def train_model(model, dataset, cfg, parallel=True, validate=True):
             metric_list.pop('lr')
             tic = time.time()
             for i, data in enumerate(valid_loader):
+
                 if parallel:
                     outputs = model._layers.val_step(data)
                 else:
@@ -126,6 +132,7 @@ def train_model(model, dataset, cfg, parallel=True, validate=True):
                     ips = "ips: {:.5f} instance/sec.".format(
                         batch_size / metric_list["batch_time"].val)
                     log_batch(metric_list, i, epoch, cfg.epochs, "val", ips)
+
             ips = "ips: {:.5f} instance/sec.".format(
                 batch_size * metric_list["batch_time"].count /
                 metric_list["batch_time"].sum)
