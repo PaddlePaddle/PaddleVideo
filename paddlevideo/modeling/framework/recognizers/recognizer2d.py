@@ -15,13 +15,12 @@ from .base import BaseRecognizer
 import paddle
 from paddlevideo.utils import get_logger
 
-
 logger = get_logger("paddlevideo")
+
 
 @RECOGNIZERS.register()
 class Recognizer2D(BaseRecognizer):
     """2D recognizer model framework."""
-
     def forward_train(self, imgs, labels, reduce_sum, **kwargs):
         """Define how the model is going to train, from input to output.
         """
@@ -29,7 +28,7 @@ class Recognizer2D(BaseRecognizer):
 
         #labels = labels.squeeze()
         #XXX: unsqueeze label to [label] ?
-        
+
         cls_score = self(imgs)
         loss_metrics = self.head.loss(cls_score, labels, reduce_sum, **kwargs)
         return loss_metrics
@@ -42,6 +41,10 @@ class Recognizer2D(BaseRecognizer):
 
         # calculate num_crops automatically
         cls_score = self.average_clip(cls_score, num_segs)
-        metrics = self.head.loss(cls_score, labels, reduce_sum, return_loss=False **kwargs)
+        metrics = self.head.loss(cls_score,
+                                 labels,
+                                 reduce_sum,
+                                 return_loss=False,
+                                 **kwargs)
 
         return metrics
