@@ -14,4 +14,6 @@
 
 from .video import VideoDataset
 from .frame import FrameDataset
-__all__ = ['VideoDataset', 'FrameDataset']
+from .bmn_dataset import BMNDataset
+
+__all__ = ['VideoDataset', 'FrameDataset', 'BMNDataset']

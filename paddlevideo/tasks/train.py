@@ -131,7 +131,7 @@ def train_model(model, dataset, cfg, parallel=True, validate=True):
                 metric_list["batch_time"].sum)
             log_epoch(metric_list, epoch, "val", ips)
 
-            if metric_list['top1'].avg > best:
+            if metric_list['top1'].avg > best:  #TODO: no top1 when localizer
                 best = metric_list['top1'].avg
             return best
 
@@ -150,14 +150,14 @@ def train_model(model, dataset, cfg, parallel=True, validate=True):
             with paddle.fluid.dygraph.no_grad():
                 best = evaluate(best)
 
-            # save best
+            # save best #TODO: no need to save best as no val top1
             save(opt_state_dict, osp.join(output_dir, f"{opt_name}.pdopt"))
             save(model.state_dict(),
                  osp.join(output_dir, model_name + "_best.pdparams"))
             best = int(best * 10000) / 10000
             logger.info(f"Already save the best model (top1 acc){best}")
 
-        if not validate and epoch % cfg.get("save_interval", 10) == 0:
+        if (epoch - 1) % cfg.get("save_interval", 10) == 0:
             save(opt_state_dict, osp.join(output_dir, f"{opt_name}.pdopt"))
             save(model.state_dict(),
                  osp.join(output_dir, model_name + f"_epoch_{epoch}.pdparams"))

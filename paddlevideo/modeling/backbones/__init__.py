@@ -15,4 +15,6 @@
 from .resnet import ResNet
 from .resnet_tsm import ResNetTSM
 from .resnet_tweaks_tsm import ResNetTweaksTSM
-__all__ = ['ResNet', 'ResNetTSM', 'ResNetTweaksTSM']
+from .bmn import BMN
+
+__all__ = ['ResNet', 'ResNetTSM', 'ResNetTweaksTSM', 'BMN']

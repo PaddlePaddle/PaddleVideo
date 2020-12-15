@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 from .base import BaseWeightedLoss
 from .cross_entropy_loss import CrossEntropyLoss
+from .bmn_loss import BMNLoss
 
-__all__ = ['CrossEntropyLoss']
+__all__ = ['CrossEntropyLoss', 'BMNLoss']

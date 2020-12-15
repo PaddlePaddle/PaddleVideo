@@ -13,5 +13,11 @@
 # limitations under the License.
 
 from .recognizers import BaseRecognizer, Recognizer2D
-__all__ = ['BaseRecognizer',
-           'Recognizer2D']
+from .localizers import BaseLocalizer, BMNLocalizer
+
+__all__ = [
+    'BaseRecognizer',
+    'Recognizer2D',
+    'BaseLocalizer',
+    'BMNLocalizer',
+]
