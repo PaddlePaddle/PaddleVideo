@@ -12,11 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from ..registry import PIPELINES
 import os
 import numpy as np
-"""
-pipeline ops for Activity Net.
+from ..registry import PIPELINES
+"""pipeline ops for Activity Net.
 """
 
 

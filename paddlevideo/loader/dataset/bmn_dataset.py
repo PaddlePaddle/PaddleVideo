@@ -12,11 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from ..registry import DATASETS
-from .base import BaseDataset
-
 import copy
 import json
+
+from ..registry import DATASETS
+from .base import BaseDataset
 from ...utils import get_logger
 logger = get_logger("paddlevideo")
 

@@ -13,8 +13,8 @@
 # limitations under the License.
 
 from abc import abstractmethod
-from ... import builder
 import paddle.nn as nn
+from ... import builder
 
 
 class BaseLocalizer(nn.Layer):

@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import numpy as np
 import paddle
 import paddle.nn.functional as F
-import numpy as np
 
 from ..registry import LOSSES
 from .base import BaseWeightedLoss
@@ -24,6 +24,11 @@ DATATYPE = 'float32'
 
 @LOSSES.register()
 class BMNLoss(BaseWeightedLoss):
+    """Loss for BMN model
+    Args:
+        tscale (int): sequence length, default 100.
+        dscale (int): max duration length, default 100.
+    """
     def __init__(self, dscale, tscale):
         super().__init__()
         self.dscale = dscale

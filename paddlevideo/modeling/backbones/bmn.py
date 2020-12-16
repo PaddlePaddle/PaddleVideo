@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import paddle
-from paddle import ParamAttr
 import math
 import numpy as np
+import paddle
+from paddle import ParamAttr
 from ..registry import BACKBONES
 
 DATATYPE = 'float32'
@@ -87,6 +87,15 @@ def init_params(name, in_channels, kernel_size):
 
 @BACKBONES.register()
 class BMN(paddle.nn.Layer):
+    """BMN model from
+    `"BMN: Boundary-Matching Network for Temporal Action Proposal Generation" <https://arxiv.org/abs/1907.09702>`_
+    Args:
+        tscale (int): sequence length, default 100.
+        dscale (int): max duration length, default 100.
+        prop_boundary_ratio (float): ratio of expanded temporal region in proposal boundary, default 0.5.
+        num_sample (int): number of samples betweent starting boundary and ending boundary of each propoasl, default 32.
+        num_sample_perbin (int):  number of selected points in each sample, default 3.
+    """
     def __init__(
         self,
         tscale,

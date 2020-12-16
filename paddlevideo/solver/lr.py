@@ -17,7 +17,7 @@ import paddle
 from . import custom_lr
 
 
-def build_lr(cfg):
+def build_lr(cfg, num_iters):
     """
     Build a learning rate scheduler accroding to ```OPTIMIZER``` configuration, and it always pass into the optimizer.
     In configuration:
@@ -25,6 +25,8 @@ def build_lr(cfg):
         name: 'PiecewiseDecay'
         boundaries: [20, 60]
         values: [0.00025, 0.000025, 0.0000025]
+
+
     Returns:
         A paddle.optimizer.lr instance.
     """
@@ -35,11 +37,12 @@ def build_lr(cfg):
     if cfg_copy.get('learning_rate') and isinstance(cfg_copy['learning_rate'],
                                                     dict):
         cfg_copy['learning_rate'] = build_lr(
-            cfg_copy['learning_rate']
-        )  #not support inner LRSchedule use iter_step
+            cfg_copy['learning_rate'],
+            num_iters)  #not support only inner iter_step
 
     lr_name = cfg_copy.pop('name')
     if cfg_copy.get('iter_step'):
+        cfg_copy['num_iters'] = num_iters
         cfg_copy.pop('iter_step')
 
     return getattr(custom_lr, lr_name)(**cfg_copy)
