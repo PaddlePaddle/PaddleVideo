@@ -43,10 +43,10 @@ def build_localizer(cfg):
 
 def build_model(cfg):
     cfg_copy = cfg.copy()
-    framework_type = cfg_copy.get('framework')  #TODO: get or pop?
-    if 'Recognizer' in framework_type:  #TODO: required str in name?
+    framework_type = cfg_copy.get('framework')
+    if framework_type in RECOGNIZERS:
         return build_recognizer(cfg)
-    elif 'Localizer' in framework_type:
+    elif framework_type in LOCALIZERS:
         return build_localizer(cfg)
     else:
         raise NotImplementedError

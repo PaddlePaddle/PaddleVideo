@@ -47,7 +47,7 @@ def parse_args():
 
 def main():
     args = parse_args()
-    cfg = get_config(args.config)
+    cfg = get_config(args.config, overrides=args.override)
 
     dataset = build_dataset((cfg.DATASET.test, cfg.PIPELINE.test))
     _, world_size = get_dist_info()

@@ -19,15 +19,24 @@ logger = get_logger("paddlevideo")
 __all__ = ['AverageMeter', 'build_record', 'log_batch', 'log_epoch']
 
 
-def build_record():
-    record_list = [
-        ("loss", AverageMeter('loss', '7.5f')),
-        ("lr", AverageMeter('lr', 'f', need_avg=False)),
-        ("top1", AverageMeter("top1", '.5f')),
-        ("top5", AverageMeter("top5", '.5f')),
-        ("batch_time", AverageMeter('elapse', '.3f')),
-        ("reader_time", AverageMeter('reader', '.3f')),
-    ]
+def build_record(cfg):
+    framework_type = cfg.get('framework')
+    if 'Recognizer' in cfg.framework:  #TODO: required specify str in framework
+        record_list = [
+            ("loss", AverageMeter('loss', '7.5f')),
+            ("lr", AverageMeter('lr', 'f', need_avg=False)),
+            ("top1", AverageMeter("top1", '.5f')),
+            ("top5", AverageMeter("top5", '.5f')),
+            ("batch_time", AverageMeter('elapse', '.3f')),
+            ("reader_time", AverageMeter('reader', '.3f')),
+        ]
+    else:
+        record_list = [
+            ("loss", AverageMeter('loss', '7.5f')),
+            ("lr", AverageMeter('lr', 'f', need_avg=False)),
+            ("batch_time", AverageMeter('elapse', '.3f')),
+            ("reader_time", AverageMeter('reader', '.3f')),
+        ]
     record_list = OrderedDict(record_list)
     return record_list
 

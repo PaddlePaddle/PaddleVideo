@@ -25,7 +25,7 @@ DATASET: #DATASET field
     subset: "validation"
   test:
     format: "BMNDataset"
-    valid_mode: True
+    test_mode: True
     file_path: "/workspace/huangjun12/DATA/bmn_data/activitynet_1.3_annotations.json"
     subset: "validation"
 
@@ -52,7 +52,7 @@ PIPELINE: #PIPELINE field
           tscale: 100
           dscale: 100
 
-  eval: #Mandatory, indicate the pipeline to deal with the validing data. associate to the 'paddlevideo/loader/pipelines/'
+  test: #Mandatory, indicate the pipeline to deal with the validing data. associate to the 'paddlevideo/loader/pipelines/'
     load_feat:
       name: "LoadFeat"
       feat_path: "/workspace/huangjun12/DATA/bmn_data/fix_feat_100"
@@ -67,7 +67,7 @@ OPTIMIZER: #OPTIMIZER field
   name: 'Adam'
   learning_rate:
     iter_step: True
-    name: 'PiecewiseDecay'
+    name: 'CustomPiecewiseDecay'
     boundaries: [4200]
     values: [0.001, 0.0001]
   weight_decay:
@@ -79,9 +79,10 @@ METRIC:
   tscale: 100
   dscale: 100
   anno_file: "/workspace/huangjun12/DATA/bmn_data/activitynet_1.3_annotations.json"
+  ground_truth_filename: "/workspace/huangjun12/DATA/bmn_data/activity_net_1_3_new.json"
   subset: "validation"
-  output_path: "output/EVAL/BMN_results" #??
-  result_path: "predict_results"  #??
+  output_path: "../data/bmn/BMN_Test_output"
+  result_path: "../data/bmn/BMN_Test_results"
 
 model_name: BMN
 log_interval: 1 #Optional, the interal of logger, default:10

@@ -57,8 +57,7 @@ def train_model(model, dataset, cfg, parallel=True, validate=True):
         valid_loader = build_dataloader(valid_dataset,
                                         **validate_dataloader_setting)
 
-    if cfg.OPTIMIZER.learning_rate.get(
-            "iter_step") and cfg.OPTIMIZER.learning_rate.iter_step == True:
+    if cfg.OPTIMIZER.learning_rate.get("iter_step"):
         cfg.OPTIMIZER.learning_rate.num_iters = len(train_loader)
 
     lr = build_lr(cfg.OPTIMIZER.learning_rate)
@@ -72,7 +71,7 @@ def train_model(model, dataset, cfg, parallel=True, validate=True):
     best = 0.
     for epoch in range(1, cfg.epochs + 1):
         model.train()
-        record_list = build_record()
+        record_list = build_record(cfg.MODEL)
         tic = time.time()
         for i, data in enumerate(train_loader):
             record_list['reader_time'].update(time.time() - tic)
@@ -101,12 +100,11 @@ def train_model(model, dataset, cfg, parallel=True, validate=True):
                 log_batch(record_list, i, epoch, cfg.epochs, "train", ips)
 
             # learning scheduler iter step
-            if cfg.OPTIMIZER.learning_rate.get("iter_step") == True:
+            if cfg.OPTIMIZER.learning_rate.get("iter_step"):
                 lr.step()
 
         # learning scheduler epoch step
-        if not cfg.OPTIMIZER.learning_rate.get(
-                "iter_step") or cfg.OPTIMIZER.learning_rate.iter_step == False:
+        if not cfg.OPTIMIZER.learning_rate.get("iter_step"):
             lr.step()
 
         ips = "ips: {:.5f} instance/sec.".format(
@@ -116,7 +114,7 @@ def train_model(model, dataset, cfg, parallel=True, validate=True):
 
         def evaluate(best):
             model.eval()
-            record_list = build_record()
+            record_list = build_record(cfg.MODEL)
             record_list.pop('lr')
             tic = time.time()
             for i, data in enumerate(valid_loader):
@@ -142,15 +140,16 @@ def train_model(model, dataset, cfg, parallel=True, validate=True):
                 record_list["batch_time"].sum)
             log_epoch(record_list, epoch, "val", ips)
 
-            if record_list['top1'].avg > best:  #TODO: no top1 when localizer
+            best_flag = False
+            if record_list.get('top1') and record_list['top1'].avg > best:
                 best = record_list['top1'].avg
-            return best
+                best_flag = True
+            return best, best_flag
 
         model_name = cfg.model_name
         output_dir = cfg.get("output_dir", f"./output/{model_name}")
         mkdir(output_dir)
         opt_state_dict = optimizer.state_dict()
-        opt_name = cfg['OPTIMIZER']['name']
 
         if cfg.get("PRECISEBN") and (
             (epoch - 1) % cfg.PRECISEBN.preciseBN_interval == 0
@@ -162,19 +161,25 @@ def train_model(model, dataset, cfg, parallel=True, validate=True):
         if validate and (epoch - 1) % cfg.get("val_interval",
                                               1) == 0 or epoch == cfg.epochs:
             with paddle.fluid.dygraph.no_grad():
-                best = evaluate(best)
+                best, save_best_flag = evaluate(best)
 
-            # save best #TODO: no need to save best as no val top1
-            save(opt_state_dict, osp.join(output_dir, f"{opt_name}.pdopt"))
-            save(model.state_dict(),
-                 osp.join(output_dir, model_name + "_best.pdparams"))
-            best = int(best * 10000) / 10000
-            logger.info(f"Already save the best model (top1 acc){best}")
+            # save best
+            if save_best_flag:
+                save(opt_state_dict,
+                     osp.join(output_dir, model_name + "_best.pdopt"))
+                save(model.state_dict(),
+                     osp.join(output_dir, model_name + "_best.pdparams"))
+                logger.info(
+                    f"Already save the best model (top1 acc){int(best * 10000) / 10000}"
+                )
 
         if (epoch - 1) % cfg.get("save_interval",
                                  10) == 0 or epoch == cfg.epochs:
-            save(opt_state_dict, osp.join(output_dir, f"{opt_name}.pdopt"))
-            save(model.state_dict(),
-                 osp.join(output_dir, model_name + f"_epoch_{epoch}.pdparams"))
+            save(opt_state_dict,
+                 osp.join(output_dir, model_name + f"_epoch_{epoch:05d}.pdopt"))
+            save(
+                model.state_dict(),
+                osp.join(output_dir,
+                         model_name + f"_epoch_{epoch:05d}.pdparams"))
 
     logger.info(f'training {cfg.model_name} finished')
