@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .registry import BACKBONES, HEADS, LOSSES, RECOGNIZERS
+from .registry import BACKBONES, HEADS, LOSSES, RECOGNIZERS, LOCALIZERS
 from ..utils import build
 
 
@@ -20,30 +20,33 @@ def build_backbone(cfg):
     """Build backbone."""
     return build(cfg, BACKBONES)
 
+
 def build_head(cfg):
     """Build head."""
     return build(cfg, HEADS)
+
 
 def build_loss(cfg):
     """Build loss."""
     return build(cfg, LOSSES)
 
+
 def build_recognizer(cfg):
     """Build recognizer."""
     return build(cfg, RECOGNIZERS, key='framework')
 
+
+def build_localizer(cfg):
+    """Build localizer."""
+    return build(cfg, LOCALIZERS, key='framework')
+
+
 def build_model(cfg):
-
-    return build_recognizer(cfg)
-
     cfg_copy = cfg.copy()
-    #XXX get or pop
-    #XXX: type or name??
-    framework_type = cfg_copy.pop('name')
+    framework_type = cfg_copy.get('framework')
     if framework_type in RECOGNIZERS:
         return build_recognizer(cfg)
     elif framework_type in LOCALIZERS:
-        raise NotImplementedError
-        #return build_localizers(cfg)
+        return build_localizer(cfg)
     else:
         raise NotImplementedError

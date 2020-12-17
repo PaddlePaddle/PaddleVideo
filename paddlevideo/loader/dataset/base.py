@@ -47,9 +47,7 @@ class BaseDataset(Dataset, ABC):
         self.data_prefix = osp.realpath(data_prefix) if \
             data_prefix is not None and osp.isdir(data_prefix) else data_prefix
         self.test_mode = test_mode
-
         self.pipeline = pipeline
-
         self.info = self.load_file()
 
     @abstractmethod

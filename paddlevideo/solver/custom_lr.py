@@ -15,6 +15,7 @@
 import math
 from paddle.optimizer.lr import *
 """
+PaddleVideo Learning Rate Schedule:
 You can use paddle.optimizer.lr
 or define your custom_lr in this file.
 """
@@ -91,3 +92,9 @@ class CustomWarmupCosineDecay(LRScheduler):
             alpha = (lr_end - lr_start) / self.warmup_epochs
             lr = self.last_epoch * alpha + lr_start
         return lr
+
+
+class CustomPiecewiseDecay(PiecewiseDecay):
+    def __init__(self, **kargs):
+        kargs.pop('num_iters')
+        super().__init__(**kargs)
