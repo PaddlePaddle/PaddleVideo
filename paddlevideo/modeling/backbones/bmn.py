@@ -18,8 +18,6 @@ import paddle
 from paddle import ParamAttr
 from ..registry import BACKBONES
 
-DATATYPE = 'float32'
-
 
 def _get_interp1d_bin_mask(seg_xmin, seg_xmax, tscale, num_sample,
                            num_sample_perbin):

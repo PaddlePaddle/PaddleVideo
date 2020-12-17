@@ -17,23 +17,23 @@ DATASET: #DATASET field
   num_workers: 8
   train:
     format: "BMNDataset"
-    file_path: "/workspace/huangjun12/DATA/bmn_data/activitynet_1.3_annotations.json"
+    file_path: "data/dataset/bmn_data/activitynet_1.3_annotations.json"
     subset: "train"
   valid:
     format: "BMNDataset"
-    file_path: "/workspace/huangjun12/DATA/bmn_data/activitynet_1.3_annotations.json"
+    file_path: "data/dataset/bmn_data/activitynet_1.3_annotations.json"
     subset: "validation"
   test:
     format: "BMNDataset"
     test_mode: True
-    file_path: "/workspace/huangjun12/DATA/bmn_data/activitynet_1.3_annotations.json"
+    file_path: "data/dataset/bmn_data/activitynet_1.3_annotations.json"
     subset: "validation"
 
 PIPELINE: #PIPELINE field
   train: #Mandotary, indicate the pipeline to deal with the training data, associate to the 'paddlevideo/loader/pipelines/'
     load_feat:
       name: "LoadFeat"
-      feat_path: "/workspace/huangjun12/DATA/bmn_data/fix_feat_100"
+      feat_path: "data/dataset/bmn_data/fix_feat_100"
     transform: #Mandotary, image transfrom operator
       - GetMatchMap:
           tscale: 100
@@ -44,7 +44,7 @@ PIPELINE: #PIPELINE field
   valid: #Mandotary, indicate the pipeline to deal with the training data, associate to the 'paddlevideo/loader/pipelines/'
     load_feat:
       name: "LoadFeat"
-      feat_path: "/workspace/huangjun12/DATA/bmn_data/fix_feat_100"
+      feat_path: "data/dataset/bmn_data/fix_feat_100"
     transform: #Mandotary, image transfrom operator
       - GetMatchMap:
           tscale: 100
@@ -55,7 +55,7 @@ PIPELINE: #PIPELINE field
   test: #Mandatory, indicate the pipeline to deal with the validing data. associate to the 'paddlevideo/loader/pipelines/'
     load_feat:
       name: "LoadFeat"
-      feat_path: "/workspace/huangjun12/DATA/bmn_data/fix_feat_100"
+      feat_path: "data/dataset/bmn_data/fix_feat_100"
     transform: #Mandotary, image transfrom operator
       - GetMatchMap:
           tscale: 100
@@ -78,8 +78,8 @@ METRIC:
   name: 'BMNMetric'
   tscale: 100
   dscale: 100
-  anno_file: "/workspace/huangjun12/DATA/bmn_data/activitynet_1.3_annotations.json"
-  ground_truth_filename: "/workspace/huangjun12/DATA/bmn_data/activity_net_1_3_new.json"
+  anno_file: "data/dataset/bmn_data/activitynet_1.3_annotations.json"
+  ground_truth_filename: "data/dataset/bmn_data/activity_net_1_3_new.json"
   subset: "validation"
   output_path: "../data/bmn/BMN_Test_output"
   result_path: "../data/bmn/BMN_Test_results"
