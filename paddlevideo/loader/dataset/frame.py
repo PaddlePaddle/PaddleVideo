@@ -14,10 +14,13 @@
 
 import os.path as osp
 import copy
+import random
 import numpy as np
 
 from ..registry import DATASETS
 from .base import BaseDataset
+from ...utils import get_logger
+logger = get_logger("paddlevideo")
 
 
 @DATASETS.register()
@@ -45,13 +48,12 @@ class FrameDataset(BaseDataset):
     def __init__(self,
                  file_path,
                  pipeline,
+                 num_retries=5,
                  data_prefix=None,
                  test_mode=False,
                  suffix='img_{:05}.jpg'):
-
-        #unique attribute in frames dataset.
+        self.num_retries = num_retries
         self.suffix = suffix
-
         super().__init__(file_path, pipeline, data_prefix, test_mode)
 
     def load_file(self):
@@ -65,24 +67,41 @@ class FrameDataset(BaseDataset):
                     frame_dir = osp.join(self.data_prefix, frame_dir)
                 info.append(
                     dict(frame_dir=frame_dir,
+                         suffix=self.suffix,
                          frames_len=frames_len,
                          labels=int(labels)))
         return info
 
     def prepare_train(self, idx):
-        """Prepare the frames for training given index. """
-        results = copy.deepcopy(self.info[idx])
-        results['suffix'] = self.suffix
-        #Note: For now, paddle.io.DataLoader cannot support dict type retval, so convert to list here
-        to_list = self.pipeline(results)  #TODO(hj): to_list rename to output?
-        #XXX have to unsqueeze label here or before calc metric!
-        return [to_list['imgs'], np.array([to_list['labels']])]
+        """Prepare the frames for training/valid given index. """
+        #Try to catch Exception caused by reading missing frames files
+        for ir in range(self.num_retries):
+            try:
+                results = copy.deepcopy(self.info[idx])
+                results = self.pipeline(results)
+            except Exception as e:
+                logger.info(e)
+                if ir < self.num_retries - 1:
+                    logger.info(
+                        "Error when loading {}, have {} trys, will try again".
+                        format(results['filename'], ir))
+                idx = random.randint(0, len(self.info) - 1)
+                continue
+            return results['imgs'], np.array([results['labels']])
 
     def prepare_test(self, idx):
         """Prepare the frames for test given index. """
-        results = copy.deepcopy(self.info[idx])
-        results['suffix'] = self.suffix
-        #Note: For now, paddle.io.DataLoader cannot support dict type retval, so convert to list here
-        to_list = self.pipeline(results)
-        #XXX have to unsqueeze label here or before calc metric!
-        return [to_list['imgs'], np.array([to_list['labels']])]
+        #Try to catch Exception caused by reading missing frames files
+        for ir in range(self.num_retries):
+            try:
+                results = copy.deepcopy(self.info[idx])
+                results = self.pipeline(results)
+            except Exception as e:
+                logger.info(e)
+                if ir < self.num_retries - 1:
+                    logger.info(
+                        "Error when loading {}, have {} trys, will try again".
+                        format(results['filename'], ir))
+                idx = random.randint(0, len(self.info) - 1)
+                continue
+            return results['imgs'], np.array([results['labels']])
