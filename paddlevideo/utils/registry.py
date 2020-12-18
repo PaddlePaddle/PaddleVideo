@@ -40,7 +40,6 @@ class Registry(object):
         b = BACKBONES.get(backbone_name)()
 
     """
-
     def __init__(self, name):
         """
         Args:
@@ -49,11 +48,14 @@ class Registry(object):
         self._name = name
         self._obj_map = {}
 
+    def __contains__(self, key):
+        return self._obj_map.get(key) is not None
 
     def _do_register(self, name, obj):
         assert (
             name not in self._obj_map
-        ), "An object named '{}' was already registered in '{}' registry!".format(name, self._name)
+        ), "An object named '{}' was already registered in '{}' registry!".format(
+            name, self._name)
         self._obj_map[name] = obj
 
     def register(self, obj=None, name=None):
@@ -76,7 +78,6 @@ class Registry(object):
             name = obj.__name__
         self._do_register(name, obj)
 
-
     def get(self, name):
         """Get the registry record.
 
@@ -88,6 +89,8 @@ class Registry(object):
         """
         ret = self._obj_map.get(name)
         if ret is None:
-            raise KeyError("No object named '{}' found in '{}' registry!".format(name, self._name))
+            raise KeyError(
+                "No object named '{}' found in '{}' registry!".format(
+                    name, self._name))
 
         return ret

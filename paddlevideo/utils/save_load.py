@@ -100,6 +100,6 @@ def save(obj, path):
 
 
 def load(file_name):
-    with open(file_name, 'rb') as f:
-        state_dicts = pickle.load(f, encoding='latin1')
-    return state_dicts
+    if not osp.isfile(file_name):
+        raise IOError(f'{file_name} not exist')
+    return paddle.load(file_name)

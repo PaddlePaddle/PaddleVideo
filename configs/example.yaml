@@ -14,7 +14,7 @@ MODEL: #MODEL field
 DATASET: #DATASET field
     batch_size: 4 #Mandatory, bacth size
     num_workers: 2 #Mandatory, XXX the number of subprocess on each GPU.
-    train: 
+    train:
         format: "VideoDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
         data_prefix: "" #Mandatory, train data root path
         file_path: "data/ucf101/ucf101_train_split_1_videos.txt" #Mandatory, train data index file path
@@ -50,7 +50,7 @@ PIPELINE: #PIPELINE field
             name: "Sampler"
             valid_mode: True
             num_seg: 8
-            seg_len: 1 
+            seg_len: 1
         transform:
             - Scale:
                 short_size: 256
@@ -64,7 +64,7 @@ PIPELINE: #PIPELINE field
 
 OPTIMIZER: #OPTIMIZER field
     name: 'Momentum' #Mandatory, the type of optimizer, associate to the 'paddlevideo/solver/'
-    momentum: 0.9 
+    momentum: 0.9
     learning_rate: #Mandatory, the type of learning rate scheduler, associate to the 'paddlevideo/solver/'
         name: 'PiecewiseDecay'
         boundaries: [30, 60]
@@ -82,4 +82,4 @@ model_name: "example"
 log_interval: 20 #Optional, the interal of logger
 epochs: 2 #Mandatory, total epoch
 log_level: "DEBUG" #Optional, the logger level.
-resume_from: "./pretrained/XXX" #checkpoint path.
+resume_epoch: 6 #Specify epoch number refer to saved file suffix

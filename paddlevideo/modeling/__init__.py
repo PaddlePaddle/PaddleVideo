@@ -13,31 +13,29 @@
 # limitations under the License.
 
 from .backbones import ResNet
-from .builder import (build_backbone, build_head, build_recognizer, build_loss)
+from .builder import (build_backbone, build_head, build_recognizer,
+                      build_localizer, build_loss)
 from .heads import BaseHead, TSNHead
 from .losses import CrossEntropyLoss
 from .framework.recognizers import BaseRecognizer, recognizer2d
-from .registry import BACKBONES, HEADS, LOSSES, RECOGNIZERS
+from .registry import BACKBONES, HEADS, LOSSES, RECOGNIZERS, LOCALIZERS
 from .weight_init import weight_init_
 
 __all__ = [
-    'BACKBONES', 
-    'HEADS', 
+    'BACKBONES',
+    'HEADS',
     'RECOGNIZERS',
+    'LOCALIZERS',
     'LOSSES',
-
-    'build_recognizer', 
+    'build_recognizer',
+    'build_localizer',
     'build_head',
     'build_backbone',
     'build_loss',
-
     'ResNet',
-
     'TSNHead',
     'BaseHead',
-
     'BaseRecognizer',
     'Recognizer2d',
-
     'CrossEntropyLoss',
 ]

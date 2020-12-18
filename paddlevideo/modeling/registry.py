@@ -13,8 +13,8 @@
 # limitations under the License.
 from ..utils import Registry
 
-
 BACKBONES = Registry('backbone')
 HEADS = Registry('head')
 RECOGNIZERS = Registry('recognizer')
+LOCALIZERS = Registry('localizer')
 LOSSES = Registry('loss')
