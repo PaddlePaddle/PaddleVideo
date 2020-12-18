@@ -58,7 +58,7 @@ class BMNDataset(BaseDataset):
         return info
 
     def prepare_train(self, idx):
-        """TRAIN & VALID: Prepare data for training given the index."""
+        """TRAIN & VALID: Prepare data for training/valid given the index."""
         results = copy.deepcopy(self.info[idx])
         results = self.pipeline(results)
         return results['video_feat'], results['gt_iou_map'], results['gt_start'],\
