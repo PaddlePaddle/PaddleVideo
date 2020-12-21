@@ -48,7 +48,8 @@ def build_dataset(cfg):
 
 
 def build_batch_pipeline(cfg):
-    batch_pipeline = build(cfg.MIX, PIPELINES)
+
+    batch_pipeline = build(cfg, PIPELINES)
     return batch_pipeline
 
 
@@ -58,7 +59,7 @@ def build_dataloader(dataset,
                      places,
                      shuffle=True,
                      drop_last=True,
-                     collate_fn=None,
+                     collate_fn_cfg=None,
                      **kwargs):
     """Build Paddle Dataloader.
 
@@ -79,18 +80,30 @@ def build_dataloader(dataset,
     # batch like: [[img, label, attibute, ...], [imgs, label, attribute, ...], ...] will recollate to:
     # [[img, img, ...], [label, label, ...], [attribute, attribute, ...], ...] as using numpy.transpose.
 
-    if collate_fn is not None:
-        #ugly code here. collate_fn is mix op config
-        pipeline = build_batch_pipeline(collate_fn)
-        return lambda batch: np.array(pipeline(batch)).T
+    def mix_collate_fn(batch):
+        pipeline = build_batch_pipeline(collate_fn_cfg)
+        batch = pipeline(batch)
+        slots = []
+        for items in batch:
+            for i, item in enumerate(items):
+                if len(slots) < len(items):
+                    slots.append([item])
+                else:
+                    slots[i].append(item)
+        return [np.stack(slot, axis=0) for slot in slots]
 
-    data_loader = DataLoader(dataset,
-                             batch_sampler=sampler,
-                             places=places,
-                             num_workers=num_workers,
-                             collate_fn=collate_fn,
-                             return_list=True,
-                             **kwargs)
+    #if collate_fn_cfg is not None:
+    #ugly code here. collate_fn is mix op config
+    #    collate_fn = mix_collate_fn(collate_fn_cfg)
+
+    data_loader = DataLoader(
+        dataset,
+        batch_sampler=sampler,
+        places=places,
+        num_workers=num_workers,
+        collate_fn=mix_collate_fn if collate_fn_cfg is not None else None,
+        return_list=True,
+        **kwargs)
 
     return data_loader
 

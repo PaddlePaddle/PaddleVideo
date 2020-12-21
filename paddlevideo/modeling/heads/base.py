@@ -88,10 +88,21 @@ class BaseHead(nn.Layer):
             losses (dict): A dict containing field 'loss'(mandatory) and 'top1_acc', 'top5_acc'(optional).
 
         """
+        if len(labels) == 1:
+            labels = labels[0]
+        elif len(labels) == 3:
+            labels_a, labels_b, lam = labels
+            return self.mixup_loss(scores, labels_a, labels_b, lam)
+        else:
+            raise NotImplemented
+
         if self.ls_eps != 0.:
             labels = F.one_hot(labels, self.num_classes)
             labels = F.label_smooth(labels, epsilon=self.ls_eps)
-        labels.stop_gradient = True  #XXX(shipping): check necessary
+            # reshape [bs, 1, num_classes] to [bs, num_classes]
+            #NOTE: maybe squeeze is helpful for understanding.
+            labels = paddle.reshape(labels, shape=[-1, self.num_classes])
+        #labels.stop_gradient = True  #XXX(shipping): check necessary
         losses = dict()
         if return_loss:
             #NOTE(shipping): F.crossentropy include logsoftmax and nllloss !
@@ -113,9 +124,27 @@ class BaseHead(nn.Layer):
         losses['top1'] = top1
         losses['top5'] = top5
         if return_loss:
-            if type(loss) is dict:
-                losses.update(avg_loss)
-            else:
-                losses['loss'] = avg_loss
+            losses['loss'] = avg_loss
+
+        return losses
+
+    def mixup_loss(self, scores, labels_a, labels_b, lam):
+        if self.ls_eps != 0:
+            labels_a = F.one_hot(labels_a, self.num_classes)
+            labels_a = F.label_smooth(labels_a, epsilon=self.ls_eps)
+            labels_b = F.one_hot(labels_b, self.num_classes)
+            labels_b = F.label_smooth(labels_b, epsilon=self.ls_eps)
+            # reshape [bs, 1, num_classes] to [bs, num_classes]
+            labels_a = paddle.reshape(labels_a, shape=[-1, self.num_classes])
+            labels_b = paddle.reshape(labels_b, shape=[-1, self.num_classes])
+
+        losses = dict()
+        loss_a = self.loss_func(scores, labels_a, soft_label=True)
+        loss_b = self.loss_func(scores, labels_b, soft_label=True)
+        avg_loss_a = paddle.mean(
+            loss_a)  #FIXME: call mean here or in last step?
+        avg_loss_b = paddle.mean(loss_b)
+        avg_loss = lam * avg_loss_a + (1 - lam) * avg_loss_b
+        losses['loss'] = avg_loss
 
         return losses

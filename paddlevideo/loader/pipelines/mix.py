@@ -30,13 +30,15 @@ class Mixup(object):
         self.alpha = alpha
 
     def __call__(self, batch):
-        imgs, labels = batch
+        imgs, labels = list(zip(*batch))
+        imgs = np.array(imgs)
+        labels = np.array(labels)
         bs = len(batch)
         idx = np.random.permutation(bs)
         lam = np.random.beta(self.alpha, self.alpha)
         lams = np.array([lam] * bs, dtype=np.float32)
         imgs = lam * imgs + (1 - lam) * imgs[idx]
-        return [imgs, labels, labels[idx], lams]
+        return list(zip(imgs, labels, labels[idx], lams))
 
 
 @PIPELINES.register()
@@ -70,7 +72,11 @@ class Cutmix(object):
         return bbx1, bby1, bbx2, bby2
 
     def __call__(self, batch):
-        imgs, labels, bs = self._unpack(batch)
+        imgs, labels = list(zip(*batch))
+        imgs = np.array(imgs)
+        labels = np.array(labels)
+
+        bs = len(batch)
         idx = np.random.permutation(bs)
         lam = np.random.beta(self.alpha, self.alpha)
 
@@ -80,4 +86,4 @@ class Cutmix(object):
                    (imgs.shape[-2] * imgs.shape[-1]))
         lams = np.array([lam] * bs, dtype=np.float32)
 
-        return [imgs, labels, labels[idx], lams]
+        return list(zip(imgs, labels, labels[idx], lams))

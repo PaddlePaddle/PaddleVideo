@@ -38,7 +38,7 @@ def train_model(model, dataset, cfg, parallel=True, validate=True):
     #single card batch size
     batch_size = cfg.DATASET.get('batch_size', 8)
     places = paddle.set_device('gpu')
-    mix = cfg.PIPELINE.get("mix", None)
+
     num_workers = cfg.DATASET.get('num_workers', 0)
     model_name = cfg.model_name
     output_dir = cfg.get("output_dir", f"./output/{model_name}")
@@ -50,7 +50,7 @@ def train_model(model, dataset, cfg, parallel=True, validate=True):
         batch_size=batch_size,
         # default num worker: 0, which means no subprocess will be created
         num_workers=num_workers,
-        collate_fn=cfg.get('MIX', None),
+        collate_fn_cfg=cfg.get('MIX', None),
         places=places)
 
     train_loader = build_dataloader(train_dataset, **train_dataloader_setting)
