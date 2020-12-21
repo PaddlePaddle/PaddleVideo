@@ -11,12 +11,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+import math
 import paddle
 import paddle.nn.functional as F
 
 from .tsn_head import TSNHead
 from ..registry import HEADS
+
+from ..weight_init import weight_init_
 
 
 @HEADS.register()
@@ -31,13 +33,24 @@ class TSMHead(TSNHead):
         std(float): Std(Scale) value in normal initilizar. Default: 0.001.
         kwargs (dict, optional): Any keyword argument to initialize.
     """
+    def __init__(self, num_classes, in_channels, drop_ratio, std, **kwargs):
 
-    def __init__(self,
-                 num_classes,
-                 in_channels,
-                 drop_ratio,
-                 std,
-                 **kwargs):
+        super().__init__(num_classes,
+                         in_channels,
+                         drop_ratio=drop_ratio,
+                         std=std,
+                         **kwargs)
 
+        self.stdv = 1.0 / math.sqrt(self.in_channels * 1.0)
 
-        super().__init__(num_classes, in_channels, drop_ratio=drop_ratio, std=std, **kwargs)
+    def init_weights(self):
+        """Initiate the FC layer parameters"""
+
+        weight_init_(self.fc,
+                     'Uniform',
+                     'fc_0.w_0',
+                     'fc_0.b_0',
+                     low=-self.stdv,
+                     high=self.stdv)
+        self.fc.bias.learning_rate = 2.0
+        self.fc.bias.regularizer = paddle.regularizer.L2Decay(0.)

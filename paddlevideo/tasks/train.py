@@ -37,6 +37,7 @@ def train_model(cfg, parallel=True, validate=True):
     logger = get_logger("paddlevideo")
     #single card batch size
     batch_size = cfg.DATASET.get('batch_size', 8)
+    valid_batch_size = cfg.DATASET.get('valid_batch_size', batch_size)
     places = paddle.set_device('gpu')
 
     # default num worker: 0, which means no subprocess will be created
@@ -45,7 +46,6 @@ def train_model(cfg, parallel=True, validate=True):
     output_dir = cfg.get("output_dir", f"./output/{model_name}")
     mkdir(output_dir)
 
-
     # 1. Construct model
     model = build_model(cfg.MODEL)
     if parallel:
@@ -53,16 +53,15 @@ def train_model(cfg, parallel=True, validate=True):
 
     # 2. Construct dataset and dataloader
     train_dataset = build_dataset((cfg.DATASET.train, cfg.PIPELINE.train))
-    train_dataloader_setting = dict(
-        batch_size=batch_size,
-        num_workers=num_workers,
-        collate_fn_cfg=cfg.get('MIX', None),
-        places=places)
+    train_dataloader_setting = dict(batch_size=batch_size,
+                                    num_workers=num_workers,
+                                    collate_fn_cfg=cfg.get('MIX', None),
+                                    places=places)
 
     train_loader = build_dataloader(train_dataset, **train_dataloader_setting)
     if validate:
         valid_dataset = build_dataset((cfg.DATASET.valid, cfg.PIPELINE.valid))
-        validate_dataloader_setting = dict(batch_size=batch_size,
+        validate_dataloader_setting = dict(batch_size=valid_batch_size,
                                            num_workers=num_workers,
                                            places=places,
                                            drop_last=False,
