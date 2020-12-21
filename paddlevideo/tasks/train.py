@@ -39,6 +39,7 @@ def train_model(cfg, parallel=True, validate=True):
     batch_size = cfg.DATASET.get('batch_size', 8)
     places = paddle.set_device('gpu')
 
+    # default num worker: 0, which means no subprocess will be created
     num_workers = cfg.DATASET.get('num_workers', 0)
     model_name = cfg.model_name
     output_dir = cfg.get("output_dir", f"./output/{model_name}")
@@ -54,7 +55,6 @@ def train_model(cfg, parallel=True, validate=True):
     train_dataset = build_dataset((cfg.DATASET.train, cfg.PIPELINE.train))
     train_dataloader_setting = dict(
         batch_size=batch_size,
-        # default num worker: 0, which means no subprocess will be created
         num_workers=num_workers,
         collate_fn_cfg=cfg.get('MIX', None),
         places=places)
@@ -119,7 +119,7 @@ def train_model(cfg, parallel=True, validate=True):
             record_list['batch_time'].update(time.time() - tic)
             tic = time.time()
 
-            if i % cfg.get("log_interval", 1) == 0:
+            if i % cfg.get("log_interval", 10) == 0:
                 ips = "ips: {:.5f} instance/sec.".format(
                     batch_size / record_list["batch_time"].val)
                 log_batch(record_list, i, epoch + 1, cfg.epochs, "train", ips)
@@ -156,7 +156,7 @@ def train_model(cfg, parallel=True, validate=True):
                 record_list['batch_time'].update(time.time() - tic)
                 tic = time.time()
 
-                if i % cfg.get("log_interval", 1) == 0:
+                if i % cfg.get("log_interval", 10) == 0:
                     ips = "ips: {:.5f} instance/sec.".format(
                         batch_size / record_list["batch_time"].val)
                     log_batch(record_list, i, epoch + 1, cfg.epochs, "val", ips)
