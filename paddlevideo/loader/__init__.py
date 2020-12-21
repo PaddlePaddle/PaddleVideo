@@ -12,7 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .builder import build_dataset, build_dataloader
+from .builder import build_dataset, build_dataloader, build_batch_pipeline
 from .dataset import VideoDataset
 
-__all__ = ['build_dataset', 'build_dataloader', 'VideoDataset']
+__all__ = [
+    'build_dataset', 'build_dataloader', 'build_batch_pipeline', 'VideoDataset'
+]

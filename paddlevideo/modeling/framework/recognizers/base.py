@@ -11,15 +11,13 @@ class BaseRecognizer(nn.Layer):
     All recognizers should subclass it.
     All subclass should overwrite:
 
-    - Methods:``forward_train``, supporting to forward when training.
-    - Methods:``forward_valid``, supporting to forward when validating.
+    - Methods:``train_step``, supporting to forward when training.
+    - Methods:``valid_step``, supporting to forward when validating.
+    - Methods:``test_step``, supporting to forward when testing.
 
     Args:
         backbone (dict): Backbone modules to extract feature.
         head (dict): Classification head to process feature.
-        #XXX cfg keep or not????
-        train_cfg (dict): Config for training. Default: None.
-        test_cfg (dict): Config for testing. Default: None.
 
     """
     def __init__(self, backbone, head):
@@ -54,14 +52,6 @@ class BaseRecognizer(nn.Layer):
         softmax_out = F.softmax(cls_score)
         return softmax_out
 
-    @abstractmethod
-    def forward_train(self, imgs, labels, reduce_sum, **kwargs):
-        pass
-
-    @abstractmethod
-    def forward_test(self, imgs, labels, reduce_sum, **kwargs):
-        pass
-
     def forward(self, imgs, **kwargs):
         """Define how the model is going to run, from input to output.
         """
@@ -74,36 +64,20 @@ class BaseRecognizer(nn.Layer):
 
         return cls_score
 
+    @abstractmethod
     def train_step(self, data_batch, **kwargs):
         """Training step.
         """
-        imgs = data_batch[0]
-        labels = data_batch[1]
+        raise NotImplementedError
 
-        # call forward
-        loss_metrics = self.forward_train(imgs,
-                                          labels,
-                                          reduce_sum=False,
-                                          **kwargs)
-
-        return loss_metrics
-
+    @abstractmethod
     def val_step(self, data_batch, **kwargs):
-        """Validating setp.
+        """Validating step.
         """
-        imgs = data_batch[0]
-        labels = data_batch[1]
+        raise NotImplementedError
 
-        # call forward
-        loss_metrics = self.forward_train(imgs,
-                                          labels,
-                                          reduce_sum=True,
-                                          **kwargs)
-        return loss_metrics
-
+    @abstractmethod
     def test_step(self, data_batch, **kwargs):
-        imgs = data_batch[0]
-        labels = data_batch[1]
-
-        metrics = self.forward_test(imgs, labels, reduce_sum=True, **kwargs)
-        return metrics
+        """Test step.
+        """
+        raise NotImplementedError
