@@ -28,6 +28,7 @@ from .compose import Compose
 from .decode import VideoDecoder, FrameDecoder
 from .sample import Sampler
 from .decode_sampler import DecodeSampler
+from .mix import Mixup, Cutmix
 from .anet_pipeline import LoadFeat, GetMatchMap, GetVideoLabel
 
 __all__ = [
@@ -40,7 +41,9 @@ __all__ = [
     'Compose',
     'VideoDecoder',
     'FrameDecoder',
-    'Sample',
+    'Sampler',
+    'Mixup',
+    'Cutmix',
     'JitterScale',
     'MultiCrop',
     'PackOutput',
