@@ -85,8 +85,6 @@ METRIC:
   result_path: "../data/bmn/BMN_Test_results"
 
 model_name: BMN
-log_interval: 1 #Optional, the interal of logger, default:10
-save_interval: 1
 epochs: 9 #Mandatory, total epoch
 log_level: "INFO"
 resume_from: "" #checkpoint path.

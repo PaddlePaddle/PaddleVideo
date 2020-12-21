@@ -124,7 +124,6 @@ PRECISEBN:
   num_iters_preciseBN: 200  #default
 
 model_name: SlowFast
-log_interval: 1 #Optional, the interal of logger, default:10
 save_interval: 10
 val_interval: 10
 epochs: 196 #Mandatory, total epoch
