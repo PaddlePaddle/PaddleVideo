@@ -13,13 +13,12 @@
 # limitations under the License.
 
 import os.path as osp
+import copy
+import numpy as np
+from abc import ABC, abstractmethod
 
 import paddle
-from abc import ABC, abstractmethod
 from paddle.io import Dataset
-import numpy as np
-
-import copy
 
 
 class BaseDataset(Dataset, ABC):
@@ -56,19 +55,20 @@ class BaseDataset(Dataset, ABC):
         pass
 
     def prepare_train(self, idx):
-        """TRAIN & VALID. Prepare the data for training given the index."""
-        results = copy.deepcopy(self.info[idx])
+        """TRAIN & VALID. Prepare the data for training/valid given the index."""
         #Note: For now, paddle.io.DataLoader cannot support dict type retval, so convert to list here
-        to_list = self.pipeline(results)
-        #XXX have to unsqueeze label here or before calc metric!
-        return [to_list['imgs'], np.array([to_list['labels']])]
+        results = copy.deepcopy(self.info[idx])
+        results = self.pipeline(results)
+        #unsqueeze label to list
+        return results['imgs'], np.array([results['labels']])
 
     def prepare_test(self, idx):
         """TEST: Prepare the data for test given the index."""
-        results = copy.deepcopy(self.info[idx])
         #Note: For now, paddle.io.DataLoader cannot support dict type retval, so convert to list here
-        to_list = self.pipeline(results)
-        return [to_list['imgs'], to_list['labels']]
+        results = copy.deepcopy(self.info[idx])
+        results = self.pipeline(results)
+        #unsqueeze label to list
+        return results['imgs'], np.array([results['labels']])
 
     def __len__(self):
         """get the size of the dataset."""

@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os.path as osp
 import copy
 import random
-import os.path as osp
 import numpy as np
 
 from ..registry import DATASETS
@@ -89,6 +89,7 @@ class SFVideoDataset(BaseDataset):
 
     def prepare_train(self, idx):
         """TRAIN & VALID. Prepare the data for training given the index."""
+        #Try to catch Exception caused by reading corrupted video file
         for ir in range(self.num_retries):
             try:
                 results = copy.deepcopy(self.info[idx])
@@ -106,6 +107,7 @@ class SFVideoDataset(BaseDataset):
 
     def prepare_test(self, idx):
         """TEST. Prepare the data for test given the index."""
+        #Try to catch Exception caused by reading corrupted video file
         for ir in range(self.num_retries):
             try:
                 results = copy.deepcopy(self.info[idx])
