@@ -35,7 +35,6 @@ class TSNHead(BaseHead):
         kwargs (dict, optional): Any keyword argument to initialize.
 
     """
-
     def __init__(self,
                  num_classes,
                  in_channels,
@@ -44,33 +43,31 @@ class TSNHead(BaseHead):
                  std=0.01,
                  **kwargs):
 
-
         super().__init__(num_classes, in_channels, loss_cfg, **kwargs)
         self.drop_ratio = drop_ratio
         self.std = std
-        self.stdv = 1.0/math.sqrt(self.in_channels * 1.0)
 
         #NOTE: global pool performance
-        self.avgpool2d = AdaptiveAvgPool2D((1,1))
+        self.avgpool2d = AdaptiveAvgPool2D((1, 1))
 
-        if self.drop_ratio !=0 :
+        if self.drop_ratio != 0:
             self.dropout = Dropout(p=self.drop_ratio)
         else:
-            self.dropout=None
-        
-        self.fc = Linear(
-                    self.in_channels,
-                    self.num_classes)
+            self.dropout = None
+
+        self.fc = Linear(self.in_channels, self.num_classes)
 
     def init_weights(self):
         """Initiate the FC layer parameters"""
 
-        weight_init_(self.fc, 'Uniform', 'fc_0.w_0', 'fc_0.b_0', low=-self.stdv, high=self.stdv )
-        self.fc.bias.learning_rate = 2.0
-        self.fc.bias.regularizer = paddle.regularizer.L2Decay(0.)
+        weight_init_(self.fc,
+                     'Normal',
+                     'fc_0.w_0',
+                     'fc_0.b_0',
+                     mean=0.,
+                     std=self.std)
 
     def forward(self, x, seg_num):
-        
         """Define how the head is going to run.
 
         Args:
@@ -96,6 +93,5 @@ class TSNHead(BaseHead):
         # [N, in_channels]
         score = self.fc(x)
         # [N, num_class]
-        #x = F.softmax(x)  #NOTE remove 
+        #x = F.softmax(x)  #NOTE remove
         return score
-
