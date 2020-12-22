@@ -16,5 +16,8 @@ from .registry import METRIC
 from .build import build_metric
 from .multi_crop_metric import MultiCropMetric
 from .bmn_metric import BMNMetric
+from .center_crop_metric import CenterCropMetric
 
-__all__ = ['METRIC', 'build_metric', 'MultiCropMetric', 'BMNMetric']
+__all__ = [
+    'METRIC', 'build_metric', 'MultiCropMetric', 'BMNMetric', 'CenterCropMetric'
+]

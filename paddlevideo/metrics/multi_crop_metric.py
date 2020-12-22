@@ -10,12 +10,13 @@
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 
-from .registry import METRIC
-from paddlevideo.utils import get_logger
-
 import numpy as np
 import paddle
 from paddle.hapi.model import _all_gather
+
+from paddlevideo.utils import get_logger
+from .registry import METRIC
+from .base import BaseMetric
 
 logger = get_logger("paddlevideo")
 """ An example for metrics class.
@@ -24,7 +25,7 @@ logger = get_logger("paddlevideo")
 
 
 @METRIC.register
-class MultiCropMetric(object):
+class MultiCropMetric(BaseMetric):
     def __init__(self,
                  data_size,
                  batch_size,
@@ -35,13 +36,10 @@ class MultiCropMetric(object):
                  log_interval=1):
         """prepare for metrics
         """
-        self.data_size = data_size
-        self.batch_size = batch_size
-        self.world_size = world_size
+        super().__init__(data_size, batch_size, world_size, log_interval)
         self.num_ensemble_views = num_ensemble_views
         self.num_spatial_crops = num_spatial_crops
         self.num_classes = num_classes
-        self.log_interval = log_interval
 
         self.num_clips = self.num_ensemble_views * self.num_spatial_crops
         num_videos = self.data_size // self.num_clips
@@ -107,5 +105,5 @@ class MultiCropMetric(object):
         acc_top5 = paddle.metric.accuracy(input=video_preds,
                                           label=video_labels,
                                           k=5)
-        logger.info('[TEST] eval finished, avg_acc1= {}, avg_acc5= {} '.format(
+        logger.info('[TEST] finished, avg_acc1= {}, avg_acc5= {} '.format(
             acc_top1.numpy(), acc_top5.numpy()))
