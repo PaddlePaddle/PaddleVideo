@@ -40,17 +40,7 @@ class Recognizer2D(BaseRecognizer):
 
     def test_step(self, data_batch, reduce_sum=False):
         """Define how the model is going to test, from input to output."""
-        #XXX
+        #NOTE: (shipping) when testing, the net won't call head.loss, we deal with the test processing in /paddlevideo/metrics
         imgs = data_batch[0]
-        labels = data_batch[1:]
-        num_segs = imgs.shape[1]
         cls_score = self(imgs)
-
-        # calculate num_crops automatically
-        cls_score = self.average_clip(cls_score, num_segs)
-        metrics = self.head.loss(cls_score,
-                                 labels,
-                                 reduce_sum=reduce_sum,
-                                 return_loss=False)
-
-        return metrics
+        return cls_score

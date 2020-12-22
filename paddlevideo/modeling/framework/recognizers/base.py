@@ -46,12 +46,6 @@ class BaseRecognizer(nn.Layer):
         feature = self.backbone(imgs)
         return feature
 
-    def average_clip(self, cls_score, num_segs=1):
-        batch_size = cls_score.shape[0]
-        cls_score = paddle.reshape(batch_size // num_segs, num_segs, -1)
-        softmax_out = F.softmax(cls_score)
-        return softmax_out
-
     def forward(self, imgs, **kwargs):
         """Define how the model is going to run, from input to output.
         """

@@ -70,13 +70,7 @@ class BaseHead(nn.Layer):
         """
         raise NotImplemented
 
-    def loss(
-        self,
-        scores,
-        labels,
-        reduce_sum=False,
-        return_loss=True,  #NOTE(shipping): Design for testing a model. will refactor in metrics.
-        **kwargs):
+    def loss(self, scores, labels, reduce_sum=False, **kwargs):
         """Calculate the loss accroding to the model output ```scores```,
            and the target ```labels```.
 
@@ -104,11 +98,10 @@ class BaseHead(nn.Layer):
             labels = paddle.reshape(labels, shape=[-1, self.num_classes])
         #labels.stop_gradient = True  #XXX(shipping): check necessary
         losses = dict()
-        if return_loss:
-            #NOTE(shipping): F.crossentropy include logsoftmax and nllloss !
-            #NOTE(shipping): check the performance of F.crossentropy
-            loss = self.loss_func(scores, labels, **kwargs)
-            avg_loss = paddle.mean(loss)
+        #NOTE(shipping): F.crossentropy include logsoftmax and nllloss !
+        #NOTE(shipping): check the performance of F.crossentropy
+        loss = self.loss_func(scores, labels, **kwargs)
+        avg_loss = paddle.mean(loss)
         top1 = paddle.metric.accuracy(input=scores, label=labels, k=1)
         top5 = paddle.metric.accuracy(input=scores, label=labels, k=5)
 
@@ -123,8 +116,7 @@ class BaseHead(nn.Layer):
 
         losses['top1'] = top1
         losses['top5'] = top5
-        if return_loss:
-            losses['loss'] = avg_loss
+        losses['loss'] = avg_loss
 
         return losses
 

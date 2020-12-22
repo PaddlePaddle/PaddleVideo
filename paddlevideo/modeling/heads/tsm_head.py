@@ -33,7 +33,12 @@ class TSMHead(TSNHead):
         std(float): Std(Scale) value in normal initilizar. Default: 0.001.
         kwargs (dict, optional): Any keyword argument to initialize.
     """
-    def __init__(self, num_classes, in_channels, drop_ratio, std, **kwargs):
+    def __init__(self,
+                 num_classes,
+                 in_channels,
+                 drop_ratio=0.8,
+                 std=0.01,
+                 **kwargs):
 
         super().__init__(num_classes,
                          in_channels,
