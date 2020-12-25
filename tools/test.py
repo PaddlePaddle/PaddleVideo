@@ -57,7 +57,7 @@ def main():
 
     model = build_model(cfg.MODEL)
 
-    test_model(model, dataset, cfg, args.weight, world_size)
+    test_model(model, dataset, cfg, args.weights, world_size)
 
 
 if __name__ == '__main__':

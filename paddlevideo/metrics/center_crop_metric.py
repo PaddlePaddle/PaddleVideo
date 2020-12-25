@@ -22,12 +22,7 @@ logger = get_logger("paddlevideo")
 
 @METRIC.register
 class CenterCropMetric(BaseMetric):
-    def __init__(self,
-                 data_size,
-                 batch_size,
-                 world_size,
-                 num_classes,
-                 log_interval=1):
+    def __init__(self, data_size, batch_size, world_size, log_interval=1):
         """prepare for metrics
         """
         super().__init__(data_size, batch_size, world_size, log_interval)
@@ -60,5 +55,4 @@ class CenterCropMetric(BaseMetric):
         """accumulate metrics when finished all iters.
         """
         logger.info('[TEST] finished, avg_acc1= {}, avg_acc5= {} '.format(
-            np.array(self.top1).mean,
-            np.array(self.top5).mean))
+            np.mean(np.array(self.top1)), np.mean(np.array(self.top5))))

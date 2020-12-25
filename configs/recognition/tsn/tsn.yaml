@@ -14,7 +14,7 @@ MODEL: #MODEL field
 
 DATASET: #DATASET field
     batch_size: 32 #Mandatory, bacth size
-    valid_batch_size: 16
+    valid_batch_size: 32
     num_workers: 4 #Mandatory, XXX the number of subprocess on each GPU.
     train:
         format: "FrameDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
@@ -104,6 +104,10 @@ EVALUATION:
     interval: 5
     function: "topk"
     topk: (1,5)
+
+
+METRIC:
+    name: 'CenterCropMetric'
 
 model_name: "TSN"
 log_interval: 20 #Optional, the interal of logger, default:10
