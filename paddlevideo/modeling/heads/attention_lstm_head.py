@@ -137,9 +137,8 @@ class AttentionLstmHead(BaseHead):
         labels.stop_gradient = True
         losses = dict()
         if return_loss:
-            cost = paddle.fluid.layers.sigmoid_cross_entropy_with_logits(x=lstm_logit, label=labels)
-            cost = paddle.sum(cost, axis=-1)
-            sum_cost = paddle.sum(cost)
+            bce_logit_loss = paddle.nn.BCEWithLogitsLoss(reduction='sum')
+            sum_cost = bce_logit_loss(lstm_logit, labels)
 
         return sum_cost
 
