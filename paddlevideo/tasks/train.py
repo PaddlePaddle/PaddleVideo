@@ -23,8 +23,6 @@ from ..utils import do_preciseBN
 from paddlevideo.utils import get_logger, coloring
 from paddlevideo.utils import (AverageMeter, build_record, log_batch, log_epoch,
                                save, load, mkdir)
-
-
 def train_model(cfg, parallel=True, validate=True):
     """Train model entry
 
@@ -34,6 +32,8 @@ def train_model(cfg, parallel=True, validate=True):
         validate (bool): Whether to do evaluation. Default: False.
 
     """
+    head_name = cfg.MODEL.head.name
+
     logger = get_logger("paddlevideo")
     #single card batch size
     batch_size = cfg.DATASET.get('batch_size', 8)
@@ -51,12 +51,20 @@ def train_model(cfg, parallel=True, validate=True):
     if parallel:
         model = paddle.DataParallel(model)
 
+    train_shuffle = True
+    valid_shuffle = False
+    if "shuffle" in cfg.DATASET.train:
+        train_shuffle = cfg.DATASET.train.pop("shuffle")
+    if "shuffle" in cfg.DATASET.valid:
+        valid_shuffle = cfg.DATASET.valid.pop("shuffle")
+
     # 2. Construct dataset and dataloader
     train_dataset = build_dataset((cfg.DATASET.train, cfg.PIPELINE.train))
     train_dataloader_setting = dict(batch_size=batch_size,
                                     num_workers=num_workers,
                                     collate_fn_cfg=cfg.get('MIX', None),
-                                    places=places)
+                                    places=places,
+                                    shuffle = train_shuffle)
 
     train_loader = build_dataloader(train_dataset, **train_dataloader_setting)
     if validate:
@@ -65,7 +73,7 @@ def train_model(cfg, parallel=True, validate=True):
                                            num_workers=num_workers,
                                            places=places,
                                            drop_last=False,
-                                           shuffle=False)
+                                           shuffle=valid_shuffle)
         valid_loader = build_dataloader(valid_dataset,
                                         **validate_dataloader_setting)
 
@@ -85,6 +93,7 @@ def train_model(cfg, parallel=True, validate=True):
         model.set_state_dict(resume_model_dict)
         optimizer.set_state_dict(resume_opt_dict)
 
+
     # 4. Train Model
     best = 0.
     for epoch in range(0, cfg.epochs):
@@ -100,9 +109,9 @@ def train_model(cfg, parallel=True, validate=True):
             record_list['reader_time'].update(time.time() - tic)
             # 4.1 forward
             if parallel:
-                outputs = model._layers.train_step(data)
+                outputs = model._layers.train_step(epoch, i, data)
             else:
-                outputs = model.train_step(data)
+                outputs = model.train_step(epoch, i, data)
             # 4.2 backward
             avg_loss = outputs['loss']
             avg_loss.backward()
@@ -114,7 +123,11 @@ def train_model(cfg, parallel=True, validate=True):
             record_list['lr'].update(
                 optimizer._global_learning_rate().numpy()[0], batch_size)
             for name, value in outputs.items():
-                record_list[name].update(value.numpy()[0], batch_size)
+                if name is 'hit_at_one' or name is 'perr' or name is 'gap':
+                    record_list[name].update(value, batch_size)
+                else:
+                    record_list[name].update(value.numpy()[0], batch_size)
+
             record_list['batch_time'].update(time.time() - tic)
             tic = time.time()
 
@@ -144,13 +157,17 @@ def train_model(cfg, parallel=True, validate=True):
             for i, data in enumerate(valid_loader):
 
                 if parallel:
-                    outputs = model._layers.val_step(data)
+                    outputs = model._layers.val_step(0,i,data)
                 else:
-                    outputs = model.val_step(data)
+                    outputs = model.val_step(0,i,data)
 
                 # log_record
                 for name, value in outputs.items():
-                    record_list[name].update(value.numpy()[0], batch_size)
+                    if name is 'hit_at_one' or name is 'perr' or name is 'gap':
+                        record_list[name].update(value, batch_size)
+                    else:
+                        record_list[name].update(value.numpy()[0], batch_size)
+
 
                 record_list['batch_time'].update(time.time() - tic)
                 tic = time.time()
@@ -166,9 +183,15 @@ def train_model(cfg, parallel=True, validate=True):
             log_epoch(record_list, epoch + 1, "val", ips)
 
             best_flag = False
-            if record_list.get('top1') and record_list['top1'].avg > best:
-                best = record_list['top1'].avg
-                best_flag = True
+            if head_name == "AttentionLstmHead":
+                if record_list.get('hit_at_one') and record_list['hit_at_one'].avg > best:
+                    best = record_list['hit_at_one'].avg
+                    best_flag = True
+            else:
+                if record_list.get('top1') and record_list['top1'].avg > best:
+                    best = record_list['top1'].avg
+                    best_flag = True
+
             return best, best_flag
 
         # use precise bn to improve acc
@@ -189,9 +212,11 @@ def train_model(cfg, parallel=True, validate=True):
                      osp.join(output_dir, model_name + "_best.pdopt"))
                 save(model.state_dict(),
                      osp.join(output_dir, model_name + "_best.pdparams"))
-                logger.info(
-                    f"Already save the best model (top1 acc){int(best * 10000) / 10000}"
-                )
+                if head_name == "AttentionLstmHead":
+                    logger.info(f"Already save the best model (hit_at_one){best}")
+                else:
+                    logger.info(f"Already save the best model (top1 acc){best}")
+
 
         # 6. Save model and optimizer
         if epoch % cfg.get("save_interval", 1) == 0 or epoch == cfg.epochs - 1:
