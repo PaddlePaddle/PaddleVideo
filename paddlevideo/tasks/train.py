@@ -16,7 +16,8 @@ import time
 import os.path as osp
 
 import paddle
-from ..loader import build_dataloader
+from ..loader.builder import build_dataloader, build_dataset
+from ..modeling.builder import build_model
 from ..solver import build_lr, build_optimizer
 from ..utils import do_preciseBN
 from paddlevideo.utils import get_logger, coloring
@@ -24,13 +25,12 @@ from paddlevideo.utils import (AverageMeter, build_record, log_batch, log_epoch,
                                save, load, mkdir)
 
 
-def train_model(model, dataset, cfg, parallel=True, validate=True):
+def train_model(cfg, parallel=True, validate=True):
     """Train model entry
 
     Args:
-    	model (paddle.nn.Layer): The model to be trained.
-   	dataset (paddle.dataset): Train dataset.
     	cfg (dict): configuration.
+    	parallel (bool): Whether multi-card training. Default: True.
         validate (bool): Whether to do evaluation. Default: False.
 
     """
@@ -41,15 +41,20 @@ def train_model(model, dataset, cfg, parallel=True, validate=True):
     output_dir = cfg.get("output_dir", f"./output/{model_name}")
     mkdir(output_dir)
 
-    # 1. Construct dataloader
-    train_dataset = dataset[0]
+    # 1. Construct model
+    model = build_model(cfg.MODEL)
+    if parallel:
+        model = paddle.DataParallel(model)
+
+    # 2. Construct dataset and dataloader
+    train_dataset = build_dataset((cfg.DATASET.train, cfg.PIPELINE.train))
     train_dataloader_setting = dict(batch_size=batch_size,
                                     num_workers=cfg.DATASET.get(
                                         'num_workers', 0),
                                     places=places)
     train_loader = build_dataloader(train_dataset, **train_dataloader_setting)
     if validate:
-        valid_dataset = dataset[1]
+        valid_dataset = build_dataset((cfg.DATASET.valid, cfg.PIPELINE.valid))
         validate_dataloader_setting = dict(batch_size=batch_size,
                                            num_workers=cfg.DATASET.get(
                                                'num_workers', 0),
@@ -59,15 +64,11 @@ def train_model(model, dataset, cfg, parallel=True, validate=True):
         valid_loader = build_dataloader(valid_dataset,
                                         **validate_dataloader_setting)
 
-    # 2. Construct optimizer
+    # 3. Construct learning rate schedule and optimizer
     lr = build_lr(cfg.OPTIMIZER.learning_rate, len(train_loader))
     optimizer = build_optimizer(cfg.OPTIMIZER,
                                 lr,
                                 parameter_list=model.parameters())
-
-    # used for multi-card
-    if parallel:
-        model = paddle.DataParallel(model)
 
     # Resume
     resume_epoch = cfg.get("resume_epoch", 0)
@@ -79,12 +80,12 @@ def train_model(model, dataset, cfg, parallel=True, validate=True):
         model.set_state_dict(resume_model_dict)
         optimizer.set_state_dict(resume_opt_dict)
 
-    # 3. Train Model
+    # 4. Train Model
     best = 0.
-    for epoch in range(1, cfg.epochs + 1):
-        if epoch <= resume_epoch:
+    for epoch in range(0, cfg.epochs):
+        if epoch < resume_epoch:
             logger.info(
-                f"| epoch: [{epoch}] <= resume_epoch: [{ resume_epoch}], continue... "
+                f"| epoch: [{epoch+1}] <= resume_epoch: [{ resume_epoch}], continue... "
             )
             continue
         model.train()
@@ -92,15 +93,15 @@ def train_model(model, dataset, cfg, parallel=True, validate=True):
         tic = time.time()
         for i, data in enumerate(train_loader):
             record_list['reader_time'].update(time.time() - tic)
-            # 3.1 forward
+            # 4.1 forward
             if parallel:
                 outputs = model._layers.train_step(data)
             else:
                 outputs = model.train_step(data)
-            #3.2 backward
+            # 4.2 backward
             avg_loss = outputs['loss']
             avg_loss.backward()
-            #3.3 minimize
+            # 4.3 minimize
             optimizer.step()
             optimizer.clear_grad()
 
@@ -112,10 +113,10 @@ def train_model(model, dataset, cfg, parallel=True, validate=True):
             record_list['batch_time'].update(time.time() - tic)
             tic = time.time()
 
-            if i % cfg.get("log_interval", 10) == 0:
+            if i % cfg.get("log_interval", 1) == 0:
                 ips = "ips: {:.5f} instance/sec.".format(
                     batch_size / record_list["batch_time"].val)
-                log_batch(record_list, i, epoch, cfg.epochs, "train", ips)
+                log_batch(record_list, i, epoch + 1, cfg.epochs, "train", ips)
 
             # learning rate iter step
             if cfg.OPTIMIZER.learning_rate.get("iter_step"):
@@ -128,7 +129,7 @@ def train_model(model, dataset, cfg, parallel=True, validate=True):
         ips = "ips: {:.5f} instance/sec.".format(
             batch_size * record_list["batch_time"].count /
             record_list["batch_time"].sum)
-        log_epoch(record_list, epoch, "train", ips)
+        log_epoch(record_list, epoch + 1, "train", ips)
 
         def evaluate(best):
             model.eval()
@@ -148,15 +149,15 @@ def train_model(model, dataset, cfg, parallel=True, validate=True):
                 record_list['batch_time'].update(time.time() - tic)
                 tic = time.time()
 
-                if i % cfg.get("log_interval", 10) == 0:
+                if i % cfg.get("log_interval", 1) == 0:
                     ips = "ips: {:.5f} instance/sec.".format(
                         batch_size / record_list["batch_time"].val)
-                    log_batch(record_list, i, epoch, cfg.epochs, "val", ips)
+                    log_batch(record_list, i, epoch + 1, cfg.epochs, "val", ips)
 
             ips = "ips: {:.5f} instance/sec.".format(
                 batch_size * record_list["batch_time"].count /
                 record_list["batch_time"].sum)
-            log_epoch(record_list, epoch, "val", ips)
+            log_epoch(record_list, epoch + 1, "val", ips)
 
             best_flag = False
             if record_list.get('top1') and record_list['top1'].avg > best:
@@ -165,16 +166,15 @@ def train_model(model, dataset, cfg, parallel=True, validate=True):
             return best, best_flag
 
         # use precise bn to improve acc
-        if cfg.get("PRECISEBN") and (
-            (epoch - 1) % cfg.PRECISEBN.preciseBN_interval == 0
-                or epoch == cfg.epochs):
+        if cfg.get("PRECISEBN") and (epoch % cfg.PRECISEBN.preciseBN_interval
+                                     == 0 or epoch == cfg.epochs - 1):
             do_preciseBN(
                 model, train_loader, parallel,
                 min(cfg.PRECISEBN.num_iters_preciseBN, len(train_loader)))
 
-        # 4. Validation
-        if validate and (epoch - 1) % cfg.get("val_interval",
-                                              1) == 0 or epoch == cfg.epochs:
+        # 5. Validation
+        if validate and epoch % cfg.get("val_interval",
+                                        1) == 0 or epoch == cfg.epochs - 1:
             with paddle.fluid.dygraph.no_grad():
                 best, save_best_flag = evaluate(best)
             # save best
@@ -187,14 +187,15 @@ def train_model(model, dataset, cfg, parallel=True, validate=True):
                     f"Already save the best model (top1 acc){int(best * 10000) / 10000}"
                 )
 
-        # 5. Save model and optimizer
-        if (epoch - 1) % cfg.get("save_interval",
-                                 10) == 0 or epoch == cfg.epochs:
-            save(optimizer.state_dict(),
-                 osp.join(output_dir, model_name + f"_epoch_{epoch:05d}.pdopt"))
+        # 6. Save model and optimizer
+        if epoch % cfg.get("save_interval", 1) == 0 or epoch == cfg.epochs - 1:
+            save(
+                optimizer.state_dict(),
+                osp.join(output_dir,
+                         model_name + f"_epoch_{epoch+1:05d}.pdopt"))
             save(
                 model.state_dict(),
                 osp.join(output_dir,
-                         model_name + f"_epoch_{epoch:05d}.pdparams"))
+                         model_name + f"_epoch_{epoch+1:05d}.pdparams"))
 
     logger.info(f'training {model_name} finished')

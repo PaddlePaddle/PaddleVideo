@@ -14,9 +14,7 @@
 import paddle
 import argparse
 from paddlevideo.utils import get_config
-from paddlevideo.loader.builder import build_dataloader, build_dataset
-from paddlevideo.modeling.builder import build_model
-from paddlevideo.tasks import train_model
+from paddlevideo.tasks import train_model, multi_train_model
 from paddlevideo.utils import get_dist_info
 
 
@@ -36,6 +34,9 @@ def parse_args():
         '--validate',
         action='store_true',
         help='whether to evaluate the checkpoint during training')
+    parser.add_argument('--multigrid',
+                        action='store_true',
+                        help='whether to use multigrid training')
     parser.add_argument('--seed', type=int, default=None, help='random seed')
 
     args = parser.parse_args()
@@ -43,30 +44,18 @@ def parse_args():
 
 
 def main():
-
     args = parse_args()
-
     cfg = get_config(args.config, overrides=args.override)
+
     _, world_size = get_dist_info()
     parallel = world_size != 1
     if parallel:
         paddle.distributed.init_parallel_env()
 
-    model = build_model(cfg.MODEL)
-
-    dataset = [build_dataset((cfg.DATASET.train, cfg.PIPELINE.train))]
-
-    #NOTE: To debug dataloader or inspect data, please try to call dataset so that errors can be catched.
-    try:
-        from collections import Iterable
-        isinstance(dataset[0], Iterable)
-    except TypeError:
-        print("TypeError: 'dataset' is not iterable")
-
-    if args.validate:
-        dataset.append(build_dataset((cfg.DATASET.valid, cfg.PIPELINE.valid)))
-
-    train_model(model, dataset, cfg, parallel=parallel, validate=args.validate)
+    if args.multigrid:
+        multi_train_model(cfg, parallel=parallel, validate=args.validate)
+    else:
+        train_model(cfg, parallel=parallel, validate=args.validate)
 
 
 if __name__ == '__main__':

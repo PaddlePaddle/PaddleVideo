@@ -19,6 +19,7 @@ from .registry import DATASETS, PIPELINES
 from ..utils.build_utils import build
 from .pipelines.compose import Compose
 from paddlevideo.utils import get_logger
+from paddlevideo.utils.multigrid import DistributedShortSampler
 
 logger = get_logger("paddlevideo")
 
@@ -52,6 +53,7 @@ def build_dataloader(dataset,
                      places,
                      shuffle=True,
                      drop_last=True,
+                     multigrid=False,
                      **kwargs):
     """Build Paddle Dataloader.
 
@@ -63,10 +65,16 @@ def build_dataloader(dataset,
         num_worker (int): num_worker
         shuffle(bool): whether to shuffle the data at every epoch.
     """
-    sampler = DistributedBatchSampler(dataset,
-                                      batch_size=batch_size,
-                                      shuffle=shuffle,
-                                      drop_last=drop_last)
+    if multigrid:
+        sampler = DistributedShortSampler(dataset,
+                                          batch_sizes=batch_size,
+                                          shuffle=True,
+                                          drop_last=True)
+    else:
+        sampler = DistributedBatchSampler(dataset,
+                                          batch_size=batch_size,
+                                          shuffle=shuffle,
+                                          drop_last=drop_last)
 
     data_loader = DataLoader(dataset,
                              batch_sampler=sampler,

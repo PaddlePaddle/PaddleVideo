@@ -337,9 +337,15 @@ class JitterScale(object):
         min_size: Lower bound for random sampler.
         max_size: Higher bound for random sampler.
     """
-    def __init__(self, min_size, max_size):
-        self.min_size = min_size
+    def __init__(self,
+                 min_size,
+                 max_size,
+                 short_cycle_factors=[0.5, 0.7071],
+                 default_min_size=256):
+        self.default_min_size = default_min_size
+        self.orig_min_size = self.min_size = min_size
         self.max_size = max_size
+        self.short_cycle_factors = short_cycle_factors
 
     def __call__(self, results):
         """
@@ -350,6 +356,14 @@ class JitterScale(object):
         return:
             resized_imgs: List where each item is a PIL.Image after scaling.
         """
+        short_cycle_idx = results.get('short_cycle_idx')
+        if short_cycle_idx in [0, 1]:
+            self.min_size = int(
+                round(self.short_cycle_factors[short_cycle_idx] *
+                      self.default_min_size))
+        else:
+            self.min_size = self.orig_min_size
+
         imgs = results['imgs']
         size = int(round(np.random.uniform(self.min_size, self.max_size)))
         assert (len(imgs) >= 1) , \
@@ -384,8 +398,15 @@ class MultiCrop(object):
     Args:
         target_size(int): Random crop a square with the target_size from an image.
     """
-    def __init__(self, target_size, test_mode=False):
-        self.target_size = target_size
+    def __init__(self,
+                 target_size,
+                 default_crop_size=224,
+                 short_cycle_factors=[0.5, 0.7071],
+                 test_mode=False):
+        self.orig_target_size = self.target_size = target_size
+        #        print("------self.target_size----", self.target_size)
+        self.short_cycle_factors = short_cycle_factors
+        self.default_crop_size = default_crop_size
         self.test_mode = test_mode
 
     def __call__(self, results):
@@ -401,6 +422,17 @@ class MultiCrop(object):
         spatial_sample_index = results['spatial_sample_index']
         spatial_num_clips = results['spatial_num_clips']
 
+        short_cycle_idx = results.get('short_cycle_idx')
+        #print('short_cycle_idx', short_cycle_idx)
+        if short_cycle_idx in [0, 1]:
+            self.target_size = int(
+                round(self.short_cycle_factors[short_cycle_idx] *
+                      self.default_crop_size))
+        else:
+            self.target_size = self.orig_target_size  # use saved value before call
+
+        #if short_cycle_idx not in [0,1]:
+        #    print("------self.target_size----", self.target_size)
         w, h = imgs[0].size
         if w == self.target_size and h == self.target_size:
             return results

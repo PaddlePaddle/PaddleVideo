@@ -90,9 +90,18 @@ class SFVideoDataset(BaseDataset):
     def prepare_train(self, idx):
         """TRAIN & VALID. Prepare the data for training given the index."""
         #Try to catch Exception caused by reading corrupted video file
+        short_cycle = False
+        if isinstance(idx, tuple):
+            idx, short_cycle_idx = idx
+            short_cycle = True
         for ir in range(self.num_retries):
             try:
-                results = copy.deepcopy(self.info[idx])
+                #Multi-grid short cycle
+                if short_cycle:
+                    results = copy.deepcopy(self.info[idx])
+                    results['short_cycle_idx'] = short_cycle_idx
+                else:
+                    results = copy.deepcopy(self.info[idx])
                 results = self.pipeline(results)
             except Exception as e:
                 logger.info(e)
@@ -101,7 +110,11 @@ class SFVideoDataset(BaseDataset):
                         "Error when loading {}, have {} trys, will try again".
                         format(results['filename'], ir))
                 idx = random.randint(0, len(self.info) - 1)
+                #                if short_cycle:
+                #                    short_cycle_idx = short_cycle_idx
                 continue
+
+            #print("results['imgs'][0].shape", results['imgs'][0].shape, "results['imgs'][1].shape", results['imgs'][1].shape)
             return results['imgs'][0], results['imgs'][1], np.array(
                 [results['labels']])
 
