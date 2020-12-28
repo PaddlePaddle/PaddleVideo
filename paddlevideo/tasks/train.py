@@ -109,9 +109,9 @@ def train_model(cfg, parallel=True, validate=True):
             record_list['reader_time'].update(time.time() - tic)
             # 4.1 forward
             if parallel:
-                outputs = model._layers.train_step(epoch, i, data)
+                outputs = model._layers.train_step(data)
             else:
-                outputs = model.train_step(epoch, i, data)
+                outputs = model.train_step(data)
             # 4.2 backward
             avg_loss = outputs['loss']
             avg_loss.backward()
@@ -157,9 +157,9 @@ def train_model(cfg, parallel=True, validate=True):
             for i, data in enumerate(valid_loader):
 
                 if parallel:
-                    outputs = model._layers.val_step(0,i,data)
+                    outputs = model._layers.val_step(data)
                 else:
-                    outputs = model.val_step(0,i,data)
+                    outputs = model.val_step(data)
 
                 # log_record
                 for name, value in outputs.items():

@@ -13,12 +13,6 @@
 from ...registry import RECOGNIZERS
 from .base import BaseRecognizer
 import paddle
-from paddlevideo.utils import get_logger
-import sys
-import numpy as np
-
-
-logger = get_logger("paddlevideo")
 
 @RECOGNIZERS.register()
 class Recognizer1D(BaseRecognizer):
@@ -41,16 +35,10 @@ class Recognizer1D(BaseRecognizer):
 
         return loss_metrics
 
-    def train_step(self, epoch_id, batch_id, data_batch, **kwargs):
+    def train_step(self, data_batch, **kwargs):
         """Training step.
         """
-        self.epoch_id = epoch_id
-        self.batch_id = batch_id
-        if self.head_name == "AttentionLstmHead":
-            imgs, labels = self.prepare_data(data_batch)
-        else:
-            imgs = data_batch[0]
-            labels = data_batch[1]
+        imgs, labels = self.prepare_data(data_batch)
 
         # call forward
         loss_metrics = self.forward_train(imgs,
@@ -59,20 +47,12 @@ class Recognizer1D(BaseRecognizer):
                                           use_mixup = 1,
                                           **kwargs)
 
-        #return self.head_name, loss_metrics
         return loss_metrics
 
-    def val_step(self, epoch_id, batch_id, data_batch, **kwargs):
+    def val_step(self, data_batch, **kwargs):
         """Validating setp.
         """
-        self.epoch_id = epoch_id
-        self.batch_id = batch_id
-
-        if self.head_name == "AttentionLstmHead":
-            imgs, labels = self.prepare_data(data_batch)
-        else:
-            imgs = data_batch[0]
-            labels = data_batch[1]
+        imgs, labels = self.prepare_data(data_batch)
 
         # call forward
         loss_metrics = self.forward_train(imgs,
@@ -80,21 +60,12 @@ class Recognizer1D(BaseRecognizer):
                                           reduce_sum=True,
                                           use_mixup = 0,
                                           **kwargs)
-        #return self.head_name, loss_metrics
         return loss_metrics
 
-    def test_step(self, epoch_id, batch_id, data_batch, **kwargs):
-        self.epoch_id = epoch_id
-        self.batch_id = batch_id
-
-        if self.head_name == "AttentionLstmHead":
-            imgs, labels = self.prepare_data(data_batch)
-        else:
-            imgs = data_batch[0]
-            labels = data_batch[1]
+    def test_step(self, data_batch, **kwargs):
+        imgs, labels = self.prepare_data(data_batch)
 
         metrics = self.forward_test(imgs, labels, reduce_sum=True, **kwargs)
-        #return self.head_name, metrics
         return  metrics
 
     def prepare_data(self, data):
@@ -109,15 +80,3 @@ class Recognizer1D(BaseRecognizer):
         imgs = [(x_data_rgb_tensor, x_data_rgb_len_tensor, x_data_rgb_mask_tensor),(x_data_audio_tensor, x_data_audio_len_tensor, x_data_audio_mask_tensor)]
         labels = y_data_label_tensor
         return imgs, labels
-
-    #def forward_test(self, imgs, labels, reduce_sum, **kwargs):
-    #    """Define how the model is going to test, from input to output."""
-    #    #XXX
-    #    num_segs = imgs.shape[1]
-    #    cls_score = self(imgs)
-
-    #    # calculate num_crops automatically
-    #    cls_score = self.average_clip(cls_score, num_segs)
-    #    metrics = self.head.loss(cls_score, labels, reduce_sum, return_loss=False **kwargs)
-
-    #    return metrics

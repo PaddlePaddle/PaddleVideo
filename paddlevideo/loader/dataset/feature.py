@@ -68,3 +68,16 @@ class FeatureDataset(BaseDataset):
 
                 info.append(dict(filename=filename))
         return info
+
+    def prepare_train(self, idx):
+        """TRAIN & VALID. Prepare the data for training/valid given the index."""
+        #Note: For now, paddle.io.DataLoader cannot support dict type retval, so convert to list here
+        results = copy.deepcopy(self.info[idx])
+        results = self.pipeline(results)
+        if type(results) is list: #for attention_lstm
+            return results
+
+        #unsqueeze label to list
+        return results['imgs'], np.array([results['labels']])
+
+

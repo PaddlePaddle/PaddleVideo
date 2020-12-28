@@ -12,18 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import math
-import sys
-
 import paddle
-import paddle.nn.functional as F
-from paddle.nn import AdaptiveAvgPool2D, Linear, Dropout
-
 from .base import BaseHead
 from ..registry import HEADS
 from ..weight_init import weight_init_
 from ...metrics.youtube8m import eval_util as youtube8m_metrics
-
-for_align = False #True
 
 @HEADS.register()
 class AttentionLstmHead(BaseHead):
@@ -37,8 +30,8 @@ class AttentionLstmHead(BaseHead):
         super(AttentionLstmHead, self).__init__(num_classes, in_channels, loss_cfg)
         self.num_classes = num_classes
         self.feature_dims = feature_dims
-        self.embedding_size = embedding_size  #512
-        self.lstm_size = lstm_size #1024
+        self.embedding_size = embedding_size 
+        self.lstm_size = lstm_size 
         self.feature_num = len(self.feature_dims)
         for i in range(self.feature_num): #0:rgb, 1:audio
             fc_feature = paddle.nn.Linear(in_features=self.feature_dims[i], out_features=self.embedding_size)
@@ -62,69 +55,55 @@ class AttentionLstmHead(BaseHead):
     def init_weights(self):
         pass
     def forward(self, inputs):
-        #处理变长特征
-        #1. 将特征padding为相同长度, 组成tensor
-        #2. 1的同时, 构造一个与1中的tensor具有相同尺寸的mask tensor,其值为0或1,mask取值0代表该位置的tensor是padding生成的元素,取值1代表真实元素
-        #3. 在网络适当位置,利用mask tensor参与计算, 使得网络输出与padding填充的元素无关
+        #deal with features with different length
+        #1. padding to same lenght, make a tensor
+        #2. make a mask tensor with the same shpae with 1
+        #3. compute output using mask tensor, s.t. output is nothing todo with padding
         assert ( len(inputs) == self.feature_num), "Input tensor does not contain {} features".format(self.feature_num)
         att_outs = []
         for i in range(len(inputs)):
-            ###组网1. fc. 将输入特征向量映射到512长度
+            ###1. fc
             m = getattr(self, "fc_feature{}".format(i))
-            #i: 0 ,inputs[i].shape: [2, 256, 1024] [2]
-            #i: 1 ,inputs[i].shape: [2, 256, 128] [2]
             output_fc = m(inputs[i][0])
             output_fc = paddle.tanh(output_fc)
 
-            ###组网2. bi_lstm, 输出对应静态图的lstm_concat_0
+            ###2. bi_lstm
             m = getattr(self, "bi_lstm{}".format(i))
-            #inputs: [batch_size, time_steps(max_len), hidden_size]
-            lstm_out, _ = m(inputs=output_fc, sequence_length=inputs[i][1])#x_data_rgb_len, x_data_audio_len
+            lstm_out, _ = m(inputs=output_fc, sequence_length=inputs[i][1])
 
-            #i: 0/1 lstm_out.shape: [2, 512, 2048] lstm_out[0/1]
-            #[batch_size, time_steps(max_len), num_directions * hidden_size]
-            if for_align == False:
-                lstm_dropout = self.dropout(lstm_out)
-            else:
-                lstm_dropout = lstm_out
+            lstm_dropout = self.dropout(lstm_out)
 
-            ###组网3. att_fc
+            ###3. att_fc
             m = getattr(self, "att_fc{}".format(i))
-            lstm_weight = m(lstm_dropout) #[2, 256, 1]
+            lstm_weight = m(lstm_dropout) 
 
-            ###softmax replace start, for it's relevant to sum in time step
-            lstm_exp = paddle.exp(lstm_weight)#[2, 256, 1]
-            lstm_mask = paddle.mean(inputs[i][2], axis=2)#[2, 256]
-
-            lstm_exp_with_mask = paddle.multiply(x=lstm_exp, y=lstm_mask, axis=0)#[2, 256, 1]
-
-            lstm_sum_with_mask = paddle.sum(lstm_exp_with_mask, axis=1) #[2, 1]
-
+            ###4. softmax replace start, for it's relevant to sum in time step
+            lstm_exp = paddle.exp(lstm_weight)
+            lstm_mask = paddle.mean(inputs[i][2], axis=2)
+            lstm_exp_with_mask = paddle.multiply(x=lstm_exp, y=lstm_mask, axis=0)
+            lstm_sum_with_mask = paddle.sum(lstm_exp_with_mask, axis=1)
             exponent = -1
-            lstm_denominator = paddle.pow(lstm_sum_with_mask, exponent) #[2, 1]
-
-            lstm_softmax = paddle.multiply(x=lstm_exp, y=lstm_denominator, axis=0)#[2, 256, 1]
+            lstm_denominator = paddle.pow(lstm_sum_with_mask, exponent)
+            lstm_softmax = paddle.multiply(x=lstm_exp, y=lstm_denominator, axis=0)
             lstm_weight = lstm_softmax
             ###softmax replace end
 
-            lstm_scale = paddle.multiply(x=lstm_dropout, y=lstm_weight, axis=0) #[2, 256, 2048]
+            lstm_scale = paddle.multiply(x=lstm_dropout, y=lstm_weight, axis=0)
 
-            ###sequence_pool's replace start, for it's relevant to sum in time step
-            lstm_scale_with_mask = paddle.multiply(x=lstm_scale, y=lstm_mask, axis=0)#[2, 256, 2048]
+            ###5. sequence_pool's replace start, for it's relevant to sum in time step
+            lstm_scale_with_mask = paddle.multiply(x=lstm_scale, y=lstm_mask, axis=0)
             fea_lens = inputs[i][1]
             fea_len = int(fea_lens[0])
             lstm_pool = paddle.sum(lstm_scale_with_mask, axis=1)
             ###sequence_pool's replace end
             att_outs.append(lstm_pool)
-            #i: 0/1 lstm_weight.shape: [2, 256, 1] ,lstm_scale.shape: [2, 256, 2048] lstm_pool.shape: [2, 2048] lstm.py 234
-        att_out = paddle.concat(att_outs, axis=1) #[2, 4096]
-        fc_out1 = self.fc_out1(att_out)# [2, 8192]
+        att_out = paddle.concat(att_outs, axis=1)
+        fc_out1 = self.fc_out1(att_out)
         fc_out1_act = self.relu(fc_out1)
         fc_out2 = self.fc_out2(fc_out1_act)
         fc_out2_act = paddle.tanh(fc_out2)
         fc_logit = self.fc_logit(fc_out2_act)
         output = self.sigmoid(fc_logit)
-        #shapes:, att_out: [2, 4096] fc_out1: [2, 8192] fc_out2: [2, 4096] fc_logit: [2, 3862] output: [2, 3862] lstm.py 242
         return fc_logit, output
 
 
@@ -139,7 +118,6 @@ class AttentionLstmHead(BaseHead):
         if return_loss:
             bce_logit_loss = paddle.nn.BCEWithLogitsLoss(reduction='sum')
             sum_cost = bce_logit_loss(lstm_logit, labels)
-
         return sum_cost
 
     def metric(self,

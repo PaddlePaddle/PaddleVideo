@@ -26,7 +26,6 @@ except ImportError:
     from io import BytesIO
 import numpy as np
 import random
-from paddle.io import Dataset, IterableDataset, DataLoader
 
 python_ver = sys.version_info
 max_len = 512
@@ -147,22 +146,22 @@ class FeatureDecoder(object):
                        mask_list[0], mask_list[1],
                        feature_out[2]]
 
-def dequantize(feat_vector, max_quantized_value=2., min_quantized_value=-2.):
-    """
-    Dequantize the feature from the byte format to the float format
-    """
-
-    assert max_quantized_value > min_quantized_value
-    quantized_range = max_quantized_value - min_quantized_value
-    scalar = quantized_range / 255.0
-    bias = (quantized_range / 512.0) + min_quantized_value
-
-    return feat_vector * scalar + bias
-
-
-def make_one_hot(label, dim=3862):
-    one_hot_label = np.zeros(dim)
-    one_hot_label = one_hot_label.astype(float)
-    for ind in label:
-        one_hot_label[int(ind)] = 1
-    return one_hot_label
+    def dequantize(feat_vector, max_quantized_value=2., min_quantized_value=-2.):
+        """
+        Dequantize the feature from the byte format to the float format
+        """
+    
+        assert max_quantized_value > min_quantized_value
+        quantized_range = max_quantized_value - min_quantized_value
+        scalar = quantized_range / 255.0
+        bias = (quantized_range / 512.0) + min_quantized_value
+    
+        return feat_vector * scalar + bias
+    
+    
+    def make_one_hot(label, dim=3862):
+        one_hot_label = np.zeros(dim)
+        one_hot_label = one_hot_label.astype(float)
+        for ind in label:
+            one_hot_label[int(ind)] = 1
+        return one_hot_label
