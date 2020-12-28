@@ -18,25 +18,9 @@ import sys
 
 @DATASETS.register()
 class FeatureDataset(BaseDataset):
-    """Video dataset for action recognition
-       The dataset loads raw videos and apply specified transforms on them.
-
-       The index file is a file with multiple lines, and each line indicates
-       a sample video with the filepath and label, which are split with a whitesapce.
-       Example of a inde file:
-
-       .. code-block:: txt
-
-           path/000.mp4 1
-           path/001.mp4 1
-           path/002.mp4 2
-           path/003.mp4 2
-
-       Args:
-           file_path(str): Path to the index file.
-           pipeline(XXX): A sequence of data transforms.
-           **kwargs: Keyword arguments for ```BaseDataset```.
-
+    """Feature dataset for action recognition
+       Example:(TODO)
+       Args:(TODO)
     """
     def __init__(self,
                  file_path,
@@ -52,32 +36,20 @@ class FeatureDataset(BaseDataset):
 
     def load_file(self):
         """Load index file to get video information."""
-        #print("chaj self.data_prefix:",self.data_prefix, "self.suffix:",self.suffix,__file__,sys._getframe().f_lineno)
         info = []
         with open(self.file_path, 'r') as fin:
             for line in fin:
-                #line_split = line.strip().split()
                 filename = line.strip() #line_split
-                #print("chaj filename:",filename,__file__,sys._getframe().f_lineno)
                 if self.data_prefix is not None:
                     filename = osp.join(self.data_prefix, filename)
-                #print("chaj filename:",filename,__file__,sys._getframe().f_lineno)
                 if self.suffix is not None:
                     filename = filename + self.suffix
-                #print("chaj filename:",filename,__file__,sys._getframe().f_lineno)
 
                 info.append(dict(filename=filename))
         return info
 
     def prepare_train(self, idx):
         """TRAIN & VALID. Prepare the data for training/valid given the index."""
-        #Note: For now, paddle.io.DataLoader cannot support dict type retval, so convert to list here
         results = copy.deepcopy(self.info[idx])
         results = self.pipeline(results)
-        if type(results) is list: #for attention_lstm
-            return results
-
-        #unsqueeze label to list
-        return results['imgs'], np.array([results['labels']])
-
-
+        return results
