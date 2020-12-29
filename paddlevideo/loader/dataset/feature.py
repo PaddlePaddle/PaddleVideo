@@ -14,6 +14,7 @@
 from ..registry import DATASETS
 from .base import BaseDataset
 import os.path as osp
+import copy
 
 @DATASETS.register()
 class FeatureDataset(BaseDataset):
