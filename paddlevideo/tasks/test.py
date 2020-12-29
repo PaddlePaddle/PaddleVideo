@@ -27,8 +27,9 @@ def test_model(model, dataset, cfg, weight, world_size):
         model (paddle.nn.Layer): The model to be tested.
         dataset (paddle.dataset): Train dataaset.
     """
+    #NOTE: add a new field : test_batch_size ?
+    batch_size = cfg.DATASET.get("test_batch_size", 2)
 
-    batch_size = cfg.DATASET.get("batch_size", 2)
     places = paddle.set_device('gpu')
 
     dataloader_setting = dict(batch_size=batch_size,

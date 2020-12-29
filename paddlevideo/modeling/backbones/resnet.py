@@ -196,7 +196,7 @@ class ResNet(nn.Layer):
         elif self.layers == 152:
             depth = [3, 8, 36, 3]
 
-        in_channels = 64
+        in_channels = [64, 256, 512, 1024]
         out_channels = [64, 128, 256, 512]
 
         self.conv = ConvBNLayer(in_channels=3,
@@ -222,13 +222,14 @@ class ResNet(nn.Layer):
                     bottleneck_block = self.add_sublayer(
                         conv_name,
                         BottleneckBlock(
-                            in_channels=in_channels
+                            # NOTE: Be careful! Here is different from TSM model.
+                            in_channels=in_channels[block]
                             if i == 0 else out_channels[block] * 4,
                             out_channels=out_channels[block],
                             stride=2 if i == 0 and block != 0 else 1,
                             shortcut=shortcut,
                             name=conv_name))
-                    in_channels = out_channels[block] * 4
+
                     self.block_list.append(bottleneck_block)
                     shortcut = True
         else:

@@ -18,6 +18,7 @@ import pandas as pd
 import multiprocessing as mp
 
 from .registry import METRIC
+from .base import BaseMetric
 from paddlevideo.utils import get_logger
 
 logger = get_logger("paddlevideo")
@@ -358,7 +359,7 @@ class ANETproposal(object):
 
 
 @METRIC.register
-class BMNMetric(object):
+class BMNMetric(BaseMetric):
     """
     Metrics for BMN. Two Stages in this metric:
     (1) Get test results using trained model, results will be saved in BMNMetric.result_path;
@@ -382,12 +383,9 @@ class BMNMetric(object):
         Params:
             get_metrics: whether to calculate AR@N and AUC metrics or not, default True.
         """
-        self.data_size = data_size
-        self.batch_size = batch_size
+        super().__init__(data_size, batch_size, world_size, log_interval)
         assert self.batch_size == 1, " Now we just support batch_size==1 test"
-        self.world_size = world_size
         assert self.world_size == 1, " Now we just support single-card test"
-        self.log_interval = log_interval
 
         self.tscale = tscale
         self.dscale = dscale

@@ -39,7 +39,7 @@ def parse_args():
                         action='append',
                         default=[],
                         help='config options to be overridden')
-    parser.add_argument('-w', '--weight', default='', help='weight path')
+    parser.add_argument('-w', '--weights', default='', help='weights path')
 
     args = parser.parse_args()
     return args
@@ -57,7 +57,7 @@ def main():
 
     model = build_model(cfg.MODEL)
 
-    test_model(model, dataset, cfg, args.weight, world_size)
+    test_model(model, dataset, cfg, args.weights, world_size)
 
 
 if __name__ == '__main__':
