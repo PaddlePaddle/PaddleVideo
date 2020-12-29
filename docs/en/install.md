@@ -39,7 +39,7 @@ Note:
 
 ## Install PaddleVideo
 
-**Clone PaddleVideo: **
+**Clone PaddleVideo:**
 
 ```
 cd path_to_clone_PaddleVideo
