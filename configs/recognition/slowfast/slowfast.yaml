@@ -121,7 +121,6 @@ METRIC:
 
 PRECISEBN:
   preciseBN_interval: 10
-  num_iters_preciseBN: 200  #default
 
 model_name: SlowFast
 save_interval: 10
