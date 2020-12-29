@@ -21,7 +21,7 @@ logger = get_logger("paddlevideo")
 @RECOGNIZERS.register()
 class Recognizer2D(BaseRecognizer):
     """2D recognizer model framework."""
-    def forward_train(self, imgs, labels, reduce_sum, **kwargs):
+    def train_step(self, data_batch, reduce_sum=False):
         """Define how the model is going to train, from input to output.
         """
         #NOTE: As the num_segs is an attribute of dataset phase, and didn't pass to build_head phase, should obtain it from imgs(paddle.Tensor) now, then call self.head method.
@@ -29,22 +29,18 @@ class Recognizer2D(BaseRecognizer):
         #labels = labels.squeeze()
         #XXX: unsqueeze label to [label] ?
 
+        imgs = data_batch[0]
+        labels = data_batch[1:]
         cls_score = self(imgs)
-        loss_metrics = self.head.loss(cls_score, labels, reduce_sum, **kwargs)
+        loss_metrics = self.head.loss(cls_score, labels, reduce_sum)
         return loss_metrics
 
-    def forward_test(self, imgs, labels, reduce_sum, **kwargs):
+    def val_step(self, data_batch, reduce_sum=True):
+        return self.train_step(data_batch, reduce_sum=reduce_sum)
+
+    def test_step(self, data_batch, reduce_sum=False):
         """Define how the model is going to test, from input to output."""
-        #XXX
-        num_segs = imgs.shape[1]
+        #NOTE: (shipping) when testing, the net won't call head.loss, we deal with the test processing in /paddlevideo/metrics
+        imgs = data_batch[0]
         cls_score = self(imgs)
-
-        # calculate num_crops automatically
-        cls_score = self.average_clip(cls_score, num_segs)
-        metrics = self.head.loss(cls_score,
-                                 labels,
-                                 reduce_sum,
-                                 return_loss=False,
-                                 **kwargs)
-
-        return metrics
+        return cls_score

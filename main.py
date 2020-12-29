@@ -52,10 +52,10 @@ def main():
     if parallel:
         paddle.distributed.init_parallel_env()
 
-    if args.multigrid:
-        train_model_multigrid(cfg, parallel=parallel, validate=args.validate)
-    else:
+    if not args.multigrid:
         train_model(cfg, parallel=parallel, validate=args.validate)
+    else:
+        train_model_multigrid(cfg, parallel=parallel, validate=args.validate)
 
 
 if __name__ == '__main__':

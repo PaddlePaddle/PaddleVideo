@@ -20,6 +20,7 @@ from ..utils.build_utils import build
 from .pipelines.compose import Compose
 from paddlevideo.utils import get_logger
 from paddlevideo.utils.multigrid import DistributedShortSampler
+import numpy as np
 
 logger = get_logger("paddlevideo")
 
@@ -47,6 +48,12 @@ def build_dataset(cfg):
     return dataset
 
 
+def build_batch_pipeline(cfg):
+
+    batch_pipeline = build(cfg, PIPELINES)
+    return batch_pipeline
+
+
 def build_dataloader(dataset,
                      batch_size,
                      num_workers,
@@ -54,6 +61,7 @@ def build_dataloader(dataset,
                      shuffle=True,
                      drop_last=True,
                      multigrid=False,
+                     collate_fn_cfg=None,
                      **kwargs):
     """Build Paddle Dataloader.
 
@@ -76,12 +84,34 @@ def build_dataloader(dataset,
                                           shuffle=shuffle,
                                           drop_last=drop_last)
 
-    data_loader = DataLoader(dataset,
-                             batch_sampler=sampler,
-                             places=places,
-                             num_workers=num_workers,
-                             return_list=True,
-                             **kwargs)
+    #NOTE(shipping): when switch the mix operator on, such as: mixup, cutmix.
+    # batch like: [[img, label, attibute, ...], [imgs, label, attribute, ...], ...] will recollate to:
+    # [[img, img, ...], [label, label, ...], [attribute, attribute, ...], ...] as using numpy.transpose.
+
+    def mix_collate_fn(batch):
+        pipeline = build_batch_pipeline(collate_fn_cfg)
+        batch = pipeline(batch)
+        slots = []
+        for items in batch:
+            for i, item in enumerate(items):
+                if len(slots) < len(items):
+                    slots.append([item])
+                else:
+                    slots[i].append(item)
+        return [np.stack(slot, axis=0) for slot in slots]
+
+    #if collate_fn_cfg is not None:
+    #ugly code here. collate_fn is mix op config
+    #    collate_fn = mix_collate_fn(collate_fn_cfg)
+
+    data_loader = DataLoader(
+        dataset,
+        batch_sampler=sampler,
+        places=places,
+        num_workers=num_workers,
+        collate_fn=mix_collate_fn if collate_fn_cfg is not None else None,
+        return_list=True,
+        **kwargs)
 
     return data_loader
 

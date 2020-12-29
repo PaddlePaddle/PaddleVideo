@@ -152,7 +152,7 @@ def train_model_multigrid(cfg, parallel=True, validate=True):
     output_dir = cfg.get("output_dir", f"./output/{model_name}")
     mkdir(output_dir)
     local_rank = dist.ParallelEnv().local_rank
-    precise_bn = cfg.get("precise_bn")
+    precise_bn = cfg.get("PRECISEBN")
     num_iters_precise_bn = cfg.PRECISEBN.num_iters_preciseBN
 
     # 1. Construct model

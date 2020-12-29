@@ -32,18 +32,5 @@ class CrossEntropyLoss(BaseWeightedLoss):
         Returns:
             loss (paddle.Tensor): The returned CrossEntropy loss.
         """
-        #TODO: move to config: label_smooth and epsilon
-        label_smooth = 1
-        if False:  #label_smooth:
-            num_class = score.shape[-1]
-            one_hot_label = F.one_hot(labels, num_class)
-            smooth_label = F.label_smooth(one_hot_label, epsilon=0.1)
-            soft_label = paddle.reshape(smooth_label, shape=[-1, num_class])
-            #TODO: to 2.0rc1, F.softmax + fluid.layers.cross_entropy = new cross_entropy
-            predict = F.softmax(score)
-            loss = paddle.fluid.layers.cross_entropy(input=predict,
-                                                     label=soft_label,
-                                                     soft_label=True)
-        else:
-            loss = F.cross_entropy(score, labels, **kwargs)
+        loss = F.cross_entropy(score, labels, **kwargs)
         return loss

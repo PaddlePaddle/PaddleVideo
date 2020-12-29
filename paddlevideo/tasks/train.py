@@ -35,8 +35,13 @@ def train_model(cfg, parallel=True, validate=True):
 
     """
     logger = get_logger("paddlevideo")
-    batch_size = cfg.DATASET.get('batch_size', 2)
+    #single card batch size
+    batch_size = cfg.DATASET.get('batch_size', 8)
+    valid_batch_size = cfg.DATASET.get('valid_batch_size', batch_size)
     places = paddle.set_device('gpu')
+
+    # default num worker: 0, which means no subprocess will be created
+    num_workers = cfg.DATASET.get('num_workers', 0)
     model_name = cfg.model_name
     output_dir = cfg.get("output_dir", f"./output/{model_name}")
     mkdir(output_dir)
@@ -49,15 +54,15 @@ def train_model(cfg, parallel=True, validate=True):
     # 2. Construct dataset and dataloader
     train_dataset = build_dataset((cfg.DATASET.train, cfg.PIPELINE.train))
     train_dataloader_setting = dict(batch_size=batch_size,
-                                    num_workers=cfg.DATASET.get(
-                                        'num_workers', 0),
+                                    num_workers=num_workers,
+                                    collate_fn_cfg=cfg.get('MIX', None),
                                     places=places)
+
     train_loader = build_dataloader(train_dataset, **train_dataloader_setting)
     if validate:
         valid_dataset = build_dataset((cfg.DATASET.valid, cfg.PIPELINE.valid))
-        validate_dataloader_setting = dict(batch_size=batch_size,
-                                           num_workers=cfg.DATASET.get(
-                                               'num_workers', 0),
+        validate_dataloader_setting = dict(batch_size=valid_batch_size,
+                                           num_workers=num_workers,
                                            places=places,
                                            drop_last=False,
                                            shuffle=False)
@@ -137,6 +142,7 @@ def train_model(cfg, parallel=True, validate=True):
             record_list.pop('lr')
             tic = time.time()
             for i, data in enumerate(valid_loader):
+
                 if parallel:
                     outputs = model._layers.val_step(data)
                 else:
