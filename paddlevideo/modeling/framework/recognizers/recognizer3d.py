@@ -55,7 +55,6 @@ class Recognizer3D(BaseRecognizer):
         """Training step.
         """
         imgs = [data_batch[0], data_batch[1]]
-        print('=====data_batch[0].shape=====', data_batch[0].shape)
         labels = data_batch[2]
 
         # call forward

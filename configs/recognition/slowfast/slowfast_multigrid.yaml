@@ -3,25 +3,25 @@ MODEL: #MODEL field
   backbone:
     name: "ResNetSlowFast"
     depth: 50 # Not Optional, only 50 now.
-    alpha: 4 #8
+    alpha: 4
     beta: 8
     width_per_group: 64
-    fusion_kernel_sz: 7 #5
+    fusion_kernel_sz: 7
     bn_norm_type: "batchnorm"
   head:
     name: "SlowFastHead"
     width_per_group: 64
-    alpha: 4 #8
+    alpha: 4
     beta: 8
-    num_classes: 10 #400
+    num_classes: 400
     num_frames: 32
     crop_size: 224  #independent to test or train mode
     dropout_rate: 0.5
     multigrid_short: True
 
 DATASET: #DATASET field
-  batch_size: 1 #4 #8  #single bacth size
-  num_workers: 0 #8
+  batch_size: 8  #single bacth size
+  num_workers: 8
   train:
     format: "SFVideoDataset"
     file_path: "./data/k400/train.csv" #Mandatory, train data index file path
@@ -55,7 +55,7 @@ PIPELINE:
           std: [0.225, 0.225, 0.225]
           tensor_shape: [1, 1, 1, 3]
       - PackOutput:
-          alpha: 4 #8
+          alpha: 4
 
   valid:
     decode_sampler:
@@ -76,7 +76,7 @@ PIPELINE:
           std: [0.225, 0.225, 0.225]
           tensor_shape: [1, 1, 1, 3]
       - PackOutput:
-          alpha: 4 #8
+          alpha: 4
 
   test:
     decode_sampler:
@@ -89,7 +89,7 @@ PIPELINE:
           min_size: 256
           max_size: 256
       - MultiCrop:
-          target_size: 256
+          target_size: 224
           test_mode: True
       - Image2Array:
           transpose: False
@@ -98,7 +98,7 @@ PIPELINE:
           std: [0.225, 0.225, 0.225]
           tensor_shape: [1, 1, 1, 3]
       - PackOutput:
-          alpha: 4 #8
+          alpha: 4
 
 OPTIMIZER: #OPTIMIZER field
   name: 'Momentum'
@@ -111,8 +111,8 @@ OPTIMIZER: #OPTIMIZER field
     step_base_lr: 0.1
     lrs: [1, 0.1, 0.01, 0.001, 0.0001, 0.00001]
     gamma: 0.1
-    steps: [0, 3, 6, 9]
-    max_epoch: 10
+    steps: [0, 94, 154, 196]
+    max_epoch: 239
   weight_decay:
     name: 'L2'
     value: 1e-4
@@ -122,7 +122,7 @@ METRIC:
   name: 'MultiCropMetric'
   num_ensemble_views: 10
   num_spatial_crops: 3
-  num_classes: 10 #400
+  num_classes: 400
 
 MULTIGRID:
   LONG_CYCLE: True
@@ -130,8 +130,8 @@ MULTIGRID:
   default_batch_size: 0
   default_temporal_size: 0
   default_crop_size: 0
-  epoch_factor: 1.5 #1.0  #try 1.0
-  bn_base_size: 1 #4 #8
+  epoch_factor: 1.5 #1.0
+  bn_base_size: 8
   long_cycle_sampling_rate: 0
   long_cycle_factors:
       - value: [0.25, 0.7071]  # 0.5 ** 0.5
@@ -141,12 +141,10 @@ MULTIGRID:
   short_cycle_factors: [0.5, 0.7071]
 
 PRECISEBN:
-  preciseBN_interval: 10 #1 #10
+  preciseBN_interval: 10
   num_iters_preciseBN: 200  #default
 
 model_name: SlowFast
-log_interval: 1 #Optional, the interal of logger, default:10
-save_interval: 1 #10
-val_interval: 10 #1 #10
-epochs: 10 #196 #Mandatory, total epoch
+val_interval: 10
+epochs: 239 #Mandatory, total epoch
 log_level: "INFO"

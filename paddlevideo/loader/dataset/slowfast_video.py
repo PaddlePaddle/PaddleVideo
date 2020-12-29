@@ -58,11 +58,13 @@ class SFVideoDataset(BaseDataset):
         num_ensemble_views=1,
         num_spatial_crops=1,
         num_retries=5,
+        num_samples_precise_bn=None,
         **kwargs,
     ):
         self.num_ensemble_views = num_ensemble_views
         self.num_spatial_crops = num_spatial_crops
         self.num_retries = num_retries
+        self.num_samples_precise_bn = num_samples_precise_bn
         super().__init__(file_path, pipeline, **kwargs)
 
     def load_file(self):
@@ -110,11 +112,8 @@ class SFVideoDataset(BaseDataset):
                         "Error when loading {}, have {} trys, will try again".
                         format(results['filename'], ir))
                 idx = random.randint(0, len(self.info) - 1)
-                #                if short_cycle:
-                #                    short_cycle_idx = short_cycle_idx
                 continue
 
-            #print("results['imgs'][0].shape", results['imgs'][0].shape, "results['imgs'][1].shape", results['imgs'][1].shape)
             return results['imgs'][0], results['imgs'][1], np.array(
                 [results['labels']])
 
@@ -135,3 +134,11 @@ class SFVideoDataset(BaseDataset):
                 continue
             return results['imgs'][0], results['imgs'][1], np.array(
                 [results['labels']]), np.array([idx])
+
+    def __len__(self):
+        """get the size of the dataset."""
+        if self.num_samples_precise_bn is None:
+            return len(self.info)
+        else:
+            random.shuffle(self.info)
+            return min(self.num_samples_precise_bn, len(self.info))

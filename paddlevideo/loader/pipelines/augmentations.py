@@ -404,7 +404,6 @@ class MultiCrop(object):
                  short_cycle_factors=[0.5, 0.7071],
                  test_mode=False):
         self.orig_target_size = self.target_size = target_size
-        #        print("------self.target_size----", self.target_size)
         self.short_cycle_factors = short_cycle_factors
         self.default_crop_size = default_crop_size
         self.test_mode = test_mode
@@ -423,7 +422,6 @@ class MultiCrop(object):
         spatial_num_clips = results['spatial_num_clips']
 
         short_cycle_idx = results.get('short_cycle_idx')
-        #print('short_cycle_idx', short_cycle_idx)
         if short_cycle_idx in [0, 1]:
             self.target_size = int(
                 round(self.short_cycle_factors[short_cycle_idx] *
@@ -431,8 +429,6 @@ class MultiCrop(object):
         else:
             self.target_size = self.orig_target_size  # use saved value before call
 
-        #if short_cycle_idx not in [0,1]:
-        #    print("------self.target_size----", self.target_size)
         w, h = imgs[0].size
         if w == self.target_size and h == self.target_size:
             return results

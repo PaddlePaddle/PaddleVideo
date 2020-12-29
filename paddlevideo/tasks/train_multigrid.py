@@ -28,7 +28,7 @@ from paddlevideo.utils import (AverageMeter, build_record, log_batch, log_epoch,
 from paddlevideo.utils.multigrid import MultigridSchedule, aggregate_sub_bn_stats, subn_load, subn_save
 
 
-def construct_loader(cfg, places, validate, preciseBN):
+def construct_loader(cfg, places, validate, precise_bn, num_iters_precise_bn):
     batch_size = cfg.DATASET.get('batch_size', 2)
     train_dataset = build_dataset((cfg.DATASET.train, cfg.PIPELINE.train))
     precise_bn_dataloader_setting = dict(
@@ -36,8 +36,15 @@ def construct_loader(cfg, places, validate, preciseBN):
         num_workers=cfg.DATASET.get('num_workers', 0),
         places=places,
     )
-    precise_bn_loader = build_dataloader(train_dataset,
-                                         **precise_bn_dataloader_setting)
+    if precise_bn:
+        cfg.DATASET.train.num_samples_precise_bn = num_iters_precise_bn * batch_size
+        precise_bn_dataset = build_dataset(
+            (cfg.DATASET.train, cfg.PIPELINE.train))
+        precise_bn_loader = build_dataloader(precise_bn_dataset,
+                                             **precise_bn_dataloader_setting)
+    else:
+        precise_bn_loader = None
+
     if cfg.MULTIGRID.SHORT_CYCLE:
         # get batch size list in short cycle schedule
         bs_factor = [
@@ -60,7 +67,7 @@ def construct_loader(cfg, places, validate, preciseBN):
         )
     else:
         train_dataloader_setting = precise_bn_dataloader_setting
-    #print("***changed crop size***", cfg.PIPELINE.train.transform[1]['MultiCrop']['target_size'])
+
     train_loader = build_dataloader(train_dataset, **train_dataloader_setting)
     if validate:
         valid_dataset = build_dataset((cfg.DATASET.valid, cfg.PIPELINE.valid))
@@ -72,38 +79,14 @@ def construct_loader(cfg, places, validate, preciseBN):
                                            shuffle=False)
         valid_loader = build_dataloader(valid_dataset,
                                         **validate_dataloader_setting)
+    else:
+        valid_loader = None
 
-    #TODO: in build dataloader DONE
-    # if not cfg.MULTIGRID.SHORT_CYCLE:
-    #     train_sampler = DistributedBatchSampler(
-    #         train_data,
-    #         batch_size=bs_train_single,
-    #         shuffle=True,
-    #         drop_last=True)
-    # else:
-    #     # get batch size list in short cycle schedule
-    #     bs_factor = [
-    #         int(round((float(cfg.DATA.train_crop_size) / (s * cfg.MULTIGRID.default_crop_size)
-    #                    )
-    #                   ** 2
-    #                   )
-    #             )
-    #         for s in cfg.MULTIGRID.short_cycle_factors
-    #     ]
-    #     single_batch_sizes = [
-    #         bs_train_single * bs_factor[0],
-    #         bs_train_single * bs_factor[1],
-    #         bs_train_single,
-    #         ]
-    #     train_sampler = DistributedShortSampler(
-    #         train_data,
-    #         batch_sizes=single_batch_sizes,
-    #         shuffle=True,
-    #         drop_last=True)
     return train_loader, valid_loader, precise_bn_loader
 
 
-def build_trainer(cfg, places, parallel, validate, preciseBN):
+def build_trainer(cfg, places, parallel, validate, precise_bn,
+                  num_iters_precise_bn):
     """
     Build training model and its associated tools, including optimizer,
     dataloaders and meters.
@@ -125,10 +108,10 @@ def build_trainer(cfg, places, parallel, validate, preciseBN):
         construct_loader(cfg,
                          places,
                          validate,
-                         preciseBN,
+                         precise_bn,
+                         num_iters_precise_bn,
                          )
 
-    #TODO: modify lr
     lr = build_lr(cfg.OPTIMIZER.learning_rate, len(train_loader))
     optimizer = build_optimizer(cfg.OPTIMIZER,
                                 lr,
@@ -144,7 +127,7 @@ def build_trainer(cfg, places, parallel, validate, preciseBN):
     )
 
 
-def multi_train_model(cfg, parallel=True, validate=True):
+def train_model_multigrid(cfg, parallel=True, validate=True):
     """Train model entry
 
     Args:
@@ -154,14 +137,13 @@ def multi_train_model(cfg, parallel=True, validate=True):
 
     """
     # Init multigrid.
-    #TODO implemetn multi-grid using current config DONE
     multigrid = None
     if cfg.MULTIGRID.LONG_CYCLE or cfg.MULTIGRID.SHORT_CYCLE:
         multigrid = MultigridSchedule()
         cfg = multigrid.init_multigrid(cfg)
         if cfg.MULTIGRID.LONG_CYCLE:
             cfg, _ = multigrid.update_long_cycle(cfg, cur_epoch=0)
-    multi_save_epoch = [i[-1] - 1 for i in multigrid.schedule]  #epoch从1开始？
+    multi_save_epoch = [i[-1] - 1 for i in multigrid.schedule]
 
     logger = get_logger("paddlevideo")
     batch_size = cfg.DATASET.get('batch_size', 2)
@@ -170,7 +152,8 @@ def multi_train_model(cfg, parallel=True, validate=True):
     output_dir = cfg.get("output_dir", f"./output/{model_name}")
     mkdir(output_dir)
     local_rank = dist.ParallelEnv().local_rank
-    preciseBN = cfg.get("PRECISEBN")
+    precise_bn = cfg.get("precise_bn")
+    num_iters_precise_bn = cfg.PRECISEBN.num_iters_preciseBN
 
     # 1. Construct model
     model = build_model(cfg.MODEL)
@@ -182,8 +165,9 @@ def multi_train_model(cfg, parallel=True, validate=True):
         construct_loader(cfg,
                          places,
                          validate,
-                         preciseBN,
-                        )
+                         precise_bn,
+                         num_iters_precise_bn,
+                         )
 
     # 3. Construct optimizer
     lr = build_lr(cfg.OPTIMIZER.learning_rate, len(train_loader))
@@ -212,7 +196,7 @@ def multi_train_model(cfg, parallel=True, validate=True):
         if cfg.MULTIGRID.LONG_CYCLE:
             cfg, changed = multigrid.update_long_cycle(cfg, epoch)
             if changed:
-                print("====== Rebuild model/optimizer/loader =====")
+                logger.info("====== Rebuild model/optimizer/loader =====")
                 (
                     model,
                     lr,
@@ -220,7 +204,8 @@ def multi_train_model(cfg, parallel=True, validate=True):
                     train_loader,
                     valid_loader,
                     precise_bn_loader,
-                ) = build_trainer(cfg, places, parallel, validate, preciseBN)
+                ) = build_trainer(cfg, places, parallel, validate, precise_bn,
+                                  num_iters_precise_bn)
 
                 #load checkpoint after re-build model
                 if epoch != 0:
@@ -312,15 +297,13 @@ def multi_train_model(cfg, parallel=True, validate=True):
             return best, best_flag
 
         # use precise bn to improve acc
-        if False:  #preciseBN and (
-            #epoch % cfg.PRECISEBN.preciseBN_interval == 0
-            #or epoch == total_epochs-1):
-            do_preciseBN(
-                model, precise_bn_loader, parallel,
-                min(cfg.PRECISEBN.num_iters_preciseBN, len(precise_bn_loader)))
+        if precise_bn and (epoch % cfg.PRECISEBN.preciseBN_interval == 0
+                           or epoch == total_epochs - 1):
+            do_preciseBN(model, precise_bn_loader, parallel,
+                         min(num_iters_precise_bn, len(precise_bn_loader)))
 
         #  aggregate sub_BN stats
-        print("Aggregate sub_BatchNorm stats...")
+        logger.info("Aggregate sub_BatchNorm stats...")
         aggregate_sub_bn_stats(model)
 
         # 5. Validation
@@ -341,7 +324,7 @@ def multi_train_model(cfg, parallel=True, validate=True):
         # 6. Save model and optimizer
         if epoch % cfg.get("save_interval",
                            10) == 0 or epoch in multi_save_epoch:
-            print("Save parameters===")
+            logger.info("[Save parameters] ======")
             subn_save(output_dir, model_name + str(local_rank) + '_', epoch + 1,
                       model, optimizer)
 

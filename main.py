@@ -14,7 +14,7 @@
 import paddle
 import argparse
 from paddlevideo.utils import get_config
-from paddlevideo.tasks import train_model, multi_train_model
+from paddlevideo.tasks import train_model, train_model_multigrid
 from paddlevideo.utils import get_dist_info
 
 
@@ -53,7 +53,7 @@ def main():
         paddle.distributed.init_parallel_env()
 
     if args.multigrid:
-        multi_train_model(cfg, parallel=parallel, validate=args.validate)
+        train_model_multigrid(cfg, parallel=parallel, validate=args.validate)
     else:
         train_model(cfg, parallel=parallel, validate=args.validate)
 
