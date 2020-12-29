@@ -22,7 +22,7 @@ Implement precise bn, which is useful for improving accuracy.
 """
 
 
-def do_preciseBN(model, data_loader, parallel, num_iters=200):
+def do_preciseBN(model, data_loader, parallel):
     """
     Recompute and update the batch norm stats to make them more precise. During
     training both BN stats and the weight are changing after every iteration, so
@@ -35,10 +35,10 @@ def do_preciseBN(model, data_loader, parallel, num_iters=200):
     Args:
         model: the model whose bn stats will be recomputed
         data_loader: an iterator. Produce data as input to the model
-        num_iters: number of iterations to compute the stats.
     Return:
         the model with precise mean and variance in bn layers.
     """
+    num_iters = len(data_loader)
     bn_layers_list = [
         m for m in model.sublayers()
         if any((isinstance(m, bn_type)
@@ -58,8 +58,7 @@ def do_preciseBN(model, data_loader, parallel, num_iters=200):
                     for bn in bn_layers_list]  #pre-ignore
     running_var = [paddle.zeros_like(bn._variance) for bn in bn_layers_list]
 
-    ind = -1
-    for ind, data in enumerate(itertools.islice(data_loader, num_iters)):
+    for ind, data in enumerate(data_loader):
         logger.info("doing precise BN {} / {}...".format(ind + 1, num_iters))
         if parallel:
             model._layers.train_step(data)
@@ -70,10 +69,6 @@ def do_preciseBN(model, data_loader, parallel, num_iters=200):
             # Accumulates the bn stats.
             running_mean[i] += (bn._mean - running_mean[i]) / (ind + 1)
             running_var[i] += (bn._variance - running_var[i]) / (ind + 1)
-
-    assert ind == num_iters - 1, (
-        "update_bn_stats is meant to run for {} iterations, but the dataloader stops at {} iterations."
-        .format(num_iters, ind))
 
     # Sets the precise bn stats.
     for i, bn in enumerate(bn_layers_list):

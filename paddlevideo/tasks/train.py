@@ -174,9 +174,7 @@ def train_model(cfg, parallel=True, validate=True):
         # use precise bn to improve acc
         if cfg.get("PRECISEBN") and (epoch % cfg.PRECISEBN.preciseBN_interval
                                      == 0 or epoch == cfg.epochs - 1):
-            do_preciseBN(
-                model, train_loader, parallel,
-                min(cfg.PRECISEBN.num_iters_preciseBN, len(train_loader)))
+            do_preciseBN(model, train_loader, parallel)
 
         # 5. Validation
         if validate and epoch % cfg.get("val_interval",

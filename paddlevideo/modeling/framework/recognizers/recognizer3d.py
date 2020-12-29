@@ -31,8 +31,8 @@ class Recognizer3D(BaseRecognizer):
     def train_step(self, data_batch, reduce_sum=False):
         """Training step.
         """
-        imgs = [data_batch[0], data_batch[1]]
-        labels = data_batch[2]
+        imgs = data_batch[0:2]
+        labels = data_batch[2:]
 
         # call forward
         cls_score = self(imgs)
@@ -47,7 +47,7 @@ class Recognizer3D(BaseRecognizer):
     def test_step(self, data_batch):
         """Test step.
         """
-        imgs = [data_batch[0], data_batch[1]]
+        imgs = data_batch[0:2]
         # call forward
         loss_metrics = self(imgs)
 
