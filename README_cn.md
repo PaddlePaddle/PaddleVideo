@@ -21,4 +21,44 @@ PaddleVideo 基于全新API设计的PaddlePaddle2.0框架，以支持视频领�
     PaddleVideo 提供更快的训练阶段解决方案，在SlowFast模型上提速30%，完整Kinectics-400训练只需要10天。
 
 - 全流程可部署
-    PaddleVideo 提供全流程的预测部署方案，从数据增广到模型设计，从速度测试到模型推理，PaddleVideo方便产出可快速部署的模型，完成同级别业界模型库部署阶段最后一公里。
+    PaddleVideo 提供全流程的预测部署方案，从数据增广到模型设计，从速度测试到模型推理，PaddleVideo方便产出可快速部署的模型，完成同级别业界模型库部署阶段最后一公里。、
+
+### 套件结构概览
+
+### 模型性能概览
+
+## 文档教程
+
+### 入门教程
+
+- [安装说明](docs/zh_CN/install.md)
+- [快速开始](docs/zh_CN/getting_started.md)
+- [benchmark]()
+
+### 进阶教程
+- [模型库整体设计]()
+- [配置模块设计]()
+- [PPTSM实践]()
+- [训练加速方案]()
+- [预测部署]()
+- [自定义开发]()
+
+### 模型库
+
+- 视频分类：
+    - [介绍]()
+    - [Attention-LSTM]()
+    - [TSN]()
+    - [TSM]()
+    - [PPTSM]()
+    - [SlowFast]()
+    - [VideoTag]()
+- 动作定位：
+    - [介绍]()
+    - [BMN]()
+- 时空动作检测：
+    - Coming Soon!
+
+
+## 许可证书
+本项目的发布受[Apache 2.0 license](LICENSE)许可认证。
