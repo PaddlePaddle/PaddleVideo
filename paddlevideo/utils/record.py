@@ -27,6 +27,10 @@ def build_record(cfg):
             ("lr", AverageMeter('lr', 'f', need_avg=False)),
             ("top1", AverageMeter("top1", '.5f')),
             ("top5", AverageMeter("top5", '.5f')),
+            ("hit_at_one", AverageMeter("hit_at_one", '.5f')),
+            ("perr", AverageMeter("perr", '.5f')),
+            ("gap", AverageMeter("gap", '.5f')),
+
             ("batch_time", AverageMeter('elapse', '.3f')),
             ("reader_time", AverageMeter('reader', '.3f')),
         ]

@@ -16,5 +16,6 @@ from .video import VideoDataset
 from .frame import FrameDataset
 from .slowfast_video import SFVideoDataset
 from .bmn_dataset import BMNDataset
+from .feature import FeatureDataset
 
-__all__ = ['VideoDataset', 'FrameDataset', 'SFVideoDataset', 'BMNDataset']
+__all__ = ['VideoDataset', 'FrameDataset', 'SFVideoDataset', 'BMNDataset', 'FeatureDataset']
