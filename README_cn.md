@@ -45,16 +45,14 @@ PaddleVideo 基于全新API设计的PaddlePaddle2.0框架，以支持视频领�
 
 ### 模型库
 
-- 视频分类：
-    - [介绍]()
+- 视频分类 [介绍]()
     - [Attention-LSTM]()
     - [TSN]()
     - [TSM]()
     - [PPTSM]()
     - [SlowFast]()
     - [VideoTag]()
-- 动作定位：
-    - [介绍]()
+- 动作定位 [介绍]()
     - [BMN]()
 - 时空动作检测：
     - Coming Soon!
