@@ -13,7 +13,8 @@ MODEL: #MODEL field
     dscale: 100
 
 DATASET: #DATASET field
-  batch_size: 4 #single bacth size
+  batch_size: 4 #single card bacth size
+  test_batch_size: 1
   num_workers: 8
   train:
     format: "BMNDataset"

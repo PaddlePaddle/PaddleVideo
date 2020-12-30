@@ -18,7 +18,8 @@ MODEL: #MODEL field
     dropout_rate: 0.5
 
 DATASET: #DATASET field
-  batch_size: 8  #single bacth size
+  batch_size: 8  #single card bacth size
+  test_batch_size: 8
   num_workers: 8
   train:
     format: "SFVideoDataset"
