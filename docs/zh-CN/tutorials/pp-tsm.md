@@ -1,30 +1,22 @@
-PP-TSM：An Effective and Efficient video-recognition model   
+PP-TSM高效实用视频识别模型  
+PP-TSM是PaddleVideo基于TSM优化和改进的视频模型，  
+其精度(UCF101和Kinetics400数据集top1)和推理速度均优于TSM论文及其他开源的TSM模型5%，3%以上，  
+要求使用PaddlePaddle2.0(可使用pip安装) 或适当的develop版本。  
 
-PP-TSM is an optimized model based on TSM in PaddleVideo,   
-whose performance (top-1 on UCF101 and Kinetics400) and inference spped   
-are better than TSM paper(https://arxiv.org/abs/1811.08383 ) and   
-other open source TSM，PaddlePaddle2.0(available on pip now) or   
-Daily Version( https://www.paddlepaddle.org.cn/documentation/docs/zh/install/Tables.html#whl-dev )   
-is required to run PP-TSM.    
+在仅用ImageNet pretrain情况下，PP-TSM在UCF101和Kinetics400数据集top1分别达到89.5%和73.5%，  
+在单卡V100上FP32推理速度为DOING, V100上开启TensorRT下FP16推理速度为TODO。
 
-When only use ImageNet for pretrain and only use 8X1 sample，  
-PP-TSM’s top1 reached to 89.5% and 73.5% on UCF101 and Kinetics400,   
-and inference speed of FP32 on single V100 is DOING,   
-inference speed of FP16 with TensorRT on single V100 isTODO.  
+据我们所知，在相同条件下，在Kinetics400上top1精度为73.5%，是至今为止开源的2D视频模型中的最高性能。  
 
-As far as we know, under the same conditions,    
-top1=73.5% on Kinetics400 is the best performance for 2D video model until now.  
-
-
-PP-TSM improved performance and speed of TSM with following methods:   
-1、Model Tweaks: ResNet50vd  
-2、ImageNet pretrain weights based on Knowledge Distillation  
-3、beter batch size  
-4、beter L2  
-5、label_smoothing  
-6、beter lr decay  
-7、Data augmentation  
-8、beter epoch num  
-9、bn strategy  
-10、integrated PaddleInference  
-11、more strategies todo: Knowledge Distillation、optimizer and so on.  
+PP-TSM从如下方面优化和提升TSM模型的精度和速度：
+1、基于知识蒸馏的预训练模型
+2、网络结构微调
+3、更优的batch size
+4、更优的L2正则化
+5、label_smoothing
+6、更优的lr decay
+7、数据增广
+8、更优的epoch num
+9、bn策略
+10、集成PaddleInference进行预测推理
+11、知识蒸馏、优化器等更多TODO策略
