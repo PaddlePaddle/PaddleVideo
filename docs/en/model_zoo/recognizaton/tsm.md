@@ -5,4 +5,4 @@ For detail , refer to the paper Temporal Shift Module for Efficient Video Unders
 
 Data Prepare, refer to the page of dataset: (TODO)  
 Model training and valid, refer to the page of tutorial: (TODO)  
-The Top-1 acc on Kinetics’ validation is 0.70.
+The Top-1 acc on Kinetics-400’ validation is 0.70.
