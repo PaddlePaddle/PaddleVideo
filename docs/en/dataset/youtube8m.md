@@ -10,5 +10,5 @@ There’s 3844 files’ download link for each set. official download tools also
 When the download is finished, you’ll get 3844 training files and 3844 validate files（TFRecord format）。  
 
 Transform Data Format  
-To speed up，we transform TFRecord to pickle format using dataset/youtube8m/tf2pkl.py,   
+To speed up，we transform TFRecord to pickle format using tf2pkl.py,   
 and split pkl to single video file using split_yt8m.py.
