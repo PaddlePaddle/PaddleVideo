@@ -128,6 +128,15 @@ PaddleVideo 基于全新API设计的PaddlePaddle2.0框架，支持视频领域�
 
 ### 模型性能概览
 
+各模型结构和骨干网络的代表模型在Kinectics-400数据集上Top1精度和单卡Tesla V100上预测速度(VPS)对比图。
+
+<div align="center">
+  <img src="docs/images/acc_vps.png" />
+</div>
+
+**说明：**
+- 图中模型均可在[模型库](#模型库)中获取
+
 ## 文档教程
 
 ### 入门教程
