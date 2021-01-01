@@ -5,6 +5,6 @@
 参考论文中实现的是两层LSTM结构，而本代码实现的是带Attention的双向LSTM，  
 Attention层可参考论文AttentionCluster( https://arxiv.org/abs/1711.09550 )。  
 
-AttentionLSTM模型使用2nd-Youtube-8M数据集，请参考数据准备页面（TODO）。  
+AttentionLSTM模型使用2nd-Youtube-8M数据集，请参考数据准备页面（ https://github.com/PaddlePaddle/PaddleVideo/blob/main/docs/zh-CN/dataset/youtube8m.md ）。  
 模型训练和评估，请参考教程页面(TODO)  
 在Youtube-8M验证集上，AttentionLSTM模型的Hit@1为0.89, PERR 为0.8012, GAP为0.8594.
