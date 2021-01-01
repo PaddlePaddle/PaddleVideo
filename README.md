@@ -148,7 +148,8 @@ The chart below illustrates the performance of the recognition models, including
 </div>
 
 **Note：**
-- all these models can be obtained in the [Model Zoo](#ModelZoo)
+- PPTSM improves 3.5% Top1 accuracy from standard TSM.
+- all these models described by RED color can be obtained in the [Model Zoo](#ModelZoo), and others are Pytorch results.
 
 ## Tutorials
 
