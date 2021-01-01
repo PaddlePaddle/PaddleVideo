@@ -143,7 +143,7 @@ PaddleVideo 基于全新API设计的PaddlePaddle2.0框架，支持视频领域�
 视频分类模型在Kinectics-400数据集上Acc Top1精度和单卡Tesla V100上预测速度(VPS)对比图。
 
 <div align="center">
-  <img src="docs/images/acc_vps.png" />
+  <img src="docs/images/acc_vps.jpeg" />
 </div>
 
 **说明：**
