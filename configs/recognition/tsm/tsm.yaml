@@ -41,7 +41,7 @@ PIPELINE: #PIPELINE field
             num_seg: 8
             seg_len: 1
             valid_mode: False
-        transform: #Mandotary, image transfrom operator
+        transform: #Mandotary, image transform operator.
             - Scale:
                 short_size: 256
             - MultiScaleCrop:
@@ -106,11 +106,6 @@ OPTIMIZER: #OPTIMIZER field
     weight_decay:
         name: 'L2'
         value: 1e-4
-
-EVALUATION:
-    interval: 5
-    function: "topk"
-    topk: (1,5)
 
 model_name: "TSM"
 log_interval: 20 #Optional, the interal of logger, default:10

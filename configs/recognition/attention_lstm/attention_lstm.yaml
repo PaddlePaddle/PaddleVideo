@@ -10,16 +10,15 @@ MODEL: #MODEL field
 DATASET: #DATASET field
     batch_size: 128  #Mandatory, bacth size
     num_workers: 0  #Mandatory, the number of subprocess on each GPU.
-    train: 
+    shuffle_valid: True
+    train:
         format: "FeatureDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
         data_prefix: "" #Mandatory, train data root path
         file_path:   "split_yt8m_list/train.list" #Mandatory, train data index file path
-        shuffle: True
     valid:
         format: "FeatureDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
         data_prefix: ""  #Mandatory, valid data root path
         file_path:   "split_yt8m_list/val.list" #Mandatory, train data index file path
-        shuffle: True
     test:
         format: "FeatureDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
         data_prefix: ""  #Mandatory, valid data root path
@@ -29,17 +28,17 @@ DATASET: #DATASET field
 PIPELINE: #PIPELINE field
     train: #Mandotary, indicate the pipeline to deal with the training data, associate to the 'paddlevideo/loader/pipelines/'
         decode:
-            name: "FeatureDecoder" #"VideoDecoder" 
+            name: "FeatureDecoder" #"VideoDecoder"
             num_classes: 3862
             mode: "train"
     valid: #Mandatory, indicate the pipeline to deal with the validing data. associate to the 'paddlevideo/loader/pipelines/'
         decode:
-            name: "FeatureDecoder" #"VideoDecoder" 
+            name: "FeatureDecoder" #"VideoDecoder"
             num_classes: 3862
             mode: "valid"
     test:
         decode:
-            name: "FeatureDecoder" #"VideoDecoder" 
+            name: "FeatureDecoder" #"VideoDecoder"
             num_classes: 3862
             mode: "test"
 
@@ -48,11 +47,11 @@ OPTIMIZER: #OPTIMIZER field
     centered: True
     learning_rate: #Mandatory, the type of learning rate scheduler, associate to the 'paddlevideo/solver/'
         name: 'PiecewiseDecay'
-        boundaries: [5, 8] 
-        values: [0.00025, 0.000025, 0.0000025]  
+        boundaries: [5, 8]
+        values: [0.00025, 0.000025, 0.0000025]
     weight_decay:
         name: 'L2'
-        value: 4e-4 
+        value: 4e-4
 
 EVALUATION:
     interval: 5

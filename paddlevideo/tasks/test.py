@@ -14,26 +14,36 @@
 
 import paddle
 from paddlevideo.utils import get_logger
-from ..loader import build_dataloader
+from ..loader.builder import build_dataloader, build_dataset
 from ..metrics import build_metric
+from ..modeling.builder import build_model
+from paddlevideo.utils import load
 
 logger = get_logger("paddlevideo")
 
 
-def test_model(model, dataset, cfg, weight, world_size):
+def test_model(cfg, weights, parallel=True):
     """Test model entry
 
     Args:
-        model (paddle.nn.Layer): The model to be tested.
-        dataset (paddle.dataset): Train dataaset.
+        cfg (dict): configuration.
+        weights (str): weights path to load.
+        parallel (bool): Whether to do multi-cards testing. Default: True.
+
     """
-    #NOTE: add a new field : test_batch_size ?
-    batch_size = cfg.DATASET.get("test_batch_size", 2)
+    # 1. Construct model.
+    model = build_model(cfg.MODEL)
+    if parallel:
+        model = paddle.DataParallel(model)
 
+    # 2. Construct dataset and dataloader.
+    dataset = build_dataset((cfg.DATASET.test, cfg.PIPELINE.test))
+    batch_size = cfg.DATASET.get("test_batch_size", 8)
     places = paddle.set_device('gpu')
-
+    # default num worker: 0, which means no subprocess will be created
+    num_workers = cfg.DATASET.get('num_workers', 0)
     dataloader_setting = dict(batch_size=batch_size,
-                              num_workers=cfg.DATASET.get("num_workers", 0),
+                              num_workers=num_workers,
                               places=places,
                               drop_last=False,
                               shuffle=False)
@@ -42,17 +52,12 @@ def test_model(model, dataset, cfg, weight, world_size):
 
     model.eval()
 
-    state_dicts = paddle.load(weight)
+    state_dicts = load(weights)
     model.set_state_dict(state_dicts)
-
-    parallel = world_size != 1
-    if parallel:
-        model = paddle.DataParallel(model)
 
     # add params to metrics
     cfg.METRIC.data_size = len(dataset)
     cfg.METRIC.batch_size = batch_size
-    cfg.METRIC.world_size = world_size
 
     Metric = build_metric(cfg.METRIC)
     for batch_id, data in enumerate(data_loader):
