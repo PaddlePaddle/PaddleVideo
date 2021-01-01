@@ -122,10 +122,7 @@ class AttentionLstmHead(BaseHead):
 
     def metric(self,
              lstm_output,
-             labels,
-             reduce_sum=False,
-             return_loss=True,
-             **kwargs):
+             labels):
         pred = lstm_output.numpy()
         label = labels.numpy()
         hit_at_one = youtube8m_metrics.calculate_hit_at_one(pred, label)
