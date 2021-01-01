@@ -148,7 +148,7 @@ The relationship between Acc Top1 and FPS on Kinectics400 dataset. (Tested on th
 </div>
 
 **Note：**
-- all these models can be obtained in the [Model Zoo](#ModelZoo)中获取
+- all these models can be obtained in the [Model Zoo](#ModelZoo)
 
 ## Tutorials
 
