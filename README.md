@@ -10,7 +10,7 @@ PaddleVideo is a toolset for video recognition, action localization, and spatio 
 ## Feature
 
 - **Advanced model zoo design**
-    PaddleVideo unifies the video understanding tasks, including recogniztion, localization, spatio temporal action detection, and so on. with the clear configuration system, we design a decoulping modular framework which can easily construct a customized network by combining different modules.
+    PaddleVideo unifies the video understanding tasks, including recogniztion, localization, spatio temporal action detection, and so on. with the clear configuration system, we design a decoupling modular framework which can easily construct a customized network by combining different modules.
 
 - **Various dataset and architectures**
     PaddleVideo supports more datasets and architectures, including Kinectics400, ucf101,YoutTube8M datasets, and video recognition model, such as TSN, TSM, SlowFast, AttentionLSTM and action localization model, like BMN.
