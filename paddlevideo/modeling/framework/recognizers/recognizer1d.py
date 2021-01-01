@@ -25,7 +25,7 @@ class Recognizer1D(BaseRecognizer):
 
         loss = self.head.loss(lstm_logit,  labels, reduce_sum, **kwargs)
 
-        hit_at_one, perr, gap = self.head.metric(lstm_output,  labels, reduce_sum, **kwargs)
+        hit_at_one, perr, gap = self.head.metric(lstm_output,  labels)
 
         loss_metrics = dict()
         loss_metrics['loss'] = loss
