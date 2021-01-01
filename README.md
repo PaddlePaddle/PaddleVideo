@@ -144,7 +144,7 @@ PaddleVideo is a toolset for video recognition, action localization, and spatio 
 The chart below illustrates the performance of the recognition models, including our implementation and pytorch version. It shows the relationship between Acc Top1 and VPS on the Kinectics400 dataset . (Tested on the Tesla V100.)
 
 <div align="center">
-  <img src="docs/images/acc_vps.png" />
+  <img src="docs/images/acc_vps.jpeg" />
 </div>
 
 **Note：**
