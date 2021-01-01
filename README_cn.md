@@ -9,19 +9,19 @@ PaddleVideo 基于全新API设计的PaddlePaddle2.0框架，支持视频领域�
 ## 特性
 
 - **模块化设计**
-    PaddleVideo 统一了视频理解框架，搭配清晰的配置系统，并将各部分功能拆分到不同组件中进行解耦，可以轻松组合，自定义组件和配置来快速实现视频算法模型。
+    PaddleVideo 统一了视频理解框架，搭配清晰的配置系统，将各部分功能拆分到不同组件中进行解耦。可以轻松组合，自定义组件和配置来快速实现视频算法模型。
 
 - **更多的数据集和模型结构**
     PaddleVideo 支持更多的数据集和模型结构，包括Kinectics400，ucf101，YoutTube8M等数据集，模型结构涵盖了视频分类模型TSN，TSM，SlowFast，AttentionLSTM和视频定位模型BMN等。
 
 - **更高指标的模型算法**
-    PaddleVideo 提供更高精度的模型结构和解决方案，在基于TSM基础改进的PPTSM上，达到2D网络SOTA效果，Acc1 73.5%相较标准版TSM提升3%且模型参数量持平。
+    PaddleVideo 提供更高精度的模型结构和解决方案，在基于TSM标准版改进的PPTSM上，达到2D网络SOTA效果，Top1 Acc 73.5% 相较标准版TSM提升3%且模型参数量持平。
 
 - **更快的解决方案**
-    PaddleVideo 提供更快的训练阶段解决方案，在SlowFast模型上提速30%，完整Kinectics-400训练只需要10天。
+    PaddleVideo 提供更快的训练阶段解决方案，在SlowFast上标准版相较pytorch提速100%，完整训练Kinectics400数据集只需10天。
 
 - **全流程可部署**
-    PaddleVideo 提供全流程的预测部署方案，从数据增广到模型设计，从速度测试到模型推理，PaddleVideo方便产出可快速部署的模型，完成同级别业界模型库部署阶段最后一公里。
+    PaddleVideo 提供全流程的预测部署方案，支持PaddlePaddle2.0动转静功能，方便产出可快速部署的模型，完成部署阶段最后一公里。
 
 ### 套件结构概览
 
