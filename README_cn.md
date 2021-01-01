@@ -49,6 +49,7 @@ PaddleVideo 基于全新API设计的PaddlePaddle2.0框架，支持视频领域�
             <li>TSM</li>
             <li>SlowFast</li>
             <li>PPTSM</li>
+            <li>VideoTag</li>
             <li>AttentionLSTM</li>
           </ul>
         </ul>
@@ -58,19 +59,30 @@ PaddleVideo 基于全新API设计的PaddlePaddle2.0框架，支持视频领域�
           </ul>
         </ul>
       </td>
-      <td>
-        <ul>
+      <td> 
           <li>Recognizer1D</li>
           <li>Recognizer2D</li>
           <li>Recognizer3D</li>
           <li>Localizer</li> 
+        <HR></HR>
+        <ul>Backbone
+            <li>resnet</li>
+            <li>resnet_tsm</li>
+            <li>resnet_tweaks_tsm</li>
+            <li>bmn</li>
+        </ul>
+        <ul>Head
+            <li>tsm_head</li>
+            <li>tsn_head</li>
+            <li>bmn_head</li>
+            <slowfast_head></li>
+            <bmn_head></li>
         </ul>
       </td>
       <td>
         <ul><li><b>Solver</b></li>
           <ul><li><b>Optimizer</b></li>
               <ul>
-                <li></li>
                 <li>Momentum</li>
                 <li>RMSProp</li>
               </ul>
@@ -128,7 +140,7 @@ PaddleVideo 基于全新API设计的PaddlePaddle2.0框架，支持视频领域�
 
 ### 模型性能概览
 
-各模型结构和骨干网络的代表模型在Kinectics-400数据集上Top1精度和单卡Tesla V100上预测速度(VPS)对比图。
+视频分类模型在Kinectics-400数据集上Acc Top1精度和单卡Tesla V100上预测速度(VPS)对比图。
 
 <div align="center">
   <img src="docs/images/acc_vps.png" />
