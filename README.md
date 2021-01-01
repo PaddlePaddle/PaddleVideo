@@ -13,13 +13,13 @@ PaddleVideo is a toolset for video recognition, action localization, and spatio 
     PaddleVideo unifies the video understanding tasks, including recogniztion, localization, spatio temporal action detection, and so on. with the clear configuration system, we design a decoupling modular framework which can easily construct a customized network by combining different modules.
 
 - **Various dataset and architectures**
-    PaddleVideo supports more datasets and architectures, including Kinectics400, ucf101,YoutTube8M datasets, and video recognition model, such as TSN, TSM, SlowFast, AttentionLSTM and action localization model, like BMN.
+    PaddleVideo supports more datasets and architectures, including Kinectics400, ucf101, YoutTube8M datasets, and video recognition models, such as TSN, TSM, SlowFast, AttentionLSTM and action localization model, like BMN.
 
 - **Higher performance**
     PaddleVideo has built-in solutions to improve accuracy on the recognition models. PPTSM, which is based on the standard TSM, already archive the best performance in the 2D recognition network, has the same size of parameters but improve the Top1 Acc to **73.5%** . One can easily apply the soulutions on his own dataset.
 
 - **Faster training strategy**
-    PaddleVideo support faster training strategy, it accelerates by 100% compared with the Pytorch standard version, and it only takes 10 days to train from scratch on the kinetics400 dataset.
+    PaddleVideo suppors faster training strategy, it accelerates by 100% compared with the standard version, and it only takes 10 days to train from scratch on the kinetics400 dataset.
 
 - **Deployable**
     PaddleVideo is powered by the Paddle Inference. There is no need to convert the model to ONNX format when deploying it, all you want can be found in this repository.
@@ -141,7 +141,7 @@ PaddleVideo is a toolset for video recognition, action localization, and spatio 
 
 ### Overview of the performance
 
-The relationship between Acc Top1 and FPS on Kinectics400 dataset. (Tested on the Tesla V100.)
+The chart below illustrates the performance of the recognition models, including our implementation and pytorch version. It shows the relationship between Acc Top1 and VPS on the Kinectics400 dataset . (Tested on the Tesla V100.)
 
 <div align="center">
   <img src="docs/images/acc_vps.png" />
