@@ -157,7 +157,7 @@ The chart below illustrates the performance of the video recognition models both
 
 - [Install](docs/en/install.md)
 - [Start](docs/en/getting_started.md)
-- [Benchmark](docs/en/benchmark.md)
+- [Benchmark](docs/en/benchmark.md)  <sup>coming soon</sup>
 
 ### Advanced
 - [modular design]() <sup>coming soon</sup>
