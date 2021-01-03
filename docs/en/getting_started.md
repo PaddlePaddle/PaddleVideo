@@ -65,7 +65,7 @@ After starting training, log file will generated, and its format is shown as bel
     
 
 <a name="model_resume"></a>
-### 1.2 resume
+### 1.2 Resume
 
 Indicate `-o resume_epoch` to resume, It will training from ```resume_epoch``` epoch, PaddleVideo will auto load optimizers parameters and checkpoints from `./output` folder, as it is the default output destination.
 
