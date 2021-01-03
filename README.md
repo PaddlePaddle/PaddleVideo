@@ -149,7 +149,7 @@ The chart below illustrates the performance of the video recognition models both
 
 **Note：**
 - PPTSM improves almost 3.5% Top1 accuracy from standard TSM.
-- all these models described by RED color can be obtained in the [Model Zoo](#ModelZoo), and others are Pytorch results.
+- all these models described by RED color can be obtained in the [Model Zoo](#ModelZoo)  <sup>coming soon</sup> , and others are Pytorch results.
 
 ## Tutorials
 
@@ -160,24 +160,24 @@ The chart below illustrates the performance of the video recognition models both
 - [Benchmark](docs/en/benchmark.md)
 
 ### Advanced
-- [modular design]()
-- [configuration design]()
-- [Higher performance PPTSM]()
-- [Accelerate training]()
-- [depolyment]()
-- [customized usage]()
+- [modular design]() <sup>coming soon</sup>
+- [configuration design]()  <sup>coming soon</sup>
+- [Higher performance PPTSM]() <sup>coming soon</sup>
+- [Accelerate training]() <sup>coming soon</sup>
+- [depolyment]() <sup>coming soon</sup>
+- [customized usage]() <sup>coming soon</sup>
 
 ### Model zoo
 
-- recognition [Introduction]()
-    - [Attention-LSTM]()
-    - [TSN]()
-    - [TSM]()
-    - [PPTSM]()
-    - [SlowFast]()
-    - [VideoTag]()
-- Localization [Introduction]()
-    - [BMN]()
+- recognition [Introduction]() <sup>coming soon</sup>
+    - [Attention-LSTM]() <sup>coming soon</sup>
+    - [TSN]() <sup>coming soon</sup>
+    - [TSM]() <sup>coming soon</sup>
+    - [PPTSM]() <sup>coming soon</sup>
+    - [SlowFast]() <sup>coming soon</sup>
+    - [VideoTag]() <sup>coming soon</sup>
+- Localization [Introduction]() <sup>coming soon</sup>
+    - [BMN]() <sup>coming soon</sup>
 - Spatio temporal action detection：
     - Coming Soon!
 
