@@ -155,7 +155,7 @@ The chart below illustrates the performance of the recognition models, including
 
 ### Basic
 
-- [Install](docs/eninstall.md)
+- [Install](docs/en/install.md)
 - [Start](docs/en/getting_started.md)
 - [Benchmark](docs/en/benchmark.md)
 
