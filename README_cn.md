@@ -184,3 +184,7 @@ PaddleVideo 基于全新API设计的PaddlePaddle2.0框架，支持视频领域�
 
 ## 许可证书
 本项目的发布受[Apache 2.0 license](LICENSE)许可认证。
+
+
+## 贡献
+我们欢迎您的任何贡献并感谢您的支持，更多信息请参考 [contribution guidelines](docs/CONTRIBUTING.md).
