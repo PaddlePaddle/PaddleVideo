@@ -10,6 +10,7 @@
 ## 二、安装PaddlePaddle
 
 运行PaddleVideo需要`PaddlePaddle 2.0`或更高版本。请参照[安装文档](http://www.paddlepaddle.org.cn/install/quick)中的说明进行操作。
+PaddleVideo只支持python3.7及以上的运行环境，依赖项请安装python3.7及以上的安装包
 
 如果已经安装好了cuda、cudnn、nccl或者安装好了nvidia-docker运行环境，可以pip3安装最新GPU版本PaddlePaddle
 
@@ -61,3 +62,11 @@ Python依赖库在[requirements.txt](https://github.com/PaddlePaddle/PaddleVideo
 ```
 pip3 install --upgrade -r requirements.txt
 ```
+
+**从python安装包安装PaddleVideo**
+
+安装最新的PaddleVideo wheel包来体验PaddleVideo，coming soon！
+
+**从Docker安装PaddleVideo**
+
+安装我们提供的Docker运行环境来体验PaddleVideo，coming soon！
