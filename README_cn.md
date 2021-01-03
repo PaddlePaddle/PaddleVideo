@@ -149,7 +149,7 @@ PaddleVideo 基于全新API设计的PaddlePaddle2.0框架，支持视频领域�
 **说明：**
 - 红色文字描述为PaddleVideo提供的模型，黑色文字描述为Pytorch实现
 - PPTSM在TSM标准版上精度提升3.5%，预测速度也略有增加。
-- 图中红色描述的模型均可在[模型库](#模型库)中获取
+- 图中红色描述的模型均可在[模型库](#模型库) <sup>coming soon</sup>中获取
 
 ## 文档教程
 
@@ -157,27 +157,27 @@ PaddleVideo 基于全新API设计的PaddlePaddle2.0框架，支持视频领域�
 
 - [安装说明](docs/zh-CN/install.md)
 - [快速开始](docs/zh-CN/getting_started.md)
-- [benchmark]()
+- [benchmark]()  <sup>coming soon</sup>
 
 ### 进阶教程
-- [模型库整体设计]()
-- [配置模块设计]()
-- [PPTSM实践]()
-- [训练加速方案]()
-- [预测部署]()
-- [自定义开发]()
+- [模型库整体设计]() <sup>coming soon</sup>
+- [配置模块设计]() <sup>coming soon</sup>
+- [PPTSM实践]() <sup>coming soon</sup>
+- [训练加速方案]() <sup>coming soon</sup>
+- [预测部署]() <sup>coming soon</sup>
+- [自定义开发]() <sup>coming soon</sup>
 
 ### 模型库
 
-- 视频分类 [介绍]()
-    - [Attention-LSTM]()
-    - [TSN]()
-    - [TSM]()
-    - [PPTSM]()
-    - [SlowFast]()
-    - [VideoTag]()
-- 动作定位 [介绍]()
-    - [BMN]()
+- 视频分类 [介绍]() <sup>coming soon</sup>
+    - [Attention-LSTM]() <sup>coming soon</sup>
+    - [TSN]() <sup>coming soon</sup>
+    - [TSM]() <sup>coming soon</sup>
+    - [PPTSM]() <sup>coming soon</sup>
+    - [SlowFast]() <sup>coming soon</sup>
+    - [VideoTag]() <sup>coming soon</sup>
+- 动作定位 [介绍]() <sup>coming soon</sup>
+    - [BMN]() <sup>coming soon</sup>
 - 时空动作检测：
     - Coming Soon!
 
