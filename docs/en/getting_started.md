@@ -6,7 +6,7 @@ Please refer to [installation documents](./install.md) to prepare the enviroment
 PaddleVideo only support linux operation system and GPU running time environment
 
 <a name="1"></a>
-## 1. Training and Testing
+## 1. Train and Test
 
 Start running multi-cards training scripts or test scripts by `paddle.distributed.launch`, or run the `run.sh` directly.
 
@@ -15,7 +15,7 @@ sh run.sh
 ```
 
 <a name="model_train"></a>
-### 1.1 Training
+### 1.1 Train
 
 Switch `--validate` on to validating while training.
 
@@ -100,7 +100,7 @@ python3 -m paddle.distributed.launch \
 Note: PaddleVideo will NOT load shape unmatched parameters.
 
 <a name="model_test"></a>
-### 1.4 Testing
+### 1.4 Test
 
 Switch `--test` on to start test mode, and indicate `--weights` to load pretrained model.
 
