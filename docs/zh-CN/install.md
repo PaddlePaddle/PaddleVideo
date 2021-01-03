@@ -1,3 +1,5 @@
+简体中文 | [English](../en/install.md)
+
 # 安装说明
 
 ---
