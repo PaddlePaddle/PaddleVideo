@@ -1,3 +1,5 @@
+[简体中文](../zh-CN/getting_started.md) | English
+
 # Start
 ---
 
