@@ -141,14 +141,14 @@ PaddleVideo is a toolset for video recognition, action localization, and spatio 
 
 ### Overview of the performance
 
-The chart below illustrates the performance of the recognition models, including our implementation and pytorch version. It shows the relationship between Acc Top1 and VPS on the Kinectics400 dataset . (Tested on the Tesla V100.)
+The chart below illustrates the performance of the video recognition models both 2D and 3D architectures, including our implementation and Pytorch version. It shows the relationship between Acc Top1 and VPS on the Kinectics400 dataset. (Tested on the Tesla V100.)
 
 <div align="center">
   <img src="docs/images/acc_vps.jpeg" />
 </div>
 
 **Note：**
-- PPTSM improves 3.5% Top1 accuracy from standard TSM.
+- PPTSM improves almost 3.5% Top1 accuracy from standard TSM.
 - all these models described by RED color can be obtained in the [Model Zoo](#ModelZoo), and others are Pytorch results.
 
 ## Tutorials
