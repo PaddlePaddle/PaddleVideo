@@ -155,8 +155,8 @@ PaddleVideo 基于全新API设计的PaddlePaddle2.0框架，支持视频领域�
 
 ### 入门教程
 
-- [安装说明](docs/zh_CN/install.md)
-- [快速开始](docs/zh_CN/getting_started.md)
+- [安装说明](docs/zh-CN/install.md)
+- [快速开始](docs/zh-CN/getting_started.md)
 - [benchmark]()
 
 ### 进阶教程
