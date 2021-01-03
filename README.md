@@ -155,9 +155,9 @@ The chart below illustrates the performance of the recognition models, including
 
 ### Basic
 
-- [Install](docs/zh_CN/install.md)
-- [Start](docs/zh_CN/getting_started.md)
-- [Benchmark]()
+- [Install](docs/eninstall.md)
+- [Start](docs/en/getting_started.md)
+- [Benchmark](docs/en/benchmark.md)
 
 ### Advanced
 - [modular design]()
