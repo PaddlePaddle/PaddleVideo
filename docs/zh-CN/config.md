@@ -1,2 +1,1 @@
-PLACEHOLDER
-# Explain how the config system work and how to build own class?
+简体中文 | [English](../en/config.md)

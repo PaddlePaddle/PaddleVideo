@@ -1,9 +1,11 @@
 简体中文 | [English](../en/benchmark.md)
+
 # Benchmark
 
 此文档主要对比PaddleVideo模型库与主流模型库的训练速度。
 
-## 实验环境配置介绍
+
+## 环境配置
 ### 硬件环境
 
 - 8 NVIDIA Tesla V100 (16G) GPUs
@@ -16,7 +18,8 @@
 - CUDA 10.1
 - CUDNN 7.6.3
 - NCCL 2.1.15
-- gcc 8.2.0
+- GCC 8.2.0
+
 
 ### 实验与评价指标
 
@@ -30,7 +33,7 @@
 ## 实验结果
 ### 分类模型
 
-| Model | batch size x gpus | Paddle(ips) | Reference(ips) | MMAction2 (ips)  | PySlowFast (ips)|
+| Model | batch size <sub>x</sub> gpus | PaddleVideo(ips) | Reference(ips) | MMAction2 (ips)  | PySlowFast (ips)|
 | :------: | :-------------------:|:---------------:|:---------------: | :---------------:  |:---------------: |
 | [TSM](../../configs/recognition/tsm/tsm.yaml) | 16x8 | 58.1 | 46.04(temporal-shift-module) | To do | X |
 | [PPTSM](../../configs/recognition/tsm/pptsm.yaml) | 16x8 |  57.6 | X |    X   | X |
@@ -38,8 +41,10 @@
 | [Slowfast](../../configs/recognition/slowfast/slowfast.yaml)| 16x8 | 99.5 | X | To do | 43.2 |
 | [Attention_LSTM](../../configs/recognition/attention_lstm/attention_lstm.yaml) |  128x8  | 112.6  | X | X | X |
 
+
 ### 定位模型
 
-| Model | Paddle(ips) |MMAction2 (ips) |BMN(boundary matching network) (ips)|
+| Model | PaddleVideo(ips) |MMAction2 (ips) |BMN(boundary matching network) (ips)|
 | :--- | :---------------: | :-------------------------------------: | :-------------------------------------: |
 | [BMN](../../configs/localization/bmn.yaml)  | 43.84 | x | x |
+

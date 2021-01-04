@@ -10,13 +10,13 @@ PaddleVideo is a toolset for video recognition, action localization, and spatio 
 ## Feature
 
 - **Advanced model zoo design**
-    PaddleVideo unifies the video understanding tasks, including recogniztion, localization, spatio temporal action detection, and so on. with the clear configuration system, we design a decoupling modular framework which can easily construct a customized network by combining different modules.
+    PaddleVideo unifies the video understanding tasks, including recogniztion, localization, spatio temporal action detection, and so on. with the clear configuration system based on IOC/DI, we design a decoupling modular and extensible framework which can easily construct a customized network by combining different modules.
 
 - **Various dataset and architectures**
     PaddleVideo supports more datasets and architectures, including Kinectics400, ucf101, YoutTube8M datasets, and video recognition models, such as TSN, TSM, SlowFast, AttentionLSTM and action localization model, like BMN.
 
 - **Higher performance**
-    PaddleVideo has built-in solutions to improve accuracy on the recognition models. PPTSM, which is based on the standard TSM, already archive the best performance in the 2D recognition network, has the same size of parameters but improve the Top1 Acc to **73.5%** , and one can easily apply the soulutions on his own dataset.
+    PaddleVideo has built-in solutions to improve accuracy on the recognition models. PP-TSM, which is based on the standard TSM, already archive the best performance in the 2D recognition network, has the same size of parameters but improve the Top1 Acc to **73.5%** , and one can easily apply the soulutions on his own dataset.
 
 - **Faster training strategy**
     PaddleVideo suppors faster training strategy, it accelerates by 100% compared with the standard Slowfast version, and it only takes 10 days to train from scratch on the kinetics400 dataset.
@@ -49,7 +49,7 @@ PaddleVideo is a toolset for video recognition, action localization, and spatio 
             <li>TSN</li>
             <li>TSM</li>
             <li>SlowFast</li>
-            <li>PPTSM</li>
+            <li>PP-TSM</li>
             <li>VideoTag</li>
             <li>AttentionLSTM</li>
           </ul>
@@ -116,20 +116,17 @@ PaddleVideo is a toolset for video recognition, action localization, and spatio 
         </ul> 
         <ul><li><b>Image</b></li>
             <ul>
-                <li>Resize</li>  
-                <li>Flipping</li>  
-                <li>MultiScaleCrop</li>
+                <li>Scale</li>
+                <li>Random FLip</li>
+                <li>Jitter Scale</li>  
                 <li>Crop</li>
-                <li>Color Distort</li>  
+                <li>MultiCrop</li>
+                <li>Center Crop</li>
+                <li>MultiScaleCrop</li>
                 <li>Random Crop</li>
+                <li>PackOutput</li>
             </ul>
          </ul>
-         <ul><li><b>Image</b></li>
-            <ul>
-                <li>Mixup </li>
-                <li>Cutmix </li>
-            </ul>
-        </ul>  
       </td>  
     </tr>
 
@@ -148,7 +145,7 @@ The chart below illustrates the performance of the video recognition models both
 </div>
 
 **Note：**
-- PPTSM improves almost 3.5% Top1 accuracy from standard TSM.
+- PP-TSM improves almost 3.5% Top1 accuracy from standard TSM.
 - all these models described by RED color can be obtained in the [Model Zoo](#ModelZoo)  <sup>coming soon</sup> , and others are Pytorch results.
 
 ## Tutorials
@@ -157,27 +154,28 @@ The chart below illustrates the performance of the video recognition models both
 
 - [Install](docs/en/install.md)
 - [Start](docs/en/getting_started.md)
-- [Benchmark](docs/en/benchmark.md)  <sup>coming soon</sup>
+- [Benchmark](docs/en/benchmark.md)
+- [Tools](docs/en/tools.md)
 
 ### Advanced
-- [modular design]() <sup>coming soon</sup>
-- [configuration design]()  <sup>coming soon</sup>
-- [Higher performance PPTSM]() <sup>coming soon</sup>
+- [Modular design]() <sup>coming soon</sup>
+- [Configuration design](docs/en/config.md)  <sup>coming soon</sup>
+- [Higher performance PP-TSM]() <sup>coming soon</sup>
 - [Accelerate training]() <sup>coming soon</sup>
-- [depolyment]() <sup>coming soon</sup>
-- [customized usage]() <sup>coming soon</sup>
+- [Depolyment]() <sup>coming soon</sup>
+- [Customized usage]() <sup>coming soon</sup>
 
 ### Model zoo
 
-- recognition [Introduction]() <sup>coming soon</sup>
-    - [Attention-LSTM]() <sup>coming soon</sup>
-    - [TSN]() <sup>coming soon</sup>
-    - [TSM]() <sup>coming soon</sup>
-    - [PPTSM]() <sup>coming soon</sup>
-    - [SlowFast]() <sup>coming soon</sup>
-    - [VideoTag]() <sup>coming soon</sup>
-- Localization [Introduction]() <sup>coming soon</sup>
-    - [BMN]() <sup>coming soon</sup>
+- recognition [Brief](docs/en/model_zoo/reconition/README.md) <sup>coming soon</sup>
+    - [Attention-LSTM](docs/en/model_zoo/recognition/attention_lstm.md) <sup>coming soon</sup>
+    - [TSN](docs/en/model_zoo/recognition/tsn.md) <sup>coming soon</sup>
+    - [TSM](docs/en/model_zoo/recognition/tsm.md) <sup>coming soon</sup>
+    - [PP-TSM](docs/en/model_zoo/recognition/pp-tsm.md) <sup>coming soon</sup>
+    - [SlowFast](docs/en/model_zoo/recognition/slowfast.md) <sup>coming soon</sup>
+    - [VideoTag](docs/en/model_zoo/recognition/videotag.md) <sup>coming soon</sup>
+- Localization [Brief](docs/en/model_zoo/recognition/README.md) <sup>coming soon</sup>
+    - [BMN](docs/en/model_zoo/localization/bmn.md) <sup>coming soon</sup>
 - Spatio temporal action detection：
     - Coming Soon!
 

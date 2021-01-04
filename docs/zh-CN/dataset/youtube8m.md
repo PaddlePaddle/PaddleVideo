@@ -10,4 +10,5 @@ YouTube-8M 是一个大规模视频标签数据集，包含百万级视频，具
 
 数据格式转化  
 为了加速，需要将TFRecord文件格式转成了pickle格式，请使用转化脚本：tf2pkl.py。  
-然后将pkl拆分为单视频一个文件，请使用拆分脚本：split_yt8m.py。
+然后将pkl拆分为单视频一个文件，请使用拆分脚本：split_yt8m.py。  
+（ https://github.com/PaddlePaddle/PaddleVideo/blob/main/data/yt8m/split_yt8m.py ）

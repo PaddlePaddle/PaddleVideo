@@ -3,20 +3,21 @@
 
 We compare our results with some popular frameworks and official releases in terms of speed.
 
-## Settings
+## Environment
+
 ### Hardware
 
 - 8 NVIDIA Tesla V100 (16G) GPUs
 - Intel(R) Xeon(R) Gold 6148 CPU @ 2.40GHz
 
-### Software Environment
+### Software
 
 - Python 3.7
 - PaddlePaddle2.0
 - CUDA 10.1
 - CUDNN 7.6.3
 - NCCL 2.1.15
-- gcc 8.2.0
+- GCC 8.2.0
 
 ## Experiments and Statistics
 The statistic is the average training time, including data processing and model training time, and the training speed is measured with ips(instance per second). Note that we skip the first 50 iters as they may contain the device warmup time.
@@ -27,10 +28,12 @@ To ensure the fairness of the comparison, the comparison experiments were conduc
 
 Significant improvement can be observed when comparing with other video understanding framework as shown in the table below, Especially the [Slowfast](../../configs/recognition/slowfast/slowfast.yaml) model is nearly 2x faster than the counterparts. 
 
+
+
 ## Results
 ### Recognizers
 
-| Model | batch size x gpus | Paddle(ips) | Reference(ips) | MMAction2 (ips)  | PySlowFast (ips)|
+| Model | batch size <sub>x</sub> gpus | PaddleVideo(ips) | Reference(ips) | MMAction2 (ips)  | PySlowFast (ips)|
 | :------: | :-------------------:|:---------------:|:---------------: | :---------------:  |:---------------: |
 | [TSM](../../configs/recognition/tsm/tsm.yaml) | 16x8 | 58.1 | 46.04(temporal-shift-module) | To do | X |
 | [PPTSM](../../configs/recognition/tsm/pptsm.yaml) | 16x8 |  57.6 | X |    X   | X |
@@ -38,8 +41,9 @@ Significant improvement can be observed when comparing with other video understa
 | [Slowfast](../../configs/recognition/slowfast/slowfast.yaml)| 16x8 | 99.5 | X | To do | 43.2 |
 | [Attention_LSTM](../../configs/recognition/attention_lstm/attention_lstm.yaml) |  128x8  | 112.6  | X | X | X |
 
+
 ### Localizers
 
-| Model | Paddle(ips) |MMAction2 (ips) |BMN(boundary matching network) (ips)|
+| Model | PaddleVideo(ips) |MMAction2 (ips) |BMN(boundary matching network) (ips)|
 | :--- | :---------------: | :-------------------------------------: | :-------------------------------------: |
 | [BMN](../../configs/localization/bmn.yaml)  | 43.84 | x | x |
