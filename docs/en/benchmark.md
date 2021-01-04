@@ -31,7 +31,7 @@ Significant improvement can be observed when comparing with other video understa
 ## Results
 ### Recognizers
 
-| Model | batch size x gpus | Paddle(ips) | Reference(ips) | MMAction2 (ips)  | PySlowFast (ips)|
+| Model | batch size x gpus | PaddleVideo(ips) | Reference(ips) | MMAction2 (ips)  | PySlowFast (ips)|
 | :------: | :-------------------:|:---------------:|:---------------: | :---------------:  |:---------------: |
 | [TSM](../configs/recognition/tsm/tsm.yaml) | 16x8 | 58.1 | 46.04(temporal-shift-module) | To do | X |
 | [PPTSM](../configs/recognition/tsm/pptsm.yaml) | 16x8 |  57.6 | X |    X   | X |
@@ -41,6 +41,6 @@ Significant improvement can be observed when comparing with other video understa
 
 ### Localizers
 
-| Model | Paddle(ips) |MMAction2 (ips) |BMN(boundary matching network) (ips)|
+| Model | PaddleVideo(ips) |MMAction2 (ips) |BMN(boundary matching network) (ips)|
 | :--- | :---------------: | :-------------------------------------: | :-------------------------------------: |
 | [BMN](../configs/localization/bmn.yaml)  | To do | x | x |
