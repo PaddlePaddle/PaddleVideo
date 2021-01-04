@@ -39,7 +39,7 @@ def train_model(cfg, weights=None, parallel=True, validate=True):
 
     logger = get_logger("paddlevideo")
     batch_size = cfg.DATASET.get('batch_size', 8)
-    valid_batch_size = cfg.DATASET.get('valid_batch_size', 8)
+    valid_batch_size = cfg.DATASET.get('valid_batch_size', batch_size)
     places = paddle.set_device('gpu')
 
     # default num worker: 0, which means no subprocess will be created
