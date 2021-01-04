@@ -11,4 +11,5 @@ When the download is finished, you’ll get 3844 training files and 3844 validat
 
 Transform Data Format  
 To speed up，we transform TFRecord to pickle format using tf2pkl.py,   
-and split pkl to single video file using split_yt8m.py.
+and split pkl to single video file using split_yt8m.py.  
+（ https://github.com/PaddlePaddle/PaddleVideo/blob/main/data/yt8m/split_yt8m.py ）
