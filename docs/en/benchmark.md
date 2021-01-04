@@ -35,7 +35,7 @@ Significant improvement can be observed when comparing with other video understa
 | :------: | :-------------------:|:---------------:|:---------------: | :---------------:  |:---------------: |
 | [TSM](./model_zoo/recognition/tsm.md) | 16x8 | 58.1 | 46.04(temporal-shift-module) | <sup>ToDo</sup> | X |
 | [PPTSM](./model_zoo/recognition/pp-tsm.md) | 16x8 |  57.6 | X |    X   | X |
-| [TSN](./model_zoo/recognition/tsn.md) | 16x8 |  841.1 |  <sup>ToDo (tsn-pytorch)</sup> | ToDo | X | 
+| [TSN](./model_zoo/recognition/tsn.md) | 16x8 |  841.1 |  <sup>ToDo (tsn-pytorch)</sup> | <sup>ToDo</sup> | X | 
 | [Slowfast](./model_zoo/recognition/slowfast.md)| 16x8 | 99.5 | X | <sup>ToDo</sup> | 43.2 |
 | [Attention_LSTM](./model_zoo/recognition/attention_lstm.md) |  128x8  | 112.6  | X | X | X |
 
