@@ -1,3 +1,4 @@
+[简体中文](../cn/benchmark.md) | English
 # Benchmark
 
 We compare our results with some popular frameworks and official releases in terms of speed.
@@ -19,7 +20,7 @@ We compare our results with some popular frameworks and official releases in ter
 - GCC 8.2.0
 
 ## Experiments and Statistics
-The statistics is the average training time, including data processing and model training time, and the training speed is measured with ips(instance per second). Note that we skip the first 50 iters as they may contain the device warmup time.
+The statistic is the average training time, including data processing and model training time, and the training speed is measured with ips(instance per second). Note that we skip the first 50 iters as they may contain the device warmup time.
 
 Here we compare PaddleVideo with the other video understanding toolkits in the same data and model settings.
  
