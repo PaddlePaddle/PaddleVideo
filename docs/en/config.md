@@ -1,4 +1,4 @@
-Configs design
+# Configs design
 
 ---
 we will explain how the PaddleVideo use the basic IOC/DI technology to decouple and control the whole framework. It is flexible to increase modularity of this system and make it extensible. At last we will explain the details of config yaml and training script args.
