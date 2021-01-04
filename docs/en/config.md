@@ -44,7 +44,8 @@ Second, to inplenment DI, we build two components:
 We implenment a getter and a setter function to map string to an instance.
 [source code](../../paddlevideo/utils/registry.py)
 
-```excerpt from source code.
+```python
+#excerpt from source code.
 class Registry():
     def __init__(self, name):
         self._name = name
@@ -77,7 +78,7 @@ It provides name -> object mapping. For example, To register an object:
 2. Builder
 To obtain registed module.
 ```python
-    Usage: To build a module.
+    # Usage: To build a module.
     
     backbone_name = "ResNet"
     b = BACKBONES.get(backbone_name)()
