@@ -33,14 +33,14 @@ Significant improvement can be observed when comparing with other video understa
 
 | Model | batch size x gpus | PaddleVideo(ips) | Reference(ips) | MMAction2 (ips)  | PySlowFast (ips)|
 | :------: | :-------------------:|:---------------:|:---------------: | :---------------:  |:---------------: |
-| [TSM](../configs/recognition/tsm/tsm.yaml) | 16x8 | 58.1 | 46.04(temporal-shift-module) | To do | X |
-| [PPTSM](../configs/recognition/tsm/pptsm.yaml) | 16x8 |  57.6 | X |    X   | X |
-| [TSN](../configs/recognition/tsn/tsn.yaml) | 16x8 |  841.1 |  To do (tsn-pytorch) | To do | X | 
-| [Slowfast](../configs/recogntion/slowfast/slowfast.yaml)| 16x8 | 99.5 | X | To do | 43.2 |
-| [Attention_LSTM](../configs/recognition/attention_lstm/attention_lstm.yaml) |  128x8  | 112.6  | X | X | X |
+| [TSM](./model_zoo/recognition/tsm.md) | 16x8 | 58.1 | 46.04(temporal-shift-module) | To do | X |
+| [PPTSM](./model_zoo/recognition/pp-tsm.md) | 16x8 |  57.6 | X |    X   | X |
+| [TSN](./model_zoo/recognition/tsn.md) | 16x8 |  841.1 |  To do (tsn-pytorch) | To do | X | 
+| [Slowfast](./model_zoo/recognition/slowfast.md)| 16x8 | 99.5 | X | To do | 43.2 |
+| [Attention_LSTM](./model_zoo/recognition/attention_lstm.md) |  128x8  | 112.6  | X | X | X |
 
 ### Localizers
 
 | Model | PaddleVideo(ips) |MMAction2 (ips) |BMN(boundary matching network) (ips)|
 | :--- | :---------------: | :-------------------------------------: | :-------------------------------------: |
-| [BMN](../configs/localization/bmn.yaml)  | To do | x | x |
+| [BMN](./model_zoo/localization/bmn.md)  | To do | x | x |
