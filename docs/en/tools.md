@@ -2,7 +2,7 @@
 
 # Tools
 
-This page include the usage of some useful tools in PaddleVideo
+This page includes the usage of some useful tools in PaddleVideo.
 
 ## Params
 
