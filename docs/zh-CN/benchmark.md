@@ -25,7 +25,7 @@
 ### 比较规则和方法
 
 我们在相同的数据和模型配置下对比Paddle视频库和其他的视频理解工具箱，为了保证比较的公平性，对比实验都是在相同的数据和硬件条件下进行，实验所用数据请参考[数据准备](./dataset/k400.md)。观察下表可以发现Paddle视频库相比其他的视频理解框架在
-训练速度方面取得了巨大的提升，尤其是[Slowfast](../../configs/recogntion/slowfast/slowfast.yaml)模型取得了将近一倍的训练速度的提升。对于每一种模型配置，我们采用了相同的数据预处理方法并且保证输入是相同的。
+训练速度方面取得了巨大的提升，尤其是[Slowfast](../../configs/recognition/slowfast/slowfast.yaml)模型取得了将近一倍的训练速度的提升。对于每一种模型配置，我们采用了相同的数据预处理方法并且保证输入是相同的。
 
 ## 实验结果
 ### 分类模型
@@ -35,7 +35,7 @@
 | [TSM](../../configs/recognition/tsm/tsm.yaml) | 16x8 | 58.1 | 46.04(temporal-shift-module) | To do | X |
 | [PPTSM](../../configs/recognition/tsm/pptsm.yaml) | 16x8 |  57.6 | X |    X   | X |
 | [TSN](../../configs/recognition/tsn/tsn.yaml) | 16x8 |  841.1 |  To do (tsn-pytorch) | To do | X | 
-| [Slowfast](../../configs/recogntion/slowfast/slowfast.yaml)| 16x8 | 99.5 | X | To do | 43.2 |
+| [Slowfast](../../configs/recognition/slowfast/slowfast.yaml)| 16x8 | 99.5 | X | To do | 43.2 |
 | [Attention_LSTM](../../configs/recognition/attention_lstm/attention_lstm.yaml) |  128x8  | 112.6  | X | X | X |
 
 ### 定位模型
