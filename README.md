@@ -116,20 +116,17 @@ PaddleVideo is a toolset for video recognition, action localization, and spatio 
         </ul> 
         <ul><li><b>Image</b></li>
             <ul>
-                <li>Resize</li>  
-                <li>Flipping</li>  
-                <li>MultiScaleCrop</li>
+                <li>Scale</li>
+                <li>Random FLip</li>
+                <li>Jitter Scale</li>  
                 <li>Crop</li>
-                <li>Color Distort</li>  
+                <li>MultiCrop</li>
+                <li>Center Crop</li>
+                <li>MultiScaleCrop</li>
                 <li>Random Crop</li>
+                <li>PackOutput</li>
             </ul>
          </ul>
-         <ul><li><b>Image</b></li>
-            <ul>
-                <li>Mixup </li>
-                <li>Cutmix </li>
-            </ul>
-        </ul>  
       </td>  
     </tr>
 
