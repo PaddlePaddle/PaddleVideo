@@ -1,4 +1,4 @@
-[简体中文](../zh-CN.md) | English
+[简体中文](../zh-CN/tools.md) | English
 
 # Tools
 
