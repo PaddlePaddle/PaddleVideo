@@ -4,7 +4,7 @@
 ## Content
 
 - [Introduction](#Introduction)
-- [Data Preparation](#Data Preparation)
+- [Data](#Data)
 - [Train](#Train)
 - [Test](#Test)
 - [Reference](#Reference)
