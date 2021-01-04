@@ -38,6 +38,10 @@ def parse_args():
                         help='config file path')
 
     parser.add_argument("--img_size", type=int, default=224)
+    parser.add_argument("--num_segs", type=int, default=8)
+    parser.add_argument("--FLOPs",
+                        action="store_true",
+                        help="whether to print FLOPs")
 
     return parser.parse_args()
 
@@ -58,9 +62,15 @@ def main():
     print(f"Building model({model_name})...")
     model = build_model(cfg)
 
-    params_info = paddle.summary(model, (1, 8, 3, 224, 224))
-
+    img_size = args.img_size
+    num_segs = args.num_segs
+    params_info = paddle.summary(model, (1, num_segs, 3, img_size, img_size))
     print(params_info)
+
+    if args.FLOPs:
+        flops_info = paddle.flops(model, [1, num_segs, 3, img_size, img_size],
+                                  print_detail=True)
+        print(flops_info)
 
 
 if __name__ == "__main__":
