@@ -4,6 +4,8 @@
 This page shows how PaddleVideo use the basic IOC/DI technology to decouple and control the whole framework. It is flexible to increase modularity of this system and make it extensible. At last we will explain the details of config yaml and training script args.
 
 
+## Design
+
 First, when we create a new class, it is common to new a instance like:
 
 ```python
@@ -92,7 +94,7 @@ Finally, We build all of the framework components from config yaml which matches
 
 ---
 
-- config yaml details <sup>Refine soon</sup>
+## config yaml details <sup>Refine soon</sup>
 
 We separate the config to several parts, in high level:
 
