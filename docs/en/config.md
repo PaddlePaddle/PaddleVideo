@@ -6,7 +6,7 @@ we will explain how the PaddleVideo use the basic IOC/DI technology to decouple 
 
 First, when we create a new class, it is common to new a instance like:
 
-```pseudo
+```python
 class TSM():
     XXX
 
@@ -15,7 +15,7 @@ a = TSM(init_attributes)
 
 when more classes are created, the coupling relationship between the calling and called method will increase sharply, obviously, we can create a factory class to solve it, like that:
 
-```pseudo
+```python
 if model_name == "TSM":
     model = TSM()
 elif model_name == "TSN":
@@ -24,7 +24,7 @@ elif ...
 ```
 and 
 
-```pseudo
+```python
 optimizer_cfg = dict(name:"MOMENTUM", params: XXX)
 if optimizer_cfg.name = "MOMENTUM":
     optimizer = MOMENTUM(optimizer_cfg.pop(name))
@@ -106,7 +106,7 @@ and some unique global configurations, like
 - log_level
 
 
-- training script args
+training script args
 
 -  --validate: switch validate mode on or not
 -  --test: switch test mode on or not
