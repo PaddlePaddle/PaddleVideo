@@ -31,7 +31,7 @@
 ## 结论
 ### 视频分类
 
-|| Model | batch size <sub>x</sub> gpus | PaddleVideo(ips) | Reference(ips) | MMAction2 (ips)  | PySlowFast (ips)|
+| Model | batch size <sub>x</sub> gpus | PaddleVideo(ips) | Reference(ips) | MMAction2 (ips)  | PySlowFast (ips)|
 | :------: | :-------------------:|:---------------:|:---------------: | :---------------:  |:---------------: |
 | [TSM](model_zoo/recognition/tsm.md) | 16x8 | 58.1 | 46.04(temporal-shift-module) | <sup>ToDo</sup> | X |
 | [PPTSM](model_zoo/recognition/pp-tsm.md) | 16x8 |  57.6 | X |    X   | X |
