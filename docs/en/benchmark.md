@@ -1,4 +1,4 @@
-[简体中文](../cn/benchmark.md) | English
+[简体中文](../zh-CN/benchmark.md) | English
 # Benchmark
 
 We compare our results with some popular frameworks and official releases in terms of speed.
