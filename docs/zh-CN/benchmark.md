@@ -1,3 +1,5 @@
+简体中文 | [English](../en/benchmark.md)
+
 # Benchmark
 
 此文档主要介绍PaddleVideo模型训练速度上与主流模型库间的横向对比。
