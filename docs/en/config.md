@@ -1,7 +1,7 @@
 # Configs design
 
 ---
-This page shows how the PaddleVideo use the basic IOC/DI technology to decouple and control the whole framework. It is flexible to increase modularity of this system and make it extensible. At last we will explain the details of config yaml and training script args.
+This page shows how PaddleVideo use the basic IOC/DI technology to decouple and control the whole framework. It is flexible to increase modularity of this system and make it extensible. At last we will explain the details of config yaml and training script args.
 
 
 First, when we create a new class, it is common to new a instance like:
