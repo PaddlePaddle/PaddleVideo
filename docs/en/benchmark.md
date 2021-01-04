@@ -46,4 +46,4 @@ For each model setting, we kept the same data preprocessing methods to make sure
 
 | Model | Paddle(ips) |MMAction2 (ips) |BMN(boundary matching network) (ips)|
 | :--- | :---------------: | :-------------------------------------: | :-------------------------------------: |
-| [BMN](../configs/localization/bmn.yaml)  | 43.84 | x | x |
+| [BMN](../../configs/localization/bmn.yaml)  | 43.84 | x | x |
