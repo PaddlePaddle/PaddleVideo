@@ -38,7 +38,7 @@ def parse_args():
                         help='config file path')
 
     parser.add_argument("--img_size", type=int, default=224)
-    parser.add_argument("--num_segs", type=int, default=8)
+    parser.add_argument("--num_seg", type=int, default=8)
     parser.add_argument("--FLOPs",
                         action="store_true",
                         help="whether to print FLOPs")
@@ -46,29 +46,32 @@ def parse_args():
     return parser.parse_args()
 
 
-def _trim(cfg):
+def _trim(cfg, args):
     """
     Reuse the trainging config will bring useless attribute, such as: backbone.pretrained model. Trim it here.
     """
     model_name = cfg.model_name
     cfg = cfg.MODEL
     cfg.backbone.pretrained = ""
+
+    cfg.backbone.num_seg = args.num_seg
     return cfg, model_name
 
 
 def main():
     args = parse_args()
-    cfg, model_name = _trim(get_config(args.config, show=False))
+    cfg, model_name = _trim(get_config(args.config, show=False), args)
     print(f"Building model({model_name})...")
     model = build_model(cfg)
 
     img_size = args.img_size
-    num_segs = args.num_segs
-    params_info = paddle.summary(model, (1, num_segs, 3, img_size, img_size))
+    num_seg = args.num_seg
+    #NOTE: only support tsm now, will refine soon
+    params_info = paddle.summary(model, (1, num_seg, 3, img_size, img_size))
     print(params_info)
 
     if args.FLOPs:
-        flops_info = paddle.flops(model, [1, num_segs, 3, img_size, img_size],
+        flops_info = paddle.flops(model, [1, num_seg, 3, img_size, img_size],
                                   print_detail=True)
         print(flops_info)
 

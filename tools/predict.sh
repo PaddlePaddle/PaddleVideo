@@ -1,1 +1,1 @@
-python3 tools/predict.py -v example.avi --model_file "./inference/example.pdmodel" --params_file "./inference/example.pdiparams" --enable_benchmark=True --model="TSM"
+python3 tools/predict.py -v 1.avi --model_file "./inference/TSM.pdmodel" --params_file "./inference/TSM.pdiparams" --enable_benchmark=False --model="TSM" --num_seg=25

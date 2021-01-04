@@ -3,6 +3,7 @@ MODEL: #MODEL field
     backbone: #Mandatory, indicate the type of backbone, associate to the 'paddlevideo/modeling/backbones/' .
         name: "ResNetTSM" #Mandatory, The name of backbone.
         pretrained: "/work/data/pretrained_dygraph/ResNet50/best_model/ppcls.pdparams" #Optional, pretrained model path.
+        num_seg: 8
         depth: 50 #Optional, the depth of backbone architecture.
     head:
         name: "TSMHead" #Mandatory, indicate the type of head, associate to the 'paddlevideo/modeling/heads'
