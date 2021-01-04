@@ -11,7 +11,7 @@ We compare our results with some popular frameworks and official releases in ter
 ### Software Environment
 
 - Python 3.7
-- Paddlepaddle-develop(待定)
+- Paddlepaddle-develop
 - CUDA 10.1
 - CUDNN 7.6.3
 - NCCL 2.1.15
@@ -46,4 +46,4 @@ For each model setting, we kept the same data preprocessing methods to make sure
 
 | Model | Paddle(ips) |MMAction2 (ips) |BMN(boundary matching network) (ips)|
 | :--- | :---------------: | :-------------------------------------: | :-------------------------------------: |
-| [BMN](../configs/localization/bmn.yaml)  | To do | x | x |
+| [BMN](../configs/localization/bmn.yaml)  | 43.84 | x | x |
