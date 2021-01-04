@@ -1,2 +1,1 @@
-PLACEHOLDER
-#Explain how to use some tools, like summary
+简体中文 | [English](../en/tools.md)
