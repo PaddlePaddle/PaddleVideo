@@ -161,7 +161,7 @@ The chart below illustrates the performance of the video recognition models both
 
 ### Advanced
 - [Modular design]() <sup>coming soon</sup>
-- [Configuration design]()  <sup>coming soon</sup>
+- [Configuration design](docs/en/config.md)  <sup>coming soon</sup>
 - [Higher performance PP-TSM]() <sup>coming soon</sup>
 - [Accelerate training]() <sup>coming soon</sup>
 - [Depolyment]() <sup>coming soon</sup>
