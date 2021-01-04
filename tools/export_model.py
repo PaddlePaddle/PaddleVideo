@@ -27,44 +27,52 @@ sys.path.append(os.path.abspath(os.path.join(__dir__, '../')))
 from paddlevideo.modeling.builder import build_model
 from paddlevideo.utils import get_config
 
+
 def parse_args():
 
-    parser = argparse.ArgumentParser("PaddleVideo test script")
-    parser.add_argument(
-            '-c',
-            '--config',
-            type=str,
-            default='configs/example.yaml',
-            help='config file path')
+    parser = argparse.ArgumentParser("PaddleVideo export model script")
+    parser.add_argument('-c',
+                        '--config',
+                        type=str,
+                        default='configs/example.yaml',
+                        help='config file path')
 
-    parser.add_argument(
-            "-p", 
-            "--pretrained_params",
-            default='./best.pdparams',
-            type=str)
-    parser.add_argument(
-        "-o", "--output_path", type=str, default="./inference")
+    parser.add_argument("-p",
+                        "--pretrained_params",
+                        default='./best.pdparams',
+                        type=str)
+    parser.add_argument("-o", "--output_path", type=str, default="./inference")
     parser.add_argument("--img_size", type=int, default=224)
+    parser.add_argument("--num_seg", type=int, default=8)
 
     return parser.parse_args()
 
-def _trim(cfg):
+
+def _trim(cfg, args):
     """
-    Reuse the trainging config will bring useless attribute, such as: backbone.pretrained model. Trim it here.
+    Reuse the trainging config will bring useless attribute, such as: backbone.pretrained model.
+    and some build phase attributes should be override, such ad: backbone.num_seg.
+    Trim it here.
     """
     model_name = cfg.model_name
     cfg = cfg.MODEL
     cfg.backbone.pretrained = ""
+    cfg.backbone.num_seg = args.num_seg
+
     return cfg, model_name
+
 
 def main():
     args = parse_args()
-    cfg, model_name = _trim(get_config(args.config, show=False))
+    cfg, model_name = _trim(get_config(args.config, show=False), args)
     print(f"Building model({model_name})...")
     model = build_model(cfg)
-    assert osp.isfile(args.pretrained_params) , f"pretrained params ({args.pretrained_params} is not a file path.)"
+    assert osp.isfile(
+        args.pretrained_params
+    ), f"pretrained params ({args.pretrained_params} is not a file path.)"
 
-    assert osp.isdir(args.output_path), f"output path ({args.output_path}) is not a file path"
+    assert osp.isdir(args.output_path
+                     ), f"output path ({args.output_path}) is not a file path"
     print(f"Loading params from ({args.pretrained_params})...")
     params = paddle.load(args.pretrained_params)
     model.set_dict(params)
@@ -74,14 +82,17 @@ def main():
         model,
         input_spec=[
             paddle.static.InputSpec(
-                shape=[None, 8, 3, args.img_size, args.img_size], dtype='float32'),
+                shape=[None, args.num_seg, 3, args.img_size, args.img_size],
+                dtype='float32'),
             #NOTE: Do not pass label.label
             #paddle.static.InputSpec(
             #    shape=[None, 1], dtype='int64'
             #   )
         ])
     paddle.jit.save(model, osp.join(args.output_path, model_name))
-    print(f"model ({model_name}) has been already saved in ({args.output_path}).")
+    print(
+        f"model ({model_name}) has been already saved in ({args.output_path}).")
+
 
 if __name__ == "__main__":
     main()

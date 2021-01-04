@@ -18,48 +18,64 @@ from ..registry import HEADS
 from ..weight_init import weight_init_
 from ...metrics.youtube8m import eval_util as youtube8m_metrics
 
+
 @HEADS.register()
 class AttentionLstmHead(BaseHead):
     """AttentionLstmHead.
     Args: TODO
     """
-
-    def __init__(self, num_classes=3862, feature_num=2, feature_dims=[1024, 128], embedding_size=512, lstm_size=1024,
+    def __init__(self,
+                 num_classes=3862,
+                 feature_num=2,
+                 feature_dims=[1024, 128],
+                 embedding_size=512,
+                 lstm_size=1024,
                  in_channels=2048,
                  loss_cfg=dict(name='CrossEntropyLoss')):
-        super(AttentionLstmHead, self).__init__(num_classes, in_channels, loss_cfg)
+        super(AttentionLstmHead, self).__init__(num_classes, in_channels,
+                                                loss_cfg)
         self.num_classes = num_classes
         self.feature_dims = feature_dims
-        self.embedding_size = embedding_size 
-        self.lstm_size = lstm_size 
+        self.embedding_size = embedding_size
+        self.lstm_size = lstm_size
         self.feature_num = len(self.feature_dims)
-        for i in range(self.feature_num): #0:rgb, 1:audio
-            fc_feature = paddle.nn.Linear(in_features=self.feature_dims[i], out_features=self.embedding_size)
+        for i in range(self.feature_num):  #0:rgb, 1:audio
+            fc_feature = paddle.nn.Linear(in_features=self.feature_dims[i],
+                                          out_features=self.embedding_size)
             self.add_sublayer("fc_feature{}".format(i), fc_feature)
 
-            bi_lstm = paddle.nn.LSTM(input_size=self.embedding_size , hidden_size=self.lstm_size, direction="bidirectional")
+            bi_lstm = paddle.nn.LSTM(input_size=self.embedding_size,
+                                     hidden_size=self.lstm_size,
+                                     direction="bidirectional")
             self.add_sublayer("bi_lstm{}".format(i), bi_lstm)
 
             drop_rate = 0.5
             self.dropout = paddle.nn.Dropout(drop_rate)
 
-            att_fc = paddle.nn.Linear(in_features=self.lstm_size*2, out_features=1)
+            att_fc = paddle.nn.Linear(in_features=self.lstm_size * 2,
+                                      out_features=1)
             self.add_sublayer("att_fc{}".format(i), att_fc)
             self.softmax = paddle.nn.Softmax()
 
-        self.fc_out1 = paddle.nn.Linear(in_features=self.lstm_size*4, out_features=8192)
+        self.fc_out1 = paddle.nn.Linear(in_features=self.lstm_size * 4,
+                                        out_features=8192)
         self.relu = paddle.nn.ReLU()
         self.fc_out2 = paddle.nn.Linear(in_features=8192, out_features=4096)
-        self.fc_logit = paddle.nn.Linear(in_features=4096, out_features=self.num_classes)
+        self.fc_logit = paddle.nn.Linear(in_features=4096,
+                                         out_features=self.num_classes)
         self.sigmoid = paddle.nn.Sigmoid()
+
     def init_weights(self):
         pass
+
     def forward(self, inputs):
         #deal with features with different length
         #1. padding to same lenght, make a tensor
         #2. make a mask tensor with the same shpae with 1
         #3. compute output using mask tensor, s.t. output is nothing todo with padding
-        assert ( len(inputs) == self.feature_num), "Input tensor does not contain {} features".format(self.feature_num)
+        assert (len(inputs) == self.feature_num
+                ), "Input tensor does not contain {} features".format(
+                    self.feature_num)
         att_outs = []
         for i in range(len(inputs)):
             ###1. fc
@@ -75,23 +91,29 @@ class AttentionLstmHead(BaseHead):
 
             ###3. att_fc
             m = getattr(self, "att_fc{}".format(i))
-            lstm_weight = m(lstm_dropout) 
+            lstm_weight = m(lstm_dropout)
 
             ###4. softmax replace start, for it's relevant to sum in time step
             lstm_exp = paddle.exp(lstm_weight)
             lstm_mask = paddle.mean(inputs[i][2], axis=2)
-            lstm_exp_with_mask = paddle.multiply(x=lstm_exp, y=lstm_mask, axis=0)
+            lstm_exp_with_mask = paddle.multiply(x=lstm_exp,
+                                                 y=lstm_mask,
+                                                 axis=0)
             lstm_sum_with_mask = paddle.sum(lstm_exp_with_mask, axis=1)
             exponent = -1
             lstm_denominator = paddle.pow(lstm_sum_with_mask, exponent)
-            lstm_softmax = paddle.multiply(x=lstm_exp, y=lstm_denominator, axis=0)
+            lstm_softmax = paddle.multiply(x=lstm_exp,
+                                           y=lstm_denominator,
+                                           axis=0)
             lstm_weight = lstm_softmax
             ###softmax replace end
 
             lstm_scale = paddle.multiply(x=lstm_dropout, y=lstm_weight, axis=0)
 
             ###5. sequence_pool's replace start, for it's relevant to sum in time step
-            lstm_scale_with_mask = paddle.multiply(x=lstm_scale, y=lstm_mask, axis=0)
+            lstm_scale_with_mask = paddle.multiply(x=lstm_scale,
+                                                   y=lstm_mask,
+                                                   axis=0)
             fea_lens = inputs[i][1]
             fea_len = int(fea_lens[0])
             lstm_pool = paddle.sum(lstm_scale_with_mask, axis=1)
@@ -106,26 +128,18 @@ class AttentionLstmHead(BaseHead):
         output = self.sigmoid(fc_logit)
         return fc_logit, output
 
-
-    def loss(self,
-             lstm_logit,
-             labels,
-             reduce_sum=False,
-             return_loss=True,
-             **kwargs):
+    def loss(self, lstm_logit, labels, **kwargs):
         labels.stop_gradient = True
         losses = dict()
-        if return_loss:
-            bce_logit_loss = paddle.nn.BCEWithLogitsLoss(reduction='sum')
-            sum_cost = bce_logit_loss(lstm_logit, labels)
+        bce_logit_loss = paddle.nn.BCEWithLogitsLoss(reduction='sum')
+        sum_cost = bce_logit_loss(lstm_logit, labels)
         return sum_cost
 
-    def metric(self,
-             lstm_output,
-             labels):
+    def metric(self, lstm_output, labels):
         pred = lstm_output.numpy()
         label = labels.numpy()
         hit_at_one = youtube8m_metrics.calculate_hit_at_one(pred, label)
-        perr = youtube8m_metrics.calculate_precision_at_equal_recall_rate(pred, label)
+        perr = youtube8m_metrics.calculate_precision_at_equal_recall_rate(
+            pred, label)
         gap = youtube8m_metrics.calculate_gap(pred, label)
         return hit_at_one, perr, gap

@@ -3,6 +3,7 @@ MODEL: #MODEL field
     backbone: #Mandatory, indicate the type of backbone, associate to the 'paddlevideo/modeling/backbones/' .
         name: "ResNetTSM" #Mandatory, The name of backbone.
         pretrained: "/work/data/pretrained_dygraph/ResNet50/best_model/ppcls.pdparams" #Optional, pretrained model path.
+        num_seg: 8
         depth: 50 #Optional, the depth of backbone architecture.
     head:
         name: "TSMHead" #Mandatory, indicate the type of head, associate to the 'paddlevideo/modeling/heads'
@@ -41,7 +42,7 @@ PIPELINE: #PIPELINE field
             num_seg: 8
             seg_len: 1
             valid_mode: False
-        transform: #Mandotary, image transfrom operator
+        transform: #Mandotary, image transform operator.
             - Scale:
                 short_size: 256
             - MultiScaleCrop:
@@ -106,11 +107,6 @@ OPTIMIZER: #OPTIMIZER field
     weight_decay:
         name: 'L2'
         value: 1e-4
-
-EVALUATION:
-    interval: 5
-    function: "topk"
-    topk: (1,5)
 
 model_name: "TSM"
 log_interval: 20 #Optional, the interal of logger, default:10

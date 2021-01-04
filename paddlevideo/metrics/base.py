@@ -13,6 +13,7 @@
 from abc import abstractmethod
 import numpy as np
 import paddle
+from paddlevideo.utils import get_dist_info
 
 from .registry import METRIC
 
@@ -26,7 +27,7 @@ class BaseMetric(object):
                  **kwargs):
         self.data_size = data_size
         self.batch_size = batch_size
-        self.world_size = world_size
+        _, self.world_size = get_dist_info()
         self.log_interval = log_interval
 
     @abstractmethod

@@ -19,11 +19,6 @@ from PIL import Image
 from ..registry import PIPELINES
 from collections.abc import Sequence
 
-#TODO
-#1. add type annotations and type hints
-#2. add input check
-#3. move to paddle.vision(need discusss)
-
 
 @PIPELINES.register()
 class Scale(object):

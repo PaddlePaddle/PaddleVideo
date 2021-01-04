@@ -14,7 +14,7 @@
 import paddle
 import argparse
 from paddlevideo.utils import get_config
-from paddlevideo.tasks import train_model
+from paddlevideo.tasks import train_model, test_model
 from paddlevideo.utils import get_dist_info
 
 
@@ -30,11 +30,19 @@ def parse_args():
                         action='append',
                         default=[],
                         help='config options to be overridden')
+
     parser.add_argument(
         '--validate',
         action='store_true',
         help='whether to evaluate the checkpoint during training')
-    parser.add_argument('--seed', type=int, default=None, help='random seed')
+
+    parser.add_argument('--test',
+                        action='store_true',
+                        help='whether to test a model')
+
+    parser.add_argument('--weights',
+                        type=str,
+                        help='weights for finetuning or testing')
 
     args = parser.parse_args()
     return args
@@ -49,7 +57,13 @@ def main():
     if parallel:
         paddle.distributed.init_parallel_env()
 
-    train_model(cfg, parallel=parallel, validate=args.validate)
+    if args.test:
+        test_model(cfg, weights=args.weights, parallel=parallel)
+    else:
+        train_model(cfg,
+                    weights=args.weights,
+                    parallel=parallel,
+                    validate=args.validate)
 
 
 if __name__ == '__main__':
