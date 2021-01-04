@@ -8,14 +8,14 @@ This page include the usage of some useful tools in PaddleVideo
 
 To get the params of a model.
 
-```bash
+```shell
 python3.7 tools/summary.py -c configs/recognization/tsm/tsm.yaml
 ```
 
 ## FLOPS
 to print FLOPs.
 
-```python
+```shell
 python3.7 tools/summary.py -c configs/recognization/tsm/tsm.yaml --FLOPs
 ```
 
