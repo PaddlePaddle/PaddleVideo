@@ -90,6 +90,8 @@ We apply this design on many places, such as: PIPELINE, BACKBONE, HEAD, LOSS, ME
 
 Finally, We build all of the framework components from config yaml which matches the source code one by one.
 
+---
+
 - config yaml details <sup>Refine soon</sup>
 
 We separate the config to several parts, in high level:
