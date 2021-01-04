@@ -208,7 +208,9 @@ def train_model(cfg, weights=None, parallel=True, validate=True):
                     logger.info(
                         f"Already save the best model (hit_at_one){best}")
                 else:
-                    logger.info(f"Already save the best model (top1 acc){best}")
+                    logger.info(
+                        f"Already save the best model (top1 acc){int(best *10000)/10000}"
+                    )
 
         # 6. Save model and optimizer
         if epoch % cfg.get("save_interval", 1) == 0 or epoch == cfg.epochs - 1:
