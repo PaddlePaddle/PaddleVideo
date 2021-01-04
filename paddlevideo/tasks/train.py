@@ -35,7 +35,6 @@ def train_model(cfg, weights=None, parallel=True, validate=True):
         validate (bool): Whether to do evaluation. Default: False.
 
     """
-    head_name = cfg.MODEL.head.name
 
     logger = get_logger("paddlevideo")
     batch_size = cfg.DATASET.get('batch_size', 8)
@@ -123,13 +122,10 @@ def train_model(cfg, weights=None, parallel=True, validate=True):
             optimizer.clear_grad()
 
             # log record
-            record_list['lr'].update(
-                optimizer._global_learning_rate().numpy()[0], batch_size)
+            record_list['lr'].update(optimizer._global_learning_rate(),
+                                     batch_size)
             for name, value in outputs.items():
-                if name in ['hit_at_one', 'perr', 'gap']:
-                    record_list[name].update(value, batch_size)
-                else:
-                    record_list[name].update(value.numpy()[0], batch_size)
+                record_list[name].update(value, batch_size)
 
             record_list['batch_time'].update(time.time() - tic)
             tic = time.time()
@@ -166,10 +162,7 @@ def train_model(cfg, weights=None, parallel=True, validate=True):
 
                 # log_record
                 for name, value in outputs.items():
-                    if name in ['hit_at_one', 'perr', 'gap']:
-                        record_list[name].update(value, batch_size)
-                    else:
-                        record_list[name].update(value.numpy()[0], batch_size)
+                    record_list[name].update(value, batch_size)
 
                 record_list['batch_time'].update(time.time() - tic)
                 tic = time.time()
@@ -185,14 +178,10 @@ def train_model(cfg, weights=None, parallel=True, validate=True):
             log_epoch(record_list, epoch + 1, "val", ips)
 
             best_flag = False
-            if head_name == "AttentionLstmHead":
+            for top_flag in ['hit_at_one', 'top1']:
                 if record_list.get(
-                        'hit_at_one') and record_list['hit_at_one'].avg > best:
-                    best = record_list['hit_at_one'].avg
-                    best_flag = True
-            else:
-                if record_list.get('top1') and record_list['top1'].avg > best:
-                    best = record_list['top1'].avg
+                        top_flag) and record_list[top_flag].avg > best:
+                    best = record_list[top_flag].avg
                     best_flag = True
 
             return best, best_flag
@@ -215,7 +204,7 @@ def train_model(cfg, weights=None, parallel=True, validate=True):
                      osp.join(output_dir, model_name + "_best.pdopt"))
                 save(model.state_dict(),
                      osp.join(output_dir, model_name + "_best.pdparams"))
-                if head_name == "AttentionLstmHead":
+                if model_name == "AttentionLstm":
                     logger.info(
                         f"Already save the best model (hit_at_one){best}")
                 else:

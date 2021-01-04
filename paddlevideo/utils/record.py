@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import paddle
 from collections import OrderedDict
 from .logger import get_logger, coloring
 logger = get_logger("paddlevideo")
@@ -30,7 +31,6 @@ def build_record(cfg):
             ("hit_at_one", AverageMeter("hit_at_one", '.5f')),
             ("perr", AverageMeter("perr", '.5f')),
             ("gap", AverageMeter("gap", '.5f')),
-
             ("batch_time", AverageMeter('elapse', '.3f')),
             ("reader_time", AverageMeter('reader', '.3f')),
         ]
@@ -64,6 +64,8 @@ class AverageMeter(object):
 
     def update(self, val, n=1):
         """ update """
+        if isinstance(val, paddle.Tensor):
+            val = val.numpy()[0]
         self.val = val
         self.sum += val * n
         self.count += n
