@@ -1,6 +1,7 @@
+简体中文 | [English](../en/benchmark.md)
 # Benchmark
 
-此文档主要介绍Paddle版本的模型与竞品版本模型以及官方版本模型的训练速度对比实验结果。
+此文档主要介绍PaddleVideo模型训练速度上与主流模型库间的横向对比。
 
 ## 实验环境配置介绍
 ### 硬件环境
@@ -11,7 +12,7 @@
 ### 软件环境
 
 - Python 3.7
-- Paddlepaddle-develop
+- PaddlePaddle2.0
 - CUDA 10.1
 - CUDNN 7.6.3
 - NCCL 2.1.15

@@ -1,3 +1,4 @@
+[简体中文](../zh-CN/benchmark.md) | English
 # Benchmark
 
 We compare our results with some popular frameworks and official releases in terms of speed.
@@ -11,7 +12,7 @@ We compare our results with some popular frameworks and official releases in ter
 ### Software Environment
 
 - Python 3.7
-- Paddlepaddle-develop
+- PaddlePaddle2.0
 - CUDA 10.1
 - CUDNN 7.6.3
 - NCCL 2.1.15
