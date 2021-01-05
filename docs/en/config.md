@@ -81,6 +81,7 @@ Or, use a decorator
 ```
 
 2. Builder
+
 To obtain a registed module.
 ```python
     # Usage: To build a module.
