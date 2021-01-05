@@ -34,12 +34,12 @@ elif:
     ...
 ```
 
-more and more conditions have to be created though. like widly used in the Java, we apply ```inversion of control``` and ```Dependency Inversion``` to decuople.
+more and more conditions have to be created though. like widly used in the Java or other platforms, we apply ```inversion of control``` and ```Dependency Inversion``` to decuople.
 
 Second, to inplenment DI, we build two components:
 
-- Register
-- Builder
+- Register, to regist a class
+- Builder, to new an instance
 
 1. Register
 
@@ -65,20 +65,23 @@ class Registry():
 
 It provides name -> object mapping. For example, To register an object:
 ```python
-    BACKBONES = Registry('backbone') #new a Register
-    @BACKBONES.register() #regist resnet as a backbone.
-    class ResNet:
-        pass
-    Or:
 
     BACKBONES = Registry('backbone')
     class ResNet:
         pass
     BACKBONES.register(ResNet)
 ```
+    
+Or, use a decorator
+```
+    BACKBONES = Registry('backbone') #new a Register
+    @BACKBONES.register() #regist resnet as a backbone.
+    class ResNet:
+        pass
+```
 
 2. Builder
-To obtain registed module.
+To obtain a registed module.
 ```python
     # Usage: To build a module.
     
@@ -88,20 +91,27 @@ To obtain registed module.
 
 so that we can new(register) an instance in **where it declared**, not **where it called**, a basic DI sub-system has been created now.
 
-We apply this design on many places, such as: PIPELINE, BACKBONE, HEAD, LOSS, METRIC
+We apply this design on many places, such as: PIPELINE, BACKBONE, HEAD, LOSS, METRIC and so on.
 
-Finally, We build all of the framework components from config yaml which matches the source code one by one.
+Finally, We build all of the framework components from config yaml which matches the source code one by one, **It means the attributes in a configuration field is same as the init atrributes of the mathced class**, and to indicate a specified class, we always use ```name``` to mark it. like:
+
+```yaml
+head:
+    name: "TSMHead"  # class name
+    num_classes: 400 # init attributes
+    ...
+```
 
 ---
 
-## config yaml details <sup>Refine soon</sup>
+## config yaml details 
 
 We separate the config to several parts, in high level:
 
-- MODEL
-- DATASET
-- PIPELINE
-- OPTIMIZER
+- MODEL: Architecture configuration, such as HEAD module, BACKBONE module.
+- DATASET: DATASET and dataloader configuration.
+- PIPELINE: pipeline of processing configuration.
+- OPTIMIZER: Optimizer configuration.
 
 and some unique global configurations, like
 - model_name
@@ -109,15 +119,17 @@ and some unique global configurations, like
 - epochs
 - resume_epoch
 - log_level
+...
 
-
-training script args
+Training script args
 
 -  --validate: switch validate mode on or not
 -  --test: switch test mode on or not
 -  --weights="": weights
 -  -c: config yaml path
--  -o: override args
+-  -o: override args, one can use it like: -o DATASET.batch_size=16
+
+Testing script args <sup>coming soon</sup>
 
 
 
