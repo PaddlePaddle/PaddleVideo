@@ -153,13 +153,13 @@ The chart below illustrates the performance of the video recognition models both
 ### Basic
 
 - [Install](docs/en/install.md)
-- [Start](docs/en/getting_started.md)
+- [Start](docs/en/start.md)
 - [Benchmark](docs/en/benchmark.md)
 - [Tools](docs/en/tools.md)
 
 ### Advanced
 - [Modular design]() <sup>coming soon</sup>
-- [Configuration design](docs/en/config.md)  <sup>coming soon</sup>
+- [Configuration design](docs/en/config.md)
 - [Higher performance PP-TSM]() <sup>coming soon</sup>
 - [Accelerate training]() <sup>coming soon</sup>
 - [Depolyment]() <sup>coming soon</sup>
