@@ -109,10 +109,10 @@ head:
 
 We separate the config to several parts, in high level:
 
-- MODEL: Architecture configuration, such as HEAD module, BACKBONE module.
-- DATASET: DATASET and dataloader configuration.
-- PIPELINE: pipeline of processing configuration.
-- OPTIMIZER: Optimizer configuration.
+- **MODEL:** Architecture configuration, such as HEAD module, BACKBONE module.
+- **DATASET:** DATASET and dataloader configuration.
+- **PIPELINE:** pipeline of processing configuration.
+- **OPTIMIZER:** Optimizer configuration.
 
 and some unique global configurations, like
 - model_name
@@ -124,15 +124,8 @@ and some unique global configurations, like
 
 Training script args
 
--  --validate: switch validate mode on or not
--  --test: switch test mode on or not
--  --weights="": weights
--  -c: config yaml path
--  -o: override args, one can use it like: -o DATASET.batch_size=16
-
-Testing script args <sup>coming soon</sup>
-
-
-
-
-
+-  **--validate**: switch validate mode on or not
+-  **--test**: switch test mode on or not
+-  **--weights**="": weights
+-  **-c**: config yaml path
+-  **-o**: override args, one can use it like: -o DATASET.batch_size=16
