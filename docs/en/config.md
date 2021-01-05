@@ -10,9 +10,9 @@ First, when we create a new class, it is common to new a instance like:
 
 ```python
 class TSM():
-    XXX
+    pass
 
-a = TSM(init_attributes)
+model = TSM(init_attributes)
 ```
 
 when more classes are created, the coupling relationship between the calling and called method will increase sharply, obviously, we can create a factory class to solve it, like that:
