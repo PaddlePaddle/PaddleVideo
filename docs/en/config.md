@@ -73,7 +73,7 @@ It provides name -> object mapping. For example, To register an object:
 ```
     
 Or, use a decorator
-```
+```python
     BACKBONES = Registry('backbone') #new a Register
     @BACKBONES.register() #regist resnet as a backbone.
     class ResNet:
