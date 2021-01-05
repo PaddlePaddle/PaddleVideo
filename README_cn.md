@@ -157,7 +157,7 @@ PaddleVideo飞桨视频模型开发套件，旨在帮助开发者更好的进行
 
 - [安装说明](docs/zh-CN/install.md)
 - [快速开始](docs/zh-CN/getting_started.md)
-- [benchmark](docs/zh-CN/benchmark.md)  <sup>coming soon</sup>
+- [benchmark](docs/zh-CN/benchmark.md)
 
 ### 进阶教程
 - [模型库整体设计]() <sup>coming soon</sup>
