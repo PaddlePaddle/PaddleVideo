@@ -1,7 +1,7 @@
 # Configs design
 
 ---
-This page shows how PaddleVideo use the basic IOC/DI technology to decouple and control the whole framework. It is flexible to increase modularity of this system and make it extensible. At last we will explain the details of config yaml and training script args.
+This page shows how PaddleVideo use the basic IOC/DI technology to decouple and control the whole framework. It is flexible to increase modularity of this system and make it extensible. At last, we will explain the details of config yaml and script args.
 
 
 ## Design
@@ -36,7 +36,7 @@ elif:
 
 more and more conditions have to be created though. like widly used in the Java or other platforms, we apply ```inversion of control``` and ```Dependency Inversion``` to decuople.
 
-Second, to inplenment DI, we build two components:
+Second, to implenment DI, we build two components:
 
 - Register, to regist a class
 - Builder, to new an instance
@@ -99,7 +99,7 @@ Finally, We build all of the framework components from config yaml which matches
 ```yaml
 head:
     name: "TSMHead"  # class name
-    num_classes: 400 # init attributes
+    num_classes: 400 # TSMHead class init attributes
     ...
 ```
 
@@ -126,6 +126,6 @@ Training script args
 
 -  **--validate**: switch validate mode on or not
 -  **--test**: switch test mode on or not
--  **--weights**="": weights
+-  **--weights**: weights path
 -  **-c**: config yaml path
 -  **-o**: override args, one can use it like: -o DATASET.batch_size=16
