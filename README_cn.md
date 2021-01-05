@@ -157,11 +157,11 @@ PaddleVideo飞桨视频模型开发套件，旨在帮助开发者更好的进行
 
 - [安装说明](docs/zh-CN/install.md)
 - [快速开始](docs/zh-CN/getting_started.md)
-- [benchmark]()  <sup>coming soon</sup>
+- [benchmark](docs/zh-CN/benchmark.md)  <sup>coming soon</sup>
 
 ### 进阶教程
 - [模型库整体设计]() <sup>coming soon</sup>
-- [配置模块设计]() <sup>coming soon</sup>
+- [配置模块设计](docs/zh-CN/config.md)
 - [PPTSM实践]() <sup>coming soon</sup>
 - [训练加速方案]() <sup>coming soon</sup>
 - [预测部署]() <sup>coming soon</sup>
@@ -169,15 +169,15 @@ PaddleVideo飞桨视频模型开发套件，旨在帮助开发者更好的进行
 
 ### 模型库
 
-- 视频分类 [介绍]() <sup>coming soon</sup>
-    - [Attention-LSTM]() <sup>coming soon</sup>
-    - [TSN]() <sup>coming soon</sup>
-    - [TSM]() <sup>coming soon</sup>
-    - [PPTSM]() <sup>coming soon</sup>
-    - [SlowFast]() <sup>coming soon</sup>
-    - [VideoTag]() <sup>coming soon</sup>
-- 动作定位 [介绍]() <sup>coming soon</sup>
-    - [BMN]() <sup>coming soon</sup>
+- 视频分类 [介绍](docs/zh-CN/model_zoo/README.md#视频分类)
+    - [Attention-LSTM](docs/zh-CN/model_zoo/recognition/attention_lstm.md) <sup>coming soon</sup>
+    - [TSN](docs/zh-CN/model_zoo/recognition/tsn.md) 
+    - [TSM](docs/zh-CN/model_zoo/recognition/tsm.md) <sup>coming soon</sup>
+    - [PPTSM](docs/zh-CN/model_zoo/recognition/pp-tsm.md) <sup>coming soon</sup>
+    - [SlowFast](docs/zh-CN/model_zoo/recognition/slowfast.md) <sup>coming soon</sup>
+    - [VideoTag](docs/zh-CN/model_zoo/recognition/videotag.md) <sup>coming soon</sup>
+- 动作定位 [介绍](docs/zh-CN/model_zoo/README.md#动作定位)
+    - [BMN](docs/zh-CN/model_zoo/localization/bmn.md) <sup>coming soon</sup>
 - 时空动作检测：
     - Coming Soon!
 
