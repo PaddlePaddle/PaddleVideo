@@ -108,7 +108,7 @@ class BaseHead(nn.Layer):
         _, world_size = get_dist_info()
 
         #NOTE(shipping): deal with multi cards validate
-        if world_size > 1:
+        if world_size > 1 and reduce_sum:
             top1 = paddle.distributed.all_reduce(
                 top1, op=paddle.distributed.ReduceOp.SUM) / world_size
             top5 = paddle.distributed.all_reduce(

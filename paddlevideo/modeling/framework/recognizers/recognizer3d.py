@@ -49,6 +49,6 @@ class Recognizer3D(BaseRecognizer):
         """
         imgs = data_batch[0:2]
         # call forward
-        loss_metrics = self(imgs)
+        cls_score = self(imgs)
 
-        return loss_metrics
+        return cls_score

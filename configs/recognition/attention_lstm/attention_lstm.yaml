@@ -9,20 +9,18 @@ MODEL: #MODEL field
 
 DATASET: #DATASET field
     batch_size: 128  #Mandatory, bacth size
-    num_workers: 0  #Mandatory, the number of subprocess on each GPU.
+    num_workers: 4  #Mandatory, the number of subprocess on each GPU.
     shuffle_valid: True
     train:
         format: "FeatureDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
-        data_prefix: "" #Mandatory, train data root path
-        file_path:   "split_yt8m_list/train.list" #Mandatory, train data index file path
+        file_path:   "data/dataset/youtube-8m/train.list" #Mandatory, train data index file path
     valid:
         format: "FeatureDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
-        data_prefix: ""  #Mandatory, valid data root path
-        file_path:   "split_yt8m_list/val.list" #Mandatory, train data index file path
+        file_path:   "data/dataset/youtube-8m/val.list" #Mandatory, train data index file path
     test:
         format: "FeatureDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
         data_prefix: ""  #Mandatory, valid data root path
-        file_path:   "split_yt8m_list/val.list" #Mandatory, train data index file path
+        file_path:   "data/dataset/youtube-8m/val.list" #Mandatory, train data index file path
 
 
 PIPELINE: #PIPELINE field
@@ -30,17 +28,14 @@ PIPELINE: #PIPELINE field
         decode:
             name: "FeatureDecoder" #"VideoDecoder"
             num_classes: 3862
-            mode: "train"
     valid: #Mandatory, indicate the pipeline to deal with the validing data. associate to the 'paddlevideo/loader/pipelines/'
         decode:
             name: "FeatureDecoder" #"VideoDecoder"
             num_classes: 3862
-            mode: "valid"
     test:
         decode:
             name: "FeatureDecoder" #"VideoDecoder"
             num_classes: 3862
-            mode: "test"
 
 OPTIMIZER: #OPTIMIZER field
     name: 'RMSProp' #Mandatory, the type of optimizer, associate to the 'paddlevideo/solver/'
@@ -53,15 +48,7 @@ OPTIMIZER: #OPTIMIZER field
         name: 'L2'
         value: 4e-4
 
-EVALUATION:
-    interval: 5
-    function: "topk"
-    topk: (1,5)
-
-
 model_name: "AttentionLstm"
 log_interval: 1 #Optional, the interal of logger, default:10
 epochs: 10 #Mandatory, total epoch
-log_level: "DEBUG" #Optional, the logger level. default: "INFO"
-resume_from: "" #checkpoint path.
 save_interval: 5
