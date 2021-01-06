@@ -49,7 +49,7 @@ class Recognizer1D(BaseRecognizer):
         return self.train_step(data_batch)
 
     def test_step(self, data_batch, **kwargs):
-        rgb_data, rgb_len, rgb_mask, audio_data, audio_len, audio_mask, labels = data_batch
+        rgb_data, rgb_len, rgb_mask, audio_data, audio_len, audio_mask = data_batch
         imgs = [(rgb_data, rgb_len, rgb_mask),
                 (audio_data, audio_len, audio_mask)]
 

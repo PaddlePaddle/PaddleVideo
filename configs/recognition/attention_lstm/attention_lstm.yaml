@@ -9,7 +9,7 @@ MODEL: #MODEL field
 
 DATASET: #DATASET field
     batch_size: 128  #Mandatory, bacth size
-    num_workers: 4  #Mandatory, the number of subprocess on each GPU.
+    num_workers: 0  #Mandatory, the number of subprocess on each GPU.
     shuffle_valid: True
     train:
         format: "FeatureDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
