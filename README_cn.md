@@ -4,6 +4,9 @@
 
 ## 简介
 
+![python version](https://img.shields.io/badge/python-3.7+-orange.svg) ![paddle version](https://img.shields.io/badge/PaddlePaddle-2.0-blue)
+
+
 PaddleVideo飞桨视频模型开发套件，旨在帮助开发者更好的进行视频领域的学术研究和产业实践。
 
 ## 特性
