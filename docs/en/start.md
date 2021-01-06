@@ -72,26 +72,21 @@ After starting training, log files will generated, and its format is shown as be
 
 [train phase] current time, current epoch/ total epoch, batch id, metrics, elapse time, ips, etc.:
 
-    ```txt
     [12/28 17:31:26] epoch:[ 1/80 ] train step:0   loss: 0.04656 lr: 0.000100 top1: 1.00000 top5: 1.00000 elapse: 0.326 reader: 0.001s ips: 98.22489 instance/sec.
-    ```
 
 [eval phase] current time, current epoch/ total epoch, batch id, metrics, elapse time, ips, etc.:
 
-    ```txt
+
     [12/28 17:31:32] epoch:[ 80/80 ] val step:0    loss: 0.20538 top1: 0.88281 top5: 0.99219 elapse: 1.589 reader: 0.000s ips: 20.14003 instance/sec.
-    ```
+
 
 [epoch end] current time, metrics, elapse time, ips, etc.
  
-    ```txt
     [12/28 17:31:38] END epoch:80  val loss_avg: 0.52208 top1_avg: 0.84398 top5_avg: 0.97393 elapse_avg: 0.234 reader_avg: 0.000 elapse_sum: 7.021s ips: 136.73686 instance/sec.
-    ```txt
+
 [the best Acc]  
 
-    ```txt
     [12/28 17:28:42] Already save the best model (top1 acc)0.8494
-    ```
 
 <a name="model_resume"></a>
 ### 1.2 Resume
