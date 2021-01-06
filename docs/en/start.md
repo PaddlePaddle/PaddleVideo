@@ -7,7 +7,7 @@ Please refer to [installation documents](./install.md) to prepare the enviroment
 
 PaddleVideo only support linux operation system and GPU running time environment now.
 
-Default detination folder of PaddleVideo
+Default detination folder of PaddleVideo files. running the [example config](../../configs/example.yaml) as example.
 
 ```
 PaddleVideo
