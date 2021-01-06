@@ -14,6 +14,7 @@ PaddleVideo目前支持Linux下的GPU单卡和多卡运行环境。
 ```shell
 sh run.sh
 ```
+我们将所有标准的启动命令都放在了```run.sh```中，注意选择想要运行的脚本。
 
 <a name="model_train"></a>
 ### 1.1 模型训练
