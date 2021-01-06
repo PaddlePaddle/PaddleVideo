@@ -29,7 +29,9 @@ class FeatureDataset(BaseDataset):
         pipeline,
         data_prefix=None,
         valid_mode=False,
+        suffix=None,
     ):
+        self.suffix = suffix
         super().__init__(file_path, pipeline, data_prefix, valid_mode)
 
     def load_file(self):
@@ -40,6 +42,8 @@ class FeatureDataset(BaseDataset):
                 filename = line.strip()
                 if self.data_prefix is not None:
                     filename = osp.join(self.data_prefix, filename)
+                if self.suffix is not None:
+                    filename = filename + self.suffix
 
                 info.append(dict(filename=filename))
         return info
