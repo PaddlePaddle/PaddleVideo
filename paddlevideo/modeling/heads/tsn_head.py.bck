@@ -41,13 +41,11 @@ class TSNHead(BaseHead):
                  loss_cfg=dict(name='CrossEntropyLoss'),
                  drop_ratio=0.4,
                  std=0.01,
-                 return_feature=False,
                  **kwargs):
 
         super().__init__(num_classes, in_channels, loss_cfg, **kwargs)
         self.drop_ratio = drop_ratio
         self.std = std
-        self.return_feature = return_feature
 
         #NOTE: global pool performance
         self.avgpool2d = AdaptiveAvgPool2D((1, 1))
@@ -88,8 +86,6 @@ class TSNHead(BaseHead):
             x = self.dropout(x)
         # [N * seg_num, in_channels, 1, 1]
         x = paddle.reshape(x, [-1, seg_num, x.shape[1]])
-        if self.return_feature:  # used for video_tag
-            return x
         # [N, seg_num, in_channels]
         x = paddle.mean(x, axis=1)
         # [N, 1, in_channels]
