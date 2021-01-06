@@ -146,20 +146,20 @@ The chart below illustrates the performance of the video recognition models both
 
 **Note：**
 - PP-TSM improves almost 3.5% Top1 accuracy from standard TSM.
-- all these models described by RED color can be obtained in the [Model Zoo](#ModelZoo)  <sup>coming soon</sup> , and others are Pytorch results.
+- all these models described by RED color can be obtained in the [Model Zoo](#model-zoo)  <sup>coming soon</sup> , and others are Pytorch results.
 
 ## Tutorials
 
 ### Basic
 
 - [Install](docs/en/install.md)
-- [Start](docs/en/getting_started.md)
+- [Start](docs/en/start.md)
 - [Benchmark](docs/en/benchmark.md)
 - [Tools](docs/en/tools.md)
 
 ### Advanced
 - [Modular design]() <sup>coming soon</sup>
-- [Configuration design](docs/en/config.md)  <sup>coming soon</sup>
+- [Configuration design](docs/en/config.md)
 - [Higher performance PP-TSM]() <sup>coming soon</sup>
 - [Accelerate training]() <sup>coming soon</sup>
 - [Depolyment]() <sup>coming soon</sup>
