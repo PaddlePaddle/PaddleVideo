@@ -1,9 +1,7 @@
 [简体中文](../../zh-CN/model_zoo/README.md) | English
 
-# Model Zoo Statistics
+# Brief
 
-- Number of architecture: 6
-- Number of configs: 7
 
 ## Video Recognition Models
 
