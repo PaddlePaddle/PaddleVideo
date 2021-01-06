@@ -12,16 +12,16 @@ PaddleVideo的默认存储路径
 PaddleVideo
     ├── paddlevideo
     ├── ... #other source codes
-    ├── output #ouput destination
+    ├── output #ouput 权重，优化器参数等存储路径
     |    ├── example
     |    |   ├── example_best.pdparams #path_to_weights
     |    |   └── ...    
     |    └── ...    
-    ├── log  #log file destination.
+    ├── log  #log存储路径
     |    ├── worker.0
     |    ├── worker.1
     |    └── ...    
-    └── inference #inference files destination.
+    └── inference #预测文件存储路径
          ├── .pdiparams file
          ├── .pdimodel file
          └── .pdiparmas.info file
@@ -98,7 +98,7 @@ python -m paddle.distributed.launch \
 如果训练任务终止，可以加载断点权重文件(优化器-学习率参数，断点文件)继续训练。
 需要指定`-o resume_epoch`参数，该参数表示从```resume_epoch```轮开始继续训练.
 
-```
+```bash
 export CUDA_VISIBLE_DEVICES=0,1,2,3
 
 python3 -m paddle.distributed.launch \
@@ -116,7 +116,7 @@ python3 -m paddle.distributed.launch \
 
 进行模型微调（Finetune），对自定义数据集进行模型微调，需要指定 `--weights` 参数来加载预训练模型。
 
-```
+```bash
 export CUDA_VISIBLE_DEVICES=0,1,2,3
 
 python3 -m paddle.distributed.launch \
@@ -124,7 +124,7 @@ python3 -m paddle.distributed.launch \
     main.py \
         -c ./configs/example.yaml \
         --validate \
-        --weights=path_to_weights
+        --weights=./output/example/path_to_weights
 ```
 
 PaddleVideo会自动**不加载**shape不匹配的参数
@@ -141,7 +141,7 @@ python3 -m paddle.distributed.launch \
     main.py \
         -c ./configs/example.yaml \
         --test \
-        --weights=path_to_weights
+        --weights=./output/example/path_to_weights
 ```
 
 
@@ -156,7 +156,7 @@ python3 -m paddle.distributed.launch \
 ```bash
 python tools/export_model.py \
     -c ./configs/example.yaml \
-    -p ./output/path_to_weights \
+    -p ./output/example/path_to_weights \
     -o ./inference
 ```
 
@@ -165,7 +165,7 @@ python tools/export_model.py \
 
 ```bash
 python tools/infer/predict.py \
-    --video_file 预测视频路径 \
+    --video_file "data/example.avi" \
     --model_file "./inference/example.pdmodel" \
     --params_file "./inference/example.pdiparams" \
     --use_gpu=True \
