@@ -16,30 +16,30 @@ from .base import BaseDataset
 import os.path as osp
 import copy
 
+
 @DATASETS.register()
 class FeatureDataset(BaseDataset):
     """Feature dataset for action recognition
        Example:(TODO)
        Args:(TODO)
     """
-    def __init__(self,
-                 file_path,
-                 pipeline,
-                 data_prefix=None,
-                 valid_mode=False,
-                 suffix=None):
+    def __init__(
+        self,
+        file_path,
+        pipeline,
+        data_prefix=None,
+        valid_mode=False,
+        suffix=None,
+    ):
         self.suffix = suffix
-        super().__init__(file_path,
-                         pipeline,
-                         data_prefix,
-                         valid_mode)
+        super().__init__(file_path, pipeline, data_prefix, valid_mode)
 
     def load_file(self):
         """Load index file to get video information."""
         info = []
         with open(self.file_path, 'r') as fin:
             for line in fin:
-                filename = line.strip() #line_split
+                filename = line.strip()
                 if self.data_prefix is not None:
                     filename = osp.join(self.data_prefix, filename)
                 if self.suffix is not None:
@@ -52,4 +52,7 @@ class FeatureDataset(BaseDataset):
         """TRAIN & VALID. Prepare the data for training/valid given the index."""
         results = copy.deepcopy(self.info[idx])
         results = self.pipeline(results)
-        return results
+
+        return results['rgb_data'], results['rgb_len'], results[
+            'rgb_mask'], results['audio_data'], results['audio_len'], results[
+                'audio_mask'], results['labels']
