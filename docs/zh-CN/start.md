@@ -65,9 +65,9 @@ python -m paddle.distributed.launch \
         --validate \
         -o DATASET.batch_size=16
 ```
-`-o`用于指定需要修改或者添加的参数，其中`-o DATASET.batch_size=16`表示更改batch_size大小为16。具体配置参数含义参考[配置文档](./config.md)
+`-o`用于指定需要修改或者添加的参数，其中`-o DATASET.batch_size=16`表示更改batch_size大小为16。具体配置参数含义参考[配置文档](./tutorials/config.md#config-yaml-details)
 
-运行上述命令，将会输出运行日志，并默认保存在./log目录下，如：worker.0 , worker.1 ... , worker日志文件对应每张卡上的输出
+运行上述命令，将会输出运行日志，并默认保存在./log目录下，如：`worker.0` , `worker.1` ... , worker日志文件对应每张卡上的输出
 
 【train阶段】打印当前时间，当前epoch/epoch总数，当前batch id，评估指标，耗时，ips等信息：
 
