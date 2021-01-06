@@ -43,16 +43,23 @@ Note:
 
 **Clone PaddleVideo:**
 
-```
+```bash
 cd path_to_clone_PaddleVideo
 git clone https://github.com/PaddlePaddle/PaddleVideo.git
 ```
 
 **Install requirements**
 
-
-```
+```bash
 pip3 install --upgrade -r requirements.txt
 ```
+
+**Install python package**
+
+Install PaddleVideo via pip <sup>coming soon</sup>
+
+**Install docker**
+
+Install PaddleVideo via docker <sup>coming soon</sup> 
 
 
