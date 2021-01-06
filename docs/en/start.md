@@ -147,7 +147,7 @@ python3 -m paddle.distributed.launch \
 ## 2. Infer
 
 First, export model.
-Indicate `-c` to set configuration, `-p` to load pretrained model, `-o` to set outputs destination.
+Indicate `-c` to set configuration, `-p` to load pretrained model, `-o` to set inference files destination.
 
 ```bash
 python tools/export_model.py \
@@ -157,7 +157,7 @@ python tools/export_model.py \
 ```
 
 
-It will generate `model_name.pdmodel` and `model_name.pdiparams`.
+It will generate `model_name.pdmodel` , `model_name.pdiparams` and `model_name.pdiparames.info`.
 Second, start PaddleInference engine to infer a video.
 
 ```bash
