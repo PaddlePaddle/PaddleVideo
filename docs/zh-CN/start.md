@@ -6,7 +6,7 @@
 
 PaddleVideo目前支持Linux下的GPU单卡和多卡运行环境。
 
-PaddleVideo的默认存储路径
+- PaddleVideo各文件夹的默认存储路径， 以运行[example](../../configs/example.yaml)配置为例。
 
 ```
 PaddleVideo
@@ -22,9 +22,9 @@ PaddleVideo
     |    ├── worker.1
     |    └── ...    
     └── inference #预测文件存储路径
-         ├── .pdiparams file
-         ├── .pdimodel file
-         └── .pdiparmas.info file
+         ├── example.pdiparams file
+         ├── example.pdimodel file
+         └── example.pdiparmas.info file
 ```
 
 <a name="1"></a>
