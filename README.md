@@ -6,6 +6,15 @@
 
 PaddleVideo is a toolset for video recognition, action localization, and spatio temporal action detection tasks prepared for the industry and academia. This repository provides examples and best practice guildelines for exploring deep learning algorithm in the scene of video area. We devote to support experiments and utilities which can significantly reduce the "time to deploy". By the way, this is also a proficiency verification and implementation of the newest PaddlePaddle 2.0 in the video field.
 
+<div align="center">
+  <img src="docs/imgs/recognition.gif" width="450px"/><br>
+    Recognition
+</div>
+
+<div align="center">
+  <img src="docs/imgs/localization.gif" width="450px"/><br>
+    localization
+</div>
 
 ## Feature
 
