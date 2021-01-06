@@ -159,8 +159,8 @@ It will generate `model_name.pdmodel` , `model_name.pdiparams` and `model_name.p
 Second, start PaddleInference engine to infer a video.
 
 ```bash
-python tools/infer/predict.py \
-    --video_file \
+python tools/predict.py \
+    --video_file data/example.avi\
     --model_file "./inference/example.pdmodel" \
     --params_file "./inference/example.pdiparams" \
     --use_gpu=True \
