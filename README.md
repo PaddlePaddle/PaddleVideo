@@ -167,14 +167,14 @@ The chart below illustrates the performance of the video recognition models both
 
 ### Model zoo
 
-- recognition [Brief](docs/en/model_zoo/reconition/README.md) <sup>coming soon</sup>
+- recognition [Brief](docs/en/model_zoo/recognition/README.md) <sup>coming soon</sup>
     - [Attention-LSTM](docs/en/model_zoo/recognition/attention_lstm.md) <sup>coming soon</sup>
     - [TSN](docs/en/model_zoo/recognition/tsn.md) <sup>coming soon</sup>
     - [TSM](docs/en/model_zoo/recognition/tsm.md) <sup>coming soon</sup>
     - [PP-TSM](docs/en/model_zoo/recognition/pp-tsm.md) <sup>coming soon</sup>
     - [SlowFast](docs/en/model_zoo/recognition/slowfast.md) <sup>coming soon</sup>
     - [VideoTag](docs/en/model_zoo/recognition/videotag.md) <sup>coming soon</sup>
-- Localization [Brief](docs/en/model_zoo/recognition/README.md) <sup>coming soon</sup>
+- Localization [Brief](docs/en/model_zoo/localization/README.md) <sup>coming soon</sup>
     - [BMN](docs/en/model_zoo/localization/bmn.md) <sup>coming soon</sup>
 - Spatio temporal action detection：
     - Coming Soon!
