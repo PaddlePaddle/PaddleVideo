@@ -158,12 +158,12 @@ The chart below illustrates the performance of the video recognition models both
 - [Tools](docs/en/tools.md)
 
 ### Advanced
-- [Modular design]() <sup>coming soon</sup>
-- [Configuration design](docs/en/config.md)
-- [Higher performance PP-TSM]() <sup>coming soon</sup>
-- [Accelerate training]() <sup>coming soon</sup>
-- [Depolyment]() <sup>coming soon</sup>
-- [Customized usage]() <sup>coming soon</sup>
+- [Modular design](docs/en/tutorials/modular_design.md) <sup>coming soon</sup>
+- [Configuration design](docs/en/tutorials/config.md)
+- [Higher performance PP-TSM](docs/en/tutorials/pp-tsm.md) <sup>coming soon</sup>
+- [Accelerate training](docs/en/tutorials/accelerate.md) <sup>coming soon</sup>
+- [Depolyment](docs/en/tutorials/depolyment.md) <sup>coming soon</sup>
+- [Customized usage](docs/en/tutorials/customized_usage.md) <sup>coming soon</sup>
 
 ### Model zoo
 
