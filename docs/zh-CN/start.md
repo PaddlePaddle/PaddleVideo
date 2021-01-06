@@ -6,6 +6,27 @@
 
 PaddleVideo目前支持Linux下的GPU单卡和多卡运行环境。
 
+PaddleVideo的默认存储路径
+
+```
+PaddleVideo
+    ├── paddlevideo
+    ├── ... #other source codes
+    ├── output #ouput destination
+    |    ├── example
+    |    |   ├── example_best.pdparams #path_to_weights
+    |    |   └── ...    
+    |    └── ...    
+    ├── log  #log file destination.
+    |    ├── worker.0
+    |    ├── worker.1
+    |    └── ...    
+    └── inference #inference files destination.
+         ├── .pdiparams file
+         ├── .pdimodel file
+         └── .pdiparmas.info file
+```
+
 <a name="1"></a>
 ## 1. 模型训练与评估
 
