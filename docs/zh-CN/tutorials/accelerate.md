@@ -1,1 +1,1 @@
-[简体中文](../../zh-CN/tutorials/accelerate.md) | English
+简体中文 | [English](../../en/tutorials/accelerate.md)
