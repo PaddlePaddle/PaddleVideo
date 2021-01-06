@@ -58,10 +58,10 @@ pip3 install --upgrade -r requirements.txt
 
 **Install python package**
 
-Install PaddleVideo via pip <sup>coming soon</sup>
+Install PaddleVideo via pip <sup>WIP</sup>
 
 **Install docker**
 
-Install PaddleVideo via docker <sup>coming soon</sup> 
+Install PaddleVideo via docker <sup>WIP</sup> 
 
 
