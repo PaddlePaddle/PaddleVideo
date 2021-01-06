@@ -1,4 +1,4 @@
-[简体中文](../zh-CN/getting_started.md) | English
+[简体中文](../zh-CN/start.md) | English
 
 # Start
 ---
