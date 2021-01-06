@@ -149,7 +149,7 @@ PaddleVideo飞桨视频模型开发套件，旨在帮助开发者更好的进行
 **说明：**
 - 红色文字描述为PaddleVideo提供的模型，黑色文字描述为Pytorch实现
 - PPTSM在TSM标准版上精度提升3.5%，预测速度也略有增加。
-- 图中红色描述的模型均可在[模型库](#模型库) <sup>coming soon</sup>中获取
+- 图中红色描述的模型均可在[模型库](#模型库)中获取
 
 ## 文档教程
 
@@ -170,17 +170,16 @@ PaddleVideo飞桨视频模型开发套件，旨在帮助开发者更好的进行
 ### 模型库
 
 - 视频分类 [介绍](docs/zh-CN/model_zoo/README.md#视频分类)
-    - [Attention-LSTM](docs/zh-CN/model_zoo/recognition/attention_lstm.md) <sup>coming soon</sup>
+    - [Attention-LSTM](docs/zh-CN/model_zoo/recognition/attention_lstm.md) 
     - [TSN](docs/zh-CN/model_zoo/recognition/tsn.md) 
-    - [TSM](docs/zh-CN/model_zoo/recognition/tsm.md) <sup>coming soon</sup>
-    - [PPTSM](docs/zh-CN/model_zoo/recognition/pp-tsm.md) <sup>coming soon</sup>
-    - [SlowFast](docs/zh-CN/model_zoo/recognition/slowfast.md) <sup>coming soon</sup>
+    - [TSM](docs/zh-CN/model_zoo/recognition/tsm.md)
+    - [PPTSM](docs/zh-CN/model_zoo/recognition/pp-tsm.md) 
+    - [SlowFast](docs/zh-CN/model_zoo/recognition/slowfast.md)
     - [VideoTag](docs/zh-CN/model_zoo/recognition/videotag.md) <sup>coming soon</sup>
 - 动作定位 [介绍](docs/zh-CN/model_zoo/README.md#动作定位)
-    - [BMN](docs/zh-CN/model_zoo/localization/bmn.md) <sup>coming soon</sup>
+    - [BMN](docs/zh-CN/model_zoo/localization/bmn.md) 
 - 时空动作检测：
     - Coming Soon!
-
 
 ## 许可证书
 本项目的发布受[Apache 2.0 license](LICENSE)许可认证。
