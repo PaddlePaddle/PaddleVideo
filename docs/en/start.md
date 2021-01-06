@@ -3,18 +3,21 @@
 # Start
 ---
 
-Please refer to [installation documents](./install.md) to prepare the enviroment, and follow the steps mentioned in the [data preparation documents](./data/) to construct dataset, we will take you through the basic functions supported by PaddleVideo, all of it takes the ucf101 dataset as example.
+Please refer to [installation documents](./install.md) to prepare the enviroment, and follow the steps mentioned in the [data preparation documents](./dataset/) to construct dataset, we will take you through the basic functions supported by PaddleVideo, all of it takes the ucf101 dataset with frame format as example.
 
-PaddleVideo only support linux operation system and GPU running time environment
+PaddleVideo only support linux operation system and GPU running time environment now.
 
 <a name="1"></a>
 ## 1. Train and Test
 
 Start running multi-cards training scripts or test scripts by `paddle.distributed.launch`, or run the `run.sh` directly.
 
-```shell
+```bash
 sh run.sh
 ```
+
+We put all the start commands in advanced in the ```run.sh```, please uncomment the selected one to run.
+
 
 <a name="model_train"></a>
 ### 1.1 Train
