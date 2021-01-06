@@ -146,7 +146,7 @@ The chart below illustrates the performance of the video recognition models both
 
 **Note：**
 - PP-TSM improves almost 3.5% Top1 accuracy from standard TSM.
-- all these models described by RED color can be obtained in the [Model Zoo](#model-zoo)  <sup>coming soon</sup> , and others are Pytorch results.
+- all these models described by RED color can be obtained in the [Model Zoo](#model-zoo), and others are Pytorch results.
 
 ## Tutorials
 
@@ -167,14 +167,14 @@ The chart below illustrates the performance of the video recognition models both
 
 ### Model zoo
 
-- recognition [Brief](docs/en/model_zoo/README.md) <sup>coming soon</sup>
+- recognition [Brief](docs/en/model_zoo/README.md)
     - [Attention-LSTM](docs/en/model_zoo/recognition/attention_lstm.md)
     - [TSN](docs/en/model_zoo/recognition/tsn.md)
     - [TSM](docs/en/model_zoo/recognition/tsm.md)
     - [PP-TSM](docs/en/model_zoo/recognition/pp-tsm.md)
     - [SlowFast](docs/en/model_zoo/recognition/slowfast.md)
     - [VideoTag](docs/en/model_zoo/recognition/videotag.md) <sup>coming soon</sup>
-- Localization [Brief](docs/en/model_zoo/README.md) <sup>coming soon</sup>
+- Localization [Brief](docs/en/model_zoo/README.md)
     - [BMN](docs/en/model_zoo/localization/bmn.md)
 - Spatio temporal action detection：
     - Coming Soon!
@@ -183,9 +183,6 @@ The chart below illustrates the performance of the video recognition models both
 ## License
 
 PaddleVideo is released under the [Apache 2.0 license](LICENSE).
-
-
-
 
 ## Contributing
 This poject welcomes contributions and suggestions. Please see our [contribution guidelines](docs/CONTRIBUTING.md).
