@@ -66,7 +66,7 @@ python -m paddle.distributed.launch \
         --validate \
         -o DATASET.batch_size=16
 ```
-Indicating `-o DATASET.batch_size=16` can update batch size to 16, please refer to [configuration](tutorials/config.md) for more information.
+Indicating `-o DATASET.batch_size=16` can update batch size to 16, please refer to [configuration](tutorials/config.md#config-yaml-details) for more information.
 
 After starting training, log files will generated, and its format is shown as below, it will output to both the screen and files. Default destination of log is under the `.log/` folder, and stored in the files named like `worker.0`, `worker.1` ...
 
