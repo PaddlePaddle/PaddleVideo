@@ -1,1 +1,1 @@
-简体中文 | [English](../en/config.md)
+简体中文 | [English](../en/tutorials/config.md)
