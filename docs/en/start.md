@@ -160,7 +160,7 @@ Second, start PaddleInference engine to infer a video.
 
 ```bash
 python tools/predict.py \
-    --video_file data/example.avi\
+    --video_file "data/example.avi" \
     --model_file "./inference/example.pdmodel" \
     --params_file "./inference/example.pdiparams" \
     --use_gpu=True \
