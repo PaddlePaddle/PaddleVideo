@@ -24,7 +24,7 @@ elif model_name == "TSN":
     model = TSN()
 elif ...
 ```
-and 
+and
 
 ```python
 optimizer_cfg = dict(name:"MOMENTUM", params: XXX)
@@ -52,11 +52,11 @@ class Registry():
     def __init__(self, name):
         self._name = name
         self._obj_map = {}
-        
+
     #mapping name -> object
     def register(self,  obj, name):
         self._obj_map[name] = obj
-        
+
     #get object
     def get(self, name):
         ret = self._obj_map.get(name)
@@ -71,7 +71,7 @@ It provides name -> object mapping. For example, To register an object:
         pass
     BACKBONES.register(ResNet)
 ```
-    
+
 Or, use a decorator
 ```python
     BACKBONES = Registry('backbone') #new a Register
@@ -85,7 +85,7 @@ Or, use a decorator
 To obtain a registed module.
 ```python
     # Usage: To build a module.
-    
+
     backbone_name = "ResNet"
     b = BACKBONES.get(backbone_name)()
 ```
@@ -105,7 +105,7 @@ head:
 
 ---
 
-## config yaml details 
+## config yaml details
 
 We separate the config to several parts, in high level:
 
