@@ -12,6 +12,7 @@ Default detination folder of PaddleVideo
 ```
 PaddleVideo
     ├── paddlevideo
+    ├── ... #other source codes
     ├── output #ouput destination
     |    ├── example
     |    |   ├── example_best.pdparams #path_to_weights
@@ -94,7 +95,7 @@ After starting training, log files will generated, and its format is shown as be
 
 Indicate `-o resume_epoch` to resume, It will training from ```resume_epoch``` epoch, PaddleVideo will auto load optimizers parameters and checkpoints from `./output` folder, as it is the default output destination.
 
-```
+```bash
 export CUDA_VISIBLE_DEVICES=0,1,2,3
 
 python3 -m paddle.distributed.launch \
@@ -119,7 +120,7 @@ python3 -m paddle.distributed.launch \
     main.py \
         -c ./configs/example.yaml \
         --validate \
-        --weights=path_to_weights
+        --weights=./outputs/example/path_to_weights
 ```
 
 Note: PaddleVideo will NOT load shape unmatched parameters.
@@ -137,7 +138,7 @@ python3 -m paddle.distributed.launch \
     main.py \
         -c ./configs/example.yaml \
         --test \
-        --weights=path_to_weights
+        --weights=./output/example/path_to_weights
 ```
 
 
@@ -151,7 +152,7 @@ Indicate `-c` to set configuration, `-p` to load pretrained model, `-o` to set o
 ```bash
 python tools/export_model.py \
     -c ./configs/example.yaml \
-    -p ./output/path_to_weights \
+    -p ./output/example/path_to_weights \
     -o ./inference
 ```
 
