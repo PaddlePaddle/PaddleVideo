@@ -50,7 +50,6 @@ class VideoDataset(BaseDataset):
         with open(self.file_path, 'r') as fin:
             for idx, line in enumerate(fin):
                 line_split = line.strip().split()
-                #filename, labels = line_split
                 #TODO(hj): Required suffix format: may mp4/avi/wmv
                 #filename = filename + '.avi'
                 if len(line_split) == 2:

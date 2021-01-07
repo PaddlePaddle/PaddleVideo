@@ -2,40 +2,40 @@ MODEL: #MODEL field
     framework: "Recognizer1D" #Mandatory, indicate the type of network, associate to the 'paddlevideo/modeling/framework/' .
     head:
         name: "AttentionLstmHead" #Mandatory, indicate the type of head, associate to the 'paddlevideo/modeling/heads'
-        num_classes: 3396 #Optional, the number of classes to be classified.
-        embedding_size: 1024 #512
-        feature_dims: [2048]
-        lstm_size: 512 #1024
+        num_classes: 3862 #Optional, the number of classes to be classified.
+        feature_num: 2
+        embedding_size: 512
+        lstm_size: 1024
 
 DATASET: #DATASET field
-    batch_size: 1 #64 #128  #Mandatory, bacth size
+    batch_size: 128  #Mandatory, bacth size
     num_workers: 0  #Mandatory, the number of subprocess on each GPU.
     shuffle_valid: True
     train:
         format: "FeatureDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
-        file_path:   "/workspace/huangjun12/DATA/youtube-8m/train.list" #Mandatory, train data index file path
+        file_path:   "data/dataset/youtube-8m/train.list" #Mandatory, train data index file path
     valid:
         format: "FeatureDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
-        file_path:   "/workspace/huangjun12/DATA/youtube-8m/val.list" #Mandatory, train data index file path
+        file_path:   "data/dataset/youtube-8m/val.list" #Mandatory, train data index file path
     test:
         format: "FeatureDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
         data_prefix: ""  #Mandatory, valid data root path
-        file_path:   "/workspace/huangjun12/DATA/youtube-8m/val.list" #Mandatory, train data index file path
+        file_path:   "data/dataset/youtube-8m/val.list" #Mandatory, train data index file path
 
 
 PIPELINE: #PIPELINE field
     train: #Mandotary, indicate the pipeline to deal with the training data, associate to the 'paddlevideo/loader/pipelines/'
         decode:
             name: "FeatureDecoder" #"VideoDecoder"
-            num_classes: 3396 #3862
+            num_classes: 3862
     valid: #Mandatory, indicate the pipeline to deal with the validing data. associate to the 'paddlevideo/loader/pipelines/'
         decode:
             name: "FeatureDecoder" #"VideoDecoder"
-            num_classes: 3396 #3862
+            num_classes: 3862
     test:
         decode:
             name: "FeatureDecoder" #"VideoDecoder"
-            num_classes: 3396 #3862
+            num_classes: 3862
 
 OPTIMIZER: #OPTIMIZER field
     name: 'RMSProp' #Mandatory, the type of optimizer, associate to the 'paddlevideo/solver/'
@@ -48,13 +48,7 @@ OPTIMIZER: #OPTIMIZER field
         name: 'L2'
         value: 4e-4
 
-VIDEOTAG:
-    topk: 20
-    label_file: "data/label_3396.txt"
-    save_dir: "output/VideoTag_results/"
-
 model_name: "AttentionLstm"
-topk: 20
 log_interval: 1 #Optional, the interal of logger, default:10
 epochs: 10 #Mandatory, total epoch
 save_interval: 5
