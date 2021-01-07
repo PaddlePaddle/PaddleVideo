@@ -165,9 +165,9 @@ PaddleVideo飞桨视频模型开发套件，旨在帮助开发者更好的进行
 ### 进阶教程
 - [模型库整体设计]() <sup>coming soon</sup>
 - [配置模块设计](docs/zh-CN/config.md)
-- [PPTSM实践]() <sup>coming soon</sup>
+- [PPTSM实践](docs/zh-CN/pp-tsm.md)
 - [训练加速方案]() <sup>coming soon</sup>
-- [预测部署]() <sup>coming soon</sup>
+- [预测部署](docs/zh-CN/deployment.md) 
 - [自定义开发]() <sup>coming soon</sup>
 
 ### 模型库
@@ -178,7 +178,6 @@ PaddleVideo飞桨视频模型开发套件，旨在帮助开发者更好的进行
     - [TSM](docs/zh-CN/model_zoo/recognition/tsm.md)
     - [PPTSM](docs/zh-CN/model_zoo/recognition/pp-tsm.md) 
     - [SlowFast](docs/zh-CN/model_zoo/recognition/slowfast.md)
-    - [VideoTag](docs/zh-CN/model_zoo/recognition/videotag.md) <sup>coming soon</sup>
 - 动作定位 [介绍](docs/zh-CN/model_zoo/README.md#动作定位)
     - [BMN](docs/zh-CN/model_zoo/localization/bmn.md) 
 - 时空动作检测：
