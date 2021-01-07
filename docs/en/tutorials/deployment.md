@@ -28,7 +28,7 @@ We just print the output shape, please feel free to extend it. Avtually, only te
 PaddleVideo supports ```tools/predict.py``` to infer
 
 ```python
- python3.7 tools/predict.py -v example.avi --model_file "./inference/example.pdmodel" --param    s_file "./inference/example.pdiparams" --enable_benchmark=False --model="example" --num_seg=8
+ python3.7 tools/predict.py -v example.avi --model_file "./inference/example.pdmodel" --params_file "./inference/example.pdiparams" --enable_benchmark=False --model="example" --num_seg=8
  ```
 
 ## How to test inference speed?
