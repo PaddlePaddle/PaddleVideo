@@ -3,7 +3,7 @@
 ## 背景
 随着多媒体、网络和存储技术的快速发展，视频数据的生成、处理和获取变得越来越方便，由此视频数据量呈现出爆炸性的增长。一方面，诸如抖音、快手、微博、腾讯微视、美拍、Twitter、Facebook等线上短视频平台迅猛发展，据统计当前抖音日活跃用户数量已超6亿人； 另一方面，在安全，运输，以及工业生产等场景中已然积累了大量的视频数据，且这些视频数据中往往蕴含着丰富而有价值的信息。
 <p align="center">
-<img src="./images/videodata.png" height=300 width=500 hspace='10'/> <br />
+<img src="../images/videodata.png" height=300 width=500 hspace='10'/> <br />
 图1.线上和线下海量视频数据
 </p>
 
@@ -18,7 +18,7 @@
 从使用的数据模态上分，分类任务还可以继续细分为基于单模态数据的分类和基于多模态数据的分类，基于RGB图像的分类和基于人体骨架的分类等等，如下图所示：
 
  <p align="center">
-<img src="./images/multimodality.png" height=300 width=500 hspace='10'/> <br />
+<img src="../images/multimodality.png" height=300 width=500 hspace='10'/> <br />
 图3.多种模态
 </p>
 从视频的视角上分还可以分为第一人称视角的行为识别和第三人称视角的行为识别，单一视角的识别和多视角融合的识别，有兴趣的用户可自行查阅相关文献。
