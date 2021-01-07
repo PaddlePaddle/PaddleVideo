@@ -18,7 +18,7 @@
 与图像任务相似，总体上看视频任务也可以分为分类（识别）和检测任务两大类，结合不同的场景还可以对这两类任务具体进行细分：
 + Task1：修剪视频识别(Trimmed Action Recognition)。这个在计算机视觉领域已经研究多年，给出一段只包含一个动作的修剪视频，要求给视频分类，如下图所示：
  <p align="center">
-<img src="./images/action_classification.png" height=300 width=500 hspace='10'/> <br />
+<img src="./images/action_classification.png" height=300 width=600 hspace='10'/> <br />
 图3.行为分类
 </p>
 从使用的数据模态上分，分类任务还可以继续细分为基于单模态数据的分类和基于多模态数据的分类，基于RGB图像的分类和基于人体骨架的分类等等，如下图所示：
@@ -34,7 +34,7 @@
 
 + Task4：时序行为定位(Temporal Action Localization)。相比于上面的时序行为提名而言，时序行为定位于我们常说的目标检测一致，要求从视频中找到可能存在行为的视频段，并且给视频段分类，如下图所示：
  <p align="center">
-<img src="./images/action_detection.png" height=300 width=500 hspace='10'/> <br />
+<img src="./images/action_detection.png" height=300 width=750 hspace='10'/> <br />
 图3.行为检测
 </p>
 
