@@ -60,8 +60,8 @@ Brown university大学提出的HMDB51数据集[4]于2011年发布，视频多数
 Kinetics[5]是当前最为重要的一个大型行为识别数据集，该数据集在2017年由Google的Deepmind团队提出，视频数据同样来自于YouTube,总共400个类别(现已经扩充到700类)，30多万段视频数据(Kinetics-700已经扩充到了60多万段视频)，每段视频持续10秒左右。动作类别主要分为三大类：“人”，“人与动物”，“人与人互动”。Kinetics数据集可以训练3D-Resnet达到152层而不发生过拟合[60]。解决了之前训练数据集过小难以训练深层3D网络的困境。当前Kinetics已经取代了UCF101[57]和HMDB51[58]成为了行为识别领域的benchmark。当前，大多数研究都采用此数据集进行效果评估和预训练。
 + Something-Something数据集
 
-SomethingV1[6]包含108499段标注视频(V2已经扩展到了220847)，每一个时长都在2到6秒之间。这些视频包含了174种类别的动作，与前面的数据集不同此数据集的识别需要更强的时间信息[10]因此在检验模型时域建模能力方面此数据集具有很重要的参考价值。
-除了以上的主流数据集外目前还有复杂动作识别的Charades[62]数据集、Breakfast Action[63]数据集、以及百万级别的体育视频数据集Sports 1M[28]。
+SomethingV1[6]包含108499段标注视频(V2已经扩展到了220847)，每一个时长都在2到6秒之间。这些视频包含了174种类别的动作，与前面的数据集不同此数据集的识别需要更强的时间信息,因此在检验模型时域建模能力方面此数据集具有很重要的参考价值。
+除了以上的主流数据集外目前还有复杂动作识别的Charades[7]数据集、Breakfast Action[8]数据集、以及百万级别的体育视频数据集Sports 1M[9]。
 
 ### 检测任务数据集
 
@@ -75,7 +75,7 @@ MEXaction2数据集中包含两类动作：骑马和斗牛。该数据集由三�
 
 + ActivityNet
 
-目前最大的数据库，同样包含分类和检测两个任务。这个数据集仅提供视频的youtube链接，而不能直接下载视频，所以还需要用python中的youtube下载工具来自动下载。该数据集包含200个动作类别，20000（训练+验证+测试集）左右的视频，视频时长共计约700小时。由于这个数据集实在太大了，我的实验条件下很难完成对其的实验，所以我之前主要还是在THUMOS14和MEXaction2上进行实验。
+目前最大的数据库，同样包含分类和检测两个任务。这个数据集仅提供视频的youtube链接，而不能直接下载视频，所以还需要用python中的youtube下载工具来自动下载。该数据集包含200个动作类别，20000（训练+验证+测试集）左右的视频，视频时长共计约700小时.
 
 ---
 ## 经典模型简介
@@ -89,7 +89,7 @@ MEXaction2数据集中包含两类动作：骑马和斗牛。该数据集由三�
 <img src="./images/classic_model.png" height=300 width=500 hspace='10'/> <br />
 图3.典型的方法
 </p>
-目前Paddlevideo模型库中已经囊括了TSN[7]，TSM[8]，slowfast[9]等经典的行为识别网络，我们后续会陆续对视频领域的经典模型和论文进行详细解析，敬请期待！
+目前Paddlevideo模型库中已经囊括了TSN[10]，TSM[11]，slowfast[12]等经典的行为识别网络，我们后续会陆续对视频领域的经典模型和论文进行详细解析，敬请期待！
 
 ---
 ## Reference
@@ -105,9 +105,15 @@ MEXaction2数据集中包含两类动作：骑马和斗牛。该数据集由三�
 
 [6] Goyal R, Kahou S E, Michalski V. The “something something” video database for learning and evaluating visual common sense. arXiv:1706.04261,2017.
 
-[7] Limin Wang, Yuanjun Xiong, Zhe Wang, Yu Qiao, Dahua Lin, Xiaoo Tang,and Luc Van Gool. Temporal segment networks for action recognition in videos? In Proceedings of the European Conference on Computer Vision,pages 20–36. Springer, 2016.
+[7] Sigurdsson G A , Varol Gül, Wang Xiaolong, et al. Hollywood in Homes: Crowdsourcing Data Collection for Activity Understanding. arXiv: 604.01753,2016
 
-[8] Lin Ji , Gan Chuang , Han Song . TSM: Temporal Shift Module for Efficient Video Understanding. arXiv:1811.08383,2018.
+[8] Kuehne H, Arslan A, Serre T. The Language of Actions Recovering the Syntax and Semantics of Goal-Directed Human Activities  Proceedings of IEEE Conference on Computer Vision and Pattern Recognition. Piscataway, NJ: IEEE, 2014.
 
-[9] Feichtenhofer C , Fan Haoqi , Malik J , et al. SlowFast Networks for Video Recognition. arXiv:1812.03982,2018.
+[9] Karpathy A , Toderici G , Shetty S , et al. Large-Scale Video Classification with Convolutional Neural Networks Proceedings of IEEE Conference on Computer Vision and Pattern Recognition. Piscataway, NJ: IEEE, 2014:1725-1732.
+
+[10] Limin Wang, Yuanjun Xiong, Zhe Wang, Yu Qiao, Dahua Lin, Xiaoo Tang,and Luc Van Gool. Temporal segment networks for action recognition in videos? In Proceedings of the European Conference on Computer Vision,pages 20–36. Springer, 2016.
+
+[11] Lin Ji , Gan Chuang , Han Song . TSM: Temporal Shift Module for Efficient Video Understanding. arXiv:1811.08383,2018.
+
+[12] Feichtenhofer C , Fan Haoqi , Malik J , et al. SlowFast Networks for Video Recognition. arXiv:1812.03982,2018.
 
