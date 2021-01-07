@@ -13,7 +13,7 @@ python3 tools/export_model.py -c 配置文件 -o 输出地址 -p 权重文件
 `export_model.py` 中，首先会重新build一个网络，这里注意，有些用于预测的模型初始化参数可能和训练时不一致，请注意更改。
 `export_model.py` 添加了针对TSM的`num_seg`等参数，会用to_static动转静，并调用jit.save来保存预测模型，注意：这里的inputspec需要指定一个`假` 输入来运行网路。
 
-具体原理请参考 [动转静](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/guides/04_dygraph_to_static/index_cn.html)
+具体原理请参考 [动转静](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/guides/04_dygraph_to_static/index_cn.html) 官方文档。
 
 ## 如何检查保存的预测模型正确性？
 
