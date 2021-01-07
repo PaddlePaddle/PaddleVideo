@@ -13,13 +13,13 @@
 + Task1：修剪视频识别(Trimmed Action Recognition)。这个在计算机视觉领域已经研究多年，给出一段只包含一个动作的修剪视频，要求给视频分类，如下图所示：
  <p align="center">
 <img src="./images/action_classification.png" height=300 width=700 hspace='10'/> <br />
-图3.行为分类
+图2.行为分类
 </p>
 从使用的数据模态上分，分类任务还可以继续细分为基于单模态数据的分类和基于多模态数据的分类，基于RGB图像的分类和基于人体骨架的分类等等，如下图所示：
 
  <p align="center">
 <img src="./images/multimodality.png" height=300 width=500 hspace='10'/> <br />
-图4.多种模态
+图3.多种模态
 </p>
 从视频的视角上分还可以分为第一人称视角的行为识别和第三人称视角的行为识别，单一视角的识别和多视角融合的识别，有兴趣的用户可自行查阅相关文献。
 
@@ -30,7 +30,7 @@
 + Task4：时序行为定位(Temporal Action Localization)。相比于上面的时序行为提名而言，时序行为定位于我们常说的目标检测一致，要求从视频中找到可能存在行为的视频段，并且给视频段分类，如下图所示：
  <p align="center">
 <img src="./images/action_detection.png" height=200 width=1000 hspace='10'/> <br />
-图5.行为检测
+图4.行为检测
 </p>
 
 + Task5：密集行为描述(Dense-Captioning Events)。之所以称为密集行为描述，主要是因为该任务要求在时序行为定位(检测)的基础上进行视频行为描述。也就是说，该任务需要将一段未修剪的视频进行时序行为定位得到许多包含行为的视频段后，对该视频段进行行为描述。
@@ -41,22 +41,22 @@
 ### 分类数据集
 
 模型的训练和验证离不开全面、大量以及具有较好标注的数据集。随着视频行为识别研究的不断深入，越来越多的数据集应用于这一领域的研究。典型的数据集如下：
-+ KTH数据集[1]
++ KTH数据集[<sup>1</sup>](#1)
 
 KTH数据集是一个早期的小型行为识别数据集，包括599段视频6类动作（走、跳、跑、击拳、挥手、拍手）背景相对静止，除了镜头的拉近拉远，摄像机的运动比较轻微。由于该数据集比较小，当训练较大型的3D网络时很容易过拟合，因此当前的大部分研究训练过程多数不基于此数据集。
-+ UCF10数据集[2]
++ UCF10数据集[<sup>1</sup>](#1)
 
 UCF101是一个中型数据集视频主要来自于YouTube，包含13320段视频，共101类动作，每类动作由25个人完成，每个人做4-7组动作。在Kinetics数据集发布之前UCF101和HMDB51数据集在很长的一段时间里被作为benchmark用于评估行为识别方法的效果。
-+ HMDB51数据集[3]
++ HMDB51数据集[<sup>1</sup>](#1)
 
 Brown university大学提出的HMDB51数据集于2011年发布，视频多数来源于电影，还有一部分来自公共数据库以及YouTube等网络视频库。数据库包含有6849段样本，分为51类，每类至少包含有101段样本。
-+ Kinetics数据集[4]
++ Kinetics数据集[<sup>1</sup>](#1)
 
 Kinetics是当前最为重要的一个大型行为识别数据集，该数据集在2017年由Google的Deepmind团队提出，视频数据同样来自于YouTube,总共400个类别(现已经扩充到700类)，30多万段视频数据(Kinetics-700已经扩充到了60多万段视频)，每段视频持续10秒左右。动作类别主要分为三大类：“人”，“人与动物”，“人与人互动”。Kinetics数据集可以训练3D-Resnet达到152层而不发生过拟合,解决了之前训练数据集过小难以训练深层3D网络的困境。当前Kinetics已经取代了UCF101和HMDB51成为了行为识别领域的benchmark。当前，大多数研究都采用此数据集进行效果评估和预训练。
-+ Something-Something数据集[5]
++ Something-Something数据集[<sup>1</sup>](#1)
 
 SomethingV1包含108499段标注视频(V2已经扩展到了220847)，每一个时长都在2到6秒之间。这些视频包含了174种类别的动作，与前面的数据集不同此数据集的识别需要更强的时间信息,因此在检验模型时域建模能力方面此数据集具有很重要的参考价值。
-除了以上的主流数据集外目前还有复杂动作识别的Charades[6]数据集、Breakfast Action[7]数据集、以及百万级别的体育视频数据集Sports 1M[8]。
+除了以上的主流数据集外目前还有复杂动作识别的Charades[<sup>1</sup>](#1)数据集、Breakfast Action[<sup>1</sup>](#1)数据集、以及百万级别的体育视频数据集Sports 1M[<sup>1</sup>](#1)。
 
 ### 检测任务数据集
 
@@ -77,14 +77,15 @@ MEXaction2数据集中包含两类动作：骑马和斗牛。该数据集由三�
 如图所示，动作识别框架主要包括三个步骤:特征提取、运动表示和分类。其中，如何提取视频的时空特征是行为识别和视频分类的核心问题。
  <p align="center">
 <img src="./images/action_framework.png" height=300 width=700 hspace='10'/> <br />
-图6.行为识别框架
+图5.行为识别框架
 </p>
 依据使用方法的不同可以总体上将行为识别（视频分类）方法概括为基于手工特征方法阶段和基于深度学习方法阶段。基于手工特征的方法阶段比较典型的运动描述子有DTP和IDT，这也是深度学习应用于这一领域之前为大家所公认的最为优秀的运动描述子，感兴趣的读者可以自行查阅文末的相关参考文献。从2014年起，深度学习的方法逐渐开始应用于视频分类领域，目前基于深度学习的方法已经成为了学术界的研究热点，并且在实际的应用效果上看也远远超越了手工设计的运动特征。从2014年至今围绕着如何表征运动特征这一问题，学术界提出了许多经典的网络结构，如下图所示：
  <p align="center">
 <img src="./images/classic_model.png" height=300 width=700 hspace='10'/> <br />
-图7.典型的方法
+图6.典型的方法
 </p>
-目前Paddlevideo模型库中已经囊括了TSN[9]，TSM[10]，slowfast[11]等经典的行为识别网络，我们后续会陆续对视频领域的经典模型和论文进行详细解析，敬请期待！
+
+目前Paddlevideo模型库中已经囊括了TSN[<sup>1</sup>](#1) ，TSM[<sup>1</sup>](#1)，slowfast[<sup>1</sup>](#1)等经典的行为识别网络，我们后续会陆续对视频领域的经典模型和论文进行详细解析，敬请期待！
 
 ---
 
@@ -97,7 +98,9 @@ ActivityNet是一个大规模行为识别竞赛，自2016年开始，每年与CV
 
 ## Reference
 
+<div id='1'>
 [1] Schuldt C, Laptev I, Caputo B.Recognizing Human Actions: A Local SVM Approach Proceedings of International Conference on Pattern Recognition. Piscataway, NJ: IEEE, 2004:23-26
+</div>
 
 [2] Soomro K, Zamir A R, Shah M. UCF101: A Dataset of 101 Human Actions Classes From Videos in The Wild. arXiv:1212.0402,2012.
 
