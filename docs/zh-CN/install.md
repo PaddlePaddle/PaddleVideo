@@ -65,6 +65,8 @@ Python依赖库在[requirements.txt](https://github.com/PaddlePaddle/PaddleVideo
 pip3 install --upgrade -r requirements.txt
 ```
 
+---
+
 **从python安装包安装PaddleVideo**
 
 安装最新的PaddleVideo wheel包来体验PaddleVideo，coming soon！

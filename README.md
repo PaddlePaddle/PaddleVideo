@@ -4,8 +4,20 @@
 
 ## Introduction
 
+![python version](https://img.shields.io/badge/python-3.7+-orange.svg) ![paddle version](https://img.shields.io/badge/PaddlePaddle-2.0-blue)
+
+
 PaddleVideo is a toolset for video recognition, action localization, and spatio temporal action detection tasks prepared for the industry and academia. This repository provides examples and best practice guildelines for exploring deep learning algorithm in the scene of video area. We devote to support experiments and utilities which can significantly reduce the "time to deploy". By the way, this is also a proficiency verification and implementation of the newest PaddlePaddle 2.0 in the video field.
 
+<div align="center">
+  <img src="docs/imgs/recognition.gif"/><br>
+    Recognition
+</div>
+
+<div align="center">
+  <img src="docs/imgs/localization.gif"/><br>
+    localization
+</div>
 
 ## Feature
 
@@ -146,7 +158,7 @@ The chart below illustrates the performance of the video recognition models both
 
 **Note：**
 - PP-TSM improves almost 3.5% Top1 accuracy from standard TSM.
-- all these models described by RED color can be obtained in the [Model Zoo](#model-zoo)  <sup>coming soon</sup> , and others are Pytorch results.
+- all these models described by RED color can be obtained in the [Model Zoo](#model-zoo), and others are Pytorch results.
 
 ## Tutorials
 
@@ -158,24 +170,24 @@ The chart below illustrates the performance of the video recognition models both
 - [Tools](docs/en/tools.md)
 
 ### Advanced
-- [Modular design]() <sup>coming soon</sup>
-- [Configuration design](docs/en/config.md)
-- [Higher performance PP-TSM]() <sup>coming soon</sup>
-- [Accelerate training]() <sup>coming soon</sup>
-- [Depolyment]() <sup>coming soon</sup>
-- [Customized usage]() <sup>coming soon</sup>
+- [Modular design](docs/en/tutorials/modular_design.md) <sup>coming soon</sup>
+- [Configuration design](docs/en/tutorials/config.md)
+- [Higher performance PP-TSM](docs/en/tutorials/pp-tsm.md)
+- [Accelerate training](docs/en/tutorials/accelerate.md) <sup>coming soon</sup>
+- [Deployment](docs/en/tutorials/deployment.md) <sup>coming soon</sup>
+- [Customized usage](docs/en/tutorials/customized_usage.md) <sup>coming soon</sup>
 
 ### Model zoo
 
-- recognition [Brief](docs/en/model_zoo/reconition/README.md) <sup>coming soon</sup>
-    - [Attention-LSTM](docs/en/model_zoo/recognition/attention_lstm.md) <sup>coming soon</sup>
-    - [TSN](docs/en/model_zoo/recognition/tsn.md) <sup>coming soon</sup>
-    - [TSM](docs/en/model_zoo/recognition/tsm.md) <sup>coming soon</sup>
-    - [PP-TSM](docs/en/model_zoo/recognition/pp-tsm.md) <sup>coming soon</sup>
-    - [SlowFast](docs/en/model_zoo/recognition/slowfast.md) <sup>coming soon</sup>
+- recognition [Brief](docs/en/model_zoo/README.md)
+    - [Attention-LSTM](docs/en/model_zoo/recognition/attention_lstm.md)
+    - [TSN](docs/en/model_zoo/recognition/tsn.md)
+    - [TSM](docs/en/model_zoo/recognition/tsm.md)
+    - [PP-TSM](docs/en/model_zoo/recognition/pp-tsm.md)
+    - [SlowFast](docs/en/model_zoo/recognition/slowfast.md)
     - [VideoTag](docs/en/model_zoo/recognition/videotag.md) <sup>coming soon</sup>
-- Localization [Brief](docs/en/model_zoo/recognition/README.md) <sup>coming soon</sup>
-    - [BMN](docs/en/model_zoo/localization/bmn.md) <sup>coming soon</sup>
+- Localization [Brief](docs/en/model_zoo/README.md)
+    - [BMN](docs/en/model_zoo/localization/bmn.md)
 - Spatio temporal action detection：
     - Coming Soon!
 
@@ -183,9 +195,6 @@ The chart below illustrates the performance of the video recognition models both
 ## License
 
 PaddleVideo is released under the [Apache 2.0 license](LICENSE).
-
-
-
 
 ## Contributing
 This poject welcomes contributions and suggestions. Please see our [contribution guidelines](docs/CONTRIBUTING.md).

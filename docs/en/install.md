@@ -1,4 +1,4 @@
-[简体中文](../zh_CN/install.md) | English
+[简体中文](../zh-CN/install.md) | English
 
 # Installation
 
@@ -43,16 +43,25 @@ Note:
 
 **Clone PaddleVideo:**
 
-```
+```bash
 cd path_to_clone_PaddleVideo
 git clone https://github.com/PaddlePaddle/PaddleVideo.git
 ```
 
 **Install requirements**
 
-
-```
+```bash
 pip3 install --upgrade -r requirements.txt
 ```
+
+---
+
+**Install python package**
+
+Install PaddleVideo via pip <sup>WIP</sup>
+
+**Install docker**
+
+Install PaddleVideo via docker <sup>WIP</sup> 
 
 
