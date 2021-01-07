@@ -3,7 +3,7 @@
 ## 背景
 随着多媒体、网络和存储技术的快速发展，视频数据的生成、处理和获取变得越来越方便，由此视频数据量呈现出爆炸性的增长。一方面，诸如抖音、快手、微博、腾讯微视、美拍、Twitter、Facebook等线上短视频平台迅猛发展，据统计当前抖音日活跃用户数量已超6亿人； 另一方面，在安全，运输，以及工业生产等场景中已然积累了大量的视频数据，且这些视频数据中往往蕴含着丰富而有价值的信息。
 <p align="center">
-<img src="../images/videodata.png" height=300 width=500 hspace='10'/> <br />
+<img src="../../images/videodata.png" height=300 width=500 hspace='10'/> <br />
 图1.线上和线下海量视频数据
 </p>
 
@@ -12,13 +12,13 @@
 与图像任务相似，视频任务也可以分为分类（识别）和检测任务两大类，结合不同的场景还可以对这两类任务具体进行细分：
 + Task1：修剪视频识别(Trimmed Action Recognition)。这个在计算机视觉领域已经研究多年，给出一段只包含一个动作的修剪视频，要求给视频分类，如下图所示：
  <p align="center">
-<img src="./images/action_classification.png" height=300 width=700 hspace='10'/> <br />
+<img src="../../images/action_classification.png" height=300 width=700 hspace='10'/> <br />
 图2.行为分类
 </p>
 从使用的数据模态上分，分类任务还可以继续细分为基于单模态数据的分类和基于多模态数据的分类，基于RGB图像的分类和基于人体骨架的分类等等，如下图所示：
 
  <p align="center">
-<img src="../images/multimodality.png" height=300 width=500 hspace='10'/> <br />
+<img src="../../images/multimodality.png" height=300 width=500 hspace='10'/> <br />
 图3.多种模态
 </p>
 从视频的视角上分还可以分为第一人称视角的行为识别和第三人称视角的行为识别，单一视角的识别和多视角融合的识别，有兴趣的用户可自行查阅相关文献。
@@ -29,7 +29,7 @@
 
 + Task4：时序行为定位(Temporal Action Localization)。相比于上面的时序行为提名而言，时序行为定位于我们常说的目标检测一致，要求从视频中找到可能存在行为的视频段，并且给视频段分类，如下图所示：
  <p align="center">
-<img src="./images/action_detection.png" height=200 width=1000 hspace='10'/> <br />
+<img src="../../images/action_detection.png" height=200 width=1000 hspace='10'/> <br />
 图4.行为检测
 </p>
 
@@ -76,12 +76,12 @@ MEXaction2数据集中包含两类动作：骑马和斗牛。该数据集由三�
 ## 经典模型简介
 如图所示，动作识别框架主要包括三个步骤:特征提取、运动表示和分类。其中，如何提取视频的时空特征是行为识别和视频分类的核心问题。
  <p align="center">
-<img src="./images/action_framework.png" height=300 width=700 hspace='10'/> <br />
+<img src="../../images/action_framework.png" height=300 width=700 hspace='10'/> <br />
 图5.行为识别框架
 </p>
 依据使用方法的不同可以总体上将行为识别（视频分类）方法概括为基于手工特征方法阶段和基于深度学习方法阶段。基于手工特征的方法阶段比较典型的运动描述子有DTP和IDT，这也是深度学习应用于这一领域之前为大家所公认的最为优秀的运动描述子，感兴趣的读者可以自行查阅文末的相关参考文献。从2014年起，深度学习的方法逐渐开始应用于视频分类领域，目前基于深度学习的方法已经成为了学术界的研究热点，并且在实际的应用效果上看也远远超越了手工设计的运动特征。从2014年至今围绕着如何表征运动特征这一问题，学术界提出了许多经典的网络结构，如下图所示：
  <p align="center">
-<img src="./images/classic_model.png" height=300 width=700 hspace='10'/> <br />
+<img src="../../images/classic_model.png" height=300 width=700 hspace='10'/> <br />
 图6.典型的方法
 </p>
 
