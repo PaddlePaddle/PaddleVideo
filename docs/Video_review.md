@@ -2,20 +2,14 @@
 
 ## 背景
 随着多媒体、网络和存储技术的快速发展，视频数据的生成、处理和获取变得越来越方便，由此视频数据量呈现出爆炸性的增长。一方面，诸如抖音、快手、微博、腾讯微视、美拍、Twitter、Facebook等线上短视频平台迅猛发展，据统计当前抖音日活跃用户数量已超6亿人； 另一方面，在安全，运输，以及工业生产等场景中已然积累了大量的视频数据，且这些视频数据中往往蕴含着丰富而有价值的信息。
- <p align="center">
-<img src="./images/videoData.png" height=300 width=500 hspace='10'/> <br />
+<p align="center">
+<img src="./images/videodata.png" height=300 width=500 hspace='10'/> <br />
 图1.线上和线下海量视频数据
 </p>
-另一方面，近年来深度学习技术的快速发展，在图像，语音，自然语言处理领域取得了巨大的成功，并且快速得到了工业落地，研究人员开始考虑将深度学习技术引入视频理解领域。
- <p align="center">
-<img src="./images/application.png" height=300 width=500 hspace='10'/> <br />
-图2.广泛的应用场景
-</p>
-作为算法应用的直接需求，智能分析算法在视频监控，人机交互，基于内容的视频检索，智能家居中监护小孩或者老人的危险行为等方面都有着巨大的应用前景。从核心技术层面分析，这些应用的背后往往包含着以“人”活动为主线的认知需求。有鉴于此，近年来面向视频中的人体行为进行智能分析的研究得到了全世界研究者的普遍关注。然而，与图像识别和目标检测相比，行为的定义更为复杂和抽象且行为的边界往往是模糊的，这些都大大增加了行为识别和检测的难度。
 
 ---
 ## 任务定义与分类
-与图像任务相似，总体上看视频任务也可以分为分类（识别）和检测任务两大类，结合不同的场景还可以对这两类任务具体进行细分：
+与图像任务相似，视频任务也可以分为分类（识别）和检测任务两大类，结合不同的场景还可以对这两类任务具体进行细分：
 + Task1：修剪视频识别(Trimmed Action Recognition)。这个在计算机视觉领域已经研究多年，给出一段只包含一个动作的修剪视频，要求给视频分类，如下图所示：
  <p align="center">
 <img src="./images/action_classification.png" height=300 width=700 hspace='10'/> <br />
@@ -124,4 +118,3 @@ ActivityNet是一个大规模行为识别竞赛，自2016年开始，每年与CV
 [10] Lin Ji , Gan Chuang , Han Song . TSM: Temporal Shift Module for Efficient Video Understanding. arXiv:1811.08383,2018.
 
 [11] Feichtenhofer C , Fan Haoqi , Malik J , et al. SlowFast Networks for Video Recognition. arXiv:1812.03982,2018.
-
