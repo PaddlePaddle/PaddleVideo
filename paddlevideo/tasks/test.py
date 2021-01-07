@@ -37,6 +37,7 @@ def test_model(cfg, weights, parallel=True):
         model = paddle.DataParallel(model)
 
     # 2. Construct dataset and dataloader.
+    cfg.DATASET.test.test_mode = True
     dataset = build_dataset((cfg.DATASET.test, cfg.PIPELINE.test))
     batch_size = cfg.DATASET.get("test_batch_size", 8)
     places = paddle.set_device('gpu')
