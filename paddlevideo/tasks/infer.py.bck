@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import numpy as np
 import paddle
 from paddlevideo.utils import get_logger
 from ..loader.builder import build_dataloader, build_dataset
@@ -22,38 +21,7 @@ from paddlevideo.utils import load
 logger = get_logger("paddlevideo")
 
 
-def feature_trans(feats):
-    batch_size = feats.shape[0]
-    feat_pad_list = []
-    feat_len_list = []
-    feat_mask_list = []
-
-    for i in range(batch_size):
-        feat = feats[i].numpy()
-        feat_len = feat.shape[0]
-        #feat pad step 1. padding
-        feat_add = np.zeros((512 - feat.shape[0], feat.shape[1]),
-                            dtype=np.float32)
-        feat_pad = np.concatenate((feat, feat_add), axis=0).astype("float32")
-        #feat pad step 2. mask
-        feat_mask_origin = np.ones(feat.shape, dtype=np.float32)
-        feat_mask_add = feat_add
-        feat_mask = np.concatenate((feat_mask_origin, feat_mask_add),
-                                   axis=0).astype("float32")
-
-        feat_pad_list.append(feat_pad)
-        feat_len_list.append(feat_len)
-        feat_mask_list.append(feat_mask)
-
-    predictor_input = [
-        paddle.to_tensor(feat_pad_list),
-        paddle.to_tensor(feat_len_list),
-        paddle.to_tensor(feat_mask_list)
-    ]
-    return predictor_input
-
-
-def infer_model(extractor_cfg, predictor_cfg, weights, parallel=True):
+def infer_model(extractor_cfg,  predictor_cfg, weights, parallel=True):
     """Test model entry
 
     Args:
@@ -72,8 +40,7 @@ def infer_model(extractor_cfg, predictor_cfg, weights, parallel=True):
         predictor_model = paddle.DataParallel(predictor_model)
 
     # 2. Construct dataset and dataloader.
-    dataset = build_dataset(
-        (extractor_cfg.DATASET.test, extractor_cfg.PIPELINE.test))
+    dataset = build_dataset((extractor_cfg.DATASET.test, extractor_cfg.PIPELINE.test))
     batch_size = extractor_cfg.DATASET.get("test_batch_size", 1)
     places = paddle.set_device('gpu')
     # default num worker: 0, which means no subprocess will be created
@@ -93,13 +60,24 @@ def infer_model(extractor_cfg, predictor_cfg, weights, parallel=True):
 
     for batch_id, data in enumerate(data_loader):
         if parallel:
-            feats = extractor_model._layers.test_step(data)
+            feat = extractor_model._layers.test_step(data)
         else:
-            feats = extractor_model.test_step(data)
+           feat = extractor_model.test_step(data)
+        #process data
+        import numpy as np
+        feat = feat[0].numpy()
+        feat_len = feat.shape[0]
+        #feat pad step 1. padding
+        feat_add = np.zeros((512 - feat.shape[0], feat.shape[1]),
+                            dtype=np.float32)
+        feat_pad = np.concatenate((feat, feat_add), axis=0).astype("float32")
+        #feat pad step 2. mask
+        feat_mask_origin = np.ones(feat.shape, dtype=np.float32)
+        feat_mask_add = feat_add
+        feat_mask = np.concatenate((feat_mask_origin, feat_mask_add),
+                                   axis=0).astype("float32")
 
-        #tranform feature
-        predictor_input = feature_trans(feats)
-
+        predictor_input = [paddle.to_tensor(feat_pad).unsqueeze(0), paddle.to_tensor(feat_len).unsqueeze(0), paddle.to_tensor(feat_mask).unsqueeze(0)]
         if parallel:
             outputs = predictor_model._layers.test_step(predictor_input)
         else:

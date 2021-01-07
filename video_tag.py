@@ -21,8 +21,13 @@ from paddlevideo.utils import get_dist_info
 
 def parse_args():
     parser = argparse.ArgumentParser("PaddleVideo train script")
-    parser.add_argument('-c',
-                        '--config',
+    parser.add_argument('-ec',
+                        '--extractor_config',
+                        type=str,
+                        default='configs/example.yaml',
+                        help='config file path')
+    parser.add_argument('-pc',
+                        '--predictor_config',
                         type=str,
                         default='configs/example.yaml',
                         help='config file path')
@@ -42,14 +47,18 @@ def parse_args():
 
 def main():
     args = parse_args()
-    cfg = get_config(args.config, overrides=args.override)
+    extractor_cfg = get_config(args.extractor_config, overrides=args.override)
+    predictor_cfg = get_config(args.predictor_config, overrides=args.override)
 
     _, world_size = get_dist_info()
     parallel = world_size != 1
     if parallel:
         paddle.distributed.init_parallel_env()
 
-    infer_model(cfg, weights=args.weights, parallel=parallel)
+    infer_model(extractor_cfg,
+                predictor_cfg,
+                weights=args.weights,
+                parallel=parallel)
 
 
 if __name__ == '__main__':

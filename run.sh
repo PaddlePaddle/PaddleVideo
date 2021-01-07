@@ -14,6 +14,7 @@ export CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7
 
 # run attention_lstm training
 #python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_attetion_lstm  main.py  --validate -c configs/recognition/attention_lstm/attention_lstm.yaml -o log_level="INFO"
+python3.7  main.py  --validate -c configs/recognition/attention_lstm/attention_lstm.yaml
 
 # run pp-tsm training
-python3.7 -B -m paddle.distributed.launch --selected_gpus="0,1,2,3"  --log_dir=log_pptsm  main.py  --validate -c configs/recognition/tsm/pptsm.yaml -o log_level="INFO"
+#python3.7 -B -m paddle.distributed.launch --selected_gpus="0,1,2,3"  --log_dir=log_pptsm  main.py  --validate -c configs/recognition/tsm/pptsm.yaml -o log_level="INFO"

@@ -57,7 +57,8 @@ class AttentionLstmHead(BaseHead):
             self.add_sublayer("att_fc{}".format(i), att_fc)
             self.softmax = paddle.nn.Softmax()
 
-        self.fc_out1 = paddle.nn.Linear(in_features=self.lstm_size * 4,
+        self.fc_out1 = paddle.nn.Linear(in_features=self.lstm_size * 2 *
+                                        self.feature_num,
                                         out_features=8192)
         self.relu = paddle.nn.ReLU()
         self.fc_out2 = paddle.nn.Linear(in_features=8192, out_features=4096)
@@ -114,8 +115,6 @@ class AttentionLstmHead(BaseHead):
             lstm_scale_with_mask = paddle.multiply(x=lstm_scale,
                                                    y=lstm_mask,
                                                    axis=0)
-            fea_lens = inputs[i][1]
-            fea_len = int(fea_lens[0])
             lstm_pool = paddle.sum(lstm_scale_with_mask, axis=1)
             ###sequence_pool's replace end
             att_outs.append(lstm_pool)

@@ -27,9 +27,13 @@ class Recognizer1D(BaseRecognizer):
     def train_step(self, data_batch, **kwargs):
         """Training step.
         """
-        rgb_data, rgb_len, rgb_mask, audio_data, audio_len, audio_mask, labels = data_batch
-        imgs = [(rgb_data, rgb_len, rgb_mask),
-                (audio_data, audio_len, audio_mask)]
+        rgb_info = data_batch[:3]
+        audio_info = data_batch[3:6]
+        labels = data_batch[-1]
+        #        rgb_data, rgb_len, rgb_mask, audio_data, audio_len, audio_mask, labels = data_batch
+        imgs = [rgb_info, audio_info]
+        #        imgs = [(rgb_data, rgb_len, rgb_mask),
+        #                (audio_data, audio_len, audio_mask)]
 
         # call forward
         lstm_logit, lstm_output = self(imgs)
@@ -49,9 +53,13 @@ class Recognizer1D(BaseRecognizer):
         return self.train_step(data_batch)
 
     def test_step(self, data_batch, **kwargs):
-        rgb_data, rgb_len, rgb_mask, audio_data, audio_len, audio_mask = data_batch
-        imgs = [(rgb_data, rgb_len, rgb_mask),
-                (audio_data, audio_len, audio_mask)]
+        rgb_info = data_batch[:3]
+        audio_info = data_batch[3:]
+        #        rgb_data, rgb_len, rgb_mask, audio_data, audio_len, audio_mask, labels = data_batch
+        imgs = [rgb_info] + audio_info
+        #        rgb_data, rgb_len, rgb_mask, audio_data, audio_len, audio_mask = data_batch
+        #        imgs = [(rgb_data, rgb_len, rgb_mask),
+        #                (audio_data, audio_len, audio_mask)]
 
         lstm_logit, lstm_output = self(imgs)
         return lstm_output
