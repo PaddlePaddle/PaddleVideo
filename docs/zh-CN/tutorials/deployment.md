@@ -30,7 +30,7 @@ python3 tools/test_export_model.py -p 权重文件 -i 导出的模型文件夹�
 这里我们提供了```tools/predict.py``` 进行模型推理。
 
 ```python
- python3.7 tools/predict.py -v example.avi --model_file "./inference/example.pdmodel" --param    s_file "./inference/example.pdiparams" --enable_benchmark=False --model="example" --num_seg=8
+ python3.7 tools/predict.py -v example.avi --model_file "./inference/example.pdmodel" --params_file "./inference/example.pdiparams" --enable_benchmark=False --model="example" --num_seg=8
  ```
  
  对example.avi进行预测并返回预测结果
