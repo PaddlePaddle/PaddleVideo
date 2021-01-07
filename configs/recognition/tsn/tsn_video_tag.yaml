@@ -12,7 +12,7 @@ MODEL: #MODEL field
     return_feature: True  #tsn is used to extract feature in video_tag
 
 DATASET: #DATASET field
-  test_batch_size: 1
+  test_batch_size: 2 #1
   num_workers: 0 #Mandatory, XXX the number of subprocess on each GPU.
   test:
     format: "VideoDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'

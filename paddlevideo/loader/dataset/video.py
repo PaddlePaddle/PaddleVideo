@@ -48,7 +48,7 @@ class VideoDataset(BaseDataset):
         """Load index file to get video information."""
         info = []
         with open(self.file_path, 'r') as fin:
-            for line in fin:
+            for idx, line in enumerate(fin):
                 line_split = line.strip().split()
                 #filename, labels = line_split
                 #TODO(hj): Required suffix format: may mp4/avi/wmv
@@ -57,7 +57,7 @@ class VideoDataset(BaseDataset):
                     filename, labels = line_split
                 elif len(line_split) == 1:
                     filename = line_split[0]
-                    labels = 0  #fake data for infer
+                    labels = idx  #fake label for infer, used to get filename
                 if self.data_prefix is not None:
                     filename = osp.join(self.data_prefix, filename)
                 info.append(dict(filename=filename, labels=int(labels)))

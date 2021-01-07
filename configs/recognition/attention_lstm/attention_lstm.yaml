@@ -48,7 +48,13 @@ OPTIMIZER: #OPTIMIZER field
         name: 'L2'
         value: 4e-4
 
+VIDEOTAG:
+    topk: 20
+    label_file: "data/label_3396.txt"
+    save_dir: "output/VideoTag_results/"
+
 model_name: "AttentionLstm"
+topk: 20
 log_interval: 1 #Optional, the interal of logger, default:10
 epochs: 10 #Mandatory, total epoch
 save_interval: 5
