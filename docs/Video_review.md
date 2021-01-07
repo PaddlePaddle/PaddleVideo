@@ -88,8 +88,8 @@ MEXaction2数据集中包含两类动作：骑马和斗牛。该数据集由三�
  <p align="center">
 <img src="./images/classic_model.png" height=300 width=500 hspace='10'/> <br />
 图3.典型的方法
-目前Paddlevideo模型库中已经囊括了TSN，TSM，slofast等经典的行为识别网络，我们后续会陆续对视频领域的经典模型和论文进行详细解析，敬请期待！
 </p>
+目前Paddlevideo模型库中已经囊括了TSN，TSM，slofast等经典的行为识别网络，我们后续会陆续对视频领域的经典模型和论文进行详细解析，敬请期待！
 
 ---
 ## Reference
