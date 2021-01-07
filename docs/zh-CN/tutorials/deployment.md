@@ -1,4 +1,4 @@
-[简体中文](../../zh-CN/tutorials/deployment.md) | English
+简体中文 | [English](../../en/tutorials/deployment.md)
 
 # 推理
 
