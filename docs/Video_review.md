@@ -99,6 +99,8 @@ MEXaction2数据集中包含两类动作：骑马和斗牛。该数据集由三�
 
 ActivityNet是一个大规模行为识别竞赛，自2016年开始，每年与CVPR同时进行，到今年为止已经连续举办了4届。它侧重于从用户产生的视频中识别出日常生活，高层次，面向目标的活动，视频取自互联网视频门户Youtube。目前，ActivityNet比赛已经成为了行为识别领域影响力最大的比赛。
 
+---
+
 ## Reference
 
 [1] Schuldt C, Laptev I, Caputo B.Recognizing Human Actions: A Local SVM Approach Proceedings of International Conference on Pattern Recognition. Piscataway, NJ: IEEE, 2004:23-26
