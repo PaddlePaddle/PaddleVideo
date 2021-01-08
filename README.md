@@ -162,6 +162,8 @@ The chart below illustrates the performance of the video recognition models both
 
 ## Tutorials
 
+- [summarize of video understanding](docs/en/tutorials/summarize.md)
+
 ### Basic
 
 - [Install](docs/en/install.md)
@@ -170,7 +172,7 @@ The chart below illustrates the performance of the video recognition models both
 - [Tools](docs/en/tools.md)
 
 ### Advanced
-- [Modular design](docs/en/tutorials/modular_design.md) <sup>coming soon</sup>
+- [Modular design](docs/en/tutorials/modular_design.md)
 - [Configuration design](docs/en/tutorials/config.md)
 - [Higher performance PP-TSM](docs/en/tutorials/pp-tsm.md)
 - [Accelerate training](docs/en/tutorials/accelerate.md) <sup>coming soon</sup>
