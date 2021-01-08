@@ -157,7 +157,7 @@ The chart below illustrates the performance of the video recognition models both
 
 ## Tutorials
 
-- [summarize of video understanding](docs/en/tutorials/summarize.md)
+- [Summarize of video understanding](docs/en/tutorials/summarize.md)
 
 ### Basic
 
