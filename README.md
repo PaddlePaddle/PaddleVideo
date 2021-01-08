@@ -14,11 +14,6 @@ PaddleVideo is a toolset for video recognition, action localization, and spatio 
     Recognition
 </div>
 
-<div align="center">
-  <img src="docs/imgs/localization.gif"/><br>
-    localization
-</div>
-
 ## Feature
 
 - **Advanced model zoo design**
@@ -150,7 +145,7 @@ PaddleVideo is a toolset for video recognition, action localization, and spatio 
 
 ### Overview of the performance
 
-The chart below illustrates the performance of the video recognition models both 2D and 3D architectures, including our implementation and Pytorch version. It shows the relationship between Acc Top1 and VPS on the Kinectics400 dataset. (Tested on the Tesla V100.)
+The chart below illustrates the performance of the video recognition models both 2D and 3D architectures, including our implementation and Pytorch version. It shows the relationship between Acc Top1 and VPS on the Kinectics400 dataset. (Tested on the NVIDIA® Tesla® GPU V100.)
 
 <div align="center">
   <img src="docs/images/acc_vps.jpeg" />
