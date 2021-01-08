@@ -3,7 +3,7 @@
 # Inference
 
 ## How to convert dygraph model to static model?
-To infer and deploy a model, we need export an inference model at first.
+To infer and deploy a model, we need export an inference model, or called to_static: `convert dygraph model to static model`, at first.
 
 ```python
     python3 tools/export_model.py -c config_file -o output_path -p params_file
@@ -36,14 +36,13 @@ PaddleVideo support a script to test inference speed
 ```
 python3.7 tools/predict.py --enable_benchmark=True --model_file=模型文件 --params_file=参数文件
 ```
+## How to use C++ infer?
+<sup> coming soon</sup>
 
 # Deployment
 
-## How to release and deploy a model?
+## How to use PaddleHub Serving deploy?
 <sup> coming soon</sup>
 
-## How to use PaddleHub?
-<sup> coming soon</sup>
-
-## How to use PaddleServing?
+## How to use PaddleLite deploy?
 <sup> coming soon</sup>
