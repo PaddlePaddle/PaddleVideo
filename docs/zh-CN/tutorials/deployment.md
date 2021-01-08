@@ -6,8 +6,8 @@
 
 为了之后的模型预测和部署，我们需要导出模型结构，模型参数，这里应用了PaddlePaddle最新的动转静能力
 执行脚本 ```tools.export_model.py```
-```
-python3 tools/export_model.py -c 配置文件 -o 输出地址 -p 权重文件
+```python
+python3.7 tools/export_model.py -c 配置文件 -o 输出地址 -p 权重文件
 ```
 
 `export_model.py` 中，首先会重新build一个网络，这里注意，有些用于预测的模型初始化参数可能和训练时不一致，请注意更改。
@@ -38,8 +38,8 @@ python3 tools/test_export_model.py -p 权重文件 -i 导出的模型文件夹�
  ## 如何测试推理速度
  我们提供了统一的测试脚本
  
- ```
- python3 tools/predict.py --enable_benchmark=True --model_file=模型文件 --params_file=参数文件
+ ```python
+ python3.7 tools/predict.py --enable_benchmark=True --model_file=模型文件 --params_file=参数文件
  ```
  
  ## 如何使用服务器端C++推理?
