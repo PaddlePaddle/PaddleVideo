@@ -36,14 +36,23 @@ python3 tools/test_export_model.py -p 权重文件 -i 导出的模型文件夹�
  对example.avi进行预测并返回预测结果
  
  ## 如何测试推理速度
+ 我们提供了统一的测试脚本
+ 
+ ```
+ python3 tools/predict.py --enable_benchmark=True --model_file=模型文件 --params_file=参数文件
+ ```
+ 
+ ## 如何使用服务器端C++推理?
+ 
+ <sup> coming soon </sup>
 
  # 部署
  
- ## 如何使用PaddleHub？
+ ## 如何使用PaddleHub Serving进行部署？
  
  <sup> coming soon </sup>
  
- ## 如何使用PaddleSeving？
+ ## 如何使用PaddleLite进行端上部署？
  
  <sup> coming soon </sup>
  
