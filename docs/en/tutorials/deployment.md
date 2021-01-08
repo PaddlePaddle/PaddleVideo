@@ -19,7 +19,7 @@ PaddleVideo supports a test script to test the exported model.
 
 ```python
 
-python3 tools/test_export_model.py -p params_file -i inference_folder -c config_file
+python3.7 tools/test_export_model.py -p params_file -i inference_folder -c config_file
 ```
 
 We just print the output shape, please feel free to extend it. Avtually, only test a video file by PaddleInference can make sure the exported model is right.
@@ -32,7 +32,10 @@ PaddleVideo supports ```tools/predict.py``` to infer
  ```
 
 ## How to test inference speed?
-
+PaddleVideo support a script to test inference speed
+```
+python3.7 tools/predict.py --enable_benchmark=True --model_file=模型文件 --params_file=参数文件
+```
 
 # Deployment
 
