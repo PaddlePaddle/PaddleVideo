@@ -191,7 +191,7 @@ def parse_args(mMain=True, add_help=True):
             params_file='',
             batch_size=1,
             use_fp16=False,
-            ir_optimt=True,
+            ir_optim=True,
             use_tensorrt=False,
             gpu_mem=8000,
             enable_benchmark=False,
@@ -227,23 +227,23 @@ class PaddleVideo(object):
         print(process_params)
 
         if not os.path.exists(process_params.model_file):
-            if process_params.model is None:
+            if process_params.model_name is None:
                 raise Exception(
                     'Please input model name that you want to use!')
-            if process_params.model in model_names:
+            if process_params.model_name in model_names:
                 url = 'https://paddle-imagenet-models-name.bj.bcebos.com/dygraph/inference/{}_infer.tar'.format(
-                    process_params.model)
+                    process_params.model_name)
                 print('----221------',os.path.join(BASE_INFERENCE_MODEL_DIR,
-                                                     process_params.model))
+                                                     process_params.model_name))
                 if not os.path.exists(
                         os.path.join(BASE_INFERENCE_MODEL_DIR,
-                                     process_params.model)):
+                                     process_params.model_name)):
                     os.makedirs(
                         os.path.join(BASE_INFERENCE_MODEL_DIR,
-                                     process_params.model))
+                                     process_params.model_name))
                 #create pretrained model download_path
                 download_path = os.path.join(BASE_INFERENCE_MODEL_DIR,
-                                             process_params.model)
+                                             process_params.model_name)
                 maybe_download(model_storage_directory=download_path, url=url)
                 process_params.model_file = os.path.join(download_path,
                                                          'inference.pdmodel')
@@ -361,4 +361,4 @@ def main():
 
 
 if __name__ == '__main__':
-    cls = PaddleVideo(model='TSN')
+    cls = PaddleVideo(model_name='TSN')
