@@ -205,7 +205,7 @@ def get_video_list(video_file):
     if video_file is None or not os.path.exists(video_file):
         raise Exception("not found any video file in {}".format(video_file))
 
-    video_end = ['.mp4','.avi']
+    video_end = ['mp4','avi']
     if os.path.isfile(video_file) and video_file.split('.')[-1] in video_end:
         videos_lists.append(video_file)
     elif os.path.isdir(video_file):
@@ -213,7 +213,7 @@ def get_video_list(video_file):
             if single_file.split('.')[-1] in video_end:
                 videos_lists.append(os.path.join(video_file, single_file))
     if len(videos_lists) == 0:
-        raise Exception("not found any img file in {}".format(video_file))
+        raise Exception("not found any video file in {}".format(video_file))
     return videos_lists
 
 
@@ -224,7 +224,6 @@ class PaddleVideo(object):
     def __init__(self, **kwargs):
         process_params = parse_args(mMain=False,add_help=False)
         process_params.__dict__.update(**kwargs)
-        print(process_params)
 
         if not os.path.exists(process_params.model_file):
             if process_params.model_name is None:
@@ -233,8 +232,6 @@ class PaddleVideo(object):
             if process_params.model_name in model_names:
                 url = 'https://paddle-imagenet-models-name.bj.bcebos.com/dygraph/inference/{}_infer.tar'.format(
                     process_params.model_name)
-                print('----221------',os.path.join(BASE_INFERENCE_MODEL_DIR,
-                                                     process_params.model_name))
                 if not os.path.exists(
                         os.path.join(BASE_INFERENCE_MODEL_DIR,
                                      process_params.model_name)):
