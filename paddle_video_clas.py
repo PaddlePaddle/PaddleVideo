@@ -46,7 +46,7 @@ from paddle.inference import create_predictor
 __all__ = ['PaddleVideo']
 BASE_DIR = os.path.expanduser("~/.paddlevideo_inference/")
 BASE_INFERENCE_MODEL_DIR = os.path.join(BASE_DIR, 'inference_model')
-BASE_IMAGES_DIR = os.path.join(BASE_DIR, 'images')
+BASE_VIDEOS_DIR = os.path.join(BASE_DIR, 'videos')
 
 model_names = {'TSM','TSN','PPTSM','SlowFast'}
 
@@ -123,14 +123,6 @@ def maybe_download(model_storage_directory, url):
                     f.write(file.read())
         os.remove(tmp_path)
 
-
-def save_prelabel_results(class_id, input_filepath, output_idr):
-    output_dir = os.path.join(output_idr, str(class_id))
-    if not os.path.isdir(output_dir):
-        os.makedirs(output_dir)
-    shutil.copy(input_filepath, output_dir)
-
-
 def load_label_name_dict(path):
     result = {}
     if not os.path.exists(path):
@@ -147,67 +139,90 @@ def load_label_name_dict(path):
                 break
     return result
 
-# def parse_args():
-#     def str2bool(v):
-#         return v.lower() in ("true", "t", "1")
-#
-#     import argparse
-#     # general params
-#     parser = argparse.ArgumentParser()
-#     parser.add_argument("-v", "--video_file", type=str, help="video file path")
-#     parser.add_argument("--use_gpu", type=str2bool, default=True)
-#
-#     # params for decode and sample
-#     parser.add_argument("--num_seg", type=int, default=8)
-#     parser.add_argument("--seg_len", type=int, default=1)
-#
-#     # params for preprocess
-#     parser.add_argument("--short_size", type=int, default=256)
-#     parser.add_argument("--target_size", type=int, default=224)
-#     parser.add_argument("--normalize", type=str2bool, default=True)
-#
-#     # params for predict
-#     parser.add_argument("--model_file", type=str)
-#     parser.add_argument("--params_file", type=str)
-#     parser.add_argument("-b", "--batch_size", type=int, default=1)
-#     parser.add_argument("--use_fp16", type=str2bool, default=False)
-#     parser.add_argument("--ir_optim", type=str2bool, default=True)
-#     parser.add_argument("--use_tensorrt", type=str2bool, default=False)
-#     parser.add_argument("--gpu_mem", type=int, default=8000)
-#     parser.add_argument("--enable_benchmark", type=str2bool, default=False)
-#     parser.add_argument("--top_k", type=int, default=1)
-#     parser.add_argument("--enable_mkldnn", type=bool, default=False)
-#     parser.add_argument("--hubserving", type=str2bool, default=False)
-#
-#     # params for infer
-#
-#     parser.add_argument("--model", type=str)
-#     """
-#     parser.add_argument("--pretrained_model", type=str)
-#     parser.add_argument("--class_num", type=int, default=1000)
-#     parser.add_argument(
-#         "--load_static_weights",
-#         type=str2bool,
-#         default=False,
-#         help='Whether to load the pretrained weights saved in static mode')
-#
-#     # parameters for pre-label the images
-#     parser.add_argument(
-#         "--pre_label_image",
-#         type=str2bool,
-#         default=False,
-#         help="Whether to pre-label the images using the loaded weights")
-#     parser.add_argument("--pre_label_out_idr", type=str, default=None)
-#     """
-#
-#     return parser.parse_args()
+def parse_args(mMain=True, add_help=True):
+    import argparse
+
+    def str2bool(v):
+        return v.lower() in ("true", "t", "1")
+
+    if mMain == True:
+
+        # general params
+        parser = argparse.ArgumentParser(add_help=add_help)
+        parser.add_argument("--model_name", type=str)
+        parser.add_argument("-v", "--video_file", type=str)
+        parser.add_argument("--use_gpu", type=str2bool, default=True)
+
+        # params for decode and sample
+        parser.add_argument("--num_seg", type=int, default=8)
+        parser.add_argument("--seg_len", type=int, default=1)
+
+        # params for preprocess
+        parser.add_argument("--short_size", type=int, default=256)
+        parser.add_argument("--target_size", type=int, default=224)
+        parser.add_argument("--normalize", type=str2bool, default=True)
+
+        # params for predict
+        parser.add_argument("--model_file", type=str)
+        parser.add_argument("--params_file", type=str)
+        parser.add_argument("-b", "--batch_size", type=int, default=1)
+        parser.add_argument("--use_fp16", type=str2bool, default=False)
+        parser.add_argument("--ir_optim", type=str2bool, default=True)
+        parser.add_argument("--use_tensorrt", type=str2bool, default=False)
+        parser.add_argument("--gpu_mem", type=int, default=8000)
+        parser.add_argument("--enable_benchmark", type=str2bool, default=False)
+        parser.add_argument("--top_k", type=int, default=1)
+        parser.add_argument("--enable_mkldnn", type=bool, default=False)
+        parser.add_argument("--hubserving", type=str2bool, default=False)
+
+        return parser.parse_args()
+
+    else:
+        return argparse.Namespace(
+            model_name='',
+            video_file='',
+            use_gpu=False,
+            num_seg=8,
+            seg_len=1,
+            short_size=256,
+            target_size=224,
+            normalize=True,
+            model_file='',
+            params_file='',
+            batch_size=1,
+            use_fp16=False,
+            ir_optimt=True,
+            use_tensorrt=False,
+            gpu_mem=8000,
+            enable_benchmark=False,
+            top_k=1,
+            enable_mkldnn=False,
+            hubserving=False,)
+
+
+def get_video_list(video_file):
+    videos_lists = []
+    if video_file is None or not os.path.exists(video_file):
+        raise Exception("not found any video file in {}".format(video_file))
+
+    video_end = ['.mp4','.avi']
+    if os.path.isfile(video_file) and video_file.split('.')[-1] in video_end:
+        videos_lists.append(video_file)
+    elif os.path.isdir(video_file):
+        for single_file in os.listdir(video_file):
+            if single_file.split('.')[-1] in video_end:
+                videos_lists.append(os.path.join(video_file, single_file))
+    if len(videos_lists) == 0:
+        raise Exception("not found any img file in {}".format(video_file))
+    return videos_lists
+
 
 class PaddleVideo(object):
     print('Inference models that Paddle provides are listed as follows:\n\n{}'.
           format(model_names), '\n')
 
     def __init__(self, **kwargs):
-        process_params = utils.parse_args()
+        process_params = parse_args(mMain=False,add_help=False)
         process_params.__dict__.update(**kwargs)
         print(process_params)
 
@@ -249,10 +264,17 @@ class PaddleVideo(object):
         self.args = process_params
         self.predictor = create_paddle_predictor(process_params)
 
-    def predict(self):
+    def predict(self,video):
+        """
 
-        assert self.args.batch_size == 1
-        assert self.args.use_fp16 is False
+        Args:
+            video:
+
+        Returns:
+
+        """
+        video_list = []
+        assert isinstance(video, (str, np.ndarray))
 
         input_names = self.predictor.get_input_names()
         input_tensor = self.predictor.get_input_handle(input_names[0])
@@ -260,27 +282,83 @@ class PaddleVideo(object):
         output_names = self.predictor.get_output_names()
         output_tensor = self.predictor.get_output_handle(output_names[0])
 
-        if not self.args.enable_benchmark:
-            # for PaddleHubServing
-            if self.args.hubserving:
-                img = self.args.image_file
-            # for predict only
+        if isinstance(video, str):
+            # download internet image
+            if video.startswith('http'):
+                if not os.path.exists(BASE_VIDEOS_DIR):
+                    os.makedirs(BASE_VIDEOS_DIR)
+                video_path = os.path.join(BASE_VIDEOS_DIR, 'tmp.mp4')
+                download_with_progressbar(video, video_path)
+                print("Current using video from Internet:{}, renamed as: {}".
+                      format(video, video_path))
+                video = video_path
+            video_list = get_video_list(video)
+        else:
+            if isinstance(video, np.ndarray):
+                video_list = [video]
             else:
-                # img = cv2.imread(args.image_file)[:, :, ::-1]
-                img = utils.decode(self.args.video_file, self.args)
-            assert img is not None, "Error in loading video: {}".format(
-                self.args.video_file)
-            inputs = utils.preprocess(img, self.args)
-            inputs = np.expand_dims(
-                inputs, axis=0).repeat(
-                self.args.batch_size, axis=0).copy()
+                print('Please input legal image!')
+
+        total_result = []
+        for filename in video_list:
+            if isinstance(filename, str):
+                v = utils.decode(video, self.args)
+                assert v is not None, "Error in loading image: {}".format(
+                    filename)
+                inputs = utils.preprocess(v, self.args)
+                inputs = np.expand_dims(
+                    inputs, axis=0).repeat(
+                    1, axis=0).copy()
+            else:
+                inputs = filename
 
             input_tensor.copy_from_cpu(inputs)
 
             self.predictor.run()
 
-            output = output_tensor.copy_to_cpu()
-            return utils.postprocess(output, self.args)
+            outputs = output_tensor.copy_to_cpu()
+            classes, scores = utils.postprocess(outputs, self.args)
+            label_names = []
+            if len(self.label_name_dict) != 0:
+                label_names = [self.label_name_dict[c] for c in classes]
+            result = {
+                "filename": filename if isinstance(filename, str) else 'video',
+                "class_ids": classes.tolist(),
+                "scores": scores.tolist(),
+                "label_names": label_names,
+            }
+            total_result.append(result)
+        return total_result
+
+        # # for PaddleHubServing
+        # if self.args.hubserving:
+        #     v = self.args.video_file
+        # # for predict only
+        # else:
+        #     v = utils.decode(video, self.args)
+        # assert v is not None, "Error in loading video: {}".format(
+        #     self.args.video_file)
+        # inputs = utils.preprocess(v, self.args)
+        # inputs = np.expand_dims(
+        #     inputs, axis=0).repeat(
+        #     self.args.batch_size, axis=0).copy()
+        #
+        # input_tensor.copy_from_cpu(inputs)
+        #
+        # self.predictor.run()
+        #
+        # output = output_tensor.copy_to_cpu()
+        # return utils.postprocess(output, self.args)
+
+def main():
+    # for cmd
+    args = parse_args(mMain=True)
+    clas_engine = PaddleVideo(**(args.__dict__))
+    print('{}{}{}'.format('*' * 10, args.image_file, '*' * 10))
+    result = clas_engine.predict(args.image_file)
+    if result is not None:
+        print(result)
+
 
 if __name__ == '__main__':
     cls = PaddleVideo(model='TSN')
