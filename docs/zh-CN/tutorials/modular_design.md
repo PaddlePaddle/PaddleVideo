@@ -18,7 +18,7 @@ PaddleVideo主要用到的nn.Layer属性和方法有
 - state_dict() 获取层的参数
 - set_state_dict() 设置层的参数
 
-其中forward 重写了类的call方法，调用forward会执行计算。
+其中forward 重写了类的call方法，调用forward会执行图的计算。
 
 2. 继承自nn.Layer的模块基类
 
@@ -38,3 +38,26 @@ class BaseHead(nn.Layer):
 ```
 
 再比如：
+
+
+3. 构建不同类型的framework
+
+PaddleVideo 设计了不同种类的framework, 当然，他们也是继承自nn.Layer的，所有模型都对应着一种framework
+包括
+
+4. 构建framework的组件，Head，Backbone等
+
+5. 构建数据读取器，优化器等
+
+6. 通过配置组合各个组件
+
+7. 正向网络
+
+8. 反向网络
+
+9. 指标
+
+10. 分析实验结果
+
+
+
