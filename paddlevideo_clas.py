@@ -170,10 +170,8 @@ def parse_args(mMain=True, add_help=True):
         parser.add_argument("--ir_optim", type=str2bool, default=True)
         parser.add_argument("--use_tensorrt", type=str2bool, default=False)
         parser.add_argument("--gpu_mem", type=int, default=8000)
-        parser.add_argument("--enable_benchmark", type=str2bool, default=False)
         parser.add_argument("--top_k", type=int, default=1)
         parser.add_argument("--enable_mkldnn", type=bool, default=False)
-        parser.add_argument("--hubserving", type=str2bool, default=False)
 
         return parser.parse_args()
 
@@ -194,10 +192,8 @@ def parse_args(mMain=True, add_help=True):
             ir_optim=True,
             use_tensorrt=False,
             gpu_mem=8000,
-            enable_benchmark=False,
             top_k=1,
-            enable_mkldnn=False,
-            hubserving=False,)
+            enable_mkldnn=False,)
 
 
 def get_video_list(video_file):
@@ -358,4 +354,4 @@ def main():
 
 
 if __name__ == '__main__':
-    cls = PaddleVideo(model_name='TSN')
+    main()
