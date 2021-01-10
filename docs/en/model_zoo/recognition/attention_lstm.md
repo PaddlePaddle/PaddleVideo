@@ -6,6 +6,6 @@ RNN is usualy used for sequence data, it works well for videos’ time-step info
  and weighted to get the final feature vector.  
  For Attention layer, refer to the paper: AttentionCluster.  
 
-Data Prepare, refer to the page of dataset: (TODO)  
+Data Prepare, refer to the page of dataset: (https://github.com/PaddlePaddle/PaddleVideo/blob/main/docs/en/dataset/youtube8m.md)  
 Model training and valid, refer to the page of tutorial: (TODO)  
 The Hit@1 on Youtube-8M’ validation is 0.89, PERR is	0.8012, GAP is 0.8594.
