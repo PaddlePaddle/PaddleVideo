@@ -9,7 +9,7 @@ PaddleVideo包含视频分类和动作定位方向的多个主流领先模型，
 
 | 模型 | 类别  | 描述 |
 | :--------------- | :--------: | :------------: |
-| [ppTSM](./recognition/pp-tsm.md) | 视频分类| paddlepaddle优化后的TSM |
+| [ppTSM](./recognition/pp-tsm.md) | 视频分类| PaddlePaddle优化后的TSM |
 | [SlowFast](./recognition/slowfast.md) | 视频分类| 3D高精度模型 |
 | [TSM](./recognition/tsm.md) | 视频分类| 基于时序移位的简单高效视频时空建模方法 |
 | [TSN](./recognition/tsn.md) | 视频分类| ECCV'16提出的基于2D-CNN经典解决方案 |
