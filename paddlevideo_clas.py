@@ -256,12 +256,11 @@ class PaddleVideo(object):
 
     def predict(self,video):
         """
-
+        predict label of video with paddleclas
         Args:
-            video:
-
+            video:input video for clas, support single video , internet url, folder path containing series of videos
         Returns:
-
+            list[dict:{videoname: "",class_ids: [], scores: [], label_names: []}],if label name path is None,label names will be empty
         """
         video_list = []
         assert isinstance(video, (str, np.ndarray))
@@ -287,13 +286,13 @@ class PaddleVideo(object):
             if isinstance(video, np.ndarray):
                 video_list = [video]
             else:
-                print('Please input legal image!')
+                print('Please input legal video!')
 
         total_result = []
         for filename in video_list:
             if isinstance(filename, str):
                 v = utils.decode(video, self.args)
-                assert v is not None, "Error in loading image: {}".format(
+                assert v is not None, "Error in loading video: {}".format(
                     filename)
                 inputs = utils.preprocess(v, self.args)
                 inputs = np.expand_dims(
@@ -312,7 +311,7 @@ class PaddleVideo(object):
             if len(self.label_name_dict) != 0:
                 label_names = [self.label_name_dict[c] for c in classes]
             result = {
-                "filename": filename if isinstance(filename, str) else 'video',
+                "videoname": filename if isinstance(filename, str) else 'video',
                 "class_ids": classes.tolist(),
                 "scores": scores.tolist(),
                 "label_names": label_names,
