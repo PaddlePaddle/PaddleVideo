@@ -22,7 +22,7 @@ Similar to image tasks, video tasks can also be divided into two categories: **c
 
   <p align="center">
   <img src="../../images/multimodality.png" height=300 width=500 hspace='10'/> <br />
- 多种模态
+ multi-modality
   </p>
 In terms of the perspective of video, it can also be divided into first-person action recognition, 
 third-person action recognition, single perspective action recognition and multi-perspective fusion action recognition. 
@@ -46,8 +46,8 @@ as shown in the figure below
 
 + Task5：Dense-Captioning Events. The reason why it is called dense captioning events is mainly 
 because that this task requires video action description on the basis of temporal action localization 
-(detection). That is to say, the task needs to locate the actions in a ** untrimmed ** video,in temporal 
-dimension ** and describe the behavior of the whole video ** after obtaining many video segments which contain actions.
+(detection). That is to say, the task needs to locate the actions in a **untrimmed** video,in **temporal 
+dimension** and describe the behavior of the **whole video** after obtaining many video segments which contain actions.
 
 ## Introduction of datasets
 
@@ -126,7 +126,7 @@ so you also need to use the YouTube download tool in Python to automatically dow
 The dataset contains 200 action categories, 20,000 (training + verification + test set) videos, 
 and a total of about 700 hours of video.
 
-## 经典模型简介
+## Introduction of classic models
 As shown in the figure, 
 the action recognition framework mainly includes three steps: 
 feature extraction, motion representation and classification. 
@@ -153,7 +153,7 @@ At present,Paddlevideo has contained several classic models such as:TSN[<sup>9</
 we will analyze the classic models and papers in these fields. Please look forward to it
 
 
-## 相关比赛介绍
+## Introduction of competetion
 + [ActivityNet](http://activity-net.org/challenges/2020/challenge.html)
 
 ActivityNet is a large-scale action recognition competition. Since 2016, 
