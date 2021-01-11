@@ -2,6 +2,7 @@
 
 
 # 概要
+该repo包含视频分类和动作定位方向的多个主流领先模型，其中Attention LSTM是比较流行的视频特征序列模型，TSN, TSM和SlowFast是End-to-End的视频分类模型。Attention LSTM模型速度快精度高，TSN是基于2D-CNN的经典解决方案，TSM是基于时序移位的简单高效视频时空建模方法，SlowFast是FAIR在ICCV2019提出的3D视频分类模型。 BMN模型是百度自研模型，2019年ActivityNet夺冠方案。
 
 
 ## 视频分类模型
