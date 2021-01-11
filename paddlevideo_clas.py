@@ -171,6 +171,7 @@ def parse_args(mMain=True, add_help=True):
         parser.add_argument("--gpu_mem", type=int, default=8000)
         parser.add_argument("--top_k", type=int, default=1)
         parser.add_argument("--enable_mkldnn", type=bool, default=False)
+        parser.add_argument("--label_name_path",type=str)
 
         return parser.parse_args()
 
@@ -192,7 +193,8 @@ def parse_args(mMain=True, add_help=True):
             use_tensorrt=False,
             gpu_mem=8000,
             top_k=1,
-            enable_mkldnn=False,)
+            enable_mkldnn=False,
+            label_name_path='')
 
 def get_video_list(video_file):
     videos_lists = []
