@@ -69,7 +69,10 @@ TSN模型的卷积层和BN层参数采用Paddle默认的[KaimingNormal](https://
 
 Linear（FC）层的参数采用mean=0，std默认0.01的Normal初始化，关于Normal初始化方法可以参考[初始化](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/api/paddle/nn/initializer/normal/Normal_cn.html)官方文档
 
+
 ## 模型测试
+
+TSN采用CenterCrop的测试Mertics
 
 ```bash
 python3 main.py --test --weights=""
