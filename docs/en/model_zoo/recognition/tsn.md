@@ -1,4 +1,4 @@
-[简体中文](../../../del_zoo/recognition/tsn.md) | English
+[简体中文](../../../zh-CN/model_zoo/recognition/tsn.md) | English
 
 # TSN
 
