@@ -2,7 +2,7 @@
 
 # Introduction
 
-We integrated video classification model and action localization model in this repo.
+We implemented video classification model and action localization model in this repo.
 
 ## Model list
 
