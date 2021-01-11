@@ -32,7 +32,7 @@ import sys
 __dir__ = os.path.dirname(__file__)
 sys.path.append(os.path.join(__dir__, ''))
 
-import cv2
+
 import numpy as np
 import tarfile
 import requests
@@ -92,7 +92,6 @@ def download_with_progressbar(url, save_path):
     if total_size_in_bytes == 0 or progress_bar.n != total_size_in_bytes:
         raise Exception("Something went wrong while downloading models")
 
-
 def maybe_download(model_storage_directory, url):
     # using custom model
     tar_file_name_list = [
@@ -130,13 +129,13 @@ def load_label_name_dict(path):
             'Warning: If want to use your own label_dict, please input legal path!\nOtherwise label_names will be empty!'
         )
     else:
-        for line in open(path, 'r'):
-            partition = line.split('\n')[0].partition(' ')
-            try:
-                result[int(partition[0])] = str(partition[-1])
-            except:
-                result = {}
-                break
+        try:
+            import json
+            f = open(path,'r')
+            content = f.read()
+            result = json.loads(content)
+        except:
+            result = {}
     return result
 
 def parse_args(mMain=True, add_help=True):
@@ -195,7 +194,6 @@ def parse_args(mMain=True, add_help=True):
             top_k=1,
             enable_mkldnn=False,)
 
-
 def get_video_list(video_file):
     videos_lists = []
     if video_file is None or not os.path.exists(video_file):
@@ -211,7 +209,6 @@ def get_video_list(video_file):
     if len(videos_lists) == 0:
         raise Exception("not found any video file in {}".format(video_file))
     return videos_lists
-
 
 class PaddleVideo(object):
     print('Inference models that Paddle provides are listed as follows:\n\n{}'.
@@ -243,7 +240,7 @@ class PaddleVideo(object):
                 process_params.params_file = os.path.join(
                     download_path, 'inference.pdiparams')
                 process_params.label_name_path = os.path.join(
-                    __dir__, 'ppcls/utils/imagenet1k_label_list.txt') #需要提供一个label_list
+                    __dir__, 'paddlevideo/utils/Kinetics-400_label_list.txt')
             else:
                 raise Exception(
                     'If you want to use your own model, Please input model_file as model path!'
