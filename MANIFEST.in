@@ -3,7 +3,7 @@ include README.md
 include tools/__init__.py
 include tools/utils.py
 
-recursive-include paddlevideo/ *.py
+recursive-include paddlevideo/ *.py *.txt
 
 
 
