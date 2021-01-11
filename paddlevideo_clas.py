@@ -48,7 +48,7 @@ BASE_DIR = os.path.expanduser("~/.paddlevideo_inference/")
 BASE_INFERENCE_MODEL_DIR = os.path.join(BASE_DIR, 'inference_model')
 BASE_VIDEOS_DIR = os.path.join(BASE_DIR, 'videos')
 
-model_names = {'TSM','TSN','PPTSM','SlowFast'}
+model_names = {'TSM','TSN','PPTSM'}
 
 
 def create_paddle_predictor(args):
@@ -272,7 +272,7 @@ class PaddleVideo(object):
         output_tensor = self.predictor.get_output_handle(output_names[0])
 
         if isinstance(video, str):
-            # download internet image
+            # download internet video,
             if video.startswith('http'):
                 if not os.path.exists(BASE_VIDEOS_DIR):
                     os.makedirs(BASE_VIDEOS_DIR)
@@ -343,8 +343,8 @@ def main():
     # for cmd
     args = parse_args(mMain=True)
     clas_engine = PaddleVideo(**(args.__dict__))
-    print('{}{}{}'.format('*' * 10, args.image_file, '*' * 10))
-    result = clas_engine.predict(args.image_file)
+    print('{}{}{}'.format('*' * 10, args.video_file, '*' * 10))
+    result = clas_engine.predict(args.video_file)
     if result is not None:
         print(result)
 

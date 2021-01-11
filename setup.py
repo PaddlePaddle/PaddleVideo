@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from setuptools import setup
-from setuptools import find_packages
 from io import open
 
 with open('requirements.txt', encoding="utf-8-sig") as f:
