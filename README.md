@@ -67,11 +67,11 @@ PaddleVideo is a toolset for video recognition, action localization, and spatio 
           </ul>
         </ul>
       </td>
-      <td> 
+      <td>
           <li>Recognizer1D</li>
           <li>Recognizer2D</li>
           <li>Recognizer3D</li>
-          <li>Localizer</li> 
+          <li>Localizer</li>
         <HR></HR>
         <ul>Backbone
             <li>resnet</li>
@@ -112,7 +112,7 @@ PaddleVideo is a toolset for video recognition, action localization, and spatio 
             <li>CenterCrop</li>
             <li>MultiCrop</li>  
           </ul>  
-        </ul> 
+        </ul>
       </td>
       <td>
         <ul><li><b>Batch</b></li>
@@ -120,7 +120,7 @@ PaddleVideo is a toolset for video recognition, action localization, and spatio 
             <li>Mixup</li>
             <li>Cutmix</li>  
           </ul>  
-        </ul> 
+        </ul>
         <ul><li><b>Image</b></li>
             <ul>
                 <li>Scale</li>
@@ -154,6 +154,16 @@ The chart below illustrates the performance of the video recognition models both
 **Note：**
 - PP-TSM improves almost 3.5% Top1 accuracy from standard TSM.
 - all these models described by RED color can be obtained in the [Model Zoo](#model-zoo), and others are Pytorch results.
+
+<a name="Community"></a>
+## Community
+- Scan the QR code below with your Wechat, you can access to official technical exchange group. Look forward to your participation.
+
+<div align="center">
+<img src="./docs/images/joinus.PNG"  width = "200" height = "200" />
+</div>
+
+
 
 ## Tutorials
 
