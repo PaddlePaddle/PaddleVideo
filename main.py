@@ -30,22 +30,19 @@ def parse_args():
                         action='append',
                         default=[],
                         help='config options to be overridden')
-
-    parser.add_argument(
-        '--validate',
-        action='store_true',
-        help='whether to evaluate the checkpoint during training')
-
     parser.add_argument('--test',
                         action='store_true',
                         help='whether to test a model')
     parser.add_argument('--train_dali',
                         action='store_true',
-                        help='whether to train a model using dali to speed up')
-
+                        help='whether to use dali to speed up training')
     parser.add_argument('--weights',
                         type=str,
                         help='weights for finetuning or testing')
+    parser.add_argument(
+        '--validate',
+        action='store_true',
+        help='whether to evaluate the checkpoint during training')
 
     args = parser.parse_args()
     return args

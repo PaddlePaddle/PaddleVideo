@@ -23,16 +23,18 @@ from paddlevideo.utils import get_logger, coloring
 from paddlevideo.utils import (AverageMeter, build_record, log_batch, log_epoch,
                                save, load, mkdir)
 from paddlevideo.loader import TSN_Dali_loader, get_input_data
+"""
+We only supported DALI training for TSN model now.
+"""
 
 
-def train_dali(cfg, weights=None, parallel=True, validate=False):
+def train_dali(cfg, weights=None, parallel=True):
     """Train model entry
 
     Args:
     	cfg (dict): configuration.
         weights (str): weights path for finetuning.
     	parallel (bool): Whether multi-cards training. Default: True.
-        validate (bool): Whether to do evaluation. Default: False.
 
     """
 
