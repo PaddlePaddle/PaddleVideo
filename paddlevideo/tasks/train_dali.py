@@ -22,7 +22,7 @@ from ..utils import do_preciseBN
 from paddlevideo.utils import get_logger, coloring
 from paddlevideo.utils import (AverageMeter, build_record, log_batch, log_epoch,
                                save, load, mkdir)
-from paddlevideo.loader import TSN_Dali_loader, data_trans
+from paddlevideo.loader import TSN_Dali_loader, get_input_data
 
 
 def train_dali(cfg, weights=None, parallel=True, validate=False):
@@ -39,8 +39,6 @@ def train_dali(cfg, weights=None, parallel=True, validate=False):
     logger = get_logger("paddlevideo")
     batch_size = cfg.DALI_LOADER.get('batch_size', 8)
     places = paddle.set_device('gpu')
-
-    # default num worker: 0, which means no subprocess will be created
     model_name = cfg.model_name
     output_dir = cfg.get("output_dir", f"./output/{model_name}")
     mkdir(output_dir)
@@ -50,9 +48,8 @@ def train_dali(cfg, weights=None, parallel=True, validate=False):
     if parallel:
         model = paddle.DataParallel(model)
 
-    # 2. Construct dataset and dataloader
-    train_loader = TSN_Dali_loader(
-        cfg.DALI_LOADER).build_dali_reader()  #create_reader()
+    # 2. Construct dali dataloader
+    train_loader = TSN_Dali_loader(cfg.DALI_LOADER).build_dali_reader()
 
     # 3. Construct solver.
     lr = build_lr(cfg.OPTIMIZER.learning_rate, None)
@@ -87,7 +84,7 @@ def train_dali(cfg, weights=None, parallel=True, validate=False):
         record_list = build_record(cfg.MODEL)
         tic = time.time()
         for i, data in enumerate(train_loader):
-            data = data_trans(data)
+            data = get_input_data(data)
             record_list['reader_time'].update(time.time() - tic)
             # 4.1 forward
             if parallel:
@@ -135,7 +132,7 @@ def train_dali(cfg, weights=None, parallel=True, validate=False):
                 model, train_loader, parallel,
                 min(cfg.PRECISEBN.num_iters_preciseBN, len(train_loader)))
 
-        # 6. Save model and optimizer
+        # 5. Save model and optimizer
         if epoch % cfg.get("save_interval", 1) == 0 or epoch == cfg.epochs - 1:
             save(
                 optimizer.state_dict(),

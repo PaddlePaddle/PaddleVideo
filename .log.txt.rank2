@@ -1,0 +1,221 @@
+[01/12 06:58:51] [35mDALI_LOADER[0m : 
+[01/12 06:58:51]     [35mbatch_size[0m : [92m32[0m
+[01/12 06:58:51]     [35mfile_path[0m : [92m./data/k400/part-10cls/train.csv[0m
+[01/12 06:58:51]     [35mmean[0m : [92m[0.485, 0.456, 0.406][0m
+[01/12 06:58:51]     [35mseg_num[0m : [92m3[0m
+[01/12 06:58:51]     [35mseglen[0m : [92m1[0m
+[01/12 06:58:51]     [35mshort_size[0m : [92m256[0m
+[01/12 06:58:51]     [35mstd[0m : [92m[0.229, 0.224, 0.225][0m
+[01/12 06:58:51]     [35mtarget_size[0m : [92m224[0m
+[01/12 06:58:51] ------------------------------------------------------------
+[01/12 06:58:51] [35mMETRIC[0m : 
+[01/12 06:58:51]     [35mname[0m : [92mCenterCropMetric[0m
+[01/12 06:58:51] ------------------------------------------------------------
+[01/12 06:58:51] [35mMODEL[0m : 
+[01/12 06:58:51]     [35mbackbone[0m : 
+[01/12 06:58:51]         [35mdepth[0m : [92m50[0m
+[01/12 06:58:51]         [35mname[0m : [92mResNet[0m
+[01/12 06:58:51]     [35mframework[0m : [92mRecognizer2D[0m
+[01/12 06:58:51]     [35mhead[0m : 
+[01/12 06:58:51]         [35mdrop_ratio[0m : [92m0.2[0m
+[01/12 06:58:51]         [35min_channels[0m : [92m2048[0m
+[01/12 06:58:51]         [35mname[0m : [92mTSNHead[0m
+[01/12 06:58:51]         [35mnum_classes[0m : [92m400[0m
+[01/12 06:58:51]         [35mstd[0m : [92m0.01[0m
+[01/12 06:58:51] ------------------------------------------------------------
+[01/12 06:58:51] [35mOPTIMIZER[0m : 
+[01/12 06:58:51]     [35mlearning_rate[0m : 
+[01/12 06:58:51]         [35mboundaries[0m : [92m[30, 60][0m
+[01/12 06:58:51]         [35mname[0m : [92mPiecewiseDecay[0m
+[01/12 06:58:51]         [35mvalues[0m : [92m[0.01, 0.001, 0.0001][0m
+[01/12 06:58:51]     [35mmomentum[0m : [92m0.9[0m
+[01/12 06:58:51]     [35mname[0m : [92mMomentum[0m
+[01/12 06:58:51]     [35mweight_decay[0m : 
+[01/12 06:58:51]         [35mname[0m : [92mL2[0m
+[01/12 06:58:51]         [35mvalue[0m : [92m0.0001[0m
+[01/12 06:58:51] ------------------------------------------------------------
+[01/12 06:58:51] [35mepochs[0m : [92m80[0m
+[01/12 06:58:51] [35mlog_interval[0m : [92m1[0m
+[01/12 06:58:51] [35mlog_level[0m : [92mINFO[0m
+[01/12 06:58:51] [35mmodel_name[0m : [92mTSN[0m
+[01/12 06:58:58] reader shuffle seed: 0.
+[01/12 06:58:58] shard_id: 2, trainer_count: 4
+[01/12 06:58:58] read videos from 2850, length: 1425, lines length: 1425, total: 5700
+[01/12 06:58:58] ---------- device_id: 2 -----------
+[01/12 06:58:58] initializing dataset, it will take several minutes if it is too large .... 
+[01/12 06:59:06] [35mepoch:[  1/80 ][0m [95mtrain step:0   [0m [92mloss: 6.19479 lr: 0.010000 elapse: 0.355 reader: 0.000 top1: 0.00000 top5: 0.00000[0ms ips: 90.01890 instance/sec.
+[01/12 06:59:08] epoch:[  1/80 ] [95mtrain step:1   [0m [92mloss: 5.67500 lr: 0.010000 elapse: 1.873 reader: 1.596 top1: 0.00000 top5: 0.06250[0ms ips: 17.08112 instance/sec.
+[01/12 06:59:10] epoch:[  1/80 ] [95mtrain step:2   [0m [92mloss: 4.65888 lr: 0.010000 elapse: 1.947 reader: 1.669 top1: 0.28125 top5: 0.65625[0ms ips: 16.43460 instance/sec.
+[01/12 06:59:13] epoch:[  1/80 ] [95mtrain step:3   [0m [92mloss: 3.57142 lr: 0.010000 elapse: 2.336 reader: 2.057 top1: 0.15625 top5: 0.75000[0ms ips: 13.69847 instance/sec.
+[01/12 06:59:15] epoch:[  1/80 ] [95mtrain step:4   [0m [92mloss: 2.97397 lr: 0.010000 elapse: 2.237 reader: 1.959 top1: 0.25000 top5: 0.78125[0ms ips: 14.30387 instance/sec.
+[01/12 06:59:17] epoch:[  1/80 ] [95mtrain step:5   [0m [92mloss: 3.80634 lr: 0.010000 elapse: 2.093 reader: 1.806 top1: 0.06250 top5: 0.65625[0ms ips: 15.28617 instance/sec.
+[01/12 06:59:19] epoch:[  1/80 ] [95mtrain step:6   [0m [92mloss: 3.32260 lr: 0.010000 elapse: 1.985 reader: 1.707 top1: 0.09375 top5: 0.75000[0ms ips: 16.12177 instance/sec.
+[01/12 06:59:21] epoch:[  1/80 ] [95mtrain step:7   [0m [92mloss: 3.74774 lr: 0.010000 elapse: 2.278 reader: 2.000 top1: 0.06250 top5: 0.71875[0ms ips: 14.04766 instance/sec.
+[01/12 06:59:23] epoch:[  1/80 ] [95mtrain step:8   [0m [92mloss: 3.04718 lr: 0.010000 elapse: 2.203 reader: 1.925 top1: 0.12500 top5: 0.75000[0ms ips: 14.52415 instance/sec.
+[01/12 06:59:25] epoch:[  1/80 ] [95mtrain step:9   [0m [92mloss: 2.68749 lr: 0.010000 elapse: 2.103 reader: 1.825 top1: 0.12500 top5: 0.62500[0ms ips: 15.21334 instance/sec.
+[01/12 06:59:28] epoch:[  1/80 ] [95mtrain step:10  [0m [92mloss: 2.67297 lr: 0.010000 elapse: 2.181 reader: 1.903 top1: 0.09375 top5: 0.59375[0ms ips: 14.66941 instance/sec.
+[01/12 06:59:30] epoch:[  1/80 ] [95mtrain step:11  [0m [92mloss: 3.57178 lr: 0.010000 elapse: 2.250 reader: 1.972 top1: 0.06250 top5: 0.50000[0ms ips: 14.22246 instance/sec.
+[01/12 06:59:32] epoch:[  1/80 ] [95mtrain step:12  [0m [92mloss: 3.51375 lr: 0.010000 elapse: 2.374 reader: 2.096 top1: 0.12500 top5: 0.43750[0ms ips: 13.47881 instance/sec.
+[01/12 06:59:34] epoch:[  1/80 ] [95mtrain step:13  [0m [92mloss: 2.63370 lr: 0.010000 elapse: 2.251 reader: 1.973 top1: 0.15625 top5: 0.62500[0ms ips: 14.21547 instance/sec.
+[01/12 06:59:37] epoch:[  1/80 ] [95mtrain step:14  [0m [92mloss: 2.64719 lr: 0.010000 elapse: 2.176 reader: 1.898 top1: 0.03125 top5: 0.65625[0ms ips: 14.70298 instance/sec.
+[01/12 06:59:39] epoch:[  1/80 ] [95mtrain step:15  [0m [92mloss: 2.37723 lr: 0.010000 elapse: 2.121 reader: 1.842 top1: 0.18750 top5: 0.78125[0ms ips: 15.08552 instance/sec.
+[01/12 06:59:41] epoch:[  1/80 ] [95mtrain step:16  [0m [92mloss: 2.71249 lr: 0.010000 elapse: 2.208 reader: 1.930 top1: 0.18750 top5: 0.71875[0ms ips: 14.49120 instance/sec.
+[01/12 06:59:43] epoch:[  1/80 ] [95mtrain step:17  [0m [92mloss: 3.37114 lr: 0.010000 elapse: 2.164 reader: 1.885 top1: 0.25000 top5: 0.62500[0ms ips: 14.78675 instance/sec.
+[01/12 06:59:45] epoch:[  1/80 ] [95mtrain step:18  [0m [92mloss: 3.06763 lr: 0.010000 elapse: 1.964 reader: 1.685 top1: 0.12500 top5: 0.53125[0ms ips: 16.29199 instance/sec.
+[01/12 06:59:47] epoch:[  1/80 ] [95mtrain step:19  [0m [92mloss: 2.97054 lr: 0.010000 elapse: 2.198 reader: 1.919 top1: 0.06250 top5: 0.50000[0ms ips: 14.55961 instance/sec.
+[01/12 06:59:50] epoch:[  1/80 ] [95mtrain step:20  [0m [92mloss: 2.98933 lr: 0.010000 elapse: 2.299 reader: 2.021 top1: 0.18750 top5: 0.53125[0ms ips: 13.91913 instance/sec.
+[01/12 06:59:52] epoch:[  1/80 ] [95mtrain step:21  [0m [92mloss: 2.83239 lr: 0.010000 elapse: 2.056 reader: 1.778 top1: 0.18750 top5: 0.46875[0ms ips: 15.56100 instance/sec.
+[01/12 06:59:54] epoch:[  1/80 ] [95mtrain step:22  [0m [92mloss: 2.83894 lr: 0.010000 elapse: 2.128 reader: 1.851 top1: 0.25000 top5: 0.56250[0ms ips: 15.03412 instance/sec.
+[01/12 06:59:56] epoch:[  1/80 ] [95mtrain step:23  [0m [92mloss: 2.67302 lr: 0.010000 elapse: 2.181 reader: 1.903 top1: 0.21875 top5: 0.71875[0ms ips: 14.67000 instance/sec.
+[01/12 06:59:58] epoch:[  1/80 ] [95mtrain step:24  [0m [92mloss: 2.66556 lr: 0.010000 elapse: 2.248 reader: 1.970 top1: 0.25000 top5: 0.65625[0ms ips: 14.23463 instance/sec.
+[01/12 07:00:00] epoch:[  1/80 ] [95mtrain step:25  [0m [92mloss: 3.06575 lr: 0.010000 elapse: 2.266 reader: 1.988 top1: 0.21875 top5: 0.68750[0ms ips: 14.11992 instance/sec.
+[01/12 07:00:02] epoch:[  1/80 ] [95mtrain step:26  [0m [92mloss: 3.82437 lr: 0.010000 elapse: 1.974 reader: 1.695 top1: 0.09375 top5: 0.50000[0ms ips: 16.21222 instance/sec.
+[01/12 07:00:05] epoch:[  1/80 ] [95mtrain step:27  [0m [92mloss: 2.80424 lr: 0.010000 elapse: 2.138 reader: 1.859 top1: 0.28125 top5: 0.62500[0ms ips: 14.96931 instance/sec.
+[01/12 07:00:07] epoch:[  1/80 ] [95mtrain step:28  [0m [92mloss: 3.18068 lr: 0.010000 elapse: 2.145 reader: 1.866 top1: 0.18750 top5: 0.68750[0ms ips: 14.92089 instance/sec.
+[01/12 07:00:09] epoch:[  1/80 ] [95mtrain step:29  [0m [92mloss: 2.75654 lr: 0.010000 elapse: 1.994 reader: 1.716 top1: 0.21875 top5: 0.62500[0ms ips: 16.04545 instance/sec.
+[01/12 07:00:11] epoch:[  1/80 ] [95mtrain step:30  [0m [92mloss: 2.41377 lr: 0.010000 elapse: 2.196 reader: 1.918 top1: 0.25000 top5: 0.75000[0ms ips: 14.57035 instance/sec.
+[01/12 07:00:13] epoch:[  1/80 ] [95mtrain step:31  [0m [92mloss: 2.25585 lr: 0.010000 elapse: 2.145 reader: 1.866 top1: 0.21875 top5: 0.68750[0ms ips: 14.92130 instance/sec.
+[01/12 07:00:15] epoch:[  1/80 ] [95mtrain step:32  [0m [92mloss: 2.84268 lr: 0.010000 elapse: 2.234 reader: 1.956 top1: 0.06250 top5: 0.59375[0ms ips: 14.32616 instance/sec.
+[01/12 07:00:17] epoch:[  1/80 ] [95mtrain step:33  [0m [92mloss: 2.42073 lr: 0.010000 elapse: 2.188 reader: 1.911 top1: 0.12500 top5: 0.68750[0ms ips: 14.62191 instance/sec.
+[01/12 07:00:20] epoch:[  1/80 ] [95mtrain step:34  [0m [92mloss: 2.56662 lr: 0.010000 elapse: 2.122 reader: 1.844 top1: 0.15625 top5: 0.65625[0ms ips: 15.07889 instance/sec.
+[01/12 07:00:22] epoch:[  1/80 ] [95mtrain step:35  [0m [92mloss: 2.30749 lr: 0.010000 elapse: 2.190 reader: 1.912 top1: 0.21875 top5: 0.59375[0ms ips: 14.60999 instance/sec.
+[01/12 07:00:24] epoch:[  1/80 ] [95mtrain step:36  [0m [92mloss: 2.11952 lr: 0.010000 elapse: 2.216 reader: 1.937 top1: 0.37500 top5: 0.84375[0ms ips: 14.43885 instance/sec.
+[01/12 07:00:26] epoch:[  1/80 ] [95mtrain step:37  [0m [92mloss: 3.01829 lr: 0.010000 elapse: 2.165 reader: 1.885 top1: 0.06250 top5: 0.71875[0ms ips: 14.78239 instance/sec.
+[01/12 07:00:28] epoch:[  1/80 ] [95mtrain step:38  [0m [92mloss: 2.37300 lr: 0.010000 elapse: 2.073 reader: 1.795 top1: 0.12500 top5: 0.81250[0ms ips: 15.43735 instance/sec.
+[01/12 07:00:31] epoch:[  1/80 ] [95mtrain step:39  [0m [92mloss: 2.35380 lr: 0.010000 elapse: 2.345 reader: 2.067 top1: 0.31250 top5: 0.71875[0ms ips: 13.64411 instance/sec.
+[01/12 07:00:33] epoch:[  1/80 ] [95mtrain step:40  [0m [92mloss: 1.94395 lr: 0.010000 elapse: 2.117 reader: 1.839 top1: 0.25000 top5: 0.87500[0ms ips: 15.11413 instance/sec.
+[01/12 07:00:35] epoch:[  1/80 ] [95mtrain step:41  [0m [92mloss: 3.21457 lr: 0.010000 elapse: 2.031 reader: 1.753 top1: 0.03125 top5: 0.43750[0ms ips: 15.75673 instance/sec.
+[01/12 07:00:37] epoch:[  1/80 ] [95mtrain step:42  [0m [92mloss: 2.31078 lr: 0.010000 elapse: 2.090 reader: 1.811 top1: 0.18750 top5: 0.62500[0ms ips: 15.31215 instance/sec.
+[01/12 07:00:39] epoch:[  1/80 ] [95mtrain step:43  [0m [92mloss: 2.50759 lr: 0.010000 elapse: 2.231 reader: 1.952 top1: 0.15625 top5: 0.62500[0ms ips: 14.34611 instance/sec.
+[01/12 07:00:41] epoch:[  1/80 ] [95mtrain step:44  [0m [92mloss: 2.47682 lr: 0.010000 elapse: 2.302 reader: 2.022 top1: 0.12500 top5: 0.68750[0ms ips: 13.90087 instance/sec.
+[01/12 07:00:41] [31mEND epoch:1  [0m [95mtrain[0m [92mloss_avg: 3.02178  elapse_avg: 2.119 reader_avg: 1.839 top1_avg: 0.15972 top5_avg: 0.62431 elapse_sum: 95.376[0ms ips: 15.09815 instance/sec.
+[01/12 07:00:44] [35mepoch:[  2/80 ][0m [95mtrain step:0   [0m [92mloss: 2.28642 lr: 0.010000 elapse: 2.191 reader: 1.913 top1: 0.15625 top5: 0.78125[0ms ips: 14.60507 instance/sec.
+[01/12 07:00:46] epoch:[  2/80 ] [95mtrain step:1   [0m [92mloss: 2.28318 lr: 0.010000 elapse: 2.124 reader: 1.846 top1: 0.25000 top5: 0.75000[0ms ips: 15.06654 instance/sec.
+[01/12 07:00:48] epoch:[  2/80 ] [95mtrain step:2   [0m [92mloss: 2.41395 lr: 0.010000 elapse: 2.130 reader: 1.851 top1: 0.18750 top5: 0.78125[0ms ips: 15.02233 instance/sec.
+[01/12 07:00:50] epoch:[  2/80 ] [95mtrain step:3   [0m [92mloss: 2.36858 lr: 0.010000 elapse: 2.327 reader: 2.048 top1: 0.15625 top5: 0.71875[0ms ips: 13.75172 instance/sec.
+[01/12 07:00:52] epoch:[  2/80 ] [95mtrain step:4   [0m [92mloss: 1.91758 lr: 0.010000 elapse: 2.084 reader: 1.805 top1: 0.21875 top5: 0.78125[0ms ips: 15.35329 instance/sec.
+[01/12 07:00:54] epoch:[  2/80 ] [95mtrain step:5   [0m [92mloss: 2.96448 lr: 0.010000 elapse: 2.021 reader: 1.743 top1: 0.18750 top5: 0.59375[0ms ips: 15.83017 instance/sec.
+[01/12 07:00:56] epoch:[  2/80 ] [95mtrain step:6   [0m [92mloss: 2.57530 lr: 0.010000 elapse: 2.076 reader: 1.797 top1: 0.21875 top5: 0.68750[0ms ips: 15.41581 instance/sec.
+[01/12 07:00:59] epoch:[  2/80 ] [95mtrain step:7   [0m [92mloss: 2.98201 lr: 0.010000 elapse: 2.328 reader: 2.050 top1: 0.15625 top5: 0.53125[0ms ips: 13.74789 instance/sec.
+[01/12 07:01:01] epoch:[  2/80 ] [95mtrain step:8   [0m [92mloss: 2.35929 lr: 0.010000 elapse: 2.136 reader: 1.857 top1: 0.12500 top5: 0.65625[0ms ips: 14.97857 instance/sec.
+[01/12 07:01:03] epoch:[  2/80 ] [95mtrain step:9   [0m [92mloss: 2.23707 lr: 0.010000 elapse: 2.146 reader: 1.865 top1: 0.25000 top5: 0.50000[0ms ips: 14.91482 instance/sec.
+[01/12 07:01:05] epoch:[  2/80 ] [95mtrain step:10  [0m [92mloss: 3.02580 lr: 0.010000 elapse: 2.258 reader: 1.979 top1: 0.12500 top5: 0.59375[0ms ips: 14.17214 instance/sec.
+[01/12 07:01:08] epoch:[  2/80 ] [95mtrain step:11  [0m [92mloss: 2.58136 lr: 0.010000 elapse: 2.408 reader: 2.129 top1: 0.12500 top5: 0.68750[0ms ips: 13.28943 instance/sec.
+[01/12 07:01:10] epoch:[  2/80 ] [95mtrain step:12  [0m [92mloss: 2.44998 lr: 0.010000 elapse: 2.242 reader: 1.963 top1: 0.21875 top5: 0.68750[0ms ips: 14.27205 instance/sec.
+[01/12 07:01:12] epoch:[  2/80 ] [95mtrain step:13  [0m [92mloss: 2.21177 lr: 0.010000 elapse: 2.120 reader: 1.842 top1: 0.25000 top5: 0.75000[0ms ips: 15.09747 instance/sec.
+[01/12 07:01:14] epoch:[  2/80 ] [95mtrain step:14  [0m [92mloss: 2.47614 lr: 0.010000 elapse: 2.242 reader: 1.964 top1: 0.15625 top5: 0.71875[0ms ips: 14.27102 instance/sec.
+[01/12 07:01:16] epoch:[  2/80 ] [95mtrain step:15  [0m [92mloss: 3.07752 lr: 0.010000 elapse: 2.105 reader: 1.826 top1: 0.12500 top5: 0.53125[0ms ips: 15.20543 instance/sec.
+[01/12 07:01:19] epoch:[  2/80 ] [95mtrain step:16  [0m [92mloss: 2.40891 lr: 0.010000 elapse: 2.212 reader: 1.933 top1: 0.21875 top5: 0.78125[0ms ips: 14.46787 instance/sec.
+[01/12 07:01:21] epoch:[  2/80 ] [95mtrain step:17  [0m [92mloss: 2.71370 lr: 0.010000 elapse: 2.071 reader: 1.792 top1: 0.18750 top5: 0.68750[0ms ips: 15.45109 instance/sec.
+[01/12 07:01:23] epoch:[  2/80 ] [95mtrain step:18  [0m [92mloss: 2.48372 lr: 0.010000 elapse: 2.089 reader: 1.811 top1: 0.25000 top5: 0.68750[0ms ips: 15.31852 instance/sec.
+[01/12 07:01:25] epoch:[  2/80 ] [95mtrain step:19  [0m [92mloss: 2.90767 lr: 0.010000 elapse: 2.227 reader: 1.949 top1: 0.12500 top5: 0.53125[0ms ips: 14.37106 instance/sec.
+[01/12 07:01:27] epoch:[  2/80 ] [95mtrain step:20  [0m [92mloss: 2.36483 lr: 0.010000 elapse: 2.205 reader: 1.927 top1: 0.28125 top5: 0.59375[0ms ips: 14.51456 instance/sec.
+[01/12 07:01:29] epoch:[  2/80 ] [95mtrain step:21  [0m [92mloss: 2.66598 lr: 0.010000 elapse: 2.032 reader: 1.754 top1: 0.21875 top5: 0.53125[0ms ips: 15.74831 instance/sec.
+[01/12 07:01:31] epoch:[  2/80 ] [95mtrain step:22  [0m [92mloss: 2.50807 lr: 0.010000 elapse: 2.148 reader: 1.870 top1: 0.15625 top5: 0.46875[0ms ips: 14.89787 instance/sec.
+[01/12 07:01:34] epoch:[  2/80 ] [95mtrain step:23  [0m [92mloss: 2.35194 lr: 0.010000 elapse: 2.257 reader: 1.979 top1: 0.09375 top5: 0.56250[0ms ips: 14.17857 instance/sec.
+[01/12 07:01:36] epoch:[  2/80 ] [95mtrain step:24  [0m [92mloss: 2.56771 lr: 0.010000 elapse: 2.303 reader: 2.024 top1: 0.03125 top5: 0.68750[0ms ips: 13.89671 instance/sec.
+[01/12 07:01:38] epoch:[  2/80 ] [95mtrain step:25  [0m [92mloss: 2.49568 lr: 0.010000 elapse: 2.063 reader: 1.784 top1: 0.21875 top5: 0.59375[0ms ips: 15.51242 instance/sec.
+[01/12 07:01:40] epoch:[  2/80 ] [95mtrain step:26  [0m [92mloss: 2.12370 lr: 0.010000 elapse: 2.134 reader: 1.855 top1: 0.25000 top5: 0.81250[0ms ips: 14.99771 instance/sec.
+[01/12 07:01:42] epoch:[  2/80 ] [95mtrain step:27  [0m [92mloss: 2.99964 lr: 0.010000 elapse: 2.142 reader: 1.862 top1: 0.18750 top5: 0.62500[0ms ips: 14.93670 instance/sec.
+[01/12 07:01:44] epoch:[  2/80 ] [95mtrain step:28  [0m [92mloss: 2.36087 lr: 0.010000 elapse: 2.026 reader: 1.747 top1: 0.28125 top5: 0.68750[0ms ips: 15.79168 instance/sec.
+[01/12 07:01:46] epoch:[  2/80 ] [95mtrain step:29  [0m [92mloss: 2.81736 lr: 0.010000 elapse: 2.205 reader: 1.926 top1: 0.15625 top5: 0.71875[0ms ips: 14.50988 instance/sec.
+[01/12 07:01:49] epoch:[  2/80 ] [95mtrain step:30  [0m [92mloss: 2.37510 lr: 0.010000 elapse: 2.087 reader: 1.808 top1: 0.21875 top5: 0.78125[0ms ips: 15.33210 instance/sec.
+[01/12 07:01:51] epoch:[  2/80 ] [95mtrain step:31  [0m [92mloss: 2.07453 lr: 0.010000 elapse: 2.289 reader: 2.010 top1: 0.21875 top5: 0.78125[0ms ips: 13.98018 instance/sec.
+[01/12 07:01:53] epoch:[  2/80 ] [95mtrain step:32  [0m [92mloss: 2.51919 lr: 0.010000 elapse: 2.171 reader: 1.893 top1: 0.12500 top5: 0.53125[0ms ips: 14.74107 instance/sec.
+[01/12 07:01:55] epoch:[  2/80 ] [95mtrain step:33  [0m [92mloss: 2.58854 lr: 0.010000 elapse: 2.263 reader: 1.983 top1: 0.15625 top5: 0.59375[0ms ips: 14.14181 instance/sec.
+[01/12 07:01:57] epoch:[  2/80 ] [95mtrain step:34  [0m [92mloss: 2.19785 lr: 0.010000 elapse: 2.192 reader: 1.914 top1: 0.31250 top5: 0.62500[0ms ips: 14.59769 instance/sec.
+[01/12 07:02:00] epoch:[  2/80 ] [95mtrain step:35  [0m [92mloss: 2.47768 lr: 0.010000 elapse: 2.100 reader: 1.820 top1: 0.18750 top5: 0.65625[0ms ips: 15.23995 instance/sec.
+[01/12 07:02:02] epoch:[  2/80 ] [95mtrain step:36  [0m [92mloss: 2.45751 lr: 0.010000 elapse: 2.323 reader: 2.045 top1: 0.18750 top5: 0.71875[0ms ips: 13.77280 instance/sec.
+[01/12 07:02:04] epoch:[  2/80 ] [95mtrain step:37  [0m [92mloss: 1.99269 lr: 0.010000 elapse: 2.014 reader: 1.736 top1: 0.34375 top5: 0.84375[0ms ips: 15.88920 instance/sec.
+[01/12 07:02:06] epoch:[  2/80 ] [95mtrain step:38  [0m [92mloss: 2.17329 lr: 0.010000 elapse: 2.212 reader: 1.934 top1: 0.21875 top5: 0.78125[0ms ips: 14.46383 instance/sec.
+[01/12 07:02:08] epoch:[  2/80 ] [95mtrain step:39  [0m [92mloss: 2.45753 lr: 0.010000 elapse: 2.266 reader: 1.987 top1: 0.12500 top5: 0.68750[0ms ips: 14.12340 instance/sec.
+[01/12 07:02:10] epoch:[  2/80 ] [95mtrain step:40  [0m [92mloss: 2.46453 lr: 0.010000 elapse: 2.096 reader: 1.817 top1: 0.18750 top5: 0.75000[0ms ips: 15.26576 instance/sec.
+[01/12 07:02:13] epoch:[  2/80 ] [95mtrain step:41  [0m [92mloss: 2.41577 lr: 0.010000 elapse: 2.095 reader: 1.817 top1: 0.31250 top5: 0.68750[0ms ips: 15.27691 instance/sec.
+[01/12 07:02:15] epoch:[  2/80 ] [95mtrain step:42  [0m [92mloss: 2.38737 lr: 0.010000 elapse: 2.050 reader: 1.769 top1: 0.18750 top5: 0.75000[0ms ips: 15.61192 instance/sec.
+[01/12 07:02:17] epoch:[  2/80 ] [95mtrain step:43  [0m [92mloss: 2.41912 lr: 0.010000 elapse: 2.283 reader: 2.004 top1: 0.15625 top5: 0.68750[0ms ips: 14.01395 instance/sec.
+[01/12 07:02:19] epoch:[  2/80 ] [95mtrain step:44  [0m [92mloss: 2.21603 lr: 0.010000 elapse: 2.257 reader: 1.979 top1: 0.25000 top5: 0.59375[0ms ips: 14.17538 instance/sec.
+[01/12 07:02:19] [31mEND epoch:2  [0m [95mtrain[0m [92mloss_avg: 2.47104  elapse_avg: 2.172 reader_avg: 1.894 top1_avg: 0.19444 top5_avg: 0.67083 elapse_sum: 97.749[0ms ips: 14.73154 instance/sec.
+[01/12 07:02:21] [35mepoch:[  3/80 ][0m [95mtrain step:0   [0m [92mloss: 2.20327 lr: 0.010000 elapse: 2.123 reader: 1.845 top1: 0.21875 top5: 0.78125[0ms ips: 15.07196 instance/sec.
+[01/12 07:02:23] epoch:[  3/80 ] [95mtrain step:1   [0m [92mloss: 2.64849 lr: 0.010000 elapse: 1.942 reader: 1.664 top1: 0.34375 top5: 0.62500[0ms ips: 16.47465 instance/sec.
+[01/12 07:02:26] epoch:[  3/80 ] [95mtrain step:2   [0m [92mloss: 2.04163 lr: 0.010000 elapse: 2.280 reader: 2.003 top1: 0.25000 top5: 0.78125[0ms ips: 14.03390 instance/sec.
+[01/12 07:02:28] epoch:[  3/80 ] [95mtrain step:3   [0m [92mloss: 2.27324 lr: 0.010000 elapse: 2.270 reader: 1.992 top1: 0.18750 top5: 0.62500[0ms ips: 14.09779 instance/sec.
+[01/12 07:02:30] epoch:[  3/80 ] [95mtrain step:4   [0m [92mloss: 2.20327 lr: 0.010000 elapse: 2.011 reader: 1.732 top1: 0.18750 top5: 0.71875[0ms ips: 15.91059 instance/sec.
+[01/12 07:02:32] epoch:[  3/80 ] [95mtrain step:5   [0m [92mloss: 2.36482 lr: 0.010000 elapse: 1.976 reader: 1.698 top1: 0.15625 top5: 0.71875[0ms ips: 16.19273 instance/sec.
+[01/12 07:02:34] epoch:[  3/80 ] [95mtrain step:6   [0m [92mloss: 2.11958 lr: 0.010000 elapse: 2.187 reader: 1.908 top1: 0.21875 top5: 0.78125[0ms ips: 14.63501 instance/sec.
+[01/12 07:02:36] epoch:[  3/80 ] [95mtrain step:7   [0m [92mloss: 2.30921 lr: 0.010000 elapse: 2.249 reader: 1.971 top1: 0.31250 top5: 0.65625[0ms ips: 14.22857 instance/sec.
+[01/12 07:02:38] epoch:[  3/80 ] [95mtrain step:8   [0m [92mloss: 2.15811 lr: 0.010000 elapse: 2.040 reader: 1.762 top1: 0.28125 top5: 0.68750[0ms ips: 15.68844 instance/sec.
+[01/12 07:02:40] epoch:[  3/80 ] [95mtrain step:9   [0m [92mloss: 2.09427 lr: 0.010000 elapse: 2.203 reader: 1.925 top1: 0.18750 top5: 0.81250[0ms ips: 14.52473 instance/sec.
+[01/12 07:02:43] epoch:[  3/80 ] [95mtrain step:10  [0m [92mloss: 2.04917 lr: 0.010000 elapse: 2.229 reader: 1.951 top1: 0.34375 top5: 0.78125[0ms ips: 14.35374 instance/sec.
+[01/12 07:02:45] epoch:[  3/80 ] [95mtrain step:11  [0m [92mloss: 2.08097 lr: 0.010000 elapse: 2.323 reader: 2.044 top1: 0.34375 top5: 0.62500[0ms ips: 13.77801 instance/sec.
+[01/12 07:02:47] epoch:[  3/80 ] [95mtrain step:12  [0m [92mloss: 2.27330 lr: 0.010000 elapse: 2.214 reader: 1.935 top1: 0.18750 top5: 0.71875[0ms ips: 14.45517 instance/sec.
+[01/12 07:02:49] epoch:[  3/80 ] [95mtrain step:13  [0m [92mloss: 2.32615 lr: 0.010000 elapse: 2.132 reader: 1.854 top1: 0.31250 top5: 0.71875[0ms ips: 15.00647 instance/sec.
+[01/12 07:02:51] epoch:[  3/80 ] [95mtrain step:14  [0m [92mloss: 2.21666 lr: 0.010000 elapse: 2.114 reader: 1.835 top1: 0.18750 top5: 0.65625[0ms ips: 15.13782 instance/sec.
+[01/12 07:02:54] epoch:[  3/80 ] [95mtrain step:15  [0m [92mloss: 2.20329 lr: 0.010000 elapse: 2.204 reader: 1.925 top1: 0.34375 top5: 0.78125[0ms ips: 14.51836 instance/sec.
+[01/12 07:02:56] epoch:[  3/80 ] [95mtrain step:16  [0m [92mloss: 2.23759 lr: 0.010000 elapse: 2.142 reader: 1.864 top1: 0.21875 top5: 0.62500[0ms ips: 14.93721 instance/sec.
+[01/12 07:02:58] epoch:[  3/80 ] [95mtrain step:17  [0m [92mloss: 2.29503 lr: 0.010000 elapse: 1.946 reader: 1.667 top1: 0.21875 top5: 0.62500[0ms ips: 16.44144 instance/sec.
+[01/12 07:03:00] epoch:[  3/80 ] [95mtrain step:18  [0m [92mloss: 2.32925 lr: 0.010000 elapse: 2.162 reader: 1.884 top1: 0.18750 top5: 0.68750[0ms ips: 14.79869 instance/sec.
+[01/12 07:03:02] epoch:[  3/80 ] [95mtrain step:19  [0m [92mloss: 2.34553 lr: 0.010000 elapse: 2.257 reader: 1.977 top1: 0.12500 top5: 0.62500[0ms ips: 14.17860 instance/sec.
+[01/12 07:03:04] epoch:[  3/80 ] [95mtrain step:20  [0m [92mloss: 2.17935 lr: 0.010000 elapse: 2.039 reader: 1.760 top1: 0.18750 top5: 0.62500[0ms ips: 15.69213 instance/sec.
+[01/12 07:03:06] epoch:[  3/80 ] [95mtrain step:21  [0m [92mloss: 2.27189 lr: 0.010000 elapse: 2.131 reader: 1.852 top1: 0.21875 top5: 0.59375[0ms ips: 15.01740 instance/sec.
+[01/12 07:03:09] epoch:[  3/80 ] [95mtrain step:22  [0m [92mloss: 2.46825 lr: 0.010000 elapse: 2.205 reader: 1.925 top1: 0.25000 top5: 0.75000[0ms ips: 14.51571 instance/sec.
+[01/12 07:03:11] epoch:[  3/80 ] [95mtrain step:23  [0m [92mloss: 2.83241 lr: 0.010000 elapse: 2.267 reader: 1.988 top1: 0.09375 top5: 0.65625[0ms ips: 14.11847 instance/sec.
+[01/12 07:03:13] epoch:[  3/80 ] [95mtrain step:24  [0m [92mloss: 2.41004 lr: 0.010000 elapse: 2.233 reader: 1.954 top1: 0.21875 top5: 0.59375[0ms ips: 14.32978 instance/sec.
+[01/12 07:03:15] epoch:[  3/80 ] [95mtrain step:25  [0m [92mloss: 2.63076 lr: 0.010000 elapse: 2.032 reader: 1.753 top1: 0.09375 top5: 0.71875[0ms ips: 15.74940 instance/sec.
+[01/12 07:03:17] epoch:[  3/80 ] [95mtrain step:26  [0m [92mloss: 2.39561 lr: 0.010000 elapse: 2.115 reader: 1.836 top1: 0.18750 top5: 0.71875[0ms ips: 15.12695 instance/sec.
+[01/12 07:03:19] epoch:[  3/80 ] [95mtrain step:27  [0m [92mloss: 1.90166 lr: 0.010000 elapse: 2.085 reader: 1.807 top1: 0.37500 top5: 0.84375[0ms ips: 15.34802 instance/sec.
+[01/12 07:03:21] epoch:[  3/80 ] [95mtrain step:28  [0m [92mloss: 2.51361 lr: 0.010000 elapse: 1.999 reader: 1.720 top1: 0.18750 top5: 0.65625[0ms ips: 16.01031 instance/sec.
+[01/12 07:03:23] epoch:[  3/80 ] [95mtrain step:29  [0m [92mloss: 2.17343 lr: 0.010000 elapse: 2.123 reader: 1.844 top1: 0.31250 top5: 0.71875[0ms ips: 15.07226 instance/sec.
+[01/12 07:03:26] epoch:[  3/80 ] [95mtrain step:30  [0m [92mloss: 2.28718 lr: 0.010000 elapse: 2.132 reader: 1.854 top1: 0.25000 top5: 0.75000[0ms ips: 15.01030 instance/sec.
+[01/12 07:03:28] epoch:[  3/80 ] [95mtrain step:31  [0m [92mloss: 2.59413 lr: 0.010000 elapse: 2.267 reader: 1.988 top1: 0.31250 top5: 0.75000[0ms ips: 14.11632 instance/sec.
+[01/12 07:03:30] epoch:[  3/80 ] [95mtrain step:32  [0m [92mloss: 2.45887 lr: 0.010000 elapse: 2.115 reader: 1.836 top1: 0.25000 top5: 0.78125[0ms ips: 15.12862 instance/sec.
+[01/12 07:03:32] epoch:[  3/80 ] [95mtrain step:33  [0m [92mloss: 2.02219 lr: 0.010000 elapse: 2.137 reader: 1.858 top1: 0.28125 top5: 0.81250[0ms ips: 14.97427 instance/sec.
+[01/12 07:03:34] epoch:[  3/80 ] [95mtrain step:34  [0m [92mloss: 2.43804 lr: 0.010000 elapse: 2.175 reader: 1.896 top1: 0.18750 top5: 0.65625[0ms ips: 14.71110 instance/sec.
+[01/12 07:03:36] epoch:[  3/80 ] [95mtrain step:35  [0m [92mloss: 2.22088 lr: 0.010000 elapse: 2.103 reader: 1.823 top1: 0.25000 top5: 0.78125[0ms ips: 15.21902 instance/sec.
+[01/12 07:03:38] epoch:[  3/80 ] [95mtrain step:36  [0m [92mloss: 2.05452 lr: 0.010000 elapse: 2.132 reader: 1.853 top1: 0.34375 top5: 0.71875[0ms ips: 15.01062 instance/sec.
+[01/12 07:03:41] epoch:[  3/80 ] [95mtrain step:37  [0m [92mloss: 2.51263 lr: 0.010000 elapse: 2.055 reader: 1.777 top1: 0.18750 top5: 0.62500[0ms ips: 15.57046 instance/sec.
+[01/12 07:03:43] epoch:[  3/80 ] [95mtrain step:38  [0m [92mloss: 2.21871 lr: 0.010000 elapse: 2.290 reader: 2.011 top1: 0.28125 top5: 0.62500[0ms ips: 13.97241 instance/sec.
+[01/12 07:03:45] epoch:[  3/80 ] [95mtrain step:39  [0m [92mloss: 2.32011 lr: 0.010000 elapse: 2.112 reader: 1.834 top1: 0.28125 top5: 0.75000[0ms ips: 15.14998 instance/sec.
+[01/12 07:03:47] epoch:[  3/80 ] [95mtrain step:40  [0m [92mloss: 2.00445 lr: 0.010000 elapse: 2.026 reader: 1.748 top1: 0.37500 top5: 0.75000[0ms ips: 15.79194 instance/sec.
+[01/12 07:03:49] epoch:[  3/80 ] [95mtrain step:41  [0m [92mloss: 2.57617 lr: 0.010000 elapse: 2.086 reader: 1.808 top1: 0.09375 top5: 0.65625[0ms ips: 15.34022 instance/sec.
+[01/12 07:03:51] epoch:[  3/80 ] [95mtrain step:42  [0m [92mloss: 2.22515 lr: 0.010000 elapse: 2.239 reader: 1.959 top1: 0.25000 top5: 0.75000[0ms ips: 14.28974 instance/sec.
+[01/12 07:03:54] epoch:[  3/80 ] [95mtrain step:43  [0m [92mloss: 2.54622 lr: 0.010000 elapse: 2.270 reader: 1.990 top1: 0.25000 top5: 0.68750[0ms ips: 14.09402 instance/sec.
+[01/12 07:03:54] [31mEND epoch:3  [0m [95mtrain[0m [92mloss_avg: 2.29612  elapse_avg: 2.145 reader_avg: 1.866 top1_avg: 0.23935 top5_avg: 0.70455 elapse_sum: 94.374[0ms ips: 14.91935 instance/sec.
+[01/12 07:03:56] [35mepoch:[  4/80 ][0m [95mtrain step:0   [0m [92mloss: 2.09319 lr: 0.010000 elapse: 2.211 reader: 1.933 top1: 0.15625 top5: 0.75000[0ms ips: 14.47254 instance/sec.
+[01/12 07:03:58] epoch:[  4/80 ] [95mtrain step:1   [0m [92mloss: 1.87111 lr: 0.010000 elapse: 2.097 reader: 1.818 top1: 0.25000 top5: 0.90625[0ms ips: 15.26092 instance/sec.
+[01/12 07:04:00] epoch:[  4/80 ] [95mtrain step:2   [0m [92mloss: 2.25926 lr: 0.010000 elapse: 2.102 reader: 1.823 top1: 0.31250 top5: 0.68750[0ms ips: 15.22213 instance/sec.
+[01/12 07:04:02] epoch:[  4/80 ] [95mtrain step:3   [0m [92mloss: 1.90043 lr: 0.010000 elapse: 2.288 reader: 2.008 top1: 0.31250 top5: 0.84375[0ms ips: 13.98744 instance/sec.
+[01/12 07:04:04] epoch:[  4/80 ] [95mtrain step:4   [0m [92mloss: 2.60193 lr: 0.010000 elapse: 2.094 reader: 1.815 top1: 0.25000 top5: 0.68750[0ms ips: 15.28474 instance/sec.
+[01/12 07:04:06] epoch:[  4/80 ] [95mtrain step:5   [0m [92mloss: 2.27810 lr: 0.010000 elapse: 2.037 reader: 1.757 top1: 0.28125 top5: 0.68750[0ms ips: 15.71239 instance/sec.
+[01/12 07:04:08] epoch:[  4/80 ] [95mtrain step:6   [0m [92mloss: 2.19170 lr: 0.010000 elapse: 2.079 reader: 1.800 top1: 0.25000 top5: 0.71875[0ms ips: 15.38992 instance/sec.
+[01/12 07:04:11] epoch:[  4/80 ] [95mtrain step:7   [0m [92mloss: 2.49682 lr: 0.010000 elapse: 2.325 reader: 2.046 top1: 0.25000 top5: 0.56250[0ms ips: 13.76413 instance/sec.
+[01/12 07:04:13] epoch:[  4/80 ] [95mtrain step:8   [0m [92mloss: 2.35402 lr: 0.010000 elapse: 2.068 reader: 1.789 top1: 0.18750 top5: 0.75000[0ms ips: 15.47212 instance/sec.
+[01/12 07:04:15] epoch:[  4/80 ] [95mtrain step:9   [0m [92mloss: 2.34627 lr: 0.010000 elapse: 2.150 reader: 1.871 top1: 0.25000 top5: 0.71875[0ms ips: 14.88470 instance/sec.
+[01/12 07:04:17] epoch:[  4/80 ] [95mtrain step:10  [0m [92mloss: 1.98472 lr: 0.010000 elapse: 2.275 reader: 1.997 top1: 0.31250 top5: 0.78125[0ms ips: 14.06315 instance/sec.
+[01/12 07:04:20] epoch:[  4/80 ] [95mtrain step:11  [0m [92mloss: 2.11634 lr: 0.010000 elapse: 2.319 reader: 2.040 top1: 0.15625 top5: 0.71875[0ms ips: 13.79785 instance/sec.
+[01/12 07:04:22] epoch:[  4/80 ] [95mtrain step:12  [0m [92mloss: 2.17272 lr: 0.010000 elapse: 2.302 reader: 2.023 top1: 0.28125 top5: 0.65625[0ms ips: 13.89904 instance/sec.
+[01/12 07:04:24] epoch:[  4/80 ] [95mtrain step:13  [0m [92mloss: 2.11308 lr: 0.010000 elapse: 2.132 reader: 1.854 top1: 0.25000 top5: 0.71875[0ms ips: 15.01015 instance/sec.
+[01/12 07:04:26] epoch:[  4/80 ] [95mtrain step:14  [0m [92mloss: 2.71295 lr: 0.010000 elapse: 2.217 reader: 1.938 top1: 0.25000 top5: 0.62500[0ms ips: 14.43549 instance/sec.
+[01/12 07:04:28] epoch:[  4/80 ] [95mtrain step:15  [0m [92mloss: 2.23545 lr: 0.010000 elapse: 2.123 reader: 1.843 top1: 0.18750 top5: 0.75000[0ms ips: 15.07378 instance/sec.
+[01/12 07:04:31] epoch:[  4/80 ] [95mtrain step:16  [0m [92mloss: 2.12834 lr: 0.010000 elapse: 2.208 reader: 1.928 top1: 0.15625 top5: 0.78125[0ms ips: 14.49345 instance/sec.
+[01/12 07:04:33] epoch:[  4/80 ] [95mtrain step:17  [0m [92mloss: 2.34980 lr: 0.010000 elapse: 2.084 reader: 1.806 top1: 0.28125 top5: 0.71875[0ms ips: 15.35273 instance/sec.
+[01/12 07:04:35] epoch:[  4/80 ] [95mtrain step:18  [0m [92mloss: 1.94266 lr: 0.010000 elapse: 2.070 reader: 1.792 top1: 0.31250 top5: 0.81250[0ms ips: 15.46041 instance/sec.
+[01/12 07:04:37] epoch:[  4/80 ] [95mtrain step:19  [0m [92mloss: 2.16214 lr: 0.010000 elapse: 2.262 reader: 1.983 top1: 0.15625 top5: 0.81250[0ms ips: 14.14495 instance/sec.
+[01/12 07:04:39] epoch:[  4/80 ] [95mtrain step:20  [0m [92mloss: 2.79956 lr: 0.010000 elapse: 2.154 reader: 1.876 top1: 0.15625 top5: 0.62500[0ms ips: 14.85382 instance/sec.
+[01/12 07:04:41] epoch:[  4/80 ] [95mtrain step:21  [0m [92mloss: 2.31822 lr: 0.010000 elapse: 1.984 reader: 1.706 top1: 0.18750 top5: 0.75000[0ms ips: 16.12566 instance/sec.
+[01/12 07:04:43] epoch:[  4/80 ] [95mtrain step:22  [0m [92mloss: 2.54612 lr: 0.010000 elapse: 2.135 reader: 1.857 top1: 0.12500 top5: 0.68750[0ms ips: 14.98839 instance/sec.
+[01/12 07:04:45] epoch:[  4/80 ] [95mtrain step:23  [0m [92mloss: 2.69322 lr: 0.010000 elapse: 2.194 reader: 1.915 top1: 0.12500 top5: 0.46875[0ms ips: 14.58227 instance/sec.
+[01/12 07:04:48] epoch:[  4/80 ] [95mtrain step:24  [0m [92mloss: 2.33218 lr: 0.010000 elapse: 2.269 reader: 1.989 top1: 0.09375 top5: 0.68750[0ms ips: 14.10042 instance/sec.
+[01/12 07:04:50] epoch:[  4/80 ] [95mtrain step:25  [0m [92mloss: 2.12781 lr: 0.010000 elapse: 2.101 reader: 1.822 top1: 0.31250 top5: 0.59375[0ms ips: 15.23244 instance/sec.
+[01/12 07:04:52] epoch:[  4/80 ] [95mtrain step:26  [0m [92mloss: 2.02121 lr: 0.010000 elapse: 2.139 reader: 1.859 top1: 0.31250 top5: 0.75000[0ms ips: 14.96297 instance/sec.
+[01/12 07:04:54] epoch:[  4/80 ] [95mtrain step:27  [0m [92mloss: 2.02337 lr: 0.010000 elapse: 2.163 reader: 1.885 top1: 0.28125 top5: 0.75000[0ms ips: 14.79108 instance/sec.
+[01/12 07:04:56] epoch:[  4/80 ] [95mtrain step:28  [0m [92mloss: 2.16901 lr: 0.010000 elapse: 2.014 reader: 1.735 top1: 0.28125 top5: 0.65625[0ms ips: 15.88857 instance/sec.
+[01/12 07:04:58] epoch:[  4/80 ] [95mtrain step:29  [0m [92mloss: 2.67105 lr: 0.010000 elapse: 2.185 reader: 1.906 top1: 0.21875 top5: 0.71875[0ms ips: 14.64353 instance/sec.
+[01/12 07:05:00] epoch:[  4/80 ] [95mtrain step:30  [0m [92mloss: 2.61697 lr: 0.010000 elapse: 2.031 reader: 1.753 top1: 0.31250 top5: 0.68750[0ms ips: 15.75286 instance/sec.
+[01/12 07:05:03] epoch:[  4/80 ] [95mtrain step:31  [0m [92mloss: 2.09510 lr: 0.010000 elapse: 2.295 reader: 2.016 top1: 0.25000 top5: 0.71875[0ms ips: 13.94606 instance/sec.
+[01/12 07:05:05] epoch:[  4/80 ] [95mtrain step:32  [0m [92mloss: 2.08664 lr: 0.010000 elapse: 2.162 reader: 1.884 top1: 0.43750 top5: 0.78125[0ms ips: 14.79980 instance/sec.
+[01/12 07:05:07] epoch:[  4/80 ] [95mtrain step:33  [0m [92mloss: 2.64830 lr: 0.010000 elapse: 2.300 reader: 2.021 top1: 0.21875 top5: 0.71875[0ms ips: 13.91028 instance/sec.
+[01/12 07:05:09] epoch:[  4/80 ] [95mtrain step:34  [0m [92mloss: 1.85388 lr: 0.010000 elapse: 2.171 reader: 1.892 top1: 0.37500 top5: 0.81250[0ms ips: 14.74202 instance/sec.
+[01/12 07:05:11] epoch:[  4/80 ] [95mtrain step:35  [0m [92mloss: 2.61726 lr: 0.010000 elapse: 2.097 reader: 1.818 top1: 0.21875 top5: 0.65625[0ms ips: 15.26112 instance/sec.
+[01/12 07:05:14] epoch:[  4/80 ] [95mtrain step:36  [0m [92mloss: 2.11928 lr: 0.010000 elapse: 2.257 reader: 1.978 top1: 0.40625 top5: 0.87500[0ms ips: 14.17863 instance/sec.
+[01/12 07:05:16] epoch:[  4/80 ] [95mtrain step:37  [0m [92mloss: 1.80806 lr: 0.010000 elapse: 2.040 reader: 1.762 top1: 0.28125 top5: 0.81250[0ms ips: 15.68290 instance/sec.
+[01/12 07:05:18] epoch:[  4/80 ] [95mtrain step:38  [0m [92mloss: 1.93866 lr: 0.010000 elapse: 2.243 reader: 1.965 top1: 0.40625 top5: 0.84375[0ms ips: 14.26409 instance/sec.

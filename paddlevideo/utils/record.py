@@ -28,7 +28,7 @@ def build_record(cfg):
         ("batch_time", AverageMeter('elapse', '.3f')),
         ("reader_time", AverageMeter('reader', '.3f')),
     ]
-    if 'Recognizer1D' in cfg.framework:
+    if 'Recognizer1D' in cfg.framework:  #TODO: required specify str in framework
         record_list.append(("hit_at_one", AverageMeter("hit_at_one", '.5f')))
         record_list.append(("perr", AverageMeter("perr", '.5f')))
         record_list.append(("gap", AverageMeter("gap", '.5f')))
@@ -36,30 +36,6 @@ def build_record(cfg):
         record_list.append(("top1", AverageMeter("top1", '.5f')))
         record_list.append(("top5", AverageMeter("top5", '.5f')))
 
-
-#    if 'Recognizer' in cfg.framework:  #TODO: required specify str in framework
-#        record_list = [
-#            ("loss", AverageMeter('loss', '7.5f')),
-#            ("lr", AverageMeter('lr', 'f', need_avg=False)),
-#            ("top1", AverageMeter("top1", '.5f')),
-#            ("top5", AverageMeter("top5", '.5f')),
-##            ("hit_at_one", AverageMeter("hit_at_one", '.5f')),
-##            ("perr", AverageMeter("perr", '.5f')),
-##            ("gap", AverageMeter("gap", '.5f')),
-#            ("batch_time", AverageMeter('elapse', '.3f')),
-#            ("reader_time", AverageMeter('reader', '.3f')),
-#        ]
-#        if 'Recognizer1D' in cfg.framework:
-#            record_list.append(("hit_at_one", AverageMeter("hit_at_one", '.5f')),
-#                               ("perr", AverageMeter("perr", '.5f')),
-#                               ("gap", AverageMeter("gap", '.5f')),)
-#    else:
-#        record_list = [
-#            ("loss", AverageMeter('loss', '7.5f')),
-#            ("lr", AverageMeter('lr', 'f', need_avg=False)),
-#            ("batch_time", AverageMeter('elapse', '.3f')),
-#            ("reader_time", AverageMeter('reader', '.3f')),
-#        ]
     record_list = OrderedDict(record_list)
     return record_list
 

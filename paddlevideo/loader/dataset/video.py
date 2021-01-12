@@ -52,7 +52,7 @@ class VideoDataset(BaseDataset):
                 line_split = line.strip().split()
                 filename, labels = line_split
                 #TODO(hj): Required suffix format: may mp4/avi/wmv
-                #filename = filename + '.avi'
+                filename = filename + '.avi'
                 if self.data_prefix is not None:
                     filename = osp.join(self.data_prefix, filename)
                 info.append(dict(filename=filename, labels=int(labels)))

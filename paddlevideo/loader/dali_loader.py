@@ -19,7 +19,7 @@ except:
         "DALI is not installed, you can improve performance if use DALI")
 
 
-def data_trans(data):
+def get_input_data(data):
     return to_variable(data[0]['image']), to_variable(data[0]['label'])
 
 
@@ -38,9 +38,6 @@ class TSN_Dali_loader(object):
         self.shard_id = ParallelEnv().local_rank
         self.dali_mean = cfg.mean * (self.seg_num * self.seglen)
         self.dali_std = cfg.std * (self.seg_num * self.seglen)
-
-    def create_reader(self):
-        return self.build_dali_reader()
 
     def build_dali_reader(self):
         """
@@ -85,7 +82,6 @@ class TSN_Dali_loader(object):
             tf.flush()
             video_files = tf.name
 
-            #            device_id = int(os.getenv('FLAGS_selected_gpus', 0))
             device_id = ParallelEnv().local_rank
             logger.info(f'---------- device_id: {device_id} -----------')
 
@@ -186,7 +182,6 @@ class VideoPipe(Pipeline):
         mirror_flag = self.mirror_generator()
         mirror_flag = (mirror_flag > 0.5)
         mirror_flag = self.cast_mirror(mirror_flag)
-        #output = self.crop(output, crop_pos_x=pos_x, crop_pos_y=pos_y)
         output = self.crop_mirror_norm(output,
                                        crop_pos_x=pos_x,
                                        crop_pos_y=pos_y,
