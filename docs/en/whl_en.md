@@ -1,4 +1,4 @@
-# paddlevideo package
+# ppvideo package
 
 ## Get started quickly
 
@@ -6,13 +6,13 @@
 
 install by pypi
 ```bash
-pip install paddlevideo==2.0.0
+pip install ppvideo==2.0.0
 ```
 
 build own whl package and install
 ```bash
 python3 setup.py bdist_wheel
-pip3 install dist/paddlevideo-x.x.x-py3-none-any.whl
+pip3 install dist/ppvideo-x.x.x-py3-none-any.whl
 ```
 
 ### 1. Quick Start
@@ -21,7 +21,7 @@ pip3 install dist/paddlevideo-x.x.x-py3-none-any.whl
 
 
 ```python
-from paddlevideo import PaddleVideo
+from ppvideo import PaddleVideo
 clas = PaddleVideo(model_name='TSN',use_gpu=False,use_tensorrt=False)
 video_file='docs/images/whl/demo.mp4.'
 result=clas.predict(video_file)
@@ -35,7 +35,7 @@ print(result)
 
 * Using command line interactive programming
 ```bash
-paddlevideo --model_name='TSN' --video_file='docs/images/whl/demo.mp4'
+ppvideo --model_name='TSN' --video_file='docs/images/whl/demo.mp4'
 ```
 
 ```
@@ -70,14 +70,14 @@ paddlevideo --model_name='TSN' --video_file='docs/images/whl/demo.mp4'
 
 * check `help` information
 ```bash
-paddlevideo -h
+ppvideo -h
 ```
 
 * Use user-specified model, you need to assign model's path `model_file` and parameters's path`params_file`
 
 ###### python
 ```python
-from paddlevideo import PaddleVideo
+from ppvideo import PaddleVideo
 clas = PaddleVideo(model_file='user-specified model path',
     params_file='parmas path', use_gpu=False, use_tensorrt=False)
 video_file = ''
@@ -87,14 +87,14 @@ print(result)
 
 ###### bash
 ```bash
-paddlevideo --model_file='user-specified model path' --params_file='parmas path' --image_file='image path'
+ppvideo --model_file='user-specified model path' --params_file='parmas path' --image_file='image path'
 ```
 
-* Use inference model which PaddlePaddle provides to predict, you need to choose one of model when initializing PaddleVideo to assign `model_name`. You may not assign `model_file` , and the model you chosen will be download in `BASE_INFERENCE_MODEL_DIR` ,which will be saved in folder named by `model_name`,avoiding overlay different inference model.
+* Use inference model which PaddlePaddle provides to predict, you need to choose one of model when initializing ppvideo to assign `model_name`. You may not assign `model_file` , and the model you chosen will be download in `BASE_INFERENCE_MODEL_DIR` ,which will be saved in folder named by `model_name`,avoiding overlay different inference model.
 
 ###### python
 ```python
-from paddlevideo import PaddleVideo
+from ppvideo import PaddleVideo
 clas = PaddleVideo(model_name='TSN',use_gpu=False, use_tensorrt=False)
 video_file = ''
 result=clas.predict(video_file)
@@ -103,14 +103,14 @@ print(result)
 
 ###### bash
 ```bash
-paddlevideo --model_name='TSN' --image_file='image path'
+ppvideo --model_name='TSN' --image_file='image path'
 ```
 
 * You can assign input as format`np.ndarray` which has been preprocessed `--image_file=np.ndarray`.
 
 ###### python
 ```python
-from paddlevideo import PaddleVideo
+from ppvideo import PaddleVideo
 clas = PaddleVideo(model_name='TSN',use_gpu=False, use_tensorrt=False)
 image_file =np.ndarray # image_file 可指定为前缀是https的网络图片，也可指定为本地图片
 result=clas.predict(image_file)
@@ -118,7 +118,7 @@ result=clas.predict(image_file)
 
 ###### bash
 ```bash
-paddlevideo --model_name='TSN' --image_file=np.ndarray
+ppvideo --model_name='TSN' --image_file=np.ndarray
 ```
 
 
@@ -126,7 +126,7 @@ paddlevideo --model_name='TSN' --image_file=np.ndarray
 
 ###### python
 ```python
-from paddlevideo import PaddleVideo
+from ppvideo import PaddleVideo
 clas = PaddleVideo(model_name='TSN',use_gpu=False, use_tensorrt=False,top_k=5)
 image_file = '' # it can be image_file folder path which contains all of images you want to predict.
 result=clas.predict(image_file)
@@ -135,14 +135,14 @@ print(result)
 
 ###### bash
 ```bash
-paddlevideo --model_name='TSN' --image_file='image path' --top_k=5
+ppvideo --model_name='TSN' --image_file='image path' --top_k=5
 ```
 
 * You can assign `--pre_label_image=True`, `--pre_label_out_idr= './output_pre_label/'`.Then images will be copied into folder named by top-1 class_id.
 
 ###### python
 ```python
-from paddlevideo import PaddleVideo
+from ppvideo import PaddleVideo
 clas = PaddleVideo(model_name='TSN',use_gpu=False, use_tensorrt=False,top_k=5, pre_label_image=True,pre_label_out_idr='./output_pre_label/')
 image_file = '' # it can be image_file folder path which contains all of images you want to predict.
 result=clas.predict(image_file)
@@ -151,7 +151,7 @@ print(result)
 
 ###### bash
 ```bash
-paddlevideo --model_name='TSN' --image_file='image path' --top_k=5 --pre_label_image=True --pre_label_out_idr='./output_pre_label/'
+ppvideo --model_name='TSN' --image_file='image path' --top_k=5 --pre_label_image=True --pre_label_out_idr='./output_pre_label/'
 ```
 
 * You can assign `--label_name_path` as your own label_dict_file, format should be as(class_id<space>class_name<\n>).
@@ -167,7 +167,7 @@ paddlevideo --model_name='TSN' --image_file='image path' --top_k=5 --pre_label_i
 
 ###### python
 ```python
-from paddlevideo import PaddleVideo
+from ppvideo import PaddleVideo
 clas = PaddleVideo(model_file= './inference.pdmodel',params_file = './inference.pdiparams',label_name_path='./ppcls/utils/imagenet1k_label_list.txt',use_gpu=False)
 image_file = '' # it can be image_file folder path which contains all of images you want to predict.
 result=clas.predict(image_file)
@@ -176,12 +176,12 @@ print(result)
 
 ###### bash
 ```bash
-paddlevideo --model_file= './inference.pdmodel' --params_file = './inference.pdiparams' --image_file='image path' --label_name_path='./ppcls/utils/imagenet1k_label_list.txt'
+ppvideo --model_file= './inference.pdmodel' --params_file = './inference.pdiparams' --image_file='image path' --label_name_path='./ppcls/utils/imagenet1k_label_list.txt'
 ```
 
 ###### python
 ```python
-from paddlevideo import PaddleVideo
+from ppvideo import PaddleVideo
 clas = PaddleVideo(model_name='TSN',use_gpu=False)
 image_file = '' # it can be image_file folder path which contains all of images you want to predict.
 result=clas.predict(image_file)
@@ -190,5 +190,5 @@ print(result)
 
 ###### bash
 ```bash
-paddlevideo --model_name='TSN' --image_file='image path'
+ppvideo --model_name='TSN' --image_file='image path'
 ```
