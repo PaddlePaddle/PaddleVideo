@@ -4,6 +4,9 @@
 
 ## 简介
 
+![python version](https://img.shields.io/badge/python-3.7+-orange.svg) ![paddle version](https://img.shields.io/badge/PaddlePaddle-2.0-blue)
+
+
 PaddleVideo飞桨视频模型开发套件，旨在帮助开发者更好的进行视频领域的学术研究和产业实践。
 
 ## 特性
@@ -59,11 +62,11 @@ PaddleVideo飞桨视频模型开发套件，旨在帮助开发者更好的进行
           </ul>
         </ul>
       </td>
-      <td> 
+      <td>
           <li>Recognizer1D</li>
           <li>Recognizer2D</li>
           <li>Recognizer3D</li>
-          <li>Localizer</li> 
+          <li>Localizer</li>
         <HR></HR>
         <ul>Backbone
             <li>resnet</li>
@@ -104,7 +107,7 @@ PaddleVideo飞桨视频模型开发套件，旨在帮助开发者更好的进行
             <li>CenterCrop</li>
             <li>MultiCrop</li>  
           </ul>  
-        </ul> 
+        </ul>
       </td>
       <td>
         <ul><li><b>Batch</b></li>
@@ -112,7 +115,7 @@ PaddleVideo飞桨视频模型开发套件，旨在帮助开发者更好的进行
             <li>Mixup</li>
             <li>Cutmix</li>  
           </ul>  
-        </ul> 
+        </ul>
         <ul><li><b>Image</b></li>
             <ul>
                 <li>Resize</li>  
@@ -149,7 +152,16 @@ PaddleVideo飞桨视频模型开发套件，旨在帮助开发者更好的进行
 **说明：**
 - 红色文字描述为PaddleVideo提供的模型，黑色文字描述为Pytorch实现
 - PPTSM在TSM标准版上精度提升3.5%，预测速度也略有增加。
-- 图中红色描述的模型均可在[模型库](#模型库) <sup>coming soon</sup>中获取
+- 图中红色描述的模型均可在[模型库](#模型库)中获取
+
+<a name="欢迎加入PaddleVideo技术交流群"></a>
+## 欢迎加入PaddleVideo技术交流群
+- 微信扫描二维码加入官方交流群，获得更高效的问题答疑，与各行各业开发者充分交流，期待您的加入。
+
+<div align="center">
+<img src="./docs/images/joinus.PNG"  width = "200" height = "200" />
+</div>
+
 
 ## 文档教程
 
@@ -162,25 +174,23 @@ PaddleVideo飞桨视频模型开发套件，旨在帮助开发者更好的进行
 ### 进阶教程
 - [模型库整体设计]() <sup>coming soon</sup>
 - [配置模块设计](docs/zh-CN/config.md)
-- [PPTSM实践]() <sup>coming soon</sup>
+- [PPTSM实践](docs/zh-CN/pp-tsm.md)
 - [训练加速方案]() <sup>coming soon</sup>
-- [预测部署]() <sup>coming soon</sup>
+- [预测部署](docs/zh-CN/deployment.md)
 - [自定义开发]() <sup>coming soon</sup>
 
 ### 模型库
 
 - 视频分类 [介绍](docs/zh-CN/model_zoo/README.md#视频分类)
-    - [Attention-LSTM](docs/zh-CN/model_zoo/recognition/attention_lstm.md) <sup>coming soon</sup>
-    - [TSN](docs/zh-CN/model_zoo/recognition/tsn.md) 
-    - [TSM](docs/zh-CN/model_zoo/recognition/tsm.md) <sup>coming soon</sup>
-    - [PPTSM](docs/zh-CN/model_zoo/recognition/pp-tsm.md) <sup>coming soon</sup>
-    - [SlowFast](docs/zh-CN/model_zoo/recognition/slowfast.md) <sup>coming soon</sup>
-    - [VideoTag](docs/zh-CN/model_zoo/recognition/videotag.md) <sup>coming soon</sup>
+    - [Attention-LSTM](docs/zh-CN/model_zoo/recognition/attention_lstm.md)
+    - [TSN](docs/zh-CN/model_zoo/recognition/tsn.md)
+    - [TSM](docs/zh-CN/model_zoo/recognition/tsm.md)
+    - [PPTSM](docs/zh-CN/model_zoo/recognition/pp-tsm.md)
+    - [SlowFast](docs/zh-CN/model_zoo/recognition/slowfast.md)
 - 动作定位 [介绍](docs/zh-CN/model_zoo/README.md#动作定位)
-    - [BMN](docs/zh-CN/model_zoo/localization/bmn.md) <sup>coming soon</sup>
+    - [BMN](docs/zh-CN/model_zoo/localization/bmn.md)
 - 时空动作检测：
     - Coming Soon!
-
 
 ## 许可证书
 本项目的发布受[Apache 2.0 license](LICENSE)许可认证。

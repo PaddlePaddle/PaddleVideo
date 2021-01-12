@@ -22,7 +22,6 @@ import sys
 __dir__ = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.abspath(os.path.join(__dir__, '../')))
 
-
 from paddlevideo.loader.pipelines import Scale, CenterCrop, Normalization, Image2Array
 
 
@@ -32,7 +31,7 @@ def parse_args():
 
     # general params
     parser = argparse.ArgumentParser()
-    parser.add_argument("-v", "--video_file", type=str)
+    parser.add_argument("-v", "--video_file", type=str, help="video file path")
     parser.add_argument("--use_gpu", type=str2bool, default=True)
 
     # params for decode and sample
@@ -58,7 +57,7 @@ def parse_args():
     parser.add_argument("--hubserving", type=str2bool, default=False)
 
     # params for infer
-    
+
     parser.add_argument("--model", type=str)
     """
     parser.add_argument("--pretrained_model", type=str)
@@ -114,8 +113,9 @@ def decode(filepath, args):
 
     return imgs
 
+
 def preprocess(img, args):
-    img = {"imgs":img}
+    img = {"imgs": img}
     resize_op = Scale(short_size=args.short_size)
     img = resize_op(img)
     ccrop_op = CenterCrop(target_size=args.target_size)
@@ -132,11 +132,7 @@ def preprocess(img, args):
 
 def postprocess(output, args):
     output = output.flatten()
-    print(output.shape)
-    print(max(output))
     classes = np.argpartition(output, -args.top_k)[-args.top_k:]
-    print(classes)
     classes = classes[np.argsort(-output[classes])]
     scores = output[classes]
     return classes, scores
-

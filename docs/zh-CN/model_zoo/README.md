@@ -1,1 +1,30 @@
-简体中文 | [English](../en/model_zoo/README.md)
+简体中文 | [English](../../en/model_zoo/README.md)
+
+
+# 概要
+PaddleVideo包含视频分类和动作定位方向的多个主流领先模型，其中TSN, TSM和SlowFast是End-to-End的视频分类模型，Attention LSTM是比较流行的视频特征序列模型，BMN是视频动作定位模型。TSN是基于2D-CNN的经典解决方案，TSM是基于时序移位的简单高效视频时空建模方法，SlowFast是FAIR在ICCV2019提出的3D视频分类模型，特征序列模型Attention LSTM速度快精度高。BMN模型是百度自研模型，为2019年ActivityNet夺冠方案。基于百度飞桨产业实践，我们自研并开源了ppTSM，该模型基于TSM进行优化，在保持模型参数量和计算量不增加的前提下，精度得到大幅提升。同时，我们的通用优化策略可以广泛适用于各种视频模型，未来我们将进行更多的模型优化工作，比如TSN、SlowFast、X3D等，敬请期待。
+
+
+## 模型概览
+
+| 模型 | 类别  | 描述 |
+| :--------------- | :--------: | :------------: |
+| [ppTSM](./recognition/pp-tsm.md) | 视频分类| PaddlePaddle优化后的TSM |
+| [SlowFast](./recognition/slowfast.md) | 视频分类| 3D高精度模型 |
+| [TSM](./recognition/tsm.md) | 视频分类| 基于时序移位的简单高效视频时空建模方法 |
+| [TSN](./recognition/tsn.md) | 视频分类| ECCV'16提出的基于2D-CNN经典解决方案 |
+| [Attention LSTM](./recognition/attention_lstm.md)  | 视频分类| 常用序列模型，速度快精度高 |
+| [BMN](./localization/bmn.md) | 视频动作定位| 2019年ActivityNet夺冠方案 |
+
+
+# 参考文献
+
+- [Attention Clusters: Purely Attention Based Local Feature Integration for Video Classification](https://arxiv.org/abs/1711.09550), Xiang Long, Chuang Gan, Gerard de Melo, Jiajun Wu, Xiao Liu, Shilei Wen
+
+- [BMN: Boundary-Matching Network for Temporal Action Proposal Generation](https://arxiv.org/abs/1907.09702), Tianwei Lin, Xiao Liu, Xin Li, Errui Ding, Shilei Wen.
+
+- [SlowFast Networks for Video Recognition](https://arxiv.org/abs/1812.03982), Feichtenhofer C, Fan H, Malik J, et al. 
+
+- [Temporal Segment Networks: Towards Good Practices for Deep Action Recognition](https://arxiv.org/abs/1608.00859), Limin Wang, Yuanjun Xiong, Zhe Wang, Yu Qiao, Dahua Lin, Xiaoou Tang, Luc Van Gool
+
+- [Temporal Shift Module for Efficient Video Understanding](https://arxiv.org/abs/1811.08383v1), Ji Lin, Chuang Gan, Song Han

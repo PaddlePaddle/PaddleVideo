@@ -2,9 +2,30 @@
 
 # 开始使用
 ---
-请参考[安装指南](./install.md)配置运行环境，并根据[数据](./data/)文档准备数据集，本章节下面所有的实验均以ucf101数据集为例。
+请参考[安装指南](./install.md)配置运行环境，并根据[数据](./dataset/)文档准备数据集，本章节下面所有的实验均以ucf101数据集为例。
 
 PaddleVideo目前支持Linux下的GPU单卡和多卡运行环境。
+
+- PaddleVideo各文件夹的默认存储路径， 以运行[example](../../configs/example.yaml)配置为例。
+
+```
+PaddleVideo
+    ├── paddlevideo
+    ├── ... #other source codes
+    ├── output #ouput 权重，优化器参数等存储路径
+    |    ├── example
+    |    |   ├── example_best.pdparams #path_to_weights
+    |    |   └── ...    
+    |    └── ...    
+    ├── log  #log存储路径
+    |    ├── worker.0
+    |    ├── worker.1
+    |    └── ...    
+    └── inference #预测文件存储路径
+         ├── example.pdiparams file
+         ├── example.pdimodel file
+         └── example.pdiparmas.info file
+```
 
 <a name="1"></a>
 ## 1. 模型训练与评估
@@ -14,6 +35,7 @@ PaddleVideo目前支持Linux下的GPU单卡和多卡运行环境。
 ```shell
 sh run.sh
 ```
+我们将所有标准的启动命令都放在了```run.sh```中，注意选择想要运行的脚本。
 
 <a name="model_train"></a>
 ### 1.1 模型训练
@@ -43,32 +65,32 @@ python -m paddle.distributed.launch \
         --validate \
         -o DATASET.batch_size=16
 ```
-`-o`用于指定需要修改或者添加的参数，其中`-o DATASET.batch_size=16`表示更改batch_size大小为16。具体配置参数含义参考[配置文档](./config.md)
+`-o`用于指定需要修改或者添加的参数，其中`-o DATASET.batch_size=16`表示更改batch_size大小为16。具体配置参数含义参考[配置文档](./tutorials/config.md#config-yaml-details)
 
-运行上述命令，将会输出运行日志，并默认保存在./log目录下，如：worker.0 , worker.1 ... , worker日志文件对应每张卡上的输出
+运行上述命令，将会输出运行日志，并默认保存在./log目录下，如：`worker.0` , `worker.1` ... , worker日志文件对应每张卡上的输出
 
 【train阶段】打印当前时间，当前epoch/epoch总数，当前batch id，评估指标，耗时，ips等信息：
 
-    
+
     [12/28 17:31:26] epoch:[ 1/80 ] train step:0   loss: 0.04656 lr: 0.000100 top1: 1.00000 top5: 1.00000 elapse: 0.326 reader: 0.001s ips: 98.22489 instance/sec.
-    
-    
+
+
 【eval阶段】打印当前时间，当前epoch/epoch总数，当前batch id，评估指标，耗时，ips等信息：
 
-    
+
     [12/28 17:31:32] epoch:[ 80/80 ] val step:0    loss: 0.20538 top1: 0.88281 top5: 0.99219 elapse: 1.589 reader: 0.000s ips: 20.14003 instance/sec.
-    
-    
+
+
 【epoch结束】打印当前时间，评估指标，耗时，ips等信息：
 
-    
+
     [12/28 17:31:38] END epoch:80  val loss_avg: 0.52208 top1_avg: 0.84398 top5_avg: 0.97393 elapse_avg: 0.234 reader_avg: 0.000 elapse_sum: 7.021s ips: 136.73686 instance/sec.
-    
-    
+
+
 当前为评估结果最好的epoch时，打印最优精度：
-    
+
     [12/28 17:28:42] Already save the best model (top1 acc)0.8494
-    
+
 
 <a name="model_resume"></a>
 ### 1.2 模型恢复训练
@@ -76,7 +98,7 @@ python -m paddle.distributed.launch \
 如果训练任务终止，可以加载断点权重文件(优化器-学习率参数，断点文件)继续训练。
 需要指定`-o resume_epoch`参数，该参数表示从```resume_epoch```轮开始继续训练.
 
-```
+```bash
 export CUDA_VISIBLE_DEVICES=0,1,2,3
 
 python3 -m paddle.distributed.launch \
@@ -94,7 +116,7 @@ python3 -m paddle.distributed.launch \
 
 进行模型微调（Finetune），对自定义数据集进行模型微调，需要指定 `--weights` 参数来加载预训练模型。
 
-```
+```bash
 export CUDA_VISIBLE_DEVICES=0,1,2,3
 
 python3 -m paddle.distributed.launch \
@@ -102,7 +124,7 @@ python3 -m paddle.distributed.launch \
     main.py \
         -c ./configs/example.yaml \
         --validate \
-        --weights=path_to_weights
+        --weights=./output/example/path_to_weights
 ```
 
 PaddleVideo会自动**不加载**shape不匹配的参数
@@ -119,7 +141,7 @@ python3 -m paddle.distributed.launch \
     main.py \
         -c ./configs/example.yaml \
         --test \
-        --weights=path_to_weights
+        --weights=./output/example/path_to_weights
 ```
 
 
@@ -134,7 +156,7 @@ python3 -m paddle.distributed.launch \
 ```bash
 python tools/export_model.py \
     -c ./configs/example.yaml \
-    -p ./output/path_to_weights \
+    -p ./output/example/path_to_weights \
     -o ./inference
 ```
 
@@ -143,7 +165,7 @@ python tools/export_model.py \
 
 ```bash
 python tools/infer/predict.py \
-    --video_file 预测视频路径 \
+    --video_file "data/example.avi" \
     --model_file "./inference/example.pdmodel" \
     --params_file "./inference/example.pdiparams" \
     --use_gpu=True \

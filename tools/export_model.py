@@ -38,20 +38,28 @@ def parse_args():
                         help='config file path')
 
     parser.add_argument("-p",
-                        "--pretrained_params",
+                        "--params",
                         default='./best.pdparams',
-                        type=str)
-    parser.add_argument("-o", "--output_path", type=str, default="./inference")
-    parser.add_argument("--img_size", type=int, default=224)
-    parser.add_argument("--num_seg", type=int, default=8)
+                        type=str,
+                        help='params path')
+    parser.add_argument("-o",
+                        "--output",
+                        type=str,
+                        default="./inference",
+                        help='output path')
+    parser.add_argument("--img_size", type=int, default=224, help='image size')
+    parser.add_argument("--num_seg",
+                        type=int,
+                        default=8,
+                        help='the number of segments')
 
     return parser.parse_args()
 
 
 def _trim(cfg, args):
     """
-    Reuse the trainging config will bring useless attribute, such as: backbone.pretrained model.
-    and some build phase attributes should be override, such ad: backbone.num_seg.
+    Reuse the trainging config will bring useless attributes, such as: backbone.pretrained model.
+    and some build phase attributes should be overrided, such as: backbone.num_seg.
     Trim it here.
     """
     model_name = cfg.model_name
@@ -78,17 +86,14 @@ def main():
     model.set_dict(params)
     model.eval()
 
-    model = to_static(
-        model,
-        input_spec=[
-            paddle.static.InputSpec(
-                shape=[None, args.num_seg, 3, args.img_size, args.img_size],
-                dtype='float32'),
-            #NOTE: Do not pass label.label
-            #paddle.static.InputSpec(
-            #    shape=[None, 1], dtype='int64'
-            #   )
-        ])
+    model = to_static(model,
+                      input_spec=[
+                          paddle.static.InputSpec(shape=[
+                              None, args.num_seg, 3, args.img_size,
+                              args.img_size
+                          ],
+                                                  dtype='float32'),
+                      ])
     paddle.jit.save(model, osp.join(args.output_path, model_name))
     print(
         f"model ({model_name}) has been already saved in ({args.output_path}).")
