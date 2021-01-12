@@ -14,7 +14,7 @@
 import paddle
 import argparse
 from paddlevideo.utils import get_config
-from paddlevideo.tasks import train_model, test_model
+from paddlevideo.tasks import train_model, test_model, train_dali
 from paddlevideo.utils import get_dist_info
 
 
@@ -39,6 +39,9 @@ def parse_args():
     parser.add_argument('--test',
                         action='store_true',
                         help='whether to test a model')
+    parser.add_argument('--train_dali',
+                        action='store_true',
+                        help='whether to train a model using dali to speed up')
 
     parser.add_argument('--weights',
                         type=str,
@@ -59,6 +62,8 @@ def main():
 
     if args.test:
         test_model(cfg, weights=args.weights, parallel=parallel)
+    elif args.train_dali:
+        train_dali(cfg, weights=args.weights, parallel=parallel)
     else:
         train_model(cfg,
                     weights=args.weights,

@@ -17,7 +17,7 @@ import paddle
 from . import custom_lr
 
 
-def build_lr(cfg, num_iters):
+def build_lr(cfg, num_iters=None):
     """
     Build a learning rate scheduler accroding to ```OPTIMIZER``` configuration, and it always pass into the optimizer.
     In configuration:
