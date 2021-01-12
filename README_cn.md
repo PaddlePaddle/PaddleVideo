@@ -168,26 +168,27 @@ PaddleVideo飞桨视频模型开发套件，旨在帮助开发者更好的进行
 ### 入门教程
 
 - [安装说明](docs/zh-CN/install.md)
-- [快速开始](docs/zh-CN/getting_started.md)
+- [快速开始](docs/zh-CN/start.md)
 - [benchmark](docs/zh-CN/benchmark.md)
+- [工具](docs/zh-CN/tools.md)
 
 ### 进阶教程
-- [模型库整体设计]() <sup>coming soon</sup>
-- [配置模块设计](docs/zh-CN/config.md)
-- [PPTSM实践](docs/zh-CN/pp-tsm.md)
+- [模型库整体设计](docs/zh-CN/tutorials/modular_design.md)
+- [配置模块设计](docs/zh-CN/tutorials/config.md)
+- [PPTSM实践](docs/zh-CN/tutorials/pp-tsm.md)
 - [训练加速方案]() <sup>coming soon</sup>
-- [预测部署](docs/zh-CN/deployment.md)
+- [预测部署](docs/zh-CN/tutorials/deployment.md)
 - [自定义开发]() <sup>coming soon</sup>
 
 ### 模型库
 
-- 视频分类 [介绍](docs/zh-CN/model_zoo/README.md#视频分类)
+- 视频分类 [介绍](docs/zh-CN/model_zoo/README.md)
     - [Attention-LSTM](docs/zh-CN/model_zoo/recognition/attention_lstm.md)
     - [TSN](docs/zh-CN/model_zoo/recognition/tsn.md)
     - [TSM](docs/zh-CN/model_zoo/recognition/tsm.md)
     - [PPTSM](docs/zh-CN/model_zoo/recognition/pp-tsm.md)
     - [SlowFast](docs/zh-CN/model_zoo/recognition/slowfast.md)
-- 动作定位 [介绍](docs/zh-CN/model_zoo/README.md#动作定位)
+- 动作定位 [介绍](docs/zh-CN/model_zoo/README.md)
     - [BMN](docs/zh-CN/model_zoo/localization/bmn.md)
 - 时空动作检测：
     - Coming Soon!
