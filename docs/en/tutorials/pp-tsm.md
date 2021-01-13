@@ -11,7 +11,7 @@ is required to run PP-TSM.
 
 When only use ImageNet for pretrain and only use 8X1 sample，  
 PP-TSM’s top1 reached to 89.5% and 73.5% on UCF101 and Kinetics400,   
-and inference speed of FP32 on single V100 is DOING,   
+and inference speed of FP32 on single V100 is 147 VPS on Kinectics400 dataset.  
 inference speed of FP16 with TensorRT on single V100 isTODO.  
 
 As far as we know, under the same conditions,    
