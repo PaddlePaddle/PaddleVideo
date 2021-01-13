@@ -8,11 +8,11 @@ We implemented video classification model and action localization model in this 
 
 | Model | Field  | Description |
 | :--------------- | :--------: | :------------: |
-| [ppTSM](./recognition/pp-tsm.md) | video classification| 基于时序移位的简单高效视频时空建模方法 |
-| [SlowFast](./recognition/slowfast.md) | video classification| 3D高精度模型 |
-| [TSM](./recognition/tsm.md) | video classification| 基于时序移位的简单高效视频时空建模方法 |
-| [TSN](./recognition/tsn.md) | video classification| ECCV'16提出的基于2D-CNN经典解决方案 |
-| [Attention LSTM](./recognition/attention_lstm.md)  | video classification| 常用序列模型，速度快精度高 |
+| [ppTSM](./recognition/pp-tsm.md) | video recognition| 基于时序移位的简单高效视频时空建模方法 |
+| [SlowFast](./recognition/slowfast.md) | video recognition| 3D高精度模型 |
+| [TSM](./recognition/tsm.md) | video recognition| 基于时序移位的简单高效视频时空建模方法 |
+| [TSN](./recognition/tsn.md) | video recognition| ECCV'16提出的基于2D-CNN经典解决方案 |
+| [Attention LSTM](./recognition/attention_lstm.md)  | video recognition| 常用序列模型，速度快精度高 |
 | [BMN](./localization/bmn.md) | action localization| 2019年ActivityNet夺冠方案 |
 
 
