@@ -44,9 +44,9 @@ nvidia-docker run --name tsn-DALI -v /home:/workspace --network=host -it --shm-s
 
 PaddleVide提供了在K400和UCF101两种数据集上训练TSN的训练脚本。
 
-- K400数据下载及准备请参考[K400数据准备](../../../dataset/K400.md)
+- K400数据下载及准备请参考[K400数据准备](../../dataset/k400.md)
 
-- UCF101数据下载及准备请参考[UCF101数据准备](../../../dataset/ucf101.md)
+- UCF101数据下载及准备请参考[UCF101数据准备](../../dataset/ucf101.md)
 
 ## 模型训练
 
