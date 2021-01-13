@@ -1,0 +1,45 @@
+MODEL: #MODEL field
+    framework: "Recognizer2D" #Mandatory, indicate the type of network, associate to the 'paddlevideo/modeling/framework/' .
+    backbone: #Mandatory, indicate the type of backbone, associate to the 'paddlevideo/modeling/backbones/' .
+        name: "ResNet" #Mandatory, The name of backbone.
+        pretrained: "/data/pretrained_model/ResNet50_pretrained.pdparams" #Optional, pretrained model path.
+        depth: 50 #Optional, the depth of backbone architecture.
+    head:
+        name: "TSNHead" #Mandatory, indicate the type of head, associate to the 'paddlevideo/modeling/heads'
+        num_classes: 400 #Optional, the number of classes to be classified.
+        in_channels: 2048 #input channel of the extracted feature.
+        drop_ratio: 0.2 #the ratio of dropout
+        # ls_eps: 0.1 # label smoothing epsilon
+        std: 0.01 #std value in params initialization
+
+
+DALI_LOADER:
+    batch_size: 32
+    file_path: 'data/k400/train.csv'
+    seg_num: 3
+    seglen: 1
+    short_size: 256
+    target_size: 224
+    mean: [0.485, 0.456, 0.406]
+    std: [0.229, 0.224, 0.225]
+
+
+OPTIMIZER: #OPTIMIZER field
+    name: 'Momentum' #Mandatory, the type of optimizer, associate to the 'paddlevideo/solver/'
+    momentum: 0.9
+    learning_rate: #Mandatory, the type of learning rate scheduler, associate to the 'paddlevideo/solver/'
+        name: 'PiecewiseDecay'
+        boundaries: [30, 60]
+        values: [0.01, 0.001, 0.0001]  #4 cards * 32 batch size
+    weight_decay:
+        name: 'L2'
+        value: 1e-4
+
+
+METRIC:
+    name: 'CenterCropMetric'
+
+model_name: "TSN"
+log_interval: 10 #Optional, the interal of logger, default:10
+epochs: 80 #Mandatory, total epoch
+log_level: "DEBUG" #Optional, the logger level. default: "INFO"
