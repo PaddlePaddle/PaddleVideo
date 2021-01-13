@@ -35,7 +35,7 @@
 
 基于以上docker镜像创建docker容器，运行命令为:
 
-```
+```bash
 nvidia-docker run --name tsn-DALI -v /home:/workspace --network=host -it --shm-size 64g -e NVIDIA_DRIVER_CAPABILITIES=compute,utility,video huangjun12/paddlevideo:tsn_dali_cuda9_0 /bin/bash
 ```
 - docker中安装好了飞桨2.0.0-rc1版本和我们二次开发后的DALI，创建容器后您可以在docker环境中直接开始tsn模型训练，无需额外配置环境。
@@ -73,7 +73,7 @@ framework: "Recognizer2D"
 
 模型训练的启动命令为: 
 
-```
+```bash
 python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3" --log_dir=log_tsn main.py --train_dali -c configs/recognition/tsn/tsn_dali.yaml -o log_level="INFO"
 ```
 
