@@ -4,10 +4,7 @@
 
 ## Wide range of application scenarios
 Video classification has a wide range of applications in many fields, such as online video platforms such as short videos, offline such as security, transportation, quality inspection and other fields。
-<p align="center">
-<img src="../../images/videodata.png" height=300 width=500 hspace='10'/> <br />
- Application scenarios
-</p>
+
 
 ## Multiple subtasks
 Similar to image tasks, video tasks can also be divided into two categories: **classification (recognition) and detection**, and these two types of tasks can be specifically subdivided by combining different scenes：
