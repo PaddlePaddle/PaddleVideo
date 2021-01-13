@@ -31,6 +31,7 @@
 ```
 
 基于以上docker镜像创建docker容器，运行命令为:
+
 ```
 nvidia-docker run --name tsn-DALI -v /home:/workspace --network=host -it --shm-size 64g -e NVIDIA_DRIVER_CAPABILITIES=compute,utility,video huangjun12/paddlevideo:tsn_dali_cuda9_0 /bin/bash
 ```
@@ -38,15 +39,7 @@ nvidia-docker run --name tsn-DALI -v /home:/workspace --network=host -it --shm-s
 
 ## 模型训练
 
-(1) 打开工作目录
-```
-cd /workspace
-```
-
-(2) 克隆PaddleVideo代码
-```
-git clone https://github.com/PaddlePaddle/PaddleVideo.git
-```
+模型训练命令为: 
 
 ```
 python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3" --log_dir=log_tsn main.py --train_dali -c configs/recognition/tsn/tsn_dali.yaml -o log_level="INFO"
