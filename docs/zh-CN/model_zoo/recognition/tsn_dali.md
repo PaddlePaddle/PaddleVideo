@@ -1,8 +1,12 @@
-# TSN模型DALI加速训练
+# TSN模型-DALI加速训练
 
 - [简介](#简介)
 - [环境配置](#环境配置)
+- [数据准备](#数据准备)
 - [模型训练](#模型训练)
+- [模型测试](#模型测试)
+- [模型推理](#模型推理)
+- [参考文献](#参考文献)
 
 ## 简介
 训练速度慢是视频模型训练常见的问题，PaddleVideo使用飞桨2.0的dataloader，凭借其优异的多进程加速能力，训练模型的训练速度可以显著增加。TSN是视频领域常用的2D模型，我们使用nvidia DALI进行GPU解码，对其训练速度进行了进一步优化:
@@ -37,14 +41,58 @@ nvidia-docker run --name tsn-DALI -v /home:/workspace --network=host -it --shm-s
 ```
 - docker中安装好了飞桨2.0.0-rc1版本和我们二次开发后的DALI，创建容器后您可以在docker环境中直接开始tsn模型训练，无需额外配置环境。
 
+## 数据准备
+
+PaddleVide提供了在K400和UCF101两种数据集上训练TSN的训练脚本。
+
+- K400数据下载及准备请参考[K400数据准备](../../dataset/K400.md)
+
+- UCF101数据下载及准备请参考[UCF101数据准备](../../dataset/ucf101.md)
+
 ## 模型训练
 
-模型训练命令为: 
+### 预训练模型下载
+
+加载在ImageNet1000上训练好的ResNet50权重作为Backbone初始化参数，请下载此[模型参数](https://paddlemodels.bj.bcebos.com/video_classification/ResNet50_pretrained.tar.gz)并解压，或是通过命令行下载
+
+```bash
+wget -q https://paddlemodels.bj.bcebos.com/video_classification/ResNet50_pretrained.tar.gz
+tar -xgz ResNet50_pretrained.tar.gz
+```
+
+并将路径添加到configs中backbone字段下
+
+```yaml
+MODEL:
+framework: "Recognizer2D"
+    backbone:
+        name: "ResNet"
+        pretrained: 将路径填写到此处
+```
+
+### 开始训练
+
+模型训练的启动命令为: 
 
 ```
 python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3" --log_dir=log_tsn main.py --train_dali -c configs/recognition/tsn/tsn_dali.yaml -o log_level="INFO"
 ```
 
+- 模型及训练参数配置请参考配置文件```configs/recognition/tsn/tsn_dali.yaml```，您可以自定义修改参数配置。
+
+- 通过`--weights`指定权重存放路径可进行模型finetune。 `--weights` 参数用法请参考[config](../../config.md)
+
+## 模型测试
+
+模型测试方法请参考TSN模型使用文档[模型测试部分](./tsn.yaml#模型测试)
+
+## 模型推理
+
+模型推理方法请参考TSN模型使用文档[模型推理部分](./tsn.yaml#模型推理)
+
+## 参考论文
+
+- [Temporal Segment Networks: Towards Good Practices for Deep Action Recognition](https://arxiv.org/abs/1608.00859), Limin Wang, Yuanjun Xiong, Zhe Wang, Yu Qiao, Dahua Lin, Xiaoou Tang, Luc Van Gool
 
 
 
