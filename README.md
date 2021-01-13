@@ -180,7 +180,7 @@ The chart below illustrates the performance of the video recognition models both
 - [Modular design](docs/en/tutorials/modular_design.md)
 - [Configuration design](docs/en/tutorials/config.md)
 - [Higher performance PP-TSM](docs/en/tutorials/pp-tsm.md)
-- [Accelerate training](docs/en/tutorials/accelerate.md) <sup>coming soon</sup>
+- [Accelerate training](docs/en/tutorials/accelerate.md)
 - [Deployment](docs/en/tutorials/deployment.md)
 - [Customized usage](docs/en/tutorials/customized_usage.md) <sup>coming soon</sup>
 
