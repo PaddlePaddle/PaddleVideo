@@ -1,5 +1,15 @@
 简体中文 | [English](../../en/tutorials/accelerate.md)
 
-# 解码库的选择
-# 多进程加速方案
-# Multigrid策略
+- 简介
+- Decord更优的解码库
+- Dataloader多进程加速
+- DALI数据预处理
+- 预先解码存成图像
+- Multigrid加速策略算法
+
+
+# Decord更优的解码库
+# Dataloader多进程加速
+# DALI数据预处理
+# 预先解码存成图像
+# Multigrid加速策略算法
