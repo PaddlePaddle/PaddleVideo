@@ -44,9 +44,9 @@ nvidia-docker run --name tsn-DALI -v /home:/workspace --network=host -it --shm-s
 
 PaddleVide提供了在K400和UCF101两种数据集上训练TSN的训练脚本。
 
-- K400数据下载及准备请参考[K400数据准备](../../dataset/K400.md)
+- K400数据下载及准备请参考[K400数据准备](../../../dataset/K400.md)
 
-- UCF101数据下载及准备请参考[UCF101数据准备](../../dataset/ucf101.md)
+- UCF101数据下载及准备请参考[UCF101数据准备](../../../dataset/ucf101.md)
 
 ## 模型训练
 
@@ -79,7 +79,7 @@ python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3" --log_dir=log_tsn mai
 
 - 模型及训练参数配置请参考配置文件```configs/recognition/tsn/tsn_dali.yaml```，您可以自定义修改参数配置。
 
-- 通过`--weights`指定权重存放路径可进行模型finetune。 `--weights` 参数用法请参考[config](../../config.md)
+- 通过`--weights`指定权重存放路径可进行模型finetune。 `--weights` 参数用法请参考[config](../../tutorials/config.md)
 
 ## 模型测试
 
