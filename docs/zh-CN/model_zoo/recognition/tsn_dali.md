@@ -1,6 +1,6 @@
 # TSN模型-DALI训练加速
 
-- [简介](#简介)
+- [方案简介](#方案简介)
 - [环境配置](#环境配置)
 - [数据准备](#数据准备)
 - [模型训练](#模型训练)
@@ -8,9 +8,8 @@
 - [模型推理](#模型推理)
 - [参考文献](#参考文献)
 
-## 简介
-训练速度慢是视频模型训练常见的问题，PaddleVideo使用飞桨2.0的dataloader，凭借其优异的多进程加速能力，训练模型的训练速度可以显著增加。TSN是视频领域常用的2D模型，我们使用nvidia DALI进行GPU解码，对其训练速度进行了进一步优化:
-针对TSN模型，我们基于DALI进行了二次开发，实现了其均匀分段的帧采样方式。
+## 方案简介
+训练速度慢是视频模型训练常见的问题，PaddleVideo使用飞桨2.0的dataloader接口进行数据读取，凭借其优异的多进程加速能力，模型的训练速度可以显著增加。TSN是视频领域常用的2D模型，我们对其训练速度进行了进一步优化。nvidia DALI使用GPU进行解码，可以显著提高数据预处理的速度。我们基于nvidia DALI进行了二次开发，实现了其均匀分段的帧采样方式，训练速度得到了进一步优化
 
 ### 性能
 
@@ -84,11 +83,11 @@ python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3" --log_dir=log_tsn mai
 
 ## 模型测试
 
-模型测试方法请参考TSN模型使用文档[模型测试部分](./tsn.yaml#模型测试)
+模型测试方法请参考TSN模型使用文档[模型测试部分](https://github.com/PaddlePaddle/PaddleVideo/blob/main/docs/zh-CN/model_zoo/recognition/tsn.md#模型测试)
 
 ## 模型推理
 
-模型推理方法请参考TSN模型使用文档[模型推理部分](./tsn.yaml#模型推理)
+模型推理方法请参考TSN模型使用文档[模型推理部分](https://github.com/PaddlePaddle/PaddleVideo/blob/main/docs/zh-CN/model_zoo/recognition/tsn.md#模型推理)
 
 ## 参考论文
 
