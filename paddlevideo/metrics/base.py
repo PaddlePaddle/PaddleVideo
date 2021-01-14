@@ -19,12 +19,7 @@ from .registry import METRIC
 
 
 class BaseMetric(object):
-    def __init__(self,
-                 data_size,
-                 batch_size,
-                 world_size,
-                 log_interval=1,
-                 **kwargs):
+    def __init__(self, data_size, batch_size, log_interval=1, **kwargs):
         self.data_size = data_size
         self.batch_size = batch_size
         _, self.world_size = get_dist_info()
