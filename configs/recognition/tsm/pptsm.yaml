@@ -104,10 +104,10 @@ OPTIMIZER: #OPTIMIZER field
         name: 'L2'
         value: 2e-4
 
-EVALUATION:
-    interval: 5
-    function: "topk"
-    topk: (1,5)
+
+METRIC:
+    name: 'CenterCropMetric'
+
 
 PRECISEBN:
   preciseBN_interval: 5     # epoch interval to do preciseBN, default 1.

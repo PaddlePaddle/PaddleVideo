@@ -108,6 +108,9 @@ OPTIMIZER: #OPTIMIZER field
         name: 'L2'
         value: 1e-4
 
+METRIC:
+    name: 'CenterCropMetric'
+
 model_name: "TSM"
 log_interval: 20 #Optional, the interal of logger, default:10
 save_interval: 10
