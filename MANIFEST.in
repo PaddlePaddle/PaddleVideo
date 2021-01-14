@@ -2,9 +2,6 @@ include LICENSE
 include README.md
 include tools/__init__.py
 include tools/utils.py
+include tools/paddlevideo_clas.py
 
 recursive-include paddlevideo/ *.py *.txt
-
-
-
-

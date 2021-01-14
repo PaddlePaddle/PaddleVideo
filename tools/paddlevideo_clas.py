@@ -48,7 +48,7 @@ BASE_DIR = os.path.expanduser("~/.paddlevideo_inference/")
 BASE_INFERENCE_MODEL_DIR = os.path.join(BASE_DIR, 'inference_model')
 BASE_VIDEOS_DIR = os.path.join(BASE_DIR, 'videos')
 
-model_names = {'TSM','TSN','PPTSM'}
+model_names = {'ppTSM','TSM','TSN'}
 
 
 def create_paddle_predictor(args):
@@ -78,7 +78,6 @@ def create_paddle_predictor(args):
 
     return predictor
 
-
 def download_with_progressbar(url, save_path):
     response = requests.get(url, stream=True)
     total_size_in_bytes = int(response.headers.get('content-length', 0))
@@ -95,7 +94,7 @@ def download_with_progressbar(url, save_path):
 def maybe_download(model_storage_directory, url):
     # using custom model
     tar_file_name_list = [
-        'inference.pdiparams', 'inference.pdiparams.info', 'inference.pdmodel' #pdiparams,和pdmodel直接下载
+        'inference.pdiparams', 'inference.pdiparams.info', 'inference.pdmodel'
     ]
     if not os.path.exists(
             os.path.join(model_storage_directory, 'inference.pdiparams')
@@ -225,8 +224,7 @@ class PaddleVideo(object):
                 raise Exception(
                     'Please input model name that you want to use!')
             if process_params.model_name in model_names:
-                url = 'https://paddle-imagenet-models-name.bj.bcebos.com/dygraph/inference/{}_infer.tar'.format(
-                    process_params.model_name)
+                url = 'https://videotag.bj.bcebos.com/PaddleVideo/InferenceModel/{}_infer.tar'.format(process_params.model_name)
                 if not os.path.exists(
                         os.path.join(BASE_INFERENCE_MODEL_DIR,
                                      process_params.model_name)):
