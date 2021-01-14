@@ -1,12 +1,12 @@
 简体中文 | [English](../../en/tutorials/accelerate.md)
 
-- 简介[#简介]
-- 更优的解码库Decord[#更优的解码库Decord]
-- 多进程加速Dataloader[#多进程加速Dataloader]
-- 数据预处理DALI[#数据预处理DALI]
-- 预先解码存成图像[#预先解码存成图像]
-- Multigrid加速策略算法[#Multigrid加速策略算法]
-- 分布式训练[#分布式训练]
+- [简介](#简介)
+- [更优的解码库Decord](#更优的解码库Decord)
+- [多进程加速Dataloader](#多进程加速Dataloader)
+- [数据预处理DALI](#数据预处理DALI)
+- [预先解码存成图像](#预先解码存成图像)
+- [Multigrid加速策略算法](#Multigrid加速策略算法)
+- [分布式训练](#分布式训练)
 
 
 # 简介
@@ -38,7 +38,7 @@ Paddle的decord实现:  0.13788146734237672
 # 多进程加速Dataloader
 
 数据准备好后喂入网络进行训练，网络运算使用GPU并行加速，其运算速度是很快的。因此对于单个进程来说，速度瓶颈大多在数据处理部分，GPU大部分时间是在等待CPU完成数据预处理。
-飞桨2.0使用[Dataloader]()进行数据加载，DataLoader支持单进程和多进程的数据加载方式，当 num_workers 大于0时，将使用多进程方式异步加载数据。多进程加速协作，可以overlap掉GPU大部分等待的时间，提升GPU利用率，加速训练过程。
+飞桨2.0使用[Dataloader]()进行数据加载，DataLoader支持单进程和多进程的数据加载方式，当 num_workers 大于0时，将使用多进程方式异步加载数据。多进程加速协作，可以overlap掉GPU大部分等待的时间，提升GPU利用率，显著加速训练过程。
 
 性能数据对比如下:
 num_workers=0 
@@ -48,7 +48,7 @@ num_workers=4
 
 # 数据预处理DALI
 
-
+既然GPU等待CPU进行数据处理耗时，能否把数据处理放到GPU上呢？[NVIDIA DALI]()将数据预处理pipeline转移到GPU上执行，可以显著提升训练速度。
 
 # 预先解码存成图像
 # Multigrid加速策略算法
