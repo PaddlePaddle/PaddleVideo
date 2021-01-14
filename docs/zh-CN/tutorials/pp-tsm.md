@@ -7,7 +7,7 @@ PP-TSM是PaddleVideo基于TSM优化和改进的视频模型，
 在单卡V100上FP32推理速度为147 VPS （基于Kinectics400数据集）.
 在单卡V100上开启TensorRT下FP16推理速度为TODO。
 
-据我们所知，在相同条件下，在Kinetics400上top1精度为73.5%，是至今为止开源的2D视频模型中的最高性能。  
+pp-TSM在Kinetics400上top1精度为73.5%，是至今为止开源的2D视频模型中在相同条件下的最高性能。  
 
 PP-TSM从如下方面优化和提升TSM模型的精度和速度：  
 1、基于知识蒸馏的预训练模型  
