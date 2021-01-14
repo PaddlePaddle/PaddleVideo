@@ -38,12 +38,12 @@ def parse_args():
                         help='config file path')
 
     parser.add_argument("-p",
-                        "--params",
+                        "--pretrained_params",
                         default='./best.pdparams',
                         type=str,
                         help='params path')
     parser.add_argument("-o",
-                        "--output",
+                        "--output_path",
                         type=str,
                         default="./inference",
                         help='output path')
@@ -79,8 +79,9 @@ def main():
         args.pretrained_params
     ), f"pretrained params ({args.pretrained_params} is not a file path.)"
 
-    assert osp.isdir(args.output_path
-                     ), f"output path ({args.output_path}) is not a file path"
+    if not os.path.isdir(args.output_path):
+        os.makedirs(args.output_path)
+
     print(f"Loading params from ({args.pretrained_params})...")
     params = paddle.load(args.pretrained_params)
     model.set_dict(params)
