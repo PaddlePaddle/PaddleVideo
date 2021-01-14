@@ -128,13 +128,13 @@ def load_label_name_dict(path):
             'Warning: If want to use your own label_dict, please input legal path!\nOtherwise label_names will be empty!'
         )
     else:
-        try:
-            import json
-            f = open(path,'r')
-            content = f.read()
-            result = json.loads(content)
-        except:
-            result = {}
+        for line in open(path, 'r'):
+            partition = line.split('\n')[0].partition(' ')
+            try:
+                result[int(partition[0])] = str(partition[-1])
+            except:
+                result = {}
+                break
     return result
 
 def parse_args(mMain=True, add_help=True):
