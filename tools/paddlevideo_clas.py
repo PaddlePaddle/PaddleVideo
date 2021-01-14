@@ -240,14 +240,14 @@ class PaddleVideo(object):
                 process_params.params_file = os.path.join(
                     download_path, 'inference.pdiparams')
                 process_params.label_name_path = os.path.join(
-                    __dir__, 'paddlevideo/utils/Kinetics-400_label_list.txt')
+                    __dir__, 'Kinetics-400_label_list.txt')
             else:
                 raise Exception(
                     'If you want to use your own model, Please input model_file as model path!'
                 )
         else:
             print('Using user-specified model and params!')
-        print("process params are as follows: \n{}".format(process_params))#一个字典
+        print("process params are as follows: \n{}".format(process_params))
         self.label_name_dict = load_label_name_dict(
             process_params.label_name_path)
 
@@ -318,26 +318,6 @@ class PaddleVideo(object):
             }
             total_result.append(result)
         return total_result
-
-        # # for PaddleHubServing
-        # if self.args.hubserving:
-        #     v = self.args.video_file
-        # # for predict only
-        # else:
-        #     v = utils.decode(video, self.args)
-        # assert v is not None, "Error in loading video: {}".format(
-        #     self.args.video_file)
-        # inputs = utils.preprocess(v, self.args)
-        # inputs = np.expand_dims(
-        #     inputs, axis=0).repeat(
-        #     self.args.batch_size, axis=0).copy()
-        #
-        # input_tensor.copy_from_cpu(inputs)
-        #
-        # self.predictor.run()
-        #
-        # output = output_tensor.copy_to_cpu()
-        # return utils.postprocess(output, self.args)
 
 def main():
     # for cmd
