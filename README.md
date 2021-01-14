@@ -13,7 +13,7 @@
 
 <p align="center">
 <img src="images.png" height=220 width=800 hspace='10'/> <br />
-Temporal shift module
+VideoTag模型示意图
 </p>
 
 - 数据处理：视频是按特定顺序排列的一组图像的集合，这些图像也称为帧。视频分类任务需要先对短视频进行解码，然后再将输出的图像帧序列灌入到VideoTag中进行训练和预测。
