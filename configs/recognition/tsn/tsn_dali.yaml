@@ -24,6 +24,34 @@ DALI_LOADER:
     std: [0.229, 0.224, 0.225]
 
 
+DATASET: #DATASET field,  only used when test in tsn_dali
+    test_batch_size: 4
+    num_workers: 4 #Mandatory, XXX the number of subprocess on each GPU.
+    test:
+        format: "VideoDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
+        file_path: "data/k400/val.csv" #Mandatory, valid data index file path
+
+
+PIPELINE: #PIPELINE field
+    test:
+        decode:
+            name: "VideoDecoder"
+        sample:
+            name: "Sampler"
+            valid_mode: True
+            num_seg: 25
+            seg_len: 1
+        transform:
+            - Scale:
+                short_size: 256
+            - CenterCrop:
+                target_size: 224
+            - Image2Array:
+            - Normalization:
+                mean: [0.485, 0.456, 0.406]
+                std: [0.229, 0.224, 0.225]
+
+
 OPTIMIZER: #OPTIMIZER field
     name: 'Momentum' #Mandatory, the type of optimizer, associate to the 'paddlevideo/solver/'
     momentum: 0.9
