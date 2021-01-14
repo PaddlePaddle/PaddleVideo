@@ -240,7 +240,7 @@ class PaddleVideo(object):
                 process_params.params_file = os.path.join(
                     download_path, 'inference.pdiparams')
                 process_params.label_name_path = os.path.join(
-                    __dir__, 'Kinetics-400_label_list.txt')
+                    __dir__, '../data/k400/Kinetics-400_label_list.txt')
             else:
                 raise Exception(
                     'If you want to use your own model, Please input model_file as model path!'
