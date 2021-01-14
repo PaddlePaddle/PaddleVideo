@@ -13,3 +13,4 @@
 # limitations under the License.
 
 from . import utils
+from .paddlevideo_clas import PaddleVideo

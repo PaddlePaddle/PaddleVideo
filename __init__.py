@@ -13,4 +13,4 @@
 # limitations under the License.
 
 __all__ = ['PaddleVideo']
-from .paddlevideo_clas import PaddleVideo
+from .tools import PaddleVideo
