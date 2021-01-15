@@ -19,14 +19,14 @@ top1=73.5% on Kinetics400 is the best performance for 2D video model until now.
 
 
 PP-TSM improved performance and speed of TSM with following methods:   
-1、Model Tweaks: ResNet50vd  ，+2.5%
-2、ImageNet pretrain weights based on Knowledge Distillation  ， +1.3%  
-3、beter batch size  ，+0.2% 
-4、beter L2  ，+0.3%
-5、label_smoothing  ，+0.2%
-6、beter lr decay  ，+0.15%
-7、Data augmentation  ，+0.3%
-8、beter epoch num  ，+0.15%
-9、bn strategy  ，+0.4%
+1、Model Tweaks: ResNet50vd  ，+2.5%  
+2、ImageNet pretrain weights based on Knowledge Distillation  ， +1.3%    
+3、beter batch size  ，+0.2%   
+4、beter L2  ，+0.3%  
+5、label_smoothing  ，+0.2%  
+6、beter lr decay  ，+0.15%  
+7、Data augmentation  ，+0.3%  
+8、beter epoch num  ，+0.15%  
+9、bn strategy  ，+0.4%  
 10、integrated PaddleInference  
 11、more strategies todo: Knowledge Distillation、optimizer and so on.  
