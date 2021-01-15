@@ -21,3 +21,12 @@ https://github.com/PaddlePaddle/models/issues/4973
 
 How can I load a pretrained model in AttentionCluster to train my own data? #4972
 https://github.com/PaddlePaddle/models/issues/4972
+
+ETS模型的数据处理 #4957
+https://github.com/PaddlePaddle/models/issues/4957
+
+BMN模型推理出现错误 #4881
+https://github.com/PaddlePaddle/models/issues/4881
+
+C-TCN模型数据集不支持MP4格式,MP4转为pickle文件格式需要提供相应处理工具脚本 #4782
+https://github.com/PaddlePaddle/models/issues/4782
