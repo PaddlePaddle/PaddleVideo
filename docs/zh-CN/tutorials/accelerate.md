@@ -65,7 +65,7 @@ num_workers=4
 基于以上思想，FAIR在实验的基础上提出了Multigrid训练策略: 固定`N*C*T*H*W`的值，降低`T*H*W`时增大`N`的值，增大`T*H*W`时减小`N`的值。具体的有两种策略，如示意图所示：
 
 Long cycle:
-设完整训练需要N个epoch，将整个训练过程分4个阶段，每个阶段分别训练`[N/8, N/4，N/2, N]/(1/8+2/8+4/8+8/8) = [N/15, 2N/15, 4N/15, 8N/15]`个epoch数，每个阶段对应的输入tensor形状为:
+设完整训练需要N个epoch，将整个训练过程分4个阶段，每个阶段对应的输入tensor形状为:
 `[8N, T/4, H/sqrt(2), W/sqrt(2)], [4N, T/2, H/sqrt(2), W/sqrt(2)], [2N, T/2, H, W], [N, T, H, W]`
 
 Short cycle:
