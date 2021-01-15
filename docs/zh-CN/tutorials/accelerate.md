@@ -66,11 +66,15 @@ num_workers=4
 
 Long cycle:
 设完整训练需要N个epoch，将整个训练过程分4个阶段，每个阶段对应的输入tensor形状为:
-`[8N, T/4, H/sqrt(2), W/sqrt(2)], [4N, T/2, H/sqrt(2), W/sqrt(2)], [2N, T/2, H, W], [N, T, H, W]`
+```
+[8N, T/4, H/sqrt(2), W/sqrt(2)], [4N, T/2, H/sqrt(2), W/sqrt(2)], [2N, T/2, H, W], [N, T, H, W]
+```
 
 Short cycle:
 在Long cycle的基础上，Short-cycle让每个iter的输入Tensor形状都会发生变化，变化策略为:
-`[H/2, W/2], [H/sqrt(2), W/sqrt(2)], [H, W]`
+```
+[H/2, W/2], [H/sqrt(2), W/sqrt(2)], [H, W]
+```
 
 在PaddleVideo中，SlowFast模型结合multigrid训练策略，在8卡v100/32G机器上，训练全量Kinetics-400数据集358个epoch只需要4.X天。
 
