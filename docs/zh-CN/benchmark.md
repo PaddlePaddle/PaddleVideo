@@ -37,7 +37,7 @@
 | :------: | :-------------------:|:---------------:|:---------------: | :---------------:  |:---------------: |
 | [TSM](../../configs/recognition/tsm/tsm.yaml) | 16x8 | 58.1 | 46.04(temporal-shift-module) | To do | X |
 | [PPTSM](../../configs/recognition/tsm/pptsm.yaml) | 16x8 |  57.6 | X |    X   | X |
-| [TSN](../../configs/recognition/tsn/tsn.yaml) | 16x8 |  841.1 |  To do (tsn-pytorch) | To do | X | 
+| [TSN](../../configs/recognition/tsn/tsn.yaml) | 16x8 |  To do |  To do (tsn-pytorch) | To do | X | 
 | [Slowfast](../../configs/recognition/slowfast/slowfast.yaml)| 16x8 | 99.5 | X | To do | 43.2 |
 | [Attention_LSTM](../../configs/recognition/attention_lstm/attention_lstm.yaml) |  128x8  | 112.6  | X | X | X |
 
