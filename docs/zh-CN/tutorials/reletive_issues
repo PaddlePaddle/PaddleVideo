@@ -39,3 +39,12 @@ https://github.com/PaddlePaddle/models/issues/4750
 
 使用BMN预训练模型训练的时候报错 #4749
 https://github.com/PaddlePaddle/models/issues/4749
+
+使用BMN进行预测时，输出的json文件 视频ID少了两个字符，所有的文件都是这样 #4745
+https://github.com/PaddlePaddle/models/issues/4745
+
+BMN模型batch_size调小之后loss为nan #4738
+https://github.com/PaddlePaddle/models/issues/4738
+
+BMN的输入问题 #4724
+https://github.com/PaddlePaddle/models/issues/4724
