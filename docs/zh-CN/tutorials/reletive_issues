@@ -30,3 +30,12 @@ https://github.com/PaddlePaddle/models/issues/4881
 
 C-TCN模型数据集不支持MP4格式,MP4转为pickle文件格式需要提供相应处理工具脚本 #4782
 https://github.com/PaddlePaddle/models/issues/4782
+
+CTCN 有没有使用I3D特征的demo #4756
+https://github.com/PaddlePaddle/models/issues/4756
+
+ctcn的数据集.pkl文件的b'feats'和b'scores'是什么？我注意到ctcn_reader.py只用到了b'scores'，是否b'scores'才是需要的特征？还有对应的txt文件是什么？假设我需要把BMN的数据集转化为ctcn的数据集，该怎么做？ #4750
+https://github.com/PaddlePaddle/models/issues/4750
+
+使用BMN预训练模型训练的时候报错 #4749
+https://github.com/PaddlePaddle/models/issues/4749
