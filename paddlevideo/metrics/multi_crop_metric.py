@@ -29,14 +29,13 @@ class MultiCropMetric(BaseMetric):
     def __init__(self,
                  data_size,
                  batch_size,
-                 world_size,
                  num_ensemble_views,
                  num_spatial_crops,
                  num_classes,
                  log_interval=1):
         """prepare for metrics
         """
-        super().__init__(data_size, batch_size, world_size, log_interval)
+        super().__init__(data_size, batch_size, log_interval)
         self.num_ensemble_views = num_ensemble_views
         self.num_spatial_crops = num_spatial_crops
         self.num_classes = num_classes

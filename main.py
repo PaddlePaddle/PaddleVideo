@@ -36,7 +36,8 @@ def parse_args():
     parser.add_argument('--train_dali',
                         action='store_true',
                         help='whether to use dali to speed up training')
-    parser.add_argument('--weights',
+    parser.add_argument('-w',
+                        '--weights',
                         type=str,
                         help='weights for finetuning or testing')
     parser.add_argument(

@@ -22,10 +22,10 @@ logger = get_logger("paddlevideo")
 
 @METRIC.register
 class CenterCropMetric(BaseMetric):
-    def __init__(self, data_size, batch_size, world_size, log_interval=1):
+    def __init__(self, data_size, batch_size, log_interval=1):
         """prepare for metrics
         """
-        super().__init__(data_size, batch_size, world_size, log_interval)
+        super().__init__(data_size, batch_size, log_interval)
         self.top1 = []
         self.top5 = []
 
