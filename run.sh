@@ -24,10 +24,10 @@ python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3"  --log_dir=log_pptsm 
 
 # test.sh
 # just use `example` as example, please replace to real name.
-#python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_test test.py  -c configs/example.yaml -w "output/example/example_best.pdparams"
+#python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_test main.py --test -c configs/example.yaml -w "output/example/example_best.pdparams"
 
 #NOTE: run bmn test, only support single card, bs=1
-#python3.7 test.py -c configs/localization/bmn.yaml -w output/BMN/BMN_epoch_00010.pdparams  -o DATASET.batch_size=1
+#python3.7 main.py --test -c configs/localization/bmn.yaml -w output/BMN/BMN_epoch_00010.pdparams -o DATASET.batch_size=1
 
 # export_models script
 # just use `example` as example, please replace to real name.

@@ -82,8 +82,8 @@ METRIC:
   anno_file: "data/dataset/bmn_data/activitynet_1.3_annotations.json"
   ground_truth_filename: "data/dataset/bmn_data/activity_net_1_3_new.json"
   subset: "validation"
-  output_path: "../data/bmn/BMN_Test_output"
-  result_path: "../data/bmn/BMN_Test_results"
+  output_path: "data/bmn/BMN_Test_output"
+  result_path: "data/bmn/BMN_Test_results"
 
 model_name: BMN
 epochs: 9 #Mandatory, total epoch
