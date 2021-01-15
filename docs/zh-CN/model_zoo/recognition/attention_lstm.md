@@ -10,8 +10,8 @@ AttentionLSTM模型使用2nd-Youtube-8M数据集，请参考数据准备页面�
 在Youtube-8M验证集上，AttentionLSTM模型的Hit@1为0.89, PERR 为0.8012, GAP为0.8594.
 
 这三个指标是youtube8M数据集官方评估使用的  
-Hit@k indicates the fraction of test samples that contain at least one of the ground truth labels in the top k predictions.
-PERR measures the video-level annotation precision when we retrieve the same number of entities per video as there are in the ground-truth.
+Hit@k indicates the fraction of test samples that contain at least one of the ground truth labels in the top k predictions.  
+PERR measures the video-level annotation precision when we retrieve the same number of entities per video as there are in the ground-truth.  
 GAP is the global average precision.  
 论文参考 https://arxiv.org/abs/1609.08675  
 具体实现参考 https://github.com/google/youtube-8m/blob/master/eval_util.py
