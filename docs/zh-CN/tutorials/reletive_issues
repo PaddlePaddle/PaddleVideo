@@ -51,3 +51,27 @@ https://github.com/PaddlePaddle/models/issues/4724
 
 报一个video_tag的BUG #4698
 https://github.com/PaddlePaddle/models/issues/4698
+
+PaddleCV-video-ctcn 训练到Epoch21，iter1365停止不动 #4719
+https://github.com/PaddlePaddle/models/issues/4719
+
+STNET跑模型推断，显卡显存充足，提示显存不足 #4608
+https://github.com/PaddlePaddle/models/issues/4608
+
+训练stnet读取kinetics数据集时出线错误 求解决 #4529
+https://github.com/PaddlePaddle/models/issues/4529
+
+有关CTCN视频动作定位的问题 #4508
+https://github.com/PaddlePaddle/models/issues/4508
+
+谁有这个yt8m 的tfrecord？ #4506
+https://github.com/PaddlePaddle/models/issues/4506
+
+The NeXtVLAD final model couldn't be used ??? #4502
+https://github.com/PaddlePaddle/models/issues/4502
+
+Hi, I'm wondering if there is an end-to-end solution for the youtube8M attention_lstm model? #4201
+https://github.com/PaddlePaddle/models/issues/4201
+
+CTCN模型训练一段时间后NAN #4123
+https://github.com/PaddlePaddle/models/issues/4123
