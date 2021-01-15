@@ -15,3 +15,9 @@ https://github.com/PaddlePaddle/models/issues/4353
 
 BMN/BSN模型评估时报错 #4110
 https://github.com/PaddlePaddle/models/issues/4110
+
+The avg losses are not same for training and validation when the same data are used. #4973
+https://github.com/PaddlePaddle/models/issues/4973
+
+How can I load a pretrained model in AttentionCluster to train my own data? #4972
+https://github.com/PaddlePaddle/models/issues/4972
