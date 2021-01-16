@@ -38,7 +38,7 @@ PP-TSM从如下方面优化和提升TSM模型的精度和速度：
 真实的均值如何计算？最直观的想法是，把所有训练数据组成一个batch，输入网络进行前向传播，每经过一个BN层，计算一下当前特征的均值和方差。
 由于训练样本过多，实际操作中不可能这么做。
 所以近似做法是，固定住网络中的参数不动，将所有训练数据分成N个batch，依次输入网络进行前向计算，在这个过程中保存下来每个iter的均值和方差，最终得到所有训练样本的均值和方差。
-这就是preciseBN的计算方法。具体实现参考[preciseBN](https://github.com/PaddlePaddle/PaddleVideo/blob/main/paddlevideo/utils/precise_bn.py)
+这就是preciseBN的计算方法。具体实现参考[preciseBN](https://github.com/PaddlePaddle/PaddleVideo/blob/main/paddlevideo/utils/precise_bn.py)。
 
 实际使用时，由于迭代所有训练样本比较耗费时间，一般只会跑200个iter左右。
 
