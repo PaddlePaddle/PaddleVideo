@@ -216,8 +216,9 @@ PaddleVideo飞桨视频模型开发套件，旨在帮助开发者更好的进行
     - **数据**     
     数据角度，我们采用更优的解码库Decord、融合共享内存等优化的多进程加速Dataloader、纯GPU解码方案DALI、预先解码视频为图像帧加速方案、Multigrid加速策略算法。    
     - **模型**  
-    模型上可以通过op融合或混合精度训练的方式提升op运算效率。针对TSM模型，我们实现了temporal shift op，在节省显存的同时加速训练过程。    
-在PaddleVideo中， 8卡v100/32G机器上，SlowFast在训练全量Kinetics-400数据集358个epoch只需要4天；TSM/ppTSM在训练全量Kinetics-400数据集80个epoch只需要2天；均远远快于其他开源实现。  
+    模型上可以通过op融合或混合精度训练的方式提升op运算效率。针对TSM模型，我们实现了temporal shift op，在节省显存的同时加速训练过程。   
+        
+    在PaddleVideo中， 8卡v100/32G机器上，SlowFast在训练全量Kinetics-400数据集358个epoch只需要4天；TSM/ppTSM在训练全量Kinetics-400数据集80个epoch只需要2天；均远远快于其他开源实现。  
 
 ## 许可证书
 本项目的发布受[Apache 2.0 license](LICENSE)许可认证。
