@@ -18,6 +18,7 @@ import numpy as np
 from PIL import Image
 import os
 import sys
+import paddle.nn.functional as F
 
 __dir__ = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.abspath(os.path.join(__dir__, '../')))
@@ -132,6 +133,7 @@ def preprocess(img, args):
 
 def postprocess(output, args):
     output = output.flatten()
+    output = F.softmax(output)
     classes = np.argpartition(output, -args.top_k)[-args.top_k:]
     classes = classes[np.argsort(-output[classes])]
     scores = output[classes]
