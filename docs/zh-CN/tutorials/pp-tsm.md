@@ -1,4 +1,5 @@
-PP-TSM高效实用视频识别模型  
+# PP-TSM高效实用视频识别模型  
+
 PP-TSM是PaddleVideo基于TSM优化和改进的视频模型，  
 其精度(UCF101和Kinetics400数据集top1)和推理速度均优于TSM论文及其他开源的TSM模型5%，3%以上，  
 要求使用PaddlePaddle2.0(可使用pip安装) 或适当的develop版本。  
@@ -22,3 +23,19 @@ PP-TSM从如下方面优化和提升TSM模型的精度和速度：
 10、集成PaddleInference进行预测推理  
 11、知识蒸馏、优化器等更多TODO策略    
 其中，每项策略的精度提升指标参考上述数据（基于ucf101及k400上进行实验）。
+
+## preciseBN
+
+在介绍preciseBN之前，我们先回顾一下BN(Batch Norm)。BN层是一种正则化层，在训练时，它根据当前batch的数据按通道计算的均值和方差，然后进行归一化运算，公式如图:
+
+详细介绍可参考[BatchNorm文档](https://paddlepaddle.org.cn/documentation/docs/zh/2.0-rc1/api/paddle/fluid/dygraph/BatchNorm_cn.html#batchnorm)。
+
+假设训练数据的分布和测试数据的分布是一致的，在训练时我们会计算并保存滑动均值和滑动方差，供测试时使用。滑动均值和滑动方差的计算方式如下:
+
+简单的说，moving_mean会等于当前batch计算的均值与历史保存的moving_mean做加权求和，即为滑动均值。**但滑动均值并不等于真实的均值**，因此测试时的精度仍会受到一定影响。
+为了提升测试精度，我们会重新计算一个更加精确的均值，这就是preciseBN的作用。
+
+真实的均值如何计算？最直观的想法是，把所有训练数据组成一个batch，输入网络进行前向传播，每经过一个BN层，计算一下当前特征的均值和方差。
+由于训练样本过多，实际操作中不可能这么做。一个近似的做法是，我们固定住网络的参数不动，
+
+
