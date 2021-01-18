@@ -1,5 +1,5 @@
 [简体中文](../zh-CN/whl_zh.md) | English
-# ppvideo package
+# paddlevideo package
 
 ## Get started quickly
 
@@ -8,6 +8,11 @@
 install by pypi
 ```bash
 pip install paddlevideo==0.0.1
+```
+**note:** you may have difficulty in installing opencv-python,you can try:
+
+```
+pip install opencv-python==4.2.0.32 -i https://pypi.doubanio.com/simple
 ```
 
 build own whl package and install

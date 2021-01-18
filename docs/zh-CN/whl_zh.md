@@ -1,5 +1,5 @@
 简体中文 | [English](../en/whl_en.md)
-# ppvideo包使用说明
+# paddlevideo包使用教程
 
 ## 快速开始
 
@@ -8,6 +8,10 @@
 使用pypi安装
 ```bash
 pip install paddlevideo==0.0.1
+```
+**注意:** 在下载opecv-python的过程中你可能遇到困难，你可以尝试使用其他源进行安装，试一试：
+```
+pip install opencv-python==4.2.0.32 -i https://pypi.doubanio.com/simple
 ```
 
 本地打包whl文件并安装
