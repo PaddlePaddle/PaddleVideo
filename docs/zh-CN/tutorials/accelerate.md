@@ -30,7 +30,7 @@
 目前[SlowFast]()模型使用decord进行视频解码([源码]())，对单进程的速度提升有较大作用。
 
 
-我们分别以opencv/decord为解码器，实现SlowFast模型数据预处理pipeline，计算各pipeline处理每条视频的平均时间，测试环境为:
+我们分别以opencv/decord为解码器，实现SlowFast模型数据预处理pipeline，然后随机从kinetics-400数据集中选取200条视频，计算各pipeline处理每条视频的平均时间，测试环境为:
 ```
 GPU: v100，4卡*16G
 CPU: Intel(R) Xeon(R) Gold 6148 CPU @ 2.40GHz
@@ -40,7 +40,7 @@ PaddlePaddle: 2.0.0-rc1
 
 测试数据如下:
 
-| 解码库 | 版本 | pipeline时间 |
+| 解码库 | 版本 | pipeline处理每条视频的平均时间 |
 | :------ | :-----: | :------: |
 | opencv | 4.2.0 | 0.2096503508090973 |
 | decord | 0.4.2 | 0.13788146734237672 |
