@@ -158,7 +158,10 @@ The chart below illustrates the performance of the video recognition models both
 <img src="./docs/images/joinus.PNG"  width = "200" height = "200" />
 </div>
 
+## Special Applications
 
+- [Special Applications 01: VideoTag](TODO)
+- [Special Applications 02: FootballAction](TODO)
 
 ## Tutorials
 
