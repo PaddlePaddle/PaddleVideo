@@ -162,6 +162,10 @@ PaddleVideo飞桨视频模型开发套件，旨在帮助开发者更好的进行
 <img src="./docs/images/joinus.PNG"  width = "200" height = "200" />
 </div>
 
+## 特色应用方案开源
+
+- [特色应用01: 大规模视频3k类标签方案(TODO)](TODO)
+- [特色应用02: 足球动作定位方案(TODO)](TODO)
 
 ## 文档教程
 
