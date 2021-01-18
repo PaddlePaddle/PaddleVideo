@@ -38,7 +38,7 @@ PaddlePaddle: 2.0.0-rc1
 ```
 
 
-测试数据如下:
+性能测试数据如下:
 
 | 解码库 | 版本 | pipeline处理每条视频的平均时间/s |
 | :------ | :-----: | :------: |
@@ -50,11 +50,19 @@ PaddlePaddle: 2.0.0-rc1
 数据准备好后喂入网络进行训练，网络运算使用GPU并行加速，其运算速度是很快的。因此对于单个进程来说，速度瓶颈大多在数据处理部分，GPU大部分时间是在等待CPU完成数据预处理。
 飞桨2.0使用[Dataloader]()进行数据加载，DataLoader支持单进程和多进程的数据加载方式，当 num_workers 大于0时，将使用多进程方式异步加载数据。多进程加速协作，可以overlap掉GPU大部分等待的时间，提升GPU利用率，显著加速训练过程。
 
-性能数据对比如下:
-num_workers=0 
-num_workers=4
+我们分别设置num_workers为0或4，单卡batch_size统一设置为8，统计训练一个batch的平均耗时，测试环境同上。
 
-结合使用decord和飞桨dataloader，加上在数据增强部分做一些细节优化，SlowFast模型训练速度增益为100%，详细数据可以参考[benchmark]()。
+性能测试数据对比如下:
+| 卡数 | num_workers | batch_cost/s | ips |
+| :------ | :-----: | :------: |:------: |
+| 单卡 | 0 | 1.763 | 4.53887 |
+| 单卡 | 4 | 1.763 | 4.53887 |
+| 4卡 | 0 | 1.763 | 4.53887 |
+| 4卡 | 4 | 1.763 | 4.53887 |
+
+其中ips = batch_size/batch_cost，即为训练一个instance(一个video)的平均耗时。
+
+**结合使用decord和飞桨dataloader，加上在数据增强部分做一些细节优化，SlowFast模型训练速度增益为100%，详细数据可以参考[benchmark]()**。
 
 # 数据预处理DALI
 
@@ -86,7 +94,7 @@ Short cycle:
 [H/2, W/2], [H/sqrt(2), W/sqrt(2)], [H, W]
 ```
 
-在PaddleVideo中，SlowFast模型结合multigrid训练策略，在8卡v100/32G机器上，训练全量Kinetics-400数据集358个epoch只需要4.X天。
+在PaddleVideo中，SlowFast模型结合multigrid训练策略，使用8卡v100/32G机器训练全量Kinetics-400数据集358个epoch只需要4.X天。
 
 
 # 分布式训练 
