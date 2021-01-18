@@ -134,7 +134,7 @@ def preprocess(img, args):
 
 def postprocess(output, args):
     output = output.flatten()
-    output = F.softmax(paddle.to_tensor(output))
+    output = F.softmax(paddle.to_tensor(output)).numpy()
     classes = np.argpartition(output, -args.top_k)[-args.top_k:]
     classes = classes[np.argsort(-output[classes])]
     scores = output[classes]
