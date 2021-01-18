@@ -63,7 +63,7 @@ def create_paddle_predictor(args):
             config.set_mkldnn_cache_capacity(10)
             config.enable_mkldnn()
 
-    #config.disable_glog_info()
+    config.disable_glog_info()
     config.switch_ir_optim(args.ir_optim)  # default true
     if args.use_tensorrt:
         config.enable_tensorrt_engine(
@@ -256,7 +256,7 @@ class PaddleVideo(object):
 
     def predict(self,video):
         """
-        predict label of video with paddleclas
+        predict label of video with paddlevideo_clas
         Args:
             video:input video for clas, support single video , internet url, folder path containing series of videos
         Returns:
