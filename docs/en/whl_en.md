@@ -1,3 +1,4 @@
+[简体中文](../zh-CN/whl_zh.md) | English
 # ppvideo package
 
 ## Get started quickly
@@ -58,7 +59,6 @@ ppvideo --model_name='ppTSM' --video_file='data/example.mp4'
 * params_file(str): path of inference.pdiparams. If not assign this param，you need assign `model_name` for downloading.
 * batch_size(int): batch number, default=1.
 * use_fp16(bool): Whether to use float16 in memory or not, default=False.
-* ir_optim(bool): whether enable IR optimization or not, default=True.
 * use_tensorrt(bool): whether to open tensorrt or not. Using it can greatly promote predict preformance, default=False.
 * gpu_mem(int): GPU memory usages，default=8000.
 * top_k(int): Assign top_k, default=1.
