@@ -32,7 +32,7 @@
 
 我们分别以opencv/decord为解码器，实现SlowFast模型数据预处理pipeline，计算各pipeline处理每条视频的平均时间，测试环境为:
 ```
-GPU: v100，4卡\*16G
+GPU: v100，4卡*16G
 CPU: Intel(R) Xeon(R) Gold 6148 CPU @ 2.40GHz
 PaddlePaddle: 2.0.0-rc1
 ```
