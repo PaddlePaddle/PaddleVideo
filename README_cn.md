@@ -187,12 +187,11 @@ PaddleVideo飞桨视频模型开发套件，旨在帮助开发者更好的进行
     - [PPTSM实践](docs/zh-CN/tutorials/pp-tsm.md)
     - [训练加速](docs/zh-CN/tutorials/accelerate.md)
     - [预测部署](docs/zh-CN/tutorials/deployment.md)
-    - [自定义开发]() <sup>coming soon</sup>
 - 辅助工具
     - [benchmark](docs/zh-CN/benchmark.md)
     - [工具](docs/zh-CN/tools.md)
 - [技术交流群](#欢迎加入PaddleVideo技术交流群)
-- [技术详解补充](#技术详解补充)
+- [技术详解](#技术详解)
 - [许可证书](#许可证书)
 - [贡献代码](#贡献代码)
 
