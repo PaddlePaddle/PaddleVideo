@@ -9,6 +9,10 @@
 
 PaddleVideo飞桨视频模型开发套件，旨在帮助开发者更好的进行视频领域的学术研究和产业实践。
 
+<div align="center">
+  <img src="docs/images/home.gif" width="500"/>
+</div>
+
 ## 特性
 
 - **模块化设计**
