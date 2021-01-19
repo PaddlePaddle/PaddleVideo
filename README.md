@@ -182,7 +182,7 @@ The chart below illustrates the performance of the video recognition models both
     - [SlowFast](docs/en/model_zoo/recognition/slowfast.md)
   - Localization [Brief](docs/en/model_zoo/README.md)
     - [BMN](docs/en/model_zoo/localization/bmn.md)
-  - Spatio temporal action detection：
+  - Spatio temporal action detection
     - Coming Soon!  
 - Practice
   - [Higher performance PP-TSM](docs/en/tutorials/pp-tsm.md)

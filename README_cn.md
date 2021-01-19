@@ -163,36 +163,34 @@ PaddleVideo飞桨视频模型开发套件，旨在帮助开发者更好的进行
 </div>
 
 ## 特色应用方案效果
-
 - [特色应用01: 大规模视频3k类标签方案(TODO)](TODO)
 - [特色应用02: 足球动作定位方案(TODO)](TODO)
 
 ## 文档教程
-
 - 快速入门
- - [安装说明](docs/zh-CN/install.md)
- - [快速开始](docs/zh-CN/start.md)
+    - [安装说明](docs/zh-CN/install.md)
+    - [快速开始](docs/zh-CN/start.md)
 - 代码组织
- - [模型库设计思路详解](docs/zh-CN/tutorials/modular_design.md)
- - [配置模块参数详解](docs/zh-CN/tutorials/config.md)
+    - [模型库设计思路详解](docs/zh-CN/tutorials/modular_design.md)
+    - [配置模块参数详解](docs/zh-CN/tutorials/config.md)
 - 丰富的模型库
- - [视频分类](docs/zh-CN/model_zoo/README.md)
-   - [TSN](docs/zh-CN/model_zoo/recognition/tsn.md)
-   - [TSM](docs/zh-CN/model_zoo/recognition/tsm.md)
-   - [PPTSM](docs/zh-CN/model_zoo/recognition/pp-tsm.md)
-   - [SlowFast](docs/zh-CN/model_zoo/recognition/slowfast.md)
-   - [Attention-LSTM](docs/zh-CN/model_zoo/recognition/attention_lstm.md)
- - [动作定位](docs/zh-CN/model_zoo/README.md)
-   - [BMN](docs/zh-CN/model_zoo/localization/bmn.md)
- - 时空动作检测 <sup>coming soon</sup>
+    - [视频分类](docs/zh-CN/model_zoo/README.md)
+       - [TSN](docs/zh-CN/model_zoo/recognition/tsn.md)
+       - [TSM](docs/zh-CN/model_zoo/recognition/tsm.md)
+       - [PPTSM](docs/zh-CN/model_zoo/recognition/pp-tsm.md)
+       - [SlowFast](docs/zh-CN/model_zoo/recognition/slowfast.md)
+       - [Attention-LSTM](docs/zh-CN/model_zoo/recognition/attention_lstm.md)
+    - [动作定位](docs/zh-CN/model_zoo/README.md)
+       - [BMN](docs/zh-CN/model_zoo/localization/bmn.md)
+    - 时空动作检测 <sup>coming soon</sup>
 - 项目实战
- - [PPTSM实践](docs/zh-CN/tutorials/pp-tsm.md)
- - [训练加速](docs/zh-CN/tutorials/accelerate.md)
- - [预测部署](docs/zh-CN/tutorials/deployment.md)
- - [自定义开发]() <sup>coming soon</sup>
+    - [PPTSM实践](docs/zh-CN/tutorials/pp-tsm.md)
+    - [训练加速](docs/zh-CN/tutorials/accelerate.md)
+    - [预测部署](docs/zh-CN/tutorials/deployment.md)
+    - [自定义开发]() <sup>coming soon</sup>
 - 辅助工具
- - [benchmark](docs/zh-CN/benchmark.md)
- - [工具](docs/zh-CN/tools.md)
+    - [benchmark](docs/zh-CN/benchmark.md)
+    - [工具](docs/zh-CN/tools.md)
 - [技术交流群](#欢迎加入PaddleVideo技术交流群)
 - [技术详解补充](#技术详解补充)
 - [许可证书](#许可证书)
