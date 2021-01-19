@@ -162,16 +162,16 @@ The chart below illustrates the performance of the video recognition models both
 <img src="./docs/images/joinus.PNG"  width = "200" height = "200" />
 </div>
 
-## Special Applications
+## Applications
 
-- [Special Applications 01: VideoTag](https://github.com/PaddlePaddle/PaddleVideo/blob/application/README.md)
+- [Applications 01: VideoTag](https://github.com/PaddlePaddle/PaddleVideo/tree/application/VideoTag)
 
 <div align="center">
   <img src="docs/images/VideoTag.gif" width="450px"/><br>
 </div>
 
 
-- [Special Applications 02: FootballAction(TODO)](TODO)
+- [Applications 02: FootballAction](https://github.com/PaddlePaddle/PaddleVideo/tree/application/FootballAction)
 
 <div align="center">
   <img src="docs/images/FootballAction.gif" width="450px"/><br>
