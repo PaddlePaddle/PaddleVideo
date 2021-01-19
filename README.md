@@ -163,38 +163,35 @@ The chart below illustrates the performance of the video recognition models both
 - [Special Applications 01: VideoTag](https://github.com/PaddlePaddle/PaddleVideo/blob/application/README.md)
 - [Special Applications 02: FootballAction(TODO)](TODO)
 
-## Tutorials
+## Tutorials and Docs
 
-- [Summarize of video understanding](docs/en/tutorials/summarize.md)
 
-### Basic
-
-- [Install](docs/en/install.md)
-- [Start](docs/en/start.md)
-- [Benchmark](docs/en/benchmark.md)
-- [Tools](docs/en/tools.md)
-
-### Advanced
-- [Modular design](docs/en/tutorials/modular_design.md)
-- [Configuration design](docs/en/tutorials/config.md)
-- [Higher performance PP-TSM](docs/en/tutorials/pp-tsm.md)
-- [Accelerate training](docs/en/tutorials/accelerate.md)
-- [Deployment](docs/en/tutorials/deployment.md)
-- [Customized usage](docs/en/tutorials/customized_usage.md)
-
-### Model zoo
-
-- recognition [Brief](docs/en/model_zoo/README.md)
+- Quick Start
+  - [Summarize of video understanding](docs/en/tutorials/summarize.md)
+  - [Install](docs/en/install.md)
+  - [Start](docs/en/start.md)
+- Project design
+  - [Modular design](docs/en/tutorials/modular_design.md)
+  - [Configuration design](docs/en/tutorials/config.md)
+- Model zoo
+  - recognition [Brief](docs/en/model_zoo/README.md)
     - [Attention-LSTM](docs/en/model_zoo/recognition/attention_lstm.md)
     - [TSN](docs/en/model_zoo/recognition/tsn.md)
     - [TSM](docs/en/model_zoo/recognition/tsm.md)
     - [PP-TSM](docs/en/model_zoo/recognition/pp-tsm.md)
     - [SlowFast](docs/en/model_zoo/recognition/slowfast.md)
-- Localization [Brief](docs/en/model_zoo/README.md)
+  - Localization [Brief](docs/en/model_zoo/README.md)
     - [BMN](docs/en/model_zoo/localization/bmn.md)
-- Spatio temporal action detection：
-    - Coming Soon!
-
+  - Spatio temporal action detection
+    - Coming Soon!  
+- Practice
+  - [Higher performance PP-TSM](docs/en/tutorials/pp-tsm.md)
+  - [Accelerate training](docs/en/tutorials/accelerate.md)
+  - [Deployment](docs/en/tutorials/deployment.md)
+  - [Customized usage](docs/en/tutorials/customized_usage.md)
+- Others
+  - [Benchmark](docs/en/benchmark.md)
+  - [Tools](docs/en/tools.md)
 
 ## License
 
