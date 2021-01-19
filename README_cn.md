@@ -168,7 +168,17 @@ PaddleVideo飞桨视频模型开发套件，旨在帮助开发者更好的进行
 
 ## 特色应用方案效果
 - [特色应用01: 大规模视频3k类标签方案](https://github.com/PaddlePaddle/PaddleVideo/blob/application/README.md)
+
+<div align="center">
+  <img src="docs/images/VideoTag.gif" width="450px"/><br>
+</div>
+
 - [特色应用02: 足球动作定位方案(TODO)](TODO)
+
+<div align="center">
+  <img src="docs/images/FootballAction.gif" width="450px"/><br>
+</div>
+
 
 ## 文档教程
 - 快速入门
