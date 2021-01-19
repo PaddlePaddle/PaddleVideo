@@ -18,7 +18,7 @@ PaddleVideo飞桨视频模型开发套件，旨在帮助开发者更好的进行
     PaddleVideo 支持更多的数据集和模型结构，包括Kinectics400，ucf101，YoutTube8M等数据集，模型结构涵盖了视频分类模型TSN，TSM，SlowFast，AttentionLSTM和视频定位模型BMN等。
 
 - **更高指标的模型算法**
-    PaddleVideo 提供更高精度的模型结构解决方案，在基于TSM标准版改进的PPTSM上，达到2D网络SOTA效果，Top1 Acc 73.5% 相较标准版TSM提升3%且模型参数量持平。
+    PaddleVideo 提供更高精度的模型结构解决方案，在基于TSM标准版改进的PPTSM上，在Kinectics400数据集上达到2D网络SOTA效果，Top1 Acc 73.5% 相较标准版TSM提升3.5%且模型参数量持平，且取得更快的模型速度。
 
 - **更快的训练速度**
     PaddleVideo 提供更快速度的训练阶段解决方案，在SlowFast标准版上，训练速度相较于pytorch提速100%。
