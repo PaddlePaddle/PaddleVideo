@@ -29,7 +29,8 @@ setup(
     package_dir={'ppvideo': ''},
     include_package_data=True, #Accept all data files and directories matched by MANIFEST.in
     install_requires=requirements,
-    version='0.0.0',
+    entry_points={"console_scripts": ["ppvideo= ppvideo.tools.paddlevideo_clas:main"]},
+    version='0.0.1',
     license='Apache License 2.0',
     description='Awesome Video toolkits based on PaddlePaddle ',
     long_description=readme(),

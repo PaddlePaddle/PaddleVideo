@@ -63,7 +63,7 @@ def create_paddle_predictor(args):
             config.set_mkldnn_cache_capacity(10)
             config.enable_mkldnn()
 
-    #config.disable_glog_info()
+    config.disable_glog_info()
     config.switch_ir_optim(args.ir_optim)  # default true
     if args.use_tensorrt:
         config.enable_tensorrt_engine(
@@ -147,8 +147,8 @@ def parse_args(mMain=True, add_help=True):
 
         # general params
         parser = argparse.ArgumentParser(add_help=add_help)
-        parser.add_argument("--model_name", type=str)
-        parser.add_argument("-v", "--video_file", type=str)
+        parser.add_argument("--model_name", type=str,default='')
+        parser.add_argument("-v", "--video_file", type=str,default='')
         parser.add_argument("--use_gpu", type=str2bool, default=True)
 
         # params for decode and sample
@@ -161,7 +161,7 @@ def parse_args(mMain=True, add_help=True):
         parser.add_argument("--normalize", type=str2bool, default=True)
 
         # params for predict
-        parser.add_argument("--model_file", type=str)
+        parser.add_argument("--model_file", type=str,default='')
         parser.add_argument("--params_file", type=str)
         parser.add_argument("-b", "--batch_size", type=int, default=1)
         parser.add_argument("--use_fp16", type=str2bool, default=False)
@@ -170,7 +170,7 @@ def parse_args(mMain=True, add_help=True):
         parser.add_argument("--gpu_mem", type=int, default=8000)
         parser.add_argument("--top_k", type=int, default=1)
         parser.add_argument("--enable_mkldnn", type=bool, default=False)
-        parser.add_argument("--label_name_path",type=str)
+        parser.add_argument("--label_name_path",type=str,default='')
 
         return parser.parse_args()
 
@@ -256,7 +256,7 @@ class PaddleVideo(object):
 
     def predict(self,video):
         """
-        predict label of video with paddleclas
+        predict label of video with paddlevideo_clas
         Args:
             video:input video for clas, support single video , internet url, folder path containing series of videos
         Returns:
