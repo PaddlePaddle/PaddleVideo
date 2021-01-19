@@ -170,11 +170,13 @@ The chart below illustrates the performance of the video recognition models both
   <img src="docs/images/VideoTag.gif" width="450px"/><br>
 </div>
 
+
 - [Special Applications 02: FootballAction(TODO)](TODO)
 
 <div align="center">
   <img src="docs/images/FootballAction.gif" width="450px"/><br>
 </div>
+
 
 ## Tutorials and Docs
 
