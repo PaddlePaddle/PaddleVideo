@@ -7,14 +7,14 @@ PaddleVideo包含视频分类和动作定位方向的多个主流领先模型，
 
 ## 模型概览
 
-| 模型 | 类别  | 描述 |
-| :--------------- | :--------: | :------------: |
-| [ppTSM](./recognition/pp-tsm.md) | 视频分类| PaddlePaddle优化后的TSM |
-| [SlowFast](./recognition/slowfast.md) | 视频分类| 3D高精度模型 |
-| [TSM](./recognition/tsm.md) | 视频分类| 基于时序移位的简单高效视频时空建模方法 |
-| [TSN](./recognition/tsn.md) | 视频分类| ECCV'16提出的基于2D-CNN经典解决方案 |
-| [Attention LSTM](./recognition/attention_lstm.md)  | 视频分类| 常用序列模型，速度快精度高 |
-| [BMN](./localization/bmn.md) | 视频动作定位| 2019年ActivityNet夺冠方案 |
+| 模型 | 类别 | 配置 | 精度指标 | kinetics-400测试精度 | 下载链接 |
+| :--------------- | :--------: | :------------: | :------------: | :------------: | :------------: |
+| [ppTSM](./recognition/pp-tsm.md) | 视频分类| [pptsm_k400.yaml](../../../configs/recognition/tsm/pptsm_k400.yaml) | Top1 | xx | xx |
+| [SlowFast](./recognition/slowfast.md) | 视频分类| [slowfast.yaml](../../../configs/recognition/slowfast/slowfast.yaml) | Top1 | xx | xx |
+| [TSM](./recognition/tsm.md) | 视频分类| [tsm.yaml](../../../configs/recognition/tsm/tsm.yaml)  | XX | XX |
+| [TSN](./recognition/tsn.md) | 视频分类| [tsn.yaml](../../../configs/recognition/tsn/tsn.yaml) | XX | XX |
+| [Attention LSTM](./recognition/attention_lstm.md)  | [attention_lstm.yaml](../../../configs/recognition/attention_lstm/attention_lstm.yaml) | XX | XX |
+| [BMN](./localization/bmn.md) | 视频动作定位| [tsn.yaml](../../../configs/localization/bmn.yaml) | XX | xX |
 
 
 # 参考文献
