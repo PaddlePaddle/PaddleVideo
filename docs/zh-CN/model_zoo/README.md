@@ -7,7 +7,7 @@ PaddleVideo包含视频分类和动作定位方向的多个主流领先模型，
 
 ## 模型概览
 
-| 领域 | 模型 | 配置 | 测试数据集 | 精度指标 | 精度 | 下载链接 |
+| 领域 | 模型 | 配置 | 测试集 | 精度指标 | 精度 | 下载链接 |
 | :--------------- | :--------: | :------------: | :------------: | :------------: | :------------: | :------------: |
 | 视频分类 | [ppTSM](./recognition/pp-tsm.md) | [pptsm_k400.yaml](../../../configs/recognition/tsm/pptsm_k400.yaml) | [Kinetics-400](../dataset/k400.md) | Top-1 | 0.735 | xx |
 | 视频分类 | [SlowFast](./recognition/slowfast.md) | [slowfast.yaml](../../../configs/recognition/slowfast/slowfast.yaml) | [Kinetics-400](../dataset/k400.md) | Top-1 | 0.743 | xx |
