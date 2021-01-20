@@ -13,8 +13,8 @@ PaddleVideo包含视频分类和动作定位方向的多个主流领先模型，
 | [SlowFast](./recognition/slowfast.md) | 视频分类| [slowfast.yaml](../../../configs/recognition/slowfast/slowfast.yaml) | Top1 | xx | xx |
 | [TSM](./recognition/tsm.md) | 视频分类| [tsm.yaml](../../../configs/recognition/tsm/tsm.yaml)  | XX | XX |
 | [TSN](./recognition/tsn.md) | 视频分类| [tsn.yaml](../../../configs/recognition/tsn/tsn.yaml) | XX | XX |
-| [Attention LSTM](./recognition/attention_lstm.md)  | [attention_lstm.yaml](../../../configs/recognition/attention_lstm/attention_lstm.yaml) | XX | XX |
-| [BMN](./localization/bmn.md) | 视频动作定位| [tsn.yaml](../../../configs/localization/bmn.yaml) | XX | xX |
+| [Attention LSTM](./recognition/attention_lstm.md)  |视频分类| [attention_lstm.yaml](../../../configs/recognition/attention_lstm/attention_lstm.yaml) | XX | XX |
+| [BMN](./localization/bmn.md) | 视频动作定位| [bmn.yaml](../../../configs/localization/bmn.yaml) | XX | xX |
 
 
 # 参考文献
