@@ -164,7 +164,7 @@ The chart below illustrates the performance of the video recognition models both
 
 ## Applications
 
-- [VideoTag](https://github.com/PaddlePaddle/PaddleVideo/tree/application/VideoTag): Large-Scale video classification model
+- [VideoTag](https://github.com/PaddlePaddle/PaddleVideo/tree/application/VideoTag): 3k Large-Scale video classification model
 
 <div align="center">
   <img src="docs/images/VideoTag.gif" width="450px"/><br>
