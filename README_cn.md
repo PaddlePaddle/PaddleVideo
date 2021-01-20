@@ -156,7 +156,7 @@ PaddleVideo飞桨视频模型开发套件，旨在帮助开发者更好的进行
 **说明：**
 - 红色文字描述为PaddleVideo提供的模型，黑色文字描述为Pytorch实现
 - PPTSM在TSM标准版上精度提升3.5%，预测速度也略有增加。
-- 图中红色描述的模型均可在[模型库](#模型库)中获取
+- 图中红色描述的模型均可在[模型库](https://github.com/PaddlePaddle/PaddleVideo/tree/main/docs/zh-CN/model_zoo)中获取
 
 <a name="欢迎加入PaddleVideo技术交流群"></a>
 ## 欢迎加入PaddleVideo技术交流群
