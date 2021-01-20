@@ -164,14 +164,14 @@ The chart below illustrates the performance of the video recognition models both
 
 ## Applications
 
-- [VideoTag](https://github.com/PaddlePaddle/PaddleVideo/tree/application/VideoTag)
+- [VideoTag](https://github.com/PaddlePaddle/PaddleVideo/tree/application/VideoTag): Large-Scale video classification model
 
 <div align="center">
   <img src="docs/images/VideoTag.gif" width="450px"/><br>
 </div>
 
 
-- [FootballAction](https://github.com/PaddlePaddle/PaddleVideo/tree/application/FootballAction)
+- [FootballAction](https://github.com/PaddlePaddle/PaddleVideo/tree/application/FootballAction): Football action detection model
 
 <div align="center">
   <img src="docs/images/FootballAction.gif" width="450px"/><br>
