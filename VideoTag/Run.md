@@ -22,7 +22,7 @@
 ### 依赖安装:
 
 - 1.7.0 <= PaddlePaddle版本 <= 2.0.0: pip install paddlepaddle-gpu==1.8.4.post97 -i https://mirror.baidu.com/pypi/simple
-- opencv版本 >= 4.1.0: pip install opencv-python==4.2.0.34
+- opencv版本 >= 4.1.0: pip install opencv-python==4.2.0.32
 
 ## 数据准备
 
