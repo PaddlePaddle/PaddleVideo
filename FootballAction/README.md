@@ -7,10 +7,6 @@
  - proposal提取，BMN
  - LSTM，动作分类 + 回归
 
-基础镜像
-```
-iregistry.baidu-int.com/acg-algo/paddlepaddle:action-detection-v1
-```
 
 # 数据集
 ```
