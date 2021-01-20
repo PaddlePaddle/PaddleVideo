@@ -189,13 +189,13 @@ The chart below illustrates the performance of the video recognition models both
   - [Modular design](docs/en/tutorials/modular_design.md)
   - [Configuration design](docs/en/tutorials/config.md)
 - Model zoo
-  - recognition [Brief](docs/en/model_zoo/README.md)
+  - [recognition](docs/en/model_zoo/README.md)
     - [Attention-LSTM](docs/en/model_zoo/recognition/attention_lstm.md)
     - [TSN](docs/en/model_zoo/recognition/tsn.md)
     - [TSM](docs/en/model_zoo/recognition/tsm.md)
     - [PP-TSM](docs/en/model_zoo/recognition/pp-tsm.md)
     - [SlowFast](docs/en/model_zoo/recognition/slowfast.md)
-  - Localization [Brief](docs/en/model_zoo/README.md)
+  - [Localization](docs/en/model_zoo/README.md)
     - [BMN](docs/en/model_zoo/localization/bmn.md)
   - Spatio temporal action detection
     - Coming Soon!  
