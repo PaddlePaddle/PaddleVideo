@@ -152,7 +152,7 @@ The chart below illustrates the performance of the video recognition models both
 
 **Note：**
 - PP-TSM improves almost 3.5% Top1 accuracy from standard TSM.
-- all these models described by RED color can be obtained in the [Model Zoo](#model-zoo), and others are Pytorch results.
+- all these models described by RED color can be obtained in the [Model Zoo](#https://github.com/PaddlePaddle/PaddleVideo/blob/main/docs/en/model_zoo/README.md), and others are Pytorch results.
 
 <a name="Community"></a>
 ## Community
