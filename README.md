@@ -1,5 +1,5 @@
 
-# Special Applications
+# Applications
 
 we release some interesting projects in this branch.
 
