@@ -1,7 +1,7 @@
 
 # Special Applications
 
-we release some interesting applications in this branch.
+we release some interesting projects in this branch.
 
 - [VideoTag](VideoTag/)
 
