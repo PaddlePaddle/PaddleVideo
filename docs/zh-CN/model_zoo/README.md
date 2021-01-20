@@ -7,14 +7,14 @@ PaddleVideo包含视频分类和动作定位方向的多个主流领先模型，
 
 ## 模型概览
 
-| 模型 | 类别 | 配置 | 精度指标 | kinetics-400测试精度 | 下载链接 |
-| :--------------- | :--------: | :------------: | :------------: | :------------: | :------------: |
-| [ppTSM](./recognition/pp-tsm.md) | 视频分类| [pptsm_k400.yaml](../../../configs/recognition/tsm/pptsm_k400.yaml) | Top1 | xx | xx |
-| [SlowFast](./recognition/slowfast.md) | 视频分类| [slowfast.yaml](../../../configs/recognition/slowfast/slowfast.yaml) | Top1 | xx | xx |
-| [TSM](./recognition/tsm.md) | 视频分类| [tsm.yaml](../../../configs/recognition/tsm/tsm.yaml)  | XX | XX |
-| [TSN](./recognition/tsn.md) | 视频分类| [tsn.yaml](../../../configs/recognition/tsn/tsn.yaml) | XX | XX |
-| [Attention LSTM](./recognition/attention_lstm.md)  |视频分类| [attention_lstm.yaml](../../../configs/recognition/attention_lstm/attention_lstm.yaml) | XX | XX |
-| [BMN](./localization/bmn.md) | 视频动作定位| [bmn.yaml](../../../configs/localization/bmn.yaml) | XX | xX |
+| 领域 | 模型 | 配置 | 测试数据集 | 精度指标 | 精度 | 下载链接 |
+| :--------------- | :--------: | :------------: | :------------: | :------------: | :------------: | :------------: |
+| 视频分类 | [ppTSM](./recognition/pp-tsm.md) | [pptsm_k400.yaml](../../../configs/recognition/tsm/pptsm_k400.yaml) | [Kinetics-400](../dataset/k400.md) | Top-1 | 0.735 | xx |
+| 视频分类 | [SlowFast](./recognition/slowfast.md) | [slowfast.yaml](../../../configs/recognition/slowfast/slowfast.yaml) | [Kinetics-400](../dataset/k400.md) | Top-1 | 0.743 | xx |
+| 视频分类 | [TSM](./recognition/tsm.md) | [tsm.yaml](../../../configs/recognition/tsm/tsm.yaml)  | [Kinetics-400](../dataset/k400.md) | Top-1 | 0.70 | XX |
+| 视频分类 | [TSN](./recognition/tsn.md) | [tsn.yaml](../../../configs/recognition/tsn/tsn.yaml) | [Kinetics-400](../dataset/k400.md) | Top-1 | 0.67 | XX |
+| 视频分类 | [Attention LSTM](./recognition/attention_lstm.md) | [attention_lstm.yaml](../../../configs/recognition/attention_lstm/attention_lstm.yaml) | [Youtube-8M](../dataset/youtube8m.md) | Hit@1 | 0.89 | XX |
+| 视频动作定位| [BMN](./localization/bmn.md) | [bmn.yaml](../../../configs/localization/bmn.yaml) | [ActivityNet](../dataset/ActivityNet.md) |  AUC | 0.67 | xX |
 
 
 # 参考文献
