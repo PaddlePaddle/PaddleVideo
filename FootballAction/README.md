@@ -7,6 +7,10 @@
  - proposal提取，BMN
  - LSTM，动作分类 + 回归
 
+# 基础镜像
+```
+docker pull tmtalgo/paddleaction:action-detection-v1
+```
 
 # 数据集
 ```
