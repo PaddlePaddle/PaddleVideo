@@ -213,3 +213,5 @@ PaddleVideo is released under the [Apache 2.0 license](LICENSE).
 
 ## Contributing
 This poject welcomes contributions and suggestions. Please see our [contribution guidelines](docs/CONTRIBUTING.md).
+
+- Many thanks to [mohui37](https://github.com/mohui37) for contributing the code for prediction.
