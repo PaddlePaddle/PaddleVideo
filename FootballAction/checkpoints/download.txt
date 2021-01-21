@@ -1,8 +1,8 @@
 # audio
-https://bj.bcebos.com/v1/acg-algo/models/action-football/models_audio.tar
+https://bj.bcebos.com/v1/tmt-pub/models/footballaction/models_audio.tar
 # tsn
-https://bj.bcebos.com/v1/acg-algo/models/action-football/models_tsn.tar
+https://bj.bcebos.com/v1/tmt-pub/models/footballaction/models_tsn.tar
 # bmn
-https://bj.bcebos.com/v1/acg-algo/models/action-football/models_bmn.tar
+https://bj.bcebos.com/v1/tmt-pub/models/footballaction/models_bmn.tar
 # lstm
-https://bj.bcebos.com/v1/acg-algo/models/action-football/models_lstm.tar
+https://bj.bcebos.com/v1/tmt-pub/models/footballaction/models_lstm.tar

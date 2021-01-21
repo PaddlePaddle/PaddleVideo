@@ -15,7 +15,7 @@ docker pull tmtalgo/paddleaction:action-detection-v1
 # 数据集
 ```
 数据集来自欧洲杯2016，共49个足球视频，其中训练集44个，验证集5个
-数据集地址: datasets/EuroCup2016/url.list
+数据集地址: datasets/EuroCup2016/dataset_url.list
 数据集label格式
 {
     "0": "背景",
