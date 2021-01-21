@@ -291,7 +291,7 @@ class PaddleVideo(object):
         total_result = []
         for filename in video_list:
             if isinstance(filename, str):
-                v = utils.decode(video, self.args)
+                v = utils.decode(filename, self.args)  
                 assert v is not None, "Error in loading video: {}".format(
                     filename)
                 inputs = utils.preprocess(v, self.args)
