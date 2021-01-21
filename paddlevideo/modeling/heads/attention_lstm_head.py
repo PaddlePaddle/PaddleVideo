@@ -96,24 +96,20 @@ class AttentionLstmHead(BaseHead):
             ###4. softmax replace start, for it's relevant to sum in time step
             lstm_exp = paddle.exp(lstm_weight)
             lstm_mask = paddle.mean(inputs[i][2], axis=2)
-            lstm_exp_with_mask = paddle.multiply(x=lstm_exp,
-                                                 y=lstm_mask,
-                                                 axis=0)
+            lstm_mask = paddle.unsqueeze(lstm_mask, axis=2)
+            lstm_exp_with_mask = paddle.multiply(x=lstm_exp, y=lstm_mask)
             lstm_sum_with_mask = paddle.sum(lstm_exp_with_mask, axis=1)
             exponent = -1
             lstm_denominator = paddle.pow(lstm_sum_with_mask, exponent)
-            lstm_softmax = paddle.multiply(x=lstm_exp,
-                                           y=lstm_denominator,
-                                           axis=0)
+            lstm_denominator = paddle.unsqueeze(lstm_denominator, axis=2)
+            lstm_softmax = paddle.multiply(x=lstm_exp, y=lstm_denominator)
             lstm_weight = lstm_softmax
             ###softmax replace end
 
-            lstm_scale = paddle.multiply(x=lstm_dropout, y=lstm_weight, axis=0)
+            lstm_scale = paddle.multiply(x=lstm_dropout, y=lstm_weight)
 
             ###5. sequence_pool's replace start, for it's relevant to sum in time step
-            lstm_scale_with_mask = paddle.multiply(x=lstm_scale,
-                                                   y=lstm_mask,
-                                                   axis=0)
+            lstm_scale_with_mask = paddle.multiply(x=lstm_scale, y=lstm_mask)
             fea_lens = inputs[i][1]
             fea_len = int(fea_lens[0])
             lstm_pool = paddle.sum(lstm_scale_with_mask, axis=1)
