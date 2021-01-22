@@ -1,4 +1,4 @@
-简体中文 | [Englist](../../../en/model_zoo/localization/bmn.md)
+[English](../../../en/model_zoo/localization/bmn.md) | 简体中文
 
 # BMN 视频动作定位模型
 
