@@ -24,7 +24,7 @@ SlowFast Overview
 
 ## Data
 
-We use Kinetics-400 to train this model，data preparation please refer to [Kinetics-400 dataset](../../dataset/K400.md)
+We use Kinetics-400 to train this model，data preparation please refer to [Kinetics-400 dataset](../../dataset/K400.md).
 
 
 ## Train
@@ -37,7 +37,7 @@ export CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7
 python -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_slowfast  main.py --validate -c configs/recognition/slowfast/slowfast.yaml 
 ```
 
-- You can train slowfast efficently using our code. The training speed is 2x faster than the original implementation. Details can refer to [benchmark](https://github.com/PaddlePaddle/PaddleVideo/blob/main/docs/en/benchmark.md)
+- You can train slowfast efficently using our code. The training speed is 2x faster than the original implementation. Details can refer to [benchmark](https://github.com/PaddlePaddle/PaddleVideo/blob/main/docs/en/benchmark.md).
 
 
 ## Test
@@ -48,7 +48,7 @@ You can start testing by such command：
 python -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_slowfast_test main.py --test -c  configs/recognition/slowfast/slowfast.yaml -w output/SlowFast/SlowFast_epoch_000196.pdparams
 ```
 
--  Args `-w` is used to specifiy the model path，you can download our model in [SlowFast.pdparams](https://videotag.bj.bcebos.com/PaddleVideo/SlowFast/SlowFast.pdparams)
+-  Args `-w` is used to specifiy the model path，you can download our model in [SlowFast.pdparams](https://videotag.bj.bcebos.com/PaddleVideo/SlowFast/SlowFast.pdparams).
 
 
 Test accuracy in Kinetics-400:
