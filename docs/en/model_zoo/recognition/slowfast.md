@@ -57,6 +57,6 @@ Test accuracy in Kinetics-400:
 
 - Acc1 may be lower than that released in papaer, as ~5% data of kinetics-400 is missing. Experiments have verified that if training with the same data, we can get the same accuracy.
 
-## 参考论文
+## Reference
 
 - [SlowFast Networks for Video Recognition](https://arxiv.org/abs/1812.03982), Feichtenhofer C, Fan H, Malik J, et al. 
