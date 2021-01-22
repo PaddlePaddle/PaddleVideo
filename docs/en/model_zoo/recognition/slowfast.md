@@ -1,6 +1,6 @@
 [简体中文 ](../../../zh-CN/model_zoo/recognition/slowfast.md) | English
 
-# SlowFast Model
+# SlowFast
 
 ---
 ## Contents
