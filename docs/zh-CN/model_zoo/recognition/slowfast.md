@@ -18,7 +18,7 @@
 SlowFast是视频分类领域的高精度模型，使用slow和fast两个分支。slow分支以稀疏采样得到的帧作为输入，捕捉视频中的表观信息。fast分支以高频采样得到的帧作为输入，捕获视频中的运动信息，最终将两个分支的特征拼接得到预测结果。
 
 <p align="center">
-<img src="./SLOWFAST.png" height=300 width=500 hspace='10'/> <br />
+<img src="../../../../SlowFast.png" height=300 width=500 hspace='10'/> <br />
 SlowFast Overview
 </p>
 
@@ -94,7 +94,7 @@ python3.7 -B main.py --test -c  configs/recognition/slowfast/slowfast.yaml -w "o
 
 - 由于Kinetics400数据集部分源文件已缺失，无法下载，我们使用的数据集比官方数据少~5%，因此精度相比于论文公布的结果有一定损失。
 
-**Note** 相同数据下，精度已与原实现对齐
+**Note:** 相同数据下，精度已与原实现对齐
 
 
 ## 参考论文
