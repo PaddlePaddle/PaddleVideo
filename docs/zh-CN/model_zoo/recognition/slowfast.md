@@ -36,7 +36,7 @@ SlowFast模型的训练数据采用Kinetics400数据集，数据下载及准备�
 ```bash
 export CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7
 
-python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_slowfast  main.py --validate -c configs/recognition/slowfast/slowfast.yaml 
+python -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_slowfast  main.py --validate -c configs/recognition/slowfast/slowfast.yaml 
 ```
 
 - 从头开始训练，使用上述启动命令行或者脚本程序即可启动训练，不需要用到预训练模型。
@@ -55,7 +55,7 @@ python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log
 单卡调试命令如下:
 
 ```bash
-python3.7 -B main.py --validate -c configs/recognition/slowfast/slowfast.yaml 
+python -B main.py --validate -c configs/recognition/slowfast/slowfast.yaml 
 ```
 
 - 调试时，请将配置文件configs/recognition/slowfast/slowfast.yaml下的`DATASET.num_workers`字段设为0，如下:
@@ -71,7 +71,7 @@ DATASET: #DATASET field
 可通过如下命令进行模型测试:
 
 ```bash
-python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_slowfast_test main.py --test -c  configs/recognition/slowfast/slowfast.yaml -w "output/SlowFast/SlowFast_epoch_000196.pdparams"
+python -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_slowfast_test main.py --test -c  configs/recognition/slowfast/slowfast.yaml -w "output/SlowFast/SlowFast_epoch_000196.pdparams"
 ```
 
 - 通过 `-w`参数指定待测试模型文件的路径，您可以下载我们训练好的模型进行测试[SlowFast.pdparams](https://videotag.bj.bcebos.com/PaddleVideo/SlowFast/SlowFast.pdparams)
@@ -83,7 +83,7 @@ python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log
 若使用单卡评估，启动方式如下：
 
 ```bash
-python3.7 -B main.py --test -c  configs/recognition/slowfast/slowfast.yaml -w "output/SlowFast/SlowFast_epoch_000196.pdparams"
+python -B main.py --test -c  configs/recognition/slowfast/slowfast.yaml -w "output/SlowFast/SlowFast_epoch_000196.pdparams"
 ```
 
 
