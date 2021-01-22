@@ -46,16 +46,20 @@ You can start testing by such command：
 python main.py --test -c configs/localization/bmn.yaml -w output/BMN/BMN_epoch_00010.pdparams -o DATASET.batch_size=1
 ```
 
+- For now, we only support testing with **single card** and `batch_size=1`.
+
+-  Please download [activity\_net\_1\_3\_new.json](https://paddlemodels.bj.bcebos.com/video_detection/activity_net_1_3_new.json) label file and specify the path in `METRIC.ground_truth_filename`.
+
 -  Args `-w` is used to specifiy the model path，you can download our model in [BMN.pdparams](https://videotag.bj.bcebos.com/PaddleVideo/BMN/BMN.pdparams)
 
-Test accuracy in Kinetics-400:
 
-| Acc1 | Acc5 |
-| :---: | :---: |
-| 74.35 | 91.33 |
+Test accuracy in ActivityNet1.3:
 
-- Acc1 may be lower than that released in papaer, as ~5% data of kinetics-400 is missing. Experiments have verified that if training with the same data, we can get the same accuracy.
+| AR@1 | AR@5 | AR@10 | AR@100 | AUC |
+| :---: | :---: | :---: | :---: | :---: |
+| 33.26 | 49.48 | 56.86 | 75.19 | 67.23% |
+
 
 ## Reference
 
-- [SlowFast Networks for Video Recognition](https://arxiv.org/abs/1812.03982), Feichtenhofer C, Fan H, Malik J, et al. 
+- [BMN: Boundary-Matching Network for Temporal Action Proposal Generation](https://arxiv.org/abs/1907.09702), Tianwei Lin, Xiao Liu, Xin Li, Errui Ding, Shilei Wen.
