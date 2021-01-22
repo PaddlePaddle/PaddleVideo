@@ -50,12 +50,6 @@ DATASET: #DATASET field
 python -B main.py  --validate -c configs/localization/bmn.yaml
 ```
 
-- 若进行单卡调试，请将配置文件中的`DATASET.num_workers`字段修改为0，如下:
-
-```yaml
-DATASET: #DATASET field
-  num_workers: 0
-```
 
 ## 模型测试
 
