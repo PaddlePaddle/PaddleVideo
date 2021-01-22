@@ -8,7 +8,6 @@
 - [模型简介](#模型简介)
 - [数据准备](#数据准备)
 - [模型训练](#模型训练)
-- [实现细节](#实现细节)
 - [模型测试](#模型测试)
 - [模型推理](#模型推理)
 - [参考论文](#参考论文)
@@ -43,33 +42,48 @@ python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log
 
 - 建议使用多卡训练方式，单卡由于batch\_size减小，精度可能会有损失。
 
-- 单卡调试命令如下:
 
-
-**训练资源要求：**
+### 训练资源要求
 
 *  8卡V100，总batch\_size=64，单卡batch\_size=8，单卡显存占用约9G。
-*  Kinetics400训练集较大(约23万个样本)，SlowFast模型迭代epoch数较多(196个)，因此模型训练耗时较长，约200个小时。
-*  训练加速工作进行中，敬请期待。
+*  训练速度相较原始实现提速100%，详细参考[benchmark](https://github.com/PaddlePaddle/PaddleVideo/blob/main/docs/zh-CN/benchmark.md#实验结果)
 
 
-## 模型评估
+### 调试方法
 
-训练完成后，可通过如下方式进行模型评估:
+单卡调试命令如下:
 
-多卡评估方式如下：
+```bash
+python3.7 -B main.py --validate -c configs/recognition/slowfast/slowfast.yaml 
+```
 
-    bash run_eval_multi.sh
+- 调试时，请将配置文件configs/recognition/slowfast/slowfast.yaml下的`DATASET.num_workers`字段设为0，如下:
 
-若使用单卡评估，启动方式如下：
+```yaml
+DATASET: #DATASET field
+  num_workers: 0
+```
 
-    bash run_eval_single.sh
 
-- 进行评估时，可修改脚本中的`weights`参数指定用到的权重文件，如果不设置，将使用默认参数文件checkpoints/slowfast_epoch195.pdparams。
+## 模型测试
+
+可通过如下命令进行模型测试:
+
+```bash
+python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_slowfast_test main.py --test -c  configs/recognition/slowfast/slowfast.yaml -w "output/SlowFast/SlowFast_epoch_000196.pdparams"
+```
+
+- 通过 `-w`参数指定待测试模型文件的路径，您可以下载我们训练好的模型进行测试[SlowFast.pdparams](https://videotag.bj.bcebos.com/PaddleVideo/SlowFast/SlowFast.pdparams)
 
 - 使用```multi_crop```的方式进行评估，因此评估有一定耗时，建议使用多卡评估，加快评估速度。若使用默认方式进行多卡评估，耗时约4小时。
 
 - 模型最终的评估精度会打印在日志文件中。
+
+若使用单卡评估，启动方式如下：
+
+```bash
+python3.7 -B main.py --test -c  configs/recognition/slowfast/slowfast.yaml -w "output/SlowFast/SlowFast_epoch_000196.pdparams"
+```
 
 
 在Kinetics400数据集下评估精度如下:
@@ -80,7 +94,9 @@ python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log
 
 - 由于Kinetics400数据集部分源文件已缺失，无法下载，我们使用的数据集比官方数据少~5%，因此精度相比于论文公布的结果有一定损失。
 
+**Note** 相同数据下，精度已与原实现对齐
+
 
 ## 参考论文
 
-- [SlowFast Networks for Video Recognition](https://arxiv.org/abs/1812.03982)
+- [SlowFast Networks for Video Recognition](https://arxiv.org/abs/1812.03982), Feichtenhofer C, Fan H, Malik J, et al. 
