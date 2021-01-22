@@ -52,3 +52,4 @@ model_name: "AttentionLstm"
 log_interval: 1 #Optional, the interal of logger, default:10
 epochs: 10 #Mandatory, total epoch
 save_interval: 5
+log_level: "INFO"

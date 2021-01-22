@@ -108,4 +108,4 @@ METRIC:
 model_name: "TSN"
 log_interval: 20 #Optional, the interal of logger, default:10
 epochs: 80 #Mandatory, total epoch
-log_level: "DEBUG" #Optional, the logger level. default: "INFO"
+log_level: "INFO" #Optional, the logger level. default: "INFO"
