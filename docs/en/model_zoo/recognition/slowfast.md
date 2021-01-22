@@ -1,4 +1,4 @@
-English | [简体中文 ](../../../zh-CN/model_zoo/recognition/slowfast.md)
+[简体中文 ](../../../zh-CN/model_zoo/recognition/slowfast.md) | English
 
 # SlowFast
 
