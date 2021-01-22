@@ -1,3 +1,5 @@
+[English](../../en/dataset/ActivityNet.md) | 简体中文
+
 # BMN模型数据使用说明
 
 BMN模型使用ActivityNet 1.3数据集，使用方法有如下两种方式：
