@@ -55,7 +55,7 @@ Test accuracy in Kinetics-400:
 | :---: | :---: |
 | 74.35 | 91.33 |
 
-- Acc1 may be lower than that released in papaer, as ~5% data of kinetics-400 is missing. Experiments have verified that if training with the same data, we can get the same accuracy
+- Acc1 may be lower than that released in papaer, as ~5% data of kinetics-400 is missing. Experiments have verified that if training with the same data, we can get the same accuracy.
 
 ## 参考论文
 
