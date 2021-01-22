@@ -18,7 +18,7 @@
 SlowFast是视频分类领域的高精度模型，使用slow和fast两个分支。slow分支以稀疏采样得到的帧作为输入，捕捉视频中的表观信息。fast分支以高频采样得到的帧作为输入，捕获视频中的运动信息，最终将两个分支的特征拼接得到预测结果。
 
 <p align="center">
-<img src="../../../../SlowFast.png" height=300 width=500 hspace='10'/> <br />
+<img src="../../../../images/SlowFast.png" height=300 width=500 hspace='10'/> <br />
 SlowFast Overview
 </p>
 
