@@ -34,6 +34,8 @@ SlowFast模型的训练数据采用Kinetics400数据集，数据下载及准备�
 数据准备完成后，可通过如下方式启动训练：
 
 ```bash
+export CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7
+
 python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_slowfast  main.py --validate -c configs/recognition/slowfast/slowfast.yaml 
 ```
 
