@@ -1,6 +1,6 @@
 简体中文 | [English](../../../en/model_zoo/recognition/slowfast.md)
 
-# SlowFast 视频分类模型动态图实现
+# SlowFast视频分类模型
 
 ---
 ## 内容
