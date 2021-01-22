@@ -35,12 +35,16 @@ SlowFast模型的训练数据采用Kinetics400数据集，数据下载及准备�
 
 数据准备完成后，可通过如下方式启动训练：
 
-
-- 建议使用多卡训练方式，单卡由于batch\_size减小，精度可能会有损失。
+```bash
+python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_slowfast  main.py --validate -c configs/recognition/slowfast/slowfast.yaml 
+```
 
 - 从头开始训练，使用上述启动命令行或者脚本程序即可启动训练，不需要用到预训练模型。
 
-- Visual DL可以用来对训练过程进行可视化，具体使用方法请参考[VisualDL](https://github.com/PaddlePaddle/VisualDL)
+- 建议使用多卡训练方式，单卡由于batch\_size减小，精度可能会有损失。
+
+- 单卡调试命令如下:
+
 
 **训练资源要求：**
 
