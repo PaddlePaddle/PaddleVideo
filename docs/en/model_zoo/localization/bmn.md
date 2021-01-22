@@ -1,7 +1,9 @@
+[简体中文 ](../../../zh-CN/model_zoo/localization/bmn.md) | English
+
 # BMN
 
 ---
-## Content
+## Contents
 
 - [Introduction](#Introduction)
 - [Data](#Data)
@@ -12,80 +14,48 @@
 
 ## Introduction
 
-BMN模型是百度自研，2019年ActivityNet夺冠方案，为视频动作定位问题中proposal的生成提供高效的解决方案，在PaddlePaddle上首次开源。此模型引入边界匹配(Boundary-Matching, BM)机制来评估proposal的置信度，按照proposal开始边界的位置及其长度将所有可能存在的proposal组合成一个二维的BM置信度图，图中每个点的数值代表其所对应的proposal的置信度分数。网络由三个模块组成，基础模块作为主干网络处理输入的特征序列，TEM模块预测每一个时序位置属于动作开始、动作结束的概率，PEM模块生成BM置信度图。
+BMN model contains three modules: Base Module handles the input feature sequence, and out- puts feature sequence shared by the following two modules; Temporal Evaluation Module evaluates starting and ending probabilities of each location in video to generate boundary probability sequences; Proposal Evaluation Module con- tains the BM layer to transfer feature sequence to BM fea- ture map, and contains a series of 3D and 2D convolutional layers to generate BM confidence map.
 
 <p align="center">
-<img src="../../images/BMN.png" height=300 width=500 hspace='10'/> <br />
+<img src="https://github.com/PaddlePaddle/PaddleVideo/blob/main/docs/images/BMN.png" height=300 width=400 hspace='10'/> <br />
 BMN Overview
 </p>
 
 
+## Data
 
-## Data Preparation
-
-BMN的训练数据采用ActivityNet1.3提供的数据集，数据下载及准备请参考[数据说明](../../data/dataset/bmn/README.md)
+We use ActivityNet dataset to train this model，data preparation please refer to [ActivityNet dataset](../../dataset/ActivityNet.md).
 
 
 ## Train
 
-数据准备完毕后，可以通过如下两种方式启动训练：
+You can start training by such command：
 
-    export CUDA_VISIBLE_DEVICES=0,1,2,3
-    export FLAGS_eager_delete_tensor_gb=0.0
-    export FLAGS_fraction_of_gpu_memory_to_use=0.98
-    export FLAGS_fast_eager_deletion_mode=1
-    python train.py --model_name=BMN \
-                    --config=./configs/bmn.yaml \
-                    --log_interval=10 \
-                    --valid_interval=1 \
-                    --use_gpu=True \
-                    --save_dir=./data/checkpoints
+```bash
+export CUDA_VISIBLE_DEVICES=0,1,2,3
 
-    bash run.sh train BMN ./configs/bmn.yaml
-
-- 代码运行需要先安装pandas
-
-- 从头开始训练，使用上述启动命令行或者脚本程序即可启动训练，不需要用到预训练模型
-
-- 若使用第二种方式，请在run.sh脚本文件中设置4卡训练：
-    export CUDA_VISIBLE_DEVICES=0,1,2,3
-
-**训练策略：**
-
-*  采用Adam优化器，初始learning\_rate=0.001
-*  权重衰减系数为1e-4
-*  学习率在迭代次数达到4200的时候做一次衰减，衰减系数为0.1
+python -B -m paddle.distributed.launch --gpus="0,1,2,3"  --log_dir=log_bmn main.py  --validate -c configs/localization/bmn.yaml
+```
 
 
 ## Test
 
-可通过如下两种方式进行模型评估:
+You can start testing by such command：
 
-    python eval.py --model_name=BMN \
-                   --config=./configs/bmn.yaml \
-                   --log_interval=1 \
-                   --weights=$PATH_TO_WEIGHTS \
-                   --use_gpu=True
+```bash
+python main.py --test -c configs/localization/bmn.yaml -w output/BMN/BMN_epoch_00010.pdparams -o DATASET.batch_size=1
+```
 
-    bash run.sh eval BMN ./configs/bmn.yaml
+-  Args `-w` is used to specifiy the model path，you can download our model in [BMN.pdparams](https://videotag.bj.bcebos.com/PaddleVideo/BMN/BMN.pdparams)
 
-- 使用`run.sh`进行评估时，需要修改脚本中的`weights`参数指定需要评估的权重。
+Test accuracy in Kinetics-400:
 
-- 若未指定`--weights`参数，脚本会下载已发布模型[model](https://paddlemodels.bj.bcebos.com/video_detection/BMN.pdparams)进行评估。
+| Acc1 | Acc5 |
+| :---: | :---: |
+| 74.35 | 91.33 |
 
-- 上述程序会将运行结果保存在data/output/EVAL\BMN\_results文件夹下，测试结果保存在data/evaluate\_results/bmn\_results\_validation.json文件中。使用ActivityNet官方提供的测试脚本，即可计算AR@AN和AUC。具体计算过程请参考[指标计算](../../metrics/bmn_metrics/README.md)。
-
-- 使用CPU进行评估时，请将上面的命令行或者run.sh脚本中的`use_gpu`设置为False。
-
-- 注：评估时可能会出现loss为nan的情况。这是由于评估时用的是单个样本，可能存在没有iou>0.6的样本，所以为nan，对最终的评估结果没有影响。
-
-在ActivityNet1.3数据集下评估精度如下:
-
-| AR@1 | AR@5 | AR@10 | AR@100 | AUC |
-| :---: | :---: | :---: | :---: | :---: |
-| 33.06 | 49.13 | 56.27 | 75.32 | 67.19% |
-
+- Acc1 may be lower than that released in papaer, as ~5% data of kinetics-400 is missing. Experiments have verified that if training with the same data, we can get the same accuracy.
 
 ## Reference
 
-- [BMN: Boundary-Matching Network for Temporal Action Proposal Generation](https://arxiv.org/abs/1907.09702), Tianwei Lin, Xiao Liu, Xin Li, Errui Ding, Shilei Wen.
+- [SlowFast Networks for Video Recognition](https://arxiv.org/abs/1812.03982), Feichtenhofer C, Fan H, Malik J, et al. 
