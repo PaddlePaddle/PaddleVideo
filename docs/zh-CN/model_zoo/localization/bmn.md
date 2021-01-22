@@ -30,14 +30,14 @@ BMN的训练数据采用ActivityNet1.3提供的数据集，数据下载及准备
 ```bash
 export CUDA_VISIBLE_DEVICES=0,1,2,3
 
-python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3"  --log_dir=log_bmn main.py  --validate -c configs/localization/bmn.yaml
+python -B -m paddle.distributed.launch --gpus="0,1,2,3"  --log_dir=log_bmn main.py  --validate -c configs/localization/bmn.yaml
 ```
 
 - 从头开始训练，使用上述启动命令行或者脚本程序即可启动训练，不需要用到预训练模型
 
 ### 单卡训练
 
-单卡训练请将配置文件中的`batch_size`字段修改为16，如下:
+单卡训练请将配置文件中的`DATASET.batch_size`字段修改为16，如下:
 
 ```yaml
 DATASET: #DATASET field
@@ -47,29 +47,33 @@ DATASET: #DATASET field
 单卡训练启动方式如下:
 
 ```bash
-python3.7 -B main.py  --validate -c configs/localization/bmn.yaml
+python -B main.py  --validate -c configs/localization/bmn.yaml
 ```
 
+- 若进行单卡调试，请将配置文件中的`DATASET.num_workers`字段修改为0，如下:
 
-## 模型评估
+```yaml
+DATASET: #DATASET field
+  num_workers: 0
+```
 
-可通过如下两种方式进行模型评估:
+## 模型测试
 
-    python eval.py --model_name=BMN \
-                   --config=./configs/bmn.yaml \
-                   --log_interval=1 \
-                   --weights=$PATH_TO_WEIGHTS \
-                   --use_gpu=True
+可通过如下两种方式进行模型测试:
 
-    bash run.sh eval BMN ./configs/bmn.yaml
+```bash
+python main.py --test -c configs/localization/bmn.yaml -w output/BMN/BMN_epoch_00010.pdparams -o DATASET.batch_size=1
+```
 
-- 使用`run.sh`进行评估时，需要修改脚本中的`weights`参数指定需要评估的权重。
+- 目前仅支持**单卡**， `batch_size`为**1**进行模型测试，
 
-- 若未指定`--weights`参数，脚本会下载已发布模型[model](https://paddlemodels.bj.bcebos.com/video_detection/BMN.pdparams)进行评估。
+-  请下载[activity\_net\_1\_3\_new.json](https://paddlemodels.bj.bcebos.com/video_detection/activity_net_1_3_new.json)文件，并通过`METRIC.ground_truth_filename`字段指定该ground_truth文件，相较于原始的activity\_net.v1-3.min.json文件，我们过滤了其中一些失效的视频条目。
 
-- 上述程序会将运行结果保存在data/output/EVAL\BMN\_results文件夹下，测试结果保存在data/evaluate\_results/bmn\_results\_validation.json文件中。使用ActivityNet官方提供的测试脚本，即可计算AR@AN和AUC。具体计算过程请参考[指标计算](../../metrics/bmn_metrics/README.md)。
+- 通过 `-w`参数指定待测试模型文件的路径，您可以下载我们训练好的模型进行测试[BMN.pdparams](https://videotag.bj.bcebos.com/PaddleVideo/BMN/BMN.pdparams)
 
-- 使用CPU进行评估时，请将上面的命令行或者run.sh脚本中的`use_gpu`设置为False。
+- 上述程序会将运行结果保存在配置文件`METRIC.output_path`字段指定的路径，默认为`data/bmn/BMN_Test_output`文件夹下，测试结果保存在配置文件`METRIC.result_path`字段指定的文件，默认为`data/evaluate\_results/bmn\_results\_validation.json`文件。
+
+- 我们使用ActivityNet官方提供的测试脚本，计算AR@AN和AUC。具体计算过程请参考[anet_prop.py](https://github.com/PaddlePaddle/PaddleVideo/blob/main/paddlevideo/metrics/ActivityNet/anet_prop.py)文件。
 
 - 注：评估时可能会出现loss为nan的情况。这是由于评估时用的是单个样本，可能存在没有iou>0.6的样本，所以为nan，对最终的评估结果没有影响。
 
