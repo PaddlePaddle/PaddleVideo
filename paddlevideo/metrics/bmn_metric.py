@@ -36,7 +36,7 @@ class BMNMetric(BaseMetric):
                  batch_size,
                  tscale,
                  dscale,
-                 anno_file,
+                 file_path,
                  ground_truth_filename,
                  subset,
                  output_path,
@@ -54,7 +54,7 @@ class BMNMetric(BaseMetric):
 
         self.tscale = tscale
         self.dscale = dscale
-        self.anno_file = anno_file
+        self.file_path = file_path
         self.ground_truth_filename = ground_truth_filename
         self.subset = subset
         self.output_path = output_path
@@ -67,10 +67,10 @@ class BMNMetric(BaseMetric):
             os.makedirs(self.result_path)
 
         self.video_dict, self.video_list = self.get_dataset_dict(
-            self.anno_file, self.subset)
+            self.file_path, self.subset)
 
-    def get_dataset_dict(self, anno_file, subset):
-        annos = json.load(open(anno_file))
+    def get_dataset_dict(self, file_path, subset):
+        annos = json.load(open(file_path))
         video_dict = {}
         for video_name in annos.keys():
             video_subset = annos[video_name]["subset"]
