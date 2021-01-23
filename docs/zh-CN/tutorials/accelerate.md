@@ -95,9 +95,6 @@ Short cycle:
 [H/2, W/2], [H/sqrt(2), W/sqrt(2)], [H, W]
 ```
 
-在PaddleVideo中，SlowFast模型结合multigrid训练策略，使用8卡v100/32G机器训练全量Kinetics-400数据集358个epoch只需要4.X天。
-
-
 # 分布式训练 
 
 目前尚未支持此方案，如有需求，欢迎联系我们~
