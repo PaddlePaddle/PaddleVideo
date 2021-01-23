@@ -167,13 +167,13 @@ PaddleVideo飞桨视频模型开发套件，旨在帮助开发者更好的进行
 </div>
 
 ## 特色应用方案效果
-- [特色应用01: 大规模视频3k类标签方案](https://github.com/PaddlePaddle/PaddleVideo/tree/application/VideoTag)
+- [特色应用01: 大规模视频3k类标签方案VideoTag](https://github.com/PaddlePaddle/PaddleVideo/tree/application/VideoTag)
 
 <div align="center">
   <img src="docs/images/VideoTag.gif" width="450px"/><br>
 </div>
 
-- [特色应用02: 足球动作定位方案](https://github.com/PaddlePaddle/PaddleVideo/tree/application/FootballAction)
+- [特色应用02: 足球动作定位方案FootballAction](https://github.com/PaddlePaddle/PaddleVideo/tree/application/FootballAction)
 
 <div align="center">
   <img src="docs/images/FootballAction.gif" width="450px"/><br>
@@ -230,10 +230,10 @@ PaddleVideo飞桨视频模型开发套件，旨在帮助开发者更好的进行
 ## 经典视频技术介绍
 - [视频分类及动作识别](https://github.com/PaddlePaddle/PaddleVideo/blob/main/docs/zh-CN/tutorials/summarize.md)
 
-## [需求征集](https://github.com/PaddlePaddle/PaddleVideo/issues/68)
 
 ## 欢迎贡献
 我们欢迎您的任何贡献并感谢您的支持，更多信息请参考 [contribution guidelines](docs/CONTRIBUTING.md).
 
 - 非常感谢 [mohui37](https://github.com/mohui37) 贡献预测相关代码
 
+## [需求征集](https://github.com/PaddlePaddle/PaddleVideo/issues/68)
