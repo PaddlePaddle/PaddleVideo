@@ -24,7 +24,7 @@
 
 ## OP融合
 
-针对[TSM模型](https://github.com/PaddlePaddle/PaddleVideo/blob/main/docs/zh-CN/model_zoo/recognition/tsm.md)，我们实现了[temporal shift op](https://github.com/PaddlePaddle/Paddle/blob/develop/paddle/fluid/operators/temporal_shift_op.h)，在节省显存的同时加速训练过程。
+针对[TSM模型](https://github.com/PaddlePaddle/PaddleVideo/blob/main/docs/zh-CN/model_zoo/recognition/tsm.md)，我们实现了[temporal shift op](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/api/paddle/fluid/layers/temporal_shift_cn.html#temporal-shift)，在节省显存的同时加速训练过程。
 
 ## 混合精度训练
 
