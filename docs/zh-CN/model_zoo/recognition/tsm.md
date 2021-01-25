@@ -23,11 +23,28 @@ UCF101数据下载及准备请参考[数据](../../dataset/ucf101.md)
 
 ## 模型训练
 
-- 加载在ImageNet1000上训练好的ResNet50权重作为Backbone初始化参数，请下载此[模型参数](https://paddlemodels.bj.bcebos.com/video_classification/ResNet50_pretrained.tar.gz) 并解压，并将路径添加到configs中 BACKBONE字段下
-或用-o 参数进行添加，``` -o MODEL.HEAD.pretrained="" ``` 具体参考[conifg](../../config.md)
+- 加载在ImageNet1000上训练好的ResNet50权重作为Backbone初始化参数，请下载此[模型参数](https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_pretrain.pdparams),
+或是通过命令行下载
 
--下载已发布模型[model](https://paddlemodels.bj.bcebos.com/video_classification/TSM.pdparams), 通过`--weights`指定权重存
-放路径进行finetune等开发
+```bash
+wget https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_pretrain.pdparams
+```
+
+并将路径添加到configs中backbone字段下
+
+```yaml
+MODEL:
+framework: "Recognizer2D"
+    backbone:
+        name: "ResNet"
+        pretrained: 将路径填写到此处
+```
+
+或用`-o` 参数在```run.sh```或命令行中进行添加
+``` -o MODEL.framework.backbone.pretrained="" ```
+`-o` 参数用法请参考[conifg](../../config.md)
+
+- 如若进行`finetune`或者[模型测试](#模型测试)等，请下载PaddleVideo的已发布模型[model]()<sup>coming soon</sup>, 通过`--weights`指定权重存放路径。 `--weights` 参数用法请参考[config](../../config.md)
 
 K400 video格式训练
 
