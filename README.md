@@ -114,7 +114,7 @@ PaddleVideo is a toolset for video recognition, action localization, and spatio 
         </ul>
       </td>
       <td>
-        <ul><li><b>Batch</b></li>
+        <ul><li><b>Video</b></li>
           <ul>
             <li>Mixup</li>
             <li>Cutmix</li>  
