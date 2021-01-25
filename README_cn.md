@@ -114,7 +114,7 @@ PaddleVideo飞桨视频模型开发套件，旨在帮助开发者更好的进行
         </ul>
       </td>
       <td>
-        <ul><li><b>Batch</b></li>
+        <ul><li><b>Video</b></li>
           <ul>
             <li>Mixup</li>
             <li>Cutmix</li>  
