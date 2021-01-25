@@ -55,7 +55,7 @@ PaddleVide提供了在K400和UCF101两种数据集上训练TSN的训练脚本。
 加载在ImageNet1000上训练好的ResNet50权重作为Backbone初始化参数，请下载此[模型参数](https://paddlemodels.bj.bcebos.com/video_classification/ResNet50_pretrained.tar.gz)并解压，或是通过命令行下载
 
 ```bash
-wget -q https://paddlemodels.bj.bcebos.com/video_classification/ResNet50_pretrained.tar.gz
+wget https://paddlemodels.bj.bcebos.com/video_classification/ResNet50_pretrained.tar.gz
 tar -xgz ResNet50_pretrained.tar.gz
 ```
 
