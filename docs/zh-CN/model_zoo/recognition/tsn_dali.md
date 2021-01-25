@@ -56,7 +56,7 @@ PaddleVide提供了在K400和UCF101两种数据集上训练TSN的训练脚本。
 
 ```bash
 wget https://paddlemodels.bj.bcebos.com/video_classification/ResNet50_pretrained.tar.gz
-tar -xgz ResNet50_pretrained.tar.gz
+tar -zxvf ResNet50_pretrained.tar.gz
 ```
 
 并将路径添加到configs中backbone字段下
