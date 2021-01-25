@@ -24,7 +24,7 @@ SlowFast Overview
 
 ## Data
 
-We use Kinetics-400 to train this model，data preparation please refer to [Kinetics-400 dataset](../../dataset/K400.md).
+We use Kinetics-400 to train this model，data preparation please refer to [Kinetics-400 dataset](../../dataset/k400.md).
 
 
 ## Train
