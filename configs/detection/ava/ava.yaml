@@ -23,6 +23,7 @@ DATASET: #DATASET field
   num_workers: 8
   train:
     format: "AVADataset" #the Class name of the dataset used by youerself
+    data_prefix: "./data/ava/rawframes"
     file_path: "./data/ava/annotations/ava_train_v2.1.csv"
     exclude_file: "./data/ava/annotations/ava_train_excluded_timestamps_v2.1.csv"
     proposal_file: "./data/ava/annotations/ava_dense_proposals_train.FAIR.recall_93.9.pkl"
@@ -31,6 +32,7 @@ DATASET: #DATASET field
     num_max_proposals: 1000
     timestamp_start: 900
     timestamp_end: 1800
+
 
   valid:
     format: "AVADataset"
