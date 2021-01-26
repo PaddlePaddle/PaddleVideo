@@ -375,7 +375,6 @@ class AVADataset(BaseDataset):
         img_key = results['img_key']
 
         results['suffix'] = self.suffix
-        results['modality'] = self.modality
         results['start_index'] = self.start_index
         results['timestamp_start'] = self.timestamp_start
         results['timestamp_end'] = self.timestamp_end
