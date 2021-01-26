@@ -79,7 +79,9 @@ python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3" --log_dir=log_tsn mai
 
 - 模型及训练参数配置请参考配置文件```configs/recognition/tsn/tsn_dali.yaml```，您可以自定义修改参数配置。
 
-- 通过`--weights`指定权重存放路径可进行模型finetune。 `--weights` 参数用法请参考[config](../../tutorials/config.md)
+- 通过`--weights`指定权重存放路径可进行模型finetune。 
+
+- 参数用法请参考[config](../../tutorials/config.md)
 
 ## 模型测试
 
