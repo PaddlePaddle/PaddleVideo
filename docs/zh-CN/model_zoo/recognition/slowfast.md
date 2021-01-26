@@ -26,7 +26,7 @@ SlowFast Overview
 
 ## 数据准备
 
-SlowFast模型的训练数据采用Kinetics400数据集，数据下载及准备请参考[K400数据准备](../../dataset/K400.md)
+SlowFast模型的训练数据采用Kinetics400数据集，数据下载及准备请参考[Kinetics-400数据准备](../../dataset/K400.md)
 
 
 ## 模型训练
