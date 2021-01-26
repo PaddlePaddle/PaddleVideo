@@ -58,7 +58,7 @@ framework: "Recognizer2D"
 python -B -m paddle.distributed.launch --gpus="0,1,2,3"  --log_dir=log_pptsm  main.py  --validate -c configs/recognition/tsm/pptsm.yaml
 ```
 
-- 通过`-c`指定模型及训练参数配置文件，默认配置文件与数据集的对应关系如下:
+- 通过`-c`指定模型训练参数配置文件，默认配置文件与数据集的对应关系如下:
 
 ```
 configs/recognition/tsm/pptsm.yaml     --> UCF-101 frames格式训练
@@ -67,7 +67,9 @@ configs/recognition/tsm/pptsm_k400.yaml   --> Kinetics-400 frames格式训练
 configs/recognition/tsm/pptsmxxx.yaml     --> Kinetics-400 videos格式训练
 ```
 
-- 通过`--weights`指定权重存放路径可进行模型finetune。 您可以自定义修改参数配置，参数用法请参考[config](../../tutorials/config.md)
+- 如若进行finetune，请下载PaddleVideo的已发布模型[ppTSM.pdparams](https://videotag.bj.bcebos.com/PaddleVideo/ppTSM/ppTSM.pdparams)，通过`--weights`指定权重存放路径。 
+
+- 您可以自定义修改参数配置，参数用法请参考[config](../../tutorials/config.md)。
 
 
 ## 模型测试
@@ -76,7 +78,7 @@ configs/recognition/tsm/pptsmxxx.yaml     --> Kinetics-400 videos格式训练
 python3 main.py --test --weights=""
 ```
 
-- 指定`--weights`参数，下载已发布模型[model](https://paddlemodels.bj.bcebos.com/video_classification/PPTSM.pdparams) 进行模型测试
+- 可下载已发布模型[ppTSM.pdparams](https://videotag.bj.bcebos.com/PaddleVideo/ppTSM/ppTSM.pdparams)，通过`--weights`指定权重存放路径进行模型测试。
 
 
 当取如下参数时，在Kinetics400的验证集下评估精度如下:
