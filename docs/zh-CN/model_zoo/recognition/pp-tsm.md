@@ -56,11 +56,7 @@ framework: "Recognizer2D"
 `-o` 参数用法请参考[conifg](../../config.md)
 
 
-- 加载在ImageNet1000上训练好的ResNet50权重作为Backbone初始化参数，请下载此[模型参数](https://paddlemodels.bj.bcebos.com/video_classification/ResNet50_vd_ssld_v2_pretrained.tar.gz) 并解压，并将路径添加到configs中 BACKBONE字段下
-或用-o 参数进行添加，``` -o MODEL.HEAD.pretrained="" ``` 具体参考[conifg](../../config.md)
 
--下载已发布模型[model](https://paddlemodels.bj.bcebos.com/video_classification/PPTSM.pdparams), 通过`--weights`指定权重存
-放路径进行finetune等开发
 
 K400 video格式训练
 
