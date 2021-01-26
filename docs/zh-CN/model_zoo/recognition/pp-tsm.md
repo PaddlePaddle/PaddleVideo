@@ -33,6 +33,29 @@ UCF101数据下载及准备请参考[UCF-101数据准备](../../dataset/ucf101.m
 
 ## 模型训练
 
+### 预训练模型下载
+
+下载在图像蒸馏预训练模型[ResNet50_vd_ssld_v2]()作为Backbone初始化参数，或是通过命令行下载
+
+```bash
+wget https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_pretrain.pdparams
+```
+
+并将路径添加到配置文件中的`MODEL.framework.backbone.pretrained`字段，如下：
+
+```yaml
+MODEL:
+framework: "Recognizer2D"
+    backbone:
+        name: "ResNet"
+        pretrained: 将路径填写到此处
+```
+
+或用`-o` 参数在```run.sh```或命令行中进行添加
+``` -o MODEL.framework.backbone.pretrained="" ```
+`-o` 参数用法请参考[conifg](../../config.md)
+
+
 - 加载在ImageNet1000上训练好的ResNet50权重作为Backbone初始化参数，请下载此[模型参数](https://paddlemodels.bj.bcebos.com/video_classification/ResNet50_vd_ssld_v2_pretrained.tar.gz) 并解压，并将路径添加到configs中 BACKBONE字段下
 或用-o 参数进行添加，``` -o MODEL.HEAD.pretrained="" ``` 具体参考[conifg](../../config.md)
 
