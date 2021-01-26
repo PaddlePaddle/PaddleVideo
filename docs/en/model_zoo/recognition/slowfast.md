@@ -37,7 +37,7 @@ export CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7
 python -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_slowfast  main.py --validate -c configs/recognition/slowfast/slowfast.yaml 
 ```
 
-- You can train slowfast efficently using our code. The training speed is 2x faster than the original implementation. Details can refer to [benchmark](https://github.com/PaddlePaddle/PaddleVideo/blob/main/docs/en/benchmark.md).
+- Training would be efficent using our code. The training speed is 2x faster than the original implementation. Details can refer to [benchmark](https://github.com/PaddlePaddle/PaddleVideo/blob/main/docs/en/benchmark.md).
 
 
 ## Test
