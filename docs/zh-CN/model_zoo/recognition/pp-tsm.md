@@ -40,7 +40,7 @@ UCF101数据下载及准备请参考[UCF-101数据准备](../../dataset/ucf101.m
 wget https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_vd_ssld_v2_pretrained.pdparams
 ```
 
-并将路径添加到配置文件中的`MODEL.framework.backbone.pretrained`字段，如下：
+并将文件路径添加到配置文件中的`MODEL.framework.backbone.pretrained`字段，如下：
 
 ```yaml
 MODEL:
