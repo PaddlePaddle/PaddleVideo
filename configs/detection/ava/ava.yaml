@@ -25,7 +25,7 @@ DATASET: #DATASET field
     format: "AVADataset" #the Class name of the dataset used by youerself
     ann_file: "./data/ava/annotations/ava_train_v2.1.csv"
     exclude_file: "./data/ava/annotations/ava_train_excluded_timestamps_v2.1.csv"
-    proposal_file_path: "./data/ava/annotations/ava_dense_proposals_train.FAIR.recall_93.9.pkl"
+    proposal_file: "./data/ava/annotations/ava_dense_proposals_train.FAIR.recall_93.9.pkl"
     label_file: "./data/ava/annotations/ava_action_list_v2.1_for_activitynet_2018.pbtxt"
     person_det_score_thr: 0.9
     num_max_proposals: 1000

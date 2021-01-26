@@ -98,9 +98,9 @@ class AVADataset(BaseDataset):
     _FPS = 30
 
     def __init__(self,
-                 ann_file,
-                 exclude_file,
                  pipeline,
+                 ann_file=None,
+                 exclude_file=None,
                  label_file=None,
                  suffix='img_{:05}.jpg',
                  proposal_file=None,
