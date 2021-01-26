@@ -58,19 +58,20 @@ framework: "Recognizer2D"
 python -B -m paddle.distributed.launch --gpus="0,1,2,3"  --log_dir=log_pptsm  main.py  --validate -c configs/recognition/tsm/pptsm.yaml
 ```
 
-- 配置文件对应关系如下:
-
-```
-configs/recognition/tsm/pptsm.yaml  --> UCF-101 frames格式训练
-configs/recognition/tsm/pptsmx.yaml  --> UCF-101 videos格式训练
-configs/recognition/tsm/pptsmxx.yaml  --> Kinetics-400 frames格式训练
-configs/recognition/tsm/pptsmxxx.yaml  --> Kinetics-400 videos格式训练
-
-```
 
 - 模型及训练参数配置请参考配置文件```configs/recognition/tsm/pptsm.yaml```，您可以自定义修改参数配置。
 
 - 通过`--weights`指定权重存放路径可进行模型finetune。 `--weights` 参数用法请参考[config](../../tutorials/config.md)
+
+- 配置文件对应关系如下:
+
+```
+configs/recognition/tsm/pptsm.yaml     --> UCF-101 frames格式训练
+configs/recognition/tsm/pptsmx.yaml    --> UCF-101 videos格式训练
+configs/recognition/tsm/pptsmxx.yaml   --> Kinetics-400 frames格式训练
+configs/recognition/tsm/pptsmxxx.yaml  --> Kinetics-400 videos格式训练
+```
+
 
 
 
