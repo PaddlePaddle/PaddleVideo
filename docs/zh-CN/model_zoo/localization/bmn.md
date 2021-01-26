@@ -23,7 +23,7 @@ BMN Overview
 
 ## 数据准备
 
-BMN的训练数据采用ActivityNet1.3提供的数据集，数据下载及准备请参考[数据说明](../../dataset/ActivityNet.md)
+BMN的训练数据采用ActivityNet1.3提供的数据集，数据下载及准备请参考[ActivityNet数据说明](../../dataset/ActivityNet.md)
 
 ## 模型训练
 
