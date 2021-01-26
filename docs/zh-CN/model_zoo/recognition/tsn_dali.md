@@ -27,7 +27,7 @@
 
 ## 环境配置
 
-我们提供docker运行环境方便您使用，docker镜像为:
+我们提供docker运行环境方便您使用，基础镜像为:
 
 ```
     huangjun12/paddlevideo:tsn_dali_cuda9_0
@@ -77,11 +77,11 @@ framework: "Recognizer2D"
 python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3" --log_dir=log_tsn main.py --train_dali -c configs/recognition/tsn/tsn_dali.yaml -o log_level="INFO"
 ```
 
-- 模型及训练参数配置请参考配置文件```configs/recognition/tsn/tsn_dali.yaml```，您可以自定义修改参数配置。
+- 通过`-c`指定模型训练参数配置文件，模型及训练参数配置请参考配置文件```configs/recognition/tsn/tsn_dali.yaml```。
 
-- 通过`--weights`指定权重存放路径可进行模型finetune。 
+- 如若进行finetune，请下载PaddleVideo的已发布模型[comming soon]()， 通过`--weights`指定权重存放路径可进行模型finetune。 
 
-- 参数用法请参考[config](../../tutorials/config.md)
+- 您可以自定义修改参数配置，参数用法请参考[config](../../tutorials/config.md)。
 
 ## 模型测试
 
