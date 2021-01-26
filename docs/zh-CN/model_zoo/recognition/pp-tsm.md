@@ -35,10 +35,10 @@ UCF101数据下载及准备请参考[UCF-101数据准备](../../dataset/ucf101.m
 
 ### 预训练模型下载
 
-下载在图像蒸馏预训练模型[ResNet50_vd_ssld_v2]()作为Backbone初始化参数，或是通过命令行下载
+下载在图像蒸馏预训练模型[ResNet50_vd_ssld_v2](https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_vd_ssld_v2_pretrained.pdparams)作为Backbone初始化参数，或是通过命令行下载
 
 ```bash
-wget https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_pretrain.pdparams
+wget https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_vd_ssld_v2_pretrained.pdparams
 ```
 
 并将路径添加到配置文件中的`MODEL.framework.backbone.pretrained`字段，如下：
@@ -51,20 +51,16 @@ framework: "Recognizer2D"
         pretrained: 将路径填写到此处
 ```
 
-或用`-o` 参数在```run.sh```或命令行中进行添加
-``` -o MODEL.framework.backbone.pretrained="" ```
-`-o` 参数用法请参考[conifg](../../config.md)
+### 开始训练
 
+UCF101 video格式训练
 
-
+UCF101 frames格式训练
 
 K400 video格式训练
 
 K400 frames格式训练
 
-UCF101 video格式训练
-
-UCF101 frames格式训练
 
 ## 实现细节
 
