@@ -99,7 +99,7 @@ class AVADataset(BaseDataset):
 
     def __init__(self,
                  pipeline,
-                 ann_file=None,
+                 file_path=None,
                  exclude_file=None,
                  label_file=None,
                  suffix='img_{:05}.jpg',
@@ -126,7 +126,7 @@ class AVADataset(BaseDataset):
         self.timestamp_start = timestamp_start
         self.timestamp_end = timestamp_end
         super().__init__(
-            ann_file,
+            file_path,
             pipeline,
             data_prefix,
             test_mode,)
@@ -325,7 +325,7 @@ class AVADataset(BaseDataset):
         """Load index file to get video information."""
         info = []
         records_dict_by_img = defaultdict(list)
-        with open(self.ann_file, 'r') as fin:
+        with open(self.file_path, 'r') as fin:
             for line in fin:
                 line_split = line.strip().split(',')
 
