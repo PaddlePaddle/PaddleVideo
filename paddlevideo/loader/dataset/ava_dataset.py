@@ -138,7 +138,7 @@ class AVADataset(BaseDataset):
 
         if not test_mode:
             valid_indexes = self.filter_exclude_file()
-            self.logger.info(
+            logger.info(
                 f'{len(valid_indexes)} out of {len(self.info)} '
                 f'frames are valid.')
             self.info = self.info = [
