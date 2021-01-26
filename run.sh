@@ -16,10 +16,13 @@ export CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7
 #python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_attetion_lstm  main.py  --validate -c configs/recognition/attention_lstm/attention_lstm.yaml
 
 # run pp-tsm training
-python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3"  --log_dir=log_pptsm  main.py  --validate -c configs/recognition/tsm/pptsm.yaml
+#python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3"  --log_dir=log_pptsm  main.py  --validate -c configs/recognition/tsm/pptsm.yaml
 
 # run tsn dali training
 #python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3" --log_dir=log_tsn main.py --train_dali -c configs/recognition/tsn/tsn_dali.yaml
+
+# run ava training
+python3.7 -B -m paddle.distributed.launch --gpus="0" --log_dir=log_ava main.py --validate -c configs/detection/ava/ava.yaml
 
 
 # test.sh
