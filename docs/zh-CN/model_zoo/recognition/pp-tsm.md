@@ -52,13 +52,17 @@ framework: "Recognizer2D"
 
 ### 开始训练
 
-UCF101 video格式训练
+UCF-101 frames格式训练
+```bash
+python -B -m paddle.distributed.launch --gpus="0,1,2,3"  --log_dir=log_pptsm  main.py  --validate -c configs/recognition/tsm/pptsm.yaml
+```
 
-UCF101 frames格式训练
+UCF-101 video格式训练
 
-K400 video格式训练
+Kinetics-400 frames格式训练
 
-K400 frames格式训练
+Kinetics-400 video格式训练
+
 
 
 ## 模型测试
