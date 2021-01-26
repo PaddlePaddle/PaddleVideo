@@ -1,16 +1,28 @@
-[English](../../../en/model_zoo/recognition/pp-tsm.md) | 简体中文
+简体中文 | [English](../../../en/model_zoo/recognition/pp-tsm.md)
+
+# PPTSM视频分类模型
+
+---
+## 内容
+
+- [模型简介](#模型简介)
+- [数据准备](#数据准备)
+- [模型训练](#模型训练)
+- [模型测试](#模型测试)
+- [模型推理](#模型推理)
+- [参考论文](#参考论文)
 
 # PPTSM
 
 ## 模型介绍
 
-我们基于paddle2.0对TSM进行改进提出了**PPTSM**，在不增加参数量和计算量的情况下， 在多个数据集上精度显著超过TSM论文精度，包括UCF101、Kinetics-400等。具体细节参考[《pptsm实用视频模型优化解析》]() <sup>coming soon</sup>
+我们基于飞桨框架2.0版本对[TSM模型](../tsm.md)进行了改进，提出了**PPTSM**高精度2D实用视频分类模型。在不增加参数量和计算量的情况下，在UCF-101、Kinetics-400数据集上精度显著超过原文精度。精度提升tricks请参考[pptsm实用视频模型优化解析](https://github.com/PaddlePaddle/PaddleVideo/blob/main/docs/zh-CN/tutorials/pp-tsm.md)。
 
 ## 数据准备
 
-K400数据下载及准备请参考[数据](../../dataset/K400.md)
+K400数据下载及准备请参考[Kinetics-400数据准备](../../dataset/k400.md)
 
-UCF101数据下载及准备请参考[数据](../../dataset/ucf101.md)
+UCF101数据下载及准备请参考[UCF-101数据准备](../../dataset/ucf101.md)
 
 
 ## 模型训练
