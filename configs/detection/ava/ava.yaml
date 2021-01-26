@@ -49,8 +49,8 @@ PIPELINE:
   train:
     decode_sampler:
       name: "SampleAVAFrames"
-      num_frames: 32
-      sampling_rate: 2
+      clip_len: 4
+      frame_interval: 16
     transform: #Mandotary, image transfrom operator
       - JitterScale:
           min_size: 256
