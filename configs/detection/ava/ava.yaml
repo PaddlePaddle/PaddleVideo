@@ -48,7 +48,7 @@ DATASET: #DATASET field
 PIPELINE:
   train:
     decode_sampler:
-      name: "DecodeSampler"
+      name: "SampleAVAFrames"
       num_frames: 32
       sampling_rate: 2
     transform: #Mandotary, image transfrom operator
@@ -69,7 +69,7 @@ PIPELINE:
 
   valid:
     decode_sampler:
-      name: "DecodeSampler"
+      name: "SampleAVAFrames"
       num_frames: 32
       sampling_rate: 2
     transform: #Mandotary, image transfrom operator
