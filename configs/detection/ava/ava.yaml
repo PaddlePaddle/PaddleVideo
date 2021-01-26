@@ -31,6 +31,7 @@ DATASET: #DATASET field
     num_max_proposals: 1000
     timestamp_start: 900
     timestamp_end: 1800
+
   valid:
     format: "AVADataset"
     file_path: "./data/k400/val.csv" #Mandatory, valid data index file path
