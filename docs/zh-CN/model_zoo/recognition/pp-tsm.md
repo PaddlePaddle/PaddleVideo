@@ -44,7 +44,7 @@ wget https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_vd_ssld_v
 
 ```yaml
 MODEL:
-framework: "Recognizer2D"
+    framework: "Recognizer2D"
     backbone:
         name: "ResNet"
         pretrained: 将路径填写到此处
