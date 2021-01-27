@@ -46,7 +46,7 @@ class BaseRecognizer(nn.Layer):
     def extract_feature(self, imgs):
         """Extract features through a backbone.
 
-	Args:
+    Args:
 	    imgs (paddle.Tensor) : The input images.
 
         Returns:
