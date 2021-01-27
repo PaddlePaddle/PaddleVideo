@@ -34,14 +34,14 @@ wget https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_pretrain.
 
 ```yaml
 MODEL:
-framework: "Recognizer2D"
+    framework: "Recognizer2D"
     backbone:
         name: "ResNet"
         pretrained: 将路径填写到此处
 ```
 
 或用`-o` 参数在```run.sh```或命令行中进行添加
-``` -o MODEL.framework.backbone.pretrained="" ```
+``` -o MODEL.backbone.pretrained="" ```
 `-o` 参数用法请参考[conifg](../../config.md)
 
 - 如若进行`finetune`或者[模型测试](#模型测试)等，请下载PaddleVideo的已发布模型[model]()<sup>coming soon</sup>, 通过`--weights`指定权重存放路径。 `--weights` 参数用法请参考[config](../../config.md)
