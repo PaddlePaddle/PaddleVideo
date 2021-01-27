@@ -181,7 +181,7 @@ PaddleVideo飞桨视频模型开发套件，旨在帮助开发者更好的进行
 
 
 ## 文档教程
-- 免费视频课程
+- 免费视频课程及PPT课件
     - [2021.1月](https://aistudio.baidu.com/aistudio/course/introduce/6742)
 - 快速入门
     - [安装说明](docs/zh-CN/install.md)
