@@ -49,8 +49,8 @@ PIPELINE:
   train:
     sampler:
       name: "SampleAVAFrames"
-      clip_len: 4
-      frame_interval: 16
+      clip_len: 32
+      frame_interval: 2
     decoder:
       name: "RawFrameDecode"
     transform: #Mandotary, image transfrom operator
