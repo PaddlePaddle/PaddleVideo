@@ -421,7 +421,7 @@ class FileClient:
 class RawFrameDecode:
     """Load and decode frames with given indices.
 
-    Required keys are "frame_dir", "filename_tmpl" and "frame_inds",
+    Required keys are "frame_dir", "suffix" and "frame_inds",
     added or modified keys are "imgs", "img_shape" and "original_shape".
 
     Args:
@@ -530,7 +530,7 @@ class RawFrameDecode:
         # mmcv.use_backend(self.decoding_backend)
 
         directory = results['frame_dir']
-        filename_tmpl = results['filename_tmpl']
+        suffix = results['suffix']
         modality = results['modality']
 
         if self.file_client is None:
@@ -547,7 +547,7 @@ class RawFrameDecode:
             import mmcv
             frame_idx += offset
             if modality == 'RGB':
-                filepath = osp.join(directory, filename_tmpl.format(frame_idx))
+                filepath = osp.join(directory, suffix.format(frame_idx))
                 img_bytes = self.file_client.get(filepath) #以二进制方式读取图片
                 # Get frame with channel order RGB directly.
 
