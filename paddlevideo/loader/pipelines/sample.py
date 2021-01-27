@@ -17,6 +17,24 @@ from ..registry import PIPELINES
 import os
 import numpy as np
 
+import io
+import os.path as osp
+from abc import ABCMeta, abstractmethod
+
+import cv2
+from cv2 import IMREAD_COLOR, IMREAD_GRAYSCALE, IMREAD_UNCHANGED
+
+import inspect
+
+supported_backends = ['cv2', 'pillow']
+imread_backend = 'cv2'
+imread_flags = {
+    'color': IMREAD_COLOR,
+    'grayscale': IMREAD_GRAYSCALE,
+    'unchanged': IMREAD_UNCHANGED
+}
+
+
 @PIPELINES.register()
 class SampleFrames:
     """Sample frames from the video.
@@ -269,7 +287,298 @@ class Sampler(object):
 
         return self._get(frames_idx, results)
 
+class BaseStorageBackend(metaclass=ABCMeta):
+    """Abstract class of storage backends.
 
+    All backends need to implement two apis: ``get()`` and ``get_text()``.
+    ``get()`` reads the file as a byte stream and ``get_text()`` reads the file
+    as texts.
+    """
+
+    @abstractmethod
+    def get(self, filepath):
+        pass
+
+    @abstractmethod
+    def get_text(self, filepath):
+        pass
+
+class HardDiskBackend(BaseStorageBackend):
+    """Raw hard disks storage backend."""
+
+    def get(self, filepath):
+        filepath = str(filepath)
+        with open(filepath, 'rb') as f:
+            value_buf = f.read()
+        return value_buf
+
+    def get_text(self, filepath):
+        filepath = str(filepath)
+        with open(filepath, 'r') as f:
+            value_buf = f.read()
+        return value_buf
+
+class FileClient:
+    """A general file client to access files in different backend.
+
+    The client loads a file or text in a specified backend from its path
+    and return it as a binary file. it can also register other backend
+    accessor with a given name and backend class.
+
+    Attributes:
+        backend (str): The storage backend type. Options are "disk", "ceph",
+            "memcached" and "lmdb".
+        client (:obj:`BaseStorageBackend`): The backend object.
+    """
+
+    _backends = {
+        'disk': HardDiskBackend,
+    }
+
+    def __init__(self, backend='disk', **kwargs):
+        if backend not in self._backends:
+            raise ValueError(
+                f'Backend {backend} is not supported. Currently supported ones'
+                f' are {list(self._backends.keys())}')
+        self.backend = backend
+        self.client = self._backends[backend](**kwargs)
+
+    @classmethod
+    def _register_backend(cls, name, backend, force=False):
+        if not isinstance(name, str):
+            raise TypeError('the backend name should be a string, '
+                            f'but got {type(name)}')
+        if not inspect.isclass(backend):
+            raise TypeError(
+                f'backend should be a class but got {type(backend)}')
+        if not issubclass(backend, BaseStorageBackend):
+            raise TypeError(
+                f'backend {backend} is not a subclass of BaseStorageBackend')
+        if not force and name in cls._backends:
+            raise KeyError(
+                f'{name} is already registered as a storage backend, '
+                'add "force=True" if you want to override it')
+
+        cls._backends[name] = backend
+
+    @classmethod
+    def register_backend(cls, name, backend=None, force=False):
+        """Register a backend to FileClient.
+
+        This method can be used as a normal class method or a decorator.
+
+        .. code-block:: python
+
+            class NewBackend(BaseStorageBackend):
+
+                def get(self, filepath):
+                    return filepath
+
+                def get_text(self, filepath):
+                    return filepath
+
+            FileClient.register_backend('new', NewBackend)
+
+        or
+
+        .. code-block:: python
+
+            @FileClient.register_backend('new')
+            class NewBackend(BaseStorageBackend):
+
+                def get(self, filepath):
+                    return filepath
+
+                def get_text(self, filepath):
+                    return filepath
+
+        Args:
+            name (str): The name of the registered backend.
+            backend (class, optional): The backend class to be registered,
+                which must be a subclass of :class:`BaseStorageBackend`.
+                When this method is used as a decorator, backend is None.
+                Defaults to None.
+            force (bool, optional): Whether to override the backend if the name
+                has already been registered. Defaults to False.
+        """
+        if backend is not None:
+            cls._register_backend(name, backend, force=force)
+            return
+
+        def _register(backend_cls):
+            cls._register_backend(name, backend_cls, force=force)
+            return backend_cls
+
+        return _register
+
+    def get(self, filepath):
+        return self.client.get(filepath)
+
+    def get_text(self, filepath):
+        return self.client.get_text(filepath)
+
+@PIPELINES.register()
+class RawFrameDecode:
+    """Load and decode frames with given indices.
+
+    Required keys are "frame_dir", "filename_tmpl" and "frame_inds",
+    added or modified keys are "imgs", "img_shape" and "original_shape".
+
+    Args:
+        io_backend (str): IO backend where frames are stored. Default: 'disk'.
+        decoding_backend (str): Backend used for image decoding.
+            Default: 'cv2'.
+        kwargs (dict, optional): Arguments for FileClient.
+    """
+
+    def __init__(self, io_backend='disk', decoding_backend='cv2', **kwargs):
+        self.io_backend = io_backend
+        self.decoding_backend = decoding_backend
+        self.kwargs = kwargs
+        self.file_client = None
+
+    def _pillow2array(self,img, flag='color', channel_order='bgr'):
+        """Convert a pillow image to numpy array.
+
+        Args:
+            img (:obj:`PIL.Image.Image`): The image loaded using PIL
+            flag (str): Flags specifying the color type of a loaded image,
+                candidates are 'color', 'grayscale' and 'unchanged'.
+                Default to 'color'.
+            channel_order (str): The channel order of the output image array,
+                candidates are 'bgr' and 'rgb'. Default to 'bgr'.
+
+        Returns:
+            np.ndarray: The converted numpy array
+        """
+        channel_order = channel_order.lower()
+        if channel_order not in ['rgb', 'bgr']:
+            raise ValueError('channel order must be either "rgb" or "bgr"')
+
+        if flag == 'unchanged':
+            array = np.array(img)
+            if array.ndim >= 3 and array.shape[2] >= 3:  # color image
+                array[:, :, :3] = array[:, :, (2, 1, 0)]  # RGB to BGR
+        else:
+            # If the image mode is not 'RGB', convert it to 'RGB' first.
+            if img.mode != 'RGB':
+                if img.mode != 'LA':
+                    # Most formats except 'LA' can be directly converted to RGB
+                    img = img.convert('RGB')
+                else:
+                    # When the mode is 'LA', the default conversion will fill in
+                    #  the canvas with black, which sometimes shadows black objects
+                    #  in the foreground.
+                    #
+                    # Therefore, a random color (124, 117, 104) is used for canvas
+                    img_rgba = img.convert('RGBA')
+                    img = Image.new('RGB', img_rgba.size, (124, 117, 104))
+                    img.paste(img_rgba, mask=img_rgba.split()[3])  # 3 is alpha
+            if flag == 'color':
+                array = np.array(img)
+                if channel_order != 'rgb':
+                    array = array[:, :, ::-1]  # RGB to BGR
+            elif flag == 'grayscale':
+                img = img.convert('L')
+                array = np.array(img)
+            else:
+                raise ValueError(
+                    'flag must be "color", "grayscale" or "unchanged", '
+                    f'but got {flag}')
+        return array
+
+    def _imfrombytes(self,content, flag='color', channel_order='bgr', backend=None):
+        """Read an image from bytes.
+
+        Args:
+            content (bytes): Image bytes got from files or other streams.
+            flag (str): Same as :func:`imread`.
+            backend (str | None): The image decoding backend type. Options are
+                `cv2`, `pillow`, `turbojpeg`, `None`. If backend is None, the
+                global imread_backend specified by ``mmcv.use_backend()`` will be
+                used. Default: None.
+
+        Returns:
+            ndarray: Loaded image array.
+        """
+
+        if backend is None:
+            backend = imread_backend
+        if backend not in supported_backends:
+            raise ValueError(f'backend: {backend} is not supported. Supported '
+                             "backends are 'cv2', 'pillow'")
+        elif backend == 'pillow':
+            buff = io.BytesIO(content)
+            img = Image.open(buff)
+            img = self._pillow2array(img, flag, channel_order)
+            return img
+        else:
+            img_np = np.frombuffer(content, np.uint8)
+            flag = imread_flags[flag] if isinstance(flag, str) else flag
+            img = cv2.imdecode(img_np, flag)
+            if flag == IMREAD_COLOR and channel_order == 'rgb':
+                cv2.cvtColor(img, cv2.COLOR_BGR2RGB, img)
+            return img
+
+    def __call__(self, results):
+        """Perform the ``RawFrameDecode`` to pick frames given indices.
+
+        Args:
+            results (dict): The resulting dict to be modified and passed
+                to the next transform in pipeline.
+        """
+        # mmcv.use_backend(self.decoding_backend)
+
+        directory = results['frame_dir']
+        filename_tmpl = results['filename_tmpl']
+        modality = results['modality']
+
+        if self.file_client is None:
+            self.file_client = FileClient(self.io_backend, **self.kwargs)
+
+        imgs = list()
+
+        if results['frame_inds'].ndim != 1:
+            results['frame_inds'] = np.squeeze(results['frame_inds'])
+
+        offset = results.get('offset', 0)
+
+        for frame_idx in results['frame_inds']:
+            import mmcv
+            frame_idx += offset
+            if modality == 'RGB':
+                filepath = osp.join(directory, filename_tmpl.format(frame_idx))
+                img_bytes = self.file_client.get(filepath) #以二进制方式读取图片
+                # Get frame with channel order RGB directly.
+
+                cur_frame = self._imfrombytes(img_bytes, channel_order='rgb')
+                imgs.append(cur_frame)
+            else:
+                raise NotImplementedError
+
+        results['imgs'] = imgs
+        results['original_shape'] = imgs[0].shape[:2]
+        results['img_shape'] = imgs[0].shape[:2]
+
+        # we resize the gt_bboxes and proposals to their real scale
+        if 'gt_bboxes' in results:
+            h, w = results['img_shape']
+            scale_factor = np.array([w, h, w, h])
+            gt_bboxes = results['gt_bboxes']
+            gt_bboxes = (gt_bboxes * scale_factor).astype(np.float32)
+            results['gt_bboxes'] = gt_bboxes
+            if 'proposals' in results and results['proposals'] is not None:
+                proposals = results['proposals']
+                proposals = (proposals * scale_factor).astype(np.float32)
+                results['proposals'] = proposals
+
+        return results
+
+    def __repr__(self):
+        repr_str = (f'{self.__class__.__name__}('
+                    f'io_backend={self.io_backend}, '
+                    f'decoding_backend={self.decoding_backend})')
+        return repr_str
 
 @PIPELINES.register()
 class SampleAVAFrames(SampleFrames):

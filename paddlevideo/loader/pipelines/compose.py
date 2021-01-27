@@ -48,7 +48,7 @@ class Compose(object):
             if isinstance(p, dict):
                 p = build(p, PIPELINES)
                 self.pipelines.append(p)
-            elif isinstance(p, list):
+            elif isinstance(p, list): #transform
                 for t in p:
                     #XXX: to deal with old format cfg, ugly code here!
                     temp_dict = dict(name=list(t.keys())[0])

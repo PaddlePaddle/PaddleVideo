@@ -47,10 +47,12 @@ DATASET: #DATASET field
 
 PIPELINE:
   train:
-    decode_sampler:
+    sampler:
       name: "SampleAVAFrames"
       clip_len: 4
       frame_interval: 16
+    decoder:
+      name: "RawFrameDecode"
     transform: #Mandotary, image transfrom operator
       - JitterScale:
           min_size: 256
@@ -68,10 +70,12 @@ PIPELINE:
           alpha: 8
 
   valid:
-    decode_sampler:
+    sampler:
       name: "SampleAVAFrames"
       num_frames: 32
       sampling_rate: 2
+    sampleer:
+      name: "RawFrameDecode"
     transform: #Mandotary, image transfrom operator
       - JitterScale:
           min_size: 256
