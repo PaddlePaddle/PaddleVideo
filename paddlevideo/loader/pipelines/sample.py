@@ -531,7 +531,7 @@ class RawFrameDecode:
 
         directory = results['frame_dir']
         suffix = results['suffix']
-        modality = results['modality']
+        #modality = results['modality']
 
         if self.file_client is None:
             self.file_client = FileClient(self.io_backend, **self.kwargs)
@@ -544,17 +544,13 @@ class RawFrameDecode:
         offset = results.get('offset', 0)
 
         for frame_idx in results['frame_inds']:
-            import mmcv
             frame_idx += offset
-            if modality == 'RGB':
-                filepath = osp.join(directory, suffix.format(frame_idx))
-                img_bytes = self.file_client.get(filepath) #以二进制方式读取图片
-                # Get frame with channel order RGB directly.
+            filepath = osp.join(directory, suffix.format(frame_idx))
+            img_bytes = self.file_client.get(filepath) #以二进制方式读取图片
+            # Get frame with channel order RGB directly.
 
-                cur_frame = self._imfrombytes(img_bytes, channel_order='rgb')
-                imgs.append(cur_frame)
-            else:
-                raise NotImplementedError
+            cur_frame = self._imfrombytes(img_bytes, channel_order='rgb')
+            imgs.append(cur_frame)
 
         results['imgs'] = imgs
         results['original_shape'] = imgs[0].shape[:2]
@@ -571,7 +567,7 @@ class RawFrameDecode:
                 proposals = results['proposals']
                 proposals = (proposals * scale_factor).astype(np.float32)
                 results['proposals'] = proposals
-
+        print('-----results[img]----',results['frame_inds'])
         return results
 
     def __repr__(self):
@@ -614,6 +610,7 @@ class SampleAVAFrames(SampleFrames):
         results['frame_interval'] = self.frame_interval
         results['num_clips'] = 1
         results['crop_quadruple'] = np.array([0, 0, 1, 1], dtype=np.float32)
+        print('-------results after sampleravaframes-----',results)
         return results
 
     def __repr__(self):

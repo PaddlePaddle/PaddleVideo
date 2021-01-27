@@ -48,12 +48,16 @@ def train_model(cfg, weights=None, parallel=True, validate=True):
     mkdir(output_dir)
 
     # 1. Construct model
-    model = build_model(cfg.MODEL)
-    if parallel:
-        model = paddle.DataParallel(model)
+#    model = build_model(cfg.MODEL)
+#    if parallel:
+#        model = paddle.DataParallel(model)
 
     # 2. Construct dataset and dataloader
     train_dataset = build_dataset((cfg.DATASET.train, cfg.PIPELINE.train))
+    print(train_dataset.info)
+    print(train_dataset[0])
+    import sys
+    sys.exit(0)
     train_dataloader_setting = dict(batch_size=batch_size,
                                     num_workers=num_workers,
                                     collate_fn_cfg=cfg.get('MIX', None),
