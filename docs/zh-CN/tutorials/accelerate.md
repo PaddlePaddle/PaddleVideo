@@ -193,11 +193,10 @@ Cuda: 9.0
 模型: ppTSM
 数据集: UCF-101
 卡数: 单卡
-batch_size: 16，
-Dataloader的num_workers参数: 0
+batch_size: 16
 ```
 
-分别以video和frame格式作为输入，
+模型参数参考默认配置[pptsm.yaml](https://github.com/PaddlePaddle/PaddleVideo/blob/main/configs/recognition/tsm/pptsm.yaml)，Dataloader的num_workers参数设为0，分别以video和frame格式作为输入，性能数据如下:
 
 
 # 训练策略加速
