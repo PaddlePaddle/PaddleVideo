@@ -168,7 +168,12 @@ Comming soon~
 
 既然GPU等待CPU进行数据处理耗时，能否把数据处理放到GPU上呢？[NVIDIA DALI](https://docs.nvidia.com/deeplearning/dali/user-guide/docs/)将数据预处理pipeline转移到GPU上执行，可以显著提升训练速度。针对视频文件，DALI提供`VideoReader`op进行解码抽帧操作，但目前其仅支持连续采样的方式进行抽帧。而视频领域常用的2D模型TSN或TSM，它们均采用分段采样方式，即把视频均匀分成N段segument，然后在每个segument内随机选取一帧，最后把选取的帧组合作为输入张量。为此，我们基于DALI进行了二次开发，实现了支持分段采样方式的`VideoReader`op。为方便用户使用，我们提供了配置好的docker运行环境，具体使用方法参考[TSN-DALI使用教程](https://github.com/PaddlePaddle/PaddleVideo/blob/main/docs/zh-CN/model_zoo/recognition/tsn_dali.md)。
 
-测试环境: Tesla v100 14卡16G，Cuda9，单卡batch_size=32。
+测试环境: 
+```
+Tesla v100 14卡16G，
+Cuda: 9.0
+单卡batch_size: 32
+```
 
 性能测试数据如下:
 
