@@ -186,7 +186,7 @@ Cuda: 9.0
 
 ## 预先解码存成图像
 
-这是一种简单直接的方法，既然视频解码耗时，那可以事先将视频解码好，存成图片，模型训练时直接读取图像即可。这种方法可以显著提升视频模型训练速度，在XXX上大约提速3倍。但它也有一个很明显的缺点，就是需要耗费大量的内存空间，以kinetics-400数据集为例，共包含24万个训练样本，mp4文件约130G，解码存成图像后，占用的内存空间约为2T，所以这种方法比较适用于较小规模的数据集，如ucf-101。PaddleVideo提供了[预先解码](https://github.com/PaddlePaddle/PaddleVideo/blob/main/data/ucf101/extract_rawframes.py)的脚本，并且[TSN模型](https://github.com/PaddlePaddle/PaddleVideo/blob/main/docs/zh-CN/model_zoo/recognition/tsn.md)和[TSM模型](https://github.com/PaddlePaddle/PaddleVideo/blob/main/docs/zh-CN/model_zoo/recognition/tsm.md)均支持直接使用frame格式的数据进行训练，详细实现参考[源码](https://github.com/PaddlePaddle/PaddleVideo/blob/main/paddlevideo/loader/dataset/frame.py)。
+这是一种简单直接的方法，既然视频解码耗时，那可以事先将视频解码好，存成图片，模型训练时直接读取图像即可。这种方法可以显著提升视频模型训练速度，但它也有一个很明显的缺点，就是需要耗费大量的内存空间。以kinetics-400数据集为例，共包含24万个训练样本，mp4文件约130G，解码存成图像后，占用的内存空间约为2T，所以这种方法比较适用于较小规模的数据集，如ucf-101。PaddleVideo提供了[预先解码](https://github.com/PaddlePaddle/PaddleVideo/blob/main/data/ucf101/extract_rawframes.py)的脚本，并且[TSN模型](https://github.com/PaddlePaddle/PaddleVideo/blob/main/docs/zh-CN/model_zoo/recognition/tsn.md)和[TSM模型](https://github.com/PaddlePaddle/PaddleVideo/blob/main/docs/zh-CN/model_zoo/recognition/tsm.md)均支持直接使用frame格式的数据进行训练，详细实现参考[源码](https://github.com/PaddlePaddle/PaddleVideo/blob/main/paddlevideo/loader/dataset/frame.py)。
 
 测试方法: 
 ```
@@ -197,6 +197,11 @@ batch_size: 16
 ```
 
 模型参数参考默认配置[pptsm.yaml](https://github.com/PaddlePaddle/PaddleVideo/blob/main/configs/recognition/tsm/pptsm.yaml)，Dataloader的num_workers参数设为0，分别以video和frame格式作为输入，性能数据如下:
+
+| 数据格式  | batch耗时/s  | reader耗时/s | ips:instance/sec | reader加速比 | 加速比 |
+| :--------------- | :--------: | :------------: | :------------: | :------------: | :------------: |
+| frame | 1.008 | 0.591 | 15.87405  | 4.79 | **3.22x** |
+| video | 3.249 | 2.832 | 4.92392| baseline | baseline |
 
 
 # 训练策略加速
