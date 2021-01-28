@@ -15,6 +15,13 @@
 
 本教程介绍如下视频模型训练加速方法: 模型上，通过op融合或混合精度训练的方式提升op运算效率；数据上，通过多进程或者并行计算的方式加速数据读取速度；训练策略上，通过multigrid策略减少训练耗时。另外也可以通过多机分布式加快训练速度。
 
+本教程的实验数据基于以下测试环境所得:
+```
+GPU: v100，4卡*16G
+CPU: Intel(R) Xeon(R) Gold 6148 CPU @ 2.40GHz
+PaddlePaddle: 2.0.0-rc1
+```
+
 以上训练加速方法都已经集成进PaddleVideo中，欢迎试用~
 
 # 模型运算加速
@@ -122,12 +129,7 @@ Comming soon~
 其中解码是最为耗时的。相较于传统的opencv或pyAV解码库，这里推荐使用性能更优的解码库[decord](https://github.com/dmlc/decord)。目前[SlowFast模型](https://github.com/PaddlePaddle/PaddleVideo/blob/main/docs/zh-CN/model_zoo/recognition/slowfast.md)使用decord进行视频解码([源码](https://github.com/PaddlePaddle/PaddleVideo/blob/main/paddlevideo/loader/pipelines/decode_sampler.py)，对单进程的速度提升有较大作用。
 
 
-我们分别以opencv/decord为解码器，实现SlowFast模型数据预处理pipeline，然后随机从kinetics-400数据集中选取200条视频，计算各pipeline处理每条视频的平均时间，测试环境为:
-```
-GPU: v100，4卡*16G
-CPU: Intel(R) Xeon(R) Gold 6148 CPU @ 2.40GHz
-PaddlePaddle: 2.0.0-rc1
-```
+我们分别以opencv/decord为解码器，实现SlowFast模型数据预处理pipeline，然后随机从kinetics-400数据集中选取200条视频，计算各pipeline处理每条视频的平均时间。
 
 性能测试数据如下:
 
