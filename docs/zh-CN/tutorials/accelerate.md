@@ -168,11 +168,11 @@ Comming soon~
 
 性能测试数据如下:
 
-| 加速方式  | batch耗时/s  | reader耗时/s | ips:instance/sec |
-| :--------------- | :--------: | :------------: | :------------: |
-| DALI | 2.083 | 1.804 | 15.36597  |
-| Dataloader:  单卡num_workers=4 | 2.943 | 2.649 | 10.87460|
-| pytorch实现 | TODO | TODO | TODO |
+| 加速方式  | batch耗时/s  | reader耗时/s | ips:instance/sec | 加速比 |
+| :--------------- | :--------: | :------------: | :------------: | :------------: |
+| DALI | 2.083 | 1.804 | 15.36597  | 1.41x |
+| Dataloader:  单卡num_workers=4 | 2.943 | 2.649 | 10.87460| baseline |
+| pytorch实现 | TODO | TODO | TODO | TODO |
 
 
 ## 预先解码存成图像
