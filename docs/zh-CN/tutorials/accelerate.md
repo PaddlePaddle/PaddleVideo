@@ -147,7 +147,7 @@ Comming soon~
 
 ## 多进程加速Dataloader
 
-数据准备好后喂入网络进行训练，网络运算使用GPU并行加速，其运算速度是很快的。因此对于单个进程来说，速度瓶颈大多在数据处理部分，GPU大部分时间是在等待CPU完成数据预处理。
+数据准备好后喂入网络进行训练，网络运算使用GPU并行加速相对较快。对于单个进程来说，速度瓶颈大多在数据处理部分，GPU大部分时间是在等待CPU完成数据预处理。
 飞桨2.0使用[Dataloader](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/api/paddle/io/DataLoader_cn.html#dataloader)进行数据加载，DataLoader支持单进程和多进程的数据加载方式，当 num_workers 大于0时，将使用多进程方式异步加载数据。多进程加速协作，可以overlap掉GPU大部分等待的时间，提升GPU利用率，显著加速训练过程。
 
 我们分别设置num_workers为0或4，单卡batch_size统一设置为8，统计训练一个batch的平均耗时。
