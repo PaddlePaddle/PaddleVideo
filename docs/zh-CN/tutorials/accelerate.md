@@ -186,7 +186,7 @@ Comming soon~
 
 # 训练策略加速
 
-前述方法大多从工程的角度思考训练速度的提升，在算法策略上，FAIR在CVPR 2020中提出了一种[Multigrid加速策略算法]()，它的基本思想如下: 
+前述方法大多从工程的角度思考训练速度的提升，在算法策略上，FAIR在CVPR 2020中提出了[Multigrid加速策略算法]()，它的基本思想如下: 
 
 在图像分类任务中，若经过预处理后图像的高度和宽度分别为H和W，batch_size为N，则网络输入batch的Tensor形状为`[N, C, H, W]`，其中C等于3，指RGB三个通道。
 对应到视频任务，由于增加了时序通道，输入batch的Tensor形状为`[N, C, T, H, W]`。
@@ -194,7 +194,7 @@ Comming soon~
 
 基于以上思想，FAIR在实验的基础上提出了Multigrid训练策略: 固定`N*C*T*H*W`的值，降低`T*H*W`时增大`N`的值，增大`T*H*W`时减小`N`的值。具体的有两种策略，如示意图所示：
 
-Long cycle:
+- Long cycle:
 设完整训练需要N个epoch，将整个训练过程分4个阶段，每个阶段对应的输入tensor形状为:
 ```
 [8N, T/4, H/sqrt(2), W/sqrt(2)], [4N, T/2, H/sqrt(2), W/sqrt(2)], [2N, T/2, H, W], [N, T, H, W]
