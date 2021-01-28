@@ -26,6 +26,78 @@
 
 针对[TSM模型](https://github.com/PaddlePaddle/PaddleVideo/blob/main/docs/zh-CN/model_zoo/recognition/tsm.md)，我们实现了[temporal shift op](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/api/paddle/fluid/layers/temporal_shift_cn.html#temporal-shift)，在节省显存的同时加速训练过程。
 
+测试方法:
+使用不同形状的Tensor，以不同的方式实现temporal
+
+测试代码:
+
+- temporal shift op实现方式
+```python
+import time
+import numpy as np
+import paddle
+import paddle.nn.functional as F
+
+SHAPE = [32, 16, 32, 32]
+#SHAPE = [128, 64, 128, 128]
+
+otl = []
+input = paddle.randn(SHAPE)
+for i in range(10000):
+    t1 = time.time()
+    out1 = F.temporal_shift(x=input, seg_num=2, shift_ratio=0.2)
+    t2 = time.time()
+    ot = t2 - t1
+    if i > 1000:
+        otl.append(ot)
+print("op time: ", sum(otl)/len(otl))
+```
+
+- 组合op实现方式
+```python
+import time
+import numpy as np
+import paddle
+import paddle.nn.functional as F
+
+SHAPE = [32, 16, 32, 32]
+#SHAPE = [128, 64, 128, 128]
+
+def temporal_shift(x, seg_num, shift_ratio):
+    shape = x.shape #[N*T, C, H, W]
+    reshape_x = x.reshape((-1, seg_num, shape[1], shape[2], shape[3])) #[N, T, C, H, W]
+    pad_x = paddle.fluid.layers.pad(reshape_x, [0,0,1,1,0,0,0,0,0,0,]) #[N, T+2, C, H, W]
+    c1 = int(shape[1] * shift_ratio)
+    c2 = int(shape[1] * 2 * shift_ratio)
+    slice1 = pad_x[:, :seg_num, :c1, :, :]
+    slice2 = pad_x[:, 2:seg_num+2, c1:c2, :, :]
+    slice3 = pad_x[:, 1:seg_num+1, c2:, :, :]
+    concat_x = paddle.concat([slice1, slice2, slice3], axis=2) #[N, T, C, H, W]
+    return concat_x.reshape(shape)
+
+ctl = []
+input = paddle.randn(SHAPE)
+for i in range(10000):
+    t2 = time.time()
+    out2 = temporal_shift(x=input, seg_num=2, shift_ratio=0.2)
+    t3 = time.time()
+    ct = t3 - t2
+    if i > 1000:
+        ctl.append(ct)
+print("combine time: ", sum(ctl)/len(ctl))
+```
+
+性能数据如下:
+
+| 输入tensor形状 | 实现方式 | 显存占用/M| 计算时间/s | 加速比 |
+| :------ | :-----: | :------: | :------: | :------: | 
+| 32\*16\*32\*32 |op组合方式 | 1074 | 0.00029325 |  baseline |
+| 32\*16\*32\*32 | temporal shift op | 1058 | 0.000045770 | 6.4x |
+| 128\*64\*128\*128 |op组合方式 | 5160 | 0.0099088 |  baseline |
+| 128\*64\*128\*128 | temporal shift op | 2588 | 0.0018617 | 5.3x |
+
+
+
 ## 混合精度训练
 
 Comming soon~
