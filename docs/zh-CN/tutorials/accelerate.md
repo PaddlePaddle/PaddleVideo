@@ -17,13 +17,13 @@
 
 以上训练加速方法都已经集成进PaddleVideo中，欢迎试用~
 
-本教程的实验数据基于以下测试环境所得:
+如非特别说明，本教程所有实验的测试环境如下:
 ```
 GPU: v100，4卡*16G
 CPU: Intel(R) Xeon(R) Gold 6148 CPU @ 2.40GHz
 PaddlePaddle: 2.0.0-rc1
+Cuda: 10.2
 ```
-
 
 
 # 模型运算加速
@@ -36,7 +36,7 @@ PaddlePaddle: 2.0.0-rc1
 针对[TSM模型](https://github.com/PaddlePaddle/PaddleVideo/blob/main/docs/zh-CN/model_zoo/recognition/tsm.md)，我们实现了[temporal shift op](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/api/paddle/fluid/layers/temporal_shift_cn.html#temporal-shift)，在节省显存的同时加速训练过程。
 
 测试方法:
-使用不同形状的Tensor，以不同的方式实现temporal
+使用不同形状的Tensor，以不同的方式实现temporal shift，记录显存占用和运行时间。
 
 测试代码:
 
@@ -118,7 +118,7 @@ Comming soon~
 - [数据预处理DALI](##数据预处理DALI)
 - [预先解码存成图像](##预先解码存成图像)
 
-对于单机训练，视频模型的训练瓶颈大多是在数据预处理上，因此本节主要介绍在数据处理上的一些加速经验
+对于单机训练，视频模型的训练瓶颈大多是在数据预处理上，因此本节主要介绍在数据处理上的一些加速经验。
 
 ## 更优的解码库Decord
 
@@ -128,8 +128,7 @@ Comming soon~
 - 抽帧: 从视频中抽取部分帧用于网络训练
 - 数据增强：缩放、裁剪、随机翻转、正则化
 
-其中解码是最为耗时的。相较于传统的opencv或pyAV解码库，这里推荐使用性能更优的解码库[decord](https://github.com/dmlc/decord)。目前[SlowFast模型](https://github.com/PaddlePaddle/PaddleVideo/blob/main/docs/zh-CN/model_zoo/recognition/slowfast.md)使用decord进行视频解码([源码](https://github.com/PaddlePaddle/PaddleVideo/blob/main/paddlevideo/loader/pipelines/decode_sampler.py)，对单进程的速度提升有较大作用。
-
+其中解码是最为耗时的。相较于传统的opencv或pyAV解码库，这里推荐使用性能更优的解码库[decord](https://github.com/dmlc/decord)。目前[SlowFast模型](https://github.com/PaddlePaddle/PaddleVideo/blob/main/docs/zh-CN/model_zoo/recognition/slowfast.md)使用decord进行视频解码([源码](https://github.com/PaddlePaddle/PaddleVideo/blob/main/paddlevideo/loader/pipelines/decode_sampler.py))，对单进程的速度提升有较大作用。
 
 我们分别以opencv/decord为解码器，实现SlowFast模型数据预处理pipeline，然后随机从kinetics-400数据集中选取200条视频，计算各pipeline处理每条视频的平均时间。
 
@@ -145,9 +144,9 @@ Comming soon~
 ## 多进程加速Dataloader
 
 数据准备好后喂入网络进行训练，网络运算使用GPU并行加速，其运算速度是很快的。因此对于单个进程来说，速度瓶颈大多在数据处理部分，GPU大部分时间是在等待CPU完成数据预处理。
-飞桨2.0使用[Dataloader]()进行数据加载，DataLoader支持单进程和多进程的数据加载方式，当 num_workers 大于0时，将使用多进程方式异步加载数据。多进程加速协作，可以overlap掉GPU大部分等待的时间，提升GPU利用率，显著加速训练过程。
+飞桨2.0使用[Dataloader](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/api/paddle/io/DataLoader_cn.html#dataloader)进行数据加载，DataLoader支持单进程和多进程的数据加载方式，当 num_workers 大于0时，将使用多进程方式异步加载数据。多进程加速协作，可以overlap掉GPU大部分等待的时间，提升GPU利用率，显著加速训练过程。
 
-我们分别设置num_workers为0或4，单卡batch_size统一设置为8，统计训练一个batch的平均耗时，测试环境同上。
+我们分别设置num_workers为0或4，单卡batch_size统一设置为8，统计训练一个batch的平均耗时。
 
 性能测试数据对比如下:
 | 卡数 | 单卡num_workers | batch_cost/s | ips | 加速比 |
@@ -159,11 +158,22 @@ Comming soon~
 
 其中ips = batch_size/batch_cost，即为训练一个instance(一个video)的平均耗时。
 
-**结合使用decord和飞桨dataloader，加上在数据增强部分做一些细节优化，SlowFast模型训练速度增益为100%，详细数据可以参考[benchmark]()**。
+**结合使用decord和飞桨dataloader，加上在数据增强部分做一些细节优化，SlowFast模型训练速度增益为100%，详细数据可以参考[benchmark](https://github.com/PaddlePaddle/PaddleVideo/blob/main/docs/zh-CN/benchmark.md)**。
 
 ## 数据预处理DALI
 
-既然GPU等待CPU进行数据处理耗时，能否把数据处理放到GPU上呢？[NVIDIA DALI]()将数据预处理pipeline转移到GPU上执行，可以显著提升训练速度。针对视频文件，DALI提供`VideoReader`op进行解码抽帧操作，但目前其仅支持连续采样的方式进行抽帧。而视频领域常用的2D模型TSN或TSM，它们均采用分段采样方式，即把视频均匀分成N段segument，然后在每个segument内随机选取一帧，最后把选取的帧组合作为输入张量。为此，我们基于DALI进行了二次开发，实现了支持分段采样方式的`VideoReader`op。为方便用户使用，我们提供了配置好的docker运行环境，具体使用方法参考[TSN-DALI使用教程]()。
+既然GPU等待CPU进行数据处理耗时，能否把数据处理放到GPU上呢？[NVIDIA DALI](https://docs.nvidia.com/deeplearning/dali/user-guide/docs/)将数据预处理pipeline转移到GPU上执行，可以显著提升训练速度。针对视频文件，DALI提供`VideoReader`op进行解码抽帧操作，但目前其仅支持连续采样的方式进行抽帧。而视频领域常用的2D模型TSN或TSM，它们均采用分段采样方式，即把视频均匀分成N段segument，然后在每个segument内随机选取一帧，最后把选取的帧组合作为输入张量。为此，我们基于DALI进行了二次开发，实现了支持分段采样方式的`VideoReader`op。为方便用户使用，我们提供了配置好的docker运行环境，具体使用方法参考[TSN-DALI使用教程](https://github.com/PaddlePaddle/PaddleVideo/blob/main/docs/zh-CN/model_zoo/recognition/tsn_dali.md)。
+
+测试环境: Tesla v100 14卡16G，Cuda9，单卡batch_size=32。
+
+性能测试数据如下:
+
+| 加速方式  | batch耗时/s  | reader耗时/s | ips:instance/sec |
+| :--------------- | :--------: | :------------: | :------------: |
+| DALI | 2.083 | 1.804 | 15.36597  |
+| Dataloader:  单卡num_workers=4 | 2.943 | 2.649 | 10.87460|
+| pytorch实现 | TODO | TODO | TODO |
+
 
 ## 预先解码存成图像
 
