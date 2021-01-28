@@ -170,7 +170,8 @@ Comming soon~
 
 测试环境: 
 ```
-Tesla v100 14卡16G，
+机器: Tesla v100
+显存: 4卡16G
 Cuda: 9.0
 单卡batch_size: 32
 ```
