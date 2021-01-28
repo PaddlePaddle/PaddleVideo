@@ -117,11 +117,9 @@ Comming soon~
 
 - 解码: 将视频文件解码成数据流
 - 抽帧: 从视频中抽取部分帧用于网络训练
-- 数据增强：缩放、裁剪、随机反转、正则化
+- 数据增强：缩放、裁剪、随机翻转、正则化
 
-其中解码是最为耗时的。相较于传统的opencv或pyAV解码库，这里推荐使用性能更优的解码库[decord]()，其官方给出的性能数据如下图:
-
-目前[SlowFast]()模型使用decord进行视频解码([源码]())，对单进程的速度提升有较大作用。
+其中解码是最为耗时的。相较于传统的opencv或pyAV解码库，这里推荐使用性能更优的解码库[decord](https://github.com/dmlc/decord)。目前[SlowFast模型](https://github.com/PaddlePaddle/PaddleVideo/blob/main/docs/zh-CN/model_zoo/recognition/slowfast.md)使用decord进行视频解码([源码](https://github.com/PaddlePaddle/PaddleVideo/blob/main/paddlevideo/loader/pipelines/decode_sampler.py)，对单进程的速度提升有较大作用。
 
 
 我们分别以opencv/decord为解码器，实现SlowFast模型数据预处理pipeline，然后随机从kinetics-400数据集中选取200条视频，计算各pipeline处理每条视频的平均时间，测试环境为:
