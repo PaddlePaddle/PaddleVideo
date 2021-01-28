@@ -144,7 +144,6 @@ Comming soon~
 | opencv | 4.2.0 | 0.20965035 | baseline |
 | decord | 0.4.2 | 0.13788146 |  1.52x |
 
-可以看到，单进程下decord相较于opencv解码库可以加速1.52倍。
 
 ## 多进程加速Dataloader
 
@@ -182,11 +181,11 @@ Comming soon~
 
 ## 预先解码存成图像
 
-这是一种简单直接的方法，既然视频解码耗时，那可以事先将视频解码好，存成图片，模型训练时直接读取图像即可。这种方法可以显著提升视频模型训练速度，在XXX上大约提速3倍。但它也有一个很明显的缺点，就是需要耗费大量的内存空间，以kinetics-400数据集为例，共包含24万个训练样本，mp4文件约130G，解码存成图像后，占用的内存空间约为2T，所以这种方法比较适用于较小规模的数据集，如ucf-101。PaddleVideo提供了[预先解码]()的脚本，并且[TSN模型]()和[TSM模型]()均支持直接使用frame格式的数据进行训练，详细实现参考[源码]()。
+这是一种简单直接的方法，既然视频解码耗时，那可以事先将视频解码好，存成图片，模型训练时直接读取图像即可。这种方法可以显著提升视频模型训练速度，在XXX上大约提速3倍。但它也有一个很明显的缺点，就是需要耗费大量的内存空间，以kinetics-400数据集为例，共包含24万个训练样本，mp4文件约130G，解码存成图像后，占用的内存空间约为2T，所以这种方法比较适用于较小规模的数据集，如ucf-101。PaddleVideo提供了[预先解码](https://github.com/PaddlePaddle/PaddleVideo/blob/main/data/ucf101/extract_rawframes.py)的脚本，并且[TSN模型](https://github.com/PaddlePaddle/PaddleVideo/blob/main/docs/zh-CN/model_zoo/recognition/tsn.md)和[TSM模型](https://github.com/PaddlePaddle/PaddleVideo/blob/main/docs/zh-CN/model_zoo/recognition/tsm.md)均支持直接使用frame格式的数据进行训练，详细实现参考[源码](https://github.com/PaddlePaddle/PaddleVideo/blob/main/paddlevideo/loader/dataset/frame.py)。
 
 # 训练策略加速
 
-前述方法大多从工程的角度思考训练速度的提升，在算法策略上，FAIR在CVPR 2020中提出了[Multigrid加速策略算法]()，它的基本思想如下: 
+前述方法大多从工程的角度思考训练速度的提升，在算法策略上，FAIR在CVPR 2020中提出了[Multigrid加速策略算法](https://arxiv.org/abs/1912.00998)，它的基本思想如下: 
 
 在图像分类任务中，若经过预处理后图像的高度和宽度分别为H和W，batch_size为N，则网络输入batch的Tensor形状为`[N, C, H, W]`，其中C等于3，指RGB三个通道。
 对应到视频任务，由于增加了时序通道，输入batch的Tensor形状为`[N, C, T, H, W]`。
