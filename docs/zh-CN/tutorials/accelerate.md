@@ -192,16 +192,14 @@ Comming soon~
 对应到视频任务，由于增加了时序通道，输入batch的Tensor形状为`[N, C, T, H, W]`。
 传统的训练策略中，每个batch的输入Tensor形状都是固定的，即都是`[N, C, T, H, W]`。若以高分辨的图像作为输入，即设置较大的`[T, H, W]`，则模型精度会高一些，但训练会更慢；若以低分辨的图像作为输入，即设置较小的`[T, H, W]`，则可以使用更大的batch size，训练更快，但模型精度会降低。在一个epoch中，能否让不同batch的输入Tensor的形状动态变化，既能提升训练速度，又能保证模型精度？
 
-基于以上思想，FAIR在实验的基础上提出了Multigrid训练策略: 固定`N*C*T*H*W`的值，降低`T*H*W`时增大`N`的值，增大`T*H*W`时减小`N`的值。具体的有两种策略，如示意图所示：
+基于以上思想，FAIR在实验的基础上提出了Multigrid训练策略: 固定`N*C*T*H*W`的值，降低`T*H*W`时增大`N`的值，增大`T*H*W`时减小`N`的值。具体包含两种策略：
 
-- Long cycle:
-设完整训练需要N个epoch，将整个训练过程分4个阶段，每个阶段对应的输入tensor形状为:
+- Long cycle: 设完整训练需要N个epoch，将整个训练过程分4个阶段，每个阶段对应的输入tensor形状为:
 ```
 [8N, T/4, H/sqrt(2), W/sqrt(2)], [4N, T/2, H/sqrt(2), W/sqrt(2)], [2N, T/2, H, W], [N, T, H, W]
 ```
 
-Short cycle:
-在Long cycle的基础上，Short-cycle让每个iter的输入Tensor形状都会发生变化，变化策略为:
+- Short cycle: 在Long cycle的基础上，Short-cycle让每个iter的输入Tensor形状都会发生变化，变化策略为:
 ```
 [H/2, W/2], [H/sqrt(2), W/sqrt(2)], [H, W]
 ```
