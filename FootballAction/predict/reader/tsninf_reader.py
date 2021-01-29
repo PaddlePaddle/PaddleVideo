@@ -92,6 +92,8 @@ class TSNINFReader(DataReader):
                 if len(batch_out) == self.batch_size:
                     yield batch_out
                     batch_out = []
+            if len(batch_out) > 1:
+                yield batch_out[:-1]
 
         return _batch_reader
 
