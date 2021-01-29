@@ -27,6 +27,7 @@
 </p>
 
 双向（bi-direction）的TSM模块可获取过去和未来的时空信息，适合高吞吐量的离线视频使用；而单向（uni-direction）的TSM模块仅可比对现在和过去的时空信息，适用于低延迟在线视频的识别。
+此外，论文中作者还考虑了TSM模块插入的位置，
 
 
 好了，TSM模块基本原理搞清楚了是不是**So Easy ！！！**，接下来问题来了，代码如何实现呢？
@@ -35,91 +36,14 @@
 
 原理搞清楚了，下面来看看代码如何实现，首先我们来看看torch版本如何实现的，呃呃呃...，不好意思torch框架并未提供TSM的API，不过我们可以来自己实现，具体实现代码如下图所示：
 
-是不是很简单？  But...，Paddle框架充分考虑到广大用户的需求已经为大家实现了tsm的操作并进行了性能的优化，所以大家再也不用自己实现了，**直接调用就可以啦！！！,直接调用就可以啦！！！，直接调用就可以啦！！！**
-3.1.数据准备
-
-TSM的训练数据采用由DeepMind公布的Kinetics-400动作识别数据集。数据下载及准备请参考：
-
-https://github.com/PaddlePaddle/models/blob/v1.5.1/PaddleCV/PaddleVideo/dataset/README.md
-
-3.2.模型训练
-
-
-数据准备完毕后，可以通过如下两种方式启动训练：
-
-export FLAGS_fast_eager_deletion_mode=1
-export FLAGS_eager_delete_tensor_gb=0.0
-export FLAGS_fraction_of_gpu_memory_to_use=0.98
-python train.py --model_name=TSM
-        --config=./configs/tsm.txt
-        --save_dir=checkpoints
-        --log_interval=10
-        --valid_interval=1
-        --pretrain=${path_to_pretrain_model}
-
-bash scripts/train/train_tsm.sh
-
-
-[1] 从头开始训练，需要加载在ImageNet上训练的ResNet50权重作为初始化参数，请下载此模型参数（https://paddlemodels.bj.bcebos.com/video_classification/ResNet50_pretrained.tar.gz）并解压，将上面启动脚本中的path_to_pretrain_model设置为解压之后的模型参数存放路径。如果没有手动下载并设置path_to_pretrain_model，则程序会自动下载并将参数保存在~/.paddle/weights/ResNet50_pretrained目录下面。
+是不是很简单？  But...，Paddle框架充分考虑到广大用户的需求已经为各位童鞋实现了TSM的OP并进行了性能的优化，所以各位童鞋再也不用自己实现了，**直接调用就可以啦！！！,直接调用就可以啦！！！，直接调用就可以啦！！！**，重要的事情讲三遍，下面我们来看看使用飞桨如何实现TSM：
 
 
 
-[2] 可下载已发布模型model（https://paddlemodels.bj.bcebos.com/video_classification/tsm_kinetics.tar.gz）通过--resume指定权重存放路径进行finetune等开发。
-
-数据读取器说明：
-
-模型读取Kinetics-400数据集中的mp4数据，每条数据抽取seg_num段，每段抽取1帧图像，对每帧图像做随机增强后，缩放至target_size。
-
-训练策略：
-
-采用Momentum优化算法训练，momentum=0.9
-权重衰减系数为1e-4
-模型评估
-
-可通过如下两种方式进行模型评估:
-
-python test.py --model_name=TSM
-        --config=configs/tsm.txt
-        --log_interval=1
-        --weights=$PATH_TO_WEIGHTS
-
-bash scripts/test/test_tsm.sh
-[1] 使用scripts/test/test_tsm.sh进行评估时，需要修改脚本中的--weights参数指定需要评估的权重。
+一行代码就可以实现TSM了，是不是很简单？
 
 
-
-[2] 若未指定--weights参数，脚本会下载已发布模型进行评估。
-
-当取如下参数时，在Kinetics400的validation数据集的评估精度如下:
-
-seg_num
-
-target_size
-
-Top-1
-
-8
-
-224
-
-0.70
-
-3.3.模型推断
-
-
-可通过如下命令进行模型推断：
-
-模型推断结果存储于TSM_infer_result中，通过pickle格式存储。
-若未指定--weights参数，脚本会下载已发布模型进行推断。
-python infer.py --model_name=TSM
-        --config=configs/tsm.txt
-        --log_interval=1
-        --weights=$PATH_TO_WEIGHTS
-        --filelist=$FILELIS
-
-3.4.效果实测
-
-
++ 效果实测
 
 TOP5预测结果
 
