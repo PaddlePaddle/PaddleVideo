@@ -42,9 +42,14 @@
 <img src="../../images/torch_tsm.png" height=188 width=500 hspace='10'/> <br />
 </p>
 
-是不是很简单？  But...，Paddle框架充分考虑到广大用户的需求已经为各位童鞋实现了TSM的OP并进行了性能的优化，所以各位童鞋再也不用自己实现了，**直接调用就可以啦！！！,直接调用就可以啦！！！，直接调用就可以啦！！！**，重要的事情讲三遍，下面我们来看看使用飞桨如何实现TSM：
+是不是很简单？  
+
+But...，
+
+
+Paddle框架充分考虑到广大用户的需求已经为各位童鞋实现了TSM的OP并进行了性能的优化，所以各位童鞋再也不用自己实现了，**直接调用就可以啦！！！,直接调用就可以啦！！！，直接调用就可以啦！！！**，重要的事情讲三遍，下面我们来看看使用飞桨如何实现TSM：
 <p align="center">
-<img src="../../images/tsm_op.png" height=188 width=500 hspace='10'/> <br />
+<img src="../../images/tsm_op.png" height=200 width=500 hspace='10'/> <br />
 </p>
 
 `shifts = paddle.fluid.layers.temporal_shift(inputs, self.num_seg,1.0 / self.num_seg)`
