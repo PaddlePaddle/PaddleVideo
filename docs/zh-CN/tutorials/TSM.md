@@ -27,7 +27,10 @@
 </p>
 
 双向（bi-direction）的TSM模块可获取过去和未来的时空信息，适合高吞吐量的离线视频使用；而单向（uni-direction）的TSM模块仅可比对现在和过去的时空信息，适用于低延迟在线视频的识别。
-此外，论文中作者还考虑了TSM模块插入的位置，
+此外，论文中作者还考虑了TSM模块插入的位置，对比了两种TSM插入方式：**Residual tsm** 和 **In-place tsm**
+<p align="center">
+<img src="../../images/residual_tsm.png" height=188 width=500 hspace='10'/> <br />
+</p>
 
 
 好了，TSM模块基本原理搞清楚了是不是**So Easy ！！！**，接下来问题来了，代码如何实现呢？
@@ -37,7 +40,11 @@
 原理搞清楚了，下面来看看代码如何实现，首先我们来看看torch版本如何实现的，呃呃呃...，不好意思torch框架并未提供TSM的API，不过我们可以来自己实现，具体实现代码如下图所示：
 
 是不是很简单？  But...，Paddle框架充分考虑到广大用户的需求已经为各位童鞋实现了TSM的OP并进行了性能的优化，所以各位童鞋再也不用自己实现了，**直接调用就可以啦！！！,直接调用就可以啦！！！，直接调用就可以啦！！！**，重要的事情讲三遍，下面我们来看看使用飞桨如何实现TSM：
+<p align="center">
+<img src="../../images/tsm_op.png" height=188 width=500 hspace='10'/> <br />
+</p>
 
+`shifts = paddle.fluid.layers.temporal_shift(inputs, self.num_seg,1.0 / self.num_seg)`
 
 
 一行代码就可以实现TSM了，是不是很简单？
