@@ -27,7 +27,7 @@
 </p>
 
 双向（bi-direction）的TSM模块可获取过去和未来的时空信息，适合高吞吐量的离线视频使用；而单向（uni-direction）的TSM模块仅可比对现在和过去的时空信息，适用于低延迟在线视频的识别。
-此外，论文中作者还考虑了TSM模块插入的位置，对比了两种TSM插入方式：**Residual tsm** 和 **In-place tsm**
+此外，论文中作者还考虑了TSM模块插入的位置，对比了两种TSM插入方式：**Residual tsm** 和 **In-place tsm**，作者发现使用**Residual tsm**方式会比 **In-place tsm** 的方式效果更好，文中作者解释为**In-place tsm** 会影响模型对空间信息的提取。
 <p align="center">
 <img src="../../images/residual_tsm.png" height=188 width=500 hspace='10'/> <br />
 </p>
@@ -50,7 +50,7 @@
 一行代码就可以实现TSM了，是不是很简单？
 
 
-+ 效果实测
++效果实测
 
 TOP5预测结果
 
