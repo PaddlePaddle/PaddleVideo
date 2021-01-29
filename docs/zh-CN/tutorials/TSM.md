@@ -42,19 +42,32 @@
 <img src="../../images/torch_tsm.png" height=188 width=500 hspace='10'/> <br />
 </p>
 
-是不是很简单？  
+这意味着你只需要在TSN的代码基础上添加4行代码就能将准确率在Something-Something这样的数据集上**翻上一倍！！！**  是不是简单高效的模型 ？
 
 But...，
 
 
-飞桨框架充分考虑到广大用户的需求已经为各位童鞋实现了TSM的OP并进行了性能的优化，所以各位童鞋再也不用自己实现了，**直接调用就可以啦！！！,直接调用就可以啦！！！，直接调用就可以啦！！！**，重要的事情讲三遍，下面我们来看看使用飞桨如何实现TSM：
+飞桨框架充分考虑到广大用户的需求已经为各位童鞋实现了TSM的OP
 <p align="center">
 <img src="../../images/tsm_op.png" height=260 width=400 hspace='10'/> <br />
 </p>
 
-`shifts = paddle.fluid.layers.temporal_shift(inputs, self.num_seg,1.0 / self.num_seg)`
+所以各位童鞋再也不用自己实现了，**直接调用就可以啦！！！,直接调用就可以啦！！！，直接调用就可以啦！！！**，重要的事情讲三遍，
 
-一行代码就可以实现TSM了，是不是很简单？
+你以为事情到这里就结束啦 ？
+
+**Too young Too simple !!!**
+
+我们在此基础上还对其进行了性能优化，在降低显存消耗的同时，可以提速5倍以上，详细信息可以参考[加速文档](./accelerate.md)
+
+下面我们来看看使用飞桨如何实现TSM：
+
+`import paddle.nn.functional as F`
+
+
+`shifts = F.temporal_shift(inputs, self.num_seg,1.0 / self.num_seg)`
+
+两行代码就可以实现TSM了，是不是很简单？
 
 # Reference
 [1] Lin Ji , Gan Chuang , Han Song . TSM: Temporal Shift Module for Efficient Video Understanding. arXiv:1811.08383,2018.
