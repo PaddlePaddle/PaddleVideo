@@ -39,22 +39,22 @@
 
 原理搞清楚了，下面来看看代码如何实现，首先我们来看看torch版本如何实现的，呃呃呃...，不好意思torch框架并未提供TSM的API，我们只能自己动手啦，具体实现代码如下图所示：
 <p align="center">
-<img src="../../images/torch_tsm.png" height=188 width=500 hspace='10'/> <br />
+<img src="../../images/torch_tsm.png" height=160 width=500 hspace='10'/> <br />
 </p>
 
-这意味着你只需要在TSN的代码基础上添加4行代码就能将准确率在Something-Something这样的数据集上**翻上一倍！！！**  是不是简单高效的模型 ？
+这意味着你只需要在TSN的代码基础上添加4行代码就能将准确率在Something-Something这样的数据集上**翻上一倍！！！**  是不是简单高效的模型 ？不得不向大佬低头！
 
 But...，
 
 
 飞桨框架充分考虑到广大用户的需求已经为各位童鞋实现了TSM的OP
 <p align="center">
-<img src="../../images/tsm_op.png" height=260 width=400 hspace='10'/> <br />
+<img src="../../images/tsm_op.png" height=300 width=400 hspace='10'/> <br />
 </p>
 
 所以各位童鞋再也不用自己实现了，**直接调用就可以啦！！！,直接调用就可以啦！！！，直接调用就可以啦！！！**，重要的事情讲三遍，
 
-是不是以为事情到这里就结束啦 ？ 唉，**Too young Too simple !!!**
+是不是以为事情到这里就结束啦 ？ 唉! **Too young Too simple !!!**
 
 我们在此基础上还对其进行了性能优化，在降低显存消耗的同时，可以提速5倍以上，详细信息可以参考[加速文档](./accelerate.md)
 
