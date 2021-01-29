@@ -49,17 +49,8 @@
 
 `shifts = paddle.fluid.layers.temporal_shift(inputs, self.num_seg,1.0 / self.num_seg)`
 
-
 一行代码就可以实现TSM了，是不是很简单？
 
-
-+ 效果实测
-[![Come on !!!]({./../images/tsm_op.png})]({./data/example.avi} "Link Title")
-
-
-TOP5预测结果
-
-
-可以看到，TSM模型准确的判断出了视频中是瑜伽（yoga）动作，而且预测概率0.97也是足够高，完全可以在商业中应用起来。
-
-赶紧来试试吧！
+# Reference
+[1] Lin Ji , Gan Chuang , Han Song . TSM: Temporal Shift Module for Efficient Video Understanding. arXiv:1811.08383,2018.
+[2] Limin Wang, Yuanjun Xiong, Zhe Wang, Yu Qiao, Dahua Lin, Xiaoo Tang,and Luc Van Gool. Temporal segment networks for action recognition in videos? In Proceedings of the European Conference on Computer Vision,pages 20–36. Springer, 2016.
