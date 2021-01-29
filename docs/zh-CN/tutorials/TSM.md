@@ -33,7 +33,7 @@
 </p>
 
 
-好了，TSM模块基本原理搞清楚了是不是**So Easy ！！！**，接下来问题来了，代码如何实现呢？
+好了，TSM模块基本原理搞清楚了是不是**So Easy ！！！**，接下来问题来了，代码该如何实现呢？
 
 # 3. 关键代码解析
 
@@ -47,9 +47,9 @@
 But...，
 
 
-Paddle框架充分考虑到广大用户的需求已经为各位童鞋实现了TSM的OP并进行了性能的优化，所以各位童鞋再也不用自己实现了，**直接调用就可以啦！！！,直接调用就可以啦！！！，直接调用就可以啦！！！**，重要的事情讲三遍，下面我们来看看使用飞桨如何实现TSM：
+飞桨框架充分考虑到广大用户的需求已经为各位童鞋实现了TSM的OP并进行了性能的优化，所以各位童鞋再也不用自己实现了，**直接调用就可以啦！！！,直接调用就可以啦！！！，直接调用就可以啦！！！**，重要的事情讲三遍，下面我们来看看使用飞桨如何实现TSM：
 <p align="center">
-<img src="../../images/tsm_op.png" height=200 width=500 hspace='10'/> <br />
+<img src="../../images/tsm_op.png" height=260 width=400 hspace='10'/> <br />
 </p>
 
 `shifts = paddle.fluid.layers.temporal_shift(inputs, self.num_seg,1.0 / self.num_seg)`
@@ -58,4 +58,6 @@ Paddle框架充分考虑到广大用户的需求已经为各位童鞋实现了TS
 
 # Reference
 [1] Lin Ji , Gan Chuang , Han Song . TSM: Temporal Shift Module for Efficient Video Understanding. arXiv:1811.08383,2018.
+
+
 [2] Limin Wang, Yuanjun Xiong, Zhe Wang, Yu Qiao, Dahua Lin, Xiaoo Tang,and Luc Van Gool. Temporal segment networks for action recognition in videos? In Proceedings of the European Conference on Computer Vision,pages 20–36. Springer, 2016.
