@@ -70,6 +70,7 @@ class AudioReader(DataReader):
                 if len(batch_out) == self.batch_size:
                     yield batch_out
                     batch_out = []
-            yield batch_out
+            if len(batch_out) > 0:
+                yield batch_out
 
         return reader
