@@ -20,26 +20,25 @@ UCF101数据下载及准备请参考[UCF101数据准备](../../dataset/ucf101.md
 
 ## 模型训练
 
-- 加载在ImageNet1000上训练好的ResNet50权重作为Backbone初始化参数，请下载此[模型参数](https://paddlemodels.bj.bcebos.com/video_classification/ResNet50_pretrained.tar.gz)并解压，
+- 加载在ImageNet1000上训练好的ResNet50权重作为Backbone初始化参数，请下载此[模型参数](https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_pretrain.pdparams),
 或是通过命令行下载
 
 ```bash
-wget -q https://paddlemodels.bj.bcebos.com/video_classification/ResNet50_pretrained.tar.gz
-tar -xgz ResNet50_pretrained.tar.gz
+wget https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_pretrain.pdparams
 ```
 
 并将路径添加到configs中backbone字段下
 
 ```yaml
 MODEL:
-framework: "Recognizer2D"
+    framework: "Recognizer2D"
     backbone:
         name: "ResNet"
         pretrained: 将路径填写到此处
 ```
 
 或用`-o` 参数在```run.sh```或命令行中进行添加
-``` -o MODEL.framework.backbone.pretrained="" ```
+``` -o MODEL.backbone.pretrained="" ```
 `-o` 参数用法请参考[conifg](../../config.md)
 
 - 如若进行`finetune`或者[模型测试](#模型测试)等，请下载PaddleVideo的已发布模型[model]()<sup>coming soon</sup>, 通过`--weights`指定权重存放路径。 `--weights` 参数用法请参考[config](../../config.md)

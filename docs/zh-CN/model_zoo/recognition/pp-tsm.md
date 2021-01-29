@@ -1,45 +1,76 @@
-[English](../../../en/model_zoo/recognition/pp-tsm.md) | 简体中文
+简体中文 | [English](../../../en/model_zoo/recognition/pp-tsm.md)
 
-# PPTSM
+# PPTSM视频分类模型
 
-## 模型介绍
+---
+## 内容
 
-我们基于paddle2.0对TSM进行改进提出了**PPTSM**，在不增加参数量和计算量的情况下， 在多个数据集上精度显著超过TSM论文精度，包括UCF101、Kinetics-400等。具体细节参考[《pptsm实用视频模型优化解析》]() <sup>coming soon</sup>
+- [模型简介](#模型简介)
+- [数据准备](#数据准备)
+- [模型训练](#模型训练)
+- [模型测试](#模型测试)
+- [模型推理](#模型推理)
+- [参考论文](#参考论文)
+
+
+## 模型简介
+
+我们基于飞桨框架2.0版本对[TSM模型](./tsm.md)进行了改进，提出了**PPTSM**高精度2D实用视频分类模型。在不增加参数量和计算量的情况下，在UCF-101、Kinetics-400等数据集上精度显著超过原文。模型优化解析请参考[**pptsm实用视频模型优化解析**](https://github.com/PaddlePaddle/PaddleVideo/blob/main/docs/zh-CN/tutorials/pp-tsm.md)。
+
+<p align="center">
+<img src="https://github.com/PaddlePaddle/PaddleVideo/blob/main/docs/images/acc_vps.jpeg" height=400 width=650 hspace='10'/> <br />
+PPTSM improvement
+</p>
+
 
 ## 数据准备
 
-K400数据下载及准备请参考[数据](../../dataset/K400.md)
+K400数据下载及准备请参考[Kinetics-400数据准备](../../dataset/k400.md)
 
-UCF101数据下载及准备请参考[数据](../../dataset/ucf101.md)
+UCF101数据下载及准备请参考[UCF-101数据准备](../../dataset/ucf101.md)
 
 
 ## 模型训练
 
-- 加载在ImageNet1000上训练好的ResNet50权重作为Backbone初始化参数，请下载此[模型参数](https://paddlemodels.bj.bcebos.com/video_classification/ResNet50_vd_ssld_v2_pretrained.tar.gz) 并解压，并将路径添加到configs中 BACKBONE字段下
-或用-o 参数进行添加，``` -o MODEL.HEAD.pretrained="" ``` 具体参考[conifg](../../config.md)
+### 预训练模型下载
 
--下载已发布模型[model](https://paddlemodels.bj.bcebos.com/video_classification/PPTSM.pdparams), 通过`--weights`指定权重存
-放路径进行finetune等开发
+下载图像蒸馏预训练模型[ResNet50_vd_ssld_v2](https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_vd_ssld_v2_pretrained.pdparams)作为Backbone初始化参数，或是通过命令行下载
 
-K400 video格式训练
+```bash
+wget https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_vd_ssld_v2_pretrained.pdparams
+```
 
-K400 frames格式训练
+并将文件路径添加到配置文件中的`MODEL.framework.backbone.pretrained`字段，如下：
 
-UCF101 video格式训练
+```yaml
+MODEL:
+    framework: "Recognizer2D"
+    backbone:
+        name: "ResNet"
+        pretrained: 将路径填写到此处
+```
 
-UCF101 frames格式训练
+### 开始训练
 
-## 实现细节
+通过指定不同的配置文件，可以使用不同的数据格式/数据集进行训练，UCF-101 frames格式训练示例命令如下:
 
-**数据处理：** 模型读取Kinetics-400数据集中的`mp4`数据，每条数据抽取`seg_num`段，每段抽取1帧图像，对每帧图像做随机增强后，缩放至`target_size`。
+```bash
+python -B -m paddle.distributed.launch --gpus="0,1,2,3"  --log_dir=log_pptsm  main.py  --validate -c configs/recognition/tsm/pptsm.yaml
+```
 
-**训练策略：**
+- 通过`-c`指定模型训练参数配置文件，默认配置文件与数据集的对应关系如下:
 
-*  采用Momentum优化算法训练，momentum=0.9
-*  l2_decay权重衰减系数为1e-4
-*  学习率在训练的总epoch数的1/3和2/3时分别做0.1倍的衰减
+```
+configs/recognition/tsm/pptsm.yaml     --> UCF-101 frames格式训练
+configs/recognition/tsm/pptsmx.yaml    --> UCF-101 videos格式训练
+configs/recognition/tsm/pptsm_k400.yaml   --> Kinetics-400 frames格式训练
+configs/recognition/tsm/pptsmxxx.yaml     --> Kinetics-400 videos格式训练
+```
 
-**参数初始化**
+- 如若进行finetune，请下载PaddleVideo的已发布模型[ppTSM.pdparams](https://videotag.bj.bcebos.com/PaddleVideo/ppTSM/ppTSM.pdparams)，通过`--weights`指定权重存放路径。 
+
+- 您可以自定义修改参数配置，参数用法请参考[config](../../tutorials/config.md)。
+
 
 ## 模型测试
 
@@ -47,7 +78,7 @@ UCF101 frames格式训练
 python3 main.py --test --weights=""
 ```
 
-- 指定`--weights`参数，下载已发布模型[model](https://paddlemodels.bj.bcebos.com/video_classification/PPTSM.pdparams) 进行模型测试
+- 可下载已发布模型[ppTSM.pdparams](https://videotag.bj.bcebos.com/PaddleVideo/ppTSM/ppTSM.pdparams)，通过`--weights`指定权重存放路径进行模型测试。
 
 
 当取如下参数时，在Kinetics400的验证集下评估精度如下:

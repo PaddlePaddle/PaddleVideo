@@ -114,7 +114,7 @@ PaddleVideo飞桨视频模型开发套件，旨在帮助开发者更好的进行
         </ul>
       </td>
       <td>
-        <ul><li><b>Batch</b></li>
+        <ul><li><b>Video</b></li>
           <ul>
             <li>Mixup</li>
             <li>Cutmix</li>  
@@ -160,7 +160,7 @@ PaddleVideo飞桨视频模型开发套件，旨在帮助开发者更好的进行
 
 <a name="欢迎加入PaddleVideo技术交流群"></a>
 ## 欢迎加入PaddleVideo技术交流群
-- 微信扫描二维码加入官方交流群，获得更高效的问题答疑，与各行各业开发者充分交流，期待您的加入。
+- 微信扫描二维码添加运营同学，回复 **“视频”**，即可邀请您加入官方交流群，获得更高效的问题答疑，与各行各业开发者充分交流，期待您的加入。
 
 <div align="center">
 <img src="./docs/images/joinus.PNG"  width = "200" height = "200" />
@@ -181,6 +181,8 @@ PaddleVideo飞桨视频模型开发套件，旨在帮助开发者更好的进行
 
 
 ## 文档教程
+- 免费视频课程及PPT课件
+    - [2021.1月](https://aistudio.baidu.com/aistudio/course/introduce/6742)
 - 快速入门
     - [安装说明](docs/zh-CN/install.md)
     - [快速开始](docs/zh-CN/start.md)

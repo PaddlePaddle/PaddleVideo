@@ -48,7 +48,7 @@ python main.py --test -c configs/localization/bmn.yaml -w output/BMN/BMN_epoch_0
 
 - For now, we only support testing with **single card** and `batch_size=1`.
 
--  Please download [activity\_net\_1\_3\_new.json](https://paddlemodels.bj.bcebos.com/video_detection/activity_net_1_3_new.json) label file and specify the path in `METRIC.ground_truth_filename`.
+-  Please download [activity\_net\_1\_3\_new.json](https://paddlemodels.bj.bcebos.com/video_detection/activity_net_1_3_new.json) label file and specify the path to `METRIC.ground_truth_filename` in config file.
 
 -  Args `-w` is used to specifiy the model path，you can download our model in [BMN.pdparams](https://videotag.bj.bcebos.com/PaddleVideo/BMN/BMN.pdparams)
 

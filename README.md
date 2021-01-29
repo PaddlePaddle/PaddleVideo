@@ -156,7 +156,7 @@ The chart below illustrates the performance of the video recognition models both
 
 <a name="Community"></a>
 ## Community
-- Scan the QR code below with your Wechat, you can access to official technical exchange group. Look forward to your participation.
+- Scan the QR code below with your Wechat and reply "video", you can access to official technical exchange group. Look forward to your participation.
 
 <div align="center">
 <img src="./docs/images/joinus.PNG"  width = "200" height = "200" />

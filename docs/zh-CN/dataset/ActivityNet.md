@@ -1,4 +1,4 @@
-[English](../../en/dataset/ActivityNet.md) | 简体中文
+简体中文 | [English](../../en/dataset/ActivityNet.md)
 
 # BMN模型数据使用说明
 

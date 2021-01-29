@@ -13,7 +13,13 @@
 
 ### 性能
 
-测试环境: Tesla v100 14卡16G，Cuda9，单卡batch_size=32。
+测试环境: 
+```
+机器: Tesla v100
+显存: 4卡16G
+Cuda: 9.0
+单卡batch_size: 32
+```
 
 训练速度对比如下:
 
@@ -27,7 +33,7 @@
 
 ## 环境配置
 
-我们提供docker运行环境方便您使用，docker镜像为:
+我们提供docker运行环境方便您使用，基础镜像为:
 
 ```
     huangjun12/paddlevideo:tsn_dali_cuda9_0
@@ -52,18 +58,18 @@ PaddleVide提供了在K400和UCF101两种数据集上训练TSN的训练脚本。
 
 ### 预训练模型下载
 
-加载在ImageNet1000上训练好的ResNet50权重作为Backbone初始化参数，请下载此[模型参数](https://paddlemodels.bj.bcebos.com/video_classification/ResNet50_pretrained.tar.gz)并解压，或是通过命令行下载
+加载在ImageNet1000上训练好的ResNet50权重作为Backbone初始化参数，请下载此[模型参数](https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_pretrain.pdparams),
+或是通过命令行下载
 
 ```bash
-wget https://paddlemodels.bj.bcebos.com/video_classification/ResNet50_pretrained.tar.gz
-tar -zxvf ResNet50_pretrained.tar.gz
+wget https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_pretrain.pdparams
 ```
 
 并将路径添加到configs中backbone字段下
 
 ```yaml
 MODEL:
-framework: "Recognizer2D"
+    framework: "Recognizer2D"
     backbone:
         name: "ResNet"
         pretrained: 将路径填写到此处
@@ -77,9 +83,11 @@ framework: "Recognizer2D"
 python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3" --log_dir=log_tsn main.py --train_dali -c configs/recognition/tsn/tsn_dali.yaml -o log_level="INFO"
 ```
 
-- 模型及训练参数配置请参考配置文件```configs/recognition/tsn/tsn_dali.yaml```，您可以自定义修改参数配置。
+- 通过`-c`指定模型训练参数配置文件，模型及训练参数配置请参考配置文件```configs/recognition/tsn/tsn_dali.yaml```。
 
-- 通过`--weights`指定权重存放路径可进行模型finetune。 `--weights` 参数用法请参考[config](../../tutorials/config.md)
+- 如若进行finetune，请下载PaddleVideo的已发布模型[comming soon]()， 通过`--weights`指定权重存放路径可进行模型finetune。 
+
+- 您可以自定义修改参数配置，参数用法请参考[config](../../tutorials/config.md)。
 
 ## 模型测试
 
