@@ -1,0 +1,12 @@
+MODEL:
+  VIDEO_OCR:
+    USE_THRESH: False
+    USE_TOP_ORDER: False
+    USE_LOCAL_MAXIMA: True
+    THRESH: 0.6
+    NUM_TOP_FRAMES: 20
+    smooth_window_length: 100
+    _COR: False #whether save coordinate
+    LANG: zh
+  VIDEO_TAG:
+
