@@ -72,14 +72,14 @@ def postprocess(results):
     """
     last = ""
     res = []
-    if cfg.MODEL.VIDEO_OCR._COR:
+    if cfg._COR:
         return results
     else:
         for item in results:
             tmp = []
             data = item['content']
             for d in data:
-                if d and d[1][1]>cfg.MODEL.VIDEO_OCR.THRESH:
+                if d and d[1][1]>cfg.THRESH:
                     d.pop(0)
                     tmp.append(d)
                 else:
@@ -120,7 +120,7 @@ def smooth(x, window_len=13, window='hanning'):
     return y[window_len - 1:-window_len + 1]
 
 def ocr_im(name):
-    img_path = cfg.MODEL.VIDEO_OCR.dir+name
+    img_path = cfg.dir+name
     #print(img_path)
     text = ocr.ocr(img_path, cls=True)
     return text
@@ -141,12 +141,12 @@ def video_ocr(frames,frame_diffs,fps):
     last_subtitle = ""
 
     frame_indexes = 0
-    if cfg.MODEL.VIDEO_OCR.USE_LOCAL_MAXIMA:
+    if cfg.USE_LOCAL_MAXIMA:
         diff_array = np.array(frame_diffs)
-        sm_diff_array = smooth(diff_array, cfg.MODEL.VIDEO_OCR.smooth_window_length) #smoothing the frame diff
+        sm_diff_array = smooth(diff_array, cfg.smooth_window_length) #smoothing the frame diff
         frame_indexes = np.asarray(argrelextrema(sm_diff_array, np.greater))[0]  # return extrema frame index
 
-    elif cfg.MODEL.VIDEO_OCR.USE_ONE_SECOND:
+    elif cfg.USE_ONE_SECOND:
         start = int(fps)//2
         frame_indexes = np.arange(start,len(frames),int(fps))
 
@@ -156,7 +156,7 @@ def video_ocr(frames,frame_diffs,fps):
     for i in frame_indexes:
         timestamp = round(total_time * i / float(num_frames), 1)
         name = "frame_" + str(frames[i - 1].id) + ".jpg"
-        cv2.imwrite(cfg.MODEL.VIDEO_OCR.dir + name, frames[i - 1].frame)  # save a frame temporaly
+        cv2.imwrite(cfg.dir + name, frames[i - 1].frame)  # save a frame temporaly
 
         text = ocr_im(name)
         # Check for repeated subtitles
@@ -164,60 +164,64 @@ def video_ocr(frames,frame_diffs,fps):
             last_subtitle = text[0][1][0]
             tmp = {'timestamp': str(timestamp) + 's', 'content': text}
             total_results.append(tmp)
-        os.remove(cfg.MODEL.VIDEO_OCR.dir + name)
+        os.remove(cfg.dir + name)
     res = postprocess(total_results)
     return res
 
 def main():
-    #check temporary frames dir
-    if not os.path.exists(cfg.MODEL.VIDEO_OCR.dir):
-        os.mkdir(cfg.MODEL.VIDEO_OCR.dir)
+    #
+    # #check temporary frames dir
+    # if not os.path.exists(cfg.MODEL.VIDEO_OCR.dir):
+    #     os.mkdir(cfg.dir)
+    #
+    # print('*'*50+"Decording video waiting"+'*'*50)
+    # print("[video path] "+args.video_path)
+    # print("[config file] "+args.config)
+    #
+    #
+    # start=datetime.datetime.now()
+    # #decode video
+    # cap = cv2.VideoCapture(str(args.video_path))
+    # fps = cap.get(cv2.CAP_PROP_FPS)
+    #
+    # print("[FPS] "+str(fps))
+    #
+    # curr_frame = None
+    # prev_frame = None
+    #
+    # frame_diffs = []
+    # frames = []
+    # ret, frame = cap.read()
+    # i = 1
+    #
+    # while (ret):
+    #     luv = cv2.cvtColor(frame, cv2.COLOR_BGR2LUV)
+    #     curr_frame = luv
+    #     if curr_frame is not None and prev_frame is not None:
+    #         # logic here
+    #         diff = cv2.absdiff(curr_frame, prev_frame)  # conculate difference between adjent frames
+    #         count = np.sum(diff)
+    #         frame_diffs.append(count)
+    #         frame = Frame(i, frame, count)  # Instance a Frame class
+    #         frames.append(frame)
+    #     prev_frame = curr_frame
+    #     i = i + 1
+    #     ret, frame = cap.read()
+    # cap.release()
+    #
+    #
+    # print('*'*50+"Finish video decord"+'*'*50)
+    # print('Decord video time consuming: {}'.format(datetime.datetime.now()-start))
+    #
+    # total_results = video_ocr(frames,frame_diffs,fps) #ocr a video
+    # end = datetime.datetime.now()
+    # save_results(total_results,end-start)
+    #
+    # os.removedirs(cfg.dir)
 
-    print('*'*50+"Decording video waiting"+'*'*50)
-    print("[video path] "+args.video_path)
-    print("[config file] "+args.config)
-
-
-    start=datetime.datetime.now()
-    #decode video
-    cap = cv2.VideoCapture(str(args.video_path))
-    fps = cap.get(cv2.CAP_PROP_FPS)
-
-    print("[FPS] "+str(fps))
-
-    curr_frame = None
-    prev_frame = None
-
-    frame_diffs = []
-    frames = []
-    ret, frame = cap.read()
-    i = 1
-
-    while (ret):
-        luv = cv2.cvtColor(frame, cv2.COLOR_BGR2LUV)
-        curr_frame = luv
-        if curr_frame is not None and prev_frame is not None:
-            # logic here
-            diff = cv2.absdiff(curr_frame, prev_frame)  # conculate difference between adjent frames
-            count = np.sum(diff)
-            frame_diffs.append(count)
-            frame = Frame(i, frame, count)  # Instance a Frame class
-            frames.append(frame)
-        prev_frame = curr_frame
-        i = i + 1
-        ret, frame = cap.read()
-    cap.release()
-
-
-    print('*'*50+"Finish video decord"+'*'*50)
-    print('Decord video time consuming: {}'.format(datetime.datetime.now()-start))
-
-    total_results = video_ocr(frames,frame_diffs,fps) #ocr a video
-    end = datetime.datetime.now()
-    save_results(total_results,end-start)
-
-    os.removedirs(cfg.MODEL.VIDEO_OCR.dir)
-    print('TIME Consuming: ',(end-start))
+    if cfg.USE_VIDEO_TAG:
+        os.system('python3 ./VideoTag/video_test.py')
+    # print('TIME Consuming: ',(end-start))
 
 if __name__ == "__main__":
     args = parse_args()
