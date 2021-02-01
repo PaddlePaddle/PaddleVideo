@@ -1,23 +1,35 @@
 # -*- coding: utf-8 -*-
+import sys
+import os
+import datetime
+import argparse
+import json
 
 import cv2
 import operator
 import numpy as np
-import sys
-import os
+
+
 from scipy.signal import argrelextrema
 from paddleocr import PaddleOCR
-import datetime
-import argparse
 
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from paddlevideo.utils import get_config
 
 ocr = PaddleOCR(use_angle_cls=True, lang='ch')  # need to run only once to download and load model into memory
 
 
-#Directory to store the processed frames
-dir = "frames/"
-
+def LCstring(string1,string2):
+    len1 = len(string1)
+    len2 = len(string2)
+    res = [[0 for i in range(len1+1)] for j in range(len2+1)]
+    result = 0
+    for i in range(1,len2+1):
+        for j in range(1,len1+1):
+            if string2[i-1] == string1[j-1]:
+                res[i][j] = res[i-1][j-1]+1
+                result = max(result,res[i][j])
+    return result
 
 #Class to hold information about each frame
 class Frame:
@@ -45,37 +57,43 @@ def parse_args():
     parser.add_argument('-c',
                         '--config',
                         type=str,
-                        default='configs/example.yaml',
+                        default='configs/multimodality/modality.yaml',
                         help='config file path')
     parser.add_argument('-v',
                         '--video_path',
                         type=str,
                         default='data/xiaodu.mp4',
                         help='video file path')
-    parser.add_argument('-w',
-                        '--window_length',
-                        type=int,
-                        default=100,
-                        help='smooth window length')
     args = parser.parse_args()
     return args
 
 def postprocess(results):
-    if _COR:
+    last = ""
+    res = []
+    if cfg.MODEL.VIDEO_OCR._COR:
         return results
     else:
         for item in results:
+            tmp = []
             data = item['content']
-            for res in data:
-                if res:
-                    res.pop(0)
+            for d in data:
+                if d and d[1][1]>cfg.MODEL.VIDEO_OCR.THRESH:
+                    d.pop(0)
+                    tmp.append(d)
                 else:
                     continue
-            item['content'] = data
-    return results
+            if tmp and LCstring(tmp[0][0][0],last) < 2:
+                item['content'] = tmp
+                res.append(item)
+                last = tmp[0][0][0]
+            else:
+                continue
+    return res
 
 def smooth(x, window_len=13, window='hanning'):
-    print(len(x), window_len)
+    """
+    smooth the data with the given window size
+    """
     if x.ndim != 1:
         raise ValueError("smooth only accepts 1 dimension arrays.") 
 
@@ -90,27 +108,22 @@ def smooth(x, window_len=13, window='hanning'):
 
     s = np.r_[2 * x[0] - x[window_len:1:-1],
               x, 2 * x[-1] - x[-1:-window_len:-1]]
-    #print(len(s))
 
     if window == 'flat':  # moving average
         w = np.ones(window_len, 'd')
     else:
         w = getattr(np, window)(window_len)
     y = np.convolve(w / w.sum(), s, mode='same')
+
     return y[window_len - 1:-window_len + 1]
 
-def rel_change(a, b):
-   x = (b - a) / max(a, b)
-   return x
-
 def ocr_im(name):
-    img_path = dir+name
-    print('img_path',img_path) #改成帧
+    img_path = cfg.MODEL.VIDEO_OCR.dir+name
+    #print(img_path)
     text = ocr.ocr(img_path, cls=True)
     return text
 
 def save_results(results,time):
-    import json
     f = open('./results.txt','w')
     for item in results:
         f.write(json.dumps(str(item),ensure_ascii=False)+'\n')
@@ -119,65 +132,56 @@ def save_results(results,time):
     f.close()
 
 def video_ocr(frames,frame_diffs,fps):
-    print("Extracting key frames, waiting...")
-    print('-----len(frames)-----',len(frames))
+    print("Extracting key frames and ocr, waiting...")
     num_frames = len(frames)
     total_time = num_frames/fps
 
     last_subtitle = ""
 
-    if USE_TOP_ORDER:
-        # sort the list in descending order
-        frames.sort(key=operator.attrgetter("value"), reverse=True)
-        for keyframe in frames[:NUM_TOP_FRAMES]:
-            name = "frame_" + str(keyframe.id) + ".jpg"
-            cv2.imwrite(dir + "/" + name, keyframe.frame)
-
-    if USE_THRESH:
-        for i in range(1, len(frames)):
-            if (rel_change(np.float(frames[i - 1].value), np.float(frames[i].value)) >= THRESH):
-                # print("prev_frame:"+str(frames[i-1].value)+"  curr_frame:"+str(frames[i].value))
-                name = "frame_" + str(frames[i].id) + ".jpg"
-                cv2.imwrite(dir + "/" + name, frames[i].frame)
-
-    if USE_LOCAL_MAXIMA:
+    frame_indexes = 0
+    if cfg.MODEL.VIDEO_OCR.USE_LOCAL_MAXIMA:
         diff_array = np.array(frame_diffs)
-        sm_diff_array = smooth(diff_array, len_window) #smoothing the frame diff
+        sm_diff_array = smooth(diff_array, cfg.MODEL.VIDEO_OCR.smooth_window_length) #smoothing the frame diff
         frame_indexes = np.asarray(argrelextrema(sm_diff_array, np.greater))[0]  # return extrema frame index
-        total_results = []
-        for i in frame_indexes:
-            timestamp = round(total_time*i/float(num_frames),1)
-            name = "frame_" + str(frames[i - 1].id) + ".jpg"
-            cv2.imwrite(dir + name, frames[i - 1].frame)
 
-            text = ocr_im(name)
-            # Check for repeated subtitles
-            if text and text != last_subtitle:
-                last_subtitle = text
-                tmp = {'timestamp':timestamp,'content':text}
-                total_results.append(tmp)
-            os.remove(dir + name)
-        postprocess(total_results)
-        return total_results
+    elif cfg.MODEL.VIDEO_OCR.USE_ONE_SECOND:
+        start = int(fps)//2
+        frame_indexes = np.arange(start,len(frames),int(fps))
+
+    print("Num of key frames: {}".format(len(frame_indexes)))
+
+    total_results = []
+    for i in frame_indexes:
+        timestamp = round(total_time * i / float(num_frames), 1)
+        name = "frame_" + str(frames[i - 1].id) + ".jpg"
+        cv2.imwrite(cfg.MODEL.VIDEO_OCR.dir + name, frames[i - 1].frame)  # save a frame temporaly
+
+        text = ocr_im(name)
+        # Check for repeated subtitles
+        if text and LCstring(text[0][1][0], last_subtitle) < 2:
+            last_subtitle = text[0][1][0]
+            tmp = {'timestamp': str(timestamp) + 's', 'content': text}
+            total_results.append(tmp)
+        os.remove(cfg.MODEL.VIDEO_OCR.dir + name)
+    res = postprocess(total_results)
+    return res
 
 def main():
-    #Print infos
-    args = parse_args()
-    cfg = get_config(args.config)
-    print(cfg)
+    #check temporary frames dir
+    if not os.path.exists(cfg.MODEL.VIDEO_OCR.dir):
+        os.mkdir(cfg.MODEL.VIDEO_OCR.dir)
 
-    import sys
-    sys.exit(0)
-
-    print("[Video Path] " + videopath)
-    print("[Frame Directory] " + dir)
     print('*'*50+"Decording video waiting"+'*'*50)
+    print("[video path] "+args.video_path)
+    print("[config file] "+args.config)
+
 
     start=datetime.datetime.now()
     #decode video
-    cap = cv2.VideoCapture(str(videopath))
-
+    cap = cv2.VideoCapture(str(args.video_path))
     fps = cap.get(cv2.CAP_PROP_FPS)
+
+    print("[FPS] "+str(fps))
 
     curr_frame = None
     prev_frame = None
@@ -202,13 +206,18 @@ def main():
         ret, frame = cap.read()
     cap.release()
 
+
     print('*'*50+"Finish video decord"+'*'*50)
     print('Decord video time consuming: {}'.format(datetime.datetime.now()-start))
 
     total_results = video_ocr(frames,frame_diffs,fps) #ocr a video
     end = datetime.datetime.now()
-    print('TIME Consuming: ',(end-start))
     save_results(total_results,end-start)
 
+    os.removedirs(cfg.MODEL.VIDEO_OCR.dir)
+    print('TIME Consuming: ',(end-start))
+
 if __name__ == "__main__":
+    args = parse_args()
+    cfg = get_config(args.config)
     main()
