@@ -169,9 +169,9 @@ def video_ocr(frames,frame_diffs,fps):
     return res
 
 def main():
-    #
-    # #check temporary frames dir
-    # if not os.path.exists(cfg.MODEL.VIDEO_OCR.dir):
+
+    #check temporary frames dir
+    # if not os.path.exists(cfg.dir):
     #     os.mkdir(cfg.dir)
     #
     # print('*'*50+"Decording video waiting"+'*'*50)
@@ -208,7 +208,6 @@ def main():
     #     i = i + 1
     #     ret, frame = cap.read()
     # cap.release()
-    #
     #
     # print('*'*50+"Finish video decord"+'*'*50)
     # print('Decord video time consuming: {}'.format(datetime.datetime.now()-start))

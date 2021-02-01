@@ -1,7 +1,7 @@
-USE_LOCAL_MAXIMA: True #use local maxima to extract key frames
-USE_ONE_SECOND: False # extract one frame during a second
+USE_LOCAL_MAXIMA: False #use local maxima to extract key frames
+USE_ONE_SECOND: True # extract one frame during a second
 USE_VIDEO_TAG: True #whether use video_tag
-THRESH: 0.98
+THRESH: 0.95
 NUM_TOP_FRAMES: 20
 smooth_window_length: 10
 _COR: False #whether save coordinate
