@@ -16,8 +16,7 @@ from paddleocr import PaddleOCR
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from paddlevideo.utils import get_config
 
-ocr = PaddleOCR(use_angle_cls=True, lang='ch')  # need to run only once to download and load model into memory
-
+ocr = PaddleOCR(use_angle_cls=True, lang='ch')  # Paddle-ocr: a lightweight and efficient model
 
 def LCstring(string1,string2):
     len1 = len(string1)
@@ -68,6 +67,9 @@ def parse_args():
     return args
 
 def postprocess(results):
+    """
+    delete repeate content and refomat the results
+    """
     last = ""
     res = []
     if cfg.MODEL.VIDEO_OCR._COR:
