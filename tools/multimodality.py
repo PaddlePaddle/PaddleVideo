@@ -170,7 +170,7 @@ def video_ocr(frames,frame_diffs,fps):
 
 def main():
 
-    check temporary frames dir
+    #check temporary frames dir
     if not os.path.exists(cfg.dir):
         os.mkdir(cfg.dir)
 
