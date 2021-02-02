@@ -222,7 +222,7 @@ def main():
         root = os.path.abspath(os.path.dirname(__file__))
         os.system('python '+root+'/VideoTag/videotag_test.py')
 
-    print('TIME Consuming: ',(end-start))
+    #print('TIME Consuming: ',(end-start))
 
 if __name__ == "__main__":
     args = parse_args()
