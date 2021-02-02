@@ -69,7 +69,7 @@ python main.py --test -c configs/localization/bmn.yaml -w output/BMN/BMN_epoch_0
 
 - 上述程序会将运行结果保存在配置文件`METRIC.output_path`字段指定的路径，默认为`data/bmn/BMN_Test_output`文件夹下，测试结果保存在配置文件`METRIC.result_path`字段指定的文件，默认为`data/bmn/BMN_Test_results/bmn_results_validation.json`文件。
 
-- 我们使用ActivityNet官方提供的测试脚本，计算AR@AN和AUC。具体计算过程请参考[anet_prop.py](https://github.com/PaddlePaddle/PaddleVideo/blob/main/paddlevideo/metrics/ActivityNet/anet_prop.py)文件。
+- 我们基于ActivityNet官方提供的测试脚本，计算AR@AN和AUC。具体计算过程请参考[anet_prop.py](https://github.com/PaddlePaddle/PaddleVideo/blob/main/paddlevideo/metrics/ActivityNet/anet_prop.py)文件。
 
 - 注：评估时可能会出现loss为nan的情况。这是由于评估时用的是单个样本，可能存在没有iou>0.6的样本，所以为nan，对最终的评估结果没有影响。
 
