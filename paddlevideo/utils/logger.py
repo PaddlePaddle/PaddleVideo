@@ -17,7 +17,7 @@ import os
 import sys
 import datetime
 
-from paddle.distributed import ParallelEnv
+#from paddle.distributed import ParallelEnv
 
 
 
@@ -76,13 +76,13 @@ def setup_logger(output=None, name="paddlevideo", level="INFO"):
             "[%(asctime)s] %(message)s",
             datefmt="%m/%d %H:%M:%S")
     # stdout logging: master only
-    local_rank = ParallelEnv().local_rank
-    if local_rank == 0:
-        ch = logging.StreamHandler(stream=sys.stdout)
-        ch.setLevel(logging.DEBUG)
-        formatter = plain_formatter
-        ch.setFormatter(formatter)
-        logger.addHandler(ch)
+    #local_rank = ParallelEnv().local_rank
+    #if local_rank == 0:
+    #    ch = logging.StreamHandler(stream=sys.stdout)
+    #    ch.setLevel(logging.DEBUG)
+    #    formatter = plain_formatter
+    #    ch.setFormatter(formatter)
+    #    logger.addHandler(ch)
 
     # file logging: all workers
     if output is not None:
@@ -90,8 +90,8 @@ def setup_logger(output=None, name="paddlevideo", level="INFO"):
             filename = output
         else:
             filename = os.path.join(output, ".log.txt")
-        if local_rank > 0:
-            filename = filename + ".rank{}".format(local_rank)
+        #if local_rank > 0:
+        #    filename = filename + ".rank{}".format(local_rank)
 
         # PathManager.mkdirs(os.path.dirname(filename))
         os.makedirs(os.path.dirname(filename), exist_ok=True)

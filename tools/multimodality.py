@@ -11,12 +11,12 @@ import numpy as np
 
 
 from scipy.signal import argrelextrema
-from paddleocr import PaddleOCR
+#from paddleocr import PaddleOCR
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from paddlevideo.utils import get_config
 
-ocr = PaddleOCR(use_angle_cls=True, lang='ch')  # Paddle-ocr: a lightweight and efficient model
+#ocr = PaddleOCR(use_angle_cls=True, lang='ch')  # Paddle-ocr: a lightweight and efficient model
 
 def LCstring(string1,string2):
     len1 = len(string1)
@@ -219,7 +219,10 @@ def main():
     # os.removedirs(cfg.dir)
 
     if cfg.USE_VIDEO_TAG:
-        os.system('python3 ./VideoTag/video_test.py')
+        root = os.path.abspath(os.path.dirname(__file__))
+        #import sys
+        #sys.exit(0)
+        os.system('python '+root+'/VideoTag/videotag_test.py')
     # print('TIME Consuming: ',(end-start))
 
 if __name__ == "__main__":
