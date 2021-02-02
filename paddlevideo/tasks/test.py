@@ -22,6 +22,7 @@ from paddlevideo.utils import load
 logger = get_logger("paddlevideo")
 
 
+@paddle.no_grad()
 def test_model(cfg, weights, parallel=True):
     """Test model entry
 
