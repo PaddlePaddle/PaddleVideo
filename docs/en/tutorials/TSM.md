@@ -64,7 +64,7 @@ Let's have a look at how TSM is implemented using **paddlepaddle**:
 
 `shifts = F.temporal_shift(inputs, self.num_seg,1.0 / self.num_seg)`
 
-**Only two lines codes !!!**, isn't it simple?
+**Only two lines codes !!!**, isn't it easy ?
 
 # Reference
 [1] [Lin Ji , Gan Chuang , Han Song . TSM: Temporal Shift Module for Efficient Video Understanding. arXiv:1811.08383,2018](https://arxiv.org/pdf/1811.08383v2.pdf).
