@@ -139,9 +139,7 @@ def video_ocr(frames,frame_diffs,fps):
     num_frames = len(frames)
     total_time = num_frames/fps
 
-    last_subtitle = ""
-
-    frame_indexes = 0
+    frame_indexes = []
     if cfg.USE_LOCAL_MAXIMA:
         diff_array = np.array(frame_diffs)
         sm_diff_array = smooth(diff_array, cfg.smooth_window_length) #smoothing the frame diff
@@ -161,8 +159,7 @@ def video_ocr(frames,frame_diffs,fps):
 
         text = ocr_im(name)
         # Check for repeated subtitles
-        if text and LCstring(text[0][1][0], last_subtitle) < 2:
-            last_subtitle = text[0][1][0]
+        if text:
             tmp = {'timestamp': str(timestamp) + 's', 'content': text}
             total_results.append(tmp)
         os.remove(cfg.dir + name)
