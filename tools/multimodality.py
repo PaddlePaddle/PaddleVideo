@@ -175,7 +175,7 @@ def main():
     if not os.path.exists(cfg.dir):
        os.mkdir(cfg.dir)
 
-    print('*'*50+"Decording video waiting"+'*'*50)
+    print('*'*30+"Decording video waiting"+'*'*30)
     print("[video path] "+args.video_path)
     print("[config file] "+args.config)
 
@@ -199,7 +199,7 @@ def main():
        luv = cv2.cvtColor(frame, cv2.COLOR_BGR2LUV)
        curr_frame = luv
        if curr_frame is not None and prev_frame is not None:
-            logic here
+            #logic here
            diff = cv2.absdiff(curr_frame, prev_frame)  # conculate difference between adjent frames
            count = np.sum(diff)
            frame_diffs.append(count)
@@ -210,9 +210,10 @@ def main():
        ret, frame = cap.read()
     cap.release()
 
-    print('*'*50+"Finish video decord"+'*'*50)
-    print('Decord video time consuming: {}'.format(datetime.datetime.now()-start))
-
+    #print('*'*30+"Finish video decord"+'*'*30)
+    #print('Decord video time consuming: {}'.format(datetime.datetime.now()-start))
+    
+    print('='*30+'Start Video OCR '+'='*30)
     total_results = video_ocr(frames,frame_diffs,fps) #ocr a video
     end = datetime.datetime.now()
     save_results(total_results,end-start)
@@ -220,14 +221,14 @@ def main():
     os.removedirs(cfg.dir)
 
     if cfg.USE_VIDEO_TAG:
+        print('='*30+'Start Video Tag '+'='*30)
         root = os.path.abspath(os.path.dirname(__file__))
         command = 'python '+root+'/VideoTag/videotag_test.py --filelist '+args.video_path
-        print(command)
         os.system(command)
-
+    print('='*30+'Finish All Process '+'='*30)
     print('TIME Consuming: ',(datetime.datetime.now()-start))
 
 if __name__ == "__main__":
     args = parse_args()
-    cfg = get_config(args.config)
+    cfg = get_config(args.config,show=False)
     main()
