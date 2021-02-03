@@ -75,7 +75,7 @@ def parse_args():
                         help='predictor weight path')
     parser.add_argument('--filelist',
                         type=str,
-                        default=root+'/data/VideoTag_test.list',
+                        default='data/xiaodu.mp4',
                         help='path of video data, multiple video')
     parser.add_argument('--save_dir',
                         type=str,
