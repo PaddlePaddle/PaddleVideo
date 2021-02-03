@@ -16,7 +16,7 @@ It looks interesting, next,let's dive into the core modules of TSM.
 
 # 2. Dark technologies used in TSM
 
-On the basis of traditional picture analysis, video analysis needs researchers to supplement the modeling structure of temporal information. At present, 2D CNN and 3D CNN are the two most commonly used methods in video understanding: using 2D CNN model requires less computation but will lose part of the time information; While using 3D CNN has a good effect but a large amount of computation. Faced with such a situation, Ji Lin, Chuang Gan and Song Han et al. from MIT and IBM Watson AI Lab proposed the Temp Shift Module (TSM) Module. By embedding the time displacement module into 2D CNN, they can easily achieve the same video understanding ability as 3D CNN without adding any additional calculation and parameters.
+On the basis of traditional image analysis, video analysis needs researchers to supplement the modeling structure of temporal information. At present, 2D CNN and 3D CNN are the two most commonly used methods in video understanding: using 2D CNN model requires less computation but will lose part of the time information; While using 3D CNN has a good effect but a large amount of computation. Faced with such a situation, Ji Lin, Chuang Gan and Song Han et al. from MIT and IBM Watson AI Lab proposed the Temp Shift Module (TSM) Module. By embedding the time displacement module into 2D CNN, they can easily achieve the same video understanding ability as 3D CNN without adding any additional calculation and parameters.
 <p align="center">
 <img src="../../images/tsm_intr.png" height=188 width=500 hspace='10'/> <br />
 </p>
