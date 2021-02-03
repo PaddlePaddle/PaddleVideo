@@ -155,7 +155,10 @@ def video_ocr(frames,frame_diffs,fps):
 
     total_results = []
     for i in frame_indexes:
-        timestamp = round(total_time * i / float(num_frames), 1)
+        timestamp = round(total_time * i / float(num_frames))
+        min = str(timestamp//60)
+        second = str(timestamp%60)
+        timestamp = min+'分'+second+'秒'
         name = "frame_" + str(frames[i - 1].id) + ".jpg"
         cv2.imwrite(cfg.dir + name, frames[i - 1].frame)  # save a frame temporaly
 
