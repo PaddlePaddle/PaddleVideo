@@ -96,8 +96,8 @@ class Youtube8mMetrics(Metrics):
         if self.mode == 'infer':
             for index, item in enumerate(self.infer_results):
                 video_id = item[0]
-                print('[========video_id [ {} ] , topk({}) preds: ========]\n'.
-                      format(video_id, self.topk))
+                # print('[========video_id [ {} ] , topk({}) preds: ========]\n'.
+                #       format(video_id, self.topk))
 
                 f = io.open(label_file, "r", encoding="utf-8")
                 fl = f.readlines()

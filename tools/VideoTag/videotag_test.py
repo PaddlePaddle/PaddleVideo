@@ -127,8 +127,8 @@ def main():
 
                 exe.run(extractor_startup_prog)
 
-                logger.info('load extractor weights from {}'.format(
-                    args.extractor_weights))
+                # logger.info('load extractor weights from {}'.format(
+                #     args.extractor_weights))
 
                 extractor_model.load_pretrain_params(exe,
                                                      args.extractor_weights,
@@ -149,11 +149,11 @@ def main():
                                           feed=extractor_feeder.feed(feed_data))
                     feature_list.append(feature_out[0])  #get out from list
                     file_list.append(file_id)
-                    logger.info(
-                        '========[Stage 1 Sample {} ] Extractor finished======'.
-                        format(idx))
+                    # logger.info(
+                    #     '========[Stage 1 Sample {} ] Extractor finished======'.
+                    #     format(idx))
         extractor_end_time = time.time()
-        print('extractor_time', extractor_end_time - extractor_start_time)
+        # print('extractor_time', extractor_end_time - extractor_start_time)
 
     predictor_config = parse_config(args.predictor_config)
     predictor_infer_config = merge_configs(predictor_config, 'infer',
@@ -195,8 +195,8 @@ def main():
 
                 exe.run(predictor_startup_prog)
 
-                logger.info('load predictor weights from {}'.format(
-                    args.predictor_weights))
+                # logger.info('load predictor weights from {}'.format(
+                #     args.predictor_weights))
                 predictor_model.load_test_weights(exe, args.predictor_weights,
                                                   predictor_main_prog)
 
@@ -213,17 +213,17 @@ def main():
                     final_outs = exe.run(
                         fetch_list=predictor_fetch_list,
                         feed=predictor_feeder.feed(predictor_feed_data))
-                    logger.info(
-                        '=======[Stage 2 Sample {} ] Predictor finished========'
-                        .format(idx))
+                    # logger.info(
+                    #     '=======[Stage 2 Sample {} ] Predictor finished========'
+                    #     .format(idx))
                     final_result_list = [item
                                          for item in final_outs] + [file_id]
 
                     predictor_metrics.accumulate(final_result_list)
-                predictor_metrics.finalize_and_log_out(
-                    savedir=args.save_dir, label_file=args.label_file)
+                # predictor_metrics.finalize_and_log_out(
+                #     savedir=args.save_dir, label_file=args.label_file)
     predictor_end_time = time.time()
-    print('predictor_time', predictor_end_time - predictor_start_time)
+    # print('predictor_time', predictor_end_time - predictor_start_time)
 
 
 if __name__ == '__main__':
@@ -236,4 +236,4 @@ if __name__ == '__main__':
     main()
     end_time = time.time()
     period = end_time - start_time
-    print('[INFER] infer finished. cost time: {}'.format(period))
+    # print('[INFER] infer finished. cost time: {}'.format(period))
