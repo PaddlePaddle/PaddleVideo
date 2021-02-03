@@ -2,7 +2,7 @@
 At present, the video data on the Internet is increasing rapidly, and the time users spend watching short videos and small videos is also increasing rapidly. How to analyze, process and classify the massive video resources quickly and accurately is an urgent problem to be solved. The video understanding technology can analyze the video content in multiple dimensions, understand the video semantics, and automatically classify and label the video, which greatly saves the efficiency of manual audit and costs. At the same time, accurate user recommendation is realized to improve the experience effect.
 In this paper, we will introduce the classic model **TSM (Temporal Shift Module)** in the field of video understanding, which is proposed by **MIT** and **IBM Watson AI Lab** `Ji Lin, Chuang Gan and Songhan, etc`, to achieve the balance between effeiciency and performance and improve video understanding ability.
 
-The most relevant video understanding model to TSM is the **Temporal Segment Network (TSN)** published by Limin Wang et al in ECCV, 2016. The TSN model samples N frames from a video and performs temporal information fusion by averaging the classification results of N frames in a direct way, which achieves the performance of state-of-the-art at that time and is applied in a large scale. Considering that TSN model is not sufficient in modeling temporal information, 
+The most relevant video understanding model to TSM is the **Temporal Segment Network (TSN)** published by Limin Wang
 a series of works represented such as I3D, S3D and P3D, which carry out end-to-end joint spatial-temporal modeling through 3D convolution. Although this series of works can capture spatial-temporal features, compared with TSN, the transition from 2D convolution to 3D convolution inevitably introduces extra computation. TSM cleverly uses the idea of temporal dimension feature map shift, theoretically achieving the purpose of feature fusion and joint modeling among different frames with zero extra computing overhead compared with TSN.
 
 **Paper Address:** [Temporal Shift Module for Efficient Video Understanding](https://arxiv.org/pdf/1811.08383v2.pdf)
@@ -64,7 +64,7 @@ Let's have a look at how TSM is implemented using **paddlepaddle**:
 
 `shifts = F.temporal_shift(inputs, self.num_seg,1.0 / self.num_seg)`
 
-TSM can be implemented in two lines codes, isn't it simple?
+**Only two lines codes !!!**, isn't it simple?
 
 # Reference
 [1] [Lin Ji , Gan Chuang , Han Song . TSM: Temporal Shift Module for Efficient Video Understanding. arXiv:1811.08383,2018](https://arxiv.org/pdf/1811.08383v2.pdf).
