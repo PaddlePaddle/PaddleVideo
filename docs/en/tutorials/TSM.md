@@ -14,7 +14,7 @@ Let's have a look at the following example: if the video is played from left to 
 
 As interesting as this looks, let's dive into the core modules of TSM.
 
-# 2. Analysis of key technologies used in TSM
+# 2. Dark technologies used in TSM
 
 On the basis of traditional picture analysis, video analysis needs researchers to supplement the modeling structure of temporal information. At present, 2D CNN and 3D CNN are the two most commonly used methods in video understanding: using 2D CNN model requires less computation but will lose part of the time information; While using 3D CNN has a good effect but a large amount of computation. Faced with such a situation, Ji Lin, Chuang Gan and Song Han et al. from MIT and IBM Watson AI Lab proposed the Temp Shift Module (TSM) Module. By embedding the time displacement module into 2D CNN, they can easily achieve the same video understanding ability as 3D CNN without adding any additional calculation and parameters.
 <p align="center">
@@ -42,7 +42,7 @@ Now that the principle is clear, let's look at how the code works. First let's h
 <img src="../../images/torch_tsm.png" height=160 width=500 hspace='10'/> <br />
 </p>
 
-This means that you only need to add four lines of code to TSN's codebase then you can **double the accuracy of Something-Something datasets!!** what a simple and efficient model!
+This means that you only need to add four lines of code to TSN's codebase then you can **double the accuracy in Something-Something datasets!!** what a simple and efficient model!
 
 But...，
 
@@ -51,20 +51,20 @@ But...，
 <img src="../../images/tsm_op.png" height=300 width=400 hspace='10'/> <br />
 </p>
 
-So you no longer have to achieve it by yourself, **direct call can be!! , it can be called directly!! , it can be called directly!!** The important thing must say three times.
+So you no longer have to achieve it by yourself, **it cab be called directly!!! , it can be called directly!!! , it can be called directly!!!** The important thing must say three times.
 
-Did you think that it was the end of the this topic?  **Too young Too simple !!!**
+Do you think that it is the end of the this topic?  **Too young Too simple !!!**
 
 We have also optimized it to increase speed by 5 times while reducing memory consumption. See the acceleration documentation [accelerate.md](./accelerate.md) for more information.
 
-Let's have a look at how TSM is implemented using paddlepaddle:
+Let's have a look at how TSM is implemented using **paddlepaddle**:
 
 `import paddle.nn.functional as F`
 
 
 `shifts = F.temporal_shift(inputs, self.num_seg,1.0 / self.num_seg)`
 
-TSM can be implemented in two lines of code, isn't it simple?
+TSM can be implemented in two lines codes, isn't it simple?
 
 # Reference
 [1] [Lin Ji , Gan Chuang , Han Song . TSM: Temporal Shift Module for Efficient Video Understanding. arXiv:1811.08383,2018](https://arxiv.org/pdf/1811.08383v2.pdf).
