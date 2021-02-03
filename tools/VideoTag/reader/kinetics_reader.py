@@ -143,24 +143,13 @@ class KineticsReader(DataReader):
                         format='frames'):
         def decode_mp4(sample, mode, seg_num, seglen, short_size, target_size,
                        img_mean, img_std):
-            print('---sample---',sample)
-            print('---mode---',mode)
-            print('---seg_num---',seg_num)
-            print('---seglen---',seglen)
-            print('---short_size---',short_size)
-            print('---target_size---',target_size)
-            print('---img_mean---',img_mean)
-            print('---img_std---',img_std)
-           
             #sample = sample[0].split(' ')
             mp4_path = sample
-            print('----mp4_path--',mp4_path)
             if mode == "infer":
                 label = mp4_path.split('/')[-1]
             else:
                 label = int(sample[1])
             try:
-                print('-----mp4_path-----',mp4_path)
                 imgs = mp4_loader(mp4_path, seg_num, seglen, mode)
                 if len(imgs) < 1:
                     logger.error('{} frame length {} less than 1.'.format(
@@ -169,9 +158,6 @@ class KineticsReader(DataReader):
             except:
                 logger.error('Error when loading {}'.format(mp4_path))
                 return None, None
-            print('---imgs---',imgs)
-            print('---imgs---',len(imgs))
-            print('---self.name---',self.name)
             return imgs_transform(imgs, mode, seg_num, seglen, \
                          short_size, target_size, img_mean, img_std, name = self.name), label
 
@@ -205,7 +191,6 @@ class KineticsReader(DataReader):
                                   name=self.name), label
 
         def reader_():
-            print('---file_list----',file_list)
             return [file_list]
             #with open(file_list) as flist:
             #    lines = [line.strip() for line in flist]
