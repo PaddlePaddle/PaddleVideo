@@ -6,4 +6,4 @@ smooth_window_length: 10
 _COR: False #whether save coordinate
 LANG: zh
 dir: 'tools/frames/'
-USE_VIDEO_TAG: True #whether use video_tag
+USE_VIDEO_TAG: False #whether use video_tag
