@@ -70,7 +70,7 @@ def postprocess(results):
     """
     delete repeate content and reformat the results
     """
-    last = []
+    last = ""
     res = []
     if cfg._COR:
         return results
@@ -84,12 +84,14 @@ def postprocess(results):
                     tmp.append(d)
                 else:
                     continue
-            # if tmp and LCstring(tmp[0][0][0],last) < 2:
-            #     item['content'] = tmp
-            #     res.append(item)
-            #     last = tmp[0][0][0]
-            # else:
-            #     continue
+            #item['content'] = tmp
+            #res.append(item)
+            if tmp and LCstring(tmp[0][0][0],last) < 2:
+                item['content'] = tmp
+                res.append(item)
+                last = tmp[0][0][0]
+            else:
+                continue
     return res
 
 def smooth(x, window_len=13, window='hanning'):
