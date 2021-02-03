@@ -2,10 +2,10 @@
 At present, the video data on the Internet is increasing rapidly, and the time users spend watching short videos and small videos is also increasing rapidly. How to analyze, process and classify the massive video resources quickly and accurately is an urgent problem to be solved. The video understanding technology can analyze the video content in multiple dimensions, understand the video semantics, and automatically classify and label the video, which greatly saves the efficiency of manual audit and costs. At the same time, accurate user recommendation is realized to improve the experience effect.
 In this paper, we will introduce the classic model **TSM (Temporal Shift Module)** in the field of video understanding, which is proposed by **MIT** and **IBM Watson AI Lab** `Ji Lin, Chuang Gan and Songhan, etc`, to achieve the balance between effect and performance through Temporal Shift Module and improve video understanding ability.
 
-The most relevant video understanding model to TSM is the Temporal Segment Network (TSN) published by Limin Wang et al in ECCV, 2016. The TSN model samples N frames from a video and performs temporal information fusion by averaging the classification results of N frames in the simplest and direct way, which achieves the performance of state-of-the -art at that time and is applied in a large scale. Considering that TSN model is not sufficient in modeling temporal information, 
+The most relevant video understanding model to TSM is the **Temporal Segment Network (TSN)** published by Limin Wang et al in ECCV, 2016. The TSN model samples N frames from a video and performs temporal information fusion by averaging the classification results of N frames in the simplest and direct way, which achieves the performance of state-of-the -art at that time and is applied in a large scale. Considering that TSN model is not sufficient in modeling temporal information, 
 a series of works represented by I3D, S3D and P3D carry out end-to-end joint spatial-temporal modeling through 3D convolution. Although this series of works can capture spatial-temporal features, compared with TSN, the transition from 2D convolution to 3D convolution inevitably introduces extra computation. TSM cleverly uses the idea of temporal dimension feature map shift, theoretically achieving the purpose of feature fusion and joint modeling among different frames with zero extra computing overhead.
 
-Paper Address: [Temporal Shift Module for Efficient VideoUnderstanding] (https://arxiv.org/pdf/1811.08383v2.pdf)
+Paper Address: [Temporal Shift Module for Efficient Video Understanding](https://arxiv.org/pdf/1811.08383v2.pdf)
 
 Take a look at the following example: if the image is played from left to right and from right to left respectively, the subjects will give different but correct interpretation of the video, indicating that the understanding of the video is strongly dependent on the timing of the video. This is the motivation proposed by TSM, which is to capture the timing information of the video.
 <p align="center">
@@ -28,12 +28,12 @@ It improves the modeling ability of the model in time dimension. On this basis, 
 </p>
 
 Bi-Direction TSM module can obtain past and future spatial and temporal information, which is suitable for offline video with high throughput. However, UNI-Direction TSM module is only suitable for low delay online video recognition compared with the present and past spatio-temporal information.
-In addition, the author also considered the insertion position of TSM modules and compared two TSM insertion methods: **Residual TSM ** and ** in-place TSM **. The author found that **Residual TSM ** had better effect than ** in-place TSM **, and explained that ** in-place TSM ** would affect the extraction of spatial information In the model.
+In addition, the author also considered the insertion position of TSM modules and compared two TSM insertion methods: **Residual TSM** and **in-place TSM**. The author found that **Residual TSM** had better effect than **in-place TSM**, and explained that **in-place TSM** would affect the extraction of spatial information In the model.
 <p align="center">
 <img src="../../images/residual_tsm.png" height=188 width=500 hspace='10'/> <br />
 </p>
 
-TSM module is  **So Easy!! **, the next question is how to implement the code?
+TSM module is  **So Easy!!**, the next question is how to implement the code?
 
 # 3. The core codes of TSM
 
@@ -52,9 +52,9 @@ Fly paddle frame fully take into account the needs of the majority of users have
 <img src="../../images/tsm_op.png" height=300 width=400 hspace='10'/> <br />
 </p>
 
-So you children's shoes no longer have to achieve their own, ** direct call can be!! , it can be called directly!! , it can be called directly!! ** Say the important thing three times,
+So you children's shoes no longer have to achieve their own, **direct call can be!! , it can be called directly!! , it can be called directly!!** The important thing must say three times.
 
-Did you think that was the end of the matter? Alas! **Too young Too simple !!! * *
+Did you think that was the end of the matter? Alas! **Too young Too simple !!!**
 
 We have also optimized it to increase speed by 5 times while reducing memory consumption. See the acceleration documentation at (./ acceler.md).
 
