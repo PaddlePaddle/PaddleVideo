@@ -132,8 +132,8 @@ def save_results(results,time):
     f.write('*'*30+'OCR Results'+'*'*30+'\n')
     for item in results:
         f.write(json.dumps(str(item), ensure_ascii=False) + '\n')
-    f.write('*'*50+'\n')
-    f.write('Time Consume: '+str(time))
+    #f.write('*'*50+'\n')
+    #f.write('Time Consume: '+str(time))
     f.close()
 
 def video_ocr(frames,frame_diffs,fps):
@@ -155,10 +155,10 @@ def video_ocr(frames,frame_diffs,fps):
 
     total_results = []
     for i in frame_indexes:
-        timestamp = round(total_time * i / float(num_frames))
+        timestamp = int(total_time * i / float(num_frames))
         min = str(timestamp//60)
         second = str(timestamp%60)
-        timestamp = min+'分'+second+'秒'
+        timestamp = min+'min '+second
         name = "frame_" + str(frames[i - 1].id) + ".jpg"
         cv2.imwrite(cfg.dir + name, frames[i - 1].frame)  # save a frame temporaly
 
@@ -228,7 +228,7 @@ def main():
         command = 'python '+root+'/VideoTag/videotag_test.py --filelist '+args.video_path
         os.system(command)
     print('='*30+'Finish All Process '+'='*30)
-    print('TIME Consuming: ',(datetime.datetime.now()-start))
+    print('TIME COST: ',(datetime.datetime.now()-start))
 
 if __name__ == "__main__":
     args = parse_args()
