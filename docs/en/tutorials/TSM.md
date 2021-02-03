@@ -12,7 +12,7 @@ Let's have a look at the following example: if the video is played from left to 
 <img src="../../images/temporal.png" height=188 width=500 hspace='10'/> <br />
 </p>
 
-As interesting as this looks, let's dive into the core modules of TSM.
+It looks interesting, next,let's dive into the core modules of TSM.
 
 # 2. Dark technologies used in TSM
 
