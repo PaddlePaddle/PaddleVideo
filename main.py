@@ -40,6 +40,10 @@ def parse_args():
                         '--weights',
                         type=str,
                         help='weights for finetuning or testing')
+    parser.add_argument('--fleet',
+                        action='store_true',
+                        help='whether to use fleet run distributed training')
+
     parser.add_argument(
         '--validate',
         action='store_true',
@@ -66,7 +70,8 @@ def main():
         train_model(cfg,
                     weights=args.weights,
                     parallel=parallel,
-                    validate=args.validate)
+                    validate=args.validate,
+                    fleet=args.fleet)
 
 
 if __name__ == '__main__':

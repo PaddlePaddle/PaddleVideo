@@ -16,6 +16,7 @@ import time
 import os.path as osp
 
 import paddle
+import paddle.distributed.fleet as fleet
 from ..loader.builder import build_dataloader, build_dataset
 from ..modeling.builder import build_model
 from ..solver import build_lr, build_optimizer
@@ -25,7 +26,7 @@ from paddlevideo.utils import (AverageMeter, build_record, log_batch, log_epoch,
                                save, load, mkdir)
 
 
-def train_model(cfg, weights=None, parallel=True, validate=True):
+def train_model(cfg, weights=None, parallel=True, validate=True, fleet=False):
     """Train model entry
 
     Args:
@@ -35,6 +36,9 @@ def train_model(cfg, weights=None, parallel=True, validate=True):
         validate (bool): Whether to do evaluation. Default: False.
 
     """
+    if fleet:
+        strategy = fleet.DistributedStrategy()
+        fleet.init(is_collective=True, strategy=strategy)
 
     logger = get_logger("paddlevideo")
     batch_size = cfg.DATASET.get('batch_size', 8)
@@ -79,7 +83,8 @@ def train_model(cfg, weights=None, parallel=True, validate=True):
     optimizer = build_optimizer(cfg.OPTIMIZER,
                                 lr,
                                 parameter_list=model.parameters())
-
+    if fleet:
+        optimizer = fleet.distributed_optimizer(optimizer)
     # Resume
     resume_epoch = cfg.get("resume_epoch", 0)
     if resume_epoch:
