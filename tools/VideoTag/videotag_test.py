@@ -220,8 +220,8 @@ def main():
                                          for item in final_outs] + [file_id]
 
                     predictor_metrics.accumulate(final_result_list)
-                # predictor_metrics.finalize_and_log_out(
-                #     savedir=args.save_dir, label_file=args.label_file)
+                predictor_metrics.finalize_and_log_out(
+                    savedir=args.save_dir, label_file=args.label_file)
     predictor_end_time = time.time()
     # print('predictor_time', predictor_end_time - predictor_start_time)
 
