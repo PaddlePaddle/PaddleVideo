@@ -150,8 +150,8 @@ class TSN(ModelBase):
         def is_parameter(var):
             return isinstance(var, fluid.framework.Parameter)
 
-        logger.info(
-            "Load pretrain weights from {}, exclude fc layer.".format(pretrain))
+        # logger.info(
+        #     "Load pretrain weights from {}, exclude fc layer.".format(pretrain))
 
         #print("===pretrain===", pretrain)
         state_dict = fluid.load_program_state(pretrain)

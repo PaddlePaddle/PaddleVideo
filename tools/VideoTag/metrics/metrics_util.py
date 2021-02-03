@@ -107,9 +107,9 @@ class Youtube8mMetrics(Metrics):
                     class_id = item[1][i]
                     class_prob = item[2][i]
                     class_name = fl[class_id].split('\n')[0]
-                    print('class_id: {},'.format(class_id), 'class_name:',
-                          class_name,
-                          ',  probability:  {} \n'.format(class_prob))
+                    # print('class_id: {},'.format(class_id), 'class_name:',
+                    #       class_name,
+                    #       ',  probability:  {} \n'.format(class_prob))
                     save_dict = {
                         "'class_id": class_id,
                         "class_name": class_name,

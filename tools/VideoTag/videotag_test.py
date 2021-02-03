@@ -37,7 +37,7 @@ logging.basicConfig(level=logging.INFO, format=FORMAT, stream=sys.stdout)
 logger = logging.getLogger(__name__)
 
 root = os.path.abspath(os.path.dirname(__file__))
-print('-----root-----',root)
+
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--extractor_config',
