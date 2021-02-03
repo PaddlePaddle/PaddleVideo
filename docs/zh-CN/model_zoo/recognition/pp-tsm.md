@@ -18,7 +18,7 @@
 我们基于飞桨框架2.0版本对[TSM模型](./tsm.md)进行了改进，提出了**PPTSM**高精度2D实用视频分类模型。在不增加参数量和计算量的情况下，在UCF-101、Kinetics-400等数据集上精度显著超过原文。模型优化解析请参考[**pptsm实用视频模型优化解析**](https://github.com/PaddlePaddle/PaddleVideo/blob/main/docs/zh-CN/tutorials/pp-tsm.md)。
 
 <p align="center">
-<img src="https://github.com/PaddlePaddle/PaddleVideo/blob/main/docs/images/acc_vps.jpeg" height=400 width=650 hspace='10'/> <br />
+<img src="../../../images/acc_vps.jpeg" height=400 width=650 hspace='10'/> <br />
 PPTSM improvement
 </p>
 
@@ -58,7 +58,7 @@ MODEL:
 python -B -m paddle.distributed.launch --gpus="0,1,2,3"  --log_dir=log_pptsm  main.py  --validate -c configs/recognition/tsm/pptsm.yaml
 ```
 
-- 通过`-c`指定模型训练参数配置文件，默认配置文件与数据集的对应关系如下:
+- 通过`-c`指定模型训练参数配置文件，默认配置文件与数据集的对应关系如下(不同数据集，数据处理部分参数配置稍有不同):
 
 ```
 configs/recognition/tsm/pptsm.yaml     --> UCF-101 frames格式训练
