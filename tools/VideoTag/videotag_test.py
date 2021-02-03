@@ -229,10 +229,10 @@ def main():
 if __name__ == '__main__':
     start_time = time.time()
     args = parse_args()
-    print(args)
+    # print(args)
     check_cuda(args.use_gpu)
     check_version()
-    logger.info(args)
+    # logger.info(args)
     main()
     end_time = time.time()
     period = end_time - start_time
