@@ -25,10 +25,11 @@ from ..utils import do_preciseBN
 from paddlevideo.utils import get_logger, coloring
 from paddlevideo.utils import (AverageMeter, build_record, log_batch, log_epoch,
                                save, load, mkdir)
-from paddlevideo.utils.multigrid import MultigridSchedule, aggregate_sub_bn_stats, subn_load, subn_save
+from paddlevideo.utils.multigrid import MultigridSchedule, aggregate_sub_bn_stats, subn_load, subn_save, is_eval_epoch
 
 
-def construct_loader(cfg, places, validate, precise_bn, num_iters_precise_bn):
+def construct_loader(cfg, places, validate, precise_bn, num_iters_precise_bn,
+                     world_size):
     batch_size = cfg.DATASET.get('batch_size', 2)
     train_dataset = build_dataset((cfg.DATASET.train, cfg.PIPELINE.train))
     precise_bn_dataloader_setting = dict(
@@ -37,11 +38,12 @@ def construct_loader(cfg, places, validate, precise_bn, num_iters_precise_bn):
         places=places,
     )
     if precise_bn:
-        cfg.DATASET.train.num_samples_precise_bn = num_iters_precise_bn * batch_size
+        cfg.DATASET.train.num_samples_precise_bn = num_iters_precise_bn * batch_size * world_size
         precise_bn_dataset = build_dataset(
             (cfg.DATASET.train, cfg.PIPELINE.train))
         precise_bn_loader = build_dataloader(precise_bn_dataset,
                                              **precise_bn_dataloader_setting)
+        cfg.DATASET.train.num_samples_precise_bn = None
     else:
         precise_bn_loader = None
 
@@ -86,7 +88,7 @@ def construct_loader(cfg, places, validate, precise_bn, num_iters_precise_bn):
 
 
 def build_trainer(cfg, places, parallel, validate, precise_bn,
-                  num_iters_precise_bn):
+                  num_iters_precise_bn, world_size):
     """
     Build training model and its associated tools, including optimizer,
     dataloaders and meters.
@@ -110,6 +112,7 @@ def build_trainer(cfg, places, parallel, validate, precise_bn,
                          validate,
                          precise_bn,
                          num_iters_precise_bn,
+                         world_size,
                          )
 
     lr = build_lr(cfg.OPTIMIZER.learning_rate, len(train_loader))
@@ -127,7 +130,7 @@ def build_trainer(cfg, places, parallel, validate, precise_bn,
     )
 
 
-def train_model_multigrid(cfg, parallel=True, validate=True):
+def train_model_multigrid(cfg, world_size=1, validate=True):
     """Train model entry
 
     Args:
@@ -145,6 +148,7 @@ def train_model_multigrid(cfg, parallel=True, validate=True):
             cfg, _ = multigrid.update_long_cycle(cfg, cur_epoch=0)
     multi_save_epoch = [i[-1] - 1 for i in multigrid.schedule]
 
+    parallel = world_size != 1
     logger = get_logger("paddlevideo")
     batch_size = cfg.DATASET.get('batch_size', 2)
     places = paddle.set_device('gpu')
@@ -167,6 +171,7 @@ def train_model_multigrid(cfg, parallel=True, validate=True):
                          validate,
                          precise_bn,
                          num_iters_precise_bn,
+                         world_size,
                          )
 
     # 3. Construct optimizer
@@ -205,7 +210,7 @@ def train_model_multigrid(cfg, parallel=True, validate=True):
                     valid_loader,
                     precise_bn_loader,
                 ) = build_trainer(cfg, places, parallel, validate, precise_bn,
-                                  num_iters_precise_bn)
+                                  num_iters_precise_bn, world_size)
 
                 #load checkpoint after re-build model
                 if epoch != 0:
@@ -297,8 +302,8 @@ def train_model_multigrid(cfg, parallel=True, validate=True):
             return best, best_flag
 
         # use precise bn to improve acc
-        if precise_bn and (epoch % cfg.PRECISEBN.preciseBN_interval == 0
-                           or epoch == total_epochs - 1):
+        if is_eval_epoch(cfg, epoch, total_epochs, multigrid.schedule):
+            logger.info(f"do precise BN in {epoch+1} ...")
             do_preciseBN(model, precise_bn_loader, parallel,
                          min(num_iters_precise_bn, len(precise_bn_loader)))
 
@@ -307,8 +312,8 @@ def train_model_multigrid(cfg, parallel=True, validate=True):
         aggregate_sub_bn_stats(model)
 
         # 5. Validation
-        if validate and epoch % cfg.get("val_interval",
-                                        1) == 0 or epoch == total_epochs - 1:
+        if is_eval_epoch(cfg, epoch, total_epochs, multigrid.schedule):
+            logger.info(f"eval in {epoch+1} ...")
             with paddle.fluid.dygraph.no_grad():
                 best, save_best_flag = evaluate(best)
             # save best
@@ -322,8 +327,10 @@ def train_model_multigrid(cfg, parallel=True, validate=True):
                 )
 
         # 6. Save model and optimizer
-        if epoch % cfg.get("save_interval",
-                           10) == 0 or epoch in multi_save_epoch:
+        if is_eval_epoch(
+                cfg, epoch,
+                total_epochs, multigrid.schedule) or epoch % cfg.get(
+                    "save_interval", 10) == 0 or epoch in multi_save_epoch:
             logger.info("[Save parameters] ======")
             subn_save(output_dir, model_name + str(local_rank) + '_', epoch + 1,
                       model, optimizer)

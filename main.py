@@ -55,7 +55,7 @@ def main():
     if not args.multigrid:
         train_model(cfg, parallel=parallel, validate=args.validate)
     else:
-        train_model_multigrid(cfg, parallel=parallel, validate=args.validate)
+        train_model_multigrid(cfg, world_size, validate=args.validate)
 
 
 if __name__ == '__main__':
