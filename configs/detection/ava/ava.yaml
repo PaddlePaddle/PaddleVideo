@@ -72,7 +72,7 @@ PIPELINE:
       - ToTensor:
           keys: ['img', 'proposals', 'gt_bboxes', 'gt_labels']
       - ToDataContainer:
-          fields: [dict(key=['proposals', 'gt_bboxes', 'gt_labels'], stack=False]
+          fields: [dict(key=['proposals', 'gt_bboxes', 'gt_labels'], stack=False)]
       - Collect:
           keys: ['img', 'proposals', 'gt_bboxes', 'gt_labels']
           meta_keys: ['scores', 'entity_ids']
