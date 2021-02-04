@@ -21,7 +21,7 @@ logger = get_logger("paddlevideo")
 @RECOGNIZERS.register()
 class Recognizer2D(BaseRecognizer):
     """2D recognizer model framework."""
-    def train_step(self, data_batch, reduce_sum=False):
+    def train_step(self, data_batch):
         """Define how the model is going to train, from input to output.
         """
         #NOTE: As the num_segs is an attribute of dataset phase, and didn't pass to build_head phase, should obtain it from imgs(paddle.Tensor) now, then call self.head method.
@@ -32,13 +32,17 @@ class Recognizer2D(BaseRecognizer):
         imgs = data_batch[0]
         labels = data_batch[1:]
         cls_score = self(imgs)
-        loss_metrics = self.head.loss(cls_score, labels, reduce_sum)
+        loss_metrics = self.head.loss(cls_score, labels)
         return loss_metrics
 
-    def val_step(self, data_batch, reduce_sum=True):
-        return self.train_step(data_batch, reduce_sum=reduce_sum)
+    def val_step(self, data_batch):
+        imgs = data_batch[0]
+        labels = data_batch[1:]
+        cls_score = self(imgs)
+        loss_metrics = self.head.loss(cls_score, labels, valid_mode=True)
+        return loss_metrics
 
-    def test_step(self, data_batch, reduce_sum=False):
+    def test_step(self, data_batch):
         """Define how the model is going to test, from input to output."""
         #NOTE: (shipping) when testing, the net won't call head.loss, we deal with the test processing in /paddlevideo/metrics
         imgs = data_batch[0]

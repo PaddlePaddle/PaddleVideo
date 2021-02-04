@@ -28,7 +28,7 @@ class Recognizer3D(BaseRecognizer):
         cls_score = self.head(feature)
         return cls_score
 
-    def train_step(self, data_batch, reduce_sum=False):
+    def train_step(self, data_batch):
         """Training step.
         """
         imgs = data_batch[0:2]
@@ -36,13 +36,19 @@ class Recognizer3D(BaseRecognizer):
 
         # call forward
         cls_score = self(imgs)
-        loss_metrics = self.head.loss(cls_score, labels, reduce_sum=reduce_sum)
+        loss_metrics = self.head.loss(cls_score, labels)
         return loss_metrics
 
-    def val_step(self, data_batch, reduce_sum=True):
+    def val_step(self, data_batch):
         """Validating setp.
         """
-        return self.train_step(data_batch, reduce_sum=reduce_sum)
+        imgs = data_batch[0:2]
+        labels = data_batch[2:]
+
+        # call forward
+        cls_score = self(imgs)
+        loss_metrics = self.head.loss(cls_score, labels, valid_mode=True)
+        return loss_metrics
 
     def test_step(self, data_batch):
         """Test step.
