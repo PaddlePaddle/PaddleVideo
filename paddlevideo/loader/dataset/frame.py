@@ -84,7 +84,7 @@ class FrameDataset(BaseDataset):
                 if ir < self.num_retries - 1:
                     logger.info(
                         "Error when loading {}, have {} trys, will try again".
-                        format(results['filename'], ir))
+                        format(results['frame_dir'], ir))
                 idx = random.randint(0, len(self.info) - 1)
                 continue
             return results['imgs'], np.array([results['labels']])
@@ -101,7 +101,7 @@ class FrameDataset(BaseDataset):
                 if ir < self.num_retries - 1:
                     logger.info(
                         "Error when loading {}, have {} trys, will try again".
-                        format(results['filename'], ir))
+                        format(results['frame_dir'], ir))
                 idx = random.randint(0, len(self.info) - 1)
                 continue
             return results['imgs'], np.array([results['labels']])

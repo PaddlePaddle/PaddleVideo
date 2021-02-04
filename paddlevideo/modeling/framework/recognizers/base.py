@@ -20,12 +20,21 @@ class BaseRecognizer(nn.Layer):
         head (dict): Classification head to process feature.
 
     """
-    def __init__(self, backbone, head):
+    def __init__(self, backbone=None, head=None):
 
         super().__init__()
-        self.backbone = builder.build_backbone(backbone)
-        self.head = builder.build_head(head)
-        self.init_weights()
+        if backbone!=None:
+            self.backbone = builder.build_backbone(backbone)
+            self.backbone.init_weights()
+        else:
+            self.backbone = None
+        if head!=None:
+            self.head_name = head.name
+            self.head = builder.build_head(head)
+            self.head.init_weights()
+        else:
+           self.head = None
+
 
     def init_weights(self):
         """Initialize the model network weights. """
@@ -37,11 +46,11 @@ class BaseRecognizer(nn.Layer):
     def extract_feature(self, imgs):
         """Extract features through a backbone.
 
-	Args:
-	    imgs (paddle.Tensor) : The input images.
+    Args:
+        imgs (paddle.Tensor) : The input images.
 
         Returns:
-	    feature (paddle.Tensor) : The extracted features.
+            feature (paddle.Tensor) : The extracted features.
         """
         feature = self.backbone(imgs)
         return feature
@@ -53,8 +62,15 @@ class BaseRecognizer(nn.Layer):
         num_segs = imgs.shape[1]
         imgs = paddle.reshape(imgs, [-1] + list(imgs.shape[2:]))
 
-        feature = self.extract_feature(imgs)
-        cls_score = self.head(feature, num_segs)
+        if self.backbone!=None:
+            feature = self.extract_feature(imgs)
+        else:
+            feature = imgs
+        if self.head!=None:
+            cls_score = self.head(feature, num_segs)
+        else:
+            cls_score = None
+
 
         return cls_score
 

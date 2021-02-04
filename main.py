@@ -14,7 +14,7 @@
 import paddle
 import argparse
 from paddlevideo.utils import get_config
-from paddlevideo.tasks import train_model, train_model_multigrid
+from paddlevideo.tasks import train_model, train_model_multigrid, test_model, train_dali
 from paddlevideo.utils import get_dist_info
 
 
@@ -30,14 +30,24 @@ def parse_args():
                         action='append',
                         default=[],
                         help='config options to be overridden')
-    parser.add_argument(
-        '--validate',
-        action='store_true',
-        help='whether to evaluate the checkpoint during training')
+    parser.add_argument('--test',
+                        action='store_true',
+                        help='whether to test a model')
+    parser.add_argument('--train_dali',
+                        action='store_true',
+                        help='whether to use dali to speed up training')
     parser.add_argument('--multigrid',
                         action='store_true',
                         help='whether to use multigrid training')
     parser.add_argument('--seed', type=int, default=None, help='random seed')
+    parser.add_argument('-w',
+                        '--weights',
+                        type=str,
+                        help='weights for finetuning or testing')
+    parser.add_argument(
+        '--validate',
+        action='store_true',
+        help='whether to evaluate the checkpoint during training')
 
     args = parser.parse_args()
     return args
@@ -52,10 +62,17 @@ def main():
     if parallel:
         paddle.distributed.init_parallel_env()
 
-    if not args.multigrid:
-        train_model(cfg, parallel=parallel, validate=args.validate)
-    else:
+    if args.test:
+        test_model(cfg, weights=args.weights, parallel=parallel)
+    elif args.train_dali:
+        train_dali(cfg, weights=args.weights, parallel=parallel)
+    elif args.multigrid:
         train_model_multigrid(cfg, world_size, validate=args.validate)
+    else:
+        train_model(cfg,
+                    weights=args.weights,
+                    parallel=parallel,
+                    validate=args.validate)
 
 
 if __name__ == '__main__':

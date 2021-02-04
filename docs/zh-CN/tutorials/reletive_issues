@@ -1,0 +1,77 @@
+video_path is what ? #4510
+https://github.com/PaddlePaddle/models/issues/4510
+
+关于BSN/BMN模型 #4411
+https://github.com/PaddlePaddle/models/issues/4411
+
+微调nextvald的参数，如何加载部分参数呢 #4367
+https://github.com/PaddlePaddle/models/issues/4367
+
+用TSN视频分类模型进行finetune时的问题 #4358
+https://github.com/PaddlePaddle/models/issues/4358
+
+用paddle视频分类模型进行finetune开发报错。 #4353
+https://github.com/PaddlePaddle/models/issues/4353
+
+BMN/BSN模型评估时报错 #4110
+https://github.com/PaddlePaddle/models/issues/4110
+
+The avg losses are not same for training and validation when the same data are used. #4973
+https://github.com/PaddlePaddle/models/issues/4973
+
+How can I load a pretrained model in AttentionCluster to train my own data? #4972
+https://github.com/PaddlePaddle/models/issues/4972
+
+ETS模型的数据处理 #4957
+https://github.com/PaddlePaddle/models/issues/4957
+
+BMN模型推理出现错误 #4881
+https://github.com/PaddlePaddle/models/issues/4881
+
+C-TCN模型数据集不支持MP4格式,MP4转为pickle文件格式需要提供相应处理工具脚本 #4782
+https://github.com/PaddlePaddle/models/issues/4782
+
+CTCN 有没有使用I3D特征的demo #4756
+https://github.com/PaddlePaddle/models/issues/4756
+
+ctcn的数据集.pkl文件的b'feats'和b'scores'是什么？我注意到ctcn_reader.py只用到了b'scores'，是否b'scores'才是需要的特征？还有对应的txt文件是什么？假设我需要把BMN的数据集转化为ctcn的数据集，该怎么做？ #4750
+https://github.com/PaddlePaddle/models/issues/4750
+
+使用BMN预训练模型训练的时候报错 #4749
+https://github.com/PaddlePaddle/models/issues/4749
+
+使用BMN进行预测时，输出的json文件 视频ID少了两个字符，所有的文件都是这样 #4745
+https://github.com/PaddlePaddle/models/issues/4745
+
+BMN模型batch_size调小之后loss为nan #4738
+https://github.com/PaddlePaddle/models/issues/4738
+
+BMN的输入问题 #4724
+https://github.com/PaddlePaddle/models/issues/4724
+
+报一个video_tag的BUG #4698
+https://github.com/PaddlePaddle/models/issues/4698
+
+PaddleCV-video-ctcn 训练到Epoch21，iter1365停止不动 #4719
+https://github.com/PaddlePaddle/models/issues/4719
+
+STNET跑模型推断，显卡显存充足，提示显存不足 #4608
+https://github.com/PaddlePaddle/models/issues/4608
+
+训练stnet读取kinetics数据集时出线错误 求解决 #4529
+https://github.com/PaddlePaddle/models/issues/4529
+
+有关CTCN视频动作定位的问题 #4508
+https://github.com/PaddlePaddle/models/issues/4508
+
+谁有这个yt8m 的tfrecord？ #4506
+https://github.com/PaddlePaddle/models/issues/4506
+
+The NeXtVLAD final model couldn't be used ??? #4502
+https://github.com/PaddlePaddle/models/issues/4502
+
+Hi, I'm wondering if there is an end-to-end solution for the youtube8M attention_lstm model? #4201
+https://github.com/PaddlePaddle/models/issues/4201
+
+CTCN模型训练一段时间后NAN #4123
+https://github.com/PaddlePaddle/models/issues/4123

@@ -41,7 +41,6 @@ class BaseDataset(Dataset, ABC):
     def __init__(self, file_path, pipeline, data_prefix=None, test_mode=False):
 
         super().__init__()
-
         self.file_path = file_path
         self.data_prefix = osp.realpath(data_prefix) if \
             data_prefix is not None and osp.isdir(data_prefix) else data_prefix

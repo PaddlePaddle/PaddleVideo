@@ -14,6 +14,7 @@
 
 from .train import train_model
 from .test import test_model
+from .train_dali import train_dali
 from .train_multigrid import train_model_multigrid
 
-__all__ = ['train_model', 'test_model', 'train_model_multigrid']
+__all__ = ['train_model', 'test_model', 'train_dali', 'train_model_multigrid']

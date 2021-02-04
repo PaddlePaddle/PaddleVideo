@@ -18,7 +18,8 @@ MODEL: #MODEL field
     dropout_rate: 0.5
 
 DATASET: #DATASET field
-  batch_size: 8  #single bacth size
+  batch_size: 8  #single card bacth size
+  test_batch_size: 8
   num_workers: 8
   train:
     format: "SFVideoDataset"
@@ -28,8 +29,7 @@ DATASET: #DATASET field
     file_path: "./data/k400/val.csv" #Mandatory, valid data index file path
   test:
     format: "SFVideoDataset"
-    file_path: "../data/k400/val.csv" #Mandatory, test data index file path
-    test_mode: True
+    file_path: "./data/k400/val.csv" #Mandatory, test data index file path
     num_ensemble_views: 10
     num_spatial_crops: 3
 

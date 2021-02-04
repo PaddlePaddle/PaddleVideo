@@ -13,7 +13,8 @@ MODEL: #MODEL field
     dscale: 100
 
 DATASET: #DATASET field
-  batch_size: 4 #single bacth size
+  batch_size: 4 #single card bacth size
+  test_batch_size: 1
   num_workers: 8
   train:
     format: "BMNDataset"
@@ -78,11 +79,11 @@ METRIC:
   name: 'BMNMetric'
   tscale: 100
   dscale: 100
-  anno_file: "data/dataset/bmn_data/activitynet_1.3_annotations.json"
+  file_path: "data/dataset/bmn_data/activitynet_1.3_annotations.json"
   ground_truth_filename: "data/dataset/bmn_data/activity_net_1_3_new.json"
   subset: "validation"
-  output_path: "../data/bmn/BMN_Test_output"
-  result_path: "../data/bmn/BMN_Test_results"
+  output_path: "data/bmn/BMN_Test_output"
+  result_path: "data/bmn/BMN_Test_results"
 
 model_name: BMN
 epochs: 9 #Mandatory, total epoch
