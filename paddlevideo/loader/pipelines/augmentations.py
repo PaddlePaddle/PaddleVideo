@@ -467,8 +467,8 @@ class PackOutput(object):
         results['imgs'] = frames_list
         return results
 
-#=================ava augmentation==============
 
+#=================ava augmentation==============
 import cv2
 if Image is not None:
     pillow_interp_codes = {
@@ -891,7 +891,7 @@ class RandomRescale:
         return repr_str
 
 @PIPELINES.register()
-class RandomCrop:
+class RandomCrop_v2:
     """Vanilla square random crop that specifics the output size.
 
     Required keys in results are "imgs" and "img_shape", added or

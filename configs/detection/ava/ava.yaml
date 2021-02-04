@@ -56,7 +56,7 @@ PIPELINE:
     transform: #Mandotary, image transfrom operator
       - RandomRescale:
           scale_range: (256,320)
-      - RandomCrop:
+      - RandomCrop_v2:
           size: 256
       - Flip:
           flip_ratio: 0.5
