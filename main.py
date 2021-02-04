@@ -39,7 +39,6 @@ def parse_args():
     parser.add_argument('--multigrid',
                         action='store_true',
                         help='whether to use multigrid training')
-    parser.add_argument('--seed', type=int, default=None, help='random seed')
     parser.add_argument('-w',
                         '--weights',
                         type=str,

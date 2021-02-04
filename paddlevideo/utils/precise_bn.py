@@ -59,7 +59,7 @@ def do_preciseBN(model, data_loader, parallel, num_iters=200):
     running_var = [paddle.zeros_like(bn._variance) for bn in bn_layers_list]
 
     ind = -1
-    for ind, data in enumerate(data_loader):
+    for ind, data in enumerate(itertools.islice(data_loader, num_iters)):
         logger.info("doing precise BN {} / {}...".format(ind + 1, num_iters))
         if parallel:
             model._layers.train_step(data)

@@ -130,7 +130,7 @@ def train_model(cfg, weights=None, parallel=True, validate=True):
             record_list['batch_time'].update(time.time() - tic)
             tic = time.time()
 
-            if i % cfg.get("log_interval", 1) == 0:
+            if i % cfg.get("log_interval", 10) == 0:
                 ips = "ips: {:.5f} instance/sec.".format(
                     batch_size / record_list["batch_time"].val)
                 log_batch(record_list, i, epoch + 1, cfg.epochs, "train", ips)
@@ -167,7 +167,7 @@ def train_model(cfg, weights=None, parallel=True, validate=True):
                 record_list['batch_time'].update(time.time() - tic)
                 tic = time.time()
 
-                if i % cfg.get("log_interval", 1) == 0:
+                if i % cfg.get("log_interval", 10) == 0:
                     ips = "ips: {:.5f} instance/sec.".format(
                         batch_size / record_list["batch_time"].val)
                     log_batch(record_list, i, epoch + 1, cfg.epochs, "val", ips)
