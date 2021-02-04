@@ -567,7 +567,7 @@ class RawFrameDecode:
                 proposals = results['proposals']
                 proposals = (proposals * scale_factor).astype(np.float32)
                 results['proposals'] = proposals
-        print('-----results[img]----',results['frame_inds'])
+        print('-----results[imgs]----',results['imgs'])
         return results
 
     def __repr__(self):

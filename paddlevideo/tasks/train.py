@@ -54,7 +54,7 @@ def train_model(cfg, weights=None, parallel=True, validate=True):
 
     # 2. Construct dataset and dataloader
     train_dataset = build_dataset((cfg.DATASET.train, cfg.PIPELINE.train))
-    print(train_dataset.info)
+    print(train_dataset.info) # dataset class initialization
     print(train_dataset[0])
     import sys
     sys.exit(0)
