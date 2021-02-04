@@ -855,9 +855,11 @@ class RandomRescale:
     """
 
     def __init__(self, scale_range, interpolation='bilinear'):
+        scale_range = eval(scale_range)
         self.scale_range = scale_range
         # make sure scale_range is legal, first make sure the type is OK
         # assert mmcv.is_tuple_of(scale_range, int)
+        
         assert len(scale_range) == 2
         assert scale_range[0] < scale_range[1]
         assert np.all([x > 0 for x in scale_range])
@@ -1055,9 +1057,9 @@ class Flip:
                 to the next transform in pipeline.
         """
         _init_lazy_if_proper(results, self.lazy)
-        modality = results['modality']
-        if modality == 'Flow':
-            assert self.direction == 'horizontal'
+        #modality = results['modality']
+        #if modality == 'Flow':
+        #    assert self.direction == 'horizontal'
 
         flip = np.random.rand() < self.flip_ratio
 
@@ -1069,11 +1071,11 @@ class Flip:
                 for i, img in enumerate(results['imgs']):
                     imflip_(img, self.direction)
                 lt = len(results['imgs'])
-                for i in range(0, lt, 2):
+                #for i in range(0, lt, 2):
                     # flow with even indexes are x_flow, which need to be
                     # inverted when doing horizontal flip
-                    if modality == 'Flow':
-                        results['imgs'][i] = iminvert(results['imgs'][i])
+                #    if modality == 'Flow':
+                #        results['imgs'][i] = iminvert(results['imgs'][i])
 
             else:
                 results['imgs'] = list(results['imgs'])
@@ -1153,7 +1155,7 @@ class Normalize:
         self.adjust_magnitude = adjust_magnitude
 
     def __call__(self, results):
-        modality = results['modality']
+        #modality = results['modality']
 
         if modality == 'RGB':
             n = len(results['imgs'])
