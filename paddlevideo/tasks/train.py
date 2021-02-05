@@ -55,7 +55,25 @@ def train_model(cfg, weights=None, parallel=True, validate=True):
     # 2. Construct dataset and dataloader
     train_dataset = build_dataset((cfg.DATASET.train, cfg.PIPELINE.train))
     print(train_dataset.info) # dataset class initialization
-    print(train_dataset[0])
+    print(len(train_dataset))
+    #print(train_dataset[0])
+    #print(train_dataset[0].keys())
+    tmp = train_dataset[0]
+    #print('-----data[imgs]----',type(tmp['img']))
+    #print('-----data[imgs]----',tmp['img'])
+    #tmp = dataset[0]
+    #print(type(tmp['img']))
+    print('--------tmp[img]-------')
+    print(tmp['img'])
+    print('--------tmp[proposal]------')
+    print(tmp['proposals'])
+    print('-------tmp[gt_bboxes]--------')
+    print(tmp['gt_bboxes'])
+    print('-------tmp[gt_labels]------')
+    print(tmp['gt_labels'])
+    print('-------tmp[img_metas]------')
+    print(tmp['img_metas'])
+
     import sys
     sys.exit(0)
     train_dataloader_setting = dict(batch_size=batch_size,

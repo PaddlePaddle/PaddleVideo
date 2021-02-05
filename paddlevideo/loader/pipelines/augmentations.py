@@ -636,7 +636,10 @@ class EntityBoxRescale:
 
         proposals = results['proposals']
         gt_bboxes = results['gt_bboxes']
+        #print('-----639----',gt_bboxes)
+        #print('-----640 scale_factor----',scale_factor)
         results['gt_bboxes'] = gt_bboxes * scale_factor
+        #print('----642---',results['gt_bboxes'])
 
         if proposals is not None:
             assert proposals.shape[1] == 4, (
@@ -681,6 +684,7 @@ class EntityBoxCrop:
         gt_bboxes_[..., 1::2] = np.clip(gt_bboxes[..., 1::2] - y1, 0,
                                         img_h - 1)
         results['gt_bboxes'] = gt_bboxes_
+        #print('-----687---- A BoxCrop',results['gt_bboxes']) 
 
         if proposals is not None:
             assert proposals.shape[-1] == 4
@@ -807,7 +811,7 @@ class Resize:
 
         self.scale_factor = np.array([new_w / img_w, new_h / img_h],
                                      dtype=np.float32)
-
+        #print('----813---scale_factor in Resize',self.scale_factor)
         results['img_shape'] = (new_h, new_w)
         results['keep_ratio'] = self.keep_ratio
         results['scale_factor'] = results['scale_factor'] * self.scale_factor
@@ -826,6 +830,7 @@ class Resize:
 
         if 'gt_bboxes' in results:
             assert not self.lazy
+            #print('---- 829 in Resize ---',results['gt_bboxes'])
             entity_box_rescale = EntityBoxRescale(self.scale_factor)
             results = entity_box_rescale(results)
 
@@ -874,8 +879,12 @@ class RandomRescale:
             results (dict): The resulting dict to be modified and passed
                 to the next transform in pipeline.
         """
-        short_edge = np.random.randint(self.scale_range[0],
-                                       self.scale_range[1] + 1)
+        #print('-----877---- before randomscale ------',results['gt_bboxes'])
+        #short_edge = np.random.randint(self.scale_range[0],
+        #                               self.scale_range[1] + 1)
+        #print('----885 b randomscale results[proposals]----',results['proposals'])
+        short_edge = 300
+        #print('---884 short_edge---',short_edge) 
         resize = Resize((-1, short_edge),
                         keep_ratio=True,
                         interpolation=self.interpolation,
@@ -883,6 +892,7 @@ class RandomRescale:
         results = resize(results)
 
         results['short_edge'] = short_edge
+        #print('-----886----A Randomrescale-----',results['proposals'])
         return results
 
     def __repr__(self):
@@ -929,7 +939,7 @@ class RandomCrop_v2:
             y_offset = int(np.random.randint(0, img_h - self.size))
         if img_w > self.size:
             x_offset = int(np.random.randint(0, img_w - self.size))
-
+        #print('---941  x_offset y_offset ---',(x_offset,y_offset))
         if 'crop_quadruple' not in results:
             results['crop_quadruple'] = np.array(
                 [0, 0, 1, 1],  # x, y, w, h
@@ -953,7 +963,7 @@ class RandomCrop_v2:
 
         results['crop_bbox'] = np.array(
             [x_offset, y_offset, x_offset + new_w, y_offset + new_h])
-
+        #print('---965  results[crop_bbox] ---',results['crop_bbox'])
         results['img_shape'] = (new_h, new_w)
 
         if not self.lazy:
@@ -981,6 +991,7 @@ class RandomCrop_v2:
         # Process entity boxes
         if 'gt_bboxes' in results:
             assert not self.lazy
+            #print('---992--- b EntiBoxCrop',results['gt_bboxes'])
             entity_box_crop = EntityBoxCrop(results['crop_bbox'])
             results = entity_box_crop(results)
 
@@ -1060,8 +1071,8 @@ class Flip:
         #modality = results['modality']
         #if modality == 'Flow':
         #    assert self.direction == 'horizontal'
-
-        flip = np.random.rand() < self.flip_ratio
+        #print(np.random.rand())
+        flip = 0.3 < self.flip_ratio
 
         results['flip'] = flip
         results['flip_direction'] = self.direction
@@ -1325,7 +1336,7 @@ def to_tensor(data):
     if isinstance(data, paddle.Tensor):
         return data
     if isinstance(data, np.ndarray):
-        return paddle.from_numpy(data)
+        return paddle.to_tensor(data)
     # if isinstance(data, Sequence) and not mmcv.is_str(data):
     #     return torch.tensor(data)
     # if isinstance(data, int):

@@ -67,7 +67,7 @@ PIPELINE:
           input_format: 'NCTHW'
           collapse: True
       - Rename:
-          mapping: dict(imgs='img')
+          mapping: {'imgs':'img'}
       - ToTensor:
           keys: ['img', 'proposals', 'gt_bboxes', 'gt_labels']
       - ToDataContainer:

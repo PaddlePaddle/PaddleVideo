@@ -557,6 +557,7 @@ class RawFrameDecode:
         results['img_shape'] = imgs[0].shape[:2]
 
         # we resize the gt_bboxes and proposals to their real scale
+        #print('-------560--------',results['gt_bboxes'])
         if 'gt_bboxes' in results:
             h, w = results['img_shape']
             scale_factor = np.array([w, h, w, h])
@@ -567,7 +568,9 @@ class RawFrameDecode:
                 proposals = results['proposals']
                 proposals = (proposals * scale_factor).astype(np.float32)
                 results['proposals'] = proposals
-        print('-----results[imgs]----',results['imgs'])
+        #print('-------571--------',results['gt_bboxes'])
+        #print('-----results[imgs]----',results['imgs'])
+        #print('----results after rawframe decord ------ ',results.keys())
         return results
 
     def __repr__(self):
@@ -593,6 +596,7 @@ class SampleAVAFrames(SampleFrames):
         return frame_inds
 
     def __call__(self, results):
+        #print('-----before sampleavaframes results----',results.keys())
         fps = results['fps']
         timestamp = results['timestamp']
         timestamp_start = results['timestamp_start']
@@ -610,7 +614,7 @@ class SampleAVAFrames(SampleFrames):
         results['frame_interval'] = self.frame_interval
         results['num_clips'] = 1
         results['crop_quadruple'] = np.array([0, 0, 1, 1], dtype=np.float32)
-        print('-------results after sampleravaframes-----',results)
+        #print('-------results after sampleravaframes-----',results)
         return results
 
     def __repr__(self):

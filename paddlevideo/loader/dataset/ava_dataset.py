@@ -400,7 +400,7 @@ class AVADataset(BaseDataset):
         results['gt_bboxes'] = ann['gt_bboxes']
         results['gt_labels'] = ann['gt_labels']
         results['entity_ids'] = ann['entity_ids']
-
+        #print('------403---- results in ava_dataset',results)
         return self.pipeline(results)
 
     def prepare_test(self, idx):
