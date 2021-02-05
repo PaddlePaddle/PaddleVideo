@@ -54,34 +54,36 @@ def train_model(cfg, weights=None, parallel=True, validate=True):
 
     # 2. Construct dataset and dataloader
     train_dataset = build_dataset((cfg.DATASET.train, cfg.PIPELINE.train))
-    print(train_dataset.info) # dataset class initialization
-    print(len(train_dataset))
-    #print(train_dataset[0])
-    #print(train_dataset[0].keys())
-    tmp = train_dataset[0]
-    #print('-----data[imgs]----',type(tmp['img']))
-    #print('-----data[imgs]----',tmp['img'])
-    #tmp = dataset[0]
-    #print(type(tmp['img']))
-    print('--------tmp[img]-------')
-    print(tmp['img'])
-    print('--------tmp[proposal]------')
-    print(tmp['proposals'])
-    print('-------tmp[gt_bboxes]--------')
-    print(tmp['gt_bboxes'])
-    print('-------tmp[gt_labels]------')
-    print(tmp['gt_labels'])
-    print('-------tmp[img_metas]------')
-    print(tmp['img_metas'])
+    # print(train_dataset.info) # dataset class initialization
+    # print(len(train_dataset))
+    #
+    # tmp = train_dataset[0]
 
-    import sys
-    sys.exit(0)
+    # print('--------tmp[img]-------')
+    # print(tmp['img'])
+    # print('--------tmp[proposal]------')
+    # print(tmp['proposals'])
+    # print('-------tmp[gt_bboxes]--------')
+    # print(tmp['gt_bboxes'])
+    # print('-------tmp[gt_labels]------')
+    # print(tmp['gt_labels'])
+    # print('-------tmp[img_metas]------')
+    # print(tmp['img_metas'])
+
+
     train_dataloader_setting = dict(batch_size=batch_size,
                                     num_workers=num_workers,
                                     collate_fn_cfg=cfg.get('MIX', None),
                                     places=places)
 
     train_loader = build_dataloader(train_dataset, **train_dataloader_setting)
+
+    for i,data in enumerate(train_loader):
+        print('-----index-----',i)
+        print('-----data------',data)
+
+    import sys
+    sys.exit(0)
     if validate:
         valid_dataset = build_dataset((cfg.DATASET.valid, cfg.PIPELINE.valid))
         validate_dataloader_setting = dict(
