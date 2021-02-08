@@ -32,13 +32,13 @@ Please refer to UCF101 data download and preparation doc [ucf101-data](../../dat
 
 ### download pretrain-model 
 
-please download [ResNet50_vd_ssld_v2](https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_vd_ssld_v2_pretrained.pdparams) as pretraind model by 
+Please download [ResNet50_vd_ssld_v2](https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_vd_ssld_v2_pretrained.pdparams) as pretraind model: 
 
 ```bash
 wget https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_vd_ssld_v2_pretrained.pdparams
 ```
 
-then add path to `MODEL.framework.backbone.pretrained` of config file as：
+and add path to `MODEL.framework.backbone.pretrained` in config file as：
 
 ```yaml
 MODEL:
