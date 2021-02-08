@@ -66,7 +66,7 @@ python -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=log_p
 
 - For finetune please download our trained model [ppTSM.pdparams](https://videotag.bj.bcebos.com/PaddleVideo/ppTSM/ppTSM.pdparams)，and specify file path with `--weights`.
 
-- For the config file usage，please refer to [config](../../tutorials/config.md)。
+- For the config file usage，please refer to [config](../../tutorials/config.md).
 
 ## Test
 
