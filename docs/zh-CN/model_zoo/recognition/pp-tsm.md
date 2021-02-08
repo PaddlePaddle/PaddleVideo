@@ -84,7 +84,7 @@ configs/recognition/tsm/todo.yaml     --> Kinetics-400 videos格式训练
 python3 main.py --test -c configs/recognition/tsm/pptsm.yaml -w output/ppTSM/ppTSM_best.pdparams
 ```
 
-- 可下载已发布模型[ppTSM.pdparams](https://videotag.bj.bcebos.com/PaddleVideo/ppTSM/ppTSM.pdparams)，通过`-c`指定配置文件，`-w`指定权重存放路径进行模型测试。
+- 通过`-c`参数指定配置文件，可下载已发布模型[ppTSM.pdparams](https://videotag.bj.bcebos.com/PaddleVideo/ppTSM/ppTSM.pdparams)，通过`-w`指定权重存放路径进行模型测试。
 
 
 当取如下参数时，在Kinetics400的验证集下评估精度如下:
