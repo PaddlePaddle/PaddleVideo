@@ -7,7 +7,7 @@
 Temporal Shift Module (TSM) 是当前比较受关注的模型，通过通道移动的方法在不增加任何额外参数量和计算量的情况下极大的提升了模型对于视频时间信息的利用能力，并且由于其具有轻量高效的特点，十分适合工业落地。
 
 <div align="center">
-<img src="../../../images/tsm_architecture.png" height=300 width=500 hspace='10'/> <br />
+<img src="../../../images/tsm_architecture.png" height=300 width=700 hspace='10'/> <br />
 </div>
 
 本代码实现的模型为基于单路RGB图像的TSM网络结构，Backbone采用ResNet-50结构。
