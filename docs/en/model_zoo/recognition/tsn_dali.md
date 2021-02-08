@@ -4,7 +4,7 @@
 
 - [Introduction](#Introduction)
 - [Requirement](#Requirement)
-- [Data preparation](#Data preparation)
+- [Data](#Data)
 - [Train](#Train)
 - [Test](#Test)
 - [Inference](#Inference)
@@ -45,7 +45,7 @@ To build container, you can use:
 nvidia-docker run --name tsn-DALI -v /home:/workspace --network=host -it --shm-size 64g -e NVIDIA_DRIVER_CAPABILITIES=compute,utility,video huangjun12/paddlevideo:tsn_dali_cuda9_0 /bin/bash
 ```
 
-## Data preparation
+## Data
 
 - Kinetics400 dataset please refer to[K400 data](../../dataset/k400.md)
 
