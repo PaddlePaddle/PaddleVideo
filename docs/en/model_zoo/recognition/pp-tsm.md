@@ -77,13 +77,13 @@ python3 main.py --test -c configs/recognition/tsm/pptsm.yaml -w output/ppTSM/ppT
 - Download the published model [ppTSM.pdparams](https://videotag.bj.bcebos.com/PaddleVideo/ppTSM/ppTSM.pdparams), then you need to set the `--weights` for model testing
 
 
-Accuracy on Kinetics400 as follows:
+Accuracy on Kinetics400:
 
 | seg\_num | target\_size | Top-1 |
 | :------: | :----------: | :----: |
 | 8 | 224 | 0.735 |
 
-Accuracy on UCF101  as follows：
+Accuracy on UCF101：
 
 | seg\_num | target\_size | Top-1 |
 | :------: | :----------: | :----: |
