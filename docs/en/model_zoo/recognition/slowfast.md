@@ -17,7 +17,7 @@
 SlowFast  involves (i) a Slow pathway, operating at low frame rate, to capture spatial semantics, and (ii) a Fast path-way, operating at high frame rate, to capture motion at fine temporal resolution. The Fast pathway can be made very lightweight by reducing its channel capacity, yet can learn useful temporal information for video recognition.
 
 <p align="center">
-<img src="https://github.com/PaddlePaddle/PaddleVideo/blob/main/docs/images/SlowFast.png" height=300 width=500 hspace='10'/> <br />
+<img src="../../../images/SlowFast.png" height=300 width=500 hspace='10'/> <br />
 SlowFast Overview
 </p>
 
