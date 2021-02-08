@@ -1,6 +1,6 @@
 [English](../../../en/model_zoo/recognition/tsm.md) | 简体中文
 
-# TSM
+# TSM视频分类模型
 
 ## 模型介绍
 
