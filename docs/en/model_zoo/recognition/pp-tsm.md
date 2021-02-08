@@ -14,7 +14,7 @@
 
 ## Introduction
 
-We optimized TSM model and proposed **PPTSM** in this paper. Without increasing the number of parameters, the accuracy of TSM was significantly improved in UCF101 and KINETIC-400 datasets. Please refer to [Tricks on ppTSM](../../tutorials/pp-tsm.md) for more details.
+We optimized TSM model and proposed **PPTSM** in this paper. Without increasing the number of parameters, the accuracy of TSM was significantly improved in UCF101 and Kinetics-400 datasets. Please refer to [Tricks on ppTSM](../../tutorials/pp-tsm.md) for more details.
 
 <p align="center">
 <img src="../../../images/acc_vps.jpeg" height=400 width=650 hspace='10'/> <br />
