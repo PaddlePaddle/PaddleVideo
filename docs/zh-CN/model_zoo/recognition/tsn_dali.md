@@ -1,3 +1,5 @@
+[English](../../../en/model_zoo/recognition/tsn_dali.md) | 简体中文
+
 # TSN模型-DALI训练加速
 
 - [方案简介](#方案简介)
