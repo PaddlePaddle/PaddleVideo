@@ -25,11 +25,11 @@ Cuda: 9.0
 
 训练速度对比如下:
 
-| 加速方式  | batch耗时/s  | reader耗时/s | ips:instance/sec |
-| :--------------- | :--------: | :------------: | :------------: |
-| DALI | 2.083 | 1.804 | 15.36597  |
-| Dataloader:  单卡num_workers=4 | 2.943 | 2.649 | 10.87460|
-| pytorch实现 | TODO | TODO | TODO |
+| 加速方式  | batch耗时/s  | reader耗时/s | ips:instance/sec | 加速比 | 
+| :--------------- | :--------: | :------------: | :------------: | :------------: |
+| DALI | 2.083 | 1.804 | 15.36597  | 1.5x | 
+| Dataloader:  单卡num_workers=4 | 2.943 | 2.649 | 10.87460| base |
+| pytorch实现 | TODO | TODO | TODO | TODO |
 
 可以看到，使用DALI可以进一步加速模型训练，相较于dataloader，加速比约为1.5倍。
 
