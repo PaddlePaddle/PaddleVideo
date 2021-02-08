@@ -36,44 +36,47 @@ Please refer to UCF101 data download and preparation [ucf101 data preparation](.
 
 ## Train
 
-- The parameters of the model are initialized by loading the weights of Resnet50 trained on ImageNet1000. You can download it by yourself 
-[Pretrained](https://paddlemodels.bj.bcebos.com/video_classification/ResNet50_pretrained.tar.gz) . Then, you need unzip it and add its path to the filed of `BACKBONE`,which is in the `configs/tsm.yaml`,of course,
-you can also use the parameter `-o MODEL.HEAD.pretrained=""`,details can be found in [conifg](../../config.md)
+### download pretrain-model
 
-- Download the published model [model](https://paddlemodels.bj.bcebos.com/video_classification/TSM.pdparams), then, you can use '--weights' to specify the weight path for finetune and other development
+- Please download [ResNet50_pretrain.pdparams](https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_pretrain.pdparams) as pretraind model:
 
-K400 video training
+```bash
+wget https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_vd_ssld_v2_pretrained.pdparams
+```
 
-K400 frames training
+and add path to MODEL.framework.backbone.pretrained in config file as：
+```yaml
+MODEL:
+    framework: "Recognizer2D"
+    backbone:
+        name: "ResNet"
+        pretrained: your weight path
+```
 
-UCF101 video training
+### Start training
 
-UCF101 frames training
+You can start training with different dataset using different config file. For UCF-101 dataset, we use 4 cards to train:
 
-## Implementation Detail
+```bash
+python -B -m paddle.distributed.launch --gpus="0,1,2,3"  --log_dir=log_tsm  main.py  --validate -c configs/recognition/tsm/tsm.yaml
+```
 
-**data preparation：** The `MP4` data from the Kinetics 400 dataset were read in the model，Segment 'seg_num' is extracted from each piece of data, and 1 frame of image is extracted from each piece of data. After random enhancement of each frame of image, the image is scaled to 'target_size'.
+- Args -c is used to specify config file.
 
-**training strategies：**
+- For finetune please download our trained model [TSM.pdparams]()<sup>coming soon</sup>，and specify file path with --weights.
 
-*  Momentum optimization algorithm is used for training, and Momentum =0.9
-*  L2_decay weight is set to be 1e-4
-*  The learning rate decays by  a factor of 10 in the 1/3 and 2/3 of the total epochs
-
-**Parameters Initialization**
-
-****
+- For the config file usage，please refer to [config](../../tutorials/config.md).
 
 ## Test
 
 ```bash
-python3 main.py --test --weights=""
+python3 main.py --test -c configs/recognition/tsm/tsm.yaml -w output/TSM/TSM_best.pdparams
 ```
 
-- Download the published model [model](https://paddlemodels.bj.bcebos.com/video_classification/TSM.pdparams) , then , you need to set the `--weights` for model testing
+- Download the published model [TSM.pdparams]()<sup>coming soon</sup>, then you need to set the `--weights` for model testing
 
 
-When the following parameters, the accuracy is evaluated as follows in the Validation dataset of Kinetics400:
+Accuracy on Kinetics400:
 
 | seg\_num | target\_size | Top-1 |
 | :------: | :----------: | :----: |
