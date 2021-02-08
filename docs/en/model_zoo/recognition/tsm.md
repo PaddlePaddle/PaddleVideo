@@ -2,28 +2,39 @@
 
 # TSM
 
+---
+## Contents
+
+- [Introduction](#Introduction)
+- [Data](#Data)
+- [Train](#Train)
+- [Test](#Test)
+- [Inference](#Inference)
+- [Reference](#Reference)
+
+
 ## Introduction
 
 Temporal Shift Module (TSM) is a popular model that attracts more attention at present. 
-The method of moving through channels greatly improves the utilization ability of the model for video time information without increasing any additional number of parameters and calculation amount. 
+The method of moving through channels greatly improves the utilization ability of temporal information without increasing any additional number of parameters and calculation amount. 
 Moreover, due to its lightweight and efficient characteristics, it is very suitable for industrial landing.
 
 <div align="center">
-  <img src="../../../images/tsm_architecture.png" >
+<img src="../../../images/tsm_architecture.png" height=250 width=700 hspace='10'/> <br />
 </div>
 
-The model of this code is TSM network structure based on single path RGB image, Backbone. ResNet-50 structure.
+This code implemented single RGB stream of TSM networks. Backbone is ResNet-50.
 
 Please refer to the ICCV 2019 paper for details [TSM: Temporal Shift Module for Efficient Video Understanding](https://arxiv.org/pdf/1811.08383.pdf)
 
-## Data Preparation
+## Data
 
-Please refer to K400 data download and preparation [data preparation](../../dataset/K400.md)
+Please refer to K400 data download and preparation [k400 data preparation](../../dataset/K400.md)
 
-Please refer to UCF101 data download and preparation [data preparation](../../dataset/ucf101.md)
+Please refer to UCF101 data download and preparation [ucf101 data preparation](../../dataset/ucf101.md)
 
 
-## Training
+## Train
 
 - The parameters of the model are initialized by loading the weights of Resnet50 trained on ImageNet1000. You can download it by yourself 
 [Pretrained](https://paddlemodels.bj.bcebos.com/video_classification/ResNet50_pretrained.tar.gz) . Then, you need unzip it and add its path to the filed of `BACKBONE`,which is in the `configs/tsm.yaml`,of course,
