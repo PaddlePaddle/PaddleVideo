@@ -17,7 +17,7 @@
 BMN model contains three modules: Base Module handles the input feature sequence, and out- puts feature sequence shared by the following two modules; Temporal Evaluation Module evaluates starting and ending probabilities of each location in video to generate boundary probability sequences; Proposal Evaluation Module con- tains the BM layer to transfer feature sequence to BM fea- ture map, and contains a series of 3D and 2D convolutional layers to generate BM confidence map.
 
 <p align="center">
-<img src="https://github.com/PaddlePaddle/PaddleVideo/blob/main/docs/images/BMN.png" height=300 width=400 hspace='10'/> <br />
+<img src="../../../images/BMN.png" height=300 width=400 hspace='10'/> <br />
 BMN Overview
 </p>
 
