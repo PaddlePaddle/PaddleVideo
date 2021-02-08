@@ -47,7 +47,7 @@ nvidia-docker run --name tsn-DALI -v /home:/workspace --network=host -it --shm-s
 
 ## Data
 
-- Kinetics400 dataset please refer to[K400 data](../../dataset/k400.md)
+- Kinetics400 dataset please refer to [K400 data](../../dataset/k400.md)
 
 - UCF101 dataset please refer to [UCF101 data](../../dataset/ucf101.md)
 
