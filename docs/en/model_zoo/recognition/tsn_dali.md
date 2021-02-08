@@ -16,7 +16,7 @@ We aims to speed up TSN model training using DALI in this code. As [nvidia DALI]
 
 ### Performance
 
-Environment: 
+Test Environment: 
 ```
 Card: Tesla v100
 Memory: 4 * 16G
@@ -87,11 +87,11 @@ python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3" --log_dir=log_tsn mai
 
 ## Test
 
-Please refer to [TSN Test](../tsn.md)
+Please refer to [TSN Test](./tsn.md)
 
 ## Inference
 
-Please refer to [TSN Inference](../tsn.md)
+Please refer to [TSN Inference](./tsn.md)
 
 ## Reference
 
