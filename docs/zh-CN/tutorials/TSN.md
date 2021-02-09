@@ -23,7 +23,6 @@ TSN 采用和 two-stream 相似的结构，网络由空间流卷积网络和时�
 <img src="../../images/tsn_structure.jpg" height=200 width=500 hspace='10'/> <br />
 </p>
 
-
 > 这里注意 segment 和 snippet 的区别
 
 TSN 采用与 two-stream 类似的结构，使用空间网络操作一帧 RGB 图像，时序卷积网络操作连续的光流图像。但由于更深的网络结构能够提升对物体的识别能力，因此 TSN 中作者采用 BN-Inception 构建网络。
