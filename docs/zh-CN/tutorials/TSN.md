@@ -1,22 +1,22 @@
 # TSN
 
 ## 背景
-$TSN$ 可以看作是对 $two-stream$的改进，通过设计有效的卷积网络体系结构 $TSN$ 解决视频动作分类中的两个主要问题：
+TSN 可以看作是对 two-stream 的改进，通过设计有效的卷积网络体系结构 TSN 解决视频动作分类中的两个主要问题：
 * 长距离时序依赖问题（有些动作在视频中持续的时间较长）；
 * 解决数据量较少的问题；
 
 ## 贡献
-$TSN$ 的贡献可概括为以下两点：
-* $TSN$ 模型基于 $long-range \ temporal \ structure$ 建模，结合了 $sparse \ temporal \ sampling \ strategy$ 和 $video-level \ supervision$ 从而保证对整段视频学习的有效性和高效性；
+TSN 的贡献可概括为以下两点：
+* TSN 模型基于 long-range temporal structure 建模，结合了 sparse temporal sampling strategy 和 video-level supervision 从而保证对整段视频学习的有效性和高效性；
 * 提出了一系列最佳实践方案；
 
 ## 原理
-由于 $two-stream$ 网络处理的是单帧图像（空间网络）或者短片段中的一堆帧图像（时序网络），因此 $two-stream$ 网络无法满足时间跨度较长的视频动作。为了能够处理长范围时序结构的情况，可以使用密集帧采样方式从视频中获取长时间信息，但这样会增加时间成本同时采样到的连续帧之间存在冗余。于是在 $TSN$ 模型中作者使用稀疏采用的方式来替代密集采样，降低计算量的同时一定程度上也去除了冗余信息。
+由于 two-stream 网络处理的是单帧图像（空间网络）或者短片段中的一堆帧图像（时序网络），因此 two-stream 网络无法满足时间跨度较长的视频动作。为了能够处理长范围时序结构的情况，可以使用密集帧采样方式从视频中获取长时间信息，但这样会增加时间成本同时采样到的连续帧之间存在冗余。于是在 TSN 模型中作者使用稀疏采用的方式来替代密集采样，降低计算量的同时一定程度上也去除了冗余信息。
 
-$TSN$ 采用和 $two-stream$ 相似的结构，网络由空间流卷积网络和时间流卷积组成。$TSN$ 使用稀疏采样的方式从整段视频采出一系列的短片段，其中每个片段都会有一个对自身动作类别的初步预测，之后通过对这些片段的预测结果进行“融合”得出对整个视频的预测结果。
+TSN 采用和 two-stream 相似的结构，网络由空间流卷积网络和时间流卷积组成。TSN 使用稀疏采样的方式从整段视频采出一系列的短片段，其中每个片段都会有一个对自身动作类别的初步预测，之后通过对这些片段的预测结果进行“融合”得出对整个视频的预测结果。
 
 ## 网络结构
-如下图所示，一个视频被分为 $K$ 段（$segment$）；之后对每个段使用稀疏采样的方式采出一个片段（$snippet$）；然后使用“段共识函数”对不同片段的预测结果进行融合生成“段共识”，此时完成了一个视频级的预测；最后对所有模式的预测结果进行融合生成最终的预测结果。
+如下图所示，一个视频被分为 ![formula](https://render.githubusercontent.com/render/math?math=K) 段（ segment ）；之后对每个段使用稀疏采样的方式采出一个片段（ snippet ）；然后使用“段共识函数”对不同片段的预测结果进行融合生成“段共识”，此时完成了一个视频级的预测；最后对所有模式的预测结果进行融合生成最终的预测结果。
 
 <center>
     <img 
@@ -33,22 +33,20 @@ $TSN$ 采用和 $two-stream$ 相似的结构，网络由空间流卷积网络和
 
 > 这里注意 segment 和 snippet 的区别
 
-$TSN$ 采用与 $two-stream$ 类似的结构，使用空间网络操作一帧 $RGB$ 图像，时序卷积网络操作连续的光流图像。但由于更深的网络结构能够提升对物体的识别能力，因此$TSN$ 中作者采用 $BN-Inception$ 构建网络。
+TSN 采用与 two-stream 类似的结构，使用空间网络操作一帧 RGB 图像，时序卷积网络操作连续的光流图像。但由于更深的网络结构能够提升对物体的识别能力，因此 TSN 中作者采用 BN-Inception 构建网络。
 
 ## 损失函数
 
-给定一段视频 $V$，按相等间隔分为 $K$ 段 ${S_1,S_2,...,S_K}$。$TSN$ 对一系列片段的建模如下：
-$$
-TSN(T_1,T_2,...,T_K)=H(G(F(T_1;W),F(T_2;W),...,F(T_K;W)))
-$$
+给定一段视频 ![formula](https://render.githubusercontent.com/render/math?math=V)，按相等间隔分为 ![formula](https://render.githubusercontent.com/render/math?math=K) 段 ![formula](https://render.githubusercontent.com/render/math?math={S_1,S_2,...,S_K})。 TSN 对一系列片段的建模如下：
 
-其中，$(T_1,T_2,...,T_K)$ 表示片段序列，从每个段 $S_k$ 中随机采样获取对应的片段 $T_k$；$F(T_k;W)$ 表示作用于短片段 $T_k$ 的卷积网络，$W$ 为网络的参数，返回值为 $T_k$ 相对于所有类别的得分；段共识函数 $G$ 用于融合所有片段的预测结果。预测函数 $H$ 用于预测整段视频属于每个动作类别的概率，它的输入为段共识函数 $G$ 的结果。
+![formula](https://render.githubusercontent.com/render/math?math=TSN(T_1,T_2,...,T_K)=H(G(F(T_1;W),F(T_2;W),...,F(T_K;W))))
+
+其中，![formula](https://render.githubusercontent.com/render/math?math=(T_1,T_2,...,T_K)) 表示片段序列，从每个段 ![formula](https://render.githubusercontent.com/render/math?math=S_k) 中随机采样获取对应的片段 ![formula](https://render.githubusercontent.com/render/math?math=T_k)；![formula](https://render.githubusercontent.com/render/math?math=F(T_k;W)) 表示作用于短片段 ![formula](https://render.githubusercontent.com/render/math?math=T_k) 的卷积网络，![formula](https://render.githubusercontent.com/render/math?math=W) 为网络的参数，返回值为 ![formula](https://render.githubusercontent.com/render/math?math=T_k) 相对于所有类别的得分；段共识函数 ![formula](https://render.githubusercontent.com/render/math?math=G) 用于融合所有片段的预测结果。预测函数 ![formula](https://render.githubusercontent.com/render/math?math=H)用于预测整段视频属于每个动作类别的概率，它的输入为段共识函数 ![formula](https://render.githubusercontent.com/render/math?math=G) 的结果。
 
 最后，采用标准分类交叉熵计算部分共识的损失：
 
-$$
-L\left( y,G \right) =-\sum_{i=1}^C{y_i\left( G_i-\log \sum_{j=1}^C{\exp\text{\ }G_j} \right)}
-$$
+<img src="http://latex.codecogs.com/gif.latex?L\left( y,G \right) =-\sum_{i=1}^C{y_i\left( G_i-\log \sum_{j=1}^C{\exp\text{\ }G_j} \right)}" />
+
 
 其中，$C$ 是类别总数；$y_i$ 是类别 $i$ 的 $groundtruth$；论文中段的数量 $K$ 设置为 $3$；共识函数 $G$ 采用取均值的方式，从所有片段的相同类别中推断出某个类别得分 $G_i$。
 
