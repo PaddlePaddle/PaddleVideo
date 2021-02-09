@@ -45,7 +45,7 @@ TSN 采用与 two-stream 类似的结构，使用空间网络操作一帧 RGB �
 
 最后，采用标准分类交叉熵计算部分共识的损失：
 
-<img src="http://latex.codecogs.com/gif.latex?L\left( y,G \right) =-\sum_{i=1}^C{y_i\left( G_i-\log \sum_{j=1}^C{\exp\text{\ }G_j} \right)}" />
+<a href="https://www.codecogs.com/eqnedit.php?latex=L\left(&space;y,G&space;\right)&space;=-\sum_{i=1}^C{y_i\left(&space;G_i-\log&space;\sum_{j=1}^C{\exp\text{\&space;}G_j}&space;\right)}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?L\left(&space;y,G&space;\right)&space;=-\sum_{i=1}^C{y_i\left(&space;G_i-\log&space;\sum_{j=1}^C{\exp\text{\&space;}G_j}&space;\right)}" title="L\left( y,G \right) =-\sum_{i=1}^C{y_i\left( G_i-\log \sum_{j=1}^C{\exp\text{\ }G_j} \right)}" /></a>
 
 
 其中，$C$ 是类别总数；$y_i$ 是类别 $i$ 的 $groundtruth$；论文中段的数量 $K$ 设置为 $3$；共识函数 $G$ 采用取均值的方式，从所有片段的相同类别中推断出某个类别得分 $G_i$。
