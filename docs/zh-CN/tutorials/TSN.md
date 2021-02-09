@@ -20,7 +20,7 @@ TSN 采用和 two-stream 相似的结构，网络由空间流卷积网络和时�
 
 
 <p align="center">
-<img src="../../images/tsn_structure.jpg" height=188 width=500 hspace='10'/> <br />
+<img src="../../images/tsn_structure.jpg" height=200 width=500 hspace='10'/> <br />
 </p>
 
 
@@ -47,7 +47,7 @@ TSN 采用与 two-stream 类似的结构，使用空间网络操作一帧 RGB �
 对于图像任务而言，只能够使用图像本身提取特征。但对视频来说，除了每一帧图像外，还有视频中的光流信息。为了探索更多输入形式对模型效果影响，TSN 模型在空间卷积网络中除了使用单一 RGB 图像外，还使用了 RGB difference；在时序卷积网络中除了将连续的光流场作为输入外还采用了扭曲的光流场。
 
 <p align="center">
-<img src="../../images/tsn_input.jpg" height=188 width=500 hspace='10'/> <br />
+<img src="../../images/tsn_input.jpg" height=200 width=500 hspace='10'/> <br />
 </p>
 
 单一 RGB 图像只能表示静态信息，缺少上下文信息。但连续两帧之间的差异能够表示动作的改变，因此作者尝试将 RGB difference 作为模型的一种输入。
