@@ -134,6 +134,8 @@ x = paddle.reshape(x, shape=[-1, self.in_channels])
 score = self.fc(x)
 ```
 
+## 广告时间
+如果文档对您理解 TSN 模型有帮助，欢迎👍star🌟，👏fork，您的支持是我们前进的动力⛽️。
 
 ## 参考
 [Temporal Segment Networks: Towards Good Practices for Deep Action Recognition](https://arxiv.org/abs/1608.00859)
