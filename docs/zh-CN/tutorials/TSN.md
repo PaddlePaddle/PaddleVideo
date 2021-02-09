@@ -18,17 +18,10 @@ TSN 采用和 two-stream 相似的结构，网络由空间流卷积网络和时�
 ## 网络结构
 如下图所示，一个视频被分为 ![formula](https://render.githubusercontent.com/render/math?math=K) 段（ segment ）；之后对每个段使用稀疏采样的方式采出一个片段（ snippet ）；然后使用“段共识函数”对不同片段的预测结果进行融合生成“段共识”，此时完成了一个视频级的预测；最后对所有模式的预测结果进行融合生成最终的预测结果。
 
-<center>
-    <img 
-    src="https://github.com/lovejing0306/Images/blob/master/DeepLearning/ActionRecognition/TSN/Fig1.jpg?raw=true"
-    width=512 height= 360
-    >
-    <br>
-    <div style="color:orange; border-bottom: 1px solid #d9d9d9;
-    display: inline-block;
-    color: #999;
-    padding: 2px;">网络结构</div>
-</center>
+
+<p align="center">
+<img src="../../images/tsn_structure.jpg" height=188 width=500 hspace='10'/> <br />
+</p>
 
 
 > 这里注意 segment 和 snippet 的区别
@@ -53,17 +46,9 @@ TSN 采用与 two-stream 类似的结构，使用空间网络操作一帧 RGB �
 ## 模型输入
 对于图像任务而言，只能够使用图像本身提取特征。但对视频来说，除了每一帧图像外，还有视频中的光流信息。为了探索更多输入形式对模型效果影响，TSN 模型在空间卷积网络中除了使用单一 RGB 图像外，还使用了 RGB difference；在时序卷积网络中除了将连续的光流场作为输入外还采用了扭曲的光流场。
 
-<center>
-    <img 
-    src="https://github.com/lovejing0306/Images/blob/master/DeepLearning/ActionRecognition/TSN/Fig2.jpg?raw=true"
-    width=512 height= 300
-    >
-    <br>
-    <div style="color:orange; border-bottom: 1px solid #d9d9d9;
-    display: inline-block;
-    color: #999;
-    padding: 2px;">模型输入</div>
-</center>
+<p align="center">
+<img src="../../images/tsn_input.jpg" height=188 width=500 hspace='10'/> <br />
+</p>
 
 单一 RGB 图像只能表示静态信息，缺少上下文信息。但连续两帧之间的差异能够表示动作的改变，因此作者尝试将 RGB difference 作为模型的一种输入。
 
