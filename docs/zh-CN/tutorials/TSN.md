@@ -60,7 +60,7 @@ TSN 将光流场作为输入捕获运动信息；将扭曲光流场作为输入�
 ### 数据增强
 通过数据增强可生成额外的训练样本，一定程度上能够避免模型的过拟合。two-stream 中采用的数据增强方式有随机裁剪和水平翻转，在 TSN 中作者新增了两种数据增强方法：
 * 角裁剪：仅从图片的边角或中心提取区域，避免默认关注图片的中心；
-* 尺度抖动：将输入图像或者光流场的大小固定为 ![formula](https://render.githubusercontent.com/render/math?math=256 \times 340)，裁剪区域的宽和高随机从 ![formula](https://render.githubusercontent.com/render/math?math={256,224,192,168}) 中选择。最终，裁剪区域将被 ![formula](https://render.githubusercontent.com/render/math?math=resize) 到 ![formula](https://render.githubusercontent.com/render/math?math=224 \times 224) 用于网络训练。
+* 尺度抖动：将输入图像或者光流场的大小固定为 <a href="https://www.codecogs.com/eqnedit.php?latex=256&space;\times&space;340" target="_blank"><img src="https://latex.codecogs.com/gif.latex?256&space;\times&space;340" title="256 \times 340" /></a>，裁剪区域的宽和高随机从 ![formula](https://render.githubusercontent.com/render/math?math={256,224,192,168}) 中选择。最终，裁剪区域将被 <a href="https://www.codecogs.com/eqnedit.php?latex=224&space;\times&space;224" target="_blank"><img src="https://latex.codecogs.com/gif.latex?224&space;\times&space;224" title="224 \times 224" /></a> 用于网络训练。
 
 ### 交叉预训练
 由于空间网络以 RGB 图片作为输入，因此作者在空间网络上直接使用 ImageNet 预训练模型初始化网络的参数。对于以 RGB difference 和光流作为输入的模型，作者提出了交叉预训练技术，使用 RGB 预训练模型初始化时序网络。首先，通过线性变换将光流场离散到从 0 到 255 的区间，使得光流场和 RGB 的取值范围相同；之后修改 RGB 模型的第一个卷积层，对 RGB 通道上的权重进行取均值操作；然后依据时序网络的输入通道数复制 RGB 均值。该策略能够有效的避免时序网络出现过拟合现象。
