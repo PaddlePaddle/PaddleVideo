@@ -1,3 +1,5 @@
+[English](../../../en/model_zoo/recognition/tsn_dali.md) | 简体中文
+
 # TSN模型-DALI训练加速
 
 - [方案简介](#方案简介)
@@ -9,7 +11,7 @@
 - [参考文献](#参考文献)
 
 ## 方案简介
-训练速度慢是视频模型训练常见的问题，PaddleVideo使用飞桨2.0的dataloader接口进行数据读取，凭借其优异的多进程加速能力，模型的训练速度可以显著增加。TSN是视频领域常用的2D模型，我们对其训练速度进行了进一步优化。基于nvidia DALI的GPU解码能力，我们对nvidia DALI进行了二次开发，实现了其均匀分段的帧采样方式，进一步提升了TSN模型的训练速度。
+训练速度慢是视频模型训练常见的问题，PaddleVideo使用飞桨2.0的dataloader接口进行数据读取，凭借其优异的多进程加速能力，模型的训练速度可以显著增加。TSN是视频领域常用的2D模型，我们对其训练速度进行了进一步优化。基于[nvidia DALI](https://github.com/NVIDIA/DALI)的GPU解码能力，我们对nvidia DALI进行了二次开发，实现了其均匀分段的帧采样方式，进一步提升了TSN模型的训练速度。
 
 ### 性能
 
@@ -23,13 +25,12 @@ Cuda: 9.0
 
 训练速度对比如下:
 
-| 加速方式  | batch耗时/s  | reader耗时/s | ips:instance/sec |
-| :--------------- | :--------: | :------------: | :------------: |
-| DALI | 2.083 | 1.804 | 15.36597  |
-| Dataloader:  单卡num_workers=4 | 2.943 | 2.649 | 10.87460|
-| pytorch实现 | TODO | TODO | TODO |
+| 加速方式  | batch耗时/s  | reader耗时/s | ips:instance/sec | 加速比 | 
+| :--------------- | :--------: | :------------: | :------------: | :------------: |
+| DALI | 2.083 | 1.804 | 15.36597  | 1.41x | 
+| Dataloader:  单卡num_workers=4 | 2.943 | 2.649 | 10.87460| base |
+| pytorch实现 | TODO | TODO | TODO | TODO |
 
-可以看到，使用DALI可以进一步加速模型训练，相较于dataloader，加速比约为1.5倍。
 
 ## 环境配置
 

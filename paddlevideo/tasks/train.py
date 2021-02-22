@@ -26,7 +26,12 @@ from paddlevideo.utils import (AverageMeter, build_record, log_batch, log_epoch,
                                save, load, mkdir)
 
 
-def train_model(cfg, weights=None, parallel=True, validate=True, fleet=False):
+def train_model(cfg,
+                weights=None,
+                parallel=True,
+                validate=True,
+                amp=False,
+                fleet=False):
     """Train model entry
 
     Args:
@@ -102,6 +107,10 @@ def train_model(cfg, weights=None, parallel=True, validate=True, fleet=False):
         model.set_state_dict(model_dict)
 
     # 4. Train Model
+    ###AMP###
+    if amp:
+        scaler = paddle.amp.GradScaler(init_loss_scaling=1024)
+
     best = 0.
     for epoch in range(0, cfg.epochs):
         if epoch < resume_epoch:
@@ -114,17 +123,36 @@ def train_model(cfg, weights=None, parallel=True, validate=True, fleet=False):
         tic = time.time()
         for i, data in enumerate(train_loader):
             record_list['reader_time'].update(time.time() - tic)
+
             # 4.1 forward
-            if parallel:
-                outputs = model._layers.train_step(data)
+
+            ###AMP###
+            if amp:
+                with paddle.amp.auto_cast():
+                    if parallel:
+                        outputs = model._layers.train_step(data)
+                    else:
+                        outputs = model.train_step(data)
+
+                avg_loss = outputs['loss']
+                scaled = scaler.scale(avg_loss)
+                scaled.backward()
+                # keep prior to 2.0 design
+                scaler.minimize(optimizer, scaled)
+                optimizer.clear_grad()
+
             else:
-                outputs = model.train_step(data)
-            # 4.2 backward
-            avg_loss = outputs['loss']
-            avg_loss.backward()
-            # 4.3 minimize
-            optimizer.step()
-            optimizer.clear_grad()
+                if parallel:
+                    outputs = model._layers.train_step(data)
+                else:
+                    outputs = model.train_step(data)
+
+                # 4.2 backward
+                avg_loss = outputs['loss']
+                avg_loss.backward()
+                # 4.3 minimize
+                optimizer.step()
+                optimizer.clear_grad()
 
             # log record
             record_list['lr'].update(optimizer._global_learning_rate(),

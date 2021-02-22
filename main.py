@@ -43,6 +43,9 @@ def parse_args():
     parser.add_argument('--fleet',
                         action='store_true',
                         help='whether to use fleet run distributed training')
+    parser.add_argument('--amp',
+                        action='store_true',
+                        help='whether to open amp training.')
 
     parser.add_argument(
         '--validate',
@@ -71,7 +74,8 @@ def main():
                     weights=args.weights,
                     parallel=parallel,
                     validate=args.validate,
-                    fleet=args.fleet)
+                    fleet=args.fleet,
+                    amp=args.amp)
 
 
 if __name__ == '__main__':
