@@ -42,8 +42,7 @@ def train_model(cfg,
 
     """
     if fleet:
-        strategy = fleet.DistributedStrategy()
-        fleet.init(is_collective=True, strategy=strategy)
+        fleet.init(is_collective=True)
 
     logger = get_logger("paddlevideo")
     batch_size = cfg.DATASET.get('batch_size', 8)
@@ -60,6 +59,9 @@ def train_model(cfg,
     model = build_model(cfg.MODEL)
     if parallel:
         model = paddle.DataParallel(model)
+
+    if fleet:
+        model = paddle.distributed_model(model)
 
     # 2. Construct dataset and dataloader
     train_dataset = build_dataset((cfg.DATASET.train, cfg.PIPELINE.train))
