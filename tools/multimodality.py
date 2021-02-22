@@ -84,8 +84,6 @@ def postprocess(results):
                     tmp.append(d)
                 else:
                     continue
-            #item['content'] = tmp
-            #res.append(item)
             if tmp and LCstring(tmp[0][0][0],last) < 2:
                 item['content'] = tmp
                 res.append(item)
@@ -123,7 +121,6 @@ def smooth(x, window_len=13, window='hanning'):
 
 def ocr_im(name):
     img_path = cfg.dir+name
-    #print(img_path)
     text = ocr.ocr(img_path, cls=True)
     return text
 
@@ -171,25 +168,17 @@ def video_ocr(frames,frame_diffs,fps):
     res = postprocess(total_results)
     return res
 
-def main():
+def decord_video():
+    """
+    decode a video
+    Returns:
 
-    # check temporary frames dir
-    if not os.path.exists(cfg.dir):
-       os.mkdir(cfg.dir)
-
-    print('*'*30+"Decording video waiting"+'*'*30)
-    print("[video path] "+args.video_path)
-    print("[config file] "+args.config)
-
-
-    start=datetime.datetime.now()
-    #decode video
+    """
     cap = cv2.VideoCapture(str(args.video_path))
     fps = cap.get(cv2.CAP_PROP_FPS)
 
     print("[FPS] "+str(fps))
 
-    curr_frame = None
     prev_frame = None
 
     frame_diffs = []
@@ -201,32 +190,49 @@ def main():
        luv = cv2.cvtColor(frame, cv2.COLOR_BGR2LUV)
        curr_frame = luv
        if curr_frame is not None and prev_frame is not None:
-            #logic here
-           diff = cv2.absdiff(curr_frame, prev_frame)  # conculate difference between adjent frames
+           #calculate difference between adjacent frames
+           diff = cv2.absdiff(curr_frame, prev_frame)
            count = np.sum(diff)
            frame_diffs.append(count)
-           frame = Frame(i, frame, count)  # Instance a Frame class
+           frame = Frame(i, frame, count)#Instance a Frame class
            frames.append(frame)
        prev_frame = curr_frame
        i = i + 1
        ret, frame = cap.read()
     cap.release()
 
-    #print('*'*30+"Finish video decord"+'*'*30)
-    #print('Decord video time consuming: {}'.format(datetime.datetime.now()-start))
-    
+    return frames,frame_diffs,fps
+
+def main():
+
+
+    # check temporary frames dir if not exist make it
+    if not os.path.exists(cfg.dir):
+       os.mkdir(cfg.dir)
+
+    start=datetime.datetime.now()
+
+    #decord one video
+    print('*'*30+"Decording video waiting"+'*'*30)
+    print("[video path] "+args.video_path)
+    print("[config file] "+args.config)
+    frames,frame_diffs,fps = decord_video()
+    print('Decord video time consuming: {}'.format(datetime.datetime.now()-start))
+
+    # ocr a video
     print('='*30+'Start Video OCR '+'='*30)
-    total_results = video_ocr(frames,frame_diffs,fps) #ocr a video
+    total_results = video_ocr(frames,frame_diffs,fps)
     end = datetime.datetime.now()
+    os.removedirs(cfg.dir)
     save_results(total_results,end-start)
 
-    os.removedirs(cfg.dir)
-
+    # use video tag for a video
     if cfg.USE_VIDEO_TAG:
         print('='*30+'Start Video Tag '+'='*30)
         root = os.path.abspath(os.path.dirname(__file__))
         command = 'python '+root+'/VideoTag/videotag_test.py --filelist '+args.video_path
         os.system(command)
+
     print('='*30+'Finish All Process '+'='*30)
     print('TIME COST: ',(datetime.datetime.now()-start))
 
