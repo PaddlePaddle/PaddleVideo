@@ -19,6 +19,13 @@ from paddlevideo.utils import get_config
 ocr = PaddleOCR(use_angle_cls=True, lang='ch')  # Paddle-ocr: a lightweight and efficient model
 
 def LCstring(string1,string2):
+    """
+    calculate the longest commmon string
+    Args:
+        string1:
+        string2:
+    Returns:
+    """
     len1 = len(string1)
     len2 = len(string2)
     res = [[0 for i in range(len1+1)] for j in range(len2+1)]
@@ -30,8 +37,10 @@ def LCstring(string1,string2):
                 result = max(result,res[i][j])
     return result
 
-#Class to hold information about each frame
 class Frame:
+    """
+    #Class to hold information about each frame
+    """
     def __init__(self, id, frame, value):
         self.id = id
         self.frame = frame
@@ -52,6 +61,10 @@ class Frame:
         return not self.__eq__(other)
 
 def parse_args():
+    """
+    parse the args
+    Returns:
+    """
     parser = argparse.ArgumentParser("PaddleVideo multimodality script")
     parser.add_argument('-c',
                         '--config',
@@ -68,7 +81,7 @@ def parse_args():
 
 def postprocess(results):
     """
-    delete repeate content and reformat the results
+    filter the repeate content and reformat the results
     """
     last = ""
     res = []
@@ -79,7 +92,7 @@ def postprocess(results):
             tmp = []
             data = item['content']
             for d in data:
-                if d and d[1][1]>cfg.THRESH:
+                if d and d[1][1]>cfg.THRESHOLD:
                     d.pop(0)
                     tmp.append(d)
                 else:
@@ -120,20 +133,29 @@ def smooth(x, window_len=13, window='hanning'):
     return y[window_len - 1:-window_len + 1]
 
 def ocr_im(name):
+    """
+    ocr for an image
+    Args:
+        name: the name of frame
+
+    Returns:
+
+    """
     img_path = cfg.dir+name
     text = ocr.ocr(img_path, cls=True)
     return text
 
-def save_results(results,time):
-    f = open('./results.txt','w')
-    f.write('*'*30+'OCR Results'+'*'*30+'\n')
-    for item in results:
-        f.write(json.dumps(str(item), ensure_ascii=False) + '\n')
-    f.write('*'*50+'\n')
-    f.write('VIDEO OCR Time Cost: '+str(time))
-    f.close()
-
 def video_ocr(frames,frame_diffs,fps):
+    """
+    implement video ocr
+    Args:
+        frames:
+        frame_diffs:
+        fps:
+
+    Returns:
+
+    """
     print("Extracting key frames and ocr, waiting...")
     num_frames = len(frames)
     total_time = num_frames/fps
@@ -203,9 +225,25 @@ def decord_video():
 
     return frames,frame_diffs,fps
 
+def save_results(results,time):
+    """
+    save video ocr results
+    Args:
+        results:
+        time:
+
+    Returns:
+
+    """
+    f = open('./results.txt','w')
+    f.write('*'*30+'OCR Results'+'*'*30+'\n')
+    for item in results:
+        f.write(json.dumps(str(item), ensure_ascii=False) + '\n')
+    f.write('*'*50+'\n')
+    f.write('VIDEO OCR Time Cost: '+str(time))
+    f.close()
+
 def main():
-
-
     # check temporary frames dir if not exist make it
     if not os.path.exists(cfg.dir):
        os.mkdir(cfg.dir)
@@ -226,7 +264,7 @@ def main():
     os.removedirs(cfg.dir)
     save_results(total_results,end-start)
 
-    # use video tag for a video
+    # use video tag
     if cfg.USE_VIDEO_TAG:
         print('='*30+'Start Video Tag '+'='*30)
         root = os.path.abspath(os.path.dirname(__file__))
