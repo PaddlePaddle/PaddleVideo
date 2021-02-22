@@ -132,8 +132,8 @@ def save_results(results,time):
     f.write('*'*30+'OCR Results'+'*'*30+'\n')
     for item in results:
         f.write(json.dumps(str(item), ensure_ascii=False) + '\n')
-    #f.write('*'*50+'\n')
-    #f.write('Time Consume: '+str(time))
+    f.write('*'*50+'\n')
+    f.write('VIDEO OCR Time Cost: '+str(time))
     f.close()
 
 def video_ocr(frames,frame_diffs,fps):
