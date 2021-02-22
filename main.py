@@ -40,6 +40,9 @@ def parse_args():
                         '--weights',
                         type=str,
                         help='weights for finetuning or testing')
+    parser.add_argument('--fleet',
+                        action='store_true',
+                        help='whether to use fleet run distributed training')
     parser.add_argument('--amp',
                         action='store_true',
                         help='whether to open amp training.')
@@ -71,6 +74,7 @@ def main():
                     weights=args.weights,
                     parallel=parallel,
                     validate=args.validate,
+                    fleet=args.fleet,
                     amp=args.amp)
 
 

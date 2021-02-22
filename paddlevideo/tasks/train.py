@@ -16,6 +16,7 @@ import time
 import os.path as osp
 
 import paddle
+import paddle.distributed.fleet as fleet
 from ..loader.builder import build_dataloader, build_dataset
 from ..modeling.builder import build_model
 from ..solver import build_lr, build_optimizer
@@ -25,7 +26,12 @@ from paddlevideo.utils import (AverageMeter, build_record, log_batch, log_epoch,
                                save, load, mkdir)
 
 
-def train_model(cfg, weights=None, parallel=True, validate=True, amp=False):
+def train_model(cfg,
+                weights=None,
+                parallel=True,
+                validate=True,
+                amp=False,
+                fleet=False):
     """Train model entry
 
     Args:
@@ -35,6 +41,8 @@ def train_model(cfg, weights=None, parallel=True, validate=True, amp=False):
         validate (bool): Whether to do evaluation. Default: False.
 
     """
+    if fleet:
+        fleet.init(is_collective=True)
 
     logger = get_logger("paddlevideo")
     batch_size = cfg.DATASET.get('batch_size', 8)
@@ -51,6 +59,9 @@ def train_model(cfg, weights=None, parallel=True, validate=True, amp=False):
     model = build_model(cfg.MODEL)
     if parallel:
         model = paddle.DataParallel(model)
+
+    if fleet:
+        model = paddle.distributed_model(model)
 
     # 2. Construct dataset and dataloader
     train_dataset = build_dataset((cfg.DATASET.train, cfg.PIPELINE.train))
@@ -79,7 +90,8 @@ def train_model(cfg, weights=None, parallel=True, validate=True, amp=False):
     optimizer = build_optimizer(cfg.OPTIMIZER,
                                 lr,
                                 parameter_list=model.parameters())
-
+    if fleet:
+        optimizer = fleet.distributed_optimizer(optimizer)
     # Resume
     resume_epoch = cfg.get("resume_epoch", 0)
     if resume_epoch:
