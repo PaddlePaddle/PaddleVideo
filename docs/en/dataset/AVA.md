@@ -1,15 +1,15 @@
 [简体中文](../../zh-CN/dataset/k400.md) | English
 # AVA Data Preparation
 This document mainly introduces the preparation process of AVA dataset. 
-It mainly includes three parts: Video Data Download, Prepare Annotations, Cut video files, 
+It mainly includes five parts: Video Data Download, Prepare Annotations, Cut video files, 
 Extract the RGB frames, Pulling Proposal Files,et al.
-Before we start, please make sure that the directory is located at `$PaddleVideo/data/ava/shell`.
+Before we start, please make sure that the directory is located at `$PaddleVideo/data/ava/script`.
 
 
 ---
 
 ## 1. Video data Download
-For basic dataset information, you can refer to the official website[AVA](https://research.google.com/ava/index.html).
+For basic dataset information, you can refer to the official website [AVA](https://research.google.com/ava/index.html).
 For the dataset download, you can refer to the [AVA Download](https://github.com/cvdfoundation/ava-dataset) ，
 which introduce the way to download the dataset. We also provide the shell script for downloading the video files
 
@@ -19,10 +19,10 @@ bash download_videos.sh
 
 Furthermore,considering the difficulty in downloading, 
 we upload the video files to Baidu cloud disk in the form of zip packages, and users can download it by themselves according to their needs.
-The total dataset needs about storage space. [Link]() <sup>coming soon</sup>.
-**Note:** the video files should be placed in `data/ava/videos`
+[Link]() <sup>coming soon</sup>.
 
----
+
+**Note: the video files should be placed in `data/ava/videos`** 
 
 ---
 ## 2.Prepare Annotations
@@ -39,7 +39,7 @@ This command will download `ava_v2.1.zip` for AVA `v2.1` annotation. If you need
 VERSION=2.2 bash download_annotations.sh
 ```
 
-**note:** In fact,we will also provide the zip files in Baidu cloud disk,so you needn't download it
+**Note: In fact,we will also provide the annotation zip files in Baidu cloud disk** 
 
 ---
 ## 3. cut video files

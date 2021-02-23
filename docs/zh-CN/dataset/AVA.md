@@ -1,23 +1,23 @@
 [English](../../en/dataset/AVA.md) | 简体中文
 # AVA数据准备
 此文档主要介绍AVA数据集的相关准备流程。主要介绍 AVA数据集的视频文件下载，标注文件准备，视频文件切分
-视频文件提取帧数据，以及拉取提名文件等。在开始之前，请把当前目录设定在 `$PaddleVideo/data/ava/shell`
+视频文件提取帧数据，以及拉取提名文件等。在开始之前，请把当前工作目录设定在 `$PaddleVideo/data/ava/shell`
 
 ---
 
 ## 1.  视频数据下载
 想要获取更多有关AVA数据集的信息，您可以访问其官方网站[AVA](https://research.google.com/ava/index.html).
-至于数据集下载，您可以参看考[AVA Download](https://github.com/cvdfoundation/ava-dataset)，该Repo详细介绍了AVA视频数据的下载方法.
+至于数据集下载，您可以参看考[AVA Download](https://github.com/cvdfoundation/ava-dataset) ，该Repo详细介绍了AVA视频数据的下载方法.
 我们也提供了视频文件的下载脚本：
 
 ```shell
 bash download_videos.sh
 ```
 
-为了方便用户，我们将视频文件以zip包的形式上传到百度网盘，您可以直接进行下载[Link]() <sup>coming soon</sup>.
-**注意:** 您自己下载的视频文件应当被放置在`data/ava/videos`文件夹下 
+为了方便用户，我们将视频文件以zip包的形式上传到百度网盘，您可以直接进行下载 [Link]() <sup>coming soon</sup>.
 
----
+
+**注意: 您自己下载的视频文件应当被放置在`data/ava/videos`文件夹下**  
 
 ---
 ## 2.准备标注文件
@@ -34,12 +34,12 @@ bash download_annotations.sh
 VERSION=2.2 bash download_annotations.sh
 ```
 
-**注意：** 事实上，我们也同样在百度网盘中提供了该标注文件，所以您无需自己下载
+**注意：事实上，我们也同样在百度网盘中提供了该标注文件，所以您无需自己下载** 
 
 ---
 ## 3. 切分视频文件
 
-以帧率30切分视频文件从第15分钟到第30分钟
+以帧率30fps,切分视频文件从第15分钟到第30分钟
 
 ```shell
 bash cut_videos.sh
@@ -51,7 +51,7 @@ bash cut_videos.sh
 您可以通过以下的脚本使用`ffmpeg`来提取RGB帧.
 
 ```shell
-bash extract_rgb_frames_ffmpeg.sh
+bash extract_rgb_frames.sh
 ```
 
 ---
