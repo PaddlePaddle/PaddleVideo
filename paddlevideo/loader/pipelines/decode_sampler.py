@@ -33,10 +33,12 @@ class DecodeSampler(object):
     def __init__(self,
                  num_frames,
                  sampling_rate,
+                 default_sampling_rate=2,
                  target_fps=30,
                  test_mode=False):
         self.num_frames = num_frames
-        self.sampling_rate = sampling_rate
+        self.orig_sampling_rate = self.sampling_rate = sampling_rate
+        self.default_sampling_rate = default_sampling_rate
         self.target_fps = target_fps
         self.test_mode = test_mode
 
@@ -58,6 +60,11 @@ class DecodeSampler(object):
         return:
             List where each item is a numpy array after decoder.
         """
+        short_cycle_idx = results.get('short_cycle_idx')
+        if short_cycle_idx:
+            self.sampling_rate = random.randint(self.default_sampling_rate,
+                                                self.orig_sampling_rate)
+
         filepath = results['filename']
         temporal_sample_index = results['temporal_sample_index']
         temporal_num_clips = results['temporal_num_clips']

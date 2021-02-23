@@ -14,7 +14,7 @@
 import paddle
 import argparse
 from paddlevideo.utils import get_config
-from paddlevideo.tasks import train_model, test_model, train_dali
+from paddlevideo.tasks import train_model, train_model_multigrid, test_model, train_dali
 from paddlevideo.utils import get_dist_info
 
 
@@ -36,6 +36,9 @@ def parse_args():
     parser.add_argument('--train_dali',
                         action='store_true',
                         help='whether to use dali to speed up training')
+    parser.add_argument('--multigrid',
+                        action='store_true',
+                        help='whether to use multigrid training')
     parser.add_argument('-w',
                         '--weights',
                         type=str,
@@ -72,6 +75,8 @@ def main():
         test_model(cfg, weights=args.weights, parallel=parallel)
     elif args.train_dali:
         train_dali(cfg, weights=args.weights, parallel=parallel)
+    elif args.multigrid:
+        train_model_multigrid(cfg, world_size, validate=args.validate)
     else:
         train_model(cfg,
                     weights=args.weights,

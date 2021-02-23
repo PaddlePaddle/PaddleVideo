@@ -16,6 +16,7 @@ import paddle
 import paddle.nn.functional as F
 from paddle.nn.initializer import KaimingNormal
 from ..registry import BACKBONES
+from paddlevideo.utils.multigrid import get_norm
 
 # seed random seed
 paddle.framework.seed(0)
@@ -571,7 +572,8 @@ class ResNetSlowFast(paddle.nn.Layer):
         self,
         alpha,
         beta,
-        norm_module=paddle.nn.BatchNorm3D,
+        bn_norm_type="batchnorm",
+        bn_num_splits=1,
         num_pathways=2,
         depth=50,
         num_groups=1,
@@ -590,7 +592,7 @@ class ResNetSlowFast(paddle.nn.Layer):
 
         self.alpha = alpha  #8
         self.beta = beta  #8
-        self.norm_module = norm_module
+        self.norm_module = get_norm(bn_norm_type, bn_num_splits)
         self.num_pathways = num_pathways
         self.depth = depth
         self.num_groups = num_groups

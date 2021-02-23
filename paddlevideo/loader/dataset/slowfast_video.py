@@ -58,11 +58,13 @@ class SFVideoDataset(BaseDataset):
         num_ensemble_views=1,
         num_spatial_crops=1,
         num_retries=5,
+        num_samples_precise_bn=None,
         **kwargs,
     ):
         self.num_ensemble_views = num_ensemble_views
         self.num_spatial_crops = num_spatial_crops
         self.num_retries = num_retries
+        self.num_samples_precise_bn = num_samples_precise_bn
         super().__init__(file_path, pipeline, **kwargs)
 
     def load_file(self):
@@ -90,9 +92,18 @@ class SFVideoDataset(BaseDataset):
     def prepare_train(self, idx):
         """TRAIN & VALID. Prepare the data for training given the index."""
         #Try to catch Exception caused by reading corrupted video file
+        short_cycle = False
+        if isinstance(idx, tuple):
+            idx, short_cycle_idx = idx
+            short_cycle = True
         for ir in range(self.num_retries):
             try:
-                results = copy.deepcopy(self.info[idx])
+                #Multi-grid short cycle
+                if short_cycle:
+                    results = copy.deepcopy(self.info[idx])
+                    results['short_cycle_idx'] = short_cycle_idx
+                else:
+                    results = copy.deepcopy(self.info[idx])
                 results = self.pipeline(results)
             except Exception as e:
                 logger.info(e)
@@ -102,6 +113,7 @@ class SFVideoDataset(BaseDataset):
                         format(results['filename'], ir))
                 idx = random.randint(0, len(self.info) - 1)
                 continue
+
             return results['imgs'][0], results['imgs'][1], np.array(
                 [results['labels']])
 
@@ -122,3 +134,11 @@ class SFVideoDataset(BaseDataset):
                 continue
             return results['imgs'][0], results['imgs'][1], np.array(
                 [results['labels']]), np.array([idx])
+
+    def __len__(self):
+        """get the size of the dataset."""
+        if self.num_samples_precise_bn is None:
+            return len(self.info)
+        else:
+            random.shuffle(self.info)
+            return min(self.num_samples_precise_bn, len(self.info))

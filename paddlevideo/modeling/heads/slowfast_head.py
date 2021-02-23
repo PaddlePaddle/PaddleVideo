@@ -40,6 +40,7 @@ class SlowFastHead(BaseHead):
                  dropout_rate,
                  pool_size_ratio=[[1, 1, 1], [1, 1, 1]],
                  loss_cfg=dict(name='CrossEntropyLoss'),
+                 multigrid_short=False,
                  **kwargs):
         """
         ResNetBasicHead takes p pathways as input where p in [1, infty].
@@ -56,6 +57,7 @@ class SlowFastHead(BaseHead):
                 dropout.
         """
         super().__init__(num_classes, loss_cfg, **kwargs)
+        self.multigrid_short = multigrid_short
         self.width_per_group = width_per_group
         self.alpha = alpha
         self.beta = beta
@@ -69,7 +71,7 @@ class SlowFastHead(BaseHead):
             self.width_per_group * 32,
             self.width_per_group * 32 // self.beta,
         ]
-        self.pool_size = [
+        self.pool_size = [None, None] if self.multigrid_short else [
             [
                 self.num_frames // self.alpha // self.pool_size_ratio[0][0],
                 self.crop_size // 32 // self.pool_size_ratio[0][1],
