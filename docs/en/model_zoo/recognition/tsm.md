@@ -84,8 +84,26 @@ Accuracy on Kinetics400:
 
 ## Inference
 
+### export inference model
+
+ To get model architecture file `TSM.pdmodel` and parameters file `TSM.pdiparams`, use: 
+
 ```bash
-python3 predict.py --test --weights=
+python3 tools/export_model.py -c configs/recognition/tsm/tsm.yaml \
+                              -p output/TSM/TSM_best.pdparams \
+                              -o inference/TSM
+```
+
+- Args usage please refer to [Model Inference](https://github.com/PaddlePaddle/PaddleVideo/blob/release/2.0/docs/zh-CN/start.md#2-%E6%A8%A1%E5%9E%8B%E6%8E%A8%E7%90%86).
+
+### infer
+
+```bash
+python3 tools/predict.py --video_file data/example.avi \
+                         --model_file inference/TSM/TSM.pdmodel \
+                         --params_file inference/TSM/TSM.pdiparams \
+                         --use_gpu=True \
+                         --use_tensorrt=False
 ```
 
 ## Reference
