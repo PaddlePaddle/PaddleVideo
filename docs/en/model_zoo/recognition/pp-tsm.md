@@ -91,9 +91,35 @@ Accuracy on UCF101：
 
 ## Inference
 
+### export inference model
+
+ To get model architecture file `ppTSM.pdmodel` and parameters file `ppTSM.pdiparams`, use: 
+
 ```bash
-python3 predict.py --test --weights=
+python3.7 tools/export_model.py -c configs/recognition/tsm/pptsm_k400.yaml \
+                                -p output/ppTSM/ppTSM_best.pdparams \
+                                -o inference/ppTSM
 ```
+
+### infer
+
+```bash
+python3.7 tools/predict.py --video_file data/example.avi \
+                           --model_file inference/ppTSM/ppTSM.pdmodel \
+                           --params_file inference/ppTSM/ppTSM.pdiparams \
+                           --use_gpu=True \
+                           --use_tensorrt=False
+```
+
+example of logs:
+
+```
+Current video file: data/example.avi
+	top-1 class: 5
+	top-1 score: 0.9621570706367493
+```
+
+we can get the class name using class id and map file `data/k400/Kinetics-400_label_list.txt`. The top1 prediction of `data/example.avi` is `archery`. 
 
 ## Reference
 
