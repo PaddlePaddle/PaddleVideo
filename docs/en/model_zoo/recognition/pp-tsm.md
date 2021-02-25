@@ -101,6 +101,8 @@ python3 tools/export_model.py -c configs/recognition/tsm/pptsm_k400.yaml \
                                 -o inference/ppTSM
 ```
 
+- Args usage please refer to [Model Inference](https://github.com/PaddlePaddle/PaddleVideo/blob/release/2.0/docs/zh-CN/start.md#2-%E6%A8%A1%E5%9E%8B%E6%8E%A8%E7%90%86).
+
 ### infer
 
 ```bash
