@@ -101,6 +101,18 @@ UCF101验证集(split1)上的评估精度如下：
 
 ## 模型推理
 
+### 导出inference模型
+
+```bash
+python3.7 tools/export_model.py -c configs/recognition/tsm/pptsm_k400.yaml \
+                                -p output/ppTSM/ppTSM_best.pdparams \
+                                -o inference/ppTSM
+```
+
+上述命令将生成模型结构文件（ppTSM.pdmodel）和模型权重文件（ppTSM.pdiparams）
+
+### 
+
 ```bash
 python3 predict.py --test --weights=
 ```
