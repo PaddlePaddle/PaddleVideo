@@ -105,8 +105,8 @@ UCF101验证集(split1)上的评估精度如下：
 
 ```bash
 python3 tools/export_model.py -c configs/recognition/tsm/pptsm_k400.yaml \
-                                -p output/ppTSM/ppTSM_best.pdparams \
-                                -o inference/ppTSM
+                              -p output/ppTSM/ppTSM_best.pdparams \
+                              -o inference/ppTSM
 ```
 
 上述命令将生成预测所需的模型结构文件`ppTSM.pdmodel`和模型权重文件`ppTSM.pdiparams`。
@@ -117,10 +117,10 @@ python3 tools/export_model.py -c configs/recognition/tsm/pptsm_k400.yaml \
 
 ```bash
 python3 tools/predict.py --video_file data/example.avi \
-                           --model_file inference/ppTSM/ppTSM.pdmodel \
-                           --params_file inference/ppTSM/ppTSM.pdiparams \
-                           --use_gpu=True \
-                           --use_tensorrt=False
+                         --model_file inference/ppTSM/ppTSM.pdmodel \
+                         --params_file inference/ppTSM/ppTSM.pdiparams \
+                         --use_gpu=True \
+                         --use_tensorrt=False
 ```
 
 输出示例如下:
