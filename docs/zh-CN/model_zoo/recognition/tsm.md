@@ -93,8 +93,24 @@ python3 main.py --test -c configs/recognition/tsm/tsm.yaml -w output/TSM/TSM_bes
 
 ## 模型推理
 
+### 导出inference模型
+
 ```bash
-python3 predict.py --test --weights=
+python3 tools/export_model.py -c configs/recognition/tsm/tsm.yaml \
+                                -p output/TSM/TSM_best.pdparams \
+                                -o inference/TSM
+```
+
+上述命令将生成预测所需的模型结构文件`TSM.pdmodel`和模型权重文件`TSM.pdiparams`。
+
+### 使用预测引擎推理
+
+```bash
+python3 tools/predict.py --video_file data/example.avi \
+                           --model_file inference/TSM/TSM.pdmodel \
+                           --params_file inference/TSM/TSM.pdiparams \
+                           --use_gpu=True \
+                           --use_tensorrt=False
 ```
 
 ## 参考论文
