@@ -67,10 +67,10 @@ python -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=log_p
 - 通过`-c`指定模型训练参数配置文件，默认配置文件与数据集的对应关系如下(不同数据集，数据处理部分参数配置稍有不同):
 
 ```
-configs/recognition/tsm/pptsm.yaml     --> UCF-101 frames格式训练
-configs/recognition/tsm/todo.yaml    --> UCF-101 videos格式训练
+configs/recognition/tsm/pptsm.yaml        --> UCF-101 frames格式训练
+configs/recognition/tsm/todo.yaml         --> UCF-101 videos格式训练
 configs/recognition/tsm/pptsm_k400.yaml   --> Kinetics-400 frames格式训练
-configs/recognition/tsm/todo.yaml     --> Kinetics-400 videos格式训练
+configs/recognition/tsm/todo.yaml         --> Kinetics-400 videos格式训练
 ```
 
 - 如若进行finetune，请下载PaddleVideo的已发布模型[ppTSM.pdparams](https://videotag.bj.bcebos.com/PaddleVideo/ppTSM/ppTSM.pdparams)，通过`--weights`指定权重存放路径。 
