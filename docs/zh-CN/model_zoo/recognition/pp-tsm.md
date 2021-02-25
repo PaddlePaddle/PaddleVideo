@@ -109,7 +109,7 @@ python3.7 tools/export_model.py -c configs/recognition/tsm/pptsm_k400.yaml \
                                 -o inference/ppTSM
 ```
 
-上述命令将生成模型结构文件（ppTSM.pdmodel）和模型权重文件（ppTSM.pdiparams）
+上述命令将生成预测所需的模型结构文件`ppTSM.pdmodel`和模型权重文件`ppTSM.pdiparams`。
 
 ### 使用预测引擎推理
 
@@ -129,7 +129,7 @@ Current video file: data/example.avi
 	top-1 score: 0.9621570706367493
 ```
 
-可以看到，使用在Kinetics-400上训练好的ppTSM模型对`data/example.avi`进行预测，输出的top1类别id为`5`，置信度为0.962。通过查阅类别id与名称对应表`data/k400/Kinetics-400_label_list.txt`，可知类别名称为`archery`。 
+可以看到，使用在Kinetics-400上训练好的ppTSM模型对`data/example.avi`进行预测，输出的top1类别id为`5`，置信度为0.962。通过查阅类别id与名称对应表`data/k400/Kinetics-400_label_list.txt`，可知预测类别名称为`archery`。 
 
 ## 参考论文
 
