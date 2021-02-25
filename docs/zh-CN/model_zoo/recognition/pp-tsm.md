@@ -67,10 +67,10 @@ python -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=log_p
 - 通过`-c`指定模型训练参数配置文件，默认配置文件与数据集的对应关系如下(不同数据集，数据处理部分参数配置稍有不同):
 
 ```
-configs/recognition/tsm/pptsm.yaml     --> UCF-101 frames格式训练
-configs/recognition/tsm/todo.yaml    --> UCF-101 videos格式训练
+configs/recognition/tsm/pptsm.yaml        --> UCF-101 frames格式训练
+configs/recognition/tsm/todo.yaml         --> UCF-101 videos格式训练
 configs/recognition/tsm/pptsm_k400.yaml   --> Kinetics-400 frames格式训练
-configs/recognition/tsm/todo.yaml     --> Kinetics-400 videos格式训练
+configs/recognition/tsm/todo.yaml         --> Kinetics-400 videos格式训练
 ```
 
 - 如若进行finetune，请下载PaddleVideo的已发布模型[ppTSM.pdparams](https://videotag.bj.bcebos.com/PaddleVideo/ppTSM/ppTSM.pdparams)，通过`--weights`指定权重存放路径。 
@@ -101,9 +101,35 @@ UCF101验证集(split1)上的评估精度如下：
 
 ## 模型推理
 
+### 导出inference模型
+
 ```bash
-python3 predict.py --test --weights=
+python3.7 tools/export_model.py -c configs/recognition/tsm/pptsm_k400.yaml \
+                                -p output/ppTSM/ppTSM_best.pdparams \
+                                -o inference/ppTSM
 ```
+
+上述命令将生成预测所需的模型结构文件`ppTSM.pdmodel`和模型权重文件`ppTSM.pdiparams`。
+
+### 使用预测引擎推理
+
+```bash
+python3.7 tools/predict.py --video_file data/example.avi \
+                           --model_file inference/ppTSM/ppTSM.pdmodel \
+                           --params_file inference/ppTSM/ppTSM.pdiparams \
+                           --use_gpu=True \
+                           --use_tensorrt=False
+```
+
+输出示例如下:
+
+```
+Current video file: data/example.avi
+	top-1 class: 5
+	top-1 score: 0.9621570706367493
+```
+
+可以看到，使用在Kinetics-400上训练好的ppTSM模型对`data/example.avi`进行预测，输出的top1类别id为`5`，置信度为0.962。通过查阅类别id与名称对应表`data/k400/Kinetics-400_label_list.txt`，可知预测类别名称为`archery`。 
 
 ## 参考论文
 
