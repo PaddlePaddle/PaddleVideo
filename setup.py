@@ -25,8 +25,8 @@ def readme():
 
 setup(
     name='paddlevideo', #name of .whl file
-    packages=['ppvideo'], #install package name
-    package_dir={'ppvideo': ''},
+    packages=['paddlevideo'], #install package name
+    package_dir={'paddlevideo': ''},
     include_package_data=True, #Accept all data files and directories matched by MANIFEST.in
     install_requires=requirements,
     entry_points={"console_scripts": ["ppvideo= ppvideo.tools.paddlevideo_clas:main"]},
