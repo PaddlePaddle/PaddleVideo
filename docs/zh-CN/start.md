@@ -164,7 +164,7 @@ python tools/export_model.py \
 上述命令将生成模型结构文件（`model_name.pdmodel`）和模型权重文件（`model_name.pdiparams`），然后可以使用预测引擎进行推理：
 
 ```bash
-python tools/infer/predict.py \
+python tools/predict.py \
     --video_file "data/example.avi" \
     --model_file "./inference/example.pdmodel" \
     --params_file "./inference/example.pdiparams" \
