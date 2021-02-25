@@ -93,7 +93,7 @@ Accuracy on UCF101：
 
 ### export inference model
 
- To get model architecture file `ppTSM.pdmodel` and parameters file `ppTSM.pdiparams` use: 
+ To get model architecture file `ppTSM.pdmodel` and parameters file `ppTSM.pdiparams`, use: 
 
 ```bash
 python3.7 tools/export_model.py -c configs/recognition/tsm/pptsm_k400.yaml \
@@ -119,7 +119,7 @@ Current video file: data/example.avi
 	top-1 score: 0.9621570706367493
 ```
 
-we can get the class name using class id from map file `data/k400/Kinetics-400_label_list.txt`. The top1 prediction of `data/example.avi` is `archery`. 
+we can get the class name using class id and map file `data/k400/Kinetics-400_label_list.txt`. The top1 prediction of `data/example.avi` is `archery`. 
 
 ## Reference
 
