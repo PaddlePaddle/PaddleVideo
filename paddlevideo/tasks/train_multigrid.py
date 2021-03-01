@@ -231,6 +231,9 @@ def train_model_multigrid(cfg, world_size=1, validate=True):
             # 4.1 forward
             if parallel:
                 outputs = model._layers.train_step(data)
+                ## required for DataParallel, will remove in next version
+                model._reducer.prepare_for_backward(
+                    list(model._find_varbase(outputs)))
             else:
                 outputs = model.train_step(data)
             # 4.2 backward
