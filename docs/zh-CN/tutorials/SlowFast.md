@@ -23,9 +23,11 @@ SlowFast 与此相似：
 ## 思路
 基于上述想法作者提出了一种用于视频识别的双路径模型 SlowFast 。
 
-<center><img src="../../images/slowfast_network.jpg" width="500" hegiht="" ></center>
-<center><br>网络结构</br></center>
-<br></br>
+<p align="center">
+<img src="../../images/slowfast_network.jpg" height=300 width="" hspace='10'/> <br />
+网络结构
+</p>
+
 
 如上图所示，一条路径用于捕获图像或稀疏帧提供的语义信息，以低帧率运行，刷新速度慢。另一条路径用于捕获快速变化的动作，刷新速度快、时间分辨率高，该路径是轻量级的，仅占整体计算量的20%。这是由于这条路径通道较少，处理空间信息的能力较差，但空间信息可以由第一个路径以简洁的方式来处理。
 
@@ -55,9 +57,10 @@ Fast pathway 是一个与 Slow pathway 相似的卷积网络，但通道数只�
 ### 实例化
 SlowFast 模型的思想是通用的，可以用不同的主干网络来实现。如下图所示是一个 SlowFast 实例化的例子，其中黄色是通道数量，绿色是时序帧分辨率。
 
-<center><img src="../../images/slowfast_structure.jpg" width="500" hegiht="" ></center>
-<center><br>实例化</br></center>
-<br></br>
+<p align="center">
+<img src="../../images/slowfast_structure.jpg"  width="500" hegiht="" hspace='10'/> <br />
+实例化
+</p>
 
 作者用<a href="https://www.codecogs.com/eqnedit.php?latex=T\times&space;S^2" target="_blank"><img src="https://latex.codecogs.com/gif.latex?T\times&space;S^2" title="T\times S^2" /></a>表示时空尺度，其中 T 是时间长度，S 是正方形裁剪区域的宽和高。
 
