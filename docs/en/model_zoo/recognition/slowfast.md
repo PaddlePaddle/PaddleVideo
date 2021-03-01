@@ -29,7 +29,7 @@ We use Kinetics-400 to train this model，data preparation please refer to [Kine
 
 ## Train
 
-You can start training by such command：
+You can start training by：
 
 ```bash
 export CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7
@@ -42,7 +42,7 @@ python -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_sl
 
 ## Test
 
-You can start testing by such command：
+You can start testing by：
 
 ```bash
 python -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_slowfast_test main.py --test -c  configs/recognition/slowfast/slowfast.yaml -w output/SlowFast/SlowFast_epoch_000196.pdparams
