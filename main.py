@@ -61,9 +61,6 @@ def parse_args():
 
 def main():
     args = parse_args()
-    if args.amp:
-        import os
-        os.environ['AMP'] = "1"
     cfg = get_config(args.config, overrides=args.override)
 
     _, world_size = get_dist_info()
