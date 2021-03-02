@@ -38,12 +38,14 @@ class TSMHead(TSNHead):
                  in_channels,
                  drop_ratio=0.8,
                  std=0.01,
+                 data_format="NCHW",
                  **kwargs):
 
         super().__init__(num_classes,
                          in_channels,
                          drop_ratio=drop_ratio,
                          std=std,
+                         data_format=data_format,
                          **kwargs)
 
         self.stdv = 1.0 / math.sqrt(self.in_channels * 1.0)
