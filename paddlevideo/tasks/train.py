@@ -130,7 +130,8 @@ def train_model(cfg,
 
             ###AMP###
             if amp:
-                with paddle.amp.auto_cast(custom_black_list="temporal_shift"):
+                with paddle.amp.auto_cast(
+                        custom_black_list={"temporal_shift", "reduce_mean"}):
                     if parallel:
                         outputs = model._layers.train_step(data)
                         ## required for DataParallel, will remove in next version

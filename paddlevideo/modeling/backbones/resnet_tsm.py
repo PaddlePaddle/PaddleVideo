@@ -117,16 +117,8 @@ class BottleneckBlock(nn.Layer):
         self.num_seg = num_seg
 
     def forward(self, inputs):
-
-        import os
-        if os.environ.get("AMP", "0") == "1":
-            inputs = paddle.cast(inputs, 'float32')
-            shifts = paddle.fluid.layers.temporal_shift(inputs, self.num_seg,
-                                                        1.0 / self.num_seg)
-            shifts = paddle.cast(shifts, 'float16')
-        else:
-            shifts = paddle.fluid.layers.temporal_shift(inputs, self.num_seg,
-                                                        1.0 / self.num_seg)
+        shifts = paddle.fluid.layers.temporal_shift(inputs, self.num_seg,
+                                                    1.0 / self.num_seg)
         y = self.conv0(shifts)
         conv1 = self.conv1(y)
         conv2 = self.conv2(conv1)
