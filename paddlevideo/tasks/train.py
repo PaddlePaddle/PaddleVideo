@@ -133,6 +133,9 @@ def train_model(cfg,
                 with paddle.amp.auto_cast(custom_black_list="temporal_shift"):
                     if parallel:
                         outputs = model._layers.train_step(data)
+                        ## required for DataParallel, will remove in next version
+                        model._reducer.prepare_for_backward(
+                            list(model._find_varbase(outputs)))
                     else:
                         outputs = model.train_step(data)
 
@@ -146,6 +149,9 @@ def train_model(cfg,
             else:
                 if parallel:
                     outputs = model._layers.train_step(data)
+                    ## required for DataParallel, will remove in next version
+                    model._reducer.prepare_for_backward(
+                        list(model._find_varbase(outputs)))
                 else:
                     outputs = model.train_step(data)
 
