@@ -236,8 +236,8 @@ def train_model(cfg,
                 min(cfg.PRECISEBN.num_iters_preciseBN, len(train_loader)))
 
         # 5. Validation
-        if validate and epoch % cfg.get("val_interval",
-                                        1) == 0 or epoch == cfg.epochs - 1:
+        if validate and (epoch % cfg.get("val_interval", 1) == 0
+                         or epoch == cfg.epochs - 1):
             with paddle.fluid.dygraph.no_grad():
                 best, save_best_flag = evaluate(best)
             # save best
