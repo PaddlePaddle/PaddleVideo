@@ -25,8 +25,6 @@ def build_record(cfg):
     record_list = [
         ("loss", AverageMeter('loss', '7.5f')),
         ("lr", AverageMeter('lr', 'f', need_avg=False)),
-        ("batch_time", AverageMeter('elapse', '.3f')),
-        ("reader_time", AverageMeter('reader', '.3f')),
     ]
     if 'Recognizer1D' in cfg.framework:  #TODO: required specify str in framework
         record_list.append(("hit_at_one", AverageMeter("hit_at_one", '.5f')))
@@ -36,6 +34,8 @@ def build_record(cfg):
         record_list.append(("top1", AverageMeter("top1", '.5f')))
         record_list.append(("top5", AverageMeter("top5", '.5f')))
 
+    record_list.append(("batch_time", AverageMeter('elapse', '.3f')))
+    record_list.append(("reader_time", AverageMeter('reader', '.3f')))
     record_list = OrderedDict(record_list)
     return record_list
 
