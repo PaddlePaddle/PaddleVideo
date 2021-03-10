@@ -49,6 +49,10 @@ python -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_sl
 *  8卡V100，总batch\_size=64，单卡batch\_size=8，单卡显存占用约9G。
 *  训练速度相较原始实现提速100%，详细参考[benchmark](https://github.com/PaddlePaddle/PaddleVideo/blob/main/docs/zh-CN/benchmark.md#实验结果)
 
+### 训练加速
+
+SlowFast为3D模型，训练异常耗时，为加速模型的训练，我们实现了Multigrid加速策略
+
 
 ## 模型测试
 
