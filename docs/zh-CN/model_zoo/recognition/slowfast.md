@@ -64,7 +64,7 @@ python -B -m paddle.distributed.launch --selected_gpus="0,1,2,3,4,5,6,7" --log_d
 | Multigrid | 27.25 |  9758(6.7天) | 2.89x |
 | Normal | 78.76 | 15438(10.7天) | base |
 
-详细数据说明可参考[加速文档](https://github.com/PaddlePaddle/PaddleVideo/blob/develop/docs/zh-CN/tutorials/accelerate.md#%E8%AE%AD%E7%BB%83%E7%AD%96%E7%95%A5%E5%8A%A0%E9%80%9F)。
+速度详细数据说明可参考[加速文档](https://github.com/PaddlePaddle/PaddleVideo/blob/develop/docs/zh-CN/tutorials/accelerate.md#%E8%AE%AD%E7%BB%83%E7%AD%96%E7%95%A5%E5%8A%A0%E9%80%9F)。
 
 ## 模型测试
 
