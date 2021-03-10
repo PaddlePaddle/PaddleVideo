@@ -53,9 +53,10 @@ python -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_sl
 
 Test accuracy in Kinetics-400:
 
-| Acc1 | Acc5 |
-| :---: | :---: |
-| 74.35 | 91.33 |
+| Configs | Acc1 | Acc5 | Weights |
+| :---: | :---: | :---: | :---: |
+|  [slowfast.yaml](../../../../configs/recognition/slowfast/slowfast.yaml) | 74.35 | 91.33 | [slowfast_4x16.pdparams](https://videotag.bj.bcebos.com/PaddleVideo/SlowFast/SlowFast.pdparams) |
+|  [slowfast_multigrid.yaml](../../../../configs/recognition/slowfast/slowfast_multigrid.yaml) | 75.84  | 92.33 | [slowfast_8x8.pdparams](https://videotag.bj.bcebos.com/PaddleVideo/SlowFast/SlowFast_8*8.pdparams) |
 
 - Acc1 may be lower than that released in papaer, as ~5% data of kinetics-400 is missing. Experiments have verified that if training with the same data, we can get the same accuracy.
 
