@@ -59,7 +59,7 @@ MODEL:
 python -B -m paddle.distributed.launch --gpus="0,1,2,3"  --log_dir=log_tsm  main.py  --validate -c configs/recognition/tsm/tsm.yaml
 ```
 
-- 如若进行finetune，请下载PaddleVideo的已发布模型[TSM.pdparams]()<sup>coming soon</sup>，通过`--weights`指定权重存放路径。
+- 如若进行finetune，请下载PaddleVideo的已发布模型[TSM.pdparams](https://videotag.bj.bcebos.com/PaddleVideo/TSM/TSM.pdparams)，通过`--weights`指定权重存放路径。
 
 - 您可以自定义修改参数配置，参数用法请参考[config](../../tutorials/config.md)。
 
@@ -82,14 +82,14 @@ python -B -m paddle.distributed.launch --gpus="0,1,2,3"  --log_dir=log_tsm  main
 python3 main.py --test -c configs/recognition/tsm/tsm.yaml -w output/TSM/TSM_best.pdparams
 ```
 
-- 指定`--weights`参数，下载已发布模型[TSM.pdparams]()<sup>coming soon</sup>进行模型测试
+- 指定`--weights`参数，下载已发布模型[TSM.pdparams](https://videotag.bj.bcebos.com/PaddleVideo/TSM/TSM.pdparams)进行模型测试
 
 
 当取如下参数时，在Kinetics400的validation数据集下评估精度如下:
 
 | seg\_num | target\_size | Top-1 |
 | :------: | :----------: | :----: |
-| 8 | 224 | 0.70 |
+| 8 | 224 | 0.7086 |
 
 ## 模型推理
 
