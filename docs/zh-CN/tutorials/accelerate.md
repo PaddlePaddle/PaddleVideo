@@ -218,7 +218,7 @@ Cuda: 9.0
 [H/2, W/2], [H/sqrt(2), W/sqrt(2)], [H, W]
 ```
 
-我们基于飞桨实现了Multigrid训练加速策略，对SlowFast模型训练进行加速，使用文档请参考[SlowFast训练加速](https://github.com/PaddlePaddle/PaddleVideo/blob/develop/docs/zh-CN/model_zoo/recognition/slowfast.md#%E8%AE%AD%E7%BB%83%E5%8A%A0%E9%80%9F)。
+我们基于飞桨实现了Multigrid训练加速策略，对SlowFast模型训练进行加速，使用方法请参考文档[SlowFast训练加速](https://github.com/PaddlePaddle/PaddleVideo/blob/develop/docs/zh-CN/model_zoo/recognition/slowfast.md#%E8%AE%AD%E7%BB%83%E5%8A%A0%E9%80%9F)。
 
 测试环境: 
 ```
@@ -226,6 +226,8 @@ Cuda: 9.0
 显存: 8卡32G
 Cuda: 9.0
 单卡batch_size: 8
+数据集: Kinetics-400
+Paddle版本: 2.0-rc0
 ```
 
 性能数据如下:
