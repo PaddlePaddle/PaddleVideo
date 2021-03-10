@@ -267,7 +267,7 @@ class Image2Array(object):
     """
     transfer PIL.Image to Numpy array and transpose dimensions from 'dhwc' to 'dchw'.
     Args:
-        transpose: whether to transpose or not, default False. True for tsn.
+        transpose: whether to transpose or not, default True, False for slowfast.
     """
     def __init__(self, transpose=True):
         self.transpose = transpose

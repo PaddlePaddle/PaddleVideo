@@ -12,9 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import numpy as np
-import math
-
 import paddle
 import paddle.nn as nn
 from paddle.nn import (Conv2D, BatchNorm2D, Linear, Dropout, MaxPool2D,
@@ -42,14 +39,17 @@ class ConvBNLayer(nn.Layer):
     Note: weight and bias initialization include initialize values and name the restored parameters, values initialization are explicit declared in the ```init_weights``` method.
 
     """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 kernel_size,
-                 stride=1,
-                 groups=1,
-                 act=None,
-                 name=None):
+    def __init__(
+        self,
+        in_channels,
+        out_channels,
+        kernel_size,
+        stride=1,
+        groups=1,
+        act=None,
+        name=None,
+        data_format="NCHW",
+    ):
         super(ConvBNLayer, self).__init__()
         self._conv = Conv2D(in_channels=in_channels,
                             out_channels=out_channels,
@@ -58,7 +58,8 @@ class ConvBNLayer(nn.Layer):
                             padding=(kernel_size - 1) // 2,
                             groups=groups,
                             weight_attr=ParamAttr(name=name + "_weights"),
-                            bias_attr=False)
+                            bias_attr=False,
+                            data_format=data_format)
         if name == "conv1":
             bn_name = "bn_" + name
         else:
@@ -69,7 +70,8 @@ class ConvBNLayer(nn.Layer):
         self._batch_norm = BatchNorm2D(out_channels,
                                        weight_attr=ParamAttr(name=bn_name +
                                                              "_scale"),
-                                       bias_attr=ParamAttr(bn_name + "_offset"))
+                                       bias_attr=ParamAttr(bn_name + "_offset"),
+                                       data_format=data_format)
 
     def forward(self, inputs):
         y = self._conv(inputs)
@@ -80,45 +82,68 @@ class ConvBNLayer(nn.Layer):
 
 
 class BottleneckBlock(nn.Layer):
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 stride,
-                 shortcut=True,
-                 num_seg=8,
-                 name=None):
+    def __init__(
+        self,
+        in_channels,
+        out_channels,
+        stride,
+        shortcut=True,
+        num_seg=8,
+        name=None,
+        data_format="NCHW",
+    ):
         super(BottleneckBlock, self).__init__()
-        self.conv0 = ConvBNLayer(in_channels=in_channels,
-                                 out_channels=out_channels,
-                                 kernel_size=1,
-                                 act="relu",
-                                 name=name + "_branch2a")
-        self.conv1 = ConvBNLayer(in_channels=out_channels,
-                                 out_channels=out_channels,
-                                 kernel_size=3,
-                                 stride=stride,
-                                 act="relu",
-                                 name=name + "_branch2b")
+        self.data_format = data_format
+        self.conv0 = ConvBNLayer(
+            in_channels=in_channels,
+            out_channels=out_channels,
+            kernel_size=1,
+            act="relu",
+            name=name + "_branch2a",
+            data_format=data_format,
+        )
+        self.conv1 = ConvBNLayer(
+            in_channels=out_channels,
+            out_channels=out_channels,
+            kernel_size=3,
+            stride=stride,
+            act="relu",
+            name=name + "_branch2b",
+            data_format=data_format,
+        )
 
-        self.conv2 = ConvBNLayer(in_channels=out_channels,
-                                 out_channels=out_channels * 4,
-                                 kernel_size=1,
-                                 act=None,
-                                 name=name + "_branch2c")
+        self.conv2 = ConvBNLayer(
+            in_channels=out_channels,
+            out_channels=out_channels * 4,
+            kernel_size=1,
+            act=None,
+            name=name + "_branch2c",
+            data_format=data_format,
+        )
 
         if not shortcut:
-            self.short = ConvBNLayer(in_channels=in_channels,
-                                     out_channels=out_channels * 4,
-                                     kernel_size=1,
-                                     stride=stride,
-                                     name=name + "_branch1")
+            self.short = ConvBNLayer(
+                in_channels=in_channels,
+                out_channels=out_channels * 4,
+                kernel_size=1,
+                stride=stride,
+                name=name + "_branch1",
+                data_format=data_format,
+            )
 
         self.shortcut = shortcut
         self.num_seg = num_seg
 
     def forward(self, inputs):
-        shifts = paddle.fluid.layers.temporal_shift(inputs, self.num_seg,
-                                                    1.0 / self.num_seg)
+        if self.data_format == "NCHW":
+            shifts = F.temporal_shift(inputs, self.num_seg, 1.0 / self.num_seg)
+        elif self.data_format == "NHWC":
+            #N,H,W,C --> N,C,H,W
+            inputs_trans = paddle.transpose(inputs, perm=[0, 3, 1, 2])
+            shifts = F.temporal_shift(inputs_trans, self.num_seg,
+                                      1.0 / self.num_seg)
+            #N,C,H,W --> N,H,W,C
+            shifts = paddle.transpose(shifts, perm=[0, 2, 3, 1])
         y = self.conv0(shifts)
         conv1 = self.conv1(y)
         conv2 = self.conv2(conv1)
@@ -136,27 +161,37 @@ class BasicBlock(nn.Layer):
                  out_channels,
                  stride,
                  shortcut=True,
-                 name=None):
+                 name=None,
+                 data_format="NCHW"):
         super(BasicBlock, self).__init__()
         self.stride = stride
-        self.conv0 = ConvBNLayer(in_channels=in_channels,
-                                 out_channels=out_channels,
-                                 filter_size=3,
-                                 stride=stride,
-                                 act="relu",
-                                 name=name + "_branch2a")
-        self.conv1 = ConvBNLayer(in_channels=out_channels,
-                                 out_channels=out_channels,
-                                 filter_size=3,
-                                 act=None,
-                                 name=name + "_branch2b")
+        self.conv0 = ConvBNLayer(
+            in_channels=in_channels,
+            out_channels=out_channels,
+            filter_size=3,
+            stride=stride,
+            act="relu",
+            name=name + "_branch2a",
+            data_format=data_format,
+        )
+        self.conv1 = ConvBNLayer(
+            in_channels=out_channels,
+            out_channels=out_channels,
+            filter_size=3,
+            act=None,
+            name=name + "_branch2b",
+            data_format=data_format,
+        )
 
         if not shortcut:
-            self.short = ConvBNLayer(in_channels=in_channels,
-                                     out_channels=out_channels,
-                                     filter_size=1,
-                                     stride=stride,
-                                     name=name + "_branch1")
+            self.short = ConvBNLayer(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                filter_size=1,
+                stride=stride,
+                name=name + "_branch1",
+                data_format=data_format,
+            )
 
         self.shortcut = shortcut
 
@@ -181,11 +216,12 @@ class ResNetTSM(nn.Layer):
         depth (int): Depth of resnet model.
         pretrained (str): pretrained model. Default: None.
     """
-    def __init__(self, depth, num_seg=8, pretrained=None):
+    def __init__(self, depth, num_seg=8, data_format="NCHW", pretrained=None):
         super(ResNetTSM, self).__init__()
         self.pretrained = pretrained
         self.layers = depth
         self.num_seg = num_seg
+        self.data_format = data_format
 
         supported_layers = [18, 34, 50, 101, 152]
         assert self.layers in supported_layers, \
@@ -204,13 +240,21 @@ class ResNetTSM(nn.Layer):
         in_channels = 64
         out_channels = [64, 128, 256, 512]
 
-        self.conv = ConvBNLayer(in_channels=3,
-                                out_channels=64,
-                                kernel_size=7,
-                                stride=2,
-                                act="relu",
-                                name="conv1")
-        self.pool2D_max = MaxPool2D(kernel_size=3, stride=2, padding=1)
+        self.conv = ConvBNLayer(
+            in_channels=3,
+            out_channels=64,
+            kernel_size=7,
+            stride=2,
+            act="relu",
+            name="conv1",
+            data_format=self.data_format,
+        )
+        self.pool2D_max = MaxPool2D(
+            kernel_size=3,
+            stride=2,
+            padding=1,
+            data_format=self.data_format,
+        )
 
         self.block_list = []
         if self.layers >= 50:
@@ -233,7 +277,9 @@ class ResNetTSM(nn.Layer):
                             stride=2 if i == 0 and block != 0 else 1,
                             num_seg=self.num_seg,
                             shortcut=shortcut,
-                            name=conv_name))
+                            name=conv_name,
+                            data_format=self.data_format,
+                        ))
                     in_channels = out_channels[block] * 4
                     self.block_list.append(bottleneck_block)
                     shortcut = True
@@ -244,12 +290,15 @@ class ResNetTSM(nn.Layer):
                     conv_name = "res" + str(block + 2) + chr(97 + i)
                     basic_block = self.add_sublayer(
                         conv_name,
-                        BasicBlock(in_channels=in_channels[block]
-                                   if i == 0 else out_channels[block],
-                                   out_channels=out_channels[block],
-                                   stride=2 if i == 0 and block != 0 else 1,
-                                   shortcut=shortcut,
-                                   name=conv_name))
+                        BasicBlock(
+                            in_channels=in_channels[block]
+                            if i == 0 else out_channels[block],
+                            out_channels=out_channels[block],
+                            stride=2 if i == 0 and block != 0 else 1,
+                            shortcut=shortcut,
+                            name=conv_name,
+                            data_format=self.data_format,
+                        ))
                     self.block_list.append(basic_block)
                     shortcut = True
 
@@ -285,7 +334,6 @@ class ResNetTSM(nn.Layer):
         #  1. the phase of generating data[images, label] from dataloader
         #     to
         #  2. last layer of a model, always is FC layer
-
         y = self.conv(inputs)
         y = self.pool2D_max(y)
         for block in self.block_list:

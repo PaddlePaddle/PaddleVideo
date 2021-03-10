@@ -11,10 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import math
 
 import paddle
-import paddle.nn.functional as F
 from paddle.nn import AdaptiveAvgPool2D, Linear, Dropout
 
 from .base import BaseHead
@@ -41,6 +39,7 @@ class TSNHead(BaseHead):
                  loss_cfg=dict(name='CrossEntropyLoss'),
                  drop_ratio=0.4,
                  std=0.01,
+                 data_format="NCHW",
                  **kwargs):
 
         super().__init__(num_classes, in_channels, loss_cfg, **kwargs)
@@ -48,7 +47,7 @@ class TSNHead(BaseHead):
         self.std = std
 
         #NOTE: global pool performance
-        self.avgpool2d = AdaptiveAvgPool2D((1, 1))
+        self.avgpool2d = AdaptiveAvgPool2D((1, 1), data_format=data_format)
 
         if self.drop_ratio != 0:
             self.dropout = Dropout(p=self.drop_ratio)
