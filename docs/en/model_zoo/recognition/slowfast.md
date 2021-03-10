@@ -39,6 +39,23 @@ python -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_sl
 
 - Training would be efficent using our code. The training speed is 2x faster than the original implementation. Details can refer to [benchmark](https://github.com/PaddlePaddle/PaddleVideo/blob/main/docs/en/benchmark.md).
 
+### Speed up training
+
+It's time consuming to train SlowFast model.  So we implement [Multigrid training stragety](https://arxiv.org/abs/1912.00998) to speed up training. Training script:
+
+```bash
+python -B -m paddle.distributed.launch --selected_gpus="0,1,2,3,4,5,6,7" --log_dir=log-slowfast main.py --validate --multigrid -c configs/recognition/slowfast/slowfast_multigrid.yaml
+```
+
+Performance evaluation:
+
+| training stragety | time cost of one epoch/min | total training time/min | speed-up |
+| :------ | :-----: | :------: |:------: |
+| Multigrid | 27.25 |  9758 (6.7 days) | 2.89x |
+| Normal | 78.76 | 15438 (10.7days) | base |
+
+For more details, please refer to [accelerate doc](https://github.com/PaddlePaddle/PaddleVideo/blob/develop/docs/zh-CN/tutorials/accelerate.md#%E8%AE%AD%E7%BB%83%E7%AD%96%E7%95%A5%E5%8A%A0%E9%80%9F).
+
 
 ## Test
 
