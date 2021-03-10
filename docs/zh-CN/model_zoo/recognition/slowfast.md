@@ -71,11 +71,12 @@ python -B main.py --test -c  configs/recognition/slowfast/slowfast.yaml -w outpu
 ```
 
 
-在Kinetics400数据集下评估精度如下:
+在Kinetics400数据集下评估精度及权重文件如下:
 
-| Acc1 | Acc5 |
-| :---: | :---: |
-| 74.35 | 91.33 |
+Configs | Acc1 | Acc5 | Weights |
+| :---: | :---: | :---: | :---: |
+|  [slowfast.yaml](../../../../../configs/recognition/slowfast/slowfast.yaml) | 74.35 | 91.33 | [slowfast_4x16.pdparams]() |
+|  []| 75.84  | 92.33 | [slowfast_8x8.pdparams]() |
 
 - 由于Kinetics400数据集部分源文件已缺失，无法下载，我们使用的数据集比官方数据少~5%，因此精度相比于论文公布的结果有一定损失。相同数据下，精度已与原实现对齐。
 
