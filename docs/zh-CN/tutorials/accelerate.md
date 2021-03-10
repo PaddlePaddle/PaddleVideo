@@ -218,6 +218,23 @@ Cuda: 9.0
 [H/2, W/2], [H/sqrt(2), W/sqrt(2)], [H, W]
 ```
 
+我们基于飞桨实现了Multigrid训练加速策略，对SlowFast模型训练进行加速，使用文档请参考[SlowFast训练加速](https://github.com/PaddlePaddle/PaddleVideo/blob/develop/docs/zh-CN/model_zoo/recognition/slowfast.md#%E8%AE%AD%E7%BB%83%E5%8A%A0%E9%80%9F)。
+
+测试环境: 
+```
+机器: Tesla v100
+显存: 8卡32G
+Cuda: 9.0
+单卡batch_size: 8
+```
+
+性能数据如下:
+
+| 训练策略 | 单个epoch平均耗时/min | 训练总时间/min | 加速比 |
+| :------ | :-----: | :------: |:------: |
+| Multigrid | 27.25 |  9758(6.7天) | 2.89x |
+| Normal | 78.76 | 15438(10.7天) | base |
+
 # 分布式训练 
 
 Comming soon~
