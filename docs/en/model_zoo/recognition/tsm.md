@@ -63,7 +63,7 @@ python -B -m paddle.distributed.launch --gpus="0,1,2,3"  --log_dir=log_tsm  main
 
 - Args -c is used to specify config file.
 
-- For finetune please download our trained model [TSM.pdparams]()<sup>coming soon</sup>，and specify file path with --weights.
+- For finetune please download our trained model [TSM.pdparams](https://videotag.bj.bcebos.com/PaddleVideo/TSM/TSM.pdparams)，and specify file path with --weights.
 
 - For the config file usage，please refer to [config](../../tutorials/config.md).
 
@@ -73,14 +73,14 @@ python -B -m paddle.distributed.launch --gpus="0,1,2,3"  --log_dir=log_tsm  main
 python3 main.py --test -c configs/recognition/tsm/tsm.yaml -w output/TSM/TSM_best.pdparams
 ```
 
-- Download the published model [TSM.pdparams]()<sup>coming soon</sup>, then you need to set the `--weights` for model testing
+- Download the published model [TSM.pdparams](https://videotag.bj.bcebos.com/PaddleVideo/TSM/TSM.pdparams), then you need to set the `--weights` for model testing
 
 
 Accuracy on Kinetics400:
 
 | seg\_num | target\_size | Top-1 |
 | :------: | :----------: | :----: |
-| 8 | 224 | 0.70 |
+| 8 | 224 | 0.7086 |
 
 ## Inference
 
