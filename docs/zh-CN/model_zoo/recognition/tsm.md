@@ -34,7 +34,7 @@ UCF101数据下载及准备请参考[ucf101数据准备](../../dataset/ucf101.md
 
 ### 预训练模型下载
 
-- 加载在ImageNet1000上训练好的ResNet50权重作为Backbone初始化参数，请下载此[预训练模型参数](https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_pretrain.pdparams),
+- 加载在ImageNet1000上训练好的ResNet50权重作为Backbone初始化参数，请下载此[ResNet50_pretrain.pdparams](https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_pretrain.pdparams),
 或是通过命令行下载
 
 ```bash
