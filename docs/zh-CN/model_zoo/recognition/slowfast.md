@@ -51,8 +51,20 @@ python -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_sl
 
 ### 训练加速
 
-SlowFast为3D模型，训练异常耗时，为加速模型的训练，我们实现了Multigrid加速策略
+SlowFast为3D模型，训练异常耗时，为加速模型的训练，我们实现了[Multigrid加速策略算法](https://arxiv.org/abs/1912.00998)，其启动方式如下:
 
+```bash
+python -B -m paddle.distributed.launch --selected_gpus="0,1,2,3,4,5,6,7" --log_dir=log-slowfast main.py --validate --multigrid -c configs/recognition/slowfast/slowfast_multigrid.yaml
+```
+
+性能数据如下:
+
+| 训练策略 | 单个epoch平均耗时/min | 训练总时间/min | 加速比 |
+| :------ | :-----: | :------: |:------: |
+| Multigrid | 27.25 |  9758(6.7天) | 2.89x |
+| Normal | 78.76 | 15438(10.7天) | base |
+
+详细数据说明可参考[加速文档](https://github.com/PaddlePaddle/PaddleVideo/blob/develop/docs/zh-CN/tutorials/accelerate.md#%E8%AE%AD%E7%BB%83%E7%AD%96%E7%95%A5%E5%8A%A0%E9%80%9F)。
 
 ## 模型测试
 
@@ -88,3 +100,4 @@ python -B main.py --test -c  configs/recognition/slowfast/slowfast.yaml -w outpu
 ## 参考论文
 
 - [SlowFast Networks for Video Recognition](https://arxiv.org/abs/1812.03982), Feichtenhofer C, Fan H, Malik J, et al. 
+- [A Multigrid Method for Efficiently Training Video Models](https://arxiv.org/abs/1912.00998), Chao-Yuan Wu, Ross Girshick, et al. 
