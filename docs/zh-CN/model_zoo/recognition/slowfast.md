@@ -51,7 +51,7 @@ python -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_sl
 
 ### 训练加速
 
-SlowFast为3D模型，训练异常耗时，为进一步加速模型的训练，我们实现了[Multigrid加速策略算法](https://arxiv.org/abs/1912.00998)，其启动方式如下:
+SlowFast为3D模型，训练异常耗时，为进一步加速模型的训练，我们实现了[Multigrid加速策略算法](https://arxiv.org/abs/1912.00998)，其训练启动方式如下:
 
 ```bash
 python -B -m paddle.distributed.launch --selected_gpus="0,1,2,3,4,5,6,7" --log_dir=log-slowfast main.py --validate --multigrid -c configs/recognition/slowfast/slowfast_multigrid.yaml
