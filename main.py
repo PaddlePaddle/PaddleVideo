@@ -79,7 +79,7 @@ def main():
                     weights=args.weights,
                     parallel=parallel,
                     validate=args.validate,
-                    fleet=args.fleet,
+                    use_fleet=args.fleet,
                     amp=args.amp)
 
 

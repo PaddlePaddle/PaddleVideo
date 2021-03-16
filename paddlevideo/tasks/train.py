@@ -31,7 +31,7 @@ def train_model(cfg,
                 parallel=True,
                 validate=True,
                 amp=False,
-                fleet=False):
+                use_fleet=False):
     """Train model entry
 
     Args:
@@ -41,7 +41,7 @@ def train_model(cfg,
         validate (bool): Whether to do evaluation. Default: False.
 
     """
-    if fleet:
+    if use_fleet:
         fleet.init(is_collective=True)
 
     logger = get_logger("paddlevideo")
@@ -60,7 +60,7 @@ def train_model(cfg,
     if parallel:
         model = paddle.DataParallel(model)
 
-    if fleet:
+    if use_fleet:
         model = paddle.distributed_model(model)
 
     # 2. Construct dataset and dataloader
@@ -90,7 +90,7 @@ def train_model(cfg,
     optimizer = build_optimizer(cfg.OPTIMIZER,
                                 lr,
                                 parameter_list=model.parameters())
-    if fleet:
+    if use_fleet:
         optimizer = fleet.distributed_optimizer(optimizer)
     # Resume
     resume_epoch = cfg.get("resume_epoch", 0)
