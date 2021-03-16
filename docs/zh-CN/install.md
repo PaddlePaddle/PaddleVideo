@@ -65,8 +65,6 @@ Python依赖库在[requirements.txt](https://github.com/PaddlePaddle/PaddleVideo
 pip3 install --upgrade -r requirements.txt
 ```
 
----
-
 **从python安装包安装PaddleVideo**
 
 使用pypi安装
@@ -81,6 +79,8 @@ ppvideo --model_name='ppTSM' --video_file='data/example.mp4'
 ```
 
 python安装包更多使用方法参考[paddlevideo包使用教程](./whl_zh.md)。
+
+---
 
 **从Docker安装PaddleVideo**
 
