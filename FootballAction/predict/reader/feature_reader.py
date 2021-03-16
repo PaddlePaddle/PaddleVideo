@@ -88,7 +88,7 @@ class FeatureReader(DataReader):
                 #print(start_id, end_id, bmn_score)
                 try:
                     image_feature = image_feature_list[start_id:end_id]
-                    audio_feature = audio_feature_list[start_id / self.fps:end_id / self.fps]
+                    audio_feature = audio_feature_list[int(start_id / self.fps):int(end_id / self.fps)]
                     #print(image_feature, audio_feature)
                     batch_out.append(
                         (image_feature, audio_feature, 0, prop_info))
