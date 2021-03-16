@@ -61,7 +61,8 @@ def video_classify(video_name):
     np_audio_features = np.array(audio_features, dtype=np.float32)
     t1 = time.time()
 
-    logger.info(np_image_features.shape, np_audio_features.shape)
+    logger.info("feature shape {} {}".format(np_image_features.shape,
+                                             np_audio_features.shape))
     logger.info("step1: feature extract time: {} min".format(
         (t1 - t0) * 1.0 / 60))
     video_features = {

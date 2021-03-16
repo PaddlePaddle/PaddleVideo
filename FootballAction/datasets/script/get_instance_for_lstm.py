@@ -80,6 +80,10 @@ def get_bmn_info(gts_data, proposal_data, res_bmn, mode, score_threshold=0.01):
             continue
 
         gts_actions = gts_item['actions']
+        for i in range(len(gts_actions)):
+            gts_actions[i]['start_id'] = gts_actions[i]['start_id'] * fps
+            gts_actions[i]['end_id'] = gts_actions[i]['end_id'] * fps
+
         prop_actions = proposal_data[video_name]
 
         res_bmn['results'].append({
@@ -93,8 +97,8 @@ def get_bmn_info(gts_data, proposal_data, res_bmn, mode, score_threshold=0.01):
         for proposal in prop_actions:
             if proposal['score'] < score_threshold:
                 continue
-            proposal['start'] = int(proposal['start'] * 1.0 / fps)
-            proposal['end'] = int(proposal['end'] * 1.0 / fps)
+            proposal['start'] = int(proposal['start'])
+            proposal['end'] = int(proposal['end'])
             gts_info = clc_iou_of_proposal(proposal, gts_actions)
             res_bmn['results'][-1]['proposal_actions'].append(gts_info)
 
@@ -124,9 +128,9 @@ def save_feature(label_info, out_dir):
             start_id = proposal['proposal']['start']
             end_id = proposal['proposal']['end']
             # get hit feature
-            image_feature_hit = image_feature[start_id * fps:end_id * fps]
-            audio_feature_hit = audio_feature[min(start_id, max_len_audio
-                                                  ):min(end_id, max_len_audio)]
+            image_feature_hit = image_feature[start_id:end_id]
+            audio_feature_hit = audio_feature[min(int(start_id / fps), max_len_audio):
+                                              min(int(end_id / fps), max_len_audio)]
 
             # save
             anno_info = {

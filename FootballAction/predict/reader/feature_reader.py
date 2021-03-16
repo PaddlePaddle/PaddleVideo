@@ -82,15 +82,13 @@ class FeatureReader(DataReader):
             """
             batch_out = []
             for prop_info in fl:
-                start_id = int(float(prop_info['start']) / self.fps)
-                end_id = int(float(prop_info['end']) / self.fps)
+                start_id = int(prop_info['start'])
+                end_id = int(prop_info['end'])
                 bmn_score = float(prop_info['score'])
                 #print(start_id, end_id, bmn_score)
                 try:
-                    image_feature = image_feature_list[start_id *
-                                                       self.fps:end_id *
-                                                       self.fps]
-                    audio_feature = audio_feature_list[start_id:end_id]
+                    image_feature = image_feature_list[start_id:end_id]
+                    audio_feature = audio_feature_list[start_id / self.fps:end_id / self.fps]
                     #print(image_feature, audio_feature)
                     batch_out.append(
                         (image_feature, audio_feature, 0, prop_info))
