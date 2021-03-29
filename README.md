@@ -25,7 +25,7 @@ PaddleVideo is a toolset for video recognition, action localization, and spatio 
     PaddleVideo has built-in solutions to improve accuracy on the recognition models. PP-TSM, which is based on the standard TSM, already archive the best performance in the 2D recognition network, has the same size of parameters but improve the Top1 Acc to **73.5%** , and one can easily apply the soulutions on his own dataset.
 
 - **Faster training strategy**
-    PaddleVideo suppors faster training strategy, it accelerates by 100% compared with the standard Slowfast version, and it only takes 10 days to train from scratch on the kinetics400 dataset.
+    PaddleVideo suppors faster training strategy, it accelerates by 100% compared with the standard Slowfast version, and it only takes 7 days to train from scratch on the kinetics400 dataset.
 
 - **Deployable**
     PaddleVideo is powered by the Paddle Inference. There is no need to convert the model to ONNX format when deploying it, all you want can be found in this repository.
