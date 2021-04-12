@@ -41,7 +41,7 @@ Please refer to UCF101 data download and preparation [ucf101 data preparation](.
 - Please download [ResNet50_pretrain.pdparams](https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_pretrain.pdparams) as pretraind model:
 
 ```bash
-wget https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_vd_ssld_v2_pretrained.pdparams
+wget https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_pretrain.pdparams
 ```
 
 and add path to MODEL.framework.backbone.pretrained in config file as：
