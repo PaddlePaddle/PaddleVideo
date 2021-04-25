@@ -229,13 +229,7 @@ def train_model_multigrid(cfg, world_size=1, validate=True):
         for i, data in enumerate(train_loader):
             record_list['reader_time'].update(time.time() - tic)
             # 4.1 forward
-            if parallel:
-                outputs = model._layers.train_step(data)
-                ## required for DataParallel, will remove in next version
-                model._reducer.prepare_for_backward(
-                    list(model._find_varbase(outputs)))
-            else:
-                outputs = model.train_step(data)
+            outputs = model(data, mode='train')
             # 4.2 backward
             avg_loss = outputs['loss']
             avg_loss.backward()
@@ -275,10 +269,7 @@ def train_model_multigrid(cfg, world_size=1, validate=True):
             record_list.pop('lr')
             tic = time.time()
             for i, data in enumerate(valid_loader):
-                if parallel:
-                    outputs = model._layers.val_step(data)
-                else:
-                    outputs = model.val_step(data)
+                outputs = model(data, mode='valid')
 
                 # log_record
                 for name, value in outputs.items():

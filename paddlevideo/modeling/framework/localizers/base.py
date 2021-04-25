@@ -38,11 +38,19 @@ class BaseLocalizer(nn.Layer):
         else:
             pass
 
-    def forward(self, imgs):
-        """Call backbone forward.
+    def forward(self, data_batch, mode):
         """
-        preds = self.backbone(imgs)
-        return preds
+        1. Define how the model is going to run, from input to output.
+        2. Console of train, valid, test or infer step
+        """
+        if mode == 'train':
+            return self.train_step(data_batch)
+        elif mode == 'valid':
+            return self.val_step(data_batch)
+        elif mode == 'test':
+            return self.test_step(data_batch)
+        else:
+            raise NotImplementedError
 
     @abstractmethod
     def train_step(self, data_batch, **kwargs):

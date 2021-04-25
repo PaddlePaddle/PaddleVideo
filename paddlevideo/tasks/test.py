@@ -33,6 +33,7 @@ def test_model(cfg, weights, parallel=True):
 
     """
     # 1. Construct model.
+    cfg.MODEL.backbone.pretrained = ''  # disable pretrain model init
     model = build_model(cfg.MODEL)
     if parallel:
         model = paddle.DataParallel(model)
@@ -63,9 +64,6 @@ def test_model(cfg, weights, parallel=True):
 
     Metric = build_metric(cfg.METRIC)
     for batch_id, data in enumerate(data_loader):
-        if parallel:
-            outputs = model._layers.test_step(data)
-        else:
-            outputs = model.test_step(data)
+        outputs = model(data, mode='test')
         Metric.update(batch_id, data, outputs)
     Metric.accumulate()

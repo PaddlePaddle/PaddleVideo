@@ -21,24 +21,34 @@ logger = get_logger("paddlevideo")
 @RECOGNIZERS.register()
 class Recognizer2D(BaseRecognizer):
     """2D recognizer model framework."""
+    def forward_net(self, imgs):
+        #NOTE: As the num_segs is an attribute of dataset phase, and didn't pass to build_head phase, should obtain it from imgs(paddle.Tensor) now, then call self.head method.
+        num_segs = imgs.shape[1]
+        imgs = paddle.reshape_(imgs, [-1] + list(imgs.shape[2:]))
+
+        if self.backbone != None:
+            feature = self.backbone(imgs)
+        else:
+            feature = imgs
+        if self.head != None:
+            cls_score = self.head(feature, num_segs)
+        else:
+            cls_score = None
+        return cls_score
+
     def train_step(self, data_batch):
         """Define how the model is going to train, from input to output.
         """
-        #NOTE: As the num_segs is an attribute of dataset phase, and didn't pass to build_head phase, should obtain it from imgs(paddle.Tensor) now, then call self.head method.
-
-        #labels = labels.squeeze()
-        #XXX: unsqueeze label to [label] ?
-
         imgs = data_batch[0]
         labels = data_batch[1:]
-        cls_score = self(imgs)
+        cls_score = self.forward_net(imgs)
         loss_metrics = self.head.loss(cls_score, labels)
         return loss_metrics
 
     def val_step(self, data_batch):
         imgs = data_batch[0]
         labels = data_batch[1:]
-        cls_score = self(imgs)
+        cls_score = self.forward_net(imgs)
         loss_metrics = self.head.loss(cls_score, labels, valid_mode=True)
         return loss_metrics
 
@@ -46,5 +56,5 @@ class Recognizer2D(BaseRecognizer):
         """Define how the model is going to test, from input to output."""
         #NOTE: (shipping) when testing, the net won't call head.loss, we deal with the test processing in /paddlevideo/metrics
         imgs = data_batch[0]
-        cls_score = self(imgs)
+        cls_score = self.forward_net(imgs)
         return cls_score
