@@ -21,10 +21,10 @@ logger = get_logger("paddlevideo")
 class Recognizer3D(BaseRecognizer):
     """3D Recognizer model framework.
     """
-    def forward(self, imgs, **kwargs):
+    def forward_net(self, imgs):
         """Define how the model is going to run, from input to output.
         """
-        feature = self.extract_feature(imgs)
+        feature = self.backbone(imgs)
         cls_score = self.head(feature)
         return cls_score
 
@@ -35,7 +35,7 @@ class Recognizer3D(BaseRecognizer):
         labels = data_batch[2:]
 
         # call forward
-        cls_score = self(imgs)
+        cls_score = self.forward_net(imgs)
         loss_metrics = self.head.loss(cls_score, labels)
         return loss_metrics
 
@@ -46,7 +46,7 @@ class Recognizer3D(BaseRecognizer):
         labels = data_batch[2:]
 
         # call forward
-        cls_score = self(imgs)
+        cls_score = self.forward_net(imgs)
         loss_metrics = self.head.loss(cls_score, labels, valid_mode=True)
         return loss_metrics
 
@@ -55,6 +55,6 @@ class Recognizer3D(BaseRecognizer):
         """
         imgs = data_batch[0:2]
         # call forward
-        cls_score = self(imgs)
+        cls_score = self.forward_net(imgs)
 
         return cls_score

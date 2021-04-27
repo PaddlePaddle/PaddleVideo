@@ -1,8 +1,6 @@
 from abc import abstractmethod
 from ... import builder
-import paddle
 import paddle.nn as nn
-import paddle.nn.functional as F
 
 
 class BaseRecognizer(nn.Layer):
@@ -23,56 +21,31 @@ class BaseRecognizer(nn.Layer):
     def __init__(self, backbone=None, head=None):
 
         super().__init__()
-        if backbone!=None:
+        if backbone != None:
             self.backbone = builder.build_backbone(backbone)
             self.backbone.init_weights()
         else:
             self.backbone = None
-        if head!=None:
+        if head != None:
             self.head_name = head.name
             self.head = builder.build_head(head)
             self.head.init_weights()
         else:
-           self.head = None
+            self.head = None
 
-
-    def init_weights(self):
-        """Initialize the model network weights. """
-
-        self.backbone.init_weights(
-        )  #TODO: required? while backbone without base class
-        self.head.init_weights()
-
-    def extract_feature(self, imgs):
-        """Extract features through a backbone.
-
-    Args:
-        imgs (paddle.Tensor) : The input images.
-
-        Returns:
-            feature (paddle.Tensor) : The extracted features.
+    def forward(self, data_batch, mode):
         """
-        feature = self.backbone(imgs)
-        return feature
-
-    def forward(self, imgs, **kwargs):
-        """Define how the model is going to run, from input to output.
+        1. Define how the model is going to run, from input to output.
+        2. Console of train, valid, test or infer step
         """
-        batches = imgs.shape[0]
-        num_segs = imgs.shape[1]
-        imgs = paddle.reshape(imgs, [-1] + list(imgs.shape[2:]))
-
-        if self.backbone!=None:
-            feature = self.extract_feature(imgs)
+        if mode == 'train':
+            return self.train_step(data_batch)
+        elif mode == 'valid':
+            return self.val_step(data_batch)
+        elif mode == 'test':
+            return self.test_step(data_batch)
         else:
-            feature = imgs
-        if self.head!=None:
-            cls_score = self.head(feature, num_segs)
-        else:
-            cls_score = None
-
-
-        return cls_score
+            raise NotImplementedError
 
     @abstractmethod
     def train_step(self, data_batch, **kwargs):

@@ -20,6 +20,12 @@ import paddle
 class BMNLocalizer(BaseLocalizer):
     """BMN Localization framework
     """
+    def forward_net(self, imgs):
+        """Call backbone forward.
+        """
+        preds = self.backbone(imgs)
+        return preds
+
     def train_step(self, data_batch):
         """Training step.
         """
@@ -32,7 +38,7 @@ class BMNLocalizer(BaseLocalizer):
         gt_end.stop_gradient = True
 
         # call Model forward
-        pred_bm, pred_start, pred_end = self(x_data)
+        pred_bm, pred_start, pred_end = self.forward_net(x_data)
         # call Loss forward
         loss = self.loss(pred_bm, pred_start, pred_end, gt_iou_map, gt_start,
                          gt_end)
@@ -58,5 +64,5 @@ class BMNLocalizer(BaseLocalizer):
         gt_end.stop_gradient = True
 
         # call Model forward
-        pred_bm, pred_start, pred_end = self(x_data)
+        pred_bm, pred_start, pred_end = self.forward_net(x_data)
         return pred_bm, pred_start, pred_end

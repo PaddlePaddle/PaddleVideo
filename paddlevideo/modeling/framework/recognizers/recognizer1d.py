@@ -10,7 +10,6 @@
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 
-import paddle
 from ...registry import RECOGNIZERS
 from .base import BaseRecognizer
 
@@ -18,13 +17,13 @@ from .base import BaseRecognizer
 @RECOGNIZERS.register()
 class Recognizer1D(BaseRecognizer):
     """1D recognizer model framework."""
-    def forward(self, imgs, **kwargs):
+    def forward_net(self, imgs):
         """Define how the model is going to train, from input to output.
         """
         lstm_logit, lstm_output = self.head(imgs)
         return lstm_logit, lstm_output
 
-    def train_step(self, data_batch, **kwargs):
+    def train_step(self, data_batch):
         """Training step.
         """
         rgb_data, rgb_len, rgb_mask, audio_data, audio_len, audio_mask, labels = data_batch
@@ -32,8 +31,8 @@ class Recognizer1D(BaseRecognizer):
                 (audio_data, audio_len, audio_mask)]
 
         # call forward
-        lstm_logit, lstm_output = self(imgs)
-        loss = self.head.loss(lstm_logit, labels, **kwargs)
+        lstm_logit, lstm_output = self.forward_net(imgs)
+        loss = self.head.loss(lstm_logit, labels)
         hit_at_one, perr, gap = self.head.metric(lstm_output, labels)
         loss_metrics = dict()
         loss_metrics['loss'] = loss
@@ -43,15 +42,15 @@ class Recognizer1D(BaseRecognizer):
 
         return loss_metrics
 
-    def val_step(self, data_batch, **kwargs):
+    def val_step(self, data_batch):
         """Validating setp.
         """
         return self.train_step(data_batch)
 
-    def test_step(self, data_batch, **kwargs):
+    def test_step(self, data_batch):
         rgb_data, rgb_len, rgb_mask, audio_data, audio_len, audio_mask = data_batch
         imgs = [(rgb_data, rgb_len, rgb_mask),
                 (audio_data, audio_len, audio_mask)]
 
-        lstm_logit, lstm_output = self(imgs)
+        lstm_logit, lstm_output = self.forward_net(imgs)
         return lstm_output

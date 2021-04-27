@@ -132,13 +132,7 @@ def train_model(cfg,
             if amp:
                 with paddle.amp.auto_cast(
                         custom_black_list={"temporal_shift", "reduce_mean"}):
-                    if parallel:
-                        outputs = model._layers.train_step(data)
-                        ## required for DataParallel, will remove in next version
-                        model._reducer.prepare_for_backward(
-                            list(model._find_varbase(outputs)))
-                    else:
-                        outputs = model.train_step(data)
+                    outputs = model(data, mode='train')
 
                 avg_loss = outputs['loss']
                 scaled = scaler.scale(avg_loss)
@@ -148,13 +142,7 @@ def train_model(cfg,
                 optimizer.clear_grad()
 
             else:
-                if parallel:
-                    outputs = model._layers.train_step(data)
-                    ## required for DataParallel, will remove in next version
-                    model._reducer.prepare_for_backward(
-                        list(model._find_varbase(outputs)))
-                else:
-                    outputs = model.train_step(data)
+                outputs = model(data, mode='train')
 
                 # 4.2 backward
                 avg_loss = outputs['loss']
@@ -196,11 +184,7 @@ def train_model(cfg,
             record_list.pop('lr')
             tic = time.time()
             for i, data in enumerate(valid_loader):
-
-                if parallel:
-                    outputs = model._layers.val_step(data)
-                else:
-                    outputs = model.val_step(data)
+                outputs = model(data, mode='valid')
 
                 # log_record
                 for name, value in outputs.items():

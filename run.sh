@@ -1,5 +1,7 @@
 export CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7
 
+start_time=$(date +%s)
+
 # run tsm training
 #python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3" --log_dir=log_tsm main.py  --validate -c configs/recognition/tsm/tsm.yaml
 
@@ -45,3 +47,7 @@ python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3"  --log_dir=log_pptsm 
 # predict script
 # just use `example` as example, please replace to real name.
 #python3.7 tools/predict.py -v example.avi --model_file "./inference/example.pdmodel" --params_file "./inference/example.pdiparams" --enable_benchmark=False --model="example" --num_seg=8
+
+end_time=$(date +%s)
+cost_time=$[ $end_time-$start_time ]
+echo "Time to train is $(($cost_time/60))min $(($cost_time%60))s"
