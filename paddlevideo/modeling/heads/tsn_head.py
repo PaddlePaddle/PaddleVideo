@@ -87,7 +87,7 @@ class TSNHead(BaseHead):
         x = paddle.reshape(x, [-1, seg_num, x.shape[1]])
         # [N, seg_num, in_channels]
         x = paddle.mean(x, axis=1)
-        # [N, 1, in_channels]
+        # [N, in_channels]
         x = paddle.reshape(x, shape=[-1, self.in_channels])
         # [N, in_channels]
         score = self.fc(x)

@@ -18,6 +18,7 @@ import math
 from PIL import Image
 from ..registry import PIPELINES
 from collections.abc import Sequence
+import paddle.vision.transforms
 
 
 @PIPELINES.register()
@@ -29,6 +30,8 @@ class Scale(object):
     """
     def __init__(self, short_size):
         self.short_size = short_size
+        self.resize_func = paddle.vision.transforms.Resize(
+            size=short_size, interpolation='bilinear')
 
     def __call__(self, results):
         """
@@ -40,23 +43,7 @@ class Scale(object):
             resized_imgs: List where each item is a PIL.Image after scaling.
         """
         imgs = results['imgs']
-        resized_imgs = []
-        for i in range(len(imgs)):
-            img = imgs[i]
-            w, h = img.size
-            if (w <= h and w == self.short_size) or (h <= w
-                                                     and h == self.short_size):
-                resized_imgs.append(img)
-                continue
-
-            if w < h:
-                ow = self.short_size
-                oh = int(self.short_size * 4.0 / 3.0)
-                resized_imgs.append(img.resize((ow, oh), Image.BILINEAR))
-            else:
-                oh = self.short_size
-                ow = int(self.short_size * 4.0 / 3.0)
-                resized_imgs.append(img.resize((ow, oh), Image.BILINEAR))
+        resized_imgs = [self.resize_func(img) for img in imgs]
         results['imgs'] = resized_imgs
         return results
 
@@ -110,6 +97,7 @@ class CenterCrop(object):
     """
     def __init__(self, target_size):
         self.target_size = target_size
+        self.crop_func = paddle.vision.transforms.CenterCrop(target_size)
 
     def __call__(self, results):
         """
@@ -121,16 +109,7 @@ class CenterCrop(object):
             ccrop_imgs: List where each item is a PIL.Image after Center crop.
         """
         imgs = results['imgs']
-        ccrop_imgs = []
-        for img in imgs:
-            w, h = img.size
-            th, tw = self.target_size, self.target_size
-            assert (w >= self.target_size) and (h >= self.target_size), \
-                "image width({}) and height({}) should be larger than crop size".format(
-                    w, h, self.target_size)
-            x1 = int(round((w - tw) / 2.))
-            y1 = int(round((h - th) / 2.))
-            ccrop_imgs.append(img.crop((x1, y1, x1 + tw, y1 + th)))
+        ccrop_imgs = [self.crop_func(img) for img in imgs]
         results['imgs'] = ccrop_imgs
         return results
 
@@ -190,19 +169,15 @@ class MultiScaleCrop(object):
                 w_offset = random.randint(0, image_w - crop_pair[0])
                 h_offset = random.randint(0, image_h - crop_pair[1])
             else:
-                w_step = (image_w - crop_pair[0]) / 4
-                h_step = (image_h - crop_pair[1]) / 4
+                w_step = (image_w - crop_pair[0]) // 4
+                h_step = (image_h - crop_pair[1]) // 4
 
                 ret = list()
                 ret.append((0, 0))  # upper left
-                if w_step != 0:
-                    ret.append((4 * w_step, 0))  # upper right
-                if h_step != 0:
-                    ret.append((0, 4 * h_step))  # lower left
-                if h_step != 0 and w_step != 0:
-                    ret.append((4 * w_step, 4 * h_step))  # lower right
-                if h_step != 0 or w_step != 0:
-                    ret.append((2 * w_step, 2 * h_step))  # center
+                ret.append((4 * w_step, 0))  # upper right
+                ret.append((0, 4 * h_step))  # lower left
+                ret.append((4 * w_step, 4 * h_step))  # lower right
+                ret.append((2 * w_step, 2 * h_step))  # center
 
                 if self.more_fix_crop:
                     ret.append((0, 2 * h_step))  # center left
