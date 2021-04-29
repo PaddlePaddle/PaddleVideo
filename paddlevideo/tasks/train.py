@@ -56,21 +56,45 @@ def train_model(cfg,
     mkdir(output_dir)
 
     # 1. Construct model
-    model = build_model(cfg.MODEL)
-    if parallel:
-        model = paddle.DataParallel(model)
+#    model = build_model(cfg.MODEL)
+#    if parallel:
+#        model = paddle.DataParallel(model)
 
     if use_fleet:
         model = paddle.distributed_model(model)
 
     # 2. Construct dataset and dataloader
     train_dataset = build_dataset((cfg.DATASET.train, cfg.PIPELINE.train))
+    # print(train_dataset.info) # dataset class initialization
+    # print(len(train_dataset))
+    #
+    # tmp = train_dataset[0]
+
+    # print('--------tmp[img]-------')
+    # print(tmp['img'])
+    # print('--------tmp[proposal]------')
+    # print(tmp['proposals'])
+    # print('-------tmp[gt_bboxes]--------')
+    # print(tmp['gt_bboxes'])
+    # print('-------tmp[gt_labels]------')
+    # print(tmp['gt_labels'])
+    # print('-------tmp[img_metas]------')
+    # print(tmp['img_metas'])
+
+
     train_dataloader_setting = dict(batch_size=batch_size,
                                     num_workers=num_workers,
                                     collate_fn_cfg=cfg.get('MIX', None),
                                     places=places)
 
     train_loader = build_dataloader(train_dataset, **train_dataloader_setting)
+
+    for i,data in enumerate(train_loader):
+        print('-----index-----',i)
+        print('-----data------',data)
+
+    import sys
+    sys.exit(0)
     if validate:
         valid_dataset = build_dataset((cfg.DATASET.valid, cfg.PIPELINE.valid))
         validate_dataloader_setting = dict(
