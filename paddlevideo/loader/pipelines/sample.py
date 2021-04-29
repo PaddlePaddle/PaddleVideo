@@ -93,5 +93,6 @@ class Sampler(object):
             frames_idx = [x % int(frames_len) for x in frames_idx]
         elif results['format'] == 'frame':
             frames_idx = list(offsets + 1)
-
+        else:
+            raise NotImplementedError
         return self._get(frames_idx, results)
