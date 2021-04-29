@@ -17,7 +17,6 @@ import paddle
 
 
 def build_optimizer(cfg, lr_scheduler, parameter_list=None):
-
     """
     Build an optimizer and learning rate scheduler to optimize parameters accroding to ```OPTIMIZER``` field in configuration .
 
@@ -56,17 +55,29 @@ def build_optimizer(cfg, lr_scheduler, parameter_list=None):
         optimizer (paddle.optimizer): paddle optimizer.
 
     """
-    
 
     cfg_copy = cfg.copy()
     #XXX check none and illegal cfg!!!
     opt_name = cfg_copy.pop('name')
     # deal with weight decay
     if cfg_copy.get('weight_decay'):
-        if isinstance(cfg_copy.get('weight_decay'), float) or 'L1' in cfg_copy.get('weight_decay').get('name').upper():
+        if isinstance(cfg_copy.get('weight_decay'),
+                      float) or 'L1' in cfg_copy.get('weight_decay').get(
+                          'name').upper():
             cfg_copy['weight_decay'] = cfg_copy.get('weight_decay').get('value')
         elif 'L2' in cfg_copy.get('weight_decay').get('name').upper():
-            cfg_copy['weight_decay'] = paddle.regularizer.L2Decay(cfg_copy.get('weight_decay').get('value'))
+            cfg_copy['weight_decay'] = paddle.regularizer.L2Decay(
+                cfg_copy.get('weight_decay').get('value'))
+        else:
+            raise ValueError
+
+    # deal with grad clip
+    if cfg_copy.get('grad_clip'):
+        if isinstance(cfg_copy.get('grad_clip'), float):
+            cfg_copy['grad_clip'] = cfg_copy.get('grad_clip').get('value')
+        elif 'global' in cfg_copy.get('grad_clip').get('name').lower():
+            cfg_copy['grad_clip'] = paddle.nn.ClipGradByGlobalNorm(
+                cfg_copy.get('grad_clip').get('value'))
         else:
             raise ValueError
 
