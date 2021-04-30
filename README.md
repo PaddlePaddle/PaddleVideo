@@ -79,6 +79,7 @@ PaddleVideo is a toolset for video recognition, action localization, and spatio 
             <li>bmn</li>
         </ul>
         <ul>Head
+            <li>pptsm_head</li>
             <li>tsm_head</li>
             <li>tsn_head</li>
             <li>bmn_head</li>

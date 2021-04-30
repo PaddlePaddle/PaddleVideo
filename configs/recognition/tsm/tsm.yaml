@@ -7,7 +7,7 @@ MODEL: #MODEL field
         depth: 50 #Optional, the depth of backbone architecture.
         bn_wd: False
     head:
-        name: "TSMHead_original" #Mandatory, indicate the type of head, associate to the 'paddlevideo/modeling/heads'
+        name: "TSMHead" #Mandatory, indicate the type of head, associate to the 'paddlevideo/modeling/heads'
         num_classes: 101 #Optional, the number of classes to be classified.
         in_channels: 2048 #input channel of the extracted feature.
         drop_ratio: 0.5 #the ratio of dropout
@@ -61,9 +61,9 @@ PIPELINE: #PIPELINE field
             seg_len: 1
             valid_mode: True
         transform:
-            - Scale_TSM:
+            - Scale_PV:
                 short_size: 256
-            - CenterCrop_TSM:
+            - CenterCrop:
                 target_size: 224
             - Image2Array:
             - Normalization:
@@ -79,9 +79,9 @@ PIPELINE: #PIPELINE field
             seg_len: 1
             valid_mode: True
         transform:
-            - Scale_TSM:
+            - Scale_PV:
                 short_size: 256
-            - CenterCrop_TSM:
+            - CenterCrop:
                 target_size: 224
             - Image2Array:
             - Normalization:

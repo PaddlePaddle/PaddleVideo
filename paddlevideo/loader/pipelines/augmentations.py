@@ -63,14 +63,16 @@ class Scale(object):
 
 
 @PIPELINES.register()
-class Scale_TSM(Scale):
+class Scale_PV(Scale):
     """
-    Scale images using PaddleVision's function.
+    Scale images using PaddleVision's function
+    It scale the short size of image to a target short size at a ratio=target_short_size/img_short_size,
+    then use the same ratio to sale another side.
     Args:
         short_size(float | int): Short size of an image will be scaled to the short_size.
     """
     def __init__(self, short_size):
-        super(Scale_TSM, self).__init__(short_size)
+        super(Scale_PV, self).__init__(short_size)
         self.resize_func = paddle.vision.transforms.Resize(
             size=short_size, interpolation='bilinear')
 
@@ -159,32 +161,6 @@ class CenterCrop(object):
             x1 = int(round((w - tw) / 2.))
             y1 = int(round((h - th) / 2.))
             ccrop_imgs.append(img.crop((x1, y1, x1 + tw, y1 + th)))
-        results['imgs'] = ccrop_imgs
-        return results
-
-
-@PIPELINES.register()
-class CenterCrop_TSM(CenterCrop):
-    """
-    Center crop images using PaddleVision's function.
-    Args:
-        target_size(int): Center crop a square with the target_size from an image.
-    """
-    def __init__(self, target_size):
-        super(CenterCrop_TSM, self).__init__(target_size)
-        self.crop_func = paddle.vision.transforms.CenterCrop(target_size)
-
-    def __call__(self, results):
-        """
-        Performs Center crop operations.
-        Args:
-            imgs: List where each item is a PIL.Image.
-            For example, [PIL.Image0, PIL.Image1, PIL.Image2, ...]
-        return:
-            ccrop_imgs: List where each item is a PIL.Image after Center crop.
-        """
-        imgs = results['imgs']
-        ccrop_imgs = [self.crop_func(img) for img in imgs]
         results['imgs'] = ccrop_imgs
         return results
 

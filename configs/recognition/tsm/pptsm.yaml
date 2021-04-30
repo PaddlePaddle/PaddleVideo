@@ -6,7 +6,7 @@ MODEL: #MODEL field
         num_seg: 8
         depth: 50 #Optional, the depth of backbone architecture.
     head:
-        name: "TSMHead" #Mandatory, indicate the type of head, associate to the 'paddlevideo/modeling/heads'
+        name: "ppTSMHead" #Mandatory, indicate the type of head, associate to the 'paddlevideo/modeling/heads'
         num_classes: 101 #Optional, the number of classes to be classified.
         in_channels: 2048 #input channel of the extracted feature.
         drop_ratio: 0.5 #the ratio of dropout
@@ -61,7 +61,6 @@ PIPELINE: #PIPELINE field
             name: "FrameDecoder"
         sample:
             name: "Sampler"
-            valid_mode: True
             num_seg: 8
             seg_len: 1
             valid_mode: True
@@ -80,7 +79,6 @@ PIPELINE: #PIPELINE field
             name: "FrameDecoder"
         sample:
             name: "Sampler"
-            valid_mode: True
             num_seg: 8
             seg_len: 1
             valid_mode: True

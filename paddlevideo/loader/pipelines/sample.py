@@ -102,7 +102,8 @@ class Sampler(object):
 @PIPELINES.register()
 class Sampler_TSM(Sampler):
     """
-    Sample frames id.
+    Sample frames from frames or videos, it will choose the right in the middle frame while Sampler will choose the
+    left int the middle frame
     NOTE: Use PIL to read image here, has diff with CV2
     Args:
         num_seg(int): number of segments.
@@ -121,22 +122,22 @@ class Sampler_TSM(Sampler):
         return:
             sampling id.
         """
-        frames_len = results['frames_len']
-        average_dur = int(int(frames_len) / self.num_seg)
+        frames_len = int(results['frames_len'])
+        average_dur = int(frames_len / self.num_seg)
         frames_idx = []
         if not self.valid_mode:
             if average_dur > 0:
                 offsets = np.multiply(list(range(self.num_seg)),
                                       average_dur) + np.random.randint(
                                           average_dur, size=self.num_seg)
-            elif int(frames_len) > self.num_seg:
+            elif frames_len > self.num_seg:
                 offsets = np.sort(
-                    np.random.randint(int(frames_len), size=self.num_seg))
+                    np.random.randint(frames_len, size=self.num_seg))
             else:
                 offsets = np.zeros(shape=(self.num_seg, ))
         else:
-            if int(frames_len) > self.num_seg:
-                tick = (int(frames_len)) / self.num_seg
+            if frames_len > self.num_seg:
+                tick = frames_len / self.num_seg
                 offsets = np.array(
                     [int(tick / 2.0 + tick * x) for x in range(self.num_seg)])
             else:
@@ -144,7 +145,7 @@ class Sampler_TSM(Sampler):
 
         if results['format'] == 'video':
             frames_idx = list(offsets)
-            frames_idx = [x % int(frames_len) for x in frames_idx]
+            frames_idx = [x % frames_len for x in frames_idx]
         elif results['format'] == 'frame':
             frames_idx = list(offsets + 1)
         else:
