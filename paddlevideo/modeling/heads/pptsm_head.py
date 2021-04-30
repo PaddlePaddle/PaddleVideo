@@ -11,8 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-
 import math
 import paddle
 from paddle import ParamAttr
@@ -26,24 +24,25 @@ from ..weight_init import weight_init_
 
 
 @HEADS.register()
-class TSMHead(TSNHead):
-    """ TSM Head
+class ppTSMHead(TSNHead):
+    """ ppTSM Head
 
     Args:
         num_classes (int): The number of classes to be classified.
         in_channels (int): The number of channles in input feature.
         loss_cfg (dict): Config for building config. Default: dict(name='CrossEntropyLoss').
-        drop_ratio(float): drop ratio. Default: 0.5.
+        drop_ratio(float): drop ratio. Default: 0.8.
         std(float): Std(Scale) value in normal initilizar. Default: 0.001.
         kwargs (dict, optional): Any keyword argument to initialize.
     """
     def __init__(self,
                  num_classes,
                  in_channels,
-                 drop_ratio=0.5,
-                 std=0.001,
+                 drop_ratio=0.8,
+                 std=0.01,
                  data_format="NCHW",
                  **kwargs):
+
         super().__init__(num_classes,
                          in_channels,
                          drop_ratio=drop_ratio,
@@ -51,41 +50,16 @@ class TSMHead(TSNHead):
                          data_format=data_format,
                          **kwargs)
 
-        self.fc = Linear(self.in_channels,
-                         self.num_classes,
-                         weight_attr=ParamAttr(learning_rate=5.0,
-                                               regularizer=L2Decay(1e-4)),
-                         bias_attr=ParamAttr(learning_rate=10.0,
-                                             regularizer=L2Decay(0.0)))
-
-        self.stdv = std
+        self.stdv = 1.0 / math.sqrt(self.in_channels * 1.0)
 
     def init_weights(self):
         """Initiate the FC layer parameters"""
-        weight_init_(self.fc, 'Normal', 'fc_0.w_0', 'fc_0.b_0', std=self.stdv)
 
-    def forward(self, x, seg_num):
-        """Define how the tsm-head is going to run.
-
-        Args:
-            x (paddle.Tensor): The input data.
-            num_segs (int): Number of segments.
-        Returns:
-            score: (paddle.Tensor) The classification scores for input samples.
-        """
-        # x.shape = [N * num_segs, in_channels, 7, 7]
-
-        x = self.avgpool2d(x)  # [N * num_segs, in_channels, 1, 1]
-
-        if self.dropout is not None:
-            x = self.dropout(x)  # [N * seg_num, in_channels, 1, 1]
-
-        x = paddle.reshape(x, x.shape[:2])  # [N * seg_num, in_channels]
-        score = self.fc(x)  # [N * seg_num, num_class]
-        score = paddle.reshape(
-            score, [-1, seg_num, score.shape[1]])  # [N, seg_num, num_class]
-        score = paddle.mean(score, axis=1)  # [N, num_class]
-        score = paddle.reshape(score,
-                               shape=[-1, self.num_classes])  # [N, num_class]
-        # score = F.softmax(score)  #NOTE remove
-        return score
+        weight_init_(self.fc,
+                     'Uniform',
+                     'fc_0.w_0',
+                     'fc_0.b_0',
+                     low=-self.stdv,
+                     high=self.stdv)
+        self.fc.bias.learning_rate = 2.0
+        self.fc.bias.regularizer = paddle.regularizer.L2Decay(0.0)

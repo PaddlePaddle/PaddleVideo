@@ -79,6 +79,7 @@ PaddleVideo飞桨视频模型开发套件，旨在帮助开发者更好的进行
             <li>bmn</li>
         </ul>
         <ul>Head
+            <li>pptsm_head</li>
             <li>tsm_head</li>
             <li>tsn_head</li>
             <li>bmn_head</li>
