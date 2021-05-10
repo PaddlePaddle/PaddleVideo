@@ -51,7 +51,8 @@ git clone https://github.com/PaddlePaddle/PaddleVideo.git
 **Install requirements**
 
 ```bash
-pip3 install --upgrade -r requirements.txt
+python3.7 -m pip install --upgrade pip
+pip3.7 install --upgrade -r requirements.txt
 ```
 
 ---
