@@ -62,7 +62,8 @@ git clone https://github.com/PaddlePaddle/PaddleVideo.git
 Python依赖库在[requirements.txt](https://github.com/PaddlePaddle/PaddleVideo/blob/master/requirements.txt)中给出，可通过如下命令安装：
 
 ```
-pip3 install --upgrade -r requirements.txt
+python3.7 -m pip install --upgrade pip
+pip3.7 install --upgrade -r requirements.txt
 ```
 
 **从python安装包安装PaddleVideo：**
