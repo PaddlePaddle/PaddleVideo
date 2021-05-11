@@ -12,13 +12,42 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import utils
+import argparse
 import numpy as np
-import cv2
 import time
 
+from utils import build_inference_helper
 from paddle.inference import Config
 from paddle.inference import create_predictor
+from paddlevideo.utils import get_config
+
+
+def parse_args():
+    def str2bool(v):
+        return v.lower() in ("true", "t", "1")
+
+    # general params
+    parser = argparse.ArgumentParser("PaddleVideo Inference model script")
+    parser.add_argument('-c',
+                        '--config',
+                        type=str,
+                        default='configs/example.yaml',
+                        help='config file path')
+    parser.add_argument("-i", "--input_file", type=str, help="input file path")
+    parser.add_argument("--use_gpu", type=str2bool, default=True)
+
+    # params for predict
+    parser.add_argument("--model_file", type=str)
+    parser.add_argument("--params_file", type=str)
+    parser.add_argument("--use_fp16", type=str2bool, default=False)
+    parser.add_argument("--ir_optim", type=str2bool, default=True)
+    parser.add_argument("--use_tensorrt", type=str2bool, default=False)
+    parser.add_argument("--gpu_mem", type=int, default=8000)
+    parser.add_argument("--enable_benchmark", type=str2bool, default=False)
+    parser.add_argument("--enable_mkldnn", type=bool, default=False)
+    # parser.add_argument("--hubserving", type=str2bool, default=False)  #TODO
+
+    return parser.parse_args()
 
 
 def create_paddle_predictor(args):
@@ -49,59 +78,64 @@ def create_paddle_predictor(args):
     return predictor
 
 
-def main(args):
-    if not args.enable_benchmark:
-        assert args.batch_size == 1
-        assert args.use_fp16 is False
-    else:
+def main():
+    args = parse_args()
+    cfg = get_config(args.config, show=False)
+    model_name = cfg.model_name
+    print(f"Inference model({model_name})...")
+    InferenceHelper = build_inference_helper(cfg.INFERENCE)
+
+    if args.enable_benchmark:
         assert args.use_gpu is True
-        assert args.model is not None
+
     # HALF precission predict only work when using tensorrt
     if args.use_fp16 is True:
         assert args.use_tensorrt is True
 
     predictor = create_paddle_predictor(args)
 
+    # get input_tensor and output_tensor
     input_names = predictor.get_input_names()
-    input_tensor = predictor.get_input_handle(input_names[0])
-
     output_names = predictor.get_output_names()
-    output_tensor = predictor.get_output_handle(output_names[0])
+    input_tensor_list = []
+    output_tensor_list = []
+    for item in input_names:
+        input_tensor_list.append(predictor.get_input_handle(item))
+    for item in output_names:
+        output_tensor_list.append(predictor.get_output_handle(item))
 
     test_num = 500
     test_time = 0.0
     if not args.enable_benchmark:
-        # for PaddleHubServing
-        if args.hubserving:
-            img = args.image_file
-        # for predict only
-        else:
-            #img = cv2.imread(args.image_file)[:, :, ::-1]
-            img = utils.decode(args.video_file, args)
-        assert img is not None, "Error in loading image: {}".format(
-            args.video_file)
-        inputs = utils.preprocess(img, args)
-        inputs = np.expand_dims(
-            inputs, axis=0).repeat(
-                args.batch_size, axis=0).copy()
-        #print(inputs.shape)
-        input_tensor.copy_from_cpu(inputs)
+        # Prepare input
+        inputs = InferenceHelper.preprocess(args.input_file)
 
+        # Run inference
+        for i in range(len(input_tensor_list)):
+            input_tensor_list[i].copy_from_cpu(inputs[i])
         predictor.run()
+        output = []
+        for j in range(len(output_tensor_list)):
+            output.append(output_tensor_list[j].copy_to_cpu())
 
-        output = output_tensor.copy_to_cpu()
-        return utils.postprocess(output, args)
-    else:
+        # Post process output
+        InferenceHelper.postprocess(output)
+    else:  # benchmark only for ppTSM
         for i in range(0, test_num + 10):
-            inputs = np.random.rand(args.batch_size, 8, 3, 224,
-                                    224).astype(np.float32)
+            inputs = []
+            inputs.append(
+                np.random.rand(args.batch_size, 8, 3, 224,
+                               224).astype(np.float32))
             start_time = time.time()
-            input_tensor.copy_from_cpu(inputs)
+            for i in range(len(input_tensor_list)):
+                input_tensor_list[i].copy_from_cpu(inputs[i])
 
             predictor.run()
 
-            output = output_tensor.copy_to_cpu()
-            output = output.flatten()
+            output = []
+            for j in range(len(output_tensor_list)):
+                output.append(output_tensor_list[j].copy_to_cpu())
+
             if i >= 10:
                 test_time += time.time() - start_time
             #time.sleep(0.01)  # sleep for T4 GPU
@@ -109,14 +143,9 @@ def main(args):
         fp_message = "FP16" if args.use_fp16 else "FP32"
         trt_msg = "using tensorrt" if args.use_tensorrt else "not using tensorrt"
         print("{0}\t{1}\t{2}\tbatch size: {3}\ttime(ms): {4}".format(
-            args.model, trt_msg, fp_message, args.batch_size, 1000 * test_time
-            / test_num))
-        exit(0)
+            args.model, trt_msg, fp_message, args.batch_size,
+            1000 * test_time / test_num))
 
 
 if __name__ == "__main__":
-    args = utils.parse_args()
-    classes, scores = main(args)
-    print("Current video file: {}".format(args.video_file))
-    print("\ttop-1 class: {0}".format(classes[0]))
-    print("\ttop-1 score: {0}".format(scores[0]))
+    main()

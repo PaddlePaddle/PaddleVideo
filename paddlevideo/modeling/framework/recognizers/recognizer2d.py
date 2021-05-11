@@ -58,3 +58,9 @@ class Recognizer2D(BaseRecognizer):
         imgs = data_batch[0]
         cls_score = self.forward_net(imgs)
         return cls_score
+
+    def infer_step(self, data_batch):
+        """Define how the model is going to test, from input to output."""
+        imgs = data_batch[0]
+        cls_score = self.forward_net(imgs)
+        return cls_score
