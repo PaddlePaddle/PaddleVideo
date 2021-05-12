@@ -22,13 +22,13 @@
 
 基础镜像
 ```
-docker pull tmtalgo/paddleaction:action-detection-v2.0
+iregistry.baidu-int.com/acg-algo/paddlepaddle:action-detection-v2.0
 ```
 
 # 数据集
 ```
 数据集来自欧洲杯2016，共49个足球视频，其中训练集44个，验证集5个
-数据集地址: datasets/EuroCup2016/url.list
+数据集地址: datasets/EuroCup2016/dataset_url.list
 数据集label格式
 {
     "0": "背景",
@@ -41,8 +41,8 @@ docker pull tmtalgo/paddleaction:action-detection-v2.0
     "7": "界外球",
 }
 数据集标注文件: 
-datasets/EuroCup2016/label_train.json
-datasets/EuroCup2016/label_val.json
+datasets/EuroCup2016/label_cls8_train.json
+datasets/EuroCup2016/label_cls8_val.json
 ```
 
 # 代码结构
@@ -110,8 +110,7 @@ cd datasets/script && python get_instance_for_tsn.py
 
 ## step4 ppTSM训练
 ```
-我们提供了足球数据训练的模型
-https://bj.bcebos.com/v1/acg-algo/models/action-football/models_pp_v1.1/pptsm.tar
+我们提供了足球数据训练的模型，参考checkpoints
 如果需要在自己的数据上训练，可参考
 https://github.com/PaddlePaddle/PaddleVideo/tree/release/2.0
 config.yaml参考configs文件夹下pptsm_football_v2.0.yaml
@@ -151,8 +150,7 @@ cd datasets/script && python get_instance_for_bmn.py
 }
 ```
 ## step 7 BMN训练
-我们同样提供了足球数据训练的模型
-https://bj.bcebos.com/v1/acg-algo/models/action-football/models_pp_v1.1/bmn.tar
+我们同样提供了足球数据训练的模型，参考checkpoints
 如果要在自己的数据上训练，具体步骤参考step4 ppTSM 训练
 
 ## step 8 BMN预测，得到 start_id, end_id, score
