@@ -33,7 +33,8 @@ def test_model(cfg, weights, parallel=True):
 
     """
     # 1. Construct model.
-    cfg.MODEL.backbone.pretrained = ''  # disable pretrain model init
+    if cfg.MODEL.backbone.get('pretrained'):
+        cfg.MODEL.backbone.pretrained = ''  # disable pretrain model init
     model = build_model(cfg.MODEL)
     if parallel:
         model = paddle.DataParallel(model)

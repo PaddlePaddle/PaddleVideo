@@ -12,130 +12,73 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import argparse
-import cv2
 import numpy as np
-from PIL import Image
-import os
 import sys
 import paddle.nn.functional as F
 import paddle
+import os
 
 __dir__ = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.abspath(os.path.join(__dir__, '../')))
 
-from paddlevideo.loader.pipelines import Scale, CenterCrop, Normalization, Image2Array
+from paddlevideo.loader.pipelines import VideoDecoder, Sampler, Scale, CenterCrop, Normalization, Image2Array
+from paddlevideo.utils import build, Registry
+
+INFERENCE = Registry('inference')
 
 
-def parse_args():
-    def str2bool(v):
-        return v.lower() in ("true", "t", "1")
-
-    # general params
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-v", "--video_file", type=str, help="video file path")
-    parser.add_argument("--use_gpu", type=str2bool, default=True)
-
-    # params for decode and sample
-    parser.add_argument("--num_seg", type=int, default=8)
-    parser.add_argument("--seg_len", type=int, default=1)
-
-    # params for preprocess
-    parser.add_argument("--short_size", type=int, default=256)
-    parser.add_argument("--target_size", type=int, default=224)
-    parser.add_argument("--normalize", type=str2bool, default=True)
-
-    # params for predict
-    parser.add_argument("--model_file", type=str)
-    parser.add_argument("--params_file", type=str)
-    parser.add_argument("-b", "--batch_size", type=int, default=1)
-    parser.add_argument("--use_fp16", type=str2bool, default=False)
-    parser.add_argument("--ir_optim", type=str2bool, default=True)
-    parser.add_argument("--use_tensorrt", type=str2bool, default=False)
-    parser.add_argument("--gpu_mem", type=int, default=8000)
-    parser.add_argument("--enable_benchmark", type=str2bool, default=False)
-    parser.add_argument("--top_k", type=int, default=1)
-    parser.add_argument("--enable_mkldnn", type=bool, default=False)
-    parser.add_argument("--hubserving", type=str2bool, default=False)
-
-    # params for infer
-
-    parser.add_argument("--model", type=str)
-    """
-    parser.add_argument("--pretrained_model", type=str)
-    parser.add_argument("--class_num", type=int, default=1000)
-    parser.add_argument(
-        "--load_static_weights",
-        type=str2bool,
-        default=False,
-        help='Whether to load the pretrained weights saved in static mode')
-
-    # parameters for pre-label the images
-    parser.add_argument(
-        "--pre_label_image",
-        type=str2bool,
-        default=False,
-        help="Whether to pre-label the images using the loaded weights")
-    parser.add_argument("--pre_label_out_idr", type=str, default=None)
-    """
-
-    return parser.parse_args()
+def build_inference_helper(cfg):
+    return build(cfg, INFERENCE)
 
 
-def decode(filepath, args):
-    num_seg = args.num_seg
-    seg_len = args.seg_len
+@INFERENCE.register()
+class ppTSM_Inference_helper():
+    def __init__(self,
+                 num_seg=8,
+                 seg_len=1,
+                 short_size=256,
+                 target_size=224,
+                 top_k=1):
+        self.num_seg = num_seg
+        self.seg_len = seg_len
+        self.short_size = short_size
+        self.target_size = target_size
+        self.top_k = top_k
 
-    cap = cv2.VideoCapture(filepath)
-    videolen = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-    sampledFrames = []
-    for i in range(videolen):
-        ret, frame = cap.read()
-        # maybe first frame is empty
-        if ret == False:
-            continue
-        img = frame[:, :, ::-1]
-        sampledFrames.append(img)
-    average_dur = int(len(sampledFrames) / num_seg)
-    imgs = []
-    for i in range(num_seg):
-        idx = 0
-        if average_dur >= seg_len:
-            idx = (average_dur - 1) // 2
-            idx += i * average_dur
-        elif average_dur >= 1:
-            idx += i * average_dur
-        else:
-            idx = i
-
-        for jj in range(idx, idx + seg_len):
-            imgbuf = sampledFrames[int(jj % len(sampledFrames))]
-            img = Image.fromarray(imgbuf, mode='RGB')
-            imgs.append(img)
-
-    return imgs
-
-
-def preprocess(img, args):
-    img = {"imgs": img}
-    resize_op = Scale(short_size=args.short_size)
-    img = resize_op(img)
-    ccrop_op = CenterCrop(target_size=args.target_size)
-    img = ccrop_op(img)
-    to_array = Image2Array()
-    img = to_array(img)
-    if args.normalize:
+    def preprocess(self, input_file):
+        """
+        input_file: str, file path
+        input_flie_list: str, file list path.
+        """
+        self.input_file = input_file
+        assert os.path.isfile(input_file) is not None, "{} not exists".format(
+            input_file)
+        results = {'filename': input_file}
         img_mean = [0.485, 0.456, 0.406]
         img_std = [0.229, 0.224, 0.225]
-        normalize_op = Normalization(mean=img_mean, std=img_std)
-        img = normalize_op(img)
-    return img['imgs']
+        ops = [
+            VideoDecoder(),
+            Sampler(self.num_seg, self.seg_len, valid_mode=True),
+            Scale(self.short_size),
+            CenterCrop(self.target_size),
+            Image2Array(),
+            Normalization(img_mean, img_std)
+        ]
+        for op in ops:
+            results = op(results)
 
+        res = np.expand_dims(results['imgs'], axis=0).copy()
+        return [res]
 
-def postprocess(output, args):
-    output = output.flatten()
-    output = F.softmax(paddle.to_tensor(output)).numpy()
-    classes = np.argpartition(output, -args.top_k)[-args.top_k:]
-    classes = classes[np.argsort(-output[classes])]
-    scores = output[classes]
-    return classes, scores
+    def postprocess(self, output):
+        """
+        output: list
+        """
+        output = output[0].flatten()
+        output = F.softmax(paddle.to_tensor(output)).numpy()
+        classes = np.argpartition(output, -self.top_k)[-self.top_k:]
+        classes = classes[np.argsort(-output[classes])]
+        scores = output[classes]
+        print("Current video file: {}".format(self.input_file))
+        print("\ttop-1 class: {0}".format(classes[0]))
+        print("\ttop-1 score: {0}".format(scores[0]))
