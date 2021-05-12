@@ -16,7 +16,7 @@ MEL_MIN_HZ = 125
 MEL_MAX_HZ = 7500
 LOG_OFFSET = 0.01  # Offset used for stabilized log of input mel-spectrogram.
 EXAMPLE_WINDOW_SECONDS = 1.00  # Each example contains 96 10ms frames
-EXAMPLE_HOP_SECONDS = 1.00     # with zero overlap.
+EXAMPLE_HOP_SECONDS = 1.00  # with zero overlap.
 
 # Parameters used for embedding postprocessing.
 PCA_EIGEN_VECTORS_NAME = 'pca_eigen_vectors'
@@ -35,4 +35,3 @@ INPUT_TENSOR_NAME = INPUT_OP_NAME + ':0'
 OUTPUT_OP_NAME = 'vggish/embedding'
 OUTPUT_TENSOR_NAME = OUTPUT_OP_NAME + ':0'
 AUDIO_EMBEDDING_FEATURE_NAME = 'audio_embedding'
-

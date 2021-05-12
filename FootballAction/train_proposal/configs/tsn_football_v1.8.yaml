@@ -51,6 +51,6 @@ INFER:
     num_reader_threads: 12
     buf_size: 1024
     batch_size: 1
-    filelist: "/home/work/datasets/EuroCup2016/input_for_tsn/val.list" 
+    filelist: "/home/work/datasets/EuroCup2016/input_for_tsn/val.list"
     video_path: ""
     kinetics_labels: "/home/work/datasets/EuroCup2016/label.json"
