@@ -20,7 +20,7 @@
  - proposal提取，BMN
  - LSTM，动作分类 + 回归
 
-基础镜像
+# 基础镜像
 ```
 iregistry.baidu-int.com/acg-algo/paddlepaddle:action-detection-v2.0
 ```
@@ -40,10 +40,14 @@ iregistry.baidu-int.com/acg-algo/paddlepaddle:action-detection-v2.0
     "6": "换人",
     "7": "界外球",
 }
-数据集标注文件: 
+数据集标注文件:
 datasets/EuroCup2016/label_cls8_train.json
 datasets/EuroCup2016/label_cls8_val.json
 ```
+
+# 简单说明
+ - image 采样频率fps=5，如果有些动作时间较短，可以适当提高采样频率
+ - BMN windows=200，即40s，所以测试自己的数据时，视频时长需大于40s
 
 # 代码结构
 ```
