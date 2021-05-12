@@ -22,7 +22,7 @@
 
 基础镜像
 ```
-iregistry.baidu-int.com/acg-algo/paddlepaddle:action-detection-v2.0
+docker pull tmtalgo/paddleaction:action-detection-v2.0
 ```
 
 # 数据集
