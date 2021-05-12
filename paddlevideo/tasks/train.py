@@ -132,14 +132,13 @@ def train_model(cfg,
         model.train()
 
         # Freeze all BN layers except the first BN layer during finetune in ucf101
-        if weights:
+        if weights and :
             count = 0
             for m in model.sublayers():
                 if isinstance(m, paddle.nn.BatchNorm2D):
                     count += 1
                     if count >= 2:
                         m.eval()
-                        # shutdown update in frozen mode
                         m.weight.stop_gradient = True
                         m.bias.stop_gradient = True
 
