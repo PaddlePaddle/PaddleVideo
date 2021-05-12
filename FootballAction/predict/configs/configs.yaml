@@ -1,7 +1,7 @@
 COMMON:
     fps: 5
     use_gpu: True
-    label_dic: '/home/work/inference/configs/index_label_football_7.json' 
+    label_dic: '/home/work/inference/configs/index_label_football_8.json' 
     # debug
     PCM_ONLY: False
     DEBUG: False

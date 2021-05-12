@@ -16,8 +16,8 @@ dataset = "/home/work/datasets"
 
 label_index_file = './configs/index_label_football_7.json'
 eval_datasets = ['EuroCup2016']
-label_files = {'train': 'label_train.json',
-               'validation': 'label_val.json'}
+label_files = {'train': 'label_cls8_train.json',
+               'validation': 'label_cls8_val.json'}
 
 global fps, mode
 label_index = json.load(open(label_index_file, 'rb'))
