@@ -75,10 +75,8 @@ class ConvBNLayer(nn.Layer):
             self._batch_norm = BatchNorm2D(
                 out_channels,
                 weight_attr=ParamAttr(name=bn_name + "_scale",
-                                      learning_rate=1.0,
                                       regularizer=L2Decay(0.0)),
                 bias_attr=ParamAttr(name=bn_name + "_offset",
-                                    learning_rate=1.0,
                                     regularizer=L2Decay(0.0)),
                 data_format=data_format)
 

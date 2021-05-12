@@ -54,7 +54,7 @@ class TSMHead(TSNHead):
         self.fc = Linear(self.in_channels,
                          self.num_classes,
                          weight_attr=ParamAttr(learning_rate=5.0,
-                                               regularizer=L2Decay(1e-4)),
+                                               regularizer=L2Decay(1e-4 if num_classes == 400 else 0.0)),
                          bias_attr=ParamAttr(learning_rate=10.0,
                                              regularizer=L2Decay(0.0)))
 
@@ -82,10 +82,8 @@ class TSMHead(TSNHead):
 
         x = paddle.reshape(x, x.shape[:2])  # [N * seg_num, in_channels]
         score = self.fc(x)  # [N * seg_num, num_class]
-        score = paddle.reshape(
-            score, [-1, seg_num, score.shape[1]])  # [N, seg_num, num_class]
+        score = paddle.reshape(score, [-1, seg_num, score.shape[1]])  # [N, seg_num, num_class]
         score = paddle.mean(score, axis=1)  # [N, num_class]
-        score = paddle.reshape(score,
-                               shape=[-1, self.num_classes])  # [N, num_class]
+        score = paddle.reshape(score, shape=[-1, self.num_classes])  # [N, num_class]
         # score = F.softmax(score)  #NOTE remove
         return score

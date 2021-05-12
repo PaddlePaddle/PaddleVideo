@@ -106,12 +106,21 @@ def train_model(cfg,
     if weights:
         assert resume_epoch == 0, f"Conflict occurs when finetuning, please switch resume function off by setting resume_epoch to 0 or not indicating it."
         model_dict = load(weights)
+        # No need to load FC layer parameters during finetune in ucf101 dataset
+        model_dict = {k: v for k, v in model_dict.items() if 'fc' not in k}
         model.set_state_dict(model_dict)
 
     # 4. Train Model
     ###AMP###
     if amp:
-        scaler = paddle.amp.GradScaler(init_loss_scaling=1024)
+        scaler = paddle.amp.GradScaler(
+            init_loss_scaling=2.0 ** 16,
+            incr_ratio=2.0,
+            decr_ratio=0.5,
+            incr_every_n_steps=2000,
+            decr_every_n_nan_or_inf=1,
+            use_dynamic_loss_scaling=True
+        )
 
     best = 0.
     for epoch in range(0, cfg.epochs):
@@ -121,6 +130,19 @@ def train_model(cfg,
             )
             continue
         model.train()
+
+        # Freeze all BN layers except the first BN layer during finetune in ucf101
+        if weights:
+            count = 0
+            for m in model.sublayers():
+                if isinstance(m, paddle.nn.BatchNorm2D):
+                    count += 1
+                    if count >= 2: # 开启partial BN时会允许第1层BN参数训练，否则全部都冻结
+                        m.eval()
+                        # shutdown update in frozen mode
+                        m.weight.stop_gradient = True
+                        m.bias.stop_gradient = True
+
         record_list = build_record(cfg.MODEL)
         tic = time.time()
         for i, data in enumerate(train_loader):
