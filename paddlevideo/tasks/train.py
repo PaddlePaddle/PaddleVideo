@@ -137,7 +137,7 @@ def train_model(cfg,
             for m in model.sublayers():
                 if isinstance(m, paddle.nn.BatchNorm2D):
                     count += 1
-                    if count >= 2: # 开启partial BN时会允许第1层BN参数训练，否则全部都冻结
+                    if count >= 2:
                         m.eval()
                         # shutdown update in frozen mode
                         m.weight.stop_gradient = True
