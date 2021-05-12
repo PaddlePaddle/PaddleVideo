@@ -9,7 +9,7 @@ feature_names = ['rgb', 'audio']
 feature_dims = [2048, 1024]
 embedding_size = 512
 lstm_size_img = 2048
-lstm_size_audio = 1024 
+lstm_size_audio = 1024
 num_classes = 8
 save_dir = "."
 
