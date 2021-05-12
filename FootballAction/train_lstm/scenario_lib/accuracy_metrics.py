@@ -27,6 +27,7 @@ logger = logging.getLogger(__name__)
 
 class MetricsCalculator():
     """MetricsCalculator"""
+
     def __init__(self, name, mode, metrics_args):
         """init"""
         self.name = name
@@ -65,11 +66,10 @@ class MetricsCalculator():
             loss = np.mean(np.array(loss))
         else:
             loss = 0.
-
+         
         #acc1, acc5 = self.calculate_metrics(loss, pred, label, self.num_classes)
         accuracy1 = compute_topk_accuracy(pred, label, top_k=1) * 100.
-        accuracy5 = compute_topk_accuracy(
-            pred, label, top_k=min(5, self.num_classes)) * 100.
+        accuracy5 = compute_topk_accuracy(pred, label, top_k=min(5, self.num_classes)) * 100.
 
     def accumulate(self, loss, softmax, labels, regiou, iou):
         """accumulate"""
@@ -85,8 +85,7 @@ class MetricsCalculator():
         aggr_iou = compute_iou_sub(regiou, iou)
         self.aggr_iou += aggr_iou * cur_batch_size
         accuracy1 = compute_topk_accuracy(softmax, labels, top_k=1) * 100.
-        accuracy5 = compute_topk_accuracy(
-            softmax, labels, top_k=min(5, self.num_classes)) * 100.
+        accuracy5 = compute_topk_accuracy(softmax, labels, top_k=min(5, self.num_classes)) * 100.
         self.aggr_acc1 += accuracy1 * cur_batch_size
         self.aggr_acc5 += accuracy5 * cur_batch_size
         return
@@ -139,7 +138,6 @@ def compute_topk_accuracy(softmax, labels, top_k):
 
     return computed_metrics
 
-
 def compute_iou_sub(regiou, iou):
     batch_size = regiou.shape[0]
     iou_sub = 0
@@ -149,3 +147,5 @@ def compute_iou_sub(regiou, iou):
 
     iou_sub = float(iou_sub) / float(batch_size)
     return iou_sub
+        
+

@@ -12,8 +12,8 @@ from concurrent import futures
 
 dataset = "../EuroCup2016"
 frames_dir = dataset + '/frames'
-label_files = {'train': 'label_cls8_train.json', 'val': 'label_cls8_val.json'}
-
+label_files = {'train': 'label_cls8_train.json', 
+               'val': 'label_cls8_val.json'}
 
 def process(item, fps, save_folder):
     actions_pos = []
@@ -24,11 +24,9 @@ def process(item, fps, save_folder):
     actions = item['actions']
     # pos
     for action in actions:
-        actions_pos.append({
-            'label': action['label_ids'],
-            'start': action['start_id'] * fps,
-            'end': action['end_id'] * fps
-        })
+        actions_pos.append({'label': action['label_ids'],
+                            'start': action['start_id'] * fps, 
+                            'end': action['end_id'] * fps})
     # neg
     for idx, pos in enumerate(actions_pos):
         if idx == len(actions_pos) - 1:
@@ -40,11 +38,9 @@ def process(item, fps, save_folder):
         for k in range(1, 3):
             start_frame = random.randint(duration_start[0], duration_start[1])
             end_frame = start_frame + len_pos
-            actions_neg.append({
-                'label': [0],
-                'start': start_frame,
-                'end': end_frame
-            })
+            actions_neg.append({'label': [0],
+                                'start': start_frame,
+                                'end': end_frame})
     # save pkl
     for item in np.concatenate((actions_pos, actions_neg), axis=0):
         start = item['start']
@@ -60,21 +56,18 @@ def process(item, fps, save_folder):
                 data = f.read()
             frames.append(data)
         # print(label_str)
-        outname = '%s/%s_%08d_%08d_%s.pkl' % (save_folder, basename, start, end,
-                                              label_str)
+        outname = '%s/%s_%08d_%08d_%s.pkl' % (save_folder, basename, start, end, label_str)
         with open(outname, 'wb') as f:
             pickle.dump((basename, label, frames), f, -1)
-
-
+        
 def gen_instance_pkl(label_data, save_folder):
     fps = label_data['fps']
     gts = label_data['gts']
-    with futures.ProcessPoolExecutor(max_workers=10) as executer:
+    with futures.ProcessPoolExecutor(max_workers = 10) as executer:
         fs = [executer.submit(process, gt, fps, save_folder) for gt in gts]
 
     #for gt in gts:
     #    process(gt, fps, save_folder)
-
 
 if __name__ == "__main__":
     for item, value in label_files.items():
@@ -89,7 +82,6 @@ if __name__ == "__main__":
 
     # gen train val list
     data_dir = '/home/work/datasets/EuroCup2016/input_for_tsn/'
-    os.system('find ' + data_dir + 'train -name "*.pkl" > ' + data_dir +
-              'train.list')
-    os.system('find ' + data_dir + 'val -name "*.pkl" > ' + data_dir +
-              'val.list')
+    os.system('find ' + data_dir + 'train -name "*.pkl" > ' + data_dir + 'train.list')
+    os.system('find ' + data_dir + 'val -name "*.pkl" > ' + data_dir + 'val.list')
+

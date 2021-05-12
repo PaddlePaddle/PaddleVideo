@@ -25,7 +25,6 @@ logger = logging.getLogger(__name__)
 best_test_acc1 = 0
 min_test_loss = float("inf")
 
-
 def log_lr_and_step():
     """log_lr_and_step"""
     try:
@@ -68,7 +67,7 @@ def test_with_pyreader(exe,
     for retry in range(3):
         test_metrics.reset()
         test_iter = 0
-
+        
         try:
             for data in test_pyreader():
                 test_outs = exe.run(compiled_test_prog,
@@ -87,15 +86,11 @@ def test_with_pyreader(exe,
             test_status = True
             return test_status, test_loss, test_acc1, test_iou
         except Exception as e:
-            logger.warn(
-                "[TEST] Epoch {} fail to execute test or calculate metrics: {}".
-                format(epoch, e))
-    logger.warn(
-        "[TEST] Finish...  Epoch {} fail to execute test or calculate metrics.".
-        format(epoch))
+            logger.warn("[TEST] Epoch {} fail to execute test or calculate metrics: {}".format(epoch, e))
+    logger.warn("[TEST] Finish...  Epoch {} fail to execute test or calculate metrics.".format(epoch))
     return test_status, test_loss, test_acc1, test_iou
 
-
+ 
 def train_with_pyreader(exe, train_prog, compiled_train_prog, train_pyreader, \
                         train_fetch_list, train_metrics, epochs=10, \
                         log_interval=0, valid_interval=0, save_dir='./', \
@@ -133,9 +128,7 @@ def train_with_pyreader(exe, train_prog, compiled_train_prog, train_pyreader, \
                     train_metrics.finalize_and_log_out( \
                         info='[TRAIN] Epoch {}, iter {} average: '.format(epoch, train_iter))
             except Exception as e:
-                logger.info(
-                    "[TRAIN] Epoch {}, iter {} data training failed: {}".format(
-                        epoch, train_iter, str(e)))
+                logger.info( "[TRAIN] Epoch {}, iter {} data training failed: {}".format(epoch, train_iter, str(e)))
             train_iter += 1
 
         if len(epoch_periods) < 1:
@@ -143,31 +136,29 @@ def train_with_pyreader(exe, train_prog, compiled_train_prog, train_pyreader, \
                 'No iteration was executed, please check the data reader')
             sys.exit(1)
 
-        logger.info(
-            '[TRAIN] Epoch {} training finished, average time: {}'.format(
-                epoch, np.mean(epoch_periods)))
+        logger.info('[TRAIN] Epoch {} training finished, average time: {}'.
+                    format(epoch, np.mean(epoch_periods)))
         train_metrics.finalize_and_log_out( \
             info='[TRAIN] Finished ... Epoch {} all iters average: '.format(epoch))
 
         #save_postfix = "_epoch{}".format(epoch)
         #save_model(exe, train_prog, save_dir, save_model_name, save_postfix)
 
-        # save models of min loss in best acc epochs
+        # save models of min loss in best acc epochs 
         if compiled_test_prog and valid_interval > 0 and (
                 epoch + 1) % valid_interval == 0:
-            test_status, test_loss, test_acc1, test_iou = test_with_pyreader(
-                exe, compiled_test_prog, test_pyreader, test_fetch_list,
-                test_metrics, epoch, log_interval, save_model_name)
+            test_status, test_loss, test_acc1, test_iou = test_with_pyreader(exe, compiled_test_prog, test_pyreader,
+                               test_fetch_list, test_metrics, epoch, log_interval,
+                               save_model_name)
             global best_test_acc1
             global min_test_loss
-            if test_status and (test_acc1 > best_test_acc1 or
-                                (test_acc1 == best_test_acc1
-                                 and test_loss < min_test_loss)):
+            if test_status and (test_acc1 > best_test_acc1 or (
+                test_acc1 == best_test_acc1 and test_loss < min_test_loss)):
                 best_test_acc1 = test_acc1
                 min_test_loss = test_loss
                 save_postfix = "_epoch{}_acc{}".format(epoch, best_test_acc1)
-                save_model(exe, train_prog, save_dir, save_model_name,
-                           save_postfix)
+                save_model(exe, train_prog, save_dir, save_model_name, save_postfix)
+
 
 
 def save_model(exe, program, save_dir, model_name, postfix=None):
@@ -185,5 +176,5 @@ def save_model(exe, program, save_dir, model_name, postfix=None):
     saved_model_name = model_name + postfix
 
     fluid.save(program, os.path.join(save_dir, saved_model_name))
-
+    
     return

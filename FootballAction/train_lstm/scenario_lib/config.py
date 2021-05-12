@@ -17,6 +17,7 @@ try:
 except BaseException:
     from ConfigParser import ConfigParser
 
+
 import logging
 
 CONFIG_SECS = [
@@ -63,8 +64,7 @@ def merge_configs(cfg, sec, args_dict):
 def print_configs(cfg, mode):
     """print_configs"""
     logger = logging.getLogger(__name__)
-    logger.info(
-        "---------------- {:>5} Arguments ----------------".format(mode))
+    logger.info("---------------- {:>5} Arguments ----------------".format(mode))
     for sec, sec_items in cfg.items():
         logger.info("{}:".format(sec))
         for k, v in sec_items.items():
@@ -74,6 +74,7 @@ def print_configs(cfg, mode):
 
 class AttrDict(dict):
     """AttrDict"""
+
     def __getattr__(self, key):
         return self[key]
 
