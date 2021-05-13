@@ -12,12 +12,6 @@ start_time=$(date +%s)
 # run tsm amp training, nhwc
 #python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3" --log_dir=log_tsm main.py  --amp --validate -c configs/recognition/tsm/tsm_nhwc.yaml
 
-# run tsm finetune in ucf101 dataset
-#python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3" --log_dir=log_tsm main.py  --validate -c configs/recognition/tsm/tsm_ucf101_frames.yaml --weights data/TSM_k400_best.pdparams
-
-# run tsm amp finetune in ucf101 dataset
-#python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3" --log_dir=log_tsm main.py  --amp --validate -c configs/recognition/tsm/tsm_ucf101_frames.yaml --weights data/TSM_k400_best.pdparams
-
 # run tsn training
 #python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3" --log_dir=log_tsn main.py  --validate -c configs/recognition/tsn/tsn.yaml
 
