@@ -115,11 +115,8 @@ def train_model(cfg,
     if amp:
         scaler = paddle.amp.GradScaler(
             init_loss_scaling=2.0 ** 16,
-            incr_ratio=2.0,
-            decr_ratio=0.5,
             incr_every_n_steps=2000,
-            decr_every_n_nan_or_inf=1,
-            use_dynamic_loss_scaling=True
+            decr_every_n_nan_or_inf=1
         )
 
     best = 0.
