@@ -11,8 +11,8 @@ MODEL: #MODEL field
         num_classes: 101 #Optional, the number of classes to be classified.
         in_channels: 2048 #input channel of the extracted feature.
         drop_ratio: 0.8 #the ratio of dropout
-        # ls_eps: 0.1 # label smoothing epsilon
         std: 0.001 #std value in params initialization
+
 
 DATASET: #DATASET field
     batch_size: 16 #Mandatory, bacth size
@@ -88,9 +88,6 @@ PIPELINE: #PIPELINE field
                 mean: [0.485, 0.456, 0.406]
                 std: [0.229, 0.224, 0.225]
 
-#MIX:
-#    name: "Mixup"
-#    alpha: 0.2
 
 OPTIMIZER: #OPTIMIZER field
     name: 'Momentum' #Mandatory, the type of optimizer, associate to the 'paddlevideo/solver/'
@@ -103,8 +100,10 @@ OPTIMIZER: #OPTIMIZER field
         name: 'ClipGradByGlobalNorm'
         value: 20.0
 
+
 METRIC:
     name: 'CenterCropMetric'
+
 
 model_name: "TSM"
 log_interval: 20 #Optional, the interal of logger, default:10
