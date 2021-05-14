@@ -80,6 +80,45 @@ python main.py --test -c configs/localization/bmn.yaml -w output/BMN/BMN_epoch_0
 | 33.26 | 49.48 | 56.86 | 75.19 | 67.23% |
 
 
+## 模型推理
+
+### 导出inference模型
+
+```bash
+python3.7 tools/export_model.py -c configs/localization/bmn.yaml \
+                                -p data/BMN.pdparams \
+                                -o inference/BMN
+```
+
+上述命令将生成预测所需的模型结构文件`BMN.pdmodel`和模型权重文件`BMN.pdiparams`。
+
+- 各参数含义可参考[模型推理方法](https://github.com/PaddlePaddle/PaddleVideo/blob/release/2.0/docs/zh-CN/start.md#2-%E6%A8%A1%E5%9E%8B%E6%8E%A8%E7%90%86)
+
+### 使用预测引擎推理
+
+```bash
+python3.7 tools/predict.py --input_file data/example_feat.list \
+                           --config configs/localization/bmn.yaml \
+                           --model_file inference/BMN/BMN.pdmodel \
+                           --params_file inference/BMN/BMN.pdiparams \
+                           --use_gpu=True \
+                           --use_tensorrt=False
+```
+
+- `input_file`指定待推断的文件信息，包括特征文件路径`feat_path`和视频时长(单位:s)`duration_second`。
+
+输出示例如下:
+
+```
+BMN Inference results of data/example_feat.npy :
+{'score': 0.7968077063560486, 'segment': [0.0, 122.9877]}
+{'score': 0.49097609519958496, 'segment': [12.423000000000002, 124.23]}
+{'score': 0.21395835280418396, 'segment': [39.7536, 122.9877]}
+{'score': 0.2106524258852005, 'segment': [0.0, 109.3224]}
+{'score': 0.06876271963119507, 'segment': [23.6037, 114.2916]}
+```
+
+
 ## 参考论文
 
 - [BMN: Boundary-Matching Network for Temporal Action Proposal Generation](https://arxiv.org/abs/1907.09702), Tianwei Lin, Xiao Liu, Xin Li, Errui Ding, Shilei Wen.
