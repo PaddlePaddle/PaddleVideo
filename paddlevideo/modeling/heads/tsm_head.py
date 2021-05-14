@@ -53,10 +53,8 @@ class TSMHead(TSNHead):
 
         self.fc = Linear(self.in_channels,
                          self.num_classes,
-                         weight_attr=ParamAttr(learning_rate=5.0,
-                                               regularizer=L2Decay(1e-4 if num_classes == 400 else 0.0)),
-                         bias_attr=ParamAttr(learning_rate=10.0,
-                                             regularizer=L2Decay(0.0)))
+                         weight_attr=ParamAttr(learning_rate=5.0, regularizer=L2Decay(1e-4)),
+                         bias_attr=ParamAttr(learning_rate=10.0, regularizer=L2Decay(0.0)))
 
         self.stdv = std
 
