@@ -17,12 +17,15 @@ import sys
 import paddle.nn.functional as F
 import paddle
 import os
+import json
+import pandas
 
 __dir__ = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.abspath(os.path.join(__dir__, '../')))
 
 from paddlevideo.loader.pipelines import VideoDecoder, Sampler, Scale, CenterCrop, Normalization, Image2Array
 from paddlevideo.utils import build, Registry
+from paddlevideo.metrics.bmn_metric import boundary_choose, soft_nms
 
 INFERENCE = Registry('inference')
 
@@ -48,7 +51,7 @@ class ppTSM_Inference_helper():
     def preprocess(self, input_file):
         """
         input_file: str, file path
-        input_flie_list: str, file list path.
+        return: list
         """
         self.input_file = input_file
         assert os.path.isfile(input_file) is not None, "{} not exists".format(
@@ -82,3 +85,88 @@ class ppTSM_Inference_helper():
         print("Current video file: {}".format(self.input_file))
         print("\ttop-1 class: {0}".format(classes[0]))
         print("\ttop-1 score: {0}".format(scores[0]))
+
+
+@INFERENCE.register()
+class BMN_Inference_helper():
+    def __init__(self, feat_dim, dscale, tscale, result_path):
+        self.feat_dim = feat_dim
+        self.dscale = dscale
+        self.tscale = tscale
+        self.result_path = result_path
+        if not os.path.isdir(self.result_path):
+            os.makedirs(self.result_path)
+
+    def preprocess(self, input_file):
+        """
+        input_file: str, file path
+        return: list
+        """
+        assert os.path.isfile(input_file) is not None, "{} not exists".format(
+            input_file)
+        file_info = json.load(open(input_file))
+        self.feat_path = file_info['feat_path']
+        self.video_duration = file_info['duration_second']
+        feat = np.load(self.feat_path).astype('float32').T
+        res = np.expand_dims(feat, axis=0).copy()
+
+        return [res]
+
+    def postprocess(self, outputs):
+        """
+        output: list
+        """
+        pred_bm, pred_start, pred_end = outputs
+        self._gen_props(pred_bm, pred_start[0], pred_end[0])
+
+    def _gen_props(self, pred_bm, pred_start, pred_end):
+        snippet_xmins = [1.0 / self.tscale * i for i in range(self.tscale)]
+        snippet_xmaxs = [
+            1.0 / self.tscale * i for i in range(1, self.tscale + 1)
+        ]
+
+        pred_bm = pred_bm[0, 0, :, :] * pred_bm[0, 1, :, :]
+        start_mask = boundary_choose(pred_start)
+        start_mask[0] = 1.
+        end_mask = boundary_choose(pred_end)
+        end_mask[-1] = 1.
+        score_vector_list = []
+        for idx in range(self.dscale):
+            for jdx in range(self.tscale):
+                start_index = jdx
+                end_index = start_index + idx
+                if end_index < self.tscale and start_mask[
+                        start_index] == 1 and end_mask[end_index] == 1:
+                    xmin = snippet_xmins[start_index]
+                    xmax = snippet_xmaxs[end_index]
+                    xmin_score = pred_start[start_index]
+                    xmax_score = pred_end[end_index]
+                    bm_score = pred_bm[idx, jdx]
+                    conf_score = xmin_score * xmax_score * bm_score
+                    score_vector_list.append([xmin, xmax, conf_score])
+
+        cols = ["xmin", "xmax", "score"]
+        score_vector_list = np.stack(score_vector_list)
+        df = pandas.DataFrame(score_vector_list, columns=cols)
+
+        result_dict = {}
+        proposal_list = []
+        df = soft_nms(df, alpha=0.4, t1=0.55, t2=0.9)
+        for idx in range(min(100, len(df))):
+            tmp_prop={"score":df.score.values[idx], \
+                      "segment":[max(0,df.xmin.values[idx])*self.video_duration, \
+                                 min(1,df.xmax.values[idx])*self.video_duration]}
+            proposal_list.append(tmp_prop)
+
+        result_dict[self.feat_path] = proposal_list
+
+        # print top-5 predictions
+        print("BMN Inference results of {} :".format(self.feat_path))
+        for pred in proposal_list[:5]:
+            print(pred)
+
+        # save result
+        outfile = open(
+            os.path.join(self.result_path, "bmn_results_inference.json"), "w")
+
+        json.dump(result_dict, outfile)

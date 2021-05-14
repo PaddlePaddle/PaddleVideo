@@ -34,11 +34,12 @@ def parse_args():
                         default='configs/example.yaml',
                         help='config file path')
     parser.add_argument("-i", "--input_file", type=str, help="input file path")
-    parser.add_argument("--use_gpu", type=str2bool, default=True)
-
-    # params for predict
     parser.add_argument("--model_file", type=str)
     parser.add_argument("--params_file", type=str)
+
+    # params for predict
+    parser.add_argument("-b", "--batch_size", type=int, default=1)
+    parser.add_argument("--use_gpu", type=str2bool, default=True)
     parser.add_argument("--use_fp16", type=str2bool, default=False)
     parser.add_argument("--ir_optim", type=str2bool, default=True)
     parser.add_argument("--use_tensorrt", type=str2bool, default=False)
@@ -143,7 +144,7 @@ def main():
         fp_message = "FP16" if args.use_fp16 else "FP32"
         trt_msg = "using tensorrt" if args.use_tensorrt else "not using tensorrt"
         print("{0}\t{1}\t{2}\tbatch size: {3}\ttime(ms): {4}".format(
-            args.model, trt_msg, fp_message, args.batch_size,
+            model_name, trt_msg, fp_message, args.batch_size,
             1000 * test_time / test_num))
 
 
