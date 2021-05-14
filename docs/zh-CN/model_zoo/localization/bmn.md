@@ -118,6 +118,7 @@ BMN Inference results of data/example_feat.npy :
 {'score': 0.06876271963119507, 'segment': [23.6037, 114.2916]}
 ```
 
+- 默认只打印前5个得分最高的proposal，所有的预测结果可在输出文件中查看，默认输出文件路径为`data/bmn/BMN_INFERENCE_results`。输出路径可在配置文件中的`INFERENCE.result_path`自行修改。
 
 ## 参考论文
 
