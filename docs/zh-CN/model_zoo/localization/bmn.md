@@ -105,7 +105,7 @@ python3.7 tools/predict.py --input_file data/example_feat.list \
                            --use_tensorrt=False
 ```
 
-- `input_file`指定待推断的文件信息，包括特征文件路径`feat_path`和视频时长(单位:s)`duration_second`。
+- `input_file`为文本文件，指定待推断的文件信息，包括特征文件路径`feat_path`和视频时长(单位:s)`duration_second`。
 
 输出示例如下:
 
