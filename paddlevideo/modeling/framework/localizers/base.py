@@ -38,10 +38,11 @@ class BaseLocalizer(nn.Layer):
         else:
             pass
 
-    def forward(self, data_batch, mode):
+    def forward(self, data_batch, mode='infer'):
         """
         1. Define how the model is going to run, from input to output.
         2. Console of train, valid, test or infer step
+        3. Set mode='infer' is used for saving inference model, refer to tools/export_model.py
         """
         if mode == 'train':
             return self.train_step(data_batch)
@@ -49,6 +50,8 @@ class BaseLocalizer(nn.Layer):
             return self.val_step(data_batch)
         elif mode == 'test':
             return self.test_step(data_batch)
+        elif mode == 'infer':
+            return self.infer_step(data_batch)
         else:
             raise NotImplementedError
 
