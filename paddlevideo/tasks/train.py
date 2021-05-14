@@ -106,8 +106,6 @@ def train_model(cfg,
     if weights:
         assert resume_epoch == 0, f"Conflict occurs when finetuning, please switch resume function off by setting resume_epoch to 0 or not indicating it."
         model_dict = load(weights)
-        # No need to load FC layer parameters during finetune in ucf101 dataset
-        model_dict = {k: v for k, v in model_dict.items() if 'fc' not in k}
         model.set_state_dict(model_dict)
 
     # 4. Train Model
