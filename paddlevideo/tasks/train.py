@@ -120,22 +120,9 @@ def train_model(cfg,
     best = 0.
     for epoch in range(0, cfg.epochs):
         if epoch < resume_epoch:
-            logger.info(
-                f"| epoch: [{epoch+1}] <= resume_epoch: [{ resume_epoch}], continue... "
-            )
+            logger.info(f"| epoch: [{epoch+1}] <= resume_epoch: [{ resume_epoch}], continue... ")
             continue
         model.train()
-
-        # Freeze all BN layers except the first BN layer during finetune in ucf101
-        if weights:
-            count = 0
-            for m in model.sublayers():
-                if isinstance(m, paddle.nn.BatchNorm2D):
-                    count += 1
-                    if count >= 2:
-                        m.eval()
-                        m.weight.stop_gradient = True
-                        m.bias.stop_gradient = True
 
         record_list = build_record(cfg.MODEL)
         tic = time.time()
