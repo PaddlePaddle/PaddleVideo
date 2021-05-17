@@ -38,20 +38,20 @@ UCF101数据下载及准备请参考[ucf101数据准备](../../dataset/ucf101.md
 
 1. 加载在ImageNet1000上训练好的ResNet50权重作为Backbone初始化参数[ResNet50_pretrain.pdparams](https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_pretrain.pdparams)，
    也可以通过命令行下载
-
-```bash
-wget https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_pretrain.pdparams
-```
+   
+   ```bash
+   wget https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_pretrain.pdparams
+   ```
 
 2. 将下载好的权重路径填写到下方`pretrained:`之后
 
-```yaml
-MODEL:
-    framework: "Recognizer2D"
-    backbone:
-        name: "ResNetTSM"
-        pretrained: 将路径填写到此处
-```
+   ```bash
+   MODEL:
+       framework: "Recognizer2D"
+       backbone:
+           name: "ResNetTSM"
+           pretrained: 将路径填写到此处
+   ```
 
 ### 开始训练
 
@@ -99,7 +99,7 @@ MODEL:
 
 将待测的模型权重放到`output/TSM/`目录下，测试命令如下
 
-```bash
+```bas
 python3.7 main.py --test -c configs/recognition/tsm/tsm_k400_frames.yaml --weights output/TSM/TSM_best.pdparams
 ```
 
