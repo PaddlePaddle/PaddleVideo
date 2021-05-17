@@ -2,17 +2,16 @@ MODEL: #MODEL field
     framework: "Recognizer2D" #Mandatory, indicate the type of network, associate to the 'paddlevideo/modeling/framework/' .
     backbone: #Mandatory, indicate the type of backbone, associate to the 'paddlevideo/modeling/backbones/' .
         name: "ResNetTSM" #Mandatory, The name of backbone.
-        pretrained: "data/ResNet50_pretrain.pdparams" #Optional, pretrained model path.
+        pretrained: "data/TSM_k400.pdparams" #Optional, pretrained model path.
         num_seg: 8
         depth: 50 #Optional, the depth of backbone architecture.
-        bn_wd: False
     head:
         name: "TSMHead" #Mandatory, indicate the type of head, associate to the 'paddlevideo/modeling/heads'
         num_classes: 101 #Optional, the number of classes to be classified.
         in_channels: 2048 #input channel of the extracted feature.
-        drop_ratio: 0.5 #the ratio of dropout
-        # ls_eps: 0.1 # label smoothing epsilon
+        drop_ratio: 0.8 #the ratio of dropout
         std: 0.001 #std value in params initialization
+
 
 DATASET: #DATASET field
     batch_size: 16 #Mandatory, bacth size
@@ -88,29 +87,25 @@ PIPELINE: #PIPELINE field
                 mean: [0.485, 0.456, 0.406]
                 std: [0.229, 0.224, 0.225]
 
-#MIX:
-#    name: "Mixup"
-#    alpha: 0.2
 
 OPTIMIZER: #OPTIMIZER field
     name: 'Momentum' #Mandatory, the type of optimizer, associate to the 'paddlevideo/solver/'
     momentum: 0.9
     learning_rate: #Mandatory, the type of learning rate scheduler, associate to the 'paddlevideo/solver/'
         name: 'PiecewiseDecay'
-        boundaries: [20, 40]
-        values: [0.02, 0.002, 0.0002]  #4 cards * 16 batch size
-    weight_decay:
-        name: 'L2'
-        value: 1e-4
+        boundaries: [10, 20]
+        values: [0.001, 0.0001, 0.00001]  #4 cards * 16 batch size
     grad_clip:
         name: 'ClipGradByGlobalNorm'
         value: 20.0
 
+
 METRIC:
     name: 'CenterCropMetric'
+
 
 model_name: "TSM"
 log_interval: 20 #Optional, the interal of logger, default:10
 save_interval: 10
-epochs: 50 #Mandatory, total epoch
+epochs: 25 #Mandatory, total epoch
 log_level: "INFO" #Optional, the logger level. default: "INFO"

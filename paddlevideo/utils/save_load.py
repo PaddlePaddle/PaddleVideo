@@ -45,7 +45,10 @@ def load_ckpt(model, weight_path):
         for item in tqdm(model.state_dict(), total=total_len, position=0):
             name = item
             desc.set_description('Loading %s' % name)
-            tmp[name] = state_dicts[name]
+            if state_dicts.get(name) is None and state_dicts.get('backbone.' + name) is not None:
+                tmp[name] = state_dicts['backbone.' + name]
+            else:
+                tmp[name] = state_dicts[name]
             time.sleep(0.01)
         ret_str = "loading {:<20d} weights completed.".format(
             len(model.state_dict()))
