@@ -2,7 +2,7 @@ MODEL: #MODEL field
     framework: "Recognizer2D" #Mandatory, indicate the type of network, associate to the 'paddlevideo/modeling/framework/' .
     backbone: #Mandatory, indicate the type of backbone, associate to the 'paddlevideo/modeling/backbones/' .
         name: "ResNetTSM" #Mandatory, The name of backbone.
-        pretrained: "data/TSM_best.pdparams" #Optional, pretrained model path.
+        pretrained: "data/TSM_k400.pdparams" #Optional, pretrained model path.
         num_seg: 8
         depth: 50 #Optional, the depth of backbone architecture.
         bn_wd: False
