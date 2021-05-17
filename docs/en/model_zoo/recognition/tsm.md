@@ -96,7 +96,7 @@ Please refer to UCF101 data download and preparation [ucf101 data preparation](.
 
 **Parameter initialization**
 
-- Initialize the weight of the FC layer with the normal distribution of $N(0,0.001)$, and initialize the bias of the FC layer with a constant of 0
+- Initialize the weight of the FC layer with the normal distribution of Normal(mean=0, std=0.001), and initialize the bias of the FC layer with a constant of 0
 
 ## Test
 
