@@ -111,11 +111,7 @@ def train_model(cfg,
     # 4. Train Model
     ###AMP###
     if amp:
-        scaler = paddle.amp.GradScaler(
-            init_loss_scaling=2.0 ** 16,
-            incr_every_n_steps=2000,
-            decr_every_n_nan_or_inf=1
-        )
+        scaler = paddle.amp.GradScaler(init_loss_scaling=2.0 ** 16, incr_every_n_steps=2000, decr_every_n_nan_or_inf=1)
 
     best = 0.
     for epoch in range(0, cfg.epochs):
