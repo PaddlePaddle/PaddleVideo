@@ -82,7 +82,6 @@ class TSMHead(TSNHead):
         if self.dropout is not None:
             x = self.dropout(x)  # [N * seg_num, in_channels, 1, 1]
 
-        #x = paddle.reshape(x, x.shape[:2])  # [N * seg_num, in_channels]
         if self.data_format == 'NCHW':
             x = paddle.reshape(x, x.shape[:2])
         else:
