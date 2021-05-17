@@ -45,7 +45,7 @@ UCF101数据下载及准备请参考[ucf101数据准备](../../dataset/ucf101.md
 
 2. 将下载好的权重路径填写到下方`pretrained:`之后
 
-   ```bash
+   ```yaml
    MODEL:
        framework: "Recognizer2D"
        backbone:
