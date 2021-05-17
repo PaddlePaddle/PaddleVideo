@@ -46,12 +46,12 @@ Please refer to UCF101 data download and preparation [ucf101 data preparation](.
 
 2. and add path to MODEL.framework.backbone.pretrained in config file as:
 
-   ```bash
+   ```yaml
    MODEL:
-   	framework: "Recognizer2D"
-   		backbone:
-   		name: "ResNetTSM"
-   		pretrained: your weight path
+       framework: "Recognizer2D"
+       backbone:
+           name: "ResNet"
+           pretrained: your weight path
    ```
 
 ### Start training
