@@ -82,17 +82,15 @@ python3 main.py --test -c configs/recognition/tsm/pptsm.yaml -w output/ppTSM/ppT
 - 通过`-c`参数指定配置文件，可下载已发布模型，通过`-w`指定权重存放路径进行模型测试。
 
 
-当取如下参数时，在Kinetics400的验证集下评估精度如下:
+Kinetics400数据集测试精度:
 
-| seg\_num | target\_size | Top-1 |
-| :------: | :----------: | :----: |
-| 8 | 224 | 0.735 |
+| backbone | Sampling method | num_seg | target_size |  distill | Top-1 | checkpoints |
+| :------: | :----------: | :----: | :----: | :----: | :----: | :----: |
+| ResNet50 | 1\*1 | 8 | 224 | False | 74.54 | TODO |
+| ResNet50 | 3\*10 | 8 | 224 | False | TODO | TODO |
+| ResNet50 | 1\*1 | 8 | 224 | True | TODO | TODO |
+| ResNet50 | 3\*10 | 8 | 224 | True | TODO | TODO |
 
-UCF101验证集(split1)上的评估精度如下：
-
-| seg\_num | target\_size | Top-1 |
-| :------: | :----------: | :----: |
-| 8 | 224 | 0.8997 |
 
 ## 模型推理
 
