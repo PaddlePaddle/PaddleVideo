@@ -67,7 +67,6 @@ PIPELINE: #PIPELINE field
             valid_mode: True
             num_seg: 8
             seg_len: 1
-            valid_mode: True
         transform:
             - Scale:
                 short_size: 256
@@ -88,7 +87,6 @@ PIPELINE: #PIPELINE field
             valid_mode: True
             num_seg: 8
             seg_len: 1
-            valid_mode: True
         transform:
             - Scale:
                 short_size: 256
