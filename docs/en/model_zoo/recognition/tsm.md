@@ -59,7 +59,7 @@ Please refer to UCF101 data download and preparation [ucf101 data preparation](.
 - By specifying different configuration files, different data formats/data sets can be used for training. Taking the training configuration of Kinetics-400 data set + 8 cards + frames format as an example, the startup command is as follows (more training commands can be viewed in `PaddleVideo/run.sh`).
 
   ```bash
-  python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7,8" --log_dir=log_tsm main.py  --validate -c configs/recognition/tsm/tsm_k400_frames.yaml
+  python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_tsm main.py  --validate -c configs/recognition/tsm/tsm_k400_frames.yaml
   ```
 
 - Args -c is used to specify config file.
