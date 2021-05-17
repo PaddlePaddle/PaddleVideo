@@ -58,7 +58,7 @@ UCF101数据下载及准备请参考[ucf101数据准备](../../dataset/ucf101.md
 - 通过指定不同的配置文件，可以使用不同的数据格式/数据集进行训练，以Kinetics-400数据集 + 8卡 + frames格式的训练配置为例，启动命令如下（更多的训练命令在`PaddleVideo/run.sh`中可以查看）。
 
   ```bash
-  python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7,8" --log_dir=log_tsm main.py  --validate -c configs/recognition/tsm/tsm_k400_frames.yaml
+  python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_tsm main.py  --validate -c configs/recognition/tsm/tsm_k400_frames.yaml
   ```
 
 - 如若进行finetune（以UCF-101 + 4卡 + frames格式的训练配置为例），请先下载PaddleVideo的已发布模型权重[TSM.pdparams](https://videotag.bj.bcebos.com/PaddleVideo/TSM/TSM.pdparams)，再将`PaddleVideo/configs/recognition/tsm/tsm_ucf101_frames.yaml`中`pretrained:`后的字段替换成下载好的`TSM.pdparams`路径，最后执行下方的命令，启动finetune训练。
