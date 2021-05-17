@@ -5,7 +5,6 @@ MODEL: #MODEL field
         pretrained: "data/ResNet50_pretrain.pdparams" #Optional, pretrained model path.
         num_seg: 8
         depth: 50 #Optional, the depth of backbone architecture.
-        bn_wd: False
         data_format: "NHWC"
     head:
         name: "TSMHead" #Mandatory, indicate the type of head, associate to the 'paddlevideo/modeling/heads'
