@@ -15,12 +15,20 @@
 
 ## 模型简介
 
-我们对[TSM模型](./tsm.md)进行了改进，提出了**PPTSM**高精度2D实用视频分类模型。在不增加参数量和计算量的情况下，在UCF-101、Kinetics-400等数据集上精度显著超过原文。模型优化解析请参考[**pptsm实用视频模型优化解析**](https://github.com/PaddlePaddle/PaddleVideo/blob/main/docs/zh-CN/tutorials/pp-tsm.md)。
+PaddleVideo对[TSM模型](./tsm.md)进行了改进，提出了**PPTSM**高精度2D实用视频分类模型。在不增加参数量和计算量的情况下，在UCF-101、Kinetics-400等数据集上精度显著超过原文。模型优化解析请参考[**pptsm实用视频模型优化解析**](https://github.com/PaddlePaddle/PaddleVideo/blob/main/docs/zh-CN/tutorials/pp-tsm.md)。
 
-<p align="center">
-<img src="../../../images/acc_vps.jpeg" height=400 width=650 hspace='10'/> <br />
-PPTSM improvement
-</p>
+| Version | Sampling method | Top1 |
+| :------: | :----------: | :----: |
+| Ours | Uniform | **74.54** |
+| [mit-han-lab](https://github.com/mit-han-lab/temporal-shift-module)  | Uniform | 71.16 |
+| [mmaction2](https://github.com/open-mmlab/mmaction2/blob/master/configs/recognition/tsm/README.md) |  Uniform | 70.59 |
+
+
+| Version | Sampling method | Top1 |
+| :------: | :----------: | :----: |
+| Ours | Dense | **TODO** |
+| [mit-han-lab](https://github.com/mit-han-lab/temporal-shift-module) | Dense | 74.1 |
+| [mmaction2](https://github.com/open-mmlab/mmaction2/blob/master/configs/recognition/tsm/README.md) | Dense | 73.38 |
 
 
 ## 数据准备
@@ -32,7 +40,9 @@ UCF101数据下载及准备请参考[UCF-101数据准备](../../dataset/ucf101.m
 
 ## 模型训练
 
-### 预训练模型下载
+### Kinetics-400数据集训练
+
+#### (1) 预训练模型下载
 
 下载图像蒸馏预训练模型[ResNet50_vd_ssld_v2.pdparams](https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_vd_ssld_v2_pretrained.pdparams)作为Backbone初始化参数，或是通过命令行下载
 
@@ -50,30 +60,15 @@ MODEL:
         pretrained: 将路径填写到此处
 ```
 
-### 开始训练
-
-通过指定不同的配置文件，可以使用不同的数据格式/数据集进行训练，UCF-101数据集使用4卡训练，frames格式数据的训练启动命令如下:
-
-```bash
-python -B -m paddle.distributed.launch --gpus="0,1,2,3"  --log_dir=log_pptsm  main.py  --validate -c configs/recognition/tsm/pptsm.yaml
-```
+#### (2) 启动训练
 
 Kinetics400数据集使用8卡训练，frames格式数据的训练启动命令如下:
 
 ```bash
-python -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=log_pptsm  main.py  --validate -c configs/recognition/tsm/pptsm_k400.yaml
+python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=log_pptsm  main.py  --validate -c configs/recognition/pptsm/pptsm_k400_frames.yaml
 ```
 
-- 通过`-c`指定模型训练参数配置文件，默认配置文件与数据集的对应关系如下(不同数据集，数据处理部分参数配置稍有不同):
-
-```
-configs/recognition/tsm/pptsm.yaml        --> UCF-101 frames格式训练
-configs/recognition/tsm/todo.yaml         --> UCF-101 videos格式训练
-configs/recognition/tsm/pptsm_k400.yaml   --> Kinetics-400 frames格式训练
-configs/recognition/tsm/todo.yaml         --> Kinetics-400 videos格式训练
-```
-
-- 如若进行finetune，请下载PaddleVideo的已发布模型[ppTSM.pdparams](https://videotag.bj.bcebos.com/PaddleVideo/ppTSM/ppTSM.pdparams)，通过`--weights`指定权重存放路径。 
+- 如若进行finetune，请下载已发布模型，通过`--weights`指定权重存放路径。 
 
 - 您可以自定义修改参数配置，参数用法请参考[config](../../tutorials/config.md)。
 
@@ -84,7 +79,7 @@ configs/recognition/tsm/todo.yaml         --> Kinetics-400 videos格式训练
 python3 main.py --test -c configs/recognition/tsm/pptsm.yaml -w output/ppTSM/ppTSM_best.pdparams
 ```
 
-- 通过`-c`参数指定配置文件，可下载已发布模型[ppTSM.pdparams](https://videotag.bj.bcebos.com/PaddleVideo/ppTSM/ppTSM.pdparams)，通过`-w`指定权重存放路径进行模型测试。
+- 通过`-c`参数指定配置文件，可下载已发布模型，通过`-w`指定权重存放路径进行模型测试。
 
 
 当取如下参数时，在Kinetics400的验证集下评估精度如下:
