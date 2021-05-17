@@ -45,7 +45,7 @@ def load_ckpt(model, weight_path):
         for item in tqdm(model.state_dict(), total=total_len, position=0):
             name = item
             desc.set_description('Loading %s' % name)
-            if not state_dicts.__contains__(name) and state_dicts.__contains__('backbone.' + name):
+            if state_dicts.get(name) is None and state_dicts.get('backbone.' + name) is not None:
                 tmp[name] = state_dicts['backbone.' + name]
             else:
                 tmp[name] = state_dicts[name]
