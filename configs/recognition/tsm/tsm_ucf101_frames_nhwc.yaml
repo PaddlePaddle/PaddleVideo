@@ -5,13 +5,14 @@ MODEL: #MODEL field
         pretrained: "data/TSM_k400.pdparams" #Optional, pretrained model path.
         num_seg: 8
         depth: 50 #Optional, the depth of backbone architecture.
+        bn_wd: False
         data_format: "NHWC"
     head:
         name: "TSMHead" #Mandatory, indicate the type of head, associate to the 'paddlevideo/modeling/heads'
         num_classes: 101 #Optional, the number of classes to be classified.
         in_channels: 2048 #input channel of the extracted feature.
-        drop_ratio: 0.5 #the ratio of dropout
-        std: 0.01 #std value in params initialization
+        drop_ratio: 0.8 #the ratio of dropout
+        std: 0.001 #std value in params initialization
         data_format: "NHWC"
 
 
@@ -40,16 +41,12 @@ PIPELINE: #PIPELINE field
         decode:
             name: "FrameDecoder"
         sample:
-            name: "Sampler"
+            name: "Sampler_TSM"
             num_seg: 8
             seg_len: 1
             valid_mode: False
         transform: #Mandotary, image transform operator.
-            - Scale:
-                short_size: 256
-            - MultiScaleCrop:
-                target_size: 256
-            - RandomCrop:
+            - MultiScaleCrop_TSM:
                 target_size: 224
             - RandomFlip:
             - Image2Array:
@@ -63,12 +60,12 @@ PIPELINE: #PIPELINE field
         decode:
             name: "FrameDecoder"
         sample:
-            name: "Sampler"
-            valid_mode: True
+            name: "Sampler_TSM"
             num_seg: 8
             seg_len: 1
+            valid_mode: True
         transform:
-            - Scale:
+            - Scale_PV:
                 short_size: 256
             - CenterCrop:
                 target_size: 224
@@ -83,12 +80,12 @@ PIPELINE: #PIPELINE field
         decode:
             name: "FrameDecoder"
         sample:
-            name: "Sampler"
-            valid_mode: True
+            name: "Sampler_TSM"
             num_seg: 8
             seg_len: 1
+            valid_mode: True
         transform:
-            - Scale:
+            - Scale_PV:
                 short_size: 256
             - CenterCrop:
                 target_size: 224
@@ -105,17 +102,19 @@ OPTIMIZER: #OPTIMIZER field
     momentum: 0.9
     learning_rate: #Mandatory, the type of learning rate scheduler, associate to the 'paddlevideo/solver/'
         name: 'PiecewiseDecay'
-        boundaries: [40, 60]
-        values: [0.01, 0.001, 0.0001]  #4 cards * 16 batch size
-    weight_decay:
-        name: 'L2'
-        value: 1e-4
+        boundaries: [10, 20]
+        values: [0.001, 0.0001, 0.00001]  #4 cards * 16 batch size
+    grad_clip:
+        name: 'ClipGradByGlobalNorm'
+        value: 20.0
+
 
 METRIC:
     name: 'CenterCropMetric'
 
+
 model_name: "TSM"
 log_interval: 20 #Optional, the interal of logger, default:10
 save_interval: 10
-epochs: 80 #Mandatory, total epoch
+epochs: 25 #Mandatory, total epoch
 log_level: "INFO" #Optional, the logger level. default: "INFO"
