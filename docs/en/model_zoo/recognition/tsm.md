@@ -13,9 +13,10 @@
 
 ## Introduction
 
-  Temporal Shift Module (TSM) is a popular model that attracts more attention at present.
-  The method of moving through channels greatly improves the utilization ability of temporal information without increasing any additional number of parameters and calculation amount.
-  Moreover, due to its lightweight and efficient characteristics, it is very suitable for industrial landing.
+Temporal Shift Module (TSM) is a popular model that attracts more attention at present.
+The method of moving through channels greatly improves the utilization ability of temporal information without increasing any
+additional number of parameters and calculation amount.
+Moreover, due to its lightweight and efficient characteristics, it is very suitable for industrial landing.
 
   <div align="center">
   <img src="../../../images/tsm_architecture.png" height=250 width=700 hspace='10'/> <br />
@@ -42,8 +43,6 @@ Please refer to UCF101 data download and preparation [ucf101 data preparation](.
    ```bash
    wget https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_pretrain.pdparams
    ```
-
-   
 
 2. and add path to MODEL.framework.backbone.pretrained in config file as:
 
