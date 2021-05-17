@@ -1,15 +1,15 @@
-- [简体中文](../../../zh-CN/model_zoo/recognition/tsm.md) | English
+[简体中文](../../../zh-CN/model_zoo/recognition/tsm.md) | English
 
-  # TSM
+# TSM
 
-  ## Contents
+## Contents
 
-  - [Introduction](#Introduction)
-  - [Data](#Data)
-  - [Train](#Train)
-  - [Test](#Test)
-  - [Inference](#Inference)
-  - [Reference](#Reference)
+- [Introduction](#Introduction)
+- [Data](#Data)
+- [Train](#Train)
+- [Test](#Test)
+- [Inference](#Inference)
+- [Reference](#Reference)
 
 
   ## Introduction
@@ -110,9 +110,9 @@
 
   Accuracy on Kinetics400:
 
-  | seg\_num | target\_size | Top-1  |
-  | :------: | :----------: | :----: |
-  |    8     |     224      | 0.7106 |
+| seg\_num | target\_size | Top-1  |
+| :------: | :----------: | :----: |
+|    8     |     224      | 0.7106 |
 
   ## Inference
 
