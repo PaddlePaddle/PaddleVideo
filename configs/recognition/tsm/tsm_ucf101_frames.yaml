@@ -5,7 +5,6 @@ MODEL: #MODEL field
         pretrained: "data/TSM_k400.pdparams" #Optional, pretrained model path.
         num_seg: 8
         depth: 50 #Optional, the depth of backbone architecture.
-        bn_wd: False
     head:
         name: "TSMHead" #Mandatory, indicate the type of head, associate to the 'paddlevideo/modeling/heads'
         num_classes: 101 #Optional, the number of classes to be classified.
