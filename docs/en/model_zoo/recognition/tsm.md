@@ -29,7 +29,7 @@ Please refer to the ICCV 2019 paper for details [TSM: Temporal Shift Module for 
 
 ## Data
 
-Please refer to K400 data download and preparation [k400 data preparation](../../dataset/K400.md)
+Please refer to Kinetics-400 data download and preparation [k400 data preparation](../../dataset/K400.md)
 
 Please refer to UCF101 data download and preparation [ucf101 data preparation](../../dataset/ucf101.md)
 
@@ -48,10 +48,10 @@ Please refer to UCF101 data download and preparation [ucf101 data preparation](.
 
    ```bash
    MODEL:
-   framework: "Recognizer2D"
-   backbone:
-   name: "ResNetTSM"
-   pretrained: your weight path
+   	framework: "Recognizer2D"
+   		backbone:
+   		name: "ResNetTSM"
+   		pretrained: your weight path
    ```
 
 ### Start training
@@ -108,7 +108,7 @@ python3 main.py --test -c configs/recognition/tsm/tsm.yaml -w output/TSM/TSM_bes
 - You can also use our trained and published model [TSM.pdparams](https://videotag.bj.bcebos.com/PaddleVideo/TSM/TSM.pdparams) to test
 
 
-Accuracy on Kinetics400:
+Accuracy on Kinetics-400 : 
 
 | seg\_num | target\_size | Top-1  |
 | :------: | :----------: | :----: |
