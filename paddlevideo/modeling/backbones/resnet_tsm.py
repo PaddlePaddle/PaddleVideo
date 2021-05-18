@@ -35,7 +35,6 @@ class ConvBNLayer(nn.Layer):
         groups (int): Groups in the Conv2D, Default: 1.
         act (str): Indicate activation after BatchNorm2D layer.
         name (str): the name of an instance of ConvBNLayer.
-        bn_wd (bool): Whether to add L2 weight decay of BN's two parameters to the optimizer, Default: True.
     Note: weight and bias initialization include initialize values and name the restored parameters, values initialization are explicit declared in the ```init_weights``` method.
 
     """
@@ -47,8 +46,7 @@ class ConvBNLayer(nn.Layer):
                  groups=1,
                  act=None,
                  name=None,
-                 data_format="NCHW",
-                 bn_wd=True):
+                 data_format="NCHW"):
         super(ConvBNLayer, self).__init__()
         self._conv = Conv2D(in_channels=in_channels,
                             out_channels=out_channels,
@@ -88,8 +86,7 @@ class BottleneckBlock(nn.Layer):
                  shortcut=True,
                  num_seg=8,
                  name=None,
-                 data_format="NCHW",
-                 bn_wd=True):
+                 data_format="NCHW"):
         super(BottleneckBlock, self).__init__()
         self.data_format = data_format
         self.conv0 = ConvBNLayer(in_channels=in_channels,
@@ -97,24 +94,21 @@ class BottleneckBlock(nn.Layer):
                                  kernel_size=1,
                                  act="relu",
                                  name=name + "_branch2a",
-                                 data_format=data_format,
-                                 bn_wd=bn_wd)
+                                 data_format=data_format)
         self.conv1 = ConvBNLayer(in_channels=out_channels,
                                  out_channels=out_channels,
                                  kernel_size=3,
                                  stride=stride,
                                  act="relu",
                                  name=name + "_branch2b",
-                                 data_format=data_format,
-                                 bn_wd=bn_wd)
+                                 data_format=data_format)
 
         self.conv2 = ConvBNLayer(in_channels=out_channels,
                                  out_channels=out_channels * 4,
                                  kernel_size=1,
                                  act=None,
                                  name=name + "_branch2c",
-                                 data_format=data_format,
-                                 bn_wd=bn_wd)
+                                 data_format=data_format)
 
         if not shortcut:
             self.short = ConvBNLayer(in_channels=in_channels,
@@ -122,8 +116,7 @@ class BottleneckBlock(nn.Layer):
                                      kernel_size=1,
                                      stride=stride,
                                      name=name + "_branch1",
-                                     data_format=data_format,
-                                     bn_wd=bn_wd)
+                                     data_format=data_format)
 
         self.shortcut = shortcut
         self.num_seg = num_seg
@@ -214,8 +207,7 @@ class ResNetTSM(nn.Layer):
                  depth,
                  num_seg=8,
                  data_format="NCHW",
-                 pretrained=None,
-                 bn_wd=True):
+                 pretrained=None):
         super(ResNetTSM, self).__init__()
         self.pretrained = pretrained
         self.layers = depth
@@ -245,8 +237,7 @@ class ResNetTSM(nn.Layer):
                                 stride=2,
                                 act="relu",
                                 name="conv1",
-                                data_format=self.data_format,
-                                bn_wd=bn_wd)
+                                data_format=self.data_format)
         self.pool2D_max = MaxPool2D(
             kernel_size=3,
             stride=2,
@@ -276,8 +267,7 @@ class ResNetTSM(nn.Layer):
                             num_seg=self.num_seg,
                             shortcut=shortcut,
                             name=conv_name,
-                            data_format=self.data_format,
-                            bn_wd=bn_wd))
+                            data_format=self.data_format))
                     in_channels = out_channels[block] * 4
                     self.block_list.append(bottleneck_block)
                     shortcut = True
