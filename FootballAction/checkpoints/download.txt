@@ -1,8 +1,8 @@
 # audio
-https://bj.bcebos.com/v1/tmt-pub/models/footballaction/models_audio.tar
-# tsn
-https://bj.bcebos.com/v1/tmt-pub/models/footballaction/models_tsn.tar
+https://videotag.bj.bcebos.com/PaddleVideo-release2.1/FootballAction/audio.tar
+# pptsm
+https://videotag.bj.bcebos.com/PaddleVideo-release2.1/FootballAction/pptsm.tar
 # bmn
-https://bj.bcebos.com/v1/tmt-pub/models/footballaction/models_bmn.tar
+https://videotag.bj.bcebos.com/PaddleVideo-release2.1/FootballAction/bmn.tar
 # lstm
-https://bj.bcebos.com/v1/tmt-pub/models/footballaction/models_lstm.tar
+https://videotag.bj.bcebos.com/PaddleVideo-release2.1/FootballAction/lstm.tar

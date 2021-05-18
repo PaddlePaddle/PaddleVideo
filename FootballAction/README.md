@@ -1,15 +1,28 @@
+
+# 更新说明
+ - v1.1 pptsm, vggish, bmn, lstm, 基于paddle-2.0环境
+ - v1.0 tsn, vggish, bmn, lstm, 基于paddle-1.8环境
+
+# 新版本说明
+ - 基础特征模型（图像）替换为ppTSM，准确率由84%提升到94%
+ - 基础特征模型（音频）没变动
+ - BMN，请使用paddlevideo最新版
+ - LSTM，暂时提供v1.8训练代码（后续升级为v2.0），也可自行尝试使用paddlevideo-2.0中的attentation lstm
+ - 为兼容paddle-v1.8和paddle-v2.0，将模型预测改为inference model，训练代码可以使用v1.8或v2.0，只要export为inference model即可进行预测
+ - 准确率提升，precision和recall均有大幅提升，F1-score从0.57提升到0.82
+
 # 简介
-该代码库用于体育动作检测+识别, 基于paddle1.8版本开发，结合PaddleVideo中的TSN,BMN, attentionLSTM的多个视频模型进行视频时空二阶段检测算法。
+该代码库用于体育动作检测+识别, 基于paddle2.0版本开发，结合PaddleVideo中的ppTSM, BMN, attentionLSTM的多个视频模型进行视频时空二阶段检测算法。
 主要分为如下几步
  - 特征抽取
-    - 图像特性，TSN
+    - 图像特性，ppTSM
     - 音频特征，Vggsound
  - proposal提取，BMN
  - LSTM，动作分类 + 回归
 
 # 基础镜像
 ```
-docker pull tmtalgo/paddleaction:action-detection-v1
+docker pull tmtalgo/paddleaction:action-detection-v2
 ```
 
 # 数据集
@@ -92,18 +105,19 @@ datasets/EuroCup2016/label_cls8_val.json
 cd datasets/script && python get_frames_pcm.py
 ```
 
-## step3 TSN数据处理，由frames结合gts生成tsn训练所需要的正负样本
+## step3 基础图像特征数据处理，由frames结合gts生成训练所需要的正负样本
 ```
 cd datasets/script && python get_instance_for_tsn.py
 # 文件名按照如下格式
 '{}_{}_{}_{}'.format(video_basename, start_id, end_id, label)
 ```
 
-## step4 TSN训练
+## step4 ppTSM训练
 ```
-我们提供了足球数据训练的模型: checkpoints/models_tsn/TSN_epoch36.pdparams
-如果需要在自己的数据上训练，可参考PaddleVideo https://github.com/PaddlePaddle/models/tree/release/2.0-beta/PaddleCV/video
-config.yaml参考configs文件夹下tsn_football.yaml
+我们提供了足球数据训练的模型，参考checkpoints
+如果需要在自己的数据上训练，可参考
+https://github.com/PaddlePaddle/PaddleVideo/tree/release/2.0
+config.yaml参考configs文件夹下pptsm_football_v2.0.yaml
 ```
 
 ## step 5 image and audio特征提取，保存到datasets features文件夹下
@@ -140,8 +154,8 @@ cd datasets/script && python get_instance_for_bmn.py
 }
 ```
 ## step 7 BMN训练
-我们同样提供了足球数据训练的模型: checkpoints/models_bmn/BMN_epoch19.pdparams
-如果要在自己的数据上训练，具体步骤参考step4 TSN 训练
+我们同样提供了足球数据训练的模型，参考checkpoints
+如果要在自己的数据上训练，具体步骤参考step4 ppTSM 训练
 
 ## step 8 BMN预测，得到 start_id, end_id, score
 ```
@@ -221,11 +235,12 @@ cd datasets/script && python get_instance_for_lstm.py
 
 ## step 10 LSTM训练
 ```
-sh train_lstm.sh
+sh run.sh	# LSTM 模块
 ```
 
 ## step 11 整个预测流程
 ```
+# 先将各模型export为inference model
 cd predict && python predict.py
 ```
 
