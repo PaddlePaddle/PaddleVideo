@@ -9,9 +9,10 @@
 - [模型训练](#模型训练)
 - [模型测试](#模型测试)
 - [模型推理](#模型推理)
+- [实现细节](#实现细节)
 - [参考论文](#参考论文)
 
-## 模型介绍
+## 模型简介
 
 Temporal Shift Module (TSM) 是当前比较受关注的视频分类模型，通过通道移动的方法在不增加任何额外参数量和计算量的情况下，极大地提升了模型对于视频时间信息的利用能力，并且由于其具有轻量高效的特点，十分适合工业落地。
 
@@ -35,7 +36,7 @@ UCF101数据下载及准备请参考[ucf101数据准备](../../dataset/ucf101.md
 
 ### Kinetics-400数据集训练
 
-#### **下载并添加预训练模型**
+#### 下载并添加预训练模型
 
 1. 加载在ImageNet1000上训练好的ResNet50权重作为Backbone初始化参数[ResNet50_pretrain.pdparams](https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_pretrain.pdparams)，也可以通过命令行下载
    
@@ -45,7 +46,7 @@ UCF101数据下载及准备请参考[ucf101数据准备](../../dataset/ucf101.md
    
 2. 打开`PaddleVideo/configs/recognition/tsm/tsm_k400_frames.yaml`，将下载好的权重路径填写到下方`pretrained:`之后
 
-   ```bash
+   ```yaml
    MODEL:
        framework: "Recognizer2D"
        backbone:
@@ -55,13 +56,22 @@ UCF101数据下载及准备请参考[ucf101数据准备](../../dataset/ucf101.md
 
 #### 开始训练
 
-- 通过指定不同的配置文件，可以使用不同的数据格式/数据集进行训练，启动命令如下（更多的训练命令在`PaddleVideo/run.sh`中可以查看）。
+- Kinetics400数据集使用8卡训练，frames格式数据的训练启动命令如下:
 
   ```bash
   python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_tsm main.py  --validate -c configs/recognition/tsm/tsm_k400_frames.yaml
   ```
 
+- 开启amp混合精度训练，可加速训练过程，其训练启动命令如下：
+
+```bash
+python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_tsm main.py  --amp --validate -c configs/recognition/tsm/tsm_k400_frames.yaml
+```
+
+
 - 另外您可以自定义修改参数配置，以达到在不同的数据集上进行训练/测试的目的，具体参数用法请参考[config](../../tutorials/config.md)。
+
+
 
 ### UCF-101数据集训练
 
@@ -91,24 +101,7 @@ UCF101数据下载及准备请参考[ucf101数据准备](../../dataset/ucf101.md
   python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3" --log_dir=log_tsm main.py  --validate -c configs/recognition/tsm/tsm_ucf101_frames.yaml
   ```
 
-### 实现细节
 
-#### **数据处理**
-
-- 模型读取Kinetics-400数据集中的`mp4`数据，首先将每条视频数据划分成`seg_num`段，然后均匀地从每段中抽取1帧图像，得到稀疏采样的`seg_num`张视频帧，再对这`seg_num`帧图像做同样的随机数据增强，包括多尺度的随机裁剪、随机左右翻转、数据归一化等，最后缩放至`target_size`。
-
-#### **训练策略**
-
-- 采用Momentum优化算法训练，momentum=0.9
-- 采用L2_Decay，权重衰减系数为1e-4
-- 采用全局梯度裁剪，裁剪系数为20.0
-- 总epoch数为50，学习率在epoch达到20、40进行0.1倍的衰减
-- FC层的权重与偏置的学习率分别为为整体学习率的5倍、10倍，且偏置不设置L2_Decay
-- Dropout_ratio=0.5
-
-#### **参数初始化**
-
-- 以Normal(mean=0, std=0.001)的正态分布来初始化FC层的权重，以常数0来初始化FC层的偏置
 
 ## 模型测试
 
@@ -158,6 +151,25 @@ python3.7 tools/predict.py --video_file data/example.avi \
                          --use_gpu=True \
                          --use_tensorrt=False
 ```
+
+## 实现细节
+
+**数据处理**
+
+- 模型读取Kinetics-400数据集中的`mp4`数据，首先将每条视频数据划分成`seg_num`段，然后均匀地从每段中抽取1帧图像，得到稀疏采样的`seg_num`张视频帧，再对这`seg_num`帧图像做同样的随机数据增强，包括多尺度的随机裁剪、随机左右翻转、数据归一化等，最后缩放至`target_size`。
+
+**训练策略**
+
+- 采用Momentum优化算法训练，momentum=0.9
+- 采用L2_Decay，权重衰减系数为1e-4
+- 采用全局梯度裁剪，裁剪系数为20.0
+- 总epoch数为50，学习率在epoch达到20、40进行0.1倍的衰减
+- FC层的权重与偏置的学习率分别为为整体学习率的5倍、10倍，且偏置不设置L2_Decay
+- Dropout_ratio=0.5
+
+**参数初始化**
+
+- 以Normal(mean=0, std=0.001)的正态分布来初始化FC层的权重，以常数0来初始化FC层的偏置
 
 ## 参考论文
 
