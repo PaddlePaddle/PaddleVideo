@@ -4,7 +4,7 @@
  - v1.0 tsn, vggish, bmn, lstm, 基于paddle-1.8环境
 
 # 新版本说明
- - 基础特征模型（图像）替换为ppTSM，准确率提升到94%
+ - 基础特征模型（图像）替换为ppTSM，准确率由84%提升到94%
  - 基础特征模型（音频）没变动
  - BMN，请使用paddlevideo最新版
  - LSTM，暂时提供v1.8训练代码（后续升级为v2.0），也可自行尝试使用paddlevideo-2.0中的attentation lstm
