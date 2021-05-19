@@ -111,12 +111,16 @@ def train_model(cfg,
     # 4. Train Model
     ###AMP###
     if amp:
-        scaler = paddle.amp.GradScaler(init_loss_scaling=2.0 ** 16, incr_every_n_steps=2000, decr_every_n_nan_or_inf=1)
+        scaler = paddle.amp.GradScaler(init_loss_scaling=2.0**16,
+                                       incr_every_n_steps=2000,
+                                       decr_every_n_nan_or_inf=1)
 
     best = 0.
     for epoch in range(0, cfg.epochs):
         if epoch < resume_epoch:
-            logger.info(f"| epoch: [{epoch+1}] <= resume_epoch: [{ resume_epoch}], continue... ")
+            logger.info(
+                f"| epoch: [{epoch+1}] <= resume_epoch: [{ resume_epoch}], continue... "
+            )
             continue
         model.train()
 
@@ -129,8 +133,7 @@ def train_model(cfg,
 
             ###AMP###
             if amp:
-                with paddle.amp.auto_cast(
-                        custom_black_list={"temporal_shift", "reduce_mean"}):
+                with paddle.amp.auto_cast(custom_black_list={"reduce_mean"}):
                     outputs = model(data, mode='train')
 
                 avg_loss = outputs['loss']
