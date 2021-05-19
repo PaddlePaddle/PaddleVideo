@@ -28,7 +28,7 @@
 | Version | Sampling method | Top1 |
 | :------ | :----------: | :----: |
 | Ours (distill) | Dense | **76.16** |
-| Ours | Dense | **TODO** |
+| Ours | Dense | **75.69** |
 | [mit-han-lab](https://github.com/mit-han-lab/temporal-shift-module) | Dense | 74.1 |
 | [mmaction2](https://github.com/open-mmlab/mmaction2/blob/master/configs/recognition/tsm/README.md) | Dense | 73.38 |
 
@@ -44,7 +44,7 @@ UCF101数据下载及准备请参考[UCF-101数据准备](../../dataset/ucf101.m
 
 ### Kinetics-400数据集训练
 
-#### (1) 预训练模型下载
+#### 下载并添加预训练模型
 
 下载图像蒸馏预训练模型[ResNet50_vd_ssld_v2.pdparams](https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_vd_ssld_v2_pretrained.pdparams)作为Backbone初始化参数，或是通过命令行下载
 
@@ -62,7 +62,7 @@ MODEL:
         pretrained: 将路径填写到此处
 ```
 
-#### (2) 启动训练
+#### 开始训练
 
 Kinetics400数据集使用8卡训练，frames格式数据的训练启动命令如下:
 
@@ -77,24 +77,35 @@ python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=lo
 
 ## 模型测试
 
+- 对Uniform采样方式，PPTSM模型在训练时同步进行测试，您可以通过在训练日志中查找关键字`best`获取模型测试精度，日志示例如下:
+
+```txt
+Already save the best model (top1 acc)0.7454
+```
+
+- 对dense采样方式，需单独运行测试代码，其启动命令如下：
+
 ```bash
 python3 main.py --test -c configs/recognition/pptsm/pptsm.yaml -w output/ppTSM/ppTSM_best.pdparams
 ```
 
-- 通过`-c`参数指定配置文件，可下载已发布模型，通过`-w`指定权重存放路径进行模型测试。
+- 通过`-c`参数指定配置文件，通过`-w`指定权重存放路径进行模型测试。
 
 
 Kinetics400数据集测试精度:
 
-| backbone | Sampling method | num_seg | target_size |  distill | Top-1 | checkpoints |
+| backbone | distill | Sampling method | num_seg | target_size | Top-1 | checkpoints |
 | :------: | :----------: | :----: | :----: | :----: | :----: | :----: |
-| ResNet50 | Uniform | 8 | 224 | False | 74.54 | TODO |
-| ResNet50 | Dense | 8 | 224 | False | TODO | TODO |
-| ResNet50 | Uniform | 8 | 224 | True | TODO | TODO |
-| ResNet50 | Dense | 8 | 224 | True | 76.16 | TODO |
+| ResNet50 | False | Uniform | 8 | 224 | False | 74.54 | TODO |
+| ResNet50 | False | Dense | 8 | 224 | False | 75.69 | TODO |
+| ResNet50 | True | Uniform | 8 | 224 | True | TODO | TODO |
+| ResNet50 | True | Dense | 8 | 224 | True | 76.16 | TODO |
 
 - Uniform采样: 时序上，等分成`num_seg`段，每段中间位置采样1帧；空间上，中心位置采样。1个视频共采样1个clips。
+
 - Dense采样：时序上，先等分成10个片段，每段从起始位置开始，以`64//num_seg`为间隔连续采样`num_seg`帧；空间上，左中，中心，右中3个位置采样。1个视频共采样`10*3=30`个clips。
+
+- distill为`True`表示使用了蒸馏所得的预训练模型，具体蒸馏方案参考[ppTSM蒸馏方案](TODO)。
 
 
 ## 模型推理
@@ -102,7 +113,7 @@ Kinetics400数据集测试精度:
 ### 导出inference模型
 
 ```bash
-python3 tools/export_model.py -c configs/recognition/pptsm/pptsm_k400.yaml \
+python3.7 tools/export_model.py -c configs/recognition/pptsm/pptsm_k400.yaml \
                                 -p data/ppTSM.pdparams \
                                 -o inference/ppTSM
 ```
