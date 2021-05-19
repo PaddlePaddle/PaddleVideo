@@ -200,6 +200,7 @@ PaddleVideo飞桨视频模型开发套件，旨在帮助开发者更好的进行
     - [动作定位](docs/zh-CN/model_zoo/README.md)
        - [BMN](docs/zh-CN/model_zoo/localization/bmn.md)
     - 时空动作检测 <sup>coming soon</sup>
+    - ActBERT: 自监督多模态视频文字学习<sup>coming soon</sup>
 - 项目实战
     - [PPTSM实践](docs/zh-CN/tutorials/pp-tsm.md)
     - [训练加速](docs/zh-CN/tutorials/accelerate.md)
