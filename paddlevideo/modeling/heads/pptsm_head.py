@@ -11,11 +11,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import math
-import paddle
+
 from paddle import ParamAttr
 from paddle.nn import Linear
-import paddle.nn.functional as F
 from paddle.regularizer import L2Decay
 from .tsn_head import TSNHead
 from ..registry import HEADS
@@ -26,7 +24,6 @@ from ..weight_init import weight_init_
 @HEADS.register()
 class ppTSMHead(TSNHead):
     """ ppTSM Head
-
     Args:
         num_classes (int): The number of classes to be classified.
         in_channels (int): The number of channles in input feature.
@@ -50,16 +47,14 @@ class ppTSMHead(TSNHead):
                          data_format=data_format,
                          **kwargs)
 
-        self.stdv = 1.0 / math.sqrt(self.in_channels * 1.0)
+        self.fc = Linear(self.in_channels,
+                         self.num_classes,
+                         weight_attr=ParamAttr(learning_rate=5.0,
+                                               regularizer=L2Decay(1e-4)),
+                         bias_attr=ParamAttr(learning_rate=10.0,
+                                             regularizer=L2Decay(0.0)))
+        self.stdv = std
 
     def init_weights(self):
         """Initiate the FC layer parameters"""
-
-        weight_init_(self.fc,
-                     'Uniform',
-                     'fc_0.w_0',
-                     'fc_0.b_0',
-                     low=-self.stdv,
-                     high=self.stdv)
-        self.fc.bias.learning_rate = 2.0
-        self.fc.bias.regularizer = paddle.regularizer.L2Decay(0.0)
+        weight_init_(self.fc, 'Normal', 'fc_0.w_0', 'fc_0.b_0', std=self.stdv)

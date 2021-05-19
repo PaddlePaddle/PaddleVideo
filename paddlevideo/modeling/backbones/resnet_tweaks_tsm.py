@@ -26,6 +26,7 @@ import paddle.nn.functional as F
 from ..registry import BACKBONES
 from ..weight_init import weight_init_
 from ...utils.save_load import load_ckpt
+from paddle.regularizer import L2Decay
 
 
 class ConvBNLayer(nn.Layer):
@@ -77,10 +78,11 @@ class ConvBNLayer(nn.Layer):
 
         self._act = act
 
-        self._batch_norm = BatchNorm2D(out_channels,
-                                       weight_attr=ParamAttr(name=bn_name +
-                                                             "_scale"),
-                                       bias_attr=ParamAttr(bn_name + "_offset"))
+        self._batch_norm = BatchNorm2D(
+            out_channels,
+            weight_attr=ParamAttr(name=bn_name + "_scale",
+                                  regularizer=L2Decay(0.0)),
+            bias_attr=ParamAttr(bn_name + "_offset", regularizer=L2Decay(0.0)))
 
     def forward(self, inputs):
         if self.is_tweaks_mode:
@@ -105,13 +107,13 @@ class BottleneckBlock(nn.Layer):
         self.conv0 = ConvBNLayer(in_channels=in_channels,
                                  out_channels=out_channels,
                                  kernel_size=1,
-                                 act="relu",
+                                 act="leaky_relu",
                                  name=name + "_branch2a")
         self.conv1 = ConvBNLayer(in_channels=out_channels,
                                  out_channels=out_channels,
                                  kernel_size=3,
                                  stride=stride,
-                                 act="relu",
+                                 act="leaky_relu",
                                  name=name + "_branch2b")
 
         self.conv2 = ConvBNLayer(in_channels=out_channels,
@@ -145,7 +147,7 @@ class BottleneckBlock(nn.Layer):
         else:
             short = self.short(inputs)
         y = paddle.add(x=short, y=conv2)
-        return F.relu(y)
+        return F.leaky_relu(y)
 
 
 class BasicBlock(nn.Layer):
@@ -161,7 +163,7 @@ class BasicBlock(nn.Layer):
                                  out_channels=out_channels,
                                  filter_size=3,
                                  stride=stride,
-                                 act="relu",
+                                 act="leaky_relu",
                                  name=name + "_branch2a")
         self.conv1 = ConvBNLayer(in_channels=out_channels,
                                  out_channels=out_channels,
@@ -187,7 +189,7 @@ class BasicBlock(nn.Layer):
         else:
             short = self.short(inputs)
         y = paddle.add(short, conv1)
-        y = F.relu(y)
+        y = F.leaky_relu(y)
         return y
 
 
@@ -227,19 +229,19 @@ class ResNetTweaksTSM(nn.Layer):
                                    out_channels=32,
                                    kernel_size=3,
                                    stride=2,
-                                   act='relu',
+                                   act='leaky_relu',
                                    name="conv1_1")
         self.conv1_2 = ConvBNLayer(in_channels=32,
                                    out_channels=32,
                                    kernel_size=3,
                                    stride=1,
-                                   act='relu',
+                                   act='leaky_relu',
                                    name="conv1_2")
         self.conv1_3 = ConvBNLayer(in_channels=32,
                                    out_channels=64,
                                    kernel_size=3,
                                    stride=1,
-                                   act='relu',
+                                   act='leaky_relu',
                                    name="conv1_3")
         self.pool2D_max = MaxPool2D(kernel_size=3, stride=2, padding=1)
 
