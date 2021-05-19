@@ -82,7 +82,7 @@ export FLAGS_cudnn_batchnorm_spatial_persistent=1
 python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_tsm main.py  --amp --validate -c configs/recognition/tsm/tsm_k400_frames_nhwc.yaml
 ```
 
-- 另外您可以自定义修改参数配置，以达到在不同的数据集上进行训练/测试的目的，具体参数用法请参考[config](../../tutorials/config.md)。
+- 另外您可以自定义修改参数配置，以达到在不同的数据集上进行训练/测试的目的，配置文件命名方式为`模型_数据集_文件格式_数据格式.yaml`具体参数用法请参考[config](../../tutorials/config.md)。
 
 
 
