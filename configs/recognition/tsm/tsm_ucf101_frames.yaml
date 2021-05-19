@@ -38,13 +38,15 @@ PIPELINE: #PIPELINE field
         decode:
             name: "FrameDecoder"
         sample:
-            name: "Sampler_TSM"
+            name: "Sampler"
             num_seg: 8
             seg_len: 1
             valid_mode: False
+            select_left: True
         transform: #Mandotary, image transform operator.
-            - MultiScaleCrop_TSM:
+            - MultiScaleCrop:
                 target_size: 224
+                allow_duplication: True
             - RandomFlip:
             - Image2Array:
             - Normalization:
@@ -55,13 +57,15 @@ PIPELINE: #PIPELINE field
         decode:
             name: "FrameDecoder"
         sample:
-            name: "Sampler_TSM"
+            name: "Sampler"
             num_seg: 8
             seg_len: 1
             valid_mode: True
+            select_left: True
         transform:
-            - Scale_PV:
+            - Scale:
                 short_size: 256
+                fixed_ratio: False
             - CenterCrop:
                 target_size: 224
             - Image2Array:
@@ -73,13 +77,15 @@ PIPELINE: #PIPELINE field
         decode:
             name: "FrameDecoder"
         sample:
-            name: "Sampler_TSM"
+            name: "Sampler"
             num_seg: 8
             seg_len: 1
             valid_mode: True
+            select_left: True
         transform:
-            - Scale_PV:
+            - Scale:
                 short_size: 256
+                fixed_ratio: False
             - CenterCrop:
                 target_size: 224
             - Image2Array:

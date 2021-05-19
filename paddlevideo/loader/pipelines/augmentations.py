@@ -27,9 +27,11 @@ class Scale(object):
     Scale images.
     Args:
         short_size(float | int): Short size of an image will be scaled to the short_size.
+        fixed_ratio(bool): Set whether to zoom according to a fixed ratio. default: True
     """
-    def __init__(self, short_size):
+    def __init__(self, short_size, fixed_ratio=True):
         self.short_size = short_size
+        self.fixed_ratio = fixed_ratio
 
     def __call__(self, results):
         """
@@ -52,41 +54,16 @@ class Scale(object):
 
             if w < h:
                 ow = self.short_size
-                oh = int(self.short_size * 4.0 / 3.0)
+                oh = int(self.short_size * 4.0 /
+                         3.0) if self.fixed_ratio else int(h * self.short_size /
+                                                           w)
                 resized_imgs.append(img.resize((ow, oh), Image.BILINEAR))
             else:
                 oh = self.short_size
-                ow = int(self.short_size * 4.0 / 3.0)
+                ow = int(self.short_size * 4.0 /
+                         3.0) if self.fixed_ratio else int(w * self.short_size /
+                                                           h)
                 resized_imgs.append(img.resize((ow, oh), Image.BILINEAR))
-        results['imgs'] = resized_imgs
-        return results
-
-
-@PIPELINES.register()
-class Scale_PV(Scale):
-    """
-    Scale images using PaddleVision's function
-    It scale the short size of image to a target short size at a ratio=target_short_size/img_short_size,
-    then use the same ratio to sale another side.
-    Args:
-        short_size(float | int): Short size of an image will be scaled to the short_size.
-    """
-    def __init__(self, short_size):
-        super(Scale_PV, self).__init__(short_size)
-        self.resize_func = paddle.vision.transforms.Resize(
-            size=short_size, interpolation='bilinear')
-
-    def __call__(self, results):
-        """
-        Performs resize operations.
-        Args:
-            imgs (Sequence[PIL.Image]): List where each item is a PIL.Image.
-            For example, [PIL.Image0, PIL.Image1, PIL.Image2, ...]
-        return:
-            resized_imgs: List where each item is a PIL.Image after scaling.
-        """
-        imgs = results['imgs']
-        resized_imgs = [self.resize_func(img) for img in imgs]
         results['imgs'] = resized_imgs
         return results
 
@@ -167,17 +144,29 @@ class CenterCrop(object):
 
 @PIPELINES.register()
 class MultiScaleCrop(object):
+    """
+    Random crop images in with multiscale sizes
+    Args:
+        target_size(int): Random crop a square with the target_size from an image.
+        scales(int): List of candidate cropping scales.
+        max_distort(int): Maximum allowable deformation combination distance.
+        fix_crop(int): Whether to fix the cutting start point.
+        allow_duplication(int): Whether to allow duplicate candidate crop starting points.
+        more_fix_crop(int): Whether to allow more cutting starting points.
+    """
     def __init__(
             self,
-            target_size,  #NOTE: named target size now, but still pass short size in it!
+            target_size,  # NOTE: named target size now, but still pass short size in it!
             scales=None,
             max_distort=1,
             fix_crop=True,
+            allow_duplication=False,
             more_fix_crop=True):
         self.target_size = target_size
         self.scales = scales if scales else [1, .875, .75, .66]
         self.max_distort = max_distort
         self.fix_crop = fix_crop
+        self.allow_duplication = allow_duplication
         self.more_fix_crop = more_fix_crop
 
     def __call__(self, results):
@@ -225,106 +214,14 @@ class MultiScaleCrop(object):
 
                 ret = list()
                 ret.append((0, 0))  # upper left
-                if w_step != 0:
+                if self.allow_duplication or w_step != 0:
                     ret.append((4 * w_step, 0))  # upper right
-                if h_step != 0:
+                if self.allow_duplication or h_step != 0:
                     ret.append((0, 4 * h_step))  # lower left
-                if h_step != 0 and w_step != 0:
+                if self.allow_duplication or (h_step != 0 and w_step != 0):
                     ret.append((4 * w_step, 4 * h_step))  # lower right
-                if h_step != 0 or w_step != 0:
+                if self.allow_duplication or (h_step != 0 or w_step != 0):
                     ret.append((2 * w_step, 2 * h_step))  # center
-
-                if self.more_fix_crop:
-                    ret.append((0, 2 * h_step))  # center left
-                    ret.append((4 * w_step, 2 * h_step))  # center right
-                    ret.append((2 * w_step, 4 * h_step))  # lower center
-                    ret.append((2 * w_step, 0 * h_step))  # upper center
-
-                    ret.append((1 * w_step, 1 * h_step))  # upper left quarter
-                    ret.append((3 * w_step, 1 * h_step))  # upper right quarter
-                    ret.append((1 * w_step, 3 * h_step))  # lower left quarter
-                    ret.append((3 * w_step, 3 * h_step))  # lower righ quarter
-
-                w_offset, h_offset = random.choice(ret)
-
-            return crop_pair[0], crop_pair[1], w_offset, h_offset
-
-        crop_w, crop_h, offset_w, offset_h = _sample_crop_size(im_size)
-        crop_img_group = [
-            img.crop((offset_w, offset_h, offset_w + crop_w, offset_h + crop_h))
-            for img in imgs
-        ]
-        ret_img_group = [
-            img.resize((input_size[0], input_size[1]), Image.BILINEAR)
-            for img in crop_img_group
-        ]
-        results['imgs'] = ret_img_group
-        return results
-
-
-@PIPELINES.register()
-class MultiScaleCrop_TSM(MultiScaleCrop):
-    def __init__(
-            self,
-            target_size,  #NOTE: named target size now, but still pass short size in it!
-            scales=None,
-            max_distort=1,
-            fix_crop=True,
-            more_fix_crop=True):
-
-        super(MultiScaleCrop_TSM,
-              self).__init__(target_size, scales, max_distort, fix_crop,
-                             more_fix_crop)
-
-    def __call__(self, results):
-        """
-        Performs MultiScaleCrop operations.
-        Args:
-            imgs: List where wach item is a PIL.Image.
-            XXX:
-        results:
-
-        """
-        imgs = results['imgs']
-
-        input_size = [self.target_size, self.target_size]
-
-        im_size = imgs[0].size
-
-        # get random crop offset
-        def _sample_crop_size(im_size):
-            image_w, image_h = im_size[0], im_size[1]
-
-            base_size = min(image_w, image_h)
-            crop_sizes = [int(base_size * x) for x in self.scales]
-            crop_h = [
-                input_size[1] if abs(x - input_size[1]) < 3 else x
-                for x in crop_sizes
-            ]
-            crop_w = [
-                input_size[0] if abs(x - input_size[0]) < 3 else x
-                for x in crop_sizes
-            ]
-
-            pairs = []
-            for i, h in enumerate(crop_h):
-                for j, w in enumerate(crop_w):
-                    if abs(i - j) <= self.max_distort:
-                        pairs.append((w, h))
-            crop_pair = random.choice(pairs)
-            if not self.fix_crop:
-                w_offset = random.randint(0, image_w - crop_pair[0])
-                h_offset = random.randint(0, image_h - crop_pair[1])
-            else:
-                w_step = (image_w - crop_pair[0]) // 4
-                h_step = (image_h - crop_pair[1]) // 4
-
-                ret = list()
-                ret.append((0, 0))  # upper left
-                ret.append((4 * w_step, 0))  # upper right
-                ret.append((0, 4 * h_step))  # lower left
-                ret.append((4 * w_step, 4 * h_step))  # lower right
-                ret.append((2 * w_step, 2 * h_step))  # center
 
                 if self.more_fix_crop:
                     ret.append((0, 2 * h_step))  # center left
@@ -406,7 +303,7 @@ class Image2Array(object):
         imgs = results['imgs']
         np_imgs = (np.stack(imgs)).astype('float32')
         if self.transpose:
-            np_imgs = np_imgs.transpose(0, 3, 1, 2)  #nchw
+            np_imgs = np_imgs.transpose(0, 3, 1, 2)  # nchw
         results['imgs'] = np_imgs
         return results
 
@@ -483,7 +380,7 @@ class JitterScale(object):
 
         imgs = results['imgs']
         size = int(round(np.random.uniform(self.min_size, self.max_size)))
-        assert (len(imgs) >= 1) , \
+        assert (len(imgs) >= 1), \
             "len(imgs):{} should be larger than 1".format(len(imgs))
         width, height = imgs[0].size
         if (width <= height and width == size) or (height <= width
@@ -556,7 +453,7 @@ class MultiCrop(object):
         if not self.test_mode:
             x_offset = random.randint(0, w - self.target_size)
             y_offset = random.randint(0, h - self.target_size)
-        else:  #multi-crop
+        else:  # multi-crop
             x_gap = int(
                 math.ceil((w - self.target_size) / (spatial_num_clips - 1)))
             y_gap = int(
