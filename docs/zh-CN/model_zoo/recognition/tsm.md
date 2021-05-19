@@ -145,7 +145,7 @@ Already save the best model (top1 acc)0.7106
 
 - 若需单独运行测试代码，其启动命令如下：
 
-```bas
+```bash
 python3.7 main.py --test -c configs/recognition/tsm/tsm_k400_frames.yaml --weights output/TSM/TSM_best.pdparams
 ```
 - 通过`-c`参数指定配置文件，通过`-w`指定权重存放路径进行模型测试。
