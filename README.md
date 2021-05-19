@@ -200,6 +200,8 @@ The chart below illustrates the performance of the video recognition models both
     - [BMN](docs/en/model_zoo/localization/bmn.md)
   - Spatio temporal action detection
     - Coming Soon!  
+  - ActBERT: Learning Global-Local Video-Text Representations
+    - Coming Soon!  
 - Practice
   - [Higher performance PP-TSM](docs/en/tutorials/pp-tsm.md)
   - [Accelerate training](docs/en/tutorials/accelerate.md)
