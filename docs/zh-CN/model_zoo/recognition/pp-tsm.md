@@ -15,17 +15,19 @@
 
 ## 模型简介
 
-我们对[TSM模型](./tsm.md)进行了改进，提出了高精度2D实用视频分类模型**PPTSM**。在不增加参数量和计算量的情况下，在UCF-101、Kinetics-400等数据集上精度显著超过原文。模型优化解析请参考[**pptsm实用视频模型优化解析**](https://github.com/PaddlePaddle/PaddleVideo/blob/main/docs/zh-CN/tutorials/pp-tsm.md)。
+我们对[TSM模型](./tsm.md)进行了改进，提出了高精度2D实用视频分类模型**PPTSM**。在不增加参数量和计算量的情况下，在UCF-101、Kinetics-400等数据集上精度显著超过原文，在Kinetics-400数据集上的精度如下表所示。模型优化解析请参考[**pptsm实用视频模型优化解析**](https://github.com/PaddlePaddle/PaddleVideo/blob/main/docs/zh-CN/tutorials/pp-tsm.md)。
 
 | Version | Sampling method | Top1 |
-| :------: | :----------: | :----: |
+| :------ | :----------: | :----: |
+| Ours (distill) | Uniform | **TODO** |
 | Ours | Uniform | **74.54** |
 | [mit-han-lab](https://github.com/mit-han-lab/temporal-shift-module)  | Uniform | 71.16 |
 | [mmaction2](https://github.com/open-mmlab/mmaction2/blob/master/configs/recognition/tsm/README.md) |  Uniform | 70.59 |
 
 
 | Version | Sampling method | Top1 |
-| :------: | :----------: | :----: |
+| :------ | :----------: | :----: |
+| Ours (distill) | Dense | **76.16** |
 | Ours | Dense | **TODO** |
 | [mit-han-lab](https://github.com/mit-han-lab/temporal-shift-module) | Dense | 74.1 |
 | [mmaction2](https://github.com/open-mmlab/mmaction2/blob/master/configs/recognition/tsm/README.md) | Dense | 73.38 |
@@ -76,7 +78,7 @@ python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=lo
 ## 模型测试
 
 ```bash
-python3 main.py --test -c configs/recognition/tsm/pptsm.yaml -w output/ppTSM/ppTSM_best.pdparams
+python3 main.py --test -c configs/recognition/pptsm/pptsm.yaml -w output/ppTSM/ppTSM_best.pdparams
 ```
 
 - 通过`-c`参数指定配置文件，可下载已发布模型，通过`-w`指定权重存放路径进行模型测试。
@@ -89,7 +91,10 @@ Kinetics400数据集测试精度:
 | ResNet50 | 1\*1 | 8 | 224 | False | 74.54 | TODO |
 | ResNet50 | 3\*10 | 8 | 224 | False | TODO | TODO |
 | ResNet50 | 1\*1 | 8 | 224 | True | TODO | TODO |
-| ResNet50 | 3\*10 | 8 | 224 | True | TODO | TODO |
+| ResNet50 | 3\*10 | 8 | 224 | True | 76.16 | TODO |
+
+- Uniform采样方式: 时序上，等分成num_seg段，每段中间位置采样1帧；空间上，中心位置采样。
+- Dense采样方式：时序上，先等分成10个片段，每段从起始位置开始，以64//num_seg为间隔连续采样num_seg帧；空间上，左中，中心，右中共3个位置采样。
 
 
 ## 模型推理
@@ -97,7 +102,7 @@ Kinetics400数据集测试精度:
 ### 导出inference模型
 
 ```bash
-python3 tools/export_model.py -c configs/recognition/tsm/pptsm_k400.yaml \
+python3 tools/export_model.py -c configs/recognition/pptsm/pptsm_k400.yaml \
                                 -p data/ppTSM.pdparams \
                                 -o inference/ppTSM
 ```
@@ -110,7 +115,7 @@ python3 tools/export_model.py -c configs/recognition/tsm/pptsm_k400.yaml \
 
 ```bash
 python3.7 tools/predict.py --input_file data/example.avi \
-                           --config configs/recognition/tsm/pptsm_k400.yaml \
+                           --config configs/recognition/pptsm/pptsm_k400.yaml \
                            --model_file inference/ppTSM/ppTSM.pdmodel \
                            --params_file inference/ppTSM/ppTSM.pdiparams \
                            --use_gpu=True \
