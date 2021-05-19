@@ -68,6 +68,11 @@ UCF101数据下载及准备请参考[ucf101数据准备](../../dataset/ucf101.md
 python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_tsm main.py  --amp --validate -c configs/recognition/tsm/tsm_k400_frames.yaml
 ```
 
+- 使用amp混合精度训练时，配合`nhwc`的数据格式有更好的加速效果，其训练启动方式如下: 
+
+```bash
+python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_tsm main.py  --amp --validate -c configs/recognition/tsm/tsm_k400_frames_nhwc.yaml
+```
 
 - 另外您可以自定义修改参数配置，以达到在不同的数据集上进行训练/测试的目的，具体参数用法请参考[config](../../tutorials/config.md)。
 
@@ -75,12 +80,12 @@ python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log
 
 ### UCF-101数据集训练
 
-#### **下载并添加预训练模型**
+#### 下载并添加预训练模型
 
-1. 加载我们在Kinetics-400上训练好的TSM模型[TODO]()，也可以通过命令行下载
+1. 加载在Kinetics-400上训练好的权重作为Backbone初始化参数[TSM_k400.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.1/TSM/TSM_k400.pdparams)，也可以通过命令行下载
 
    ```bash
-   wget 
+   wget https://videotag.bj.bcebos.com/PaddleVideo-release2.1/TSM/TSM_k400.pdparams
    ```
 
 2. 打开`PaddleVideo/configs/recognition/tsm/tsm_ucf101_frames.yaml`，将下载好的权重路径填写到下方`pretrained:`之后
@@ -95,38 +100,55 @@ python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log
 
 #### 开始训练
 
-- 通过指定不同的配置文件，可以使用不同的数据格式/数据集进行训练，启动命令如下（更多的训练命令在`PaddleVideo/run.sh`中可以查看）。
+- UCF-101数据集使用4卡训练，frames格式数据的训练启动命令如下:
 
   ```bash
   python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3" --log_dir=log_tsm main.py  --validate -c configs/recognition/tsm/tsm_ucf101_frames.yaml
   ```
 
+- 开启amp混合精度训练，可加速训练过程，其训练启动命令如下：
+
+```bash
+python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3" --log_dir=log_tsm main.py  --amp --validate -c configs/recognition/tsm/tsm_ucf101_frames.yaml
+```
+
+- 使用amp混合精度训练时，配合`nhwc`的数据格式有更好的加速效果，其训练启动方式如下: 
+
+```bash
+python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3" --log_dir=log_tsm main.py  --amp --validate -c configs/recognition/tsm/tsm_ucf101_frames_nhwc.yaml
+```
 
 
 ## 模型测试
 
-将待测的模型权重放到`output/TSM/`目录下，测试命令如下：
+- TSM模型在训练时同步进行测试，您可以通过在训练日志中查找关键字`best`获取模型测试精度，日志示例如下:
+
+```txt
+Already save the best model (top1 acc)0.7106
+```
+
+- 若需单独运行测试代码，其启动命令如下：
 
 ```bas
 python3.7 main.py --test -c configs/recognition/tsm/tsm_k400_frames.yaml --weights output/TSM/TSM_best.pdparams
 ```
+- 通过`-c`参数指定配置文件，通过`-w`指定权重存放路径进行模型测试。
 
-- 也可以使用我们下载我们训练好并已发布的模型[TODO]()进行测试
-
+---
 
 当测试配置采用如下参数时，在Kinetics-400的validation数据集上的评估精度如下：
 
 | backbone | Sampling method | Training Strategy | num_seg | target_size | Top-1 | checkpoints |
 | :--------: | :---------------: | :-------: | :-----------: | :-----: | :-----------: | :-----------: |
-| ResNet50 | Uniform         | NCHW | 8       | 224         | 71.06 | TODO        |
+| ResNet50 | Uniform         | NCHW | 8       | 224         | 71.06 | [TSM_k400.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.1/TSM/TSM_k400.pdparams)        |
 
 当测试配置采用如下参数时，在UCF-101的validation数据集上的评估精度如下：
 
 | backbone | Sampling method | Training Strategy | num_seg | target_size | Top-1 | checkpoints |
 | :------: | :-------------: | :-----------------: | :-----: | :---------: | :---: | :---------: |
-| ResNet50 |     Uniform     | NCHW              |    8    |     224     | 94.42 |    TODO     |
-| ResNet50 |     Uniform     | NCHW+AMP |    8    |     224     | 94.40 |    TODO     |
-| ResNet50 |     Uniform     | NHWC+AMP |    8    |     224     | 94.55 |    TODO     |
+| ResNet50 |     Uniform     | NCHW              |    8    |     224     | 94.42 |    [TSM_ucf101_nchw.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.1/TSM/TSM_ucf101_nchw.pdparams)     |
+| ResNet50 |     Uniform     | NCHW+AMP |    8    |     224     | 94.40 |   [TSM_ucf101_amp_nchw.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.1/TSM/TSM_ucf101_amp_nchw.pdparams)     |
+| ResNet50 |     Uniform     | NHWC+AMP |    8    |     224     | 94.55 |   [TSM_ucf101_amp_nhwc.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.1/TSM/TSM_ucf101_amp_nhwc.pdparams)     |
 
 ## 模型推理
 
