@@ -1,7 +1,11 @@
 export CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7
 
-start_time=$(date +%s)
+#export FLAGS_conv_workspace_size_limit=800 #MB
+#export FLAGS_cudnn_exhaustive_search=1
+#export FLAGS_cudnn_batchnorm_spatial_persistent=1
 
+
+start_time=$(date +%s)
 
 # run tsm training
 #python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_tsm main.py  --validate -c configs/recognition/tsm/tsm_k400_frames.yaml
@@ -28,7 +32,7 @@ start_time=$(date +%s)
 #python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_attetion_lstm  main.py  --validate -c configs/recognition/attention_lstm/attention_lstm.yaml
 
 # run pp-tsm training
-python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3"  --log_dir=log_pptsm  main.py  --validate -c configs/recognition/tsm/pptsm.yaml
+python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=log_pptsm  main.py  --validate -c configs/recognition/pptsm/pptsm_k400_frames.yaml
 
 # run tsn dali training
 #python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3" --log_dir=log_tsn main.py --train_dali -c configs/recognition/tsn/tsn_dali.yaml

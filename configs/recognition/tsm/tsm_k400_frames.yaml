@@ -87,7 +87,6 @@ PIPELINE: #PIPELINE field
                 mean: [0.485, 0.456, 0.406]
                 std: [0.229, 0.224, 0.225]
 
-
 OPTIMIZER: #OPTIMIZER field
     name: 'Momentum' #Mandatory, the type of optimizer, associate to the 'paddlevideo/solver/'
     momentum: 0.9
@@ -106,6 +105,10 @@ OPTIMIZER: #OPTIMIZER field
 METRIC:
     name: 'CenterCropMetric'
 
+INFERENCE:
+    name: 'ppTSM_Inference_helper'
+    num_seg: 8
+    target_size: 224
 
 model_name: "TSM"
 log_interval: 20 #Optional, the interal of logger, default:10

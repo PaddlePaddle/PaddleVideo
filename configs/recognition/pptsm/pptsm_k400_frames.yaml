@@ -14,21 +14,21 @@ MODEL: #MODEL field
 
 DATASET: #DATASET field
     batch_size: 16  #Mandatory, bacth size
-    num_workers:   2 #Mandatory, XXX the number of subprocess on each GPU.
+    num_workers: 4 #Mandatory, the number of subprocess on each GPU.
     train:
         format: "FrameDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
         data_prefix: "" #Mandatory, train data root path
-        file_path: "./train.list" #Mandatory, train data index file path
+        file_path: "data/k400_frames/train.list" #Mandatory, train data index file path
         suffix: 'img_{:05}.jpg'
     valid:
         format: "FrameDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
         data_prefix: "" #Mandatory, valid data root path
-        file_path: "./val.list" #Mandatory, valid data index file path
+        file_path: "data/k400_frames/val.list" #Mandatory, valid data index file path
         suffix: 'img_{:05}.jpg'
     test:
         format: "FrameDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
         data_prefix: "" #Mandatory, valid data root path
-        file_path: "./val.list" #Mandatory, valid data index file path
+        file_path: "data/k400_frames/val.list" #Mandatory, valid data index file path
         suffix: 'img_{:05}.jpg'
 
 PIPELINE: #PIPELINE field
@@ -52,7 +52,6 @@ PIPELINE: #PIPELINE field
             - Normalization:
                 mean: [0.485, 0.456, 0.406]
                 std: [0.229, 0.224, 0.225]
-
     valid: #Mandatory, indicate the pipeline to deal with the validing data. associate to the 'paddlevideo/loader/pipelines/'
         decode:
             name: "FrameDecoder"
@@ -70,8 +69,7 @@ PIPELINE: #PIPELINE field
             - Normalization:
                 mean: [0.485, 0.456, 0.406]
                 std: [0.229, 0.224, 0.225]
-
-    test:
+    test:  #Mandatory, indicate the pipeline to deal with the validing data. associate to the 'paddlevideo/loader/pipelines/'
         decode:
             name: "FrameDecoder"
         sample:
@@ -90,15 +88,19 @@ PIPELINE: #PIPELINE field
                 std: [0.229, 0.224, 0.225]
 
 OPTIMIZER: #OPTIMIZER field
-    name: 'Momentum' #Mandatory, the type of optimizer, associate to the 'paddlevideo/solver/'
-    momentum: 0.9
-    learning_rate: #Mandatory, the type of learning rate scheduler, associate to the 'paddlevideo/solver/'
-        name: 'PiecewiseDecay'
-        boundaries: [40, 60]
-        values: [0.01, 0.001, 0.0001]  #4 cards * 16 batch size
-    weight_decay:
-        name: 'L2'
-        value: 2e-4
+  name: 'Momentum'
+  momentum: 0.9
+  learning_rate:
+    iter_step: True
+    name: 'CustomWarmupCosineDecay'
+    max_epoch: 80
+    warmup_epochs: 10
+    warmup_start_lr: 0.005
+    cosine_base_lr: 0.01
+  weight_decay:
+    name: 'L2'
+    value: 1e-4
+  use_nesterov: True
 
 MIX:
     name: "Mixup"
@@ -112,12 +114,10 @@ PRECISEBN:
 METRIC:
     name: 'CenterCropMetric'
 
-
 INFERENCE:
     name: 'ppTSM_Inference_helper'
     num_seg: 8
     target_size: 224
-
 
 model_name: "ppTSM"
 log_interval: 10 #Optional, the interal of logger, default:10
