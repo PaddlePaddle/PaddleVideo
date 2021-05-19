@@ -63,11 +63,13 @@ class ConvBNLayer(nn.Layer):
             bn_name = "bn" + name[3:]
 
         self._act = act
-        
+
         self._batch_norm = BatchNorm2D(
             out_channels,
-            weight_attr=ParamAttr(name=bn_name + "_scale", regularizer=L2Decay(0.0)),
-            bias_attr=ParamAttr(name=bn_name + "_offset", regularizer=L2Decay(0.0)),
+            weight_attr=ParamAttr(name=bn_name + "_scale",
+                                  regularizer=L2Decay(0.0)),
+            bias_attr=ParamAttr(name=bn_name + "_offset",
+                                regularizer=L2Decay(0.0)),
             data_format=data_format)
 
     def forward(self, inputs):
@@ -122,15 +124,10 @@ class BottleneckBlock(nn.Layer):
         self.num_seg = num_seg
 
     def forward(self, inputs):
-        if self.data_format == "NCHW":
-            shifts = F.temporal_shift(inputs, self.num_seg, 1.0 / self.num_seg)
-        elif self.data_format == "NHWC":
-            #N,H,W,C --> N,C,H,W
-            inputs_trans = paddle.transpose(inputs, perm=[0, 3, 1, 2])
-            shifts = F.temporal_shift(inputs_trans, self.num_seg,
-                                      1.0 / self.num_seg)
-            #N,C,H,W --> N,H,W,C
-            shifts = paddle.transpose(shifts, perm=[0, 2, 3, 1])
+        shifts = F.temporal_shift(inputs,
+                                  self.num_seg,
+                                  1.0 / self.num_seg,
+                                  data_format=self.data_format)
         y = self.conv0(shifts)
         conv1 = self.conv1(y)
         conv2 = self.conv2(conv1)
@@ -203,11 +200,7 @@ class ResNetTSM(nn.Layer):
         depth (int): Depth of resnet model.
         pretrained (str): pretrained model. Default: None.
     """
-    def __init__(self,
-                 depth,
-                 num_seg=8,
-                 data_format="NCHW",
-                 pretrained=None):
+    def __init__(self, depth, num_seg=8, data_format="NCHW", pretrained=None):
         super(ResNetTSM, self).__init__()
         self.pretrained = pretrained
         self.layers = depth
@@ -322,6 +315,7 @@ class ResNetTSM(nn.Layer):
         #  1. the phase of generating data[images, label] from dataloader
         #     to
         #  2. last layer of a model, always is FC layer
+
         y = self.conv(inputs)
         y = self.pool2D_max(y)
         for block in self.block_list:

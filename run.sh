@@ -1,7 +1,11 @@
 export CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7
 
-start_time=$(date +%s)
+#export FLAGS_conv_workspace_size_limit=800 #MB
+#export FLAGS_cudnn_exhaustive_search=1
+#export FLAGS_cudnn_batchnorm_spatial_persistent=1
 
+
+start_time=$(date +%s)
 
 # run tsm training
 #python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_tsm main.py  --validate -c configs/recognition/tsm/tsm_k400_frames.yaml
