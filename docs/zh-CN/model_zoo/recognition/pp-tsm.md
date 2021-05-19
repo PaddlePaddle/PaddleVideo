@@ -88,13 +88,13 @@ Kinetics400数据集测试精度:
 
 | backbone | Sampling method | num_seg | target_size |  distill | Top-1 | checkpoints |
 | :------: | :----------: | :----: | :----: | :----: | :----: | :----: |
-| ResNet50 | 1\*1 | 8 | 224 | False | 74.54 | TODO |
-| ResNet50 | 3\*10 | 8 | 224 | False | TODO | TODO |
-| ResNet50 | 1\*1 | 8 | 224 | True | TODO | TODO |
-| ResNet50 | 3\*10 | 8 | 224 | True | 76.16 | TODO |
+| ResNet50 | Uniform | 8 | 224 | False | 74.54 | TODO |
+| ResNet50 | Dense | 8 | 224 | False | TODO | TODO |
+| ResNet50 | Uniform | 8 | 224 | True | TODO | TODO |
+| ResNet50 | Dense | 8 | 224 | True | 76.16 | TODO |
 
-- Uniform采样方式: 时序上，等分成num_seg段，每段中间位置采样1帧；空间上，中心位置采样。
-- Dense采样方式：时序上，先等分成10个片段，每段从起始位置开始，以64//num_seg为间隔连续采样num_seg帧；空间上，左中，中心，右中共3个位置采样。
+- Uniform采样: 时序上，等分成`num_seg`段，每段中间位置采样1帧；空间上，中心位置采样。1个视频共采样1个clips。
+- Dense采样：时序上，先等分成10个片段，每段从起始位置开始，以`64//num_seg`为间隔连续采样`num_seg`帧；空间上，左中，中心，右中3个位置采样。1个视频共采样`10*3=30`个clips。
 
 
 ## 模型推理
