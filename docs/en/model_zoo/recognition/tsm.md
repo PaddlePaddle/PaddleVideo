@@ -9,6 +9,7 @@
 - [Train](#Train)
 - [Test](#Test)
 - [Inference](#Inference)
+- [Details](#Details)
 - [Reference](#Reference)
 
 ## Introduction
@@ -64,16 +65,36 @@ Please refer to UCF101 data download and preparation [ucf101 data preparation](.
   python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_tsm main.py  --validate -c configs/recognition/tsm/tsm_k400_frames.yaml
   ```
 
+- AMP is useful for speeding up training, scripts as follows:
+
+```bash
+export FLAGS_conv_workspace_size_limit=800 #MB
+export FLAGS_cudnn_exhaustive_search=1
+export FLAGS_cudnn_batchnorm_spatial_persistent=1
+
+python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_tsm main.py  --amp --validate -c configs/recognition/tsm/tsm_k400_frames.yaml
+```
+
+- AMP works better with `NHWC` data format, scripts as follows:
+
+```bash
+export FLAGS_conv_workspace_size_limit=800 #MB
+export FLAGS_cudnn_exhaustive_search=1
+export FLAGS_cudnn_batchnorm_spatial_persistent=1
+
+python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_tsm main.py  --amp --validate -c configs/recognition/tsm/tsm_k400_frames_nhwc.yaml
+```
+
 - For the config file usage，please refer to [config](../../tutorials/config.md).
 
 ### Train on UCF-101 dataset
 
 #### download pretrain-model
 
-- Load the TSM model we trained on Kinetics-400 [TSM_k400.pdparams](), or download it through the command line
+- Load the TSM model we trained on Kinetics-400 [TSM_k400.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.1/TSM/TSM_k400.pdparams), or download it through the command line
 
   ```bash
-  wget 
+  wget https://videotag.bj.bcebos.com/PaddleVideo-release2.1/TSM/TSM_k400.pdparams
   ```
 
 - Open `PaddleVideo/configs/recognition/tsm/tsm_ucf101_frames.yaml`, and fill in the downloaded weight path below `pretrained:`
@@ -94,24 +115,25 @@ Please refer to UCF101 data download and preparation [ucf101 data preparation](.
   python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3" --log_dir=log_tsm main.py  --validate -c configs/recognition/tsm/tsm_ucf101_frames.yaml
   ```
 
-### Implementation details
+- AMP is useful for speeding up training, scripts as follows:
 
-#### **data processing**
+```bash
+export FLAGS_conv_workspace_size_limit=800 #MB
+export FLAGS_cudnn_exhaustive_search=1
+export FLAGS_cudnn_batchnorm_spatial_persistent=1
 
-- The model reads the `mp4` data in the Kinetics-400 data set, first divides each piece of video data into `seg_num` segments, and then uniformly extracts 1 frame of image from each segment to obtain sparsely sampled `seg_num` video frames. Then do the same random data enhancement to this `seg_num` frame image, including multi-scale random cropping, random left and right flips, data normalization, etc., and finally zoom to `target_size`.
+python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3" --log_dir=log_tsm main.py  --amp --validate -c configs/recognition/tsm/tsm_ucf101_frames.yaml
+```
 
-#### **Training strategy**
+- AMP works better with `NHWC` data format, scripts as follows:
 
-*  Use Momentum optimization algorithm training, momentum=0.9
-*  Using L2_Decay, the weight attenuation coefficient is 1e-4
-*  Using global gradient clipping, the clipping factor is 20.0
-*  The total number of epochs is 50, and the learning rate will be attenuated by 0.1 times when the epoch reaches 20 and 40
-*  The learning rate of the weight and bias of the FC layer are respectively 5 times and 10 times the overall learning rate, and the bias does not set L2_Decay
-*  Dropout_ratio=0.5
+```bash
+export FLAGS_conv_workspace_size_limit=800 #MB
+export FLAGS_cudnn_exhaustive_search=1
+export FLAGS_cudnn_batchnorm_spatial_persistent=1
 
-#### **Parameter initialization**
-
-- Initialize the weight of the FC layer with the normal distribution of Normal(mean=0, std=0.001), and initialize the bias of the FC layer with a constant of 0
+python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3" --log_dir=log_tsm main.py  --amp --validate -c configs/recognition/tsm/tsm_ucf101_frames_nhwc.yaml
+```
 
 ## Test
 
@@ -121,21 +143,21 @@ Put the weight of the model to be tested into the `output/TSM/` directory, the t
 python3 main.py --test -c configs/recognition/tsm/tsm.yaml -w output/TSM/TSM_best.pdparams
 ```
 
-- You can also use our trained and published model [TSM.pdparams](https://videotag.bj.bcebos.com/PaddleVideo/TSM/TSM.pdparams) to test
+---
 
 When the test configuration uses the following parameters, the evaluation accuracy on the validation data set of Kinetics-400 is as follows:
 
 | backbone | Sampling method | Training Strategy | num_seg | target_size | Top-1 | checkpoints |
-| :------: | :-------------: | :---------------: | :-----: | :---------: | :---: | :---------: |
-| ResNet50 |     Uniform     |       NCHW        |    8    |     224     | 71.06 |    TODO     |
+| :--------: | :---------------: | :-------: | :-----------: | :-----: | :-----------: | :-----------: |
+| ResNet50 | Uniform         | NCHW | 8       | 224         | 71.06 | [TSM_k400.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.1/TSM/TSM_k400.pdparams)        |
 
 When the test configuration uses the following parameters, the evaluation accuracy on the validation data set of UCF-101 is as follows:
 
 | backbone | Sampling method | Training Strategy | num_seg | target_size | Top-1 | checkpoints |
-| :------: | :-------------: | :---------------: | :-----: | :---------: | :---: | :---------: |
-| ResNet50 |     Uniform     |       NCHW        |    8    |     224     | 94.42 |    TODO     |
-| ResNet50 |     Uniform     |     NCHW+AMP      |    8    |     224     | 94.40 |    TODO     |
-| ResNet50 |     Uniform     |     NHWC+AMP      |    8    |     224     | 94.55 |    TODO     |
+| :------: | :-------------: | :-----------------: | :-----: | :---------: | :---: | :---------: |
+| ResNet50 |     Uniform     | NCHW              |    8    |     224     | 94.42 |    [TSM_ucf101_nchw.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.1/TSM/TSM_ucf101_nchw.pdparams)     |
+| ResNet50 |     Uniform     | NCHW+AMP |    8    |     224     | 94.40 |   [TSM_ucf101_amp_nchw.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.1/TSM/TSM_ucf101_amp_nchw.pdparams)     |
+| ResNet50 |     Uniform     | NHWC+AMP |    8    |     224     | 94.55 |   [TSM_ucf101_amp_nhwc.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.1/TSM/TSM_ucf101_amp_nhwc.pdparams)     |
 
 ## Inference
 
@@ -144,9 +166,9 @@ When the test configuration uses the following parameters, the evaluation accura
 To get model architecture file `TSM.pdmodel` and parameters file `TSM.pdiparams`, use:
 
 ```bash
-python3 tools/export_model.py -c configs/recognition/tsm/tsm_k400_frames.yaml \
--p output/TSM/TSM_best.pdparams \
--o inference/TSM
+python3.7 tools/export_model.py -c configs/recognition/tsm/tsm_k400_frames.yaml \
+                                -p data/TSM_k400.pdparams \
+                                -o inference/TSM
 ```
 
 - Args usage please refer to [Model Inference](https://github.com/PaddlePaddle/PaddleVideo/blob/release/2.0/docs/zh-CN/start.md#2-%E6%A8%A1%E5%9E%8B%E6%8E%A8%E7%90%86).
@@ -154,12 +176,33 @@ python3 tools/export_model.py -c configs/recognition/tsm/tsm_k400_frames.yaml \
 ### infer
 
 ```bash
-python3 tools/predict.py --video_file data/example.avi \
---model_file inference/TSM/TSM.pdmodel \
---params_file inference/TSM/TSM.pdiparams \
---use_gpu=True \
---use_tensorrt=False
+python3.7 tools/predict.py --input_file data/example.avi \
+                           --config configs/recognition/tsm/tsm_k400_frames.yaml \
+                           --model_file inference/TSM/TSM.pdmodel \
+                           --params_file inference/TSM/TSM.pdiparams \
+                           --use_gpu=True \
+                           --use_tensorrt=False
 ```
+
+## Implementation details
+
+### data processing
+
+- The model reads the `mp4` data in the Kinetics-400 data set, first divides each piece of video data into `seg_num` segments, and then uniformly extracts 1 frame of image from each segment to obtain sparsely sampled `seg_num` video frames. Then do the same random data enhancement to this `seg_num` frame image, including multi-scale random cropping, random left and right flips, data normalization, etc., and finally zoom to `target_size`.
+
+### Training strategy
+
+*  Use Momentum optimization algorithm training, momentum=0.9
+*  Using L2_Decay, the weight attenuation coefficient is 1e-4
+*  Using global gradient clipping, the clipping factor is 20.0
+*  The total number of epochs is 50, and the learning rate will be attenuated by 0.1 times when the epoch reaches 20 and 40
+*  The learning rate of the weight and bias of the FC layer are respectively 5 times and 10 times the overall learning rate, and the bias does not set L2_Decay
+*  Dropout_ratio=0.5
+
+### Parameter initialization
+
+- Initialize the weight of the FC layer with the normal distribution of Normal(mean=0, std=0.001), and initialize the bias of the FC layer with a constant of 0
+
 
 ## Reference
 
