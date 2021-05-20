@@ -41,6 +41,9 @@ PaddleVideo is a toolset for video recognition, action localization, and spatio 
 | action recgonition | [AttentionLSTM](./recognition/attention_lstm.md) | [Youtube-8M](../dataset/youtube8m.md) | Hit@1 | 89.0 | 
 | action detection| [BMN](./localization/bmn.md) | [ActivityNet](../dataset/ActivityNet.md) |  AUC | 67.0 | 
 
+### Changelog
+
+release/2.1 was released in 20/05/2021. Please refer to [release note](https://github.com/PaddlePaddle/PaddleVideo/releases) for details.
 
 <a name="Community"></a>
 ## Community
