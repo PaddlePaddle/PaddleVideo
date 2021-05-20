@@ -77,7 +77,7 @@ class Sampler(object):
         average_dur = int(frames_len / self.num_seg)
         frames_idx = []
         if not self.select_left:
-            if self.dense_sample:
+            if self.dense_sample:  # For ppTSM
                 if not self.valid_mode:  #train
                     sample_pos = max(1, 1 + frames_len - 64)
                     t_stride = 64 // self.num_seg
@@ -129,7 +129,7 @@ class Sampler(object):
 
             return self._get(frames_idx, results)
 
-        else:
+        else:  # for TSM
             if not self.valid_mode:
                 if average_dur > 0:
                     offsets = np.multiply(list(range(self.num_seg)),

@@ -1,8 +1,8 @@
 export CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7
 
-export FLAGS_conv_workspace_size_limit=800 #MB
-export FLAGS_cudnn_exhaustive_search=1
-export FLAGS_cudnn_batchnorm_spatial_persistent=1
+#export FLAGS_conv_workspace_size_limit=800 #MB
+#export FLAGS_cudnn_exhaustive_search=1
+#export FLAGS_cudnn_batchnorm_spatial_persistent=1
 
 
 start_time=$(date +%s)
