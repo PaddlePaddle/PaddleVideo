@@ -24,13 +24,13 @@ DATASET: #DATASET field
   num_workers: 4
   train:
     format: "SFVideoDataset"
-    file_path: "./data/k400/train.csv" #Mandatory, train data index file path
+    file_path: "./data/k400/train.list" #Mandatory, train data index file path
   valid:
     format: "SFVideoDataset"
-    file_path: "./data/k400/val.csv" #Mandatory, valid data index file path
+    file_path: "./data/k400/val.list" #Mandatory, valid data index file path
   test:
     format: "SFVideoDataset"
-    file_path: "../data/k400/val.csv" #Mandatory, test data index file path
+    file_path: "../data/k400/val.list" #Mandatory, test data index file path
     test_mode: True
     num_ensemble_views: 10
     num_spatial_crops: 3
