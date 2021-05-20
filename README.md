@@ -32,15 +32,15 @@ PaddleVideo is a toolset for video recognition, action localization, and spatio 
 
 ### Overview of the performance
 
-The chart below illustrates the performance of the video recognition models both 2D and 3D architectures, including our implementation and Pytorch version. It shows the relationship between Acc Top1 and VPS on the Kinectics400 dataset. (Tested on the NVIDIA® Tesla® GPU V100.)
+| Field | Model | Dataset | Metrics | ACC% | 
+| :--------------- | :--------: | :------------: | :------------: | :------------: | 
+| action recgonition | [ppTSM](./recognition/pp-tsm.md) | [Kinetics-400](../dataset/k400.md) | Top-1 | 76.16 | 
+| action recgonition | [SlowFast](./recognition/slowfast.md) | [Kinetics-400](../dataset/k400.md) | Top-1 | 75.84 |
+| action recgonition | [TSM](./recognition/tsm.md) | [Kinetics-400](../dataset/k400.md) | Top-1 | 70.86 | 
+| action recgonition | [TSN](./recognition/tsn.md) | [Kinetics-400](../dataset/k400.md) | Top-1 | 67.0 |
+| action recgonition | [AttentionLSTM](./recognition/attention_lstm.md) | [Youtube-8M](../dataset/youtube8m.md) | Hit@1 | 89.0 | 
+| action detection| [BMN](./localization/bmn.md) | [ActivityNet](../dataset/ActivityNet.md) |  AUC | 67.0 | 
 
-<div align="center">
-  <img src="docs/images/acc_vps.jpeg" />
-</div>
-
-**Note：**
-- PP-TSM improves almost 3.5% Top1 accuracy from standard TSM.
-- all these models described by RED color can be obtained in the [Model Zoo](https://github.com/PaddlePaddle/PaddleVideo/blob/main/docs/en/model_zoo/README.md), and others are Pytorch results.
 
 <a name="Community"></a>
 ## Community
