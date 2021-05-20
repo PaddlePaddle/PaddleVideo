@@ -20,6 +20,7 @@ import numpy as np
 from ..registry import DATASETS
 from .base import BaseDataset
 from ...utils import get_logger
+
 logger = get_logger("paddlevideo")
 
 
@@ -80,7 +81,7 @@ class FrameDataset(BaseDataset):
                 results = copy.deepcopy(self.info[idx])
                 results = self.pipeline(results)
             except Exception as e:
-                logger.info(e)
+                #logger.info(e)
                 if ir < self.num_retries - 1:
                     logger.info(
                         "Error when loading {}, have {} trys, will try again".
