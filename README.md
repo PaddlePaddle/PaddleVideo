@@ -13,6 +13,9 @@ PaddleVideo is a toolset for video recognition, action localization, and spatio 
   <img src="docs/images/home.gif" width="450px"/><br>
 </div>
 
+> If you think this repo is helpful to you, welcome to star us~
+
+
 ## Feature
 
 - **Various dataset and models**
@@ -26,7 +29,6 @@ PaddleVideo is a toolset for video recognition, action localization, and spatio 
 
 - **Deployable**
     PaddleVideo is powered by the Paddle Inference. There is no need to convert the model to ONNX format when deploying it, all you want can be found in this repository.
-
 
 ### Overview of the performance
 
