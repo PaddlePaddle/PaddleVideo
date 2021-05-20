@@ -34,12 +34,12 @@ PaddleVideo is a toolset for video recognition, action localization, and spatio 
 
 | Field | Model | Dataset | Metrics | ACC% | 
 | :--------------- | :--------: | :------------: | :------------: | :------------: | 
-| action recgonition | [ppTSM](./recognition/pp-tsm.md) | [Kinetics-400](../dataset/k400.md) | Top-1 | 76.16 | 
-| action recgonition | [SlowFast](./recognition/slowfast.md) | [Kinetics-400](../dataset/k400.md) | Top-1 | 75.84 |
-| action recgonition | [TSM](./recognition/tsm.md) | [Kinetics-400](../dataset/k400.md) | Top-1 | 70.86 | 
-| action recgonition | [TSN](./recognition/tsn.md) | [Kinetics-400](../dataset/k400.md) | Top-1 | 67.0 |
-| action recgonition | [AttentionLSTM](./recognition/attention_lstm.md) | [Youtube-8M](../dataset/youtube8m.md) | Hit@1 | 89.0 | 
-| action detection| [BMN](./localization/bmn.md) | [ActivityNet](../dataset/ActivityNet.md) |  AUC | 67.0 | 
+| action recgonition | [ppTSM](./docs/zh-CN/model_zoo/recognition/pp-tsm.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | 76.16 | 
+| action recgonition | [SlowFast](./docs/zh-CN/model_zoo/recognition/slowfast.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | 75.84 |
+| action recgonition | [TSM](./docs/zh-CN/model_zoo/recognition/tsm.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | 70.86 | 
+| action recgonition | [TSN](./docs/zh-CN/model_zoo/recognition/tsn.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | 67.0 |
+| action recgonition | [AttentionLSTM](./docs/zh-CN/model_zoo/recognition/attention_lstm.md) | [Youtube-8M](./docs/zh-CN/dataset/youtube8m.md) | Hit@1 | 89.0 | 
+| action detection| [BMN](./docs/zh-CN/model_zoo/localization/bmn.md) | [ActivityNet](./docs/zh-CN/dataset/ActivityNet.md) |  AUC | 67.0 | 
 
 ### Changelog
 
