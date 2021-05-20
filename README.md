@@ -43,7 +43,7 @@ PaddleVideo is a toolset for video recognition, action localization, and spatio 
 
 ### Changelog
 
-release/2.1 was released in 20/05/2021. Please refer to [release note](https://github.com/PaddlePaddle/PaddleVideo/releases) for details.
+release/2.1 was released in 20/05/2021. Please refer to [release notes](https://github.com/PaddlePaddle/PaddleVideo/releases) for details.
 
 <a name="Community"></a>
 ## Community
