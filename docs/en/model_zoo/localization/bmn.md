@@ -9,6 +9,7 @@
 - [Data](#Data)
 - [Train](#Train)
 - [Test](#Test)
+- [Inference](#Inference)
 - [Reference](#Reference)
 
 
