@@ -14,12 +14,23 @@
 
 ## Introduction
 
-We optimized TSM model and proposed **PPTSM** in this paper. Without increasing the number of parameters, the accuracy of TSM was significantly improved in UCF101 and Kinetics-400 datasets. Please refer to [Tricks on ppTSM](../../tutorials/pp-tsm.md) for more details.
+We optimized TSM model and proposed **PPTSM** in this repo. Without increasing the number of parameters, the accuracy of TSM was significantly improved in UCF101 and Kinetics-400 datasets. Please refer to [Tricks on ppTSM](../../tutorials/pp-tsm.md) for more details.
 
-<p align="center">
-<img src="../../../images/acc_vps.jpeg" height=400 width=650 hspace='10'/> <br />
-PPTSM improvement
-</p>
+| Version | Sampling method | Top1 |
+| :------ | :----------: | :----: |
+| Ours (distill) | Uniform | TODO |
+| Ours | Uniform | **74.54** |
+| [mit-han-lab](https://github.com/mit-han-lab/temporal-shift-module)  | Uniform | 71.16 |
+| [mmaction2](https://github.com/open-mmlab/mmaction2/blob/master/configs/recognition/tsm/README.md) |  Uniform | 70.59 |
+
+
+| Version | Sampling method | Top1 |
+| :------ | :----------: | :----: |
+| Ours (distill) | Dense | **76.16** |
+| Ours | Dense | 75.69 |
+| [mit-han-lab](https://github.com/mit-han-lab/temporal-shift-module) | Dense | 74.1 |
+| [mmaction2](https://github.com/open-mmlab/mmaction2/blob/master/configs/recognition/tsm/README.md) | Dense | 73.38 |
+
 
 ## Data
 
@@ -30,7 +41,9 @@ Please refer to UCF101 data download and preparation doc [ucf101-data](../../dat
 
 ## Train
 
-### download pretrain-model 
+### Train on kinetics-400
+
+#### download pretrain-model 
 
 Please download [ResNet50_vd_ssld_v2](https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_vd_ssld_v2_pretrained.pdparams) as pretraind model: 
 
@@ -48,46 +61,55 @@ MODEL:
         pretrained: your weight path
 ```
 
-### Start training
+#### Start training
 
-You can start training with different dataset using different config file. For UCF-101 dataset, we use 4 cards to train:
-
-```bash
-python -B -m paddle.distributed.launch --gpus="0,1,2,3"  --log_dir=log_pptsm  main.py  --validate -c configs/recognition/tsm/pptsm.yaml
-```
-
-For Kinetics400 dataset， we use 8 cards to train:
+- Train PPTSM on kinetics-400 scripts:
 
 ```bash
-python -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=log_pptsm  main.py  --validate -c configs/recognition/tsm/pptsm_k400.yaml
+python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=log_pptsm  main.py  --validate -c configs/recognition/pptsm/pptsm_k400_frames_uniform.yaml
 ```
 
-- Args `-c` is used to specify config file.
+- AMP is useful for speeding up training:
 
-- For finetune please download our trained model [ppTSM.pdparams](https://videotag.bj.bcebos.com/PaddleVideo/ppTSM/ppTSM.pdparams)，and specify file path with `--weights`.
+```bash
+export FLAGS_conv_workspace_size_limit=800 #MB
+export FLAGS_cudnn_exhaustive_search=1
+export FLAGS_cudnn_batchnorm_spatial_persistent=1
 
-- For the config file usage，please refer to [config](../../tutorials/config.md).
+python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=log_pptsm  main.py  --amp --validate -c configs/recognition/pptsm/pptsm_k400_frames_uniform.yaml
+```
+
+- Train PPTSM on kinetics-400 with dense sampling:
+
+```bash
+python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=log_pptsm  main.py  --validate -c configs/recognition/pptsm/pptsm_k400_frames_dense.yaml
+```
+
 
 ## Test
 
-```bash
-python3 main.py --test -c configs/recognition/tsm/pptsm.yaml -w output/ppTSM/ppTSM_best.pdparams
+- For uniform sampling, test accuracy can be found in training-logs by search key word `best`, such as:
+
+```txt
+Already save the best model (top1 acc)0.7454
 ```
 
-- Download the published model [ppTSM.pdparams](https://videotag.bj.bcebos.com/PaddleVideo/ppTSM/ppTSM.pdparams), then you need to set the `--weights` for model testing
+- For dense sampling, test accuracy can be obtained using scripts:
+
+```bash
+python3 main.py --test -c configs/recognition/pptsm/pptsm_k400_frames_dense.yaml -w output/ppTSM/ppTSM_best.pdparams
+```
 
 
 Accuracy on Kinetics400:
 
-| seg\_num | target\_size | Top-1 |
-| :------: | :----------: | :----: |
-| 8 | 224 | 0.735 |
+| backbone | distill | Sampling method | num_seg | target_size | Top-1 | checkpoints |
+| :------: | :----------: | :----: | :----: | :----: | :----: | :----: |
+| ResNet50 | False | Uniform | 8 | 224 | 74.54 | [ppTSM_k400_uniform.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.1/PPTSM/ppTSM_k400_uniform.pdparams) |
+| ResNet50 | False | Dense | 8 | 224 | 75.69 | [ppTSM_k400_dense.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.1/PPTSM/ppTSM_k400_dense.pdparams) |
+| ResNet50 | True | Uniform | 8 | 224 | TODO | TODO |
+| ResNet50 | True | Dense | 8 | 224 | 76.16 | [ppTSM_k400_dense_distill.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.1/PPTSM/ppTSM_k400_dense_distill.pdparams) |
 
-Accuracy on UCF101：
-
-| seg\_num | target\_size | Top-1 |
-| :------: | :----------: | :----: |
-| 8 | 224 | 0.8997 |
 
 ## Inference
 
@@ -96,9 +118,9 @@ Accuracy on UCF101：
  To get model architecture file `ppTSM.pdmodel` and parameters file `ppTSM.pdiparams`, use: 
 
 ```bash
-python3 tools/export_model.py -c configs/recognition/tsm/pptsm_k400.yaml \
-                              -p data/ppTSM.pdparams \
-                              -o inference/ppTSM
+python3.7 tools/export_model.py -c configs/recognition/pptsm/pptsm_k400_frames_uniform.yaml \
+                                -p data/ppTSM_k400_uniform.pdparams \
+                                -o inference/ppTSM
 ```
 
 - Args usage please refer to [Model Inference](https://github.com/PaddlePaddle/PaddleVideo/blob/release/2.0/docs/zh-CN/start.md#2-%E6%A8%A1%E5%9E%8B%E6%8E%A8%E7%90%86).
@@ -107,7 +129,7 @@ python3 tools/export_model.py -c configs/recognition/tsm/pptsm_k400.yaml \
 
 ```bash
 python3.7 tools/predict.py --input_file data/example.avi \
-                           --config configs/recognition/tsm/pptsm_k400.yaml \
+                           --config configs/recognition/pptsm/pptsm_k400_frames_uniform.yaml \
                            --model_file inference/ppTSM/ppTSM.pdmodel \
                            --params_file inference/ppTSM/ppTSM.pdiparams \
                            --use_gpu=True \
@@ -119,7 +141,7 @@ example of logs:
 ```
 Current video file: data/example.avi
 	top-1 class: 5
-	top-1 score: 0.9621570706367493
+	top-1 score: 0.9907386302947998
 ```
 
 we can get the class name using class id and map file `data/k400/Kinetics-400_label_list.txt`. The top1 prediction of `data/example.avi` is `archery`. 
