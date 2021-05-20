@@ -31,11 +31,17 @@ class Sampler(object):
     Returns:
         frames_idx: the index of sampled #frames.
     """
-    def __init__(self, num_seg, seg_len, valid_mode=False, select_left=False):
+    def __init__(self,
+                 num_seg,
+                 seg_len,
+                 valid_mode=False,
+                 select_left=False,
+                 dense_sample=False):
         self.num_seg = num_seg
         self.seg_len = seg_len
         self.valid_mode = valid_mode
         self.select_left = select_left
+        self.dense_sample = dense_sample
 
     def _get(self, frames_idx, results):
         data_format = results['format']
@@ -48,7 +54,6 @@ class Sampler(object):
                     os.path.join(frame_dir,
                                  results['suffix'].format(idx))).convert('RGB')
                 imgs.append(img)
-
         elif data_format == "video":
             frames = np.array(results['frames'])
             imgs = []
@@ -72,31 +77,55 @@ class Sampler(object):
         average_dur = int(frames_len / self.num_seg)
         frames_idx = []
         if not self.select_left:
-            for i in range(self.num_seg):
-                idx = 0
-                if not self.valid_mode:
-                    if average_dur >= self.seg_len:
-                        idx = random.randint(0, average_dur - self.seg_len)
-                        idx += i * average_dur
-                    elif average_dur >= 1:
-                        idx += i * average_dur
-                    else:
-                        idx = i
+            if self.dense_sample:
+                if not self.valid_mode:  #train
+                    sample_pos = max(1, 1 + frames_len - 64)
+                    t_stride = 64 // self.num_seg
+                    start_idx = 0 if sample_pos == 1 else np.random.randint(
+                        0, sample_pos - 1)
+                    offsets = [(idx * t_stride + start_idx) % frames_len + 1
+                               for idx in range(self.num_seg)]
+                    frames_idx = offsets
                 else:
-                    if average_dur >= self.seg_len:
-                        idx = (average_dur - 1) // 2
-                        idx += i * average_dur
-                    elif average_dur >= 1:
-                        idx += i * average_dur
+                    sample_pos = max(1, 1 + frames_len - 64)
+                    t_stride = 64 // self.num_seg
+                    start_list = np.linspace(0,
+                                             sample_pos - 1,
+                                             num=10,
+                                             dtype=int)
+                    offsets = []
+                    for start_idx in start_list.tolist():
+                        offsets += [
+                            (idx * t_stride + start_idx) % frames_len + 1
+                            for idx in range(self.num_seg)
+                        ]
+                    frames_idx = offsets
+            else:
+                for i in range(self.num_seg):
+                    idx = 0
+                    if not self.valid_mode:
+                        if average_dur >= self.seg_len:
+                            idx = random.randint(0, average_dur - self.seg_len)
+                            idx += i * average_dur
+                        elif average_dur >= 1:
+                            idx += i * average_dur
+                        else:
+                            idx = i
                     else:
-                        idx = i
-                for jj in range(idx, idx + self.seg_len):
-                    if results['format'] == 'video':
-                        frames_idx.append(int(jj % frames_len))
-                    elif results['format'] == 'frame':
-                        frames_idx.append(jj + 1)
-                    else:
-                        raise NotImplementedError
+                        if average_dur >= self.seg_len:
+                            idx = (average_dur - 1) // 2
+                            idx += i * average_dur
+                        elif average_dur >= 1:
+                            idx += i * average_dur
+                        else:
+                            idx = i
+                    for jj in range(idx, idx + self.seg_len):
+                        if results['format'] == 'video':
+                            frames_idx.append(int(jj % frames_len))
+                        elif results['format'] == 'frame':
+                            frames_idx.append(jj + 1)
+                        else:
+                            raise NotImplementedError
 
             return self._get(frames_idx, results)
 
