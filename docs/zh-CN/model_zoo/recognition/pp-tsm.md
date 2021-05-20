@@ -96,10 +96,10 @@ Kinetics400数据集测试精度:
 
 | backbone | distill | Sampling method | num_seg | target_size | Top-1 | checkpoints |
 | :------: | :----------: | :----: | :----: | :----: | :----: | :----: |
-| ResNet50 | False | Uniform | 8 | 224 | 74.54 | TODO |
-| ResNet50 | False | Dense | 8 | 224 | 75.69 | TODO |
+| ResNet50 | False | Uniform | 8 | 224 | 74.54 | [ppTSM_k400_uniform.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.1/PPTSM/ppTSM_k400_uniform.pdparams) |
+| ResNet50 | False | Dense | 8 | 224 | 75.69 | [ppTSM_k400_dense.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.1/PPTSM/ppTSM_k400_dense.pdparams) |
 | ResNet50 | True | Uniform | 8 | 224 | TODO | TODO |
-| ResNet50 | True | Dense | 8 | 224 | 76.16 | TODO |
+| ResNet50 | True | Dense | 8 | 224 | 76.16 | [ppTSM_k400_dense_distill.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.1/PPTSM/ppTSM_k400_dense_distill.pdparams) |
 
 - Uniform采样: 时序上，等分成`num_seg`段，每段中间位置采样1帧；空间上，中心位置采样。1个视频共采样1个clips。
 
