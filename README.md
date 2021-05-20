@@ -76,8 +76,8 @@ release/2.1 was released in 20/05/2021. Please refer to [release notes](https://
 
 - Tutorials and Slides
   - [2021.01](https://aistudio.baidu.com/aistudio/course/introduce/6742)
-- Quick Start
   - [Summarize of video understanding](docs/en/tutorials/summarize.md)
+- Quick Start
   - [Install](docs/en/install.md)
   - [Start](docs/en/start.md)
 - Project design
