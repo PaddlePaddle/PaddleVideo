@@ -16,7 +16,7 @@ PaddleVideo is a toolset for video recognition, action localization, and spatio 
 > If you think this repo is helpful to you, welcome to star us~
 
 
-## Feature
+## Features
 
 - **Various dataset and models**
     PaddleVideo supports more datasets and models, including [Kinectics400](docs/zh-CN/dataset/k400.md), ucf101, YoutTube8M datasets, and video recognition models, such as TSN, TSM, SlowFast, AttentionLSTM and action localization model, like [BMN](./docs/zh-CN/model_zoo/localization/bmn.md).
