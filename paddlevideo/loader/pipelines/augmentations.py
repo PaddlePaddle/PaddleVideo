@@ -616,3 +616,43 @@ class PackOutput(object):
         frames_list = [slow_pathway, fast_pathway]
         results['imgs'] = frames_list
         return results
+
+
+@PIPELINES.register()
+class GroupFullResSample(object):
+    def __init__(self, crop_size, flip=False):
+        self.crop_size = crop_size if not isinstance(crop_size, int) else (
+            crop_size, crop_size)
+        self.flip = flip
+
+    def __call__(self, results):
+        img_group = results['imgs']
+
+        image_w, image_h = img_group[0].size
+        crop_w, crop_h = self.crop_size
+
+        w_step = (image_w - crop_w) // 4
+        h_step = (image_h - crop_h) // 4
+
+        offsets = list()
+        offsets.append((0 * w_step, 2 * h_step))  # left
+        offsets.append((4 * w_step, 2 * h_step))  # right
+        offsets.append((2 * w_step, 2 * h_step))  # center
+
+        oversample_group = list()
+        for o_w, o_h in offsets:
+            normal_group = list()
+            flip_group = list()
+            for i, img in enumerate(img_group):
+                crop = img.crop((o_w, o_h, o_w + crop_w, o_h + crop_h))
+                normal_group.append(crop)
+                if self.flip:
+                    flip_crop = crop.copy().transpose(Image.FLIP_LEFT_RIGHT)
+                    flip_group.append(flip_crop)
+
+            oversample_group.extend(normal_group)
+            if self.flip:
+                oversample_group.extend(flip_group)
+
+        results['imgs'] = oversample_group
+        return results
