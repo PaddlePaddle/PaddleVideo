@@ -13,151 +13,38 @@ PaddleVideo飞桨视频模型开发套件，旨在帮助开发者更好的进行
   <img src="docs/images/home.gif" width="450px"/><br>
 </div>
 
+> 如果本项目对您有帮忙，欢迎给我们star~
+
 ## 特性
 
-- **模块化设计**
-    PaddleVideo 基于统一的视频理解框架，使用模块化设计，将各部分功能拆分到不同组件中进行解耦。可以轻松的组合、配置和自定义组件来快速实现视频算法模型。
-
 - **更多的数据集和模型结构**
-    PaddleVideo 支持更多的数据集和模型结构，包括Kinectics400，ucf101，YoutTube8M等数据集，模型结构涵盖了视频分类模型TSN，TSM，SlowFast，AttentionLSTM和视频定位模型BMN等。
+    PaddleVideo 支持更多的数据集和模型结构，包括[Kinectics400](docs/zh-CN/dataset/k400.md)，ucf101，YoutTube8M等数据集，模型结构涵盖了视频分类模型TSN，TSM，SlowFast，AttentionLSTM和视频定位模型[BMN](./docs/zh-CN/model_zoo/localization/bmn.md)等。
 
 - **更高指标的模型算法**
-    PaddleVideo 提供更高精度的模型结构解决方案，在基于TSM标准版改进的PPTSM上，在Kinectics400数据集上达到2D网络SOTA效果，Top1 Acc 73.5% 相较标准版TSM提升3.5%且模型参数量持平，且取得更快的模型速度。
+    PaddleVideo 提供更高精度的模型结构解决方案，在基于TSM标准版改进的[PPTSM](docs/zh-CN/model_zoo/recognition/pp-tsm.md)上，在Kinectics400数据集上达到2D网络SOTA效果，Top1 Acc 76.16% 相较标准版TSM模型参数量持平，且取得更快的模型速度。
 
 - **更快的训练速度**
-    PaddleVideo 提供更快速度的训练阶段解决方案，在SlowFast标准版上，训练速度相较于pytorch提速100%。
+    PaddleVideo 提供更快速度的训练阶段解决方案，包括[混合精度训练](https://www.paddlepaddle.org.cn/documentation/docs/zh/guides/index_cn.html)，分布式训练，针对Slowfast模型的Multigrid训练策略，OP融合策略以及更快的数据预处理模块等。
 
 - **全流程可部署**
     PaddleVideo 提供全流程的预测部署方案，支持PaddlePaddle2.0动转静功能，方便产出可快速部署的模型，完成部署阶段最后一公里。
+    
+- **丰富的应用案例**
+    PaddleVideo 提供了基于行为识别和动作检测技术的多个实用案例，包括[FootballAction](https://github.com/PaddlePaddle/PaddleVideo/tree/application/FootballAction)和VideoTag。
 
-### 套件结构概览
-
-<table>
-  <tbody>
-    <tr align="center" valign="bottom">
-      <td>
-        <b>Architectures</b>
-      </td>
-      <td>
-        <b>Frameworks</b>
-      </td>
-      <td>
-        <b>Components</b>
-      </td>
-      <td>
-        <b>Data Augmentation</b>
-      </td>
-    </tr>
-    <tr valign="top">
-      <td>
-        <ul><li><b>Recognition</b></li>
-          <ul>
-            <li>TSN</li>
-            <li>TSM</li>
-            <li>SlowFast</li>
-            <li>PPTSM</li>
-            <li>VideoTag</li>
-            <li>AttentionLSTM</li>
-          </ul>
-        </ul>
-        <ul><li><b>Localization</b></li>
-          <ul>
-            <li>BMN</li>
-          </ul>
-        </ul>
-      </td>
-      <td>
-          <li>Recognizer1D</li>
-          <li>Recognizer2D</li>
-          <li>Recognizer3D</li>
-          <li>Localizer</li>
-        <HR></HR>
-        <ul>Backbone
-            <li>resnet</li>
-            <li>resnet_tsm</li>
-            <li>resnet_tweaks_tsm</li>
-            <li>bmn</li>
-        </ul>
-        <ul>Head
-            <li>pptsm_head</li>
-            <li>tsm_head</li>
-            <li>tsn_head</li>
-            <li>bmn_head</li>
-            <slowfast_head></li>
-            <bmn_head></li>
-        </ul>
-      </td>
-      <td>
-        <ul><li><b>Solver</b></li>
-          <ul><li><b>Optimizer</b></li>
-              <ul>
-                <li>Momentum</li>
-                <li>RMSProp</li>
-              </ul>
-          </ul>
-          <ul><li><b>LearningRate</b></li>
-              <ul>
-                <li>PiecewiseDecay</li>
-              </ul>
-          </ul>
-        </ul>
-        <ul><li><b>Loss</b></li>
-          <ul>
-            <li>CrossEntropy</li>
-            <li>BMNLoss</li>  
-          </ul>  
-        </ul>  
-        <ul><li><b>Metrics</b></li>
-          <ul>
-            <li>CenterCrop</li>
-            <li>MultiCrop</li>  
-          </ul>  
-        </ul>
-      </td>
-      <td>
-        <ul><li><b>Video</b></li>
-          <ul>
-            <li>Mixup</li>
-            <li>Cutmix</li>  
-          </ul>  
-        </ul>
-        <ul><li><b>Image</b></li>
-            <ul>
-                <li>Resize</li>  
-                <li>Flipping</li>  
-                <li>MultiScaleCrop</li>
-                <li>Crop</li>
-                <li>Color Distort</li>  
-                <li>Random Crop</li>
-            </ul>
-         </ul>
-         <ul><li><b>Image</b></li>
-            <ul>
-                <li>Mixup </li>
-                <li>Cutmix </li>
-            </ul>
-        </ul>  
-      </td>  
-    </tr>
-
-
-</td>
-    </tr>
-  </tbody>
-</table>
 
 ### 模型性能概览
 
 视频分类模型在Kinectics-400数据集上Acc Top1精度和单卡Tesla V100上预测速度(VPS)对比图。
 
-<div align="center">
-  <img src="docs/images/acc_vps.jpeg" />
-</div>
-
-**说明：**
-- 红色文字描述为PaddleVideo提供的模型，黑色文字描述为Pytorch实现
-- PPTSM在TSM标准版上精度提升3.5%，预测速度也略有增加。
-- 图中红色描述的模型均可在[模型库](https://github.com/PaddlePaddle/PaddleVideo/tree/main/docs/zh-CN/model_zoo)中获取
+| 领域 | 模型 | 数据集 | 精度指标 | 精度% | 
+| :--------------- | :--------: | :------------: | :------------: | :------------: | 
+| 行为识别 | [**ppTSM**](./docs/zh-CN/model_zoo/recognition/pp-tsm.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | **76.16** | 
+| 行为识别 | [SlowFast](./docs/zh-CN/model_zoo/recognition/slowfast.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | 75.84 |
+| 行为识别 | [TSM](./docs/zh-CN/model_zoo/recognition/tsm.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | 70.86 | 
+| 行为识别 | [TSN](./docs/zh-CN/model_zoo/recognition/tsn.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | 67.0 |
+| 行为识别 | [AttentionLSTM](./docs/zh-CN/model_zoo/recognition/attention_lstm.md) | [Youtube-8M](./docs/zh-CN/dataset/youtube8m.md) | Hit@1 | 89.0 | 
+| action detection| [BMN](./docs/zh-CN/model_zoo/localization/bmn.md) | [ActivityNet](./docs/zh-CN/dataset/ActivityNet.md) |  AUC | 67.23 | 
 
 <a name="欢迎加入PaddleVideo技术交流群"></a>
 ## 欢迎加入PaddleVideo技术交流群
