@@ -15,17 +15,14 @@ PaddleVideo is a toolset for video recognition, action localization, and spatio 
 
 ## Feature
 
-- **Advanced model zoo design**
-    PaddleVideo unifies the video understanding tasks, including recogniztion, localization, spatio temporal action detection, and so on. with the clear configuration system based on IOC/DI, we design a decoupling modular and extensible framework which can easily construct a customized network by combining different modules.
-
-- **Various dataset and architectures**
-    PaddleVideo supports more datasets and architectures, including [Kinectics400](docs/zh-CN/dataset/k400.md), ucf101, YoutTube8M datasets, and video recognition models, such as TSN, TSM, SlowFast, AttentionLSTM and action localization model, like BMN.
+- **Various dataset and models**
+    PaddleVideo supports more datasets and models, including [Kinectics400](docs/zh-CN/dataset/k400.md), ucf101, YoutTube8M datasets, and video recognition models, such as TSN, TSM, SlowFast, AttentionLSTM and action localization model, like [BMN](./docs/zh-CN/model_zoo/localization/bmn.md).
 
 - **Higher performance**
-    PaddleVideo has built-in solutions to improve accuracy on the recognition models. [PP-TSM](docs/en/model_zoo/recognition/pp-tsm.md), which is based on the standard TSM, already archive the best performance in the 2D recognition network, has the same size of parameters but improve the Top1 Acc to **73.5%** , and one can easily apply the soulutions on his own dataset.
+    PaddleVideo has built-in solutions to improve accuracy on the recognition models. [PP-TSM](docs/en/model_zoo/recognition/pp-tsm.md), which is based on the standard TSM, already archive the best performance in the 2D recognition network, has the same size of parameters but improve the Top1 Acc to **76.16%** , and one can easily apply the soulutions on his own dataset.
 
 - **Faster training strategy**
-    PaddleVideo suppors faster training strategy, it accelerates by 100% compared with the standard Slowfast version, and it only takes 7 days to train from scratch on the kinetics400 dataset.
+    PaddleVideo suppors faster training strategy, such as [AMP training](https://www.paddlepaddle.org.cn/documentation/docs/zh/guides/index_cn.html), Distributed training, Multigrid method for Slowfast, OP fusion method, Faster reader and so on.
 
 - **Deployable**
     PaddleVideo is powered by the Paddle Inference. There is no need to convert the model to ONNX format when deploying it, all you want can be found in this repository.
