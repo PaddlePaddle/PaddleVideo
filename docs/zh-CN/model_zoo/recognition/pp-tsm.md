@@ -127,8 +127,8 @@ Kinetics400数据集测试精度:
 ### 导出inference模型
 
 ```bash
-python3.7 tools/export_model.py -c configs/recognition/pptsm/pptsm_k400.yaml \
-                                -p data/ppTSM.pdparams \
+python3.7 tools/export_model.py -c configs/recognition/pptsm/pptsm_k400_frames_uniform.yaml \
+                                -p data/ppTSM_k400_uniform.pdparams \
                                 -o inference/ppTSM
 ```
 
@@ -140,7 +140,7 @@ python3.7 tools/export_model.py -c configs/recognition/pptsm/pptsm_k400.yaml \
 
 ```bash
 python3.7 tools/predict.py --input_file data/example.avi \
-                           --config configs/recognition/pptsm/pptsm_k400.yaml \
+                           --config configs/recognition/pptsm/pptsm_k400_frames_uniform.yaml \
                            --model_file inference/ppTSM/ppTSM.pdmodel \
                            --params_file inference/ppTSM/ppTSM.pdiparams \
                            --use_gpu=True \
@@ -152,10 +152,10 @@ python3.7 tools/predict.py --input_file data/example.avi \
 ```
 Current video file: data/example.avi
 	top-1 class: 5
-	top-1 score: 0.9621570706367493
+	top-1 score: 0.9907386302947998
 ```
 
-可以看到，使用在Kinetics-400上训练好的ppTSM模型对`data/example.avi`进行预测，输出的top1类别id为`5`，置信度为0.962。通过查阅类别id与名称对应表`data/k400/Kinetics-400_label_list.txt`，可知预测类别名称为`archery`。
+可以看到，使用在Kinetics-400上训练好的ppTSM模型对`data/example.avi`进行预测，输出的top1类别id为`5`，置信度为0.99。通过查阅类别id与名称对应表`data/k400/Kinetics-400_label_list.txt`，可知预测类别名称为`archery`。
 
 ## 参考论文
 
