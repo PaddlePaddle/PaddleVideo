@@ -1,4 +1,4 @@
-简体中文 | [English](../../../en/model_zoo/recognition/pp-tsm.md)
+[English](../../../en/model_zoo/recognition/pp-tsm.md) | 简体中文
 
 # PPTSM视频分类模型
 
@@ -19,7 +19,7 @@
 
 | Version | Sampling method | Top1 |
 | :------ | :----------: | :----: |
-| Ours (distill) | Uniform | **TODO** |
+| Ours (distill) | Uniform | TODO |
 | Ours | Uniform | **74.54** |
 | [mit-han-lab](https://github.com/mit-han-lab/temporal-shift-module)  | Uniform | 71.16 |
 | [mmaction2](https://github.com/open-mmlab/mmaction2/blob/master/configs/recognition/tsm/README.md) |  Uniform | 70.59 |
@@ -28,7 +28,7 @@
 | Version | Sampling method | Top1 |
 | :------ | :----------: | :----: |
 | Ours (distill) | Dense | **76.16** |
-| Ours | Dense | **75.69** |
+| Ours | Dense | 75.69 |
 | [mit-han-lab](https://github.com/mit-han-lab/temporal-shift-module) | Dense | 74.1 |
 | [mmaction2](https://github.com/open-mmlab/mmaction2/blob/master/configs/recognition/tsm/README.md) | Dense | 73.38 |
 
