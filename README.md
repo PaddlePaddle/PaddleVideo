@@ -31,7 +31,7 @@ PaddleVideo is a toolset for video recognition, action localization, and spatio 
     PaddleVideo is powered by the Paddle Inference. There is no need to convert the model to ONNX format when deploying it, all you want can be found in this repository.
     
 - **Applications**
-    PaddleVideo provides some interesting and practical projects that is implemented using video recognition and detection techniques, such as [FootballAction](https://github.com/PaddlePaddle/PaddleVideo/tree/application/FootballAction) and VideoTag.
+    PaddleVideo provides some interesting and practical projects that are implemented using video recognition and detection techniques, such as [FootballAction](https://github.com/PaddlePaddle/PaddleVideo/tree/application/FootballAction) and VideoTag.
 
 ### Overview of the performance
 
