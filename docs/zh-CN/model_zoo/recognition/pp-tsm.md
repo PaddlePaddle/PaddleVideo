@@ -64,15 +64,29 @@ MODEL:
 
 #### 开始训练
 
-Kinetics400数据集使用8卡训练，frames格式数据的训练启动命令如下:
+- Kinetics400数据集使用8卡训练，frames格式数据，uniform训练方式的启动命令如下:
 
 ```bash
-python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=log_pptsm  main.py  --validate -c configs/recognition/pptsm/pptsm_k400_frames.yaml
+python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=log_pptsm  main.py  --validate -c configs/recognition/pptsm/pptsm_k400_frames_uniform.yaml
 ```
 
-- 如若进行finetune，请下载已发布模型，通过`--weights`指定权重存放路径。
+- 开启amp混合精度训练，可加速训练过程，其训练启动命令如下：
 
-- 您可以自定义修改参数配置，参数用法请参考[config](../../tutorials/config.md)。
+```bash
+export FLAGS_conv_workspace_size_limit=800 #MB
+export FLAGS_cudnn_exhaustive_search=1
+export FLAGS_cudnn_batchnorm_spatial_persistent=1
+
+python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=log_pptsm  main.py  --amp --validate -c configs/recognition/pptsm/pptsm_k400_frames_uniform.yaml
+```
+
+- Kinetics400数据集frames格式数据，dense训练方式的启动命令如下:
+
+```bash
+python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=log_pptsm  main.py  --validate -c configs/recognition/pptsm/pptsm_k400_frames_dense.yaml
+```
+
+- 另外您可以自定义修改参数配置，以达到在不同的数据集上进行训练/测试的目的，配置文件命名方式为`模型_数据集_文件格式_数据格式_采样方式.yaml`，参数用法请参考[config](../../tutorials/config.md)。
 
 
 ## 模型测试
@@ -86,7 +100,7 @@ Already save the best model (top1 acc)0.7454
 - 对dense采样方式，需单独运行测试代码，其启动命令如下：
 
 ```bash
-python3 main.py --test -c configs/recognition/pptsm/pptsm.yaml -w output/ppTSM/ppTSM_best.pdparams
+python3 main.py --test -c configs/recognition/pptsm/pptsm_k400_frames_dense.yaml -w output/ppTSM/ppTSM_best.pdparams
 ```
 
 - 通过`-c`参数指定配置文件，通过`-w`指定权重存放路径进行模型测试。
