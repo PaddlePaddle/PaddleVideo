@@ -18,8 +18,8 @@ We optimized TSM model and proposed **PPTSM** in this repo. Without increasing t
 
 | Version | Sampling method | Top1 |
 | :------ | :----------: | :----: |
-| Ours (distill) | Uniform | TODO |
-| Ours | Uniform | **74.54** |
+| Ours (distill) | Uniform | **75.11** |
+| Ours | Uniform | 74.54 |
 | [mit-han-lab](https://github.com/mit-han-lab/temporal-shift-module)  | Uniform | 71.16 |
 | [mmaction2](https://github.com/open-mmlab/mmaction2/blob/master/configs/recognition/tsm/README.md) |  Uniform | 70.59 |
 
@@ -107,7 +107,7 @@ Accuracy on Kinetics400:
 | :------: | :----------: | :----: | :----: | :----: | :----: | :----: |
 | ResNet50 | False | Uniform | 8 | 224 | 74.54 | [ppTSM_k400_uniform.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.1/PPTSM/ppTSM_k400_uniform.pdparams) |
 | ResNet50 | False | Dense | 8 | 224 | 75.69 | [ppTSM_k400_dense.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.1/PPTSM/ppTSM_k400_dense.pdparams) |
-| ResNet50 | True | Uniform | 8 | 224 | TODO | TODO |
+| ResNet50 | True | Uniform | 8 | 224 | 75.11 | [ppTSM_k400_uniform_distill.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.1/PPTSM/ppTSM_k400_uniform_distill.pdparams) |
 | ResNet50 | True | Dense | 8 | 224 | 76.16 | [ppTSM_k400_dense_distill.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.1/PPTSM/ppTSM_k400_dense_distill.pdparams) |
 
 
