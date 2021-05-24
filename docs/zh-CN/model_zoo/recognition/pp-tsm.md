@@ -19,8 +19,8 @@
 
 | Version | Sampling method | Top1 |
 | :------ | :----------: | :----: |
-| Ours (distill) | Uniform | TODO |
-| Ours | Uniform | **74.54** |
+| Ours (distill) | Uniform | **75.11** |
+| Ours | Uniform | 74.54 |
 | [mit-han-lab](https://github.com/mit-han-lab/temporal-shift-module)  | Uniform | 71.16 |
 | [mmaction2](https://github.com/open-mmlab/mmaction2/blob/master/configs/recognition/tsm/README.md) |  Uniform | 70.59 |
 
