@@ -41,8 +41,9 @@ class VideoDataset(BaseDataset):
            pipeline(XXX): A sequence of data transforms.
            **kwargs: Keyword arguments for ```BaseDataset```.
     """
-    def __init__(self, file_path, pipeline, num_retries=5, **kwargs):
+    def __init__(self, file_path, pipeline, num_retries=5, suffix='', **kwargs):
         self.num_retries = num_retries
+        self.suffix = suffix
         super().__init__(file_path, pipeline, **kwargs)
 
     def load_file(self):
@@ -53,7 +54,7 @@ class VideoDataset(BaseDataset):
                 line_split = line.strip().split()
                 filename, labels = line_split
                 #TODO(hj): Required suffix format: may mp4/avi/wmv
-                filename = filename + '.avi'
+                filename = filename + self.suffix
                 if self.data_prefix is not None:
                     filename = osp.join(self.data_prefix, filename)
                 info.append(dict(filename=filename, labels=int(labels)))
@@ -67,7 +68,7 @@ class VideoDataset(BaseDataset):
                 results = copy.deepcopy(self.info[idx])
                 results = self.pipeline(results)
             except Exception as e:
-                logger.info(e)
+                #logger.info(e)
                 if ir < self.num_retries - 1:
                     logger.info(
                         "Error when loading {}, have {} trys, will try again".

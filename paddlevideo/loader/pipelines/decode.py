@@ -12,14 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import sys
-from io import BytesIO
-import os
-import random
-
 import numpy as np
 import pickle
 import cv2
+import decord as de
 
 from ..registry import PIPELINES
 
@@ -31,8 +27,8 @@ class VideoDecoder(object):
     Args:
         filepath: the file path of mp4 file
     """
-    def __init__(self):
-        pass
+    def __init__(self, backend='decord'):
+        self.backend = backend
 
     def __call__(self, results):
         """
@@ -40,21 +36,28 @@ class VideoDecoder(object):
         return:
             List where each item is a numpy array after decoder.
         """
-        #XXX get info from results!!!
         file_path = results['filename']
-        cap = cv2.VideoCapture(file_path)
-        videolen = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-        sampledFrames = []
-        for i in range(videolen):
-            ret, frame = cap.read()
-            # maybe first frame is empty
-            if ret == False:
-                continue
-            img = frame[:, :, ::-1]
-            sampledFrames.append(img)
-        results['frames'] = sampledFrames
-        results['frames_len'] = len(sampledFrames)
         results['format'] = 'video'
+        results['backend'] = self.backend
+
+        if self.backend == 'cv2':
+            cap = cv2.VideoCapture(file_path)
+            videolen = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+            sampledFrames = []
+            for i in range(videolen):
+                ret, frame = cap.read()
+                # maybe first frame is empty
+                if ret == False:
+                    continue
+                img = frame[:, :, ::-1]
+                sampledFrames.append(img)
+            results['frames'] = sampledFrames
+            results['frames_len'] = len(sampledFrames)
+        elif self.backend == 'decord':
+            vr = de.VideoReader(file_path)
+            frames_len = len(vr)
+            results['frames'] = vr
+            results['frames_len'] = frames_len
         return results
 
 
