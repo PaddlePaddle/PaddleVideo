@@ -64,6 +64,12 @@ Please refer to UCF101 data download and preparation [ucf101 data preparation](.
   ```bash
   python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_tsm main.py  --validate -c configs/recognition/tsm/tsm_k400_frames.yaml
   ```
+  
+- Training Kinetics-400 dataset of videos format using scripts.
+
+  ```bash
+  python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_tsm main.py  --validate -c configs/recognition/tsm/tsm_k400_videos.yaml
+  ```
 
 - AMP is useful for speeding up training, scripts as follows:
 
@@ -113,6 +119,12 @@ python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log
 
   ```bash
   python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3" --log_dir=log_tsm main.py  --validate -c configs/recognition/tsm/tsm_ucf101_frames.yaml
+  ```
+
+- Training UCF-101 dataset of videos format using scripts.
+
+  ```bash
+  python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3" --log_dir=log_tsm main.py  --validate -c configs/recognition/tsm/tsm_ucf101_videos.yaml
   ```
 
 - AMP is useful for speeding up training, scripts as follows:
