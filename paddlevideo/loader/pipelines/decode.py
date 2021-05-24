@@ -27,7 +27,7 @@ class VideoDecoder(object):
     Args:
         filepath: the file path of mp4 file
     """
-    def __init__(self, backend='decord'):
+    def __init__(self, backend='cv2'):
         self.backend = backend
 
     def __call__(self, results):

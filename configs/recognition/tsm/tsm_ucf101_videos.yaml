@@ -37,7 +37,6 @@ PIPELINE: #PIPELINE field
     train: #Mandotary, indicate the pipeline to deal with the training data, associate to the 'paddlevideo/loader/pipelines/'
         decode:
             name: "VideoDecoder"
-            backend: "cv2"
         sample:
             name: "Sampler"
             num_seg: 8
@@ -57,7 +56,6 @@ PIPELINE: #PIPELINE field
     valid: #Mandatory, indicate the pipeline to deal with the validing data. associate to the 'paddlevideo/loader/pipelines/'
         decode:
             name: "VideoDecoder"
-            backend: "cv2"
         sample:
             name: "Sampler"
             num_seg: 8
@@ -78,7 +76,6 @@ PIPELINE: #PIPELINE field
     test:
         decode:
             name: "VideoDecoder"
-            backend: "cv2"
         sample:
             name: "Sampler"
             num_seg: 8
