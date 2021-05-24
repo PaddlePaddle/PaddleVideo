@@ -70,6 +70,12 @@ MODEL:
 python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=log_pptsm  main.py  --validate -c configs/recognition/pptsm/pptsm_k400_frames_uniform.yaml
 ```
 
+- Kinetics400数据集使用8卡训练，videos格式数据，uniform训练方式的启动命令如下:
+
+```bash
+python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=log_pptsm  main.py  --validate -c configs/recognition/pptsm/pptsm_k400_videos_uniform.yaml
+```
+
 - 开启amp混合精度训练，可加速训练过程，其训练启动命令如下：
 
 ```bash
