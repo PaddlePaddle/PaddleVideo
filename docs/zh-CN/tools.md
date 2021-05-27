@@ -7,13 +7,13 @@
 ## 统计 Params
 
 ```shell
-python3.7 tools/summary.py -c configs/recognization/tsm/tsm.yaml
+python3.7 tools/summary.py -c configs/recognition/tsm/tsm.yaml
 ```
 
 ## 统计FLOPS
 
 ```shell
-python3.7 tools/summary.py -c configs/recognization/tsm/tsm.yaml --FLOPs
+python3.7 tools/summary.py -c configs/recognition/tsm/tsm.yaml --FLOPs
 ```
 
 ## 测试导出模型 <sup>coming soon</sup>
