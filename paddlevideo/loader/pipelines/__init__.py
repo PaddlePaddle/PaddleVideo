@@ -12,17 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .augmentations import (
-    Scale,
-    RandomCrop,
-    CenterCrop,
-    RandomFlip,
-    Image2Array,
-    Normalization,
-    JitterScale,
-    MultiCrop,
-    PackOutput,
-)
+from .augmentations import (Scale, RandomCrop, CenterCrop, RandomFlip,
+                            Image2Array, Normalization, JitterScale, MultiCrop,
+                            PackOutput, TenCrop)
 
 from .compose import Compose
 from .decode import VideoDecoder, FrameDecoder
@@ -47,6 +39,7 @@ __all__ = [
     'JitterScale',
     'MultiCrop',
     'PackOutput',
+    'TenCrop',
     'DecodeSampler',
     'LoadFeat',
     'GetMatchMap',

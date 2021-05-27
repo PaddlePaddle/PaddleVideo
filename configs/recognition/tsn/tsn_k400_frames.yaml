@@ -6,11 +6,11 @@ MODEL: #MODEL field
         depth: 50 #Optional, the depth of backbone architecture.
     head:
         name: "TSNHead" #Mandatory, indicate the type of head, associate to the 'paddlevideo/modeling/heads'
-        num_classes: 101 #Optional, the number of classes to be classified.
+        num_classes: 400 #Optional, the number of classes to be classified.
         in_channels: 2048 #input channel of the extracted feature.
-        drop_ratio: 0.2 #the ratio of dropout
-        # ls_eps: 0.1 # label smoothing epsilon
+        drop_ratio: 0.4 #the ratio of dropout
         std: 0.01 #std value in params initialization
+
 
 DATASET: #DATASET field
     batch_size: 32 #Mandatory, bacth size
@@ -20,17 +20,17 @@ DATASET: #DATASET field
     train:
         format: "FrameDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
         data_prefix: "" #Mandatory, train data root path
-        file_path: "data/ucf101/ucf101_train_split_1_rawframes.txt" #Mandatory, train data index file path
+        file_path: "data/k400_frames/train.list" #Mandatory, train data index file path
         suffix: 'img_{:05}.jpg'
     valid:
         format: "FrameDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
         data_prefix: "" #Mandatory, valid data root path
-        file_path: "data/ucf101/ucf101_val_split_1_rawframes.txt" #Mandatory, valid data index file path
+        file_path: "data/k400_frames/val.list" #Mandatory, valid data index file path
         suffix: 'img_{:05}.jpg'
     test:
         format: "FrameDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
         data_prefix: "" #Mandatory, valid data root path
-        file_path: "data/ucf101/ucf101_val_split_1_rawframes.txt" #Mandatory, valid data index file path
+        file_path: "data/k400_frames/val.list" #Mandatory, valid data index file path
         suffix: 'img_{:05}.jpg'
 
 
@@ -43,6 +43,7 @@ PIPELINE: #PIPELINE field
             num_seg: 3
             seg_len: 1
             valid_mode: False
+            select_left: True
         transform: #Mandotary, image transfrom operator
             - Scale:
                 short_size: 256
@@ -65,8 +66,12 @@ PIPELINE: #PIPELINE field
         transform:
             - Scale:
                 short_size: 256
+                fixed_ratio: False
+                do_round: True
+                backend: 'cv2'
             - CenterCrop:
                 target_size: 224
+                do_round: False
             - Image2Array:
             - Normalization:
                 mean: [0.485, 0.456, 0.406]
@@ -83,29 +88,36 @@ PIPELINE: #PIPELINE field
         transform:
             - Scale:
                 short_size: 256
-            - CenterCrop:
+                fixed_ratio: False
+                do_round: True
+                backend: 'cv2'
+            - TenCrop:
                 target_size: 224
             - Image2Array:
             - Normalization:
                 mean: [0.485, 0.456, 0.406]
                 std: [0.229, 0.224, 0.225]
 
+
 OPTIMIZER: #OPTIMIZER field
     name: 'Momentum' #Mandatory, the type of optimizer, associate to the 'paddlevideo/solver/'
     momentum: 0.9
     learning_rate: #Mandatory, the type of learning rate scheduler, associate to the 'paddlevideo/solver/'
         name: 'PiecewiseDecay'
-        boundaries: [30, 60]
+        boundaries: [40, 80]
         values: [0.01, 0.001, 0.0001]  #4 cards * 32 batch size
     weight_decay:
         name: 'L2'
-        value: 1e-4
-
+        value: 0.0001
+    grad_clip:
+        name: 'ClipGradByGlobalNorm'
+        value: 40.0
 
 METRIC:
     name: 'CenterCropMetric'
 
 model_name: "TSN"
 log_interval: 20 #Optional, the interal of logger, default:10
-epochs: 80 #Mandatory, total epoch
+save_interval: 10
+epochs: 100 #Mandatory, total epoch
 log_level: "INFO" #Optional, the logger level. default: "INFO"
