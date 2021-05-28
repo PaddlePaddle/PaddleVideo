@@ -79,15 +79,16 @@ class TSNHead(BaseHead):
         #XXX: check dropout location!
 
         # [N * num_segs, in_channels, 7, 7]
+        
         x = self.avgpool2d(x)
         # [N * num_segs, in_channels, 1, 1]
         x = paddle.reshape(x, [-1, seg_num, x.shape[1]])
         # [N, seg_num, in_channels]
         x = paddle.mean(x, axis=1)
-        # [N, 1, in_channels]
+        # [N, in_channels]
         if self.dropout is not None:
             x = self.dropout(x)
-        # [N * seg_num, in_channels, 1, 1]
+            # [N, in_channels]
         score = self.fc(x)
         # [N, num_class]
         #x = F.softmax(x)  #NOTE remove
