@@ -47,8 +47,14 @@ PIPELINE: #PIPELINE field
         transform: #Mandotary, image transfrom operator
             - Scale:
                 short_size: 256
-            - RandomCrop:
+                fixed_ratio: False
+                do_round: True
+                backend: 'cv2'
+            - MultiScaleCrop:
                 target_size: 224
+                allow_duplication: True
+                more_fix_crop: False
+                backend: 'cv2'
             - RandomFlip:
             - Image2Array:
             - Normalization:
@@ -60,9 +66,10 @@ PIPELINE: #PIPELINE field
             name: "FrameDecoder"
         sample:
             name: "Sampler"
-            valid_mode: True
             num_seg: 3
             seg_len: 1
+            valid_mode: True
+            select_left: True
         transform:
             - Scale:
                 short_size: 256
@@ -82,9 +89,10 @@ PIPELINE: #PIPELINE field
             name: "FrameDecoder"
         sample:
             name: "Sampler"
-            valid_mode: True
             num_seg: 25
             seg_len: 1
+            valid_mode: True
+            select_left: True
         transform:
             - Scale:
                 short_size: 256
