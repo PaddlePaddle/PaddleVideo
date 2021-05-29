@@ -15,7 +15,7 @@ MODEL: #MODEL field
 DATASET: #DATASET field
     batch_size: 32 #Mandatory, bacth size
     valid_batch_size: 32
-    test_batch_size: 4
+    test_batch_size: 1
     num_workers: 4 #Mandatory, XXX the number of subprocess on each GPU.
     train:
         format: "FrameDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
