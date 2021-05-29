@@ -618,8 +618,8 @@ class TenCrop:
         img_crops = list()
         for x_offset, y_offset in offsets:
             crop = [
-                img.crop(x_offset, y_offset, x_offset + crop_w,
-                         y_offset + crop_h) for img in imgs
+                img.crop((x_offset, y_offset, x_offset + crop_w,
+                         y_offset + crop_h)) for img in imgs
             ]
             crop_fliped = [
                 timg.transpose(Image.FLIP_LEFT_RIGHT) for timg in crop
