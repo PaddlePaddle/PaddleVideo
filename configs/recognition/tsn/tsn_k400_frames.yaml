@@ -2,7 +2,7 @@ MODEL: #MODEL field
     framework: "Recognizer2D" #Mandatory, indicate the type of network, associate to the 'paddlevideo/modeling/framework/' .
     backbone: #Mandatory, indicate the type of backbone, associate to the 'paddlevideo/modeling/backbones/' .
         name: "ResNet" #Mandatory, The name of backbone.
-        pretrained: "/work/data/pretrained_dygraph/ResNet50/best_model/ppcls.pdparams" #Optional, pretrained model path.
+        pretrained: "data/ResNet50_pretrain.pdparams" #Optional, pretrained model path.
         depth: 50 #Optional, the depth of backbone architecture.
     head:
         name: "TSNHead" #Mandatory, indicate the type of head, associate to the 'paddlevideo/modeling/heads'
