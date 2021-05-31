@@ -55,7 +55,6 @@ class Scale(object):
         """
         imgs = results['imgs']
         resized_imgs = []
-        delta = 0.5 if self.do_round else 0.0
         for i in range(len(imgs)):
             img = imgs[i]
             w, h = img.size
@@ -65,16 +64,16 @@ class Scale(object):
                 continue
             if w < h:
                 ow = self.short_size
-                oh = int(
-                    self.short_size * 4.0 /
-                    3.0) if self.fixed_ratio else int(h * self.short_size / w +
-                                                      delta)
+                if self.fixed_ratio:
+                    oh = int(self.short_size * 4.0 / 3.0)
+                else:
+                    oh = round(h * self.short_size / w) if self.do_round else int(h * self.short_size / w)
             else:
                 oh = self.short_size
-                ow = int(
-                    self.short_size * 4.0 /
-                    3.0) if self.fixed_ratio else int(w * self.short_size / h +
-                                                      delta)
+                if self.fixed_ratio:
+                    ow = int(self.short_size * 4.0 / 3.0)
+                else:
+                    ow = round(w * self.short_size / h) if self.do_round else int(w * self.short_size / h)
             if self.backend == 'pillow':
                 resized_imgs.append(img.resize((ow, oh), Image.BILINEAR))
             else:
