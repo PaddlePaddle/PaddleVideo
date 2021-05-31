@@ -67,13 +67,13 @@ class Scale(object):
                 if self.fixed_ratio:
                     oh = int(self.short_size * 4.0 / 3.0)
                 else:
-                    oh = round(h * self.short_size / w) if self.do_round else int(h * self.short_size / w)
+                    oh = int(round(h * self.short_size / w)) if self.do_round else int(h * self.short_size / w)
             else:
                 oh = self.short_size
                 if self.fixed_ratio:
                     ow = int(self.short_size * 4.0 / 3.0)
                 else:
-                    ow = round(w * self.short_size / h) if self.do_round else int(w * self.short_size / h)
+                    ow = int(round(w * self.short_size / h)) if self.do_round else int(w * self.short_size / h)
             if self.backend == 'pillow':
                 resized_imgs.append(img.resize((ow, oh), Image.BILINEAR))
             else:
