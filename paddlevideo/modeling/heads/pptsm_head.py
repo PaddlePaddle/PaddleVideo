@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import paddle
 from paddle import ParamAttr
 from paddle.nn import Linear
 from paddle.regularizer import L2Decay
