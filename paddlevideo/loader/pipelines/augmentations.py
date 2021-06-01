@@ -18,7 +18,7 @@ import math
 from PIL import Image
 from ..registry import PIPELINES
 from collections.abc import Sequence
-import paddle.vision.transforms
+import cv2
 
 
 @PIPELINES.register()
@@ -28,10 +28,21 @@ class Scale(object):
     Args:
         short_size(float | int): Short size of an image will be scaled to the short_size.
         fixed_ratio(bool): Set whether to zoom according to a fixed ratio. default: True
+        do_round(bool): Whether to round up when calculating the zoom ratio. default: False
+        backend(str): Choose pillow or cv2 as the graphics processing backend. default: 'pillow'
     """
-    def __init__(self, short_size, fixed_ratio=True):
+    def __init__(self,
+                 short_size,
+                 fixed_ratio=True,
+                 do_round=False,
+                 backend='pillow'):
         self.short_size = short_size
         self.fixed_ratio = fixed_ratio
+        self.do_round = do_round
+        assert backend in [
+            'pillow', 'cv2'
+        ], f"Scale's backend must be pillow or cv2, but get {backend}"
+        self.backend = backend
 
     def __call__(self, results):
         """
@@ -51,19 +62,25 @@ class Scale(object):
                                                      and h == self.short_size):
                 resized_imgs.append(img)
                 continue
-
             if w < h:
                 ow = self.short_size
-                oh = int(self.short_size * 4.0 /
-                         3.0) if self.fixed_ratio else int(h * self.short_size /
-                                                           w)
-                resized_imgs.append(img.resize((ow, oh), Image.BILINEAR))
+                if self.fixed_ratio:
+                    oh = int(self.short_size * 4.0 / 3.0)
+                else:
+                    oh = int(round(h * self.short_size / w)) if self.do_round else int(h * self.short_size / w)
             else:
                 oh = self.short_size
-                ow = int(self.short_size * 4.0 /
-                         3.0) if self.fixed_ratio else int(w * self.short_size /
-                                                           h)
+                if self.fixed_ratio:
+                    ow = int(self.short_size * 4.0 / 3.0)
+                else:
+                    ow = int(round(w * self.short_size / h)) if self.do_round else int(w * self.short_size / h)
+            if self.backend == 'pillow':
                 resized_imgs.append(img.resize((ow, oh), Image.BILINEAR))
+            else:
+                resized_imgs.append(
+                    Image.fromarray(
+                        cv2.resize(np.asarray(img), (ow, oh),
+                                   interpolation=cv2.INTER_LINEAR)))
         results['imgs'] = resized_imgs
         return results
 
@@ -114,9 +131,11 @@ class CenterCrop(object):
     Center crop images.
     Args:
         target_size(int): Center crop a square with the target_size from an image.
+        do_round(bool): Whether to round up the coordinates of the upper left corner of the cropping area. default: True
     """
-    def __init__(self, target_size):
+    def __init__(self, target_size, do_round=True):
         self.target_size = target_size
+        self.do_round = do_round
 
     def __call__(self, results):
         """
@@ -135,8 +154,8 @@ class CenterCrop(object):
             assert (w >= self.target_size) and (h >= self.target_size), \
                 "image width({}) and height({}) should be larger than crop size".format(
                     w, h, self.target_size)
-            x1 = int(round((w - tw) / 2.))
-            y1 = int(round((h - th) / 2.))
+            x1 = int(round((w - tw) / 2.0)) if self.do_round else (w - tw) // 2
+            y1 = int(round((h - th) / 2.0)) if self.do_round else (h - th) // 2
             ccrop_imgs.append(img.crop((x1, y1, x1 + tw, y1 + th)))
         results['imgs'] = ccrop_imgs
         return results
@@ -161,13 +180,19 @@ class MultiScaleCrop(object):
             max_distort=1,
             fix_crop=True,
             allow_duplication=False,
-            more_fix_crop=True):
+            more_fix_crop=True,
+            backend='pillow'):
+
         self.target_size = target_size
         self.scales = scales if scales else [1, .875, .75, .66]
         self.max_distort = max_distort
         self.fix_crop = fix_crop
         self.allow_duplication = allow_duplication
         self.more_fix_crop = more_fix_crop
+        assert backend in [
+            'pillow', 'cv2'
+        ], f"MultiScaleCrop's backend must be pillow or cv2, but get {backend}"
+        self.backend = backend
 
     def __call__(self, results):
         """
@@ -243,10 +268,19 @@ class MultiScaleCrop(object):
             img.crop((offset_w, offset_h, offset_w + crop_w, offset_h + crop_h))
             for img in imgs
         ]
-        ret_img_group = [
-            img.resize((input_size[0], input_size[1]), Image.BILINEAR)
-            for img in crop_img_group
-        ]
+        if self.backend == 'pillow':
+            ret_img_group = [
+                img.resize((input_size[0], input_size[1]), Image.BILINEAR)
+                for img in crop_img_group
+            ]
+        else:
+            ret_img_group = [
+                Image.fromarray(
+                    cv2.resize(np.asarray(img),
+                               dsize=(input_size[0], input_size[1]),
+                               interpolation=cv2.INTER_LINEAR))
+                for img in crop_img_group
+            ]
         results['imgs'] = ret_img_group
         return results
 
@@ -552,4 +586,45 @@ class GroupFullResSample(object):
                 oversample_group.extend(flip_group)
 
         results['imgs'] = oversample_group
+        return results
+
+
+@PIPELINES.register()
+class TenCrop:
+    """
+    Crop out 5 regions (4 corner points + 1 center point) from the picture,
+    and then flip the cropping result to get 10 cropped images, which can make the prediction result more robust.
+    Args:
+        target_size(int | tuple[int]): (w, h) of target size for crop.
+    """
+    def __init__(self, target_size):
+        self.target_size = (target_size, target_size)
+
+    def __call__(self, results):
+
+        imgs = results['imgs']
+        img_w, img_h = imgs[0].size
+        crop_w, crop_h = self.target_size
+        w_step = (img_w - crop_w) // 4
+        h_step = (img_h - crop_h) // 4
+        offsets = [
+            (0, 0),
+            (4 * w_step, 0),
+            (0, 4 * h_step),
+            (4 * w_step, 4 * h_step),
+            (2 * w_step, 2 * h_step),
+        ]
+        img_crops = list()
+        for x_offset, y_offset in offsets:
+            crop = [
+                img.crop((x_offset, y_offset, x_offset + crop_w,
+                         y_offset + crop_h)) for img in imgs
+            ]
+            crop_fliped = [
+                timg.transpose(Image.FLIP_LEFT_RIGHT) for timg in crop
+            ]
+            img_crops.extend(crop)
+            img_crops.extend(crop_fliped)
+
+        results['imgs'] = img_crops
         return results
