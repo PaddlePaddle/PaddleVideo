@@ -1,6 +1,6 @@
 [English](../../../en/model_zoo/recognition/pp-tsm.md) | 简体中文
 
-# PPTSM视频分类模型
+# PP-TSM视频分类模型
 
 ---
 ## 内容
