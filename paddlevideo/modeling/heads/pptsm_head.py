@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import paddle
 from paddle import ParamAttr
 from paddle.nn import Linear
 from paddle.regularizer import L2Decay
@@ -58,3 +59,31 @@ class ppTSMHead(TSNHead):
     def init_weights(self):
         """Initiate the FC layer parameters"""
         weight_init_(self.fc, 'Normal', 'fc_0.w_0', 'fc_0.b_0', std=self.stdv)
+    
+    
+    def forward(self, x, seg_num):
+        """Define how the head is going to run.
+        Args:
+            x (paddle.Tensor): The input data.
+            num_segs (int): Number of segments.
+        Returns:
+            score: (paddle.Tensor) The classification scores for input samples.
+        """
+
+        #XXX: check dropout location!
+        # [N * num_segs, in_channels, 7, 7]
+        x = self.avgpool2d(x)
+        # [N * num_segs, in_channels, 1, 1]
+        if self.dropout is not None:
+            x = self.dropout(x)
+            # [N * seg_num, in_channels, 1, 1]
+        x = paddle.reshape(x, [-1, seg_num, x.shape[1]])
+        # [N, seg_num, in_channels]
+        x = paddle.mean(x, axis=1)
+        # [N, in_channels]
+        x = paddle.reshape(x, shape=[-1, self.in_channels])
+        # [N, in_channels]
+        score = self.fc(x)
+        # [N, num_class]
+        #x = F.softmax(x)  #NOTE remove
+        return score

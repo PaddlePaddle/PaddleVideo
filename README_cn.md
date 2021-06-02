@@ -21,7 +21,7 @@ PaddleVideo飞桨视频模型开发套件，旨在帮助开发者更好的进行
     PaddleVideo 支持更多的数据集和模型结构，包括[Kinectics400](docs/zh-CN/dataset/k400.md)，ucf101，YoutTube8M等数据集，模型结构涵盖了视频分类模型TSN，TSM，SlowFast，AttentionLSTM和视频定位模型[BMN](./docs/zh-CN/model_zoo/localization/bmn.md)等。
 
 - **更高指标的模型算法**
-    PaddleVideo 提供更高精度的模型结构解决方案，在基于TSM标准版改进的[PPTSM](docs/zh-CN/model_zoo/recognition/pp-tsm.md)上，在Kinectics400数据集上达到2D网络SOTA效果，Top1 Acc 76.16% 相较标准版TSM模型参数量持平，且取得更快的模型速度。
+    PaddleVideo 提供更高精度的模型结构解决方案，在基于TSM标准版改进的[PP-TSM](docs/zh-CN/model_zoo/recognition/pp-tsm.md)上，在Kinectics400数据集上达到2D网络SOTA效果，Top1 Acc 76.16% 相较标准版TSM模型参数量持平，且取得更快的模型速度。
 
 - **更快的训练速度**
     PaddleVideo 提供更快速度的训练阶段解决方案，包括[混合精度训练](https://www.paddlepaddle.org.cn/documentation/docs/zh/guides/index_cn.html)，分布式训练，针对Slowfast模型的Multigrid训练策略，OP融合策略以及更快的数据预处理模块等。
@@ -38,7 +38,7 @@ PaddleVideo飞桨视频模型开发套件，旨在帮助开发者更好的进行
 
 | 领域 | 模型 | 数据集 | 精度指标 | 精度% | 
 | :--------------- | :--------: | :------------: | :------------: | :------------: | 
-| 视频分类 | [**ppTSM**](./docs/zh-CN/model_zoo/recognition/pp-tsm.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | **76.16** | 
+| 视频分类 | [**PP-TSM**](./docs/zh-CN/model_zoo/recognition/pp-tsm.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | **76.16** | 
 | 视频分类 | [SlowFast](./docs/zh-CN/model_zoo/recognition/slowfast.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | 75.84 |
 | 视频分类 | [TSM](./docs/zh-CN/model_zoo/recognition/tsm.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | 71.06 | 
 | 视频分类 | [TSN](./docs/zh-CN/model_zoo/recognition/tsn.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | 67.0 |
