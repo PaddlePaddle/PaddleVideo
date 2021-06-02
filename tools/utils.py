@@ -145,7 +145,6 @@ class ppTSN_Inference_helper():
         print("\ttop-1 score: {0}".format(scores[0]))
 
 
-
 @INFERENCE.register()
 class BMN_Inference_helper():
     def __init__(self, feat_dim, dscale, tscale, result_path):
