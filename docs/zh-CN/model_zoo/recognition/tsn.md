@@ -75,12 +75,12 @@ python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log
 ### 导出inference模型
 
 ```bash
-python3.7 tools/export_model.py -c configs/recognition/tsm/tsn_k400_frames.yaml \
+python3.7 tools/export_model.py -c configs/recognition/tsn/tsn_k400_frames.yaml \
                                 -p data/TSN_k400.pdparams \
                                 -o inference/TSN
 ```
 
-上述命令将生成预测所需的模型结构文件`TSM.pdmodel`和模型权重文件`TSN.pdiparams`。
+上述命令将生成预测所需的模型结构文件`TSN.pdmodel`和模型权重文件`TSN.pdiparams`。
 
 各参数含义可参考[模型推理方法](https://github.com/PaddlePaddle/PaddleVideo/blob/release/2.0/docs/zh-CN/start.md#2-模型推理)
 
@@ -88,7 +88,7 @@ python3.7 tools/export_model.py -c configs/recognition/tsm/tsn_k400_frames.yaml 
 
 ```bash
 python3.7 tools/predict.py --input_file data/example.avi \
-                           --config configs/recognition/tsm/tsn_k400_frames.yaml \
+                           --config configs/recognition/tsn/tsn_k400_frames.yaml \
                            --model_file inference/TSN/TSN.pdmodel \
                            --params_file inference/TSN/TSN.pdiparams \
                            --use_gpu=True \
