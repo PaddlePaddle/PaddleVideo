@@ -54,7 +54,7 @@ class ppTSM_Inference_helper():
         return: list
         """
         self.input_file = input_file
-        assert os.path.isfile(input_file) is not None, "{} not exists".format(
+        assert os.path.isfile(input_file) is not None, "{0} not exists".format(
             input_file)
         results = {'filename': input_file}
         img_mean = [0.485, 0.456, 0.406]
@@ -82,7 +82,7 @@ class ppTSM_Inference_helper():
         classes = np.argpartition(output, -self.top_k)[-self.top_k:]
         classes = classes[np.argsort(-output[classes])]
         scores = output[classes]
-        print("Current video file: {}".format(self.input_file))
+        print("Current video file: {0}".format(self.input_file))
         print("\ttop-1 class: {0}".format(classes[0]))
         print("\ttop-1 score: {0}".format(scores[0]))
 
@@ -107,7 +107,7 @@ class ppTSN_Inference_helper():
         return: list
         """
         self.input_file = input_file
-        assert os.path.isfile(input_file) is not None, "{} not exists".format(input_file)
+        assert os.path.isfile(input_file) is not None, "{0} not exists".format(input_file)
         results = {'filename': input_file}
         img_mean = [0.485, 0.456, 0.406]
         img_std = [0.229, 0.224, 0.225]
@@ -140,7 +140,7 @@ class ppTSN_Inference_helper():
         classes = np.argpartition(output, -self.top_k)[-self.top_k:]
         classes = classes[np.argsort(-output[classes])]
         scores = output[classes]
-        print("Current video file: {}".format(self.input_file))
+        print("Current video file: {0}".format(self.input_file))
         print("\ttop-1 class: {0}".format(classes[0]))
         print("\ttop-1 score: {0}".format(scores[0]))
 
@@ -160,7 +160,7 @@ class BMN_Inference_helper():
         input_file: str, file path
         return: list
         """
-        assert os.path.isfile(input_file) is not None, "{} not exists".format(
+        assert os.path.isfile(input_file) is not None, "{0} not exists".format(
             input_file)
         file_info = json.load(open(input_file))
         self.feat_path = file_info['feat_path']
@@ -219,7 +219,7 @@ class BMN_Inference_helper():
         result_dict[self.feat_path] = proposal_list
 
         # print top-5 predictions
-        print("BMN Inference results of {} :".format(self.feat_path))
+        print("BMN Inference results of {0} :".format(self.feat_path))
         for pred in proposal_list[:5]:
             print(pred)
 
