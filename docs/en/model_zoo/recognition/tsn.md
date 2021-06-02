@@ -102,7 +102,7 @@ python3.7 tools/predict.py --input_file data/example.avi \
 
 - The model reads the `mp4` data in the Kinetics-400 data set, first divides each piece of video data into `seg_num` segments, and then evenly extracts 1 frame of image from each segment to obtain sparsely sampled `seg_num` video frames , And then do the same random data enhancement to this `seg_num` frame image, including multi-scale random cropping, random left and right flips, data normalization, etc., and finally zoom to `target_size`
 
-**Training strategy:**
+**training strategy:**
 
 - Use Momentum optimization algorithm for training, momentum=0.9
 
@@ -114,7 +114,7 @@ python3.7 tools/predict.py --input_file data/example.avi \
 
 - Dropout_ratio=0.4
 
-**Parameter initialization**
+**parameter initialization**
 
 - The convolutional layer of the TSN model uses Paddle's default [KaimingNormal](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/api/paddle/nn/initializer/KaimingNormal_cn.html#kaimingnormal) and [Constant](https://www.paddlepaddle.org.cn/documentation/docs/en/develop/api/paddle/nn/initializer/Constant_cn.html#constant) initialization method, with Normal(mean=0, std= 0.01) normal distribution to initialize the weight of the FC layer, and a constant 0 to initialize the bias of the FC layer
 
