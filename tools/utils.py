@@ -115,7 +115,7 @@ class ppTSN_Inference_helper():
             VideoDecoder(),
             Sampler(self.num_seg, self.seg_len, valid_mode=True, select_left=True),
             Scale(self.short_size, fixed_ratio=False, do_round=True, backend='cv2'),
-            TenCrop(self.target_size),
+            CenterCrop(self.target_size, do_round=False),
             Image2Array(),
             Normalization(img_mean, img_std)
         ]
