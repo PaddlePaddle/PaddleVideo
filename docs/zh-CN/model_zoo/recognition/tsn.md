@@ -68,7 +68,7 @@ python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log
 
 | backbone | Sampling method | Training Strategy | num_seg | target_size | Top-1 | checkpoints                                                  |
 | :------: | :-------------: | :---------------: | :-----: | :---------: | :---: | ------------------------------------------------------------ |
-| ResNet50 |     Uniform     |       NCHW        |   25    |     224     | 69.81 | [TSN_k400.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/TSN_k400.pdparams) |
+| ResNet50 |     TenCrop     |       NCHW        |   25    |     224     | 69.81 | [TSN_k400.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/TSN_k400.pdparams) |
 
 ## 模型推理
 
