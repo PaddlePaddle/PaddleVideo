@@ -2,69 +2,122 @@
 
 # TSN
 
+## Content
+
+- [Introduction](#Introduction)
+- [Data](#Data)
+- [Train](#Train)
+- [Test](#Test)
+- [Inference](#Inference)
+- [Details](#Details)
+- [Reference](#Reference)
+
 ## Introduction
 
-Temporal Segment Network (TSN) 是视频分类领域经典的基于2D-CNN的解决方案。该方法主要解决视频的长时间行为判断问题，通过稀疏采样视频帧的方式代替稠密采样，既能捕获视频全局信息，也能去除冗余，降低计算量。最终将每帧特征平均融合后得到视频的整体特征，并用于分类。本代码实现的模型为基于单路RGB图像的TSN网络结构，Backbone采用ResNet-50结构。
+Temporal Segment Network (TSN) is a classic 2D-CNN-based solution in the field of video classification. This method mainly solves the problem of long-term behavior recognition of video, and replaces dense sampling by sparsely sampling video frames, which can not only capture the global information of the video, but also remove redundancy and reduce the amount of calculation. The core idea is to average the features of each frame as the overall feature of the video, and then enter the classifier for classification. The model implemented by this code is a TSN network based on a single-channel RGB image, and Backbone uses the ResNet-50 structure.
 
-详细内容请参考ECCV 2016年论文[Temporal Segment Networks: Towards Good Practices for Deep Action Recognition](https://arxiv.org/abs/1608.00859)
-
-## 数据准备
-
-K400数据下载及准备请参考[数据](../../dataset/K400.md)
-
-UCF101数据下载及准备请参考[数据](../../dataset/ucf101.md)
+<div align="center">
+<img src="../../../images/tsn_architecture.png" height=350 width=80000 hspace='10'/> <br />
+</div>
 
 
-## 模型训练
+For details, please refer to the ECCV 2016 paper [Temporal Segment Networks: Towards Good Practices for Deep Action Recognition](https://arxiv.org/abs/1608.00859)
 
-- 加载在ImageNet1000上训练好的ResNet50权重作为Backbone初始化参数，请下载此[模型参数](https://paddlemodels.bj.bcebos.com/video_classification/ResNet50_pretrained.tar.gz)并解压，并将路径添加到configs中 BACKBONE字段下
-或用-o 参数进行添加，``` -o MODEL.HEAD.pretrained="" ``` 具体参考[conifg](../../config.md)
+## Data
 
--下载已发布模型[model](https://paddlemodels.bj.bcebos.com/video_classification/TSN.pdparams), 通过`--weights`指定权重存
-放路径进行finetune等开发
+PaddleVide provides training and testing scripts on the Kinetics-400 dataset. Kinetics-400 data download and preparation please refer to [Kinetics400 data preparation](../../dataset/K400.md)
 
-K400 video格式训练
+## Train
 
-K400 frames格式训练
+### Kinetics-400 data set training
 
-UCF101 video格式训练
+#### Download and add pre-trained models
 
-UCF101 frames格式训练
+1. Load the ResNet50 weights trained on ImageNet1000 as Backbone initialization parameters [ResNet50_pretrain.pdparams](https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_pretrain.pdparams), or download through the command line
 
-## 实现细节
+   ```bash
+   wget https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_pretrain.pdparams
+   ```
 
-**数据处理：** 模型读取Kinetics-400数据集中的`mp4`数据，每条数据抽取`seg_num`段，每段抽取1帧图像，对每帧图像做随机增强后，缩放至`target_size`。
+2. Open `PaddleVideo/configs/recognition/tsn/tsn_k400_frames.yaml`, and fill in the downloaded weight path below `pretrained:`
 
-**训练策略：**
+   ```yaml
+   MODEL:
+       framework: "Recognizer2D"
+       backbone:
+           name: "ResNet"
+           pretrained: fill in the path here
+   ```
 
-*  采用Momentum优化算法训练，momentum=0.9
-*  l2_decay权重衰减系数为1e-4
-*  学习率在训练的总epoch数的1/3和2/3时分别做0.1倍的衰减
+#### Start training
 
-**参数初始化**
+- Kinetics-400 data set uses 8 cards for training, the training start command for frames format data is as follows
 
-## 模型测试
+  ```bash
+  python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_tsn main.py --validate -c configs/recognition/ tsn/tsn_k400_frames.yaml
+  ```
 
-```bash
-python3 main.py --test --weights=""
-```
+## Test
 
-- 指定`--weights`参数，下载已发布模型[model](https://paddlemodels.bj.bcebos.com/video_classification/TSN.pdparams)进行模型测试
-
-
-当取如下参数时，在Kinetics400的validation数据集下评估精度如下:
-
-| seg\_num | target\_size | Top-1 |
-| :------: | :----------: | :----: |
-| 3 | 224 | 0.66 |
-| 7 | 224 | 0.67 |
-
-## 模型推理
+Since the sampling method of the TSN model test mode is **TenCrop** with a slower speed but higher accuracy, which is different from the **CenterCrop** used in the verification mode during the training process, the verification index `topk Acc` recorded in the training log It does not represent the final test score, so after the training is completed, you can use the test mode to test the best model to obtain the final index. The command is as follows:
 
 ```bash
-python3 predict.py --test --weights=
+python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_tsn main.py --test -c configs/recognition/ tsn/tsn_k400_frames.yaml -w "output/TSN/TSN_best.pdparams"
 ```
 
-## 参考论文
+When the test configuration uses the following parameters, the test indicators on the validation data set of Kinetics-400 are as follows:
+
+| backbone | Sampling method | Training Strategy | num_seg | target_size | Top-1 |                         checkpoints                          |
+| :------: | :-------------: | :---------------: | :-----: | :---------: | :---: | :----------------------------------------------------------: |
+| ResNet50 |     Uniform     |       NCHW        |   25    |     224     | 69.81 | [TSN_k400.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/TSN_k400.pdparams) |
+
+## Inference
+
+### Export inference model
+
+```bash
+python3.7 tools/export_model.py -c configs/recognition/tsn/tsn_k400_frames.yaml \
+                                -p data/TSN_k400.pdparams \
+                                -o inference/TSN
+```
+
+The above command will generate the model structure file `TSN.pdmodel` and the model weight file `TSN.pdiparams` required for prediction.
+
+For the meaning of each parameter, please refer to [Model Reasoning Method](https://github.com/PaddlePaddle/PaddleVideo/blob/release/2.0/docs/zh-CN/start.md#2-Model Reasoning)
+
+### Use prediction engine inference
+
+```bash
+python3.7 tools/predict.py --input_file data/example.avi \
+                           --config configs/recognition/tsn/tsn_k400_frames.yaml \
+                           --model_file inference/TSN/TSN.pdmodel \
+                           --params_file inference/TSN/TSN.pdiparams \
+                           --use_gpu=True \
+                           --use_tensorrt=False
+```
+
+## Details
+
+**data processing:**
+
+- The model reads the `mp4` data in the Kinetics-400 data set, first divides each piece of video data into `seg_num` segments, and then evenly extracts 1 frame of image from each segment to obtain sparsely sampled `seg_num` video frames , And then do the same random data enhancement to this `seg_num` frame image, including multi-scale random cropping, random left and right flips, data normalization, etc., and finally zoom to `target_size`
+
+**training strategy:**
+
+- Use Momentum optimization algorithm for training, momentum=0.9
+
+- Using L2_Decay, the weight attenuation coefficient is 1e-4
+
+- Use global gradient clipping, with a clipping factor of 40.0
+
+- The total number of epochs is 100, and the learning rate will be attenuated by 0.1 times when the epoch reaches 40 and 80
+
+- Dropout_ratio=0.4
+
+**parameter initialization**
+
+- The convolutional layer of the TSN model uses Paddle's default [KaimingNormal](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/api/paddle/nn/initializer/KaimingNormal_cn.html#kaimingnormal) and [Constant](https://www.paddlepaddle.org.cn/documentation/docs/en/develop/api/paddle/nn/initializer/Constant_cn.html#constant) initialization method, with Normal(mean=0, std= 0.01) normal distribution to initialize the weight of the FC layer, and a constant 0 to initialize the bias of the FC layer
+
+## Reference
 
 - [Temporal Segment Networks: Towards Good Practices for Deep Action Recognition](https://arxiv.org/abs/1608.00859), Limin Wang, Yuanjun Xiong, Zhe Wang, Yu Qiao, Dahua Lin, Xiaoou Tang, Luc Van Gool
