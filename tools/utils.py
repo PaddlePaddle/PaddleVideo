@@ -114,8 +114,8 @@ class ppTSN_Inference_helper():
         ops = [
             VideoDecoder(),
             Sampler(self.num_seg, self.seg_len, valid_mode=True, select_left=True),
-            Scale(self.short_size, fixed_ratio=False, do_round=True, backend='cv2'),
-            CenterCrop(self.target_size, do_round=False),
+            Scale(self.short_size, fixed_ratio=True, do_round=True, backend='cv2'),
+            TenCrop(self.target_size),
             Image2Array(),
             Normalization(img_mean, img_std)
         ]
@@ -129,7 +129,13 @@ class ppTSN_Inference_helper():
         """
         output: list
         """
-        output = output[0].flatten()
+        output = output[0]
+        if output.ndim == 1:
+            pass
+        elif output.ndim == 2:
+            output = output.mean(axis=0)
+        if output.ndim > 1:
+            output = output.flatten()
         output = F.softmax(paddle.to_tensor(output)).numpy()
         classes = np.argpartition(output, -self.top_k)[-self.top_k:]
         classes = classes[np.argsort(-output[classes])]
@@ -137,6 +143,7 @@ class ppTSN_Inference_helper():
         print("Current video file: {}".format(self.input_file))
         print("\ttop-1 class: {0}".format(classes[0]))
         print("\ttop-1 score: {0}".format(scores[0]))
+
 
 
 @INFERENCE.register()
