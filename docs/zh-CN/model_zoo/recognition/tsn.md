@@ -1,107 +1,117 @@
 简体中文 | [English](../../../en/model_zoo/recognition/tsn.md)
 
-
 # TSN
 
-## 简介
+## 内容
 
-Temporal Segment Network (TSN) 是视频分类领域经典的基于2D-CNN的解决方案。该方法主要解决视频的长时间行为判断问题，通过稀疏采样视频帧的方式代替稠密采样，既能捕获视频全局信息，也能去除冗余，降低计算量。最终将每帧特征平均融合后得到视频的整体特征，并用于分类。本代码实现的模型为基于单路RGB图像的TSN网络结构，Backbone采用ResNet-50结构。
+- [模型简介](#模型简介)
+- [数据准备](#数据准备)
+- [模型训练](#模型训练)
+- [模型测试](#模型测试)
+- [模型推理](#模型推理)
+- [实现细节](#实现细节)
+- [参考论文](#参考论文)
 
-详细内容请参考ECCV 2016年论文[Temporal Segment Networks: Towards Good Practices for Deep Action Recognition](https://arxiv.org/abs/1608.00859)
+## 模型简介
+
+Temporal Segment Network (TSN) 是视频分类领域经典的基于2D-CNN的解决方案。该方法主要解决视频的长时间行为识别问题，通过稀疏采样视频帧的方式代替稠密采样，既能捕获视频的全局信息，也能去除冗余，降低计算量。核心思想是将每帧的特征做平均融合作为视频的整体特征，再输入分类器进行分类。本代码实现的模型为**基于单路RGB图像**的TSN网络，Backbone采用ResNet-50结构。
+
+<div align="center">
+<img src="../../../images/tsn_architecture.png" height=350 width=80000 hspace='10'/> <br />
+</div>
+
+详细内容请参考ECCV 2016年的论文[Temporal Segment Networks: Towards Good Practices for Deep Action Recognition](https://arxiv.org/abs/1608.00859)
 
 ## 数据准备
 
-PaddleVide提供了在K400和UCF101两种数据集上训练TSN的训练脚本。
-
-K400数据下载及准备请参考[K400数据准备](../../dataset/K400.md)
-
-UCF101数据下载及准备请参考[UCF101数据准备](../../dataset/ucf101.md)
-
+PaddleVide提供了在Kinetics-400数据集上训练和测试练脚本。Kinetics-400数据下载及准备请参考[Kinetics-400数据准备](../../dataset/K400.md)
 
 ## 模型训练
 
-- 加载在ImageNet1000上训练好的ResNet50权重作为Backbone初始化参数，请下载此[模型参数](https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_pretrain.pdparams),
-或是通过命令行下载
+### Kinetics-400数据集训练
 
-```bash
-wget https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_pretrain.pdparams
-```
+#### 下载并添加预训练模型
 
-并将路径添加到configs中backbone字段下
+1. 加载在ImageNet1000上训练好的ResNet50权重作为Backbone初始化参数[ResNet50_pretrain.pdparams](https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_pretrain.pdparams)，也可以通过命令行下载
 
-```yaml
-MODEL:
-    framework: "Recognizer2D"
-    backbone:
-        name: "ResNet"
-        pretrained: 将路径填写到此处
-```
+   ```bash
+   wget https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_pretrain.pdparams
+   ```
 
-或用`-o` 参数在```run.sh```或命令行中进行添加
-``` -o MODEL.backbone.pretrained="" ```
-`-o` 参数用法请参考[conifg](../../config.md)
+2. 打开`PaddleVideo/configs/recognition/tsn/tsn_k400_frames.yaml`，将下载好的权重路径填写到下方`pretrained:`之后
 
-- 如若进行`finetune`或者[模型测试](#模型测试)等，请下载PaddleVideo的已发布模型[model]()<sup>coming soon</sup>, 通过`--weights`指定权重存放路径。 `--weights` 参数用法请参考[config](../../config.md)
+   ```yaml
+   MODEL:
+       framework: "Recognizer2D"
+       backbone:
+           name: "ResNet"
+           pretrained: 将路径填写到此处
+   ```
 
-K400 video格式训练
+#### 开始训练
 
-K400 frames格式训练
+- Kinetics-400数据集使用8卡训练，frames格式数据的训练启动命令如下
 
-UCF101 video格式训练
-
-UCF101 frames格式训练
-
-## 实现细节
-
-**数据处理：** 模型读取Kinetics-400数据集中的`mp4`数据，每条数据抽取`seg_num`段，每段抽取1帧图像，对每帧图像做随机增强后，缩放至`target_size`。
-
-**训练策略：**
-
-*  采用[Momentum](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/api/paddle/optimizer/momentum/Momentum_cn.html#momentum)优化算法训练，momentum值设定为0.9。
-*  [l2_decay](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/api/paddle/regularizer/L2Decay_cn.html#l2decay)权重衰减系数为1e-4。
-*  学习率在训练的总epoch数的15（1/3）和30（2/3）时分别做0.1倍的衰减。
-
-**参数初始化**
-
-TSN模型的卷积层和BN层参数采用Paddle默认的[KaimingNormal](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/api/paddle/nn/initializer/kaiming/KaimingNormal_cn.html#kaimingnormal)和[Constant](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/api/paddle/nn/initializer/constant/Constant_cn.html#constant)初始化方法。而实际，在真正训练过程中，指定了pretrained参数后会以保存的权重进行参数初始化。
-源代码可参考[TSN的参数初始化](https://github.com/PaddlePaddle/PaddleVideo/blob/main/paddlevideo/modeling/backbones/resnet.py#L251)。
-
-Linear（FC）层的参数采用mean=0，std默认0.01的Normal初始化，关于Normal初始化方法可以参考[初始化](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/api/paddle/nn/initializer/normal/Normal_cn.html)官方文档
-
+  ```bash
+  python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_tsn main.py  --validate -c configs/recognition/tsn/tsn_k400_frames.yaml
+  ```
 
 ## 模型测试
 
-TSN采用CenterCrop的测试Mertics
+由于TSN模型测试模式的采样方式是速度稍慢但精度高一些的**TenCrop**，与训练过程中验证模式采用的**CenterCrop**不同，所以训练日志中记录的验证指标`topk Acc`不代表最终的测试分数，因此在训练完成之后可以用测试模式对最好的模型进行测试获取最终的指标，命令如下：
 
 ```bash
-python3 main.py --test --weights=""
+python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_tsn main.py  --test -c configs/recognition/tsn/tsn_k400_frames.yaml -w "output/TSN/TSN_best.pdparams"
 ```
 
-- 指定`--weights`参数为下载已发布模型进行模型测试。
+当测试配置采用如下参数时，在Kinetics-400的validation数据集上的测试指标如下：
 
-
-当取如下参数时，在Kinetics400的validation数据集下评估精度如下:
-
-| seg\_num | target\_size | Top-1 |
-| :------: | :----------: | :----: |
-| 3 | 224 | 0.66 |
-| 7 | 224 | 0.67 |
+| backbone | Sampling method | Training Strategy | num_seg | target_size | Top-1 | checkpoints                                                  |
+| :------: | :-------------: | :---------------: | :-----: | :---------: | :---: | ------------------------------------------------------------ |
+| ResNet50 |     TenCrop     |       NCHW        |   25    |     224     | 69.81 | [TSN_k400.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/TSN_k400.pdparams) |
 
 ## 模型推理
 
-首先导出模型，这里加载默认路径为```output/TSN```下的参数。并将预测模型导出至`inference`下。
+### 导出inference模型
 
 ```bash
-    python3.7 tools/export_model.py -c configs/recognition/tsn/tsn.yaml -p output/TSN/TSN_best.pdparams -o ./inference
+python3.7 tools/export_model.py -c configs/recognition/tsn/tsn_k400_frames.yaml \
+                                -p data/TSN_k400.pdparams \
+                                -o inference/TSN
 ```
 
-之后，进行模型推理
+上述命令将生成预测所需的模型结构文件`TSN.pdmodel`和模型权重文件`TSN.pdiparams`。
+
+各参数含义可参考[模型推理方法](https://github.com/PaddlePaddle/PaddleVideo/blob/release/2.0/docs/zh-CN/start.md#2-模型推理)
+
+### 使用预测引擎推理
 
 ```bash
-python3 tools/predict.py -v data/example.avi --model_file "./inference/TSN.pdmodel" --params_file "./inference/TSN.pdiparams" --enable_benchmark=False --model="TSN"
+python3.7 tools/predict.py --input_file data/example.avi \
+                           --config configs/recognition/tsn/tsn_k400_frames.yaml \
+                           --model_file inference/TSN/TSN.pdmodel \
+                           --params_file inference/TSN/TSN.pdiparams \
+                           --use_gpu=True \
+                           --use_tensorrt=False
 ```
 
-更多关于预测部署功能介绍请参考[../../tutorials/deployment.md]
+## 实现细节
+
+**数据处理：**
+
+- 模型读取Kinetics-400数据集中的`mp4`数据，首先将每条视频数据划分成`seg_num`段，然后均匀地从每段中抽取1帧图像，得到稀疏采样的`seg_num`张视频帧，再对这`seg_num`帧图像做同样的随机数据增强，包括多尺度的随机裁剪、随机左右翻转、数据归一化等，最后缩放至`target_size`
+
+**训练策略：**
+
+- 采用Momentum优化算法训练，momentum=0.9
+- 采用L2_Decay，权重衰减系数为1e-4
+- 采用全局梯度裁剪，裁剪系数为40.0
+- 总epoch数为100，学习率在epoch达到40、80进行0.1倍的衰减
+- Dropout_ratio=0.4
+
+**参数初始化**
+
+- TSN模型的卷积层采用Paddle默认的[KaimingNormal](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/api/paddle/nn/initializer/KaimingNormal_cn.html#kaimingnormal)和[Constant](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/api/paddle/nn/initializer/Constant_cn.html#constant)初始化方法，以Normal(mean=0, std=0.01)的正态分布来初始化FC层的权重，以常数0来初始化FC层的偏置
 
 ## 参考论文
 
