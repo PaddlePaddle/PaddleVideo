@@ -73,7 +73,7 @@ When the test configuration uses the following parameters, the test indicators o
 
 ## Inference
 
-### Export inference model
+### export inference model
 
 ```bash
 python3.7 tools/export_model.py -c configs/recognition/tsn/tsn_k400_frames.yaml \
@@ -85,7 +85,7 @@ The above command will generate the model structure file `TSN.pdmodel` and the m
 
 For the meaning of each parameter, please refer to [Model Reasoning Method](https://github.com/PaddlePaddle/PaddleVideo/blob/release/2.0/docs/zh-CN/start.md#2-Model Reasoning)
 
-### Use prediction engine inference
+### infer
 
 ```bash
 python3.7 tools/predict.py --input_file data/example.avi \
