@@ -15,6 +15,7 @@
 import paddle
 from collections import OrderedDict
 from .logger import get_logger, coloring
+
 logger = get_logger("paddlevideo")
 
 __all__ = ['AverageMeter', 'build_record', 'log_batch', 'log_epoch']
@@ -34,8 +35,8 @@ def build_record(cfg):
         record_list.append(("top1", AverageMeter("top1", '.5f')))
         record_list.append(("top5", AverageMeter("top5", '.5f')))
 
-    record_list.append(("batch_time", AverageMeter('elapse', '.3f')))
-    record_list.append(("reader_time", AverageMeter('reader', '.3f')))
+    record_list.append(("batch_time", AverageMeter('batch_cost', '.5f')))
+    record_list.append(("reader_time", AverageMeter('reader_cost', '.5f')))
     record_list = OrderedDict(record_list)
     return record_list
 
@@ -86,21 +87,37 @@ class AverageMeter(object):
 
 
 def log_batch(metric_list, batch_id, epoch_id, total_epoch, mode, ips):
-    metric_str = ' '.join([str(m.value) for m in metric_list.values()])
+    batch_cost = str(metric_list['batch_time'].value) + ' sec,'
+    reader_cost = str(metric_list['reader_time'].value) + ' sec,'
+
+    metric_values = []
+    for m in metric_list:
+        if not (m == 'batch_time' or m == 'reader_time'):
+            metric_values.append(metric_list[m].value)
+    metric_str = ' '.join([str(v) for v in metric_values])
     epoch_str = "epoch:[{:>3d}/{:<3d}]".format(epoch_id, total_epoch)
     step_str = "{:s} step:{:<4d}".format(mode, batch_id)
-    logger.info("{:s} {:s} {:s}s {}".format(
+
+    logger.info("{:s} {:s} {:s} {:s} {:s} {}".format(
         coloring(epoch_str, "HEADER") if batch_id == 0 else epoch_str,
-        coloring(step_str, "PURPLE"), coloring(metric_str, 'OKGREEN'), ips))
+        coloring(step_str, "PURPLE"), coloring(metric_str, 'OKGREEN'),
+        coloring(batch_cost, "OKGREEN"), coloring(reader_cost, 'OKGREEN'), ips))
 
 
 def log_epoch(metric_list, epoch, mode, ips):
-    metric_avg = ' '.join([str(m.mean) for m in metric_list.values()] +
-                          [metric_list['batch_time'].total])
+    batch_cost = 'avg_' + str(metric_list['batch_time'].value) + ' sec,'
+    reader_cost = 'avg_' + str(metric_list['reader_time'].value) + ' sec,'
+    batch_sum = str(metric_list['batch_time'].total) + ' sec,'
+
+    metric_values = []
+    for m in metric_list:
+        if not (m == 'batch_time' or m == 'reader_time'):
+            metric_values.append(metric_list[m].value)
+    metric_str = ' '.join([str(v) for v in metric_values])
 
     end_epoch_str = "END epoch:{:<3d}".format(epoch)
 
-    logger.info("{:s} {:s} {:s}s {}".format(coloring(end_epoch_str, "RED"),
-                                            coloring(mode, "PURPLE"),
-                                            coloring(metric_avg, "OKGREEN"),
-                                            ips))
+    logger.info("{:s} {:s} {:s} {:s} {:s} {:s} {}".format(
+        coloring(end_epoch_str, "RED"), coloring(mode, "PURPLE"),
+        coloring(metric_str, "OKGREEN"), coloring(batch_cost, "OKGREEN"),
+        coloring(reader_cost, "OKGREEN"), coloring(batch_sum, "OKGREEN"), ips))

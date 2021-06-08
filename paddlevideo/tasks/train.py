@@ -175,7 +175,7 @@ def train_model(cfg,
         if not cfg.OPTIMIZER.learning_rate.get("iter_step"):
             lr.step()
 
-        ips = "ips: {:.5f} instance/sec.".format(
+        ips = "avg_ips: {:.5f} instance/sec.".format(
             batch_size * record_list["batch_time"].count /
             record_list["batch_time"].sum)
         log_epoch(record_list, epoch + 1, "train", ips)
@@ -200,7 +200,7 @@ def train_model(cfg,
                         batch_size / record_list["batch_time"].val)
                     log_batch(record_list, i, epoch + 1, cfg.epochs, "val", ips)
 
-            ips = "ips: {:.5f} instance/sec.".format(
+            ips = "avg_ips: {:.5f} instance/sec.".format(
                 batch_size * record_list["batch_time"].count /
                 record_list["batch_time"].sum)
             log_epoch(record_list, epoch + 1, "val", ips)
