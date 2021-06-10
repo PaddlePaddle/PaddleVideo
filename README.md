@@ -48,6 +48,10 @@ PaddleVideo is a toolset for video recognition, action localization, and spatio 
 
 release/2.1 was released in 20/05/2021. Please refer to [release notes](https://github.com/PaddlePaddle/PaddleVideo/releases) for details.
 
+Plan 
+- ActBert 
+- PP-TSN
+
 <a name="Community"></a>
 ## Community
 - Scan the QR code below with your Wechat and reply "video", you can access to official technical exchange group. Look forward to your participation.
