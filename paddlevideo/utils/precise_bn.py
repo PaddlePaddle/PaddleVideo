@@ -22,6 +22,7 @@ Implement precise bn, which is useful for improving accuracy.
 """
 
 
+@paddle.no_grad()  # speed up and save CUDA memory
 def do_preciseBN(model, data_loader, parallel, num_iters=200):
     """
     Recompute and update the batch norm stats to make them more precise. During

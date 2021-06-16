@@ -16,9 +16,10 @@ from .base import BaseHead
 from .tsn_head import TSNHead
 from .tsm_head import TSMHead
 from .pptsm_head import ppTSMHead
+from .pptsn_head import ppTSNHead
 from .slowfast_head import SlowFastHead
 from .attention_lstm_head import AttentionLstmHead
 __all__ = [
-    'BaseHead', 'TSNHead', 'TSMHead', 'ppTSMHead', 'SlowFastHead',
+    'BaseHead', 'TSNHead', 'TSMHead', 'ppTSMHead', 'ppTSNHead', 'SlowFastHead',
     'AttentionLstmHead'
 ]
