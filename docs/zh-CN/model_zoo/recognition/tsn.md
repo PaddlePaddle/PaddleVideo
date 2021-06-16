@@ -24,7 +24,7 @@ Temporal Segment Network (TSN) 是视频分类领域经典的基于2D-CNN的解�
 
 ## 数据准备
 
-PaddleVide提供了在Kinetics-400数据集上训练和测试练脚本。Kinetics-400数据下载及准备请参考[Kinetics400数据准备](../../dataset/K400.md)
+PaddleVide提供了在Kinetics-400数据集上训练和测试练脚本。Kinetics-400数据下载及准备请参考[Kinetics-400数据准备](../../dataset/K400.md)
 
 ## 模型训练
 
@@ -68,7 +68,7 @@ python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log
 
 | backbone | Sampling method | Training Strategy | num_seg | target_size | Top-1 | checkpoints                                                  |
 | :------: | :-------------: | :---------------: | :-----: | :---------: | :---: | ------------------------------------------------------------ |
-| ResNet50 |     Uniform     |       NCHW        |   25    |     224     | 69.81 | [TSN_k400.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/TSN_k400.pdparams) |
+| ResNet50 |     TenCrop     |       NCHW        |   25    |     224     | 69.81 | [TSN_k400.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/TSN_k400.pdparams) |
 
 ## 模型推理
 
