@@ -25,7 +25,7 @@ For details, please refer to the ECCV 2016 paper [Temporal Segment Networks: Tow
 
 ## Data
 
-PaddleVide provides training and testing scripts on the Kinetics-400 dataset. Kinetics-400 data download and preparation please refer to [Kinetics400 data preparation](../../dataset/K400.md)
+PaddleVide provides training and testing scripts on the Kinetics-400 dataset. Kinetics-400 data download and preparation please refer to [Kinetics-400 data preparation](../../dataset/K400.md)
 
 ## Train
 
@@ -69,11 +69,11 @@ When the test configuration uses the following parameters, the test indicators o
 
 | backbone | Sampling method | Training Strategy | num_seg | target_size | Top-1 |                         checkpoints                          |
 | :------: | :-------------: | :---------------: | :-----: | :---------: | :---: | :----------------------------------------------------------: |
-| ResNet50 |     Uniform     |       NCHW        |   25    |     224     | 69.81 | [TSN_k400.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/TSN_k400.pdparams) |
+| ResNet50 |     TenCrop     |       NCHW        |   25    |     224     | 69.81 | [TSN_k400.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/TSN_k400.pdparams) |
 
 ## Inference
 
-### Export inference model
+### export inference model
 
 ```bash
 python3.7 tools/export_model.py -c configs/recognition/tsn/tsn_k400_frames.yaml \
@@ -85,7 +85,7 @@ The above command will generate the model structure file `TSN.pdmodel` and the m
 
 For the meaning of each parameter, please refer to [Model Reasoning Method](https://github.com/PaddlePaddle/PaddleVideo/blob/release/2.0/docs/zh-CN/start.md#2-Model Reasoning)
 
-### Use prediction engine inference
+### infer
 
 ```bash
 python3.7 tools/predict.py --input_file data/example.avi \
