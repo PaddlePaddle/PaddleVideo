@@ -114,7 +114,7 @@ python3 main.py --test -c configs/recognition/pptsm/pptsm_k400_frames_dense.yaml
 Kinetics400数据集测试精度:
 
 | backbone | distill | Sampling method | num_seg | target_size | Top-1 | checkpoints |
-| :------: | :----------: | :----: | :----: | :----: | :----: | :----: |
+| :------: | :----------: | :----: | :----: | :----: | :----: | :---- |
 | ResNet50 | False | Uniform | 8 | 224 | 74.54 | [ppTSM_k400_uniform.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.1/PPTSM/ppTSM_k400_uniform.pdparams) |
 | ResNet50 | False | Dense | 8 | 224 | 75.69 | [ppTSM_k400_dense.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.1/PPTSM/ppTSM_k400_dense.pdparams) |
 | ResNet50 | True | Uniform | 8 | 224 | 75.11 | [ppTSM_k400_uniform_distill.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.1/PPTSM/ppTSM_k400_uniform_distill.pdparams) |

@@ -23,7 +23,7 @@ import pandas
 __dir__ = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.abspath(os.path.join(__dir__, '../')))
 
-from paddlevideo.loader.pipelines import VideoDecoder, Sampler, Scale, CenterCrop, Normalization, Image2Array
+from paddlevideo.loader.pipelines import VideoDecoder, Sampler, Scale, CenterCrop, Normalization, Image2Array, TenCrop
 from paddlevideo.utils import build, Registry
 from paddlevideo.metrics.bmn_metric import boundary_choose, soft_nms
 
@@ -54,7 +54,7 @@ class ppTSM_Inference_helper():
         return: list
         """
         self.input_file = input_file
-        assert os.path.isfile(input_file) is not None, "{} not exists".format(
+        assert os.path.isfile(input_file) is not None, "{0} not exists".format(
             input_file)
         results = {'filename': input_file}
         img_mean = [0.485, 0.456, 0.406]
@@ -82,7 +82,65 @@ class ppTSM_Inference_helper():
         classes = np.argpartition(output, -self.top_k)[-self.top_k:]
         classes = classes[np.argsort(-output[classes])]
         scores = output[classes]
-        print("Current video file: {}".format(self.input_file))
+        print("Current video file: {0}".format(self.input_file))
+        print("\ttop-1 class: {0}".format(classes[0]))
+        print("\ttop-1 score: {0}".format(scores[0]))
+
+
+@INFERENCE.register()
+class ppTSN_Inference_helper():
+    def __init__(self,
+                 num_seg=25,
+                 seg_len=1,
+                 short_size=256,
+                 target_size=224,
+                 top_k=1):
+        self.num_seg = num_seg
+        self.seg_len = seg_len
+        self.short_size = short_size
+        self.target_size = target_size
+        self.top_k = top_k
+
+    def preprocess(self, input_file):
+        """
+        input_file: str, file path
+        return: list
+        """
+        self.input_file = input_file
+        assert os.path.isfile(input_file) is not None, "{0} not exists".format(input_file)
+        results = {'filename': input_file}
+        img_mean = [0.485, 0.456, 0.406]
+        img_std = [0.229, 0.224, 0.225]
+        ops = [
+            VideoDecoder(),
+            Sampler(self.num_seg, self.seg_len, valid_mode=True, select_left=True),
+            Scale(self.short_size, fixed_ratio=True, do_round=True, backend='cv2'),
+            TenCrop(self.target_size),
+            Image2Array(),
+            Normalization(img_mean, img_std)
+        ]
+        for op in ops:
+            results = op(results)
+
+        res = np.expand_dims(results['imgs'], axis=0).copy()
+        return [res]
+
+    def postprocess(self, output):
+        """
+        output: list
+        """
+        output = output[0]
+        if output.ndim == 1:
+            pass
+        elif output.ndim == 2:
+            output = output.mean(axis=0)
+        if output.ndim > 1:
+            output = output.flatten()
+        output = F.softmax(paddle.to_tensor(output)).numpy()
+        classes = np.argpartition(output, -self.top_k)[-self.top_k:]
+        classes = classes[np.argsort(-output[classes])]
+        scores = output[classes]
+        print("Current video file: {0}".format(self.input_file))
         print("\ttop-1 class: {0}".format(classes[0]))
         print("\ttop-1 score: {0}".format(scores[0]))
 
@@ -102,7 +160,7 @@ class BMN_Inference_helper():
         input_file: str, file path
         return: list
         """
-        assert os.path.isfile(input_file) is not None, "{} not exists".format(
+        assert os.path.isfile(input_file) is not None, "{0} not exists".format(
             input_file)
         file_info = json.load(open(input_file))
         self.feat_path = file_info['feat_path']
@@ -161,7 +219,7 @@ class BMN_Inference_helper():
         result_dict[self.feat_path] = proposal_list
 
         # print top-5 predictions
-        print("BMN Inference results of {} :".format(self.feat_path))
+        print("BMN Inference results of {0} :".format(self.feat_path))
         for pred in proposal_list[:5]:
             print(pred)
 
