@@ -1,8 +1,7 @@
-English | [Simplified Chinese]((../../../zh-CN/model_zoo/recognition/pp-tsn.md))
+[简体中文](../../../zh-CN/model_zoo/recognition/pp-tsn.md) | English
 
 # PP-TSN
 
----
 ## Content
 
 - [Introduction](#Introduction)
@@ -100,7 +99,7 @@ UCF101 data download and preparation please refer to [UCF-101 data preparation](
 
 	| backbone | Sampling method | distill | num_seg | target_size | Top-1 |       checkpoints       |
 	| :------: | :-------------: | :-----: | :-----: | :---------: | :---- | :---------------------: |
-	| ResNet50 |     TenCrop     |  False  |    3    |     224     | 73.68 | [ppTSN_k400.pdparams]() |
+	| ResNet50 |     TenCrop     |  False  |    3    |     224     | 73.68 | [ppTSN_k400.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ppTSN_k400.pdparams) |
 	| ResNet50 |     TenCrop     |  True   |    3    |     224     | TODO  |          TODO           |
 
 - PPTSN video sampling strategy is Uniform sampling: in terms of timing, the input video is evenly divided into `num_seg` sections, and the middle position of each section is sampled 1 frame; spatially, the center position is sampled in an area of ​​224x224. A total of 1 clip is sampled for 1 video.
@@ -118,7 +117,7 @@ python3.7 tools/export_model.py -c configs/recognition/pptsn/pptsn_k400_frames.y
 
 The above command will generate the model structure file `ppTSN.pdmodel` and model weight files `ppTSN.pdiparams` and `ppTSN.pdiparams.info` files required for prediction, all of which are stored in the `inference/ppTSN/` directory
 
-For the meaning of each parameter in the above bash command, please refer to [Model Reasoning Method](https://github.com/PaddlePaddle/PaddleVideo/blob/release/2.0/docs/zh-CN/start.md#2-%E6%A8% A1%E5%9E%8B%E6%8E%A8%E7%90%86)
+For the meaning of each parameter in the above bash command, please refer to [Model Reasoning Method](https://github.com/HydrogenSulfate/PaddleVideo/blob/PPTSN-v1/docs/en/start.md#2-infer)
 
 ### Use prediction engine inference
 
