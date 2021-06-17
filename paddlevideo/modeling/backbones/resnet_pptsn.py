@@ -28,7 +28,7 @@ from ..registry import BACKBONES
 from ..weight_init import weight_init_
 from ...utils import load_ckpt
 
-__all__ = ["ResNetPPTSN"]
+__all__ = ["ResNetTweaksTSN"]
 
 
 class ConvBNLayer(nn.Layer):
@@ -187,8 +187,8 @@ class BasicBlock(nn.Layer):
 
 
 @BACKBONES.register()
-class ResNetPPTSN(nn.Layer):
-    """ResNetPPTSN backbone.
+class ResNetTweaksTSN(nn.Layer):
+    """ResNetTweaksTSN backbone.
 
     Args:
         depth (int): Depth of resnet model.
@@ -198,7 +198,7 @@ class ResNetPPTSN(nn.Layer):
                  layers=50,
                  pretrained=None,
                  lr_mult_list=[1.0, 1.0, 1.0, 1.0, 1.0]):
-        super(ResNetPPTSN, self).__init__()
+        super(ResNetTweaksTSN, self).__init__()
 
         self.pretrained = pretrained
         self.layers = layers
