@@ -122,7 +122,12 @@ For the meaning of each parameter in the above bash command, please refer to [Mo
 ### Use prediction engine inference
 
 ```bash
-python3.7 tools/predict.py --input_file data/example.avi --config configs/recognition/pptsn/pptsn_k400_frames.yaml --model_file inference/ppTSN/ppTSN.pdmodel --params_file inference/ppTSN/ppTSN.pdiparams - use_gpu=True --use_tensorrt=False
+python3.7 tools/predict.py --input_file data/example.avi \
+                           --config configs/recognition/pptsn/pptsn_k400_frames.yaml \
+                           --model_file inference/ppTSN/ppTSN.pdmodel \
+                           --params_file inference/ppTSN/ppTSN.pdiparams \
+                           --use_gpu=True \
+                           --use_tensorrt=False
 ```
 
 The output example is as follows:
