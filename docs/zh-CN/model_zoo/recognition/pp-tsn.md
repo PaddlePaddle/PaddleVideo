@@ -102,7 +102,7 @@ UCF101数据下载及准备请参考[UCF-101数据准备](../../dataset/ucf101.m
 
   | backbone | Sampling method | distill | num_seg | target_size | Top-1 | checkpoints |
   | :------: | :----------: | :----: | :----: | :----: | :---- | :---: |
-  | ResNet50 | TenCrop | False | 3 | 224 | 73.68 | [ppTSN_k400.pdparams]() |
+  | ResNet50 | TenCrop | False | 3 | 224 | 73.68 | [ppTSN_k400.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ppTSN_k400.pdparams) |
   | ResNet50 | TenCrop | True | 3 | 224 | TODO | TODO |
 
 - PPTSN视频采样策略为Uniform采样：时序上，将待输入视频均匀分成`num_seg`段区间，每段的中间位置采样1帧；空间上，中心位置采样224x224的区域。1个视频共采样1个clip。
