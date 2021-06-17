@@ -104,7 +104,7 @@ UCF101 data download and preparation please refer to [UCF-101 data preparation](
 
 - PPTSN video sampling strategy is Uniform sampling: in terms of timing, the input video is evenly divided into `num_seg` sections, and the middle position of each section is sampled 1 frame; spatially, the center position is sampled in an area of ​​224x224. A total of 1 clip is sampled for 1 video.
 
-- Distill is `True`, which means that the pre-trained model obtained by distillation is used. For the specific distillation scheme, please refer to [ppTSM Distillation Scheme] (TODO).
+- Distill is `True`, which means that the pre-trained model obtained by distillation is used. For the specific distillation scheme, please refer to [ppTSM Distillation Scheme]().
 
 
 ## Inference
