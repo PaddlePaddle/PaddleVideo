@@ -48,7 +48,7 @@ UCF101 data download and preparation please refer to [UCF-101 data preparation](
     MODEL:
         framework: "Recognizer2D"
         backbone:
-            name: "ResNetPPTSN"
+            name: "ResNetTweaksTSN"
             pretrained: fill in the path here
     ```
 
@@ -83,13 +83,13 @@ UCF101 data download and preparation please refer to [UCF-101 data preparation](
 
 ## Test
 
-- The PPTSN model is verified during training. You can find the keyword `best` in the training log to obtain the model test accuracy. The log example is as follows:
+- The PP-TSN model is verified during training. You can find the keyword `best` in the training log to obtain the model test accuracy. The log example is as follows:
 
 	```
   Already save the best model (top1 acc)0.7004
 	```
 
-- Since the sampling method of the PPTSN model test mode is **TenCrop**, which is slightly slower but more accurate, it is different from the **CenterCrop** used in the verification mode during the training process, so the verification index recorded in the training log is `topk Acc `Does not represent the final test score, so after the training is completed, you can use the test mode to test the best model to obtain the final index, the command is as follows:
+- Since the sampling method of the PP-TSN model test mode is **TenCrop**, which is slightly slower but more accurate, it is different from the **CenterCrop** used in the verification mode during the training process, so the verification index recorded in the training log is `topk Acc `Does not represent the final test score, so after the training is completed, you can use the test mode to test the best model to obtain the final index, the command is as follows:
 
 	```bash
   python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_pptsn main.py --test -c configs/recognition/ pptsn/pptsn_k400_frames.yaml -w "output/ppTSN/ppTSN_best.pdparams"
@@ -102,7 +102,7 @@ UCF101 data download and preparation please refer to [UCF-101 data preparation](
 	| ResNet50 |     TenCrop     |  False  |    3    |     224     | 73.68 | [ppTSN_k400.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ppTSN_k400.pdparams) |
 	| ResNet50 |     TenCrop     |  True   |    3    |     224     | TODO  |          TODO           |
 
-- PPTSN video sampling strategy is Uniform sampling: in terms of timing, the input video is evenly divided into `num_seg` sections, and the middle position of each section is sampled 1 frame; spatially, the center position is sampled in an area of ​​224x224. A total of 1 clip is sampled for 1 video.
+- PP-TSN video sampling strategy is Uniform sampling: in terms of timing, the input video is evenly divided into `num_seg` sections, and the middle position of each section is sampled 1 frame; spatially, the center position is sampled in an area of ​​224x224. A total of 1 clip is sampled for 1 video.
 
 - Distill is `True`, which means that the pre-trained model obtained by distillation is used. For the specific distillation scheme, please refer to [ppTSM Distillation Scheme]().
 
@@ -133,7 +133,7 @@ Current video file: data/example.avi
         top-1 score: 0.9998553991317749
 ```
 
-It can be seen that using the ppTSN model trained on Kinetics-400 to predict `data/example.avi`, the output top1 category id is `5`, and the confidence is 0.99. By consulting the category id and name correspondence table `data/k400/Kinetics-400_label_list.txt`, it can be known that the predicted category name is `archery`.
+It can be seen that using the PP-TSN model trained on Kinetics-400 to predict `data/example.avi`, the output top1 category id is `5`, and the confidence is 0.99. By consulting the category id and name correspondence table `data/k400/Kinetics-400_label_list.txt`, it can be known that the predicted category name is `archery`.
 
 ## Reference
 
