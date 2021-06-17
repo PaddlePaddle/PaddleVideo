@@ -29,27 +29,27 @@ PaddleVideo is a toolset for video recognition, action localization, and spatio 
 
 - **Deployable**
     PaddleVideo is powered by the Paddle Inference. There is no need to convert the model to ONNX format when deploying it, all you want can be found in this repository.
-    
+
 - **Applications**
     PaddleVideo provides some interesting and practical projects that are implemented using video recognition and detection techniques, such as [FootballAction](https://github.com/PaddlePaddle/PaddleVideo/tree/application/FootballAction) and VideoTag.
 
 ### Overview of the performance
 
-| Field | Model | Dataset | Metrics | ACC% | 
-| :--------------- | :--------: | :------------: | :------------: | :------------: | 
-| action recgonition | [**PP-TSM**](./docs/zh-CN/model_zoo/recognition/pp-tsm.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | **76.16** | 
+| Field | Model | Dataset | Metrics | ACC% |
+| :--------------- | :--------: | :------------: | :------------: | :------------: |
+| action recgonition | [**PP-TSM**](./docs/zh-CN/model_zoo/recognition/pp-tsm.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | **76.16** |
 | action recgonition | [SlowFast](./docs/zh-CN/model_zoo/recognition/slowfast.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | 75.84 |
-| action recgonition | [TSM](./docs/zh-CN/model_zoo/recognition/tsm.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | 71.06 | 
+| action recgonition | [TSM](./docs/zh-CN/model_zoo/recognition/tsm.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | 71.06 |
 | action recgonition | [TSN](./docs/zh-CN/model_zoo/recognition/tsn.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | 69.81 |
-| action recgonition | [AttentionLSTM](./docs/zh-CN/model_zoo/recognition/attention_lstm.md) | [Youtube-8M](./docs/zh-CN/dataset/youtube8m.md) | Hit@1 | 89.0 | 
-| action detection| [BMN](./docs/zh-CN/model_zoo/localization/bmn.md) | [ActivityNet](./docs/zh-CN/dataset/ActivityNet.md) |  AUC | 67.23 | 
+| action recgonition | [AttentionLSTM](./docs/zh-CN/model_zoo/recognition/attention_lstm.md) | [Youtube-8M](./docs/zh-CN/dataset/youtube8m.md) | Hit@1 | 89.0 |
+| action detection| [BMN](./docs/zh-CN/model_zoo/localization/bmn.md) | [ActivityNet](./docs/zh-CN/dataset/ActivityNet.md) |  AUC | 67.23 |
 
 ### Changelog
 
 release/2.1 was released in 20/05/2021. Please refer to [release notes](https://github.com/PaddlePaddle/PaddleVideo/releases) for details.
 
-Plan 
-- ActBert 
+Plan
+- ActBert
 - PP-TSN
 
 <a name="Community"></a>
@@ -93,6 +93,7 @@ Plan
     - [TSN](docs/en/model_zoo/recognition/tsn.md)
     - [TSM](docs/en/model_zoo/recognition/tsm.md)
     - [PP-TSM](docs/en/model_zoo/recognition/pp-tsm.md)
+    - [PP-TSN](docs/en/model_zoo/recognition/pp-tsn.md)
     - [SlowFast](docs/en/model_zoo/recognition/slowfast.md)
   - [Localization](docs/en/model_zoo/README.md)
     - [BMN](docs/en/model_zoo/localization/bmn.md)

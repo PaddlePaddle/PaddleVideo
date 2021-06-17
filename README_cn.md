@@ -28,7 +28,7 @@ PaddleVideo飞桨视频模型开发套件，旨在帮助开发者更好的进行
 
 - **全流程可部署**
     PaddleVideo 提供全流程的预测部署方案，支持PaddlePaddle2.0动转静功能，方便产出可快速部署的模型，完成部署阶段最后一公里。
-    
+
 - **丰富的应用案例**
     PaddleVideo 提供了基于行为识别和动作检测技术的多个实用案例，包括[FootballAction](https://github.com/PaddlePaddle/PaddleVideo/tree/application/FootballAction)和VideoTag。
 
@@ -36,14 +36,14 @@ PaddleVideo飞桨视频模型开发套件，旨在帮助开发者更好的进行
 ### 模型性能概览
 
 
-| 领域 | 模型 | 数据集 | 精度指标 | 精度% | 
-| :--------------- | :--------: | :------------: | :------------: | :------------: | 
-| 视频分类 | [**PP-TSM**](./docs/zh-CN/model_zoo/recognition/pp-tsm.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | **76.16** | 
+| 领域 | 模型 | 数据集 | 精度指标 | 精度% |
+| :--------------- | :--------: | :------------: | :------------: | :------------: |
+| 视频分类 | [**PP-TSM**](./docs/zh-CN/model_zoo/recognition/pp-tsm.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | **76.16** |
 | 视频分类 | [SlowFast](./docs/zh-CN/model_zoo/recognition/slowfast.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | 75.84 |
-| 视频分类 | [TSM](./docs/zh-CN/model_zoo/recognition/tsm.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | 71.06 | 
+| 视频分类 | [TSM](./docs/zh-CN/model_zoo/recognition/tsm.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | 71.06 |
 | 视频分类 | [TSN](./docs/zh-CN/model_zoo/recognition/tsn.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | 69.81 |
-| 视频分类 | [AttentionLSTM](./docs/zh-CN/model_zoo/recognition/attention_lstm.md) | [Youtube-8M](./docs/zh-CN/dataset/youtube8m.md) | Hit@1 | 89.0 | 
-| 视频动作定位| [BMN](./docs/zh-CN/model_zoo/localization/bmn.md) | [ActivityNet](./docs/zh-CN/dataset/ActivityNet.md) |  AUC | 67.23 | 
+| 视频分类 | [AttentionLSTM](./docs/zh-CN/model_zoo/recognition/attention_lstm.md) | [Youtube-8M](./docs/zh-CN/dataset/youtube8m.md) | Hit@1 | 89.0 |
+| 视频动作定位| [BMN](./docs/zh-CN/model_zoo/localization/bmn.md) | [ActivityNet](./docs/zh-CN/dataset/ActivityNet.md) |  AUC | 67.23 |
 
 <a name="欢迎加入PaddleVideo技术交流群"></a>
 ## 欢迎加入PaddleVideo技术交流群
@@ -82,6 +82,7 @@ PaddleVideo飞桨视频模型开发套件，旨在帮助开发者更好的进行
        - [TSN](docs/zh-CN/model_zoo/recognition/tsn.md)
        - [TSM](docs/zh-CN/model_zoo/recognition/tsm.md)
        - [PPTSM](docs/zh-CN/model_zoo/recognition/pp-tsm.md)
+       - [PPTSN](docs/zh-CN/model_zoo/recognition/pp-tsn.md)
        - [SlowFast](docs/zh-CN/model_zoo/recognition/slowfast.md)
        - [Attention-LSTM](docs/zh-CN/model_zoo/recognition/attention_lstm.md)
     - [动作定位](docs/zh-CN/model_zoo/README.md)
