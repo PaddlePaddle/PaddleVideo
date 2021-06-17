@@ -124,7 +124,12 @@ python3.7 tools/export_model.py -c configs/recognition/pptsn/pptsn_k400_frames.y
 ### 使用预测引擎推理
 
 ```bash
-python3.7 tools/predict.py --input_file data/example.avi --config configs/recognition/pptsn/pptsn_k400_frames.yaml --model_file inference/ppTSN/ppTSN.pdmodel --params_file inference/ppTSN/ppTSN.pdiparams --use_gpu=True --use_tensorrt=False
+python3.7 tools/predict.py --input_file data/example.avi \
+                           --config configs/recognition/pptsn/pptsn_k400_frames.yaml \
+                           --model_file inference/ppTSN/ppTSN.pdmodel \
+                           --params_file inference/ppTSN/ppTSN.pdiparams \
+                           --use_gpu=True \
+                           --use_tensorrt=False
 ```
 
 输出示例如下:
