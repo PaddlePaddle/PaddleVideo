@@ -57,7 +57,7 @@ wget https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_vd_ssld_v
 MODEL:
     framework: "Recognizer2D"
     backbone:
-        name: "ResNet"
+        name: "ResNetTweaksTSM"
         pretrained: 将路径填写到此处
 ```
 
@@ -96,7 +96,7 @@ python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=lo
 
 ## 模型测试
 
-- 对Uniform采样方式，PPTSM模型在训练时同步进行测试，您可以通过在训练日志中查找关键字`best`获取模型测试精度，日志示例如下:
+- 对Uniform采样方式，PP-TSM模型在训练时同步进行测试，您可以通过在训练日志中查找关键字`best`获取模型测试精度，日志示例如下:
 
 ```txt
 Already save the best model (top1 acc)0.7454
