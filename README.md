@@ -51,7 +51,7 @@ release/2.1 was released in 20/05/2021. Please refer to [release notes](https://
 
 Plan
 - ActBert
-- PP-TSN
+- TimeSformer
 
 <a name="Community"></a>
 ## Community
