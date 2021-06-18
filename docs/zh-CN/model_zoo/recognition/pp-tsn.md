@@ -48,7 +48,7 @@ UCF101数据下载及准备请参考[UCF-101数据准备](../../dataset/ucf101.m
     MODEL:
         framework: "Recognizer2D"
         backbone:
-            name: "ResNetPPTSN"
+            name: "ResNetTweaksTSN"
             pretrained: 将路径填写到此处
     ```
 
@@ -83,13 +83,13 @@ UCF101数据下载及准备请参考[UCF-101数据准备](../../dataset/ucf101.m
 
 ## 模型测试
 
-- PPTSN模型在训练时同步进行验证，您可以通过在训练日志中查找关键字`best`获取模型测试精度，日志示例如下:
+- PP-TSN模型在训练时同步进行验证，您可以通过在训练日志中查找关键字`best`获取模型测试精度，日志示例如下:
 
   ```
   Already save the best model (top1 acc)0.7004
   ```
 
-- 由于PPTSN模型测试模式的采样方式是速度稍慢但精度高一些的**TenCrop**，与训练过程中验证模式采用的**CenterCrop**不同，所以训练日志中记录的验证指标`topk Acc`不代表最终的测试分数，因此在训练完成之后可以用测试模式对最好的模型进行测试获取最终的指标，命令如下：
+- 由于PP-TSN模型测试模式的采样方式是速度稍慢但精度高一些的**TenCrop**，与训练过程中验证模式采用的**CenterCrop**不同，所以训练日志中记录的验证指标`topk Acc`不代表最终的测试分数，因此在训练完成之后可以用测试模式对最好的模型进行测试获取最终的指标，命令如下：
 
   ```bash
   python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_pptsn main.py  --test -c configs/recognition/pptsn/pptsn_k400_frames.yaml -w "output/ppTSN/ppTSN_best.pdparams"
