@@ -57,19 +57,19 @@ and add path to `MODEL.framework.backbone.pretrained` in config file as：
 MODEL:
     framework: "Recognizer2D"
     backbone:
-        name: "ResNet"
+        name: "ResNetTweaksTSM"
         pretrained: your weight path
 ```
 
 #### Start training
 
-- Train PPTSM on kinetics-400 scripts:
+- Train PP-TSM on kinetics-400 scripts:
 
 ```bash
 python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=log_pptsm  main.py  --validate -c configs/recognition/pptsm/pptsm_k400_frames_uniform.yaml
 ```
 
-- Train PPTSM on kinetics-400 video data using scripts:
+- Train PP-TSM on kinetics-400 video data using scripts:
 
 ```bash
 python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=log_pptsm  main.py  --validate -c configs/recognition/pptsm/pptsm_k400_videos_uniform.yaml
@@ -85,7 +85,7 @@ export FLAGS_cudnn_batchnorm_spatial_persistent=1
 python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=log_pptsm  main.py  --amp --validate -c configs/recognition/pptsm/pptsm_k400_frames_uniform.yaml
 ```
 
-- Train PPTSM on kinetics-400 with dense sampling:
+- Train PP-TSM on kinetics-400 with dense sampling:
 
 ```bash
 python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=log_pptsm  main.py  --validate -c configs/recognition/pptsm/pptsm_k400_frames_dense.yaml
