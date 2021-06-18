@@ -32,7 +32,7 @@ UCF101 data download and preparation please refer to [UCF-101 data preparation](
 
 ## Train
 
-### Kinetics-400 data set training (take frames format as an example)
+### Kinetics-400 data set training
 
 #### Download and add pre-trained models
 
