@@ -14,7 +14,7 @@
 
 ## Introduction
 
-We optimized TSM model and proposed **PP-TSM** in this repo. Without increasing the number of parameters, the accuracy of TSM was significantly improved in UCF101 and Kinetics-400 datasets. Please refer to [Tricks on ppTSM](../../tutorials/pp-tsm.md) for more details.
+We optimized TSM model and proposed **PP-TSM** in this repo. Without increasing the number of parameters, the accuracy of TSM was significantly improved in UCF101 and Kinetics-400 datasets. Please refer to[**Tricks on PP-TSM**](https://zhuanlan.zhihu.com/p/382134297) for more details.
 
 | Version | Sampling method | Top1 |
 | :------ | :----------: | :----: |
