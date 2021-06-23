@@ -44,7 +44,7 @@ python -B -m paddle.distributed.launch --gpus="0,1,2,3"  --log_dir=log_bmn main.
 You can start testing by such command：
 
 ```bash
-python main.py --test -c configs/localization/bmn.yaml -w output/BMN/BMN_epoch_00009.pdparams -o DATASET.batch_size=1
+python main.py --test -c configs/localization/bmn.yaml -w output/BMN/BMN_epoch_00009.pdparams -o DATASET.test_batch_size=1
 ```
 
 - For now, we only support testing with **single card** and `batch_size=1`.
