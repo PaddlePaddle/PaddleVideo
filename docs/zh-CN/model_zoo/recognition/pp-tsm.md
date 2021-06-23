@@ -15,7 +15,7 @@
 
 ## 模型简介
 
-我们对[TSM模型](./tsm.md)进行了改进，提出了高精度2D实用视频分类模型**PP-TSM**。在不增加参数量和计算量的情况下，在UCF-101、Kinetics-400等数据集上精度显著超过原文，在Kinetics-400数据集上的精度如下表所示。模型优化解析请参考[**pptsm实用视频模型优化解析**](https://github.com/PaddlePaddle/PaddleVideo/blob/main/docs/zh-CN/tutorials/pp-tsm.md)。
+我们对[TSM模型](./tsm.md)进行了改进，提出了高精度2D实用视频分类模型**PP-TSM**。在不增加参数量和计算量的情况下，在UCF-101、Kinetics-400等数据集上精度显著超过原文，在Kinetics-400数据集上的精度如下表所示。模型优化解析请参考[**PP-TSM模型精度优化Tricks详解**](https://zhuanlan.zhihu.com/p/382134297)。
 
 | Version | Sampling method | Top1 |
 | :------ | :----------: | :----: |
