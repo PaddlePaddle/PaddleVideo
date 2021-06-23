@@ -9,7 +9,8 @@ PaddleVideo包含视频分类和动作定位方向的多个主流领先模型，
 
 | 领域 | 模型 | 配置 | 测试集 | 精度指标 | 精度% | 下载链接 |
 | :--------------- | :--------: | :------------: | :------------: | :------------: | :------------: | :------------: |
-| 视频分类 | [ppTSM](./recognition/pp-tsm.md) | [pptsm.yaml](../../../configs/recognition/pptsm/pptsm_k400_frames_dense.yaml) | [Kinetics-400](../dataset/k400.md) | Top-1 | 76.16 | [ppTSM.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.1/PPTSM/ppTSM_k400_dense_distill.pdparams) |
+| 视频分类 | [**PP-TSM**](./recognition/pp-tsm.md) | [pptsm.yaml](../../../configs/recognition/pptsm/pptsm_k400_frames_dense.yaml) | [Kinetics-400](../dataset/k400.md) | Top-1 | 76.16 | [ppTSM.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.1/PPTSM/ppTSM_k400_dense_distill.pdparams) |
+| 视频分类 | [**PP-TSN**](./recognition/pp-tsn.md) | [pptsn.yaml](../../../configs/recognition/pptsn/pptsn_k400_frames.yaml) | [Kinetics-400](../dataset/k400.md) | Top-1 | 73.68 | [ppTSN.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ppTSN_k400.pdparams) |
 | 视频分类 | [SlowFast](./recognition/slowfast.md) | [slowfast_multigrid.yaml](../../../configs/recognition/slowfast/slowfast_multigrid.yaml) | [Kinetics-400](../dataset/k400.md) | Top-1 | 75.84 | [SlowFast.pdparams](https://videotag.bj.bcebos.com/PaddleVideo/SlowFast/SlowFast_8*8.pdparams) |
 | 视频分类 | [TSM](./recognition/tsm.md) | [tsm.yaml](../../../configs/recognition/tsm/tsm_k400_frames.yaml)  | [Kinetics-400](../dataset/k400.md) | Top-1 | 70.86 | [TSM.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.1/TSM/TSM_k400.pdparams) |
 | 视频分类 | [TSN](./recognition/tsn.md) | [tsn.yaml](../../../configs/recognition/tsn/tsn_k400_frames.yaml) | [Kinetics-400](../dataset/k400.md) | Top-1 | 69.81 | [TSN.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/TSN_k400.pdparams) |
