@@ -112,7 +112,7 @@ def log_epoch(metric_list, epoch, mode, ips):
     metric_values = []
     for m in metric_list:
         if not (m == 'batch_time' or m == 'reader_time'):
-            metric_values.append(metric_list[m].value)
+            metric_values.append(metric_list[m].mean)
     metric_str = ' '.join([str(v) for v in metric_values])
 
     end_epoch_str = "END epoch:{:<3d}".format(epoch)
