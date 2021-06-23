@@ -59,7 +59,7 @@ python -B main.py  --validate -c configs/localization/bmn.yaml
 可通过如下方式进行模型测试:
 
 ```bash
-python main.py --test -c configs/localization/bmn.yaml -w output/BMN/BMN_epoch_00009.pdparams -o DATASET.batch_size=1
+python main.py --test -c configs/localization/bmn.yaml -w output/BMN/BMN_epoch_00009.pdparams -o DATASET.test_batch_size=1
 ```
 
 - 目前仅支持**单卡**， `batch_size`为**1**进行模型测试，
