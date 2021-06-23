@@ -42,7 +42,7 @@ UCF101数据下载及准备请参考[UCF-101数据准备](../../dataset/ucf101.m
    wget https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_vd_ssld_v2_pretrained.pdparams
    ```
 
-2. 打开`PaddleVideo/configs/recognition/tsn/pptsn_k400_frames_uniform.yaml`，将下载好的权重存放路径填写到下方`pretrained:`之后
+2. 打开`PaddleVideo/configs/recognition/pptsn/pptsn_k400_frames_uniform.yaml`，将下载好的权重存放路径填写到下方`pretrained:`之后
 
     ```yaml
     MODEL:
