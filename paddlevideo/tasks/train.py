@@ -22,8 +22,8 @@ from ..loader.builder import build_dataloader, build_dataset
 from ..modeling.builder import build_model
 from ..solver import build_lr, build_optimizer
 from ..utils import do_preciseBN
-from paddlevideo.utils import get_logger, coloring
-from paddlevideo.utils import (AverageMeter, build_record, log_batch, log_epoch,
+from paddlevideo.utils import get_logger
+from paddlevideo.utils import (build_record, log_batch, log_epoch,
                                save, load, mkdir)
 
 
@@ -68,6 +68,10 @@ def train_model(cfg,
         cfg.GRADIENT_ACCUMULATION[
             "num_iters"] = global_batch_size // cur_global_batch_size
         # The number of iterations required to reach the global batchsize
+        logger.info(
+            f"Using gradient accumulation training strategy, \
+            global_batch_size={global_batch_size}, num_gpus={num_gpus}, num_accumulative_iters={cfg.GRADIENT_ACCUMULATION.num_iters}"
+        )
 
     places = paddle.set_device('gpu')
 
