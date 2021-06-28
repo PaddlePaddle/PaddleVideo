@@ -14,7 +14,7 @@
 
 from .augmentations import (Scale, RandomCrop, CenterCrop, RandomFlip,
                             Image2Array, Normalization, JitterScale, MultiCrop,
-                            PackOutput, TenCrop)
+                            PackOutput, TenCrop, UniformCrop)
 
 from .compose import Compose
 from .decode import VideoDecoder, FrameDecoder
@@ -40,6 +40,7 @@ __all__ = [
     'MultiCrop',
     'PackOutput',
     'TenCrop',
+    'UniformCrop',
     'DecodeSampler',
     'LoadFeat',
     'GetMatchMap',

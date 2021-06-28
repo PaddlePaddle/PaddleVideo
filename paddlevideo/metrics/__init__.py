@@ -18,8 +18,9 @@ from .multi_crop_metric import MultiCropMetric
 from .bmn_metric import BMNMetric
 from .center_crop_metric import CenterCropMetric
 from .ten_crop_metric import TenCropMetric
+from .uniform_crop_metric import UniformCropMetric
 
 __all__ = [
     'METRIC', 'build_metric', 'MultiCropMetric', 'BMNMetric',
-    'CenterCropMetric', 'TenCropMetric'
+    'CenterCropMetric', 'TenCropMetric', 'UniformCropMetric'
 ]

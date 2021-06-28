@@ -67,13 +67,17 @@ class Scale(object):
                 if self.fixed_ratio:
                     oh = int(self.short_size * 4.0 / 3.0)
                 else:
-                    oh = int(round(h * self.short_size / w)) if self.do_round else int(h * self.short_size / w)
+                    oh = int(round(h * self.short_size /
+                                   w)) if self.do_round else int(
+                                       h * self.short_size / w)
             else:
                 oh = self.short_size
                 if self.fixed_ratio:
                     ow = int(self.short_size * 4.0 / 3.0)
                 else:
-                    ow = int(round(w * self.short_size / h)) if self.do_round else int(w * self.short_size / h)
+                    ow = int(round(w * self.short_size /
+                                   h)) if self.do_round else int(
+                                       w * self.short_size / h)
             if self.backend == 'pillow':
                 resized_imgs.append(img.resize((ow, oh), Image.BILINEAR))
             else:
@@ -322,8 +326,12 @@ class Image2Array(object):
     Args:
         transpose: whether to transpose or not, default True, False for slowfast.
     """
-    def __init__(self, transpose=True):
+    def __init__(self, transpose=True, data_format='tchw'):
+        assert data_format in [
+            'tchw', 'cthw'
+        ], f"Target format must in ['tchw', 'cthw'], but got {data_format}"
         self.transpose = transpose
+        self.data_format = data_format
 
     def __call__(self, results):
         """
@@ -337,7 +345,10 @@ class Image2Array(object):
         imgs = results['imgs']
         np_imgs = (np.stack(imgs)).astype('float32')
         if self.transpose:
-            np_imgs = np_imgs.transpose(0, 3, 1, 2)  # nchw
+            if self.data_format == 'tchw':
+                np_imgs = np_imgs.transpose(0, 3, 1, 2)  # tchw
+            else:
+                np_imgs = np_imgs.transpose(3, 0, 1, 2)  # cthw
         results['imgs'] = np_imgs
         return results
 
@@ -617,8 +628,9 @@ class TenCrop:
         img_crops = list()
         for x_offset, y_offset in offsets:
             crop = [
-                img.crop((x_offset, y_offset, x_offset + crop_w,
-                         y_offset + crop_h)) for img in imgs
+                img.crop(
+                    (x_offset, y_offset, x_offset + crop_w, y_offset + crop_h))
+                for img in imgs
             ]
             crop_fliped = [
                 timg.transpose(Image.FLIP_LEFT_RIGHT) for timg in crop
@@ -626,5 +638,46 @@ class TenCrop:
             img_crops.extend(crop)
             img_crops.extend(crop_fliped)
 
+        results['imgs'] = img_crops
+        return results
+
+
+@PIPELINES.register()
+class UniformCrop:
+    """
+    Perform uniform spatial sampling on the images.
+    and then flip the cropping result to get 10 cropped images, which can make the prediction result more robust.
+    Args:
+        target_size(int | tuple[int]): (w, h) of target size for crop.
+    """
+    def __init__(self, target_size):
+        self.target_size = (target_size, target_size)
+
+    def __call__(self, results):
+
+        imgs = results['imgs']
+        img_w, img_h = imgs[0].size
+        crop_w, crop_h = self.target_size
+        if img_h > img_w:
+            offsets = [
+                (0, 0),
+                (0, (img_h - crop_h + 1) // 2),  # ceil
+                (0, img_h - crop_h)
+            ]
+        else:
+            offsets = [
+                (0, 0),
+                ((img_w - crop_w + 1) // 2, 0),  # ceil
+                (img_w - crop_w, 0)
+            ]
+        img_crops = []
+        for x_offset, y_offset in offsets:
+            crop = [
+                img.crop(
+                    (x_offset, y_offset, x_offset + crop_w, y_offset + crop_h))
+                for img in imgs
+            ]
+            img_crops.extend(
+                crop)  # [I0_left, ..., ITleft, ...I0right, ..., ITright]
         results['imgs'] = img_crops
         return results
