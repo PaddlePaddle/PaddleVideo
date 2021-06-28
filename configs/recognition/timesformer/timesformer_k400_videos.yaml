@@ -1,7 +1,7 @@
 MODEL: #MODEL field
     framework: "Recognizer2D" #Mandatory, indicate the type of network, associate to the 'paddlevideo/modeling/framework/' .
     backbone: #Mandatory, indicate the type of backbone, associate to the 'paddlevideo/modeling/backbones/' .
-        name: "VisionTransformer" #Mandatory, The name of backbone.
+        name: "vit_tweaks_timesformer" #Mandatory, The name of backbone.
         pretrained: "data/ViT_base_patch16_224_pretrained.pdparams" #Optional, pretrained model path.
         img_size: 224
         patch_size: 16
