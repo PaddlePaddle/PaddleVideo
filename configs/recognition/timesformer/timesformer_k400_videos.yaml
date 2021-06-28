@@ -129,7 +129,6 @@ METRIC:
 
 GRADIENT_ACCUMULATION:
     global_batch_size: 64 # Specify the sum of batches to be calculated by all GPUs
-    num_gpus: 8 # Number of GPUs
 
 # INFERENCE:
 #     name: 'ppTSM_Inference_helper'
