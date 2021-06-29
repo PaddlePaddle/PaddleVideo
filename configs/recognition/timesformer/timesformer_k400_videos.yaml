@@ -131,7 +131,7 @@ GRADIENT_ACCUMULATION:
     global_batch_size: 64 # Specify the sum of batches to be calculated by all GPUs
 
 # INFERENCE:
-#     name: 'ppTSM_Inference_helper'
+#     name: 'TimeSformer_Inference_helper'
 #     num_seg: 8
 #     target_size: 224
 
