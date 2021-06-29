@@ -69,10 +69,10 @@ def train_model(cfg,
             "num_iters"] = global_batch_size // cur_global_batch_size
         # The number of iterations required to reach the global batchsize
         logger.info(
-        f"Using gradient accumulation training strategy, "
-        f"global_batch_size={global_batch_size}, "
-        f"num_gpus={num_gpus}, "
-        f"num_accumulative_iters={cfg.GRADIENT_ACCUMULATION.num_iters}")
+            f"Using gradient accumulation training strategy, "
+            f"global_batch_size={global_batch_size}, "
+            f"num_gpus={num_gpus}, "
+            f"num_accumulative_iters={cfg.GRADIENT_ACCUMULATION.num_iters}")
 
     places = paddle.set_device('gpu')
 
@@ -180,15 +180,14 @@ def train_model(cfg,
                 avg_loss.backward()
 
                 # 4.3 minimize
-                # Use gradient accumulation strategy
-                if use_gradient_accumulation:
+                if use_gradient_accumulation: # Use gradient accumulation strategy
                     if (i + 1) % cfg.GRADIENT_ACCUMULATION.num_iters == 0:
                         for p in model.parameters():
                             p.grad.set_value(
                                 p.grad / cfg.GRADIENT_ACCUMULATION.num_iters)
                         optimizer.step()
                         optimizer.clear_grad()
-                else:
+                else: # Common case
                     optimizer.step()
                     optimizer.clear_grad()
 
