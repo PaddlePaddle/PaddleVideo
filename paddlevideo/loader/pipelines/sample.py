@@ -38,13 +38,13 @@ class Sampler(object):
                  valid_mode=False,
                  select_left=False,
                  dense_sample=False,
-                 use_linspace=False):
+                 linspace_sample=False):
         self.num_seg = num_seg
         self.seg_len = seg_len
         self.valid_mode = valid_mode
         self.select_left = select_left
         self.dense_sample = dense_sample
-        self.use_linspace = use_linspace
+        self.linspace_sample = linspace_sample
 
     def _get(self, frames_idx, results):
         data_format = results['format']
