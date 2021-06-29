@@ -1,4 +1,4 @@
-[English](../../../en/model_zoo/recognition/pp-tsn.md) | 简体中文
+[English](../../../en/model_zoo/recognition/timesformer.md) | 简体中文
 
 # TimeSformer视频分类模型
 
@@ -14,9 +14,9 @@
 
 ## 模型简介
 
-TimeSformer是基于vision transformer的视频分类模型，具有无卷积、全局感受野、时间序列建模能力强的特点。目前在Kinetics-400数据集上达到了SOTA精度，超过了经典的基于CNN的视频分类模型TSN和TSM以及Slowfast，而且具有更短的训练用时（Kinetics-400数据集训练用时3天）。本代码实现的是论文中的时间-空间分离的注意力级联网络
+TimeSformer是基于vision transformer的视频分类模型，具有无卷积、全局感受野、时间序列建模能力强的特点。目前在Kinetics-400数据集上达到了SOTA精度，超过了经典的基于CNN的视频分类模型TSN和TSM以及Slowfast，而且具有更短的训练用时（Kinetics-400数据集训练用时3天）。**本代码实现的是论文中的时间-空间分离的注意力级联网络**。
 
-<img src="C:\Users\hesensen\AppData\Roaming\Typora\typora-user-images\image-20210628210446041.png" alt="image-20210628210446041"  />![image-20210628210613282](C:\Users\hesensen\AppData\Roaming\Typora\typora-user-images\image-20210628210613282.png)
+<img src="../../../images/timesformer_attention_arch.png" alt="image-20210628210446041"/><img src="../../../images/timesformer_attention_visualize.png" alt="image-20210628210446041"  />
 
 | Version | Top1  |
 | :------ | :---: |
