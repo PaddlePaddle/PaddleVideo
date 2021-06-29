@@ -61,7 +61,7 @@ UCF101 data download and preparation please refer to [UCF-101 data preparation](
 python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_timesformer main.py --validate -c configs/recognition/ timesformer/timesformer_k400_videos.yaml
 ```
 
--Turn on amp mixed-precision training to speed up the training process. The training start command is as follows:
+- Turn on amp mixed-precision training to speed up the training process. The training start command is as follows:
 
 ```bash
 export FLAGS_conv_workspace_size_limit=800 # MB
