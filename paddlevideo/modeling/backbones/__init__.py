@@ -18,7 +18,7 @@ from .resnet_slowfast import ResNetSlowFast
 from .resnet_tweaks_tsm import ResNetTweaksTSM
 from .resnet_tweaks_tsn import ResNetTweaksTSN
 from .bmn import BMN
-from .vit_tweaks_timesformer import VisionTransformer
+from .vit import VisionTransformer
 
 __all__ = [
     'ResNet', 'ResNetTSM', 'ResNetTweaksTSM', 'ResNetSlowFast', 'BMN',
