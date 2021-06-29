@@ -1,0 +1,106 @@
+[简体中文](../../../zh-CN/model_zoo/recognition/timesformer.md) | English
+
+# TimeSformer
+
+## Content
+
+- [Introduction](#Introduction)
+- [Data](#DATA)
+- [Train](#Train)
+- [Test](#Test)
+- [Inference(TODO)](#Inference(TODO))
+- [Reference](#Reference)
+
+
+## Introduction
+
+TimeSformer is a video classification model based on vision transformer, which has the characteristics of no convolution, global receptive field, and strong time series modeling ability. At present, it has achieved SOTA accuracy on the Kinetics-400 data set, surpassing the classic CNN-based video classification models TSN, TSM and Slowfast, and has a shorter training time (the Kinetics-400 data set training time is 3 days). **This code implements the time-space separated attention cascade network in the paper**.
+
+<img src="../../../images/timesformer_attention_arch.png" alt="image-20210628210446041"/><img src="../../../images/timesformer_attention_visualize.png" alt ="image-20210628210446041" />
+
+| Version | Top1 |
+| :------ | :---: |
+| Ours | 77.03 |
+
+
+## Data
+
+K400 data download and preparation please refer to [Kinetics-400 data preparation](../../dataset/k400.md)
+
+UCF101 data download and preparation please refer to [UCF-101 data preparation](../../dataset/ucf101.md)
+
+
+## Train
+
+### Kinetics-400 data set training
+
+#### Download and add pre-trained models
+
+1. Download the image distillation pre-training model [ViT_base_patch16_224](https://paddle-imagenet-models-name.bj.bcebos.com/dygraph/ViT_base_patch16_224_pretrained.pdparams) as Backbone initialization parameters, or download through the wget command
+
+   ```bash
+   wget https://paddle-imagenet-models-name.bj.bcebos.com/dygraph/ViT_base_patch16_224_pretrained.pdparams
+   ```
+
+2. Open `PaddleVideo/configs/recognition/timesformer/timesformer_k400_videos.yaml`, and fill in the downloaded weight storage path below `pretrained:`
+
+    ```yaml
+    MODEL:
+        framework: "Recognizer2D"
+        backbone:
+            name: "VisionTransformer"
+            pretrained: fill in the path here
+    ```
+
+#### Start training
+
+- The Kinetics400 data set uses 8 cards for training, and the start command of the training method is as follows:
+
+```bash
+# videos data format
+python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_timesformer main.py --validate -c configs/recognition/ timesformer/timesformer_k400_videos.yaml
+```
+
+-Turn on amp mixed-precision training to speed up the training process. The training start command is as follows:
+
+```bash
+export FLAGS_conv_workspace_size_limit=800 # MB
+export FLAGS_cudnn_exhaustive_search=1
+export FLAGS_cudnn_batchnorm_spatial_persistent=1
+# videos data format
+python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_timesformer main.py --validate -c configs/recognition/ timesformer/timesformer_k400_videos.yaml
+```
+
+- In addition, you can customize and modify the parameter configuration to achieve the purpose of training/testing on different data sets. It is recommended that the naming method of the configuration file is `model_dataset name_file format_data format_sampling method.yaml` , Please refer to [config](../../tutorials/config.md) for parameter usage.
+
+
+## Test
+
+- The TimeSformer model is verified synchronously during training. You can find the keyword `best` in the training log to obtain the model test accuracy. The log example is as follows:
+
+  ```
+  Already save the best model (top1 acc)0.7258
+  ```
+
+- Since the sampling method of the TimeSformer model test mode is **UniformCrop** with a slower speed but higher accuracy, which is different from the **RandomCrop** used in the verification mode during the training process, so the verification index recorded in the training log is `topk Acc `Does not represent the final test score, so after the training is completed, you can use the test mode to test the best model to obtain the final index, the command is as follows:
+
+  ```bash
+  python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_timesformer main.py --test -c configs/recognition/ timesformer/timesformer_k400_videos.yaml -w "output/TimeSformer/TimeSformer_best.pdparams"
+  ```
+
+
+  When the test configuration uses the following parameters, the test indicators on the validation data set of Kinetics-400 are as follows:
+  
+
+  | backbone | Sampling method | distill | num_seg | target_size | Top-1 | checkpoints |
+  | :----------------: | :-------------: | :-----: | :-----: | :---------: | :----: | :----------------------------------------------------------: |
+  | Vision Transformer | UniformCrop | False | 8 | 224 | 77.03 | [TimeSformer_k400.pdparams]() |
+
+
+- The TimeSformer video sampling strategy is to use Linspace sampling: in time series, num_seg sparse sampling points are uniformly generated from the sampled video sequence; spatially, 224-size pictures are sampled from the left, middle, and right or upper, middle, and lower regions. , A total of 3 sampling areas are obtained. A total of 1 clip is sampled for 1 video.
+
+## Inference(TODO)
+
+## Reference
+
+-[Is Space-Time Attention All You Need for Video Understanding?](https://arxiv.org/pdf/2102.05095.pdf), Gedas Bertasius, Heng Wang, Lorenzo Torresani
