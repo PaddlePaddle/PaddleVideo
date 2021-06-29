@@ -96,7 +96,7 @@ UCF101数据下载及准备请参考[UCF-101数据准备](../../dataset/ucf101.m
    | Vision Transformer |   UniformCrop   |  False  |    8    |     224     | 77.03 | [TimeSformer_k400.pdparams]() |
 
 
-- TimeSformer视频采样策略为使用Linspace采样：时序上，从带采样的视频序列中均匀生成`num_seg`个稀疏采样点；空间上，对左中右或上中下3个区域采样出224尺寸的图片，一共得到3个采样区域。1个视频共采样1个clip。
+- 测试时，TimeSformer视频采样策略为使用Linspace采样：时序上，从带采样的视频序列中均匀生成`num_seg`个稀疏采样点；空间上，对左中右或上中下3个区域采样出224尺寸的图片，一共得到3个采样区域。1个视频共采样1个clip。
 
 ## 模型推理（TODO）
 
