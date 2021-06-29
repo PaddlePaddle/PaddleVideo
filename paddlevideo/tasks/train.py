@@ -72,7 +72,7 @@ def train_model(cfg,
         f"Using gradient accumulation training strategy, "
         f"global_batch_size={global_batch_size}, "
         f"num_gpus={num_gpus}, "
-        f"num_accumulative_iters={cfg.GRADIENT_ACCUMULATION.num_iters}"
+        f"num_accumulative_iters={cfg.GRADIENT_ACCUMULATION.num_iters}")
 
     places = paddle.set_device('gpu')
 
