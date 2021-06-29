@@ -8,7 +8,7 @@
 - [Data](#DATA)
 - [Train](#Train)
 - [Test](#Test)
-- [Inference(TODO)](#Inference(TODO))
+- [Inference](#Inference)
 - [Reference](#Reference)
 
 
@@ -99,7 +99,8 @@ python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log
 
 - The TimeSformer video sampling strategy is to use Linspace sampling: in time series, num_seg sparse sampling points are uniformly generated from the sampled video sequence; spatially, 224-size pictures are sampled from the left, middle, and right or upper, middle, and lower regions. , A total of 3 sampling areas are obtained. A total of 1 clip is sampled for 1 video.
 
-## Inference(TODO)
+## Inference
+TODO
 
 ## Reference
 
