@@ -71,7 +71,7 @@ PIPELINE: #PIPELINE field TODO.....
             name: "Sampler"
             num_seg: 8
             seg_len: 1
-            valid_mode: False
+            valid_mode: False # It is indeed False when verifying
             linspace_sample: True
         transform:
             - JitterScale:
@@ -115,7 +115,7 @@ OPTIMIZER: #OPTIMIZER field
     name: 'Momentum' #Mandatory, the type of optimizer, associate to the 'paddlevideo/solver/'
     momentum: 0.9
     learning_rate: #Mandatory, the type of learning rate scheduler, associate to the 'paddlevideo/solver/'
-        learning_rate: 0.005 # 8 cards * 4 batch size
+        learning_rate: 0.005 # Applicable when global batch size=64
         name: 'MultiStepDecay'
         milestones: [11, 14]
         gamma: 0.1
@@ -130,7 +130,7 @@ METRIC:
 GRADIENT_ACCUMULATION:
     global_batch_size: 64 # Specify the sum of batches to be calculated by all GPUs
 
-# INFERENCE:
+# INFERENCE:# TODO
 #     name: 'TimeSformer_Inference_helper'
 #     num_seg: 8
 #     target_size: 224
