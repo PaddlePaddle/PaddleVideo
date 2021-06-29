@@ -39,6 +39,7 @@ PaddleVideo is a toolset for video recognition, action localization, and spatio 
 | :--------------- | :--------: | :------------: | :------------: | :------------: |
 | action recgonition | [**PP-TSM**](./docs/zh-CN/model_zoo/recognition/pp-tsm.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | **76.16** |
 | action recgonition | [**PP-TSN**](./docs/zh-CN/model_zoo/recognition/pp-tsn.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | **73.68** |
+| action recgonition | [TimeSformer](./docs/zh-CN/model_zoo/recognition/timesformer.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | 77.03 |
 | action recgonition | [SlowFast](./docs/zh-CN/model_zoo/recognition/slowfast.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | 75.84 |
 | action recgonition | [TSM](./docs/zh-CN/model_zoo/recognition/tsm.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | 71.06 |
 | action recgonition | [TSN](./docs/zh-CN/model_zoo/recognition/tsn.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | 69.81 |
@@ -51,7 +52,6 @@ release/2.1 was released in 20/05/2021. Please refer to [release notes](https://
 
 Plan
 - ActBert
-- TimeSformer
 
 <a name="Community"></a>
 ## Community
@@ -90,6 +90,7 @@ Plan
   - [Configuration design](docs/en/tutorials/config.md)
 - Model zoo
   - [recognition](docs/en/model_zoo/README.md)
+    - [TimeSformer](docs/en/model_zoo/recognition/timesformer.md)
     - [Attention-LSTM](docs/en/model_zoo/recognition/attention_lstm.md)
     - [TSN](docs/en/model_zoo/recognition/tsn.md)
     - [TSM](docs/en/model_zoo/recognition/tsm.md)
