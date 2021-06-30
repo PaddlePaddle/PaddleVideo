@@ -94,7 +94,7 @@ python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log
 
   | backbone | Sampling method | distill | num_seg | target_size | Top-1 | checkpoints |
   | :----------------: | :-------------: | :-----: | :-----: | :---------: | :----: | :----------------------------------------------------------: |
-  | Vision Transformer | UniformCrop | False | 8 | 224 | 77.03 | [TimeSformer_k400.pdparams]() |
+  | Vision Transformer | UniformCrop | False | 8 | 224 | 77.03 | [TimeSformer_k400.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/TimeSformer_k400.pdparams) |
 
 
 - When testing, the TimeSformer video sampling strategy is to use Linspace sampling: in time series, num_seg sparse sampling points are uniformly generated from the sampled video sequence; spatially, 224-size pictures are sampled from the left, middle, and right or upper, middle, and lower regions. , A total of 3 sampling areas are obtained. A total of 1 clip is sampled for 1 video.
