@@ -98,7 +98,40 @@ UCF101数据下载及准备请参考[UCF-101数据准备](../../dataset/ucf101.m
 
 - 测试时，TimeSformer视频采样策略为使用Linspace采样：时序上，从带采样的视频序列中均匀生成`num_seg`个稀疏采样点；空间上，对左中右或上中下3个区域采样出224尺寸的图片，一共得到3个采样区域。1个视频共采样1个clip。
 
-## 模型推理（TODO）
+## 模型推理
+
+### 导出inference模型
+
+```bash
+python3.7 tools/export_model.py -c configs/recognition/timesformer/timesformer_k400_videos.yaml \
+                                -p data/TimeSformer_k400.pdparams \
+                                -o inference/TimeSformer
+```
+
+上述命令将生成预测所需的模型结构文件`TimeSformer.pdmodel`和模型权重文件`TimeSformer.pdiparams`。
+
+- 各参数含义可参考[模型推理方法](https://github.com/PaddlePaddle/PaddleVideo/blob/release/2.0/docs/zh-CN/start.md#2-%E6%A8%A1%E5%9E%8B%E6%8E%A8%E7%90%86)
+
+### 使用预测引擎推理
+
+```bash
+python3.7 tools/predict.py --input_file data/example.avi \
+                           --config configs/recognition/timesformer/timesformer_k400_videos.yaml \
+                           --model_file inference/TimeSformer/TimeSformer.pdmodel \
+                           --params_file inference/TimeSformer/TimeSformer.pdiparams \
+                           --use_gpu=True \
+                           --use_tensorrt=False
+```
+
+输出示例如下:
+
+```
+Current video file: data/example.avi
+	top-1 class: 5
+	top-1 score: 0.9998419284820557
+```
+
+可以看到，使用在Kinetics-400上训练好的ppTSM模型对`data/example.avi`进行预测，输出的top1类别id为`5`，置信度为0.99。通过查阅类别id与名称对应表`data/k400/Kinetics-400_label_list.txt`，可知预测类别名称为`archery`。
 
 ## 参考论文
 
