@@ -100,7 +100,39 @@ python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log
 - When testing, the TimeSformer video sampling strategy is to use Linspace sampling: in time series, num_seg sparse sampling points are uniformly generated from the sampled video sequence; spatially, 224-size pictures are sampled from the left, middle, and right or upper, middle, and lower regions. , A total of 3 sampling areas are obtained. A total of 1 clip is sampled for 1 video.
 
 ## Inference
-TODO
+
+### Export inference model
+
+```bash
+python3.7 tools/export_model.py -c configs/recognition/timesformer/timesformer_k400_videos.yaml \
+                                -p data/TimeSformer_k400.pdparams \
+                                -o inference/TimeSformer
+```
+
+The above command will generate the model structure file `TimeSformer.pdmodel` and the model weight file `TimeSformer.pdiparams` required for prediction.
+
+- For the meaning of each parameter, please refer to [Model Reasoning Method](../../start.md#2-infer)
+
+### Use prediction engine inference
+
+```bash
+python3.7 tools/predict.py --input_file data/example.avi \
+                           --config configs/recognition/timesformer/timesformer_k400_videos.yaml \
+                           --model_file inference/TimeSformer/TimeSformer.pdmodel \
+                           --params_file inference/TimeSformer/TimeSformer.pdiparams \
+                           --use_gpu=True \
+                           --use_tensorrt=False
+```
+
+The output example is as follows:
+
+```
+Current video file: data/example.avi
+    top-1 class: 5
+    top-1 score: 0.9998419284820557
+```
+
+It can be seen that using the ppTSM model trained on Kinetics-400 to predict `data/example.avi`, the output top1 category id is `5`, and the confidence is 0.99. By consulting the category id and name correspondence table `data/k400/Kinetics-400_label_list.txt`, it can be seen that the predicted category name is `archery`.
 
 ## Reference
 
