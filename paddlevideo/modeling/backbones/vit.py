@@ -205,7 +205,7 @@ class Block(nn.Layer):
             ########## Temporal ##########
             xt = x[:, 1:, :]
             _b, _h, _w, _t, _m = B, H, W, T, xt.shape[-1]
-            xt = xt.reshape([_b * _h * _w, _t, _m])
+            xt = xt.reshape([_b * _h * _w if _b > 0 else -1, _t, _m])
 
             res_temporal = self.drop_path(
                 self.temporal_attn(self.temporal_norm1(xt)))
@@ -225,7 +225,7 @@ class Block(nn.Layer):
             xs = xt
             _b, _h, _w, _t, _m = B, H, W, T, xs.shape[-1]
             xs = xs.reshape([_b, _h, _w, _t, _m]).transpose(
-                (0, 3, 1, 2, 4)).reshape([_b * _t, _h * _w, _m])
+                (0, 3, 1, 2, 4)).reshape([_b * _t if _b > 0 else -1, _h * _w, _m])
             xs = paddle.concat((cls_token, xs), axis=1)
             res_spatial = self.drop_path(self.attn(self.norm1(xs)))
 
@@ -281,7 +281,7 @@ class PatchEmbed(nn.Layer):
         assert H == self.img_size[0] and W == self.img_size[1], \
             f"Input image size ({H}*{W}) doesn't match model ({self.img_size[0]}*{self.img_size[1]})."
         x = x.transpose((0, 2, 1, 3, 4))
-        x = x.reshape([B * T, C, H, W])
+        x = x.reshape([B * T if B > 0 else -1, C, H, W])
         x = self.proj(x)
         W = x.shape[-1]
         x = x.flatten(2).transpose((0, 2, 1))
@@ -399,17 +399,17 @@ class VisionTransformer(nn.Layer):
         B = x.shape[0]
         # B = paddle.shape(x)[0]
         x, T, W = self.patch_embed(x)
-        cls_tokens = self.cls_token.expand((x.shape[0], -1, -1))
+        cls_tokens = self.cls_token.expand((x.shape[0] if B > 0 else 3 * T, -1, -1))
         x = paddle.concat((cls_tokens, x), axis=1)
-
-        if x.shape[1] != self.pos_embed.shape[1]:
+        pos_interp = (x.shape[1] != self.pos_embed.shape[1])
+        if pos_interp:
             pos_embed = self.pos_embed
             cls_pos_embed = pos_embed[0, 0, :].unsqueeze(0).unsqueeze(1)
             other_pos_embed = pos_embed[0, 1:, :].unsqueeze(0).transpose(
                 (0, 2, 1))
             P = int(other_pos_embed.shape[2]**0.5)
             H = x.shape[1] // W
-            other_pos_embed = other_pos_embed.reshape(1, x.shape[2], P, P)
+            other_pos_embed = other_pos_embed.reshape([1, x.shape[2], P, P])
             new_pos_embed = F.interpolate(other_pos_embed,
                                           size=(H, W),
                                           mode='nearest')
@@ -425,15 +425,17 @@ class VisionTransformer(nn.Layer):
 
         # Time Embeddings
         if self.attention_type != 'space_only':
-            cls_tokens = x[:B, 0, :].unsqueeze(1)
+            # cls_tokens = x[:B, 0, :].unsqueeze(1)
+            cls_tokens = x[:B, 0, :].unsqueeze(1) if B > 0 else x.split(T)[0].index_select(paddle.to_tensor([0]), axis=1)
             x = x[:, 1:]
             _bt, _n, _m = x.shape
             _b = B
-            _t = _bt // _b
+            _t = _bt // _b if _b != -1 else T
             x = x.reshape([_b, _t, _n, _m]).transpose(
-                (0, 2, 1, 3)).reshape([_b * _n, _t, _m])
+                (0, 2, 1, 3)).reshape([_b * _n if _b > 0 else -1, _t, _m])
             # Resizing time embeddings in case they don't match
-            if T != self.time_embed.shape[1]:  # T' != T
+            time_interp = (T != self.time_embed.shape[1])
+            if time_interp:  # T' != T
                 time_embed = self.time_embed.transpose((0, 2, 1)).unsqueeze(0)
                 new_time_embed = F.interpolate(time_embed,
                                                size=(T, x.shape[-1]),
@@ -446,8 +448,7 @@ class VisionTransformer(nn.Layer):
             x = self.time_drop(x)
             _bn, _t, _m = x.shape
             _b = B
-            _n = _bn // _b
-            x = x.reshape([_b, _n * _t, _m])
+            x = x.reshape([_b, _n * _t, _m] if _n > 0 else [_b, W * W * T, _m])
             x = paddle.concat((cls_tokens, x), axis=1)
 
         # Attention blocks
