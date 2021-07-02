@@ -31,7 +31,8 @@ PaddleVideo飞桨视频模型开发套件，旨在帮助开发者更好的进行
  [5]百度校招绿色通道，100%面试，锁定提前批校招名额
 
 相关链接，赶快收藏：
-[VideoTag(]https://github.com/PaddlePaddle/PaddleVideo/tree/application/VideoTag)
+
+[VideoTag](https://github.com/PaddlePaddle/PaddleVideo/tree/application/VideoTag)
 
 [msra_ner](https://github.com/PaddlePaddle/PaddleNLP/tree/develop/examples/information_extraction/msra_ner)
 
