@@ -15,6 +15,23 @@ PaddleVideo飞桨视频模型开发套件，旨在帮助开发者更好的进行
 
 ### **如果本项目对您有帮忙，欢迎点击页面右上方star，方便访问**
 
+## 最新动态
+基于PaddleVideo和PadldleNLP的CCKS2021【知识增强的视频语义理解】评测比赛正在 [表情][表情]火热进行中，前沿命题等你来挑战！
+
+比赛亮点：
+ [表情]中国中文信息学会语言与知识计算专业委员会和百度联合主办
+ [表情]知识图谱、NLP、视觉、语音等多模态信息的视频语义理解
+ [表情]提供飞桨官方基线，AI Studio免费算力支持
+ [表情]4万元奖金池+周奖励+参与奖等你来拿到手软
+ [表情]百度校招绿色通道，100%面试，锁定提前批校招名额
+
+相关链接，赶快收藏：
+https://github.com/PaddlePaddle/PaddleVideo/tree/application/VideoTag
+https://github.com/PaddlePaddle/PaddleNLP/tree/develop/examples/information_extraction/msra_ner
+深度学习一站式学习平台：
+https://github.com/PaddlePaddle/awesome-DeepLearning
+报名地址：https://www.biendata.xyz/competition/ccks_2021_videounderstanding/
+
 ## 特性
 
 - **更多的数据集和模型结构**
