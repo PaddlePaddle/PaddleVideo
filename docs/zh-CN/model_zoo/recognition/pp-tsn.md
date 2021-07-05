@@ -20,7 +20,7 @@
 | :------ | :----: |
 | Ours (distill) | TODO |
 | Ours | **73.68** |
-| [mmaction2](https://github.com/open-mmlab/mmaction2/tree/master/configs/recognition/tsn#kinetics-400) | 70.42 |
+| [mmaction2](https://github.com/open-mmlab/mmaction2/tree/master/configs/recognition/tsn#kinetics-400) | 71.11 |
 
 
 ## 数据准备
