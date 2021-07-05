@@ -15,6 +15,32 @@ PaddleVideo飞桨视频模型开发套件，旨在帮助开发者更好的进行
 
 ### **如果本项目对您有帮忙，欢迎点击页面右上方star，方便访问**
 
+## 最新动态
+基于PaddleVideo和PadldleNLP的CCKS2021【知识增强的视频语义理解】评测比赛正在火热进行中，前沿命题等你来挑战！
+
+比赛亮点：
+
+ [1]中国中文信息学会语言与知识计算专业委员会和百度联合主办
+ 
+ [2]知识图谱、NLP、视觉、语音等多模态信息的视频语义理解
+ 
+ [3]提供飞桨官方基线，AI Studio免费算力支持
+ 
+ [4]4万元奖金池+周奖励+参与奖等你来拿到手软
+ 
+ [5]百度校招绿色通道，100%面试，锁定提前批校招名额
+
+相关链接，赶快收藏：
+
+[VideoTag](https://github.com/PaddlePaddle/PaddleVideo/tree/application/VideoTag)
+
+[msra_ner](https://github.com/PaddlePaddle/PaddleNLP/tree/develop/examples/information_extraction/msra_ner)
+
+深度学习一站式学习平台：
+[awesome-DeepLearning](https://github.com/PaddlePaddle/awesome-DeepLearning)
+
+[报名地址](https://www.biendata.xyz/competition/ccks_2021_videounderstanding/)
+
 ## 特性
 
 - **更多的数据集和模型结构**
@@ -118,6 +144,8 @@ PaddleVideo飞桨视频模型开发套件，旨在帮助开发者更好的进行
 - **更快的训练速度**  
     视频任务相比于图像任务的训练往往更加耗时，其原因主要有两点: 一是模型上，视频任务使用的模型通常有更大的参数量与计算量；一是数据上，视频文件解码通常极为耗时。为优化视频模型训练速度，项目中分别从模型角度和数据预处理角度，实现了多种视频训练加速方案。针对TSM模型，通过op融合的方式实现了temporal shift op，在节省显存的同时加速训练过程。针对TSN模型，实现了基于DALI的纯GPU解码方案，训练速度较标准实现加速3.6倍。针对SlowFast模型，结合Decode解码库和DataLoader多子进程异步加速，训练速度较原始实现提升100%，使用Multigrid策略训练总耗时可以进一步减少。预先解码存成图像的方案也能显著加速训练过程，TSM/PP-TSM在训练全量Kinetics-400数据集80个epoch只需要2天。  
 
+## 赛事支持
+[CCKS 2021：知识增强的视频语义理解](https://www.biendata.xyz/competition/ccks_2021_videounderstanding/)
 
 ## 许可证书
 本项目的发布受[Apache 2.0 license](LICENSE)许可认证。
