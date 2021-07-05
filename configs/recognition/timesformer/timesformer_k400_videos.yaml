@@ -24,6 +24,7 @@ MODEL: #MODEL field
 DATASET: #DATASET field
     batch_size: 1 #Mandatory, bacth size
     num_workers: 4 #Mandatory, XXX the number of subprocess on each GPU.
+    test_batch_size: 8
     train:
         format: "VideoDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
         file_path: "data/k400/train.list" #Mandatory, train data index file path
@@ -48,18 +49,19 @@ PIPELINE: #PIPELINE field TODO.....
             valid_mode: False
             linspace_sample: True
         transform: #Mandotary, image transform operator.
+            - Normalization:
+                mean: [0.45, 0.45, 0.45]
+                std: [0.225, 0.225, 0.225]
+                tensor_shape: [1, 1, 1, 3]
+                in_tensor: True
+            - Image2Array:
+                data_format: 'cthw'
             - JitterScale:
                 min_size: 256
                 max_size: 320
             - RandomCrop:
                 target_size: 224
             - RandomFlip:
-            - Image2Array:
-                data_format: 'cthw'
-            - Normalization:
-                mean: [0.45, 0.45, 0.45]
-                std: [0.225, 0.225, 0.225]
-                tensor_shape: [3, 1, 1, 1]
 
     valid: #Mandatory, indicate the pipeline to deal with the validing data. associate to the 'paddlevideo/loader/pipelines/'
         decode:
@@ -74,18 +76,19 @@ PIPELINE: #PIPELINE field TODO.....
             valid_mode: False # It is indeed False when verifying
             linspace_sample: True
         transform:
+            - Normalization:
+                mean: [0.45, 0.45, 0.45]
+                std: [0.225, 0.225, 0.225]
+                tensor_shape: [1, 1, 1, 3]
+                in_tensor: True
+            - Image2Array:
+                data_format: 'cthw'
             - JitterScale:
                 min_size: 256
                 max_size: 320
             - RandomCrop:
                 target_size: 224
             - RandomFlip:
-            - Image2Array:
-                data_format: 'cthw'
-            - Normalization:
-                mean: [0.45, 0.45, 0.45]
-                std: [0.225, 0.225, 0.225]
-                tensor_shape: [3, 1, 1, 1]
     test:
         decode:
             name: "VideoDecoder"
@@ -99,17 +102,18 @@ PIPELINE: #PIPELINE field TODO.....
             valid_mode: True
             linspace_sample: True
         transform:
+            - Normalization:
+                mean: [0.45, 0.45, 0.45]
+                std: [0.225, 0.225, 0.225]
+                tensor_shape: [1, 1, 1, 3]
+                in_tensor: True
+            - Image2Array:
+                data_format: 'cthw'
             - JitterScale:
                 min_size: 224
                 max_size: 224
             - UniformCrop:
                 target_size: 224
-            - Image2Array:
-                data_format: 'cthw'
-            - Normalization:
-                mean: [0.45, 0.45, 0.45]
-                std: [0.225, 0.225, 0.225]
-                tensor_shape: [3, 1, 1, 1]
 
 OPTIMIZER: #OPTIMIZER field
     name: 'Momentum' #Mandatory, the type of optimizer, associate to the 'paddlevideo/solver/'
@@ -124,11 +128,11 @@ OPTIMIZER: #OPTIMIZER field
         value: 0.0001
     use_nesterov: True
 
-METRIC:
-    name: 'UniformCropMetric'
-
 GRADIENT_ACCUMULATION:
     global_batch_size: 64 # Specify the sum of batches to be calculated by all GPUs
+
+METRIC:
+    name: 'UniformCropMetric'
 
 INFERENCE:
     name: 'TimeSformer_Inference_helper'

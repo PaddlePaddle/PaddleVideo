@@ -89,11 +89,8 @@ class VideoDecoder(object):
 
         elif self.backend == 'pyav':  # for TimeSformer
             if self.mode in ["train", "valid"]:
-                temporal_sample_index = -1
-                spatial_sample_index = -1
                 clip_idx = -1
             elif self.mode in ["test"]:
-                temporal_sample_index = 0
                 clip_idx = 0
             else:
                 raise NotImplementedError

@@ -17,6 +17,7 @@ from PIL import Image
 from ..registry import PIPELINES
 import os
 import numpy as np
+import paddle
 
 
 @PIPELINES.register()
@@ -79,8 +80,8 @@ class Sampler(object):
                 frames = np.array(results['frames'])
                 for idx in frames_idx:
                     imgbuf = frames[idx]
-                    img = Image.fromarray(imgbuf, mode='RGB')
-                    imgs.append(img)
+                    imgs.append(imgbuf)
+                imgs = np.stack(imgs)  # thwc
             else:
                 raise NotImplementedError
         else:
