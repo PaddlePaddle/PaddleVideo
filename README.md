@@ -41,8 +41,8 @@ PaddleVideo is a toolset for video recognition, action localization, and spatio 
 | action recgonition | [**PP-TSN**](./docs/zh-CN/model_zoo/recognition/pp-tsn.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | **73.68** | 24,293,616 | 4,326,776,832 | 19.4 |
 | action recgonition | [TimeSformer](./docs/zh-CN/model_zoo/recognition/timesformer.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | 77.03 | 121,566,352 | 115,605,504 | 18.40 |
 | action recgonition | [SlowFast](./docs/zh-CN/model_zoo/recognition/slowfast.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | 75.84 | - | - | - |
-| action recgonition | [TSM](./docs/zh-CN/model_zoo/recognition/tsm.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | 71.06 | - | - | - |
-| action recgonition | [TSN](./docs/zh-CN/model_zoo/recognition/tsn.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | 69.81 | - | - | - |
+| action recgonition | [TSM](./docs/zh-CN/model_zoo/recognition/tsm.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | 71.06 | 24,293,616 | 4,326,776,832 | - |
+| action recgonition | [TSN](./docs/zh-CN/model_zoo/recognition/tsn.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | 69.81 | 24,293,616 | 4,326,776,832 | - |
 | action recgonition | [AttentionLSTM](./docs/zh-CN/model_zoo/recognition/attention_lstm.md) | [Youtube-8M](./docs/zh-CN/dataset/youtube8m.md) | Hit@1 | 89.0 | - | - | - |
 | action detection| [BMN](./docs/zh-CN/model_zoo/localization/bmn.md) | [ActivityNet](./docs/zh-CN/dataset/ActivityNet.md) |  AUC | 67.23 | - | - | - |
 
