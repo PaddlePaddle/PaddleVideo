@@ -129,7 +129,7 @@ The output example is as follows:
 ```
 Current video file: data/example.avi
     top-1 class: 5
-    top-1 score: 0.9998419284820557
+    top-1 score: 0.9999722242355347
 ```
 
 It can be seen that using the ppTSM model trained on Kinetics-400 to predict `data/example.avi`, the output top1 category id is `5`, and the confidence is 0.99. By consulting the category id and name correspondence table `data/k400/Kinetics-400_label_list.txt`, it can be seen that the predicted category name is `archery`.
