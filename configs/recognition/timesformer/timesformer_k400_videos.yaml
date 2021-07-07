@@ -53,7 +53,6 @@ PIPELINE: #PIPELINE field TODO.....
                 mean: [0.45, 0.45, 0.45]
                 std: [0.225, 0.225, 0.225]
                 tensor_shape: [1, 1, 1, 3]
-                in_tensor: True
             - Image2Array:
                 data_format: 'cthw'
             - JitterScale:
@@ -80,7 +79,6 @@ PIPELINE: #PIPELINE field TODO.....
                 mean: [0.45, 0.45, 0.45]
                 std: [0.225, 0.225, 0.225]
                 tensor_shape: [1, 1, 1, 3]
-                in_tensor: True
             - Image2Array:
                 data_format: 'cthw'
             - JitterScale:
@@ -106,7 +104,6 @@ PIPELINE: #PIPELINE field TODO.....
                 mean: [0.45, 0.45, 0.45]
                 std: [0.225, 0.225, 0.225]
                 tensor_shape: [1, 1, 1, 3]
-                in_tensor: True
             - Image2Array:
                 data_format: 'cthw'
             - JitterScale:
