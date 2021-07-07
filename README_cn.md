@@ -66,7 +66,7 @@ PaddleVideo飞桨视频模型开发套件，旨在帮助开发者更好的进行
 | :----------------- | :----------------------------------------------------------: | :------------------------------------------------: | :------: | :-------: | :---------: | :-----------: | :------------: |
 | 视频分类 |  [**PP-TSM**](./docs/zh-CN/model_zoo/recognition/pp-tsm.md)  |    [Kinetics-400](./docs/zh-CN/dataset/k400.md)    |  Top-1   | **76.16** | 24,293,616  | 4,326,776,832 |      50.0      |
 | 视频分类 |  [**PP-TSN**](./docs/zh-CN/model_zoo/recognition/pp-tsn.md)  |    [Kinetics-400](./docs/zh-CN/dataset/k400.md)    |  Top-1   | **73.68** | 24,293,616  | 4,326,776,832 |      19.4      |
-| 视频分类 | [TimeSformer](./docs/zh-CN/model_zoo/recognition/timesformer.md) |    [Kinetics-400](./docs/zh-CN/dataset/k400.md)    |  Top-1   |   77.03   | 121,566,352 |  115,605,504  |     18.40      |
+| 视频分类 | [TimeSformer](./docs/zh-CN/model_zoo/recognition/timesformer.md) |    [Kinetics-400](./docs/zh-CN/dataset/k400.md)    |  Top-1   |   77.25   | 121,566,352 |  115,605,504  |     18.40      |
 | 视频分类 |  [SlowFast](./docs/zh-CN/model_zoo/recognition/slowfast.md)  |    [Kinetics-400](./docs/zh-CN/dataset/k400.md)    |  Top-1   |   75.84   |      -      |       -       |       -        |
 | 视频分类 |       [TSM](./docs/zh-CN/model_zoo/recognition/tsm.md)       |    [Kinetics-400](./docs/zh-CN/dataset/k400.md)    |  Top-1   |   71.06   | 24,293,616 | 4,326,776,832 |       -        |
 | 视频分类 |       [TSN](./docs/zh-CN/model_zoo/recognition/tsn.md)       |    [Kinetics-400](./docs/zh-CN/dataset/k400.md)    |  Top-1   |   69.81   | 24,293,616 | 4,326,776,832 |       -        |
