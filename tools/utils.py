@@ -269,10 +269,10 @@ class TimeSformer_Inference_helper():
                     self.seg_len,
                     valid_mode=True,
                     linspace_sample=True),
-            JitterScale(self.short_size, self.short_size),
-            UniformCrop(self.target_size),
+            Normalization(img_mean, img_std, tensor_shape=[1, 1, 1, 3]),
             Image2Array(data_format='cthw'),
-            Normalization(img_mean, img_std, tensor_shape=[3, 1, 1, 1])
+            JitterScale(self.short_size, self.short_size),
+            UniformCrop(self.target_size)
         ]
         for op in ops:
             results = op(results)
