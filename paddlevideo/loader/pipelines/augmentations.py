@@ -677,7 +677,8 @@ class TenCrop:
 @PIPELINES.register()
 class UniformCrop:
     """
-    Perform uniform spatial sampling on the images, select the two ends of the long side and the middle position (left middle right or top middle bottom) 3 regions.
+    Perform uniform spatial sampling on the images,
+    select the two ends of the long side and the middle position (left middle right or top middle bottom) 3 regions.
     Args:
         target_size(int | tuple[int]): (w, h) of target size for crop.
     """
