@@ -68,7 +68,7 @@ export FLAGS_conv_workspace_size_limit=800 # MB
 export FLAGS_cudnn_exhaustive_search=1
 export FLAGS_cudnn_batchnorm_spatial_persistent=1
 # videos data format
-python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_timesformer main.py --validate -c configs/recognition/ timesformer/timesformer_k400_videos.yaml
+python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_timesformer main.py --amp --validate -c configs/recognition/ timesformer/timesformer_k400_videos.yaml
 ```
 
 - In addition, you can customize and modify the parameter configuration to achieve the purpose of training/testing on different data sets. It is recommended that the naming method of the configuration file is `model_dataset name_file format_data format_sampling method.yaml` , Please refer to [config](../../tutorials/config.md) for parameter usage.
