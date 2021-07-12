@@ -129,7 +129,7 @@ GRADIENT_ACCUMULATION:
     global_batch_size: 64 # Specify the sum of batches to be calculated by all GPUs
 
 METRIC:
-    name: 'UniformCropMetric'
+    name: 'CenterCropMetric'
 
 INFERENCE:
     name: 'TimeSformer_Inference_helper'
