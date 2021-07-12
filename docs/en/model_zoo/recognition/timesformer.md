@@ -92,9 +92,9 @@ python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log
   When the test configuration uses the following parameters, the test indicators on the validation data set of Kinetics-400 are as follows:
   
 
-  | backbone | Sampling method | distill | num_seg | target_size | Top-1 | checkpoints |
-  | :----------------: | :-------------: | :-----: | :-----: | :---------: | :----: | :----------------------------------------------------------: |
-  | Vision Transformer | UniformCrop | False | 8 | 224 | 77.25 | [TimeSformer_k400.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/TimeSformer_k400.pdparams) |
+  | backbone | Sampling method | num_seg | target_size | Top-1 | checkpoints |
+  | :----------------: | :-----: | :-----: | :---------: | :----: | :----------------------------------------------------------: |
+  | Vision Transformer | UniformCrop | 8 | 224 | 77.25 | [TimeSformer_k400.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/TimeSformer_k400.pdparams) |
 
 
 - During the test, the TimeSformer video sampling strategy is to use Linspace sampling: in time sequence, num_seg sparse sampling points are uniformly generated from the video sequence to be sampled; in space, select the two ends of the long side and the middle position (left middle right or top middle bottom) 3 regions are sampled. A total of 1 clip is sampled for 1 video.
