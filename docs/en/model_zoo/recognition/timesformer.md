@@ -46,7 +46,7 @@ UCF101 data download and preparation please refer to [UCF-101 data preparation](
 
     ```yaml
     MODEL:
-        framework: "Recognizer2D"
+        framework: "RecognizerTransformer"
         backbone:
             name: "VisionTransformer"
             pretrained: fill in the path here
