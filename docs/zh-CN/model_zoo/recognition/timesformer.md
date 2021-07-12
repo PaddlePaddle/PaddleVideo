@@ -68,7 +68,7 @@ UCF101数据下载及准备请参考[UCF-101数据准备](../../dataset/ucf101.m
     export FLAGS_cudnn_exhaustive_search=1
     export FLAGS_cudnn_batchnorm_spatial_persistent=1
     # videos数据格式
-    python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=log_timesformer  main.py  --validate -c configs/recognition/timesformer/timesformer_k400_videos.yaml
+    python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=log_timesformer  main.py --amp --validate -c configs/recognition/timesformer/timesformer_k400_videos.yaml
     ```
     
 - 另外您可以自定义修改参数配置，以达到在不同的数据集上进行训练/测试的目的，建议配置文件的命名方式为`模型_数据集名称_文件格式_数据格式_采样方式.yaml`，参数用法请参考[config](../../tutorials/config.md)。
