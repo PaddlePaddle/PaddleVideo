@@ -46,7 +46,7 @@ UCF101数据下载及准备请参考[UCF-101数据准备](../../dataset/ucf101.m
 
     ```yaml
     MODEL:
-        framework: "Recognizer2D"
+        framework: "RecognizerTransformer"
         backbone:
             name: "VisionTransformer"
             pretrained: 将路径填写到此处
