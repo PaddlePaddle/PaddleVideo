@@ -20,7 +20,6 @@ MODEL: #MODEL field
         in_channels: 768 #input channel of the extracted feature.
         std: 0.01 #std value in params initialization
 
-
 DATASET: #DATASET field
     batch_size: 1 #Mandatory, bacth size
     num_workers: 4 #Mandatory, XXX the number of subprocess on each GPU.
