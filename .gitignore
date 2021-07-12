@@ -116,5 +116,3 @@ venv.bak/
 data/
 output_dir/
 
-# ignore ./idea when using pycharm
-.idea
