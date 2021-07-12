@@ -130,7 +130,7 @@ MIX:
 
 
 METRIC:
-    name: 'TenCropMetric'
+    name: 'CenterCropMetric'
 
 
 INFERENCE:
