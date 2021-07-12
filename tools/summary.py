@@ -55,7 +55,8 @@ def _trim(cfg, args):
     cfg = cfg.MODEL
     cfg.backbone.pretrained = ""
 
-    cfg.backbone.num_seg = args.num_seg
+    if 'num_seg' in cfg.backbone:
+        cfg.backbone.num_seg = args.num_seg
     return cfg, model_name
 
 
