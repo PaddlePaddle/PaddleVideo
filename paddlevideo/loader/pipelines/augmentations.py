@@ -701,13 +701,13 @@ class UniformCrop:
         if img_h > img_w:
             offsets = [
                 (0, 0),
-                (0, (img_h - crop_h + 1) // 2),  # ceil
+                (0, int(math.ceil((img_h - crop_h) / 2))),
                 (0, img_h - crop_h)
             ]
         else:
             offsets = [
                 (0, 0),
-                ((img_w - crop_w + 1) // 2, 0),  # ceil
+                (int(math.ceil((img_w - crop_w) / 2)), 0),
                 (img_w - crop_w, 0)
             ]
         img_crops = []
