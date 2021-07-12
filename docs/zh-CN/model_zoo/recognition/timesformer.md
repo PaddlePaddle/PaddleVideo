@@ -91,9 +91,9 @@ UCF101数据下载及准备请参考[UCF-101数据准备](../../dataset/ucf101.m
 
   当测试配置采用如下参数时，在Kinetics-400的validation数据集上的测试指标如下：
 
-   |      backbone      | Sampling method | distill | num_seg | target_size | Top-1 |                         checkpoints                          |
-   | :----------------: | :-------------: | :-----: | :-----: | :---------: | :---- | :----------------------------------------------------------: |
-   | Vision Transformer |   UniformCrop   |  False  |    8    |     224     | 77.25 | [TimeSformer_k400.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/TimeSformer_k400.pdparams) |
+   |      backbone      | Sampling method | num_seg | target_size | Top-1 |                         checkpoints                          |
+   | :----------------: | :-------------: | :-----: | :---------: | :---- | :----------------------------------------------------------: |
+   | Vision Transformer |   UniformCrop   |   8    |     224     | 77.25 | [TimeSformer_k400.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/TimeSformer_k400.pdparams) |
 
 
 - 测试时，TimeSformer视频采样策略为使用Linspace采样：时序上，从待采样的视频序列中均匀生成`num_seg`个稀疏采样点；空间上，选择长边两端及中间位置（左中右 或 上中下）3个区域采样。1个视频共采样1个clip。
