@@ -644,7 +644,6 @@ class TenCrop:
         self.target_size = (target_size, target_size)
 
     def __call__(self, results):
-
         imgs = results['imgs']
         img_w, img_h = imgs[0].size
         crop_w, crop_h = self.target_size
@@ -690,6 +689,7 @@ class UniformCrop:
         else:
             raise TypeError(
                 f'target_size must be int or tuple[int], but got {type(target_size)}')
+
     def __call__(self, results):
 
         imgs = results['imgs']
