@@ -677,14 +677,18 @@ class TenCrop:
 @PIPELINES.register()
 class UniformCrop:
     """
-    Perform uniform spatial sampling on the images.
-    and then flip the cropping result to get 10 cropped images, which can make the prediction result more robust.
+    Perform uniform spatial sampling on the images, select the two ends of the long side and the middle position (left middle right or top middle bottom) 3 regions.
     Args:
         target_size(int | tuple[int]): (w, h) of target size for crop.
     """
     def __init__(self, target_size):
-        self.target_size = (target_size, target_size)
-
+        if isinstance(target_size, tuple):
+            self.target_size = target_size
+        elif isinstance(target_size, int):
+            self.target_size = (target_size, target_size)
+        else:
+            raise TypeError(
+                f'target_size must be int or tuple[int], but got {type(target_size)}')
     def __call__(self, results):
 
         imgs = results['imgs']
