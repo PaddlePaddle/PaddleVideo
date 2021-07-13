@@ -80,7 +80,7 @@ def load_ckpt(model,
                 tmp['pos_embed'] = new_pos_embed
                 time.sleep(0.01)
 
-            if 'time_embed' in tmp and seg_num != tmp['time_embed'].size(1):
+            if 'time_embed' in tmp and seg_num != tmp['time_embed'].shape[1]:
                 logger.info("Loading %s" % 'time_embed')
                 time_embed = tmp['time_embed'].transpose((0, 2, 1)).unsqueeze(0)
                 new_time_embed = F.interpolate(time_embed,
