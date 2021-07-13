@@ -50,7 +50,7 @@ def train_model(cfg,
     valid_batch_size = cfg.DATASET.get('valid_batch_size', batch_size)
 
     use_gradient_accumulation = cfg.get('GRADIENT_ACCUMULATION', None)
-    if use_gradient_accumulation and dist.get_world_size() > 1:
+    if use_gradient_accumulation and dist.get_world_size() >= 1:
         global_batch_size = cfg.GRADIENT_ACCUMULATION.get(
             'global_batch_size', None)
         num_gpus = dist.get_world_size()
