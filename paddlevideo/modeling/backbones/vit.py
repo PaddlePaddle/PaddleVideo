@@ -469,7 +469,3 @@ class VisionTransformer(nn.Layer):
     def forward(self, x):
         x = self.forward_features(x)
         return x
-
-
-if __name__ == '__main__':
-    pass
