@@ -47,7 +47,7 @@ class TimeSformerHead(BaseHead):
         """Initiate the FC layer parameters"""
 
         weight_init_(self.fc,
-                     'Normal',
+                     'TruncatedNormal',
                      'fc_0.w_0',
                      'fc_0.b_0',
                      mean=0.0,
