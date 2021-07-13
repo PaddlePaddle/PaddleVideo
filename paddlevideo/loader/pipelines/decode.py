@@ -102,12 +102,8 @@ class VideoDecoder(object):
             # decode process
             fps = float(container.streams.video[0].average_rate)
 
-            orig_duration = None  # None
-            tb = float(container.streams.video[0].time_base)
             frames_length = container.streams.video[0].frames
             duration = container.streams.video[0].duration
-            if duration is None and orig_duration is not None:
-                duration = orig_duration / tb
 
             if duration is None:
                 # If failed to fetch the decoding information, decode the entire video.
