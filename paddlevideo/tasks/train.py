@@ -174,7 +174,7 @@ def train_model(cfg,
                 outputs = model(data, mode='train')
 
                 # 4.2 backward
-                if use_gradient_accumulation and i == 0:  # use GRADIENT_ACCUMULATION
+                if use_gradient_accumulation and i == 0:  # Use gradient accumulation strategy
                     optimizer.clear_grad()
                 avg_loss = outputs['loss']
                 avg_loss.backward()
