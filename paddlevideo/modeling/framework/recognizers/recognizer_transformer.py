@@ -59,7 +59,7 @@ class RecognizerTransformer(BaseRecognizer):
             axis=2
         )  # [N, 3, T, H, W], [N, 3, T, H, W], [N, 3, T, H, W]
         cls_score = [
-            paddle.nn.functional.softmax(self.forward_net(imgs), axis=1)
+            self.forward_net(imgs)
             for imgs in clips_list
         ]  # [N, C], [N, C], [N, C]
         cls_score = paddle.add_n(cls_score)  # [N, C] in [0,1]
