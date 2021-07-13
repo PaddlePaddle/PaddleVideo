@@ -115,7 +115,7 @@ class Sampler(object):
 
         if not self.select_left:
             if self.dense_sample:  # For ppTSM
-                if not self.valid_mode:  #train
+                if not self.valid_mode:  # train
                     sample_pos = max(1, 1 + frames_len - 64)
                     t_stride = 64 // self.num_seg
                     start_idx = 0 if sample_pos == 1 else np.random.randint(
