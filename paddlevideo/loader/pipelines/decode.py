@@ -153,10 +153,9 @@ class VideoDecoder(object):
                 start_idx, end_idx = get_start_end_idx(
                     len(frames),  # frame_len
                     clip_sz,
-                    clip_idx
-                    if decode_all_video else 0,  #  -1 in train, 0 in test
-                    num_clips
-                    if decode_all_video else 1,  #  1 in train and test
+                    clip_idx if decode_all_video else 0,  # If decode all video, -1 in train and valid, 0 in test; 
+                    # else, always 0 in train, valid and test, as we has selected clip size frames when decode.
+                    1
                 )
                 results['frames'] = frames
                 results['frames_len'] = len(frames)
