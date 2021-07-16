@@ -30,7 +30,7 @@ Please refer to the ICCV 2019 paper for details [TSM: Temporal Shift Module for 
 
 ## Data
 
-Please refer to Kinetics-400 data download and preparation [k400 data preparation](../../dataset/K400.md)
+Please refer to Kinetics-400 data download and preparation [k400 data preparation](../../dataset/k400.md)
 
 Please refer to UCF101 data download and preparation [ucf101 data preparation](../../dataset/ucf101.md)
 
