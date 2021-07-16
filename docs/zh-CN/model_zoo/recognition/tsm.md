@@ -70,23 +70,23 @@ UCF101数据下载及准备请参考[ucf101数据准备](../../dataset/ucf101.md
 
 - 开启amp混合精度训练，可加速训练过程，其训练启动命令如下：
 
-```bash
-export FLAGS_conv_workspace_size_limit=800 #MB
-export FLAGS_cudnn_exhaustive_search=1
-export FLAGS_cudnn_batchnorm_spatial_persistent=1
+   ```bash
+   export FLAGS_conv_workspace_size_limit=800 #MB
+   export FLAGS_cudnn_exhaustive_search=1
+   export FLAGS_cudnn_batchnorm_spatial_persistent=1
 
-python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_tsm main.py  --amp --validate -c configs/recognition/tsm/tsm_k400_frames.yaml
-```
+   python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_tsm main.py  --amp --validate -c configs/recognition/tsm/tsm_k400_frames.yaml
+   ```
 
 - 使用amp混合精度训练时，配合`nhwc`的数据格式有更好的加速效果，其训练启动方式如下: 
 
-```bash
-export FLAGS_conv_workspace_size_limit=800 #MB
-export FLAGS_cudnn_exhaustive_search=1
-export FLAGS_cudnn_batchnorm_spatial_persistent=1
+   ```bash
+   export FLAGS_conv_workspace_size_limit=800 #MB
+   export FLAGS_cudnn_exhaustive_search=1
+   export FLAGS_cudnn_batchnorm_spatial_persistent=1
 
-python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_tsm main.py  --amp --validate -c configs/recognition/tsm/tsm_k400_frames_nhwc.yaml
-```
+   python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_tsm main.py  --amp --validate -c configs/recognition/tsm/tsm_k400_frames_nhwc.yaml
+   ```
 
 - 另外您可以自定义修改参数配置，以达到在不同的数据集上进行训练/测试的目的，配置文件命名方式为`模型_数据集_文件格式_数据格式.yaml`，具体参数用法请参考[config](../../tutorials/config.md)。
 
