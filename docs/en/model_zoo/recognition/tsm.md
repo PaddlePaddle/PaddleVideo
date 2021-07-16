@@ -129,23 +129,23 @@ python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log
 
 - AMP is useful for speeding up training, scripts as follows:
 
-```bash
-export FLAGS_conv_workspace_size_limit=800 #MB
-export FLAGS_cudnn_exhaustive_search=1
-export FLAGS_cudnn_batchnorm_spatial_persistent=1
+  ```bash
+  export FLAGS_conv_workspace_size_limit=800 #MB
+  export FLAGS_cudnn_exhaustive_search=1
+  export FLAGS_cudnn_batchnorm_spatial_persistent=1
 
-python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3" --log_dir=log_tsm main.py  --amp --validate -c configs/recognition/tsm/tsm_ucf101_frames.yaml
-```
+  python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3" --log_dir=log_tsm main.py  --amp --validate -c configs/recognition/tsm/tsm_ucf101_frames.yaml
+  ```
 
 - AMP works better with `NHWC` data format, scripts as follows:
 
-```bash
-export FLAGS_conv_workspace_size_limit=800 #MB
-export FLAGS_cudnn_exhaustive_search=1
-export FLAGS_cudnn_batchnorm_spatial_persistent=1
+  ```bash
+  export FLAGS_conv_workspace_size_limit=800 #MB
+  export FLAGS_cudnn_exhaustive_search=1
+  export FLAGS_cudnn_batchnorm_spatial_persistent=1
 
-python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3" --log_dir=log_tsm main.py  --amp --validate -c configs/recognition/tsm/tsm_ucf101_frames_nhwc.yaml
-```
+  python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3" --log_dir=log_tsm main.py  --amp --validate -c configs/recognition/tsm/tsm_ucf101_frames_nhwc.yaml
+  ```
 
 ## Test
 
