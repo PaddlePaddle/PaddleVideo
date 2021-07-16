@@ -28,7 +28,7 @@ Temporal Shift Module (TSM) 是当前比较受关注的视频分类模型，通�
 
 ## 数据准备
 
-Kinetics400数据下载及准备请参考[k400数据准备](../../dataset/K400.md)
+Kinetics400数据下载及准备请参考[k400数据准备](../../dataset/k400.md)
 
 UCF101数据下载及准备请参考[ucf101数据准备](../../dataset/ucf101.md)
 
