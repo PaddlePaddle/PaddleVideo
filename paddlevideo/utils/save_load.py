@@ -22,6 +22,61 @@ import paddle.nn.functional as F
 from paddlevideo.utils import get_logger
 from paddlevideo.utils import main_only
 
+def pretrain_vit_param_trans(model, num_patches, seg_num, attention_type, state_dicts):
+    """
+    """
+    if "VisionTransformer" in str(model):
+        if 'head' + '.weight' in state_dicts:
+            del state_dicts['head' + '.weight']
+        if 'head' + '.bias' in state_dicts:
+            del state_dicts['head' + '.bias']
+
+        total_len = len(model.state_dict())
+        if num_patches + 1 != state_dicts['pos_embed'].shape[1]:
+            pos_embed = state_dicts['pos_embed']
+            cls_pos_embed = pos_embed[0, 0, :].unsqueeze(0).unsqueeze(1)
+            other_pos_embed = pos_embed[0, 1:, :].unsqueeze(0).unsqueeze(1).transpose((0, 1, 3, 2))
+            new_pos_embed = F.interpolate(
+                other_pos_embed,
+                size=(other_pos_embed.shape[-2], num_patches),
+                mode='nearest'
+            )
+            new_pos_embed = new_pos_embed.squeeze(0).transpose((0, 2, 1))
+            new_pos_embed = paddle.concat((cls_pos_embed, new_pos_embed), axis=1)
+            state_dicts['pos_embed'] = new_pos_embed
+            time.sleep(0.01)
+
+        if 'time_embed' in state_dicts and seg_num != state_dicts['time_embed'].shape[1]:
+            time_embed = state_dicts['time_embed'].transpose((0, 2, 1)).unsqueeze(0)
+            new_time_embed = F.interpolate(
+                time_embed,
+                size=(time_embed.shape[-2], seg_num),
+                mode='nearest'
+            )
+            state_dicts['time_embed'] = new_time_embed.squeeze(0).transpose((0, 2, 1))
+            time.sleep(0.01)
+        with tqdm(total=total_len, position=1, bar_format='{desc}', desc="Loading weights") as desc:
+            if attention_type == 'divided_space_time':
+                new_state_dicts = state_dicts.copy()
+                for key in tqdm(state_dicts):
+                    if 'blocks' in key and 'attn' in key:
+                        desc.set_description("Loading %s" % key)
+                        new_key = key.replace('attn', 'temporal_attn')
+                        if not new_key in state_dicts:
+                            new_state_dicts[new_key] = state_dicts[key]
+                        else:
+                            new_state_dicts[new_key] = state_dicts[new_key]
+                    if 'blocks' in key and 'norm1' in key:
+                        desc.set_description("Loading %s" % key)
+                        new_key = key.replace('norm1', 'temporal_norm1')
+                        if not new_key in state_dicts:
+                            new_state_dicts[new_key] = state_dicts[key]
+                        else:
+                            new_state_dicts[new_key] = state_dicts[new_key]
+                    time.sleep(0.01)
+        ret_str = "loading {:<20d} weights completed.".format(len(model.state_dict()))
+        desc.set_description(ret_str)
+    return new_state_dicts
 
 #XXX(shipping): maybe need load N times because of different cards have different params.
 @main_only
@@ -40,83 +95,24 @@ def load_ckpt(model,
 
     logger = get_logger("paddlevideo")
     state_dicts = paddle.load(weight_path)
-    tmp = {}
-    total_len = len(model.state_dict())
-    with tqdm(total=total_len,
-              position=1,
-              bar_format='{desc}',
-              desc="Loading weights") as desc:
-        if "VisionTransformer" in str(model):  # For TimeSformer case
-            tmp = state_dicts
-        else:  # For 2DCNN case
+    if "VisionTransformer" in str(model):  # For TimeSformer case
+        tmp = pretrain_vit_param_trans(model, num_patches, seg_num, attention_type, state_dicts)
+    else:
+        tmp = {}
+        total_len = len(model.state_dict())
+        with tqdm(total=total_len, position=1, bar_format='{desc}', desc="Loading weights") as desc:
             for item in tqdm(model.state_dict(), total=total_len, position=0):
                 name = item
                 desc.set_description('Loading %s' % name)
-                if name not in state_dicts:
+                if name not in state_dicts: # Convert from non-parallel model
                     if str('backbone.' + name) in state_dicts:
                         tmp[name] = state_dicts['backbone.' + name]
-                else:  # Common case
+                else:  # Convert from parallel model
                     tmp[name] = state_dicts[name]
                 time.sleep(0.01)
-
-        if "VisionTransformer" in str(model):  # For TimeSformer case
-            if 'head' + '.weight' in tmp:
-                del tmp['head' + '.weight']
-            if 'head' + '.bias' in tmp:
-                del tmp['head' + '.bias']
-
-            logger.info("Loading %s" % 'pos_embed')
-            if num_patches + 1 != tmp['pos_embed'].shape[1]:
-                pos_embed = tmp['pos_embed']
-                cls_pos_embed = pos_embed[0, 0, :].unsqueeze(0).unsqueeze(1)
-                other_pos_embed = pos_embed[0, 1:, :].unsqueeze(0).unsqueeze(
-                    1).transpose((0, 1, 3, 2))
-                new_pos_embed = F.interpolate(other_pos_embed,
-                                              size=(other_pos_embed.shape[-2],
-                                                    num_patches),
-                                              mode='nearest')
-                new_pos_embed = new_pos_embed.squeeze(0).transpose((0, 2, 1))
-                new_pos_embed = paddle.concat((cls_pos_embed, new_pos_embed), 1)
-                tmp['pos_embed'] = new_pos_embed
-                time.sleep(0.01)
-
-            if 'time_embed' in tmp and seg_num != tmp['time_embed'].shape[1]:
-                logger.info("Loading %s" % 'time_embed')
-                time_embed = tmp['time_embed'].transpose((0, 2, 1)).unsqueeze(0)
-                new_time_embed = F.interpolate(time_embed,
-                                               size=(time_embed.shape[-2],
-                                                     seg_num),
-                                               mode='nearest')
-                tmp['time_embed'] = new_time_embed.squeeze(0).transpose(
-                    (0, 2, 1))
-                time.sleep(0.01)
-
-            if attention_type == 'divided_space_time':  # Transformer case
-                new_state_dict = tmp.copy()
-                for key in tmp:
-                    if 'blocks' in key and 'attn' in key:
-                        logger.info("Loading %s" % key)
-                        new_key = key.replace('attn', 'temporal_attn')
-                        if not new_key in tmp:
-                            new_state_dict[new_key] = tmp[key]
-                        else:
-                            new_state_dict[new_key] = tmp[new_key]
-                    if 'blocks' in key and 'norm1' in key:
-                        logger.info("Loading %s" % key)
-                        new_key = key.replace('norm1', 'temporal_norm1')
-                        if not new_key in tmp:
-                            new_state_dict[new_key] = tmp[key]
-                        else:
-                            new_state_dict[new_key] = tmp[new_key]
-                tmp = new_state_dict
-                time.sleep(0.01)
-
-        ret_str = "loading {:<20d} weights completed.".format(
-            len(model.state_dict()))
+        ret_str = "loading {:<20d} weights completed.".format(len(model.state_dict()))
         desc.set_description(ret_str)
-
-        model.set_state_dict(tmp)
-
+    model.set_state_dict(tmp)
 
 def mkdir(dir):
     if not os.path.exists(dir):
