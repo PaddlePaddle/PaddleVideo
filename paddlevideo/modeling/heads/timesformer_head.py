@@ -17,7 +17,7 @@ from paddle.nn import AdaptiveAvgPool2D, Linear, Dropout
 
 from .base import BaseHead
 from ..registry import HEADS
-from ..weight_init import weight_init_
+from ..weight_init import weight_init_, trunc_normal_
 
 
 @HEADS.register()
@@ -36,7 +36,7 @@ class TimeSformerHead(BaseHead):
                  num_classes,
                  in_channels,
                  loss_cfg=dict(name='CrossEntropyLoss'),
-                 std=0.01,
+                 std=0.02,
                  **kwargs):
 
         super().__init__(num_classes, in_channels, loss_cfg, **kwargs)
@@ -52,6 +52,8 @@ class TimeSformerHead(BaseHead):
                      'fc_0.b_0',
                      mean=0.0,
                      std=self.std)
+        # NOTE: Temporarily use trunc_normal_ instead of TruncatedNormal
+        trunc_normal_(self.fc.weight, std=self.std)
 
     def forward(self, x):
         """Define how the head is going to run.
