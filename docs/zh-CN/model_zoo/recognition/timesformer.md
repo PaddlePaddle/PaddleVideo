@@ -20,7 +20,7 @@ TimeSformer是基于vision transformer的视频分类模型，具有无卷积、
 
 | Version | Top1  |
 | :------ | :---: |
-| Ours    | 77.25 |
+| Ours    | 77.29 |
 
 
 ## 数据准备
