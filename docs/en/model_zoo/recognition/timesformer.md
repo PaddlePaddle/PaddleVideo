@@ -20,7 +20,7 @@ TimeSformer is a video classification model based on vision transformer, which h
 
 | Version | Top1 |
 | :------ | :---: |
-| Ours | 77.25 |
+| Ours | 77.29 |
 
 
 ## Data
