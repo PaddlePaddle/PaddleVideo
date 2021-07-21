@@ -21,11 +21,12 @@ from paddle.nn.initializer import TruncatedNormal, Constant, Normal
 import paddle.nn.functional as F
 from ..registry import BACKBONES
 from ...utils import load_ckpt
+from ..weight_init import trunc_normal_
+
 
 __all__ = ['VisionTransformer']
 
-trunc_normal_ = TruncatedNormal(std=.02)
-normal_ = Normal
+
 zeros_ = Constant(value=0.)
 ones_ = Constant(value=1.)
 
@@ -361,20 +362,10 @@ class VisionTransformer(nn.Layer):
 
     def init_weights(self):
         """First init model's weight"""
-        trunc_normal_(self.pos_embed)
-        trunc_normal_(self.cls_token)
+        trunc_normal_(self.pos_embed, std=0.02)
+        trunc_normal_(self.cls_token, std=0.02)
+        self.apply(self._init_fn)
 
-        def _init_fn(m):
-            if isinstance(m, nn.Linear):
-                trunc_normal_(m.weight)
-                if isinstance(m, nn.Linear) and m.bias is not None:
-                    zeros_(m.bias)
-            elif isinstance(m, nn.LayerNorm):
-                ones_(m.weight)
-                zeros_(m.bias)
-
-        self.apply(_init_fn)
-        # initialization of temporal attention weights
         if self.attention_type == 'divided_space_time':
             i = 0
             for m in self.blocks.sublayers(include_self=True):
@@ -384,6 +375,7 @@ class VisionTransformer(nn.Layer):
                         zeros_(m.temporal_fc.weight)
                         zeros_(m.temporal_fc.bias)
                     i += 1
+
         """Second, if provide pretrained ckpt, load it"""
         if isinstance(
                 self.pretrained, str
@@ -394,6 +386,15 @@ class VisionTransformer(nn.Layer):
             pass
         else:
             raise NotImplementedError
+
+    def _init_fn(self, m):
+        if isinstance(m, nn.Linear):
+            trunc_normal_(m.weight)
+            if isinstance(m, nn.Linear) and m.bias is not None:
+                zeros_(m.bias)
+        elif isinstance(m, nn.LayerNorm):
+            ones_(m.weight)
+            zeros_(m.bias)
 
     def forward_features(self, x):
         B = x.shape[0]
