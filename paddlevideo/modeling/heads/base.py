@@ -105,7 +105,7 @@ class BaseHead(nn.Layer):
                 loss_b = self.label_smooth_loss(scores, labels_b, **kwargs)
             else:
                 loss_a = self.loss_func(scores, labels_a, **kwargs)
-                loss_b = self.loss_func(scores, labels_a, **kwargs)
+                loss_b = self.loss_func(scores, labels_b, **kwargs)
             loss = lam * loss_a + (1 - lam) * loss_b
             top1a, top5a = self.get_acc(scores, labels_a, valid_mode)
             top1b, top5b = self.get_acc(scores, labels_b, valid_mode)
