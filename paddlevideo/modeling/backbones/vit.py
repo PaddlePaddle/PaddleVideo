@@ -380,8 +380,8 @@ class VisionTransformer(nn.Layer):
         if isinstance(
                 self.pretrained, str
         ) and self.pretrained.strip() != "":  # load pretrained weights
-            load_ckpt(self, self.pretrained, self.patch_embed.num_patches,
-                      self.seg_num, self.attention_type)
+            load_ckpt(self, self.pretrained, num_patches=self.patch_embed.num_patches,
+                      seg_num=self.seg_num, attention_type=self.attention_type)
         elif self.pretrained is None or self.pretrained.strip() == "":
             pass
         else:
