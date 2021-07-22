@@ -16,11 +16,9 @@
 
 TimeSformer is a video classification model based on vision transformer, which has the characteristics of no convolution, global receptive field, and strong time series modeling ability. At present, it has achieved SOTA accuracy on the Kinetics-400 data set, surpassing the classic CNN-based video classification models TSN, TSM and Slowfast, and has a shorter training time (the Kinetics-400 data set training time is 39 hourss). **This code implements the time-space separated attention cascade network in the paper**.
 
-<img src="../../../images/timesformer_attention_arch.png" alt="image-20210628210446041"/><img src="../../../images/timesformer_attention_visualize.png" alt ="image-20210628210446041" />
-
-| Version | Top1 |
-| :------ | :---: |
-| Ours | 77.29 |
+<div align="center">
+<img src="../../../images/timesformer_attention_arch.png" alt="image-20210628210446041"/><img src="../../../images/timesformer_attention_visualize.png" alt="image-20210628210446041"  />
+</div>
 
 
 ## Data
