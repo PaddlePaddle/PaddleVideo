@@ -22,7 +22,7 @@ import paddle.nn.functional as F
 from paddlevideo.utils import get_logger
 from paddlevideo.utils import main_only
 
-def pretrain_vit_param_trans(model, num_patches, seg_num, attention_type, state_dicts):
+def pretrain_vit_param_trans(model, state_dicts, num_patches, seg_num, attention_type):
     """
     Convert ViT's pre-trained model parameters to a parameter dictionary that matches the existing model
     """
@@ -82,9 +82,7 @@ def pretrain_vit_param_trans(model, num_patches, seg_num, attention_type, state_
 @main_only
 def load_ckpt(model,
               weight_path,
-              num_patches=None,
-              seg_num=None,
-              attention_type=None):
+              **kargs):
     """
     1. Load pre-trained model parameters
     2. Extract and convert from the pre-trained model to the parameters 
@@ -100,7 +98,7 @@ def load_ckpt(model,
     logger = get_logger("paddlevideo")
     state_dicts = paddle.load(weight_path)
     if "VisionTransformer" in str(model):  # For TimeSformer case
-        tmp = pretrain_vit_param_trans(model, num_patches, seg_num, attention_type, state_dicts)
+        tmp = pretrain_vit_param_trans(model, state_dicts, kargs['num_patches'], kargs['seg_num'], kargs['attention_type'])
     else:
         tmp = {}
         total_len = len(model.state_dict())
