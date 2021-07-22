@@ -16,11 +16,9 @@
 
 TimeSformer是基于vision transformer的视频分类模型，具有无卷积、全局感受野、时间序列建模能力强的特点。目前在Kinetics-400数据集上达到了SOTA精度，超过了经典的基于CNN的视频分类模型TSN和TSM以及Slowfast，而且具有更短的训练用时（Kinetics-400数据集训练用时39小时）。**本代码实现的是论文中的时间-空间分离的注意力级联网络**。
 
+<div align="center">
 <img src="../../../images/timesformer_attention_arch.png" alt="image-20210628210446041"/><img src="../../../images/timesformer_attention_visualize.png" alt="image-20210628210446041"  />
-
-| Version | Top1  |
-| :------ | :---: |
-| Ours    | 77.29 |
+</div>
 
 
 ## 数据准备
