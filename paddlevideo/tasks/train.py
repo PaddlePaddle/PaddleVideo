@@ -261,7 +261,7 @@ def train_model(cfg,
         # 5. Validation
         if validate and (epoch % cfg.get("val_interval", 1) == 0
                          or epoch == cfg.epochs - 1):
-            with paddle.fluid.dygraph.no_grad():
+            with paddle.no_grad():
                 best, save_best_flag = evaluate(best)
             # save best
             if save_best_flag:
