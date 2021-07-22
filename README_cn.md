@@ -62,15 +62,16 @@ PaddleVideo飞桨视频模型开发套件，旨在帮助开发者更好的进行
 ### 模型性能概览
 
 
-| 领域 | 模型 | 数据集 | 精度指标 | 精度% |
-| :--------------- | :--------: | :------------: | :------------: | :------------: |
-| 视频分类 | [**PP-TSM**](./docs/zh-CN/model_zoo/recognition/pp-tsm.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | **76.16** |
-| 视频分类 | [**PP-TSN**](./docs/zh-CN/model_zoo/recognition/pp-tsn.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | **73.68** |
-| 视频分类 | [SlowFast](./docs/zh-CN/model_zoo/recognition/slowfast.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | 75.84 |
-| 视频分类 | [TSM](./docs/zh-CN/model_zoo/recognition/tsm.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | 71.06 |
-| 视频分类 | [TSN](./docs/zh-CN/model_zoo/recognition/tsn.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | 69.81 |
-| 视频分类 | [AttentionLSTM](./docs/zh-CN/model_zoo/recognition/attention_lstm.md) | [Youtube-8M](./docs/zh-CN/dataset/youtube8m.md) | Hit@1 | 89.0 |
-| 视频动作定位| [BMN](./docs/zh-CN/model_zoo/localization/bmn.md) | [ActivityNet](./docs/zh-CN/dataset/ActivityNet.md) |  AUC | 67.23 |
+| 领域               |                             模型                             |                       数据集                       | 精度指标 |   精度%   |
+| :----------------- | :----------------------------------------------------------: | :------------------------------------------------: | :------: | :-------: |
+| 视频分类 |  [**PP-TSM**](./docs/zh-CN/model_zoo/recognition/pp-tsm.md)  |    [Kinetics-400](./docs/zh-CN/dataset/k400.md)    |  Top-1   | **76.16** |
+| 视频分类 |  [**PP-TSN**](./docs/zh-CN/model_zoo/recognition/pp-tsn.md)  |    [Kinetics-400](./docs/zh-CN/dataset/k400.md)    |  Top-1   | **73.68** |
+| 视频分类 | [TimeSformer](./docs/zh-CN/model_zoo/recognition/timesformer.md) |    [Kinetics-400](./docs/zh-CN/dataset/k400.md)    |  Top-1   |   77.29   |
+| 视频分类 |  [SlowFast](./docs/zh-CN/model_zoo/recognition/slowfast.md)  |    [Kinetics-400](./docs/zh-CN/dataset/k400.md)    |  Top-1   |   75.84   |
+| 视频分类 |       [TSM](./docs/zh-CN/model_zoo/recognition/tsm.md)       |    [Kinetics-400](./docs/zh-CN/dataset/k400.md)    |  Top-1   |   71.06   |
+| 视频分类 |       [TSN](./docs/zh-CN/model_zoo/recognition/tsn.md)       |    [Kinetics-400](./docs/zh-CN/dataset/k400.md)    |  Top-1   |   69.81   |
+| 视频分类 | [AttentionLSTM](./docs/zh-CN/model_zoo/recognition/attention_lstm.md) |  [Youtube-8M](./docs/zh-CN/dataset/youtube8m.md)   |  Hit@1   |   89.0    |
+| 视频动作定位   |      [BMN](./docs/zh-CN/model_zoo/localization/bmn.md)       | [ActivityNet](./docs/zh-CN/dataset/ActivityNet.md) |   AUC    |   67.23   |
 
 <a name="欢迎加入PaddleVideo技术交流群"></a>
 ## 欢迎加入PaddleVideo技术交流群
@@ -111,6 +112,7 @@ PaddleVideo飞桨视频模型开发套件，旨在帮助开发者更好的进行
        - [PP-TSM](docs/zh-CN/model_zoo/recognition/pp-tsm.md)
        - [PP-TSN](docs/zh-CN/model_zoo/recognition/pp-tsn.md)
        - [SlowFast](docs/zh-CN/model_zoo/recognition/slowfast.md)
+       - [TimeSformer](docs/zh-CN/model_zoo/recognition/timesformer.md)
        - [Attention-LSTM](docs/zh-CN/model_zoo/recognition/attention_lstm.md)
     - [动作定位](docs/zh-CN/model_zoo/README.md)
        - [BMN](docs/zh-CN/model_zoo/localization/bmn.md)

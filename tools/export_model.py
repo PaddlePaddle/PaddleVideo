@@ -75,6 +75,12 @@ def get_input_spec(cfg, model_name):
                       dtype='float32',
                       name='feat_input'),
         ]]
+    elif model_name in ['TimeSformer']:
+        input_spec = [[
+            InputSpec(
+                shape=[None, 3, cfg.num_seg, cfg.target_size, cfg.target_size],
+                dtype='float32'),
+        ]]
     return input_spec
 
 

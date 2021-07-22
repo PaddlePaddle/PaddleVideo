@@ -16,13 +16,14 @@ import time
 import os.path as osp
 
 import paddle
+import paddle.distributed as dist
 import paddle.distributed.fleet as fleet
 from ..loader.builder import build_dataloader, build_dataset
 from ..modeling.builder import build_model
 from ..solver import build_lr, build_optimizer
 from ..utils import do_preciseBN
-from paddlevideo.utils import get_logger, coloring
-from paddlevideo.utils import (AverageMeter, build_record, log_batch, log_epoch,
+from paddlevideo.utils import get_logger
+from paddlevideo.utils import (build_record, log_batch, log_epoch,
                                save, load, mkdir)
 
 
@@ -47,6 +48,32 @@ def train_model(cfg,
     logger = get_logger("paddlevideo")
     batch_size = cfg.DATASET.get('batch_size', 8)
     valid_batch_size = cfg.DATASET.get('valid_batch_size', batch_size)
+
+    use_gradient_accumulation = cfg.get('GRADIENT_ACCUMULATION', None)
+    if use_gradient_accumulation and dist.get_world_size() >= 1:
+        global_batch_size = cfg.GRADIENT_ACCUMULATION.get(
+            'global_batch_size', None)
+        num_gpus = dist.get_world_size()
+
+        assert isinstance(
+            global_batch_size, int
+        ), f"global_batch_size must be int, but got {type(global_batch_size)}"
+        assert batch_size < global_batch_size, f"global_batch_size must bigger than batch_size"
+
+        cur_global_batch_size = batch_size * num_gpus  # The number of batches calculated by all GPUs at one time
+        assert global_batch_size % cur_global_batch_size == 0, \
+            f"The global batchsize must be divisible by cur_global_batch_size, but \
+                {global_batch_size} % {cur_global_batch_size} != 0"
+
+        cfg.GRADIENT_ACCUMULATION[
+            "num_iters"] = global_batch_size // cur_global_batch_size
+        # The number of iterations required to reach the global batchsize
+        logger.info(
+            f"Using gradient accumulation training strategy, "
+            f"global_batch_size={global_batch_size}, "
+            f"num_gpus={num_gpus}, "
+            f"num_accumulative_iters={cfg.GRADIENT_ACCUMULATION.num_iters}")
+
     places = paddle.set_device('gpu')
 
     # default num worker: 0, which means no subprocess will be created
@@ -147,15 +174,25 @@ def train_model(cfg,
                 outputs = model(data, mode='train')
 
                 # 4.2 backward
+                if use_gradient_accumulation and i == 0:  # Use gradient accumulation strategy
+                    optimizer.clear_grad()
                 avg_loss = outputs['loss']
                 avg_loss.backward()
+
                 # 4.3 minimize
-                optimizer.step()
-                optimizer.clear_grad()
+                if use_gradient_accumulation: # Use gradient accumulation strategy
+                    if (i + 1) % cfg.GRADIENT_ACCUMULATION.num_iters == 0:
+                        for p in model.parameters():
+                            p.grad.set_value(
+                                p.grad / cfg.GRADIENT_ACCUMULATION.num_iters)
+                        optimizer.step()
+                        optimizer.clear_grad()
+                else: # Common case
+                    optimizer.step()
+                    optimizer.clear_grad()
 
             # log record
-            record_list['lr'].update(optimizer._global_learning_rate(),
-                                     batch_size)
+            record_list['lr'].update(optimizer.get_lr(), batch_size)
             for name, value in outputs.items():
                 record_list[name].update(value, batch_size)
 

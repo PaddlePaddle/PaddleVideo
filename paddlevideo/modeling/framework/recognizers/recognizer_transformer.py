@@ -19,20 +19,17 @@ logger = get_logger("paddlevideo")
 
 
 @RECOGNIZERS.register()
-class Recognizer2D(BaseRecognizer):
-    """2D recognizer model framework."""
+class RecognizerTransformer(BaseRecognizer):
+    """Transformer's recognizer model framework."""
     def forward_net(self, imgs):
-        # NOTE: As the num_segs is an attribute of dataset phase, and didn't pass to build_head phase, should obtain it from imgs(paddle.Tensor) now, then call self.head method.
-        num_segs = imgs.shape[1]  # imgs.shape=[N,T,C,H,W], for most commonly case
-        imgs = paddle.reshape_(imgs, [-1] + list(imgs.shape[2:]))
-
+        # imgs.shape=[N,C,T,H,W], for transformer case
         if self.backbone != None:
             feature = self.backbone(imgs)
         else:
             feature = imgs
 
         if self.head != None:
-            cls_score = self.head(feature, num_segs)
+            cls_score = self.head(feature)
         else:
             cls_score = None
 
@@ -57,8 +54,15 @@ class Recognizer2D(BaseRecognizer):
     def test_step(self, data_batch):
         """Define how the model is going to test, from input to output."""
         # NOTE: (shipping) when testing, the net won't call head.loss, we deal with the test processing in /paddlevideo/metrics
-        imgs = data_batch[0]
-        cls_score = self.forward_net(imgs)
+        clips_list = paddle.split(
+            data_batch[0], num_or_sections=3,
+            axis=2
+        )  # [N, 3, T, H, W], [N, 3, T, H, W], [N, 3, T, H, W]
+        cls_score = [
+            self.forward_net(imgs)
+            for imgs in clips_list
+        ]  # [N, C], [N, C], [N, C]
+        cls_score = paddle.add_n(cls_score)  # [N, C] in [0,1]
         return cls_score
 
     def infer_step(self, data_batch):

@@ -17,6 +17,7 @@ from PIL import Image
 from ..registry import PIPELINES
 import os
 import numpy as np
+import paddle
 
 
 @PIPELINES.register()
@@ -37,12 +38,14 @@ class Sampler(object):
                  seg_len,
                  valid_mode=False,
                  select_left=False,
-                 dense_sample=False):
+                 dense_sample=False,
+                 linspace_sample=False):
         self.num_seg = num_seg
         self.seg_len = seg_len
         self.valid_mode = valid_mode
         self.select_left = select_left
         self.dense_sample = dense_sample
+        self.linspace_sample = linspace_sample
 
     def _get(self, frames_idx, results):
         data_format = results['format']
@@ -72,6 +75,15 @@ class Sampler(object):
                 for i in range(np_frames.shape[0]):
                     imgbuf = np_frames[i]
                     imgs.append(Image.fromarray(imgbuf, mode='RGB'))
+            elif results['backend'] == 'pyav':
+                imgs = []
+                frames = np.array(results['frames'])
+                for idx in frames_idx:
+                    imgbuf = frames[idx]
+                    imgs.append(imgbuf)
+                imgs = np.stack(imgs)  # thwc
+            else:
+                raise NotImplementedError
         else:
             raise NotImplementedError
         results['imgs'] = imgs
@@ -87,9 +99,23 @@ class Sampler(object):
         frames_len = int(results['frames_len'])
         average_dur = int(frames_len / self.num_seg)
         frames_idx = []
+        if self.linspace_sample:
+            # Do uniformly temporal sampling using linspace function
+            offsets = np.linspace(results['start_idx'], results['end_idx'],
+                                  self.num_seg)
+            offsets = np.clip(offsets, 0, frames_len - 1).astype(np.long)
+            if results['format'] == 'video':
+                frames_idx = list(offsets)
+                frames_idx = [x % frames_len for x in frames_idx]
+            elif results['format'] == 'frame':
+                frames_idx = list(offsets + 1)
+            else:
+                raise NotImplementedError
+            return self._get(frames_idx, results)
+
         if not self.select_left:
             if self.dense_sample:  # For ppTSM
-                if not self.valid_mode:  #train
+                if not self.valid_mode:  # train
                     sample_pos = max(1, 1 + frames_len - 64)
                     t_stride = 64 // self.num_seg
                     start_idx = 0 if sample_pos == 1 else np.random.randint(

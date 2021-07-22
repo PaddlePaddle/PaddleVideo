@@ -13,11 +13,25 @@
 # limitations under the License.
 
 import numpy as np
-import pickle
+import av
 import cv2
+import pickle
 import decord as de
-
+import math
+import random
 from ..registry import PIPELINES
+
+
+def get_start_end_idx(video_size, clip_size, clip_idx, num_clips):
+    delta = max(video_size - clip_size, 0)
+    if clip_idx == -1:  # here
+        # Random temporal sampling.
+        start_idx = random.uniform(0, delta)
+    else:  # ignore
+        # Uniformly sample the clip with the given index.
+        start_idx = delta * clip_idx / num_clips
+    end_idx = start_idx + clip_size - 1
+    return start_idx, end_idx
 
 
 @PIPELINES.register()
@@ -27,8 +41,21 @@ class VideoDecoder(object):
     Args:
         filepath: the file path of mp4 file
     """
-    def __init__(self, backend='cv2'):
+    def __init__(self,
+                 backend='cv2',
+                 mode='train',
+                 sampling_rate=32,
+                 num_seg=8,
+                 num_clips=1,
+                 target_fps=30):
+
         self.backend = backend
+        # params below only for TimeSformer
+        self.mode = mode
+        self.sampling_rate = sampling_rate
+        self.num_seg = num_seg
+        self.num_clips = num_clips
+        self.target_fps = target_fps
 
     def __call__(self, results):
         """
@@ -53,11 +80,89 @@ class VideoDecoder(object):
                 sampledFrames.append(img)
             results['frames'] = sampledFrames
             results['frames_len'] = len(sampledFrames)
+
         elif self.backend == 'decord':
             vr = de.VideoReader(file_path)
             frames_len = len(vr)
             results['frames'] = vr
             results['frames_len'] = frames_len
+
+        elif self.backend == 'pyav':  # for TimeSformer
+            if self.mode in ["train", "valid"]:
+                clip_idx = -1
+            elif self.mode in ["test"]:
+                clip_idx = 0
+            else:
+                raise NotImplementedError
+
+            container = av.open(file_path)
+
+            num_clips = 1  # always be 1
+
+            # decode process
+            fps = float(container.streams.video[0].average_rate)
+
+            frames_length = container.streams.video[0].frames
+            duration = container.streams.video[0].duration
+
+            if duration is None:
+                # If failed to fetch the decoding information, decode the entire video.
+                decode_all_video = True
+                video_start_pts, video_end_pts = 0, math.inf
+            else:
+                decode_all_video = False
+                start_idx, end_idx = get_start_end_idx(
+                    frames_length,
+                    self.sampling_rate * self.num_seg / self.target_fps * fps,
+                    clip_idx, num_clips)
+                timebase = duration / frames_length
+                video_start_pts = int(start_idx * timebase)
+                video_end_pts = int(end_idx * timebase)
+
+            frames = None
+            # If video stream was found, fetch video frames from the video.
+            if container.streams.video:
+                margin = 1024
+                seek_offset = max(video_start_pts - margin, 0)
+
+                container.seek(seek_offset,
+                               any_frame=False,
+                               backward=True,
+                               stream=container.streams.video[0])
+                tmp_frames = {}
+                buffer_count = 0
+                max_pts = 0
+                for frame in container.decode(**{"video": 0}):
+                    max_pts = max(max_pts, frame.pts)
+                    if frame.pts < video_start_pts:
+                        continue
+                    if frame.pts <= video_end_pts:
+                        tmp_frames[frame.pts] = frame
+                    else:
+                        buffer_count += 1
+                        tmp_frames[frame.pts] = frame
+                        if buffer_count >= 0:
+                            break
+                video_frames = [tmp_frames[pts] for pts in sorted(tmp_frames)]
+
+                container.close()
+
+                frames = [frame.to_rgb().to_ndarray() for frame in video_frames]
+                clip_sz = self.sampling_rate * self.num_seg / self.target_fps * fps
+
+                start_idx, end_idx = get_start_end_idx(
+                    len(frames),  # frame_len
+                    clip_sz,
+                    clip_idx if decode_all_video else 0,  # If decode all video, -1 in train and valid, 0 in test; 
+                    # else, always 0 in train, valid and test, as we has selected clip size frames when decode.
+                    1
+                )
+                results['frames'] = frames
+                results['frames_len'] = len(frames)
+                results['start_idx'] = start_idx
+                results['end_idx'] = end_idx
+        else:
+            raise NotImplementedError
         return results
 
 

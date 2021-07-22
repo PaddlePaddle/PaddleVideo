@@ -14,5 +14,6 @@ from .base import BaseRecognizer
 from .recognizer1d import Recognizer1D
 from .recognizer2d import Recognizer2D
 from .recognizer3d import Recognizer3D
+from .recognizer_transformer import RecognizerTransformer
 
-__all__ = ['BaseRecognizer', 'Recognizer1D', 'Recognizer2D', 'Recognizer3D']
+__all__ = ['BaseRecognizer', 'Recognizer1D', 'Recognizer2D', 'Recognizer3D', 'RecognizerTransformer']

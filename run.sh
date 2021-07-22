@@ -37,24 +37,27 @@ python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=lo
 # run pp-tsn training
 # python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=log_pptsn  main.py  --validate -c configs/recognition/pptsn/pptsn_k400_frames.yaml
 
+# run timesformer training
+# python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=log_timesformer  main.py  --validate -c configs/recognition/timesformer/timesformer_k400_videos.yaml
+
 # run tsn dali training
 #python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3" --log_dir=log_tsn main.py --train_dali -c configs/recognition/tsn/tsn_dali.yaml
 
 
 # test.sh
 # just use `example` as example, please replace to real name.
-#python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_test main.py --test -c configs/example.yaml -w "output/example/example_best.pdparams"
+# python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_test main.py --test -c configs/example.yaml -w "output/example/example_best.pdparams"
 
-#NOTE: run bmn test, only support single card, bs=1
-#python3.7 main.py --test -c configs/localization/bmn.yaml -w output/BMN/BMN_epoch_00010.pdparams -o DATASET.batch_size=1
+# NOTE: run bmn test, only support single card, bs=1
+# python3.7 main.py --test -c configs/localization/bmn.yaml -w output/BMN/BMN_epoch_00010.pdparams -o DATASET.batch_size=1
 
 # export_models script
 # just use `example` as example, please replace to real name.
-#python3.7 tools/export_model.py -c configs/example.yaml -p output/example/example_best.pdparams -o ./inference
+# python3.7 tools/export_model.py -c configs/example.yaml -p output/example/example_best.pdparams -o ./inference
 
 # predict script
 # just use `example` as example, please replace to real name.
-#python3.7 tools/predict.py -v example.avi --model_file "./inference/example.pdmodel" --params_file "./inference/example.pdiparams" --enable_benchmark=False --model="example" --num_seg=8
+# python3.7 tools/predict.py -v example.avi --model_file "./inference/example.pdmodel" --params_file "./inference/example.pdiparams" --enable_benchmark=False --model="example" --num_seg=8
 
 end_time=$(date +%s)
 cost_time=$[ $end_time-$start_time ]
