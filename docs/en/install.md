@@ -5,6 +5,8 @@
 ---
 
 - [Introduction](#Introduction)
+- [Install PaddlePaddle](#Install PaddlePaddle)
+- [Install PaddleVideo](#Install PaddleVideo)
 
 ## Introduction
 
