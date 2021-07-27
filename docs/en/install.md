@@ -10,7 +10,7 @@
 
 ## Introduction
 
-This document introduces how to install PaddleVideo and its requirements.
+This document introduces how to install PaddlePaddle、PaddleVideo and its requirements.
 
 ## Install PaddlePaddle
 
@@ -59,8 +59,6 @@ git clone https://github.com/PaddlePaddle/PaddleVideo.git
 python3.7 -m pip install --upgrade pip
 pip3.7 install --upgrade -r requirements.txt
 ```
-
----
 
 **Install python package**
 
