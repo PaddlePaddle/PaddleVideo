@@ -123,6 +123,13 @@ PRECISEBN:
   preciseBN_interval: 10
   num_iters_preciseBN: 200  #default
 
+
+INFERENCE:
+    name: 'SlowFast_Inference_helper'
+    num_frames: 32
+    alpha: 8
+    target_size: 256
+
 model_name: SlowFast
 save_interval: 10
 val_interval: 10

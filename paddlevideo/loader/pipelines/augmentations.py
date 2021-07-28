@@ -355,7 +355,8 @@ class Image2Array(object):
             np_imgs: Numpy array.
         """
         imgs = results['imgs']
-        if results['backend'] == 'pyav':  # [T,H,W,C] in [0, 1]
+        if 'backend' in results and results[
+                'backend'] == 'pyav':  # [T,H,W,C] in [0, 1]
             if self.transpose:
                 if self.data_format == 'tchw':
                     t_imgs = imgs.transpose((0, 3, 1, 2))  # tchw
@@ -404,7 +405,7 @@ class Normalization(object):
         norm_imgs = imgs / 255.0
         norm_imgs -= self.mean
         norm_imgs /= self.std
-        if results['backend'] == 'pyav':
+        if 'backend' in results and results['backend'] == 'pyav':
             norm_imgs = paddle.to_tensor(norm_imgs, dtype=paddle.float32)
         results['imgs'] = norm_imgs
         return results
@@ -450,7 +451,7 @@ class JitterScale(object):
         assert (len(imgs) >= 1), \
             "len(imgs):{} should be larger than 1".format(len(imgs))
 
-        if results['backend'] == 'pyav':
+        if 'backend' in results and results['backend'] == 'pyav':
             height, width = imgs.shape[2:]
         else:
             width, height = imgs[0].size
@@ -465,7 +466,7 @@ class JitterScale(object):
         else:
             new_width = int(math.floor((float(width) / height) * size))
 
-        if results['backend'] == 'pyav':
+        if 'backend' in results and results['backend'] == 'pyav':
             frames_resize = F.interpolate(imgs,
                                           size=(new_height, new_width),
                                           mode="bilinear",
@@ -688,7 +689,8 @@ class UniformCrop:
             self.target_size = (target_size, target_size)
         else:
             raise TypeError(
-                f'target_size must be int or tuple[int], but got {type(target_size)}')
+                f'target_size must be int or tuple[int], but got {type(target_size)}'
+            )
 
     def __call__(self, results):
 
@@ -699,17 +701,11 @@ class UniformCrop:
             img_w, img_h = imgs[0].size
         crop_w, crop_h = self.target_size
         if img_h > img_w:
-            offsets = [
-                (0, 0),
-                (0, int(math.ceil((img_h - crop_h) / 2))),
-                (0, img_h - crop_h)
-            ]
+            offsets = [(0, 0), (0, int(math.ceil((img_h - crop_h) / 2))),
+                       (0, img_h - crop_h)]
         else:
-            offsets = [
-                (0, 0),
-                (int(math.ceil((img_w - crop_w) / 2)), 0),
-                (img_w - crop_w, 0)
-            ]
+            offsets = [(0, 0), (int(math.ceil((img_w - crop_w) / 2)), 0),
+                       (img_w - crop_w, 0)]
         img_crops = []
         if results['backend'] == 'pyav':  # [c,t,h,w]
             for x_offset, y_offset in offsets:
