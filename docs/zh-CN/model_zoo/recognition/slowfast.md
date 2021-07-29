@@ -9,6 +9,7 @@
 - [数据准备](#数据准备)
 - [模型训练](#模型训练)
 - [模型测试](#模型测试)
+- [模型推理](#模型推理)
 - [参考论文](#参考论文)
 
 
@@ -36,7 +37,7 @@ SlowFast模型的训练数据采用Kinetics400数据集，数据下载及准备�
 ```bash
 export CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7
 
-python -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_slowfast  main.py --validate -c configs/recognition/slowfast/slowfast.yaml 
+python -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_slowfast  main.py --validate -c configs/recognition/slowfast/slowfast.yaml
 ```
 
 - 从头开始训练，使用上述启动命令行或者脚本程序即可启动训练，不需要用到预训练模型。
@@ -97,7 +98,43 @@ python -B main.py --test -c  configs/recognition/slowfast/slowfast.yaml -w outpu
 - 由于Kinetics400数据集部分源文件已缺失，无法下载，我们使用的数据集比官方数据少~5%，因此精度相比于论文公布的结果有一定损失。相同数据下，精度已与原实现对齐。
 
 
+## 模型推理
+
+### 导出inference模型
+
+```bash
+python3.7 tools/export_model.py -c configs/recognition/slowfast/slowfast.yaml \
+                                -p data/SlowFast.pdparams \
+                                -o inference/SlowFast
+```
+
+上述命令将生成预测所需的模型结构文件`SlowFast.pdmodel`和模型权重文件`SlowFast.pdiparams`。
+
+- 各参数含义可参考[模型推理方法](https://github.com/PaddlePaddle/PaddleVideo/blob/release/2.0/docs/zh-CN/start.md#2-%E6%A8%A1%E5%9E%8B%E6%8E%A8%E7%90%86)
+
+### 使用预测引擎推理
+
+```bash
+python3.7 tools/predict.py --input_file data/example.avi \
+                           --config configs/recognition/slowfast/slowfast.yaml \
+                           --model_file inference/SlowFast/SlowFast.pdmodel \
+                           --params_file inference/SlowFast/SlowFast.pdiparams \
+                           --use_gpu=True \
+                           --use_tensorrt=False
+```
+
+输出示例如下:
+
+```
+Current video file: data/example.avi
+        top-1 class: 5
+        top-1 score: 1.0
+```
+
+可以看到，使用在Kinetics-400上训练好的SlowFast模型对`data/example.avi`进行预测，输出的top1类别id为`5`，置信度为1.0。通过查阅类别id与名称对应表`data/k400/Kinetics-400_label_list.txt`，可知预测类别名称为`archery`。
+
+
 ## 参考论文
 
-- [SlowFast Networks for Video Recognition](https://arxiv.org/abs/1812.03982), Feichtenhofer C, Fan H, Malik J, et al. 
-- [A Multigrid Method for Efficiently Training Video Models](https://arxiv.org/abs/1912.00998), Chao-Yuan Wu, Ross Girshick, et al. 
+- [SlowFast Networks for Video Recognition](https://arxiv.org/abs/1812.03982), Feichtenhofer C, Fan H, Malik J, et al.
+- [A Multigrid Method for Efficiently Training Video Models](https://arxiv.org/abs/1912.00998), Chao-Yuan Wu, Ross Girshick, et al.

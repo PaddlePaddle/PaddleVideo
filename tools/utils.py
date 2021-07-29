@@ -24,7 +24,7 @@ __dir__ = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.abspath(os.path.join(__dir__, '../')))
 
 from paddlevideo.loader.pipelines import VideoDecoder, Sampler, Scale, \
-    CenterCrop, TenCrop, Normalization, Image2Array, UniformCrop, JitterScale
+    CenterCrop, TenCrop, Normalization, Image2Array, UniformCrop, JitterScale, DecodeSampler, MultiCrop, PackOutput
 from paddlevideo.utils import build, Registry
 from paddlevideo.metrics.bmn_metric import boundary_choose, soft_nms
 
@@ -292,6 +292,66 @@ class TimeSformer_Inference_helper():
         if output.ndim > 1:
             output = output.flatten()
         output = F.softmax(paddle.to_tensor(output)).numpy()
+        classes = np.argpartition(output, -self.top_k)[-self.top_k:]
+        classes = classes[np.argsort(-output[classes])]
+        scores = output[classes]
+        print("Current video file: {0}".format(self.input_file))
+        print("\ttop-1 class: {0}".format(classes[0]))
+        print("\ttop-1 score: {0}".format(scores[0]))
+
+
+@INFERENCE.register()
+class SlowFast_Inference_helper():
+    def __init__(self,
+                 num_frames=32,
+                 sampling_rate=2,
+                 target_size=256,
+                 alpha=8,
+                 top_k=1):
+        self.num_frames = num_frames
+        self.sampling_rate = sampling_rate
+        self.target_size = target_size
+        self.alpha = alpha
+        self.top_k = top_k
+
+    def preprocess(self, input_file):
+        """
+        input_file: str, file path
+        return: list
+        """
+        self.input_file = input_file
+        assert os.path.isfile(input_file) is not None, "{0} not exists".format(
+            input_file)
+        results = {
+            'filename': input_file,
+            'temporal_sample_index': 0,
+            'spatial_sample_index': 0,
+            'temporal_num_clips': 1,
+            'spatial_num_clips': 1
+        }
+        img_mean = [0.45, 0.45, 0.45]
+        img_std = [0.225, 0.225, 0.225]
+        ops = [
+            DecodeSampler(self.num_frames, self.sampling_rate, test_mode=True),
+            JitterScale(self.target_size, self.target_size),
+            MultiCrop(self.target_size),
+            Image2Array(transpose=False),
+            Normalization(img_mean, img_std, tensor_shape=[1, 1, 1, 3]),
+            PackOutput(self.alpha),
+        ]
+        for op in ops:
+            results = op(results)
+
+        res = []
+        for item in results['imgs']:
+            res.append(np.expand_dims(item, axis=0).copy())
+        return res
+
+    def postprocess(self, output):
+        """
+        output: list
+        """
+        output = output[0].flatten()
         classes = np.argpartition(output, -self.top_k)[-self.top_k:]
         classes = classes[np.argsort(-output[classes])]
         scores = output[classes]
