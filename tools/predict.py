@@ -128,8 +128,8 @@ def main():
                 np.random.rand(args.batch_size, 8, 3, 224,
                                224).astype(np.float32))
             start_time = time.time()
-            for i in range(len(input_tensor_list)):
-                input_tensor_list[i].copy_from_cpu(inputs[i])
+            for j in range(len(input_tensor_list)):
+                input_tensor_list[j].copy_from_cpu(inputs[j])
 
             predictor.run()
 
