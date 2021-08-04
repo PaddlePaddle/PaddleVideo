@@ -134,6 +134,7 @@ INFERENCE:
     target_size: 224
     optimize_convbn: True
 
+OPTIMIZE_CONV_BN: True
 
 model_name: "ppTSN"
 log_interval: 20 #Optional, the interal of logger, default:10
