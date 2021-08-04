@@ -132,7 +132,6 @@ INFERENCE:
     name: 'ppTSN_Inference_helper'
     num_seg: 25
     target_size: 224
-    optimize_convbn: True
 
 OPTIMIZE_CONV_BN: True
 
