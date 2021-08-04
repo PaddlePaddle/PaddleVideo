@@ -18,7 +18,7 @@ We have improved the [TSN model](./tsn.md) and obtained a more accurate 2D pract
 
 | Version | Top1 |
 | :------ | :----: |
-| Ours (distill) | TODO |
+| Ours (distill) | 74.99 |
 | Ours | **73.68** |
 | [mmaction2](https://github.com/open-mmlab/mmaction2/tree/master/configs/recognition/tsn#kinetics-400) | 71.11 |
 
@@ -99,8 +99,8 @@ UCF101 data download and preparation please refer to [UCF-101 data preparation](
 
 	| backbone | Sampling method | distill | num_seg | target_size | Top-1 |       checkpoints       |
 	| :------: | :-------------: | :-----: | :-----: | :---------: | :---- | :---------------------: |
-	| ResNet50 |     TenCrop     |  False  |    3    |     224     | 73.68 | [ppTSN_k400.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ppTSN_k400.pdparams) |
-	| ResNet50 |     TenCrop     |  True   |    3    |     224     | TODO  |          TODO           |
+	| ResNet50 |     TenCrop     |  False  |    25    |     224     | 73.68 | [ppTSN_k400.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ppTSN_k400.pdparams) |
+	| ResNet50 |     TenCrop     |  True   |    25    |     224     | 74.99  |          TODO           |
 
 - The PP-TSN video sampling strategy is TenCrop sampling: in time sequence, the input video is evenly divided into num_seg segments, and the middle position of each segment is sampled 1 frame; spatially, from the upper left corner, upper right corner, center point, lower left corner, and lower right corner Each of the 5 sub-regions sampled an area of 224x224, and the horizontal flip was added to obtain a total of 10 sampling results. A total of 1 clip is sampled for 1 video.
 
@@ -135,7 +135,7 @@ The output example is as follows:
 ```bash
 Current video file: data/example.avi
         top-1 class: 5
-        top-1 score: 0.9998553991317749
+        top-1 score: 0.998979389667511
 ```
 
 It can be seen that using the PP-TSN model trained on Kinetics-400 to predict `data/example.avi`, the output top1 category id is `5`, and the confidence is 0.99. By consulting the category id and name correspondence table `data/k400/Kinetics-400_label_list.txt`, it can be known that the predicted category name is `archery`.

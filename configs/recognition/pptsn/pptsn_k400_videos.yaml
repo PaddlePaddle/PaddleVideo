@@ -18,6 +18,7 @@ DATASET: #DATASET field
     valid_batch_size: 32
     test_batch_size: 1
     num_workers: 4 #Mandatory, XXX the number of subprocess on each GPU.
+    train:
         format: "VideoDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
         file_path: "data/k400/train.list" #Mandatory, train data index file path
     valid:
@@ -89,12 +90,10 @@ PIPELINE: #PIPELINE field
             num_seg: 25
             seg_len: 1
             valid_mode: True
-            select_left: True
         transform:
             - Scale:
                 short_size: 256
                 fixed_ratio: False
-                do_round: True
                 backend: 'cv2'
             - TenCrop:
                 target_size: 224
@@ -133,6 +132,7 @@ INFERENCE:
     name: 'ppTSN_Inference_helper'
     num_seg: 25
     target_size: 224
+    optimize_convbn: True
 
 
 model_name: "ppTSN"
