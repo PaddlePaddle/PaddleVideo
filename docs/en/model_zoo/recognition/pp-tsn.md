@@ -20,7 +20,7 @@ We have improved the [TSN model](./tsn.md) and obtained a more accurate 2D pract
 | :------ | :----: |
 | Ours (distill) | TODO |
 | Ours | **73.68** |
-| [mmaction2](https://github.com/open-mmlab/mmaction2/tree/master/configs/recognition/tsn#kinetics-400) | 70.42 |
+| [mmaction2](https://github.com/open-mmlab/mmaction2/tree/master/configs/recognition/tsn#kinetics-400) | 71.11 |
 
 
 ## Data
@@ -102,7 +102,7 @@ UCF101 data download and preparation please refer to [UCF-101 data preparation](
 	| ResNet50 |     TenCrop     |  False  |    3    |     224     | 73.68 | [ppTSN_k400.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ppTSN_k400.pdparams) |
 	| ResNet50 |     TenCrop     |  True   |    3    |     224     | TODO  |          TODO           |
 
-- PP-TSN video sampling strategy is Uniform sampling: in terms of timing, the input video is evenly divided into `num_seg` sections, and the middle position of each section is sampled 1 frame; spatially, the center position is sampled in an area of ​​224x224. A total of 1 clip is sampled for 1 video.
+- The PP-TSN video sampling strategy is TenCrop sampling: in time sequence, the input video is evenly divided into num_seg segments, and the middle position of each segment is sampled 1 frame; spatially, from the upper left corner, upper right corner, center point, lower left corner, and lower right corner Each of the 5 sub-regions sampled an area of 224x224, and the horizontal flip was added to obtain a total of 10 sampling results. A total of 1 clip is sampled for 1 video.
 
 - Distill is `True`, which means that the pre-trained model obtained by distillation is used. For the specific distillation scheme, please refer to [ppTSM Distillation Scheme]().
 

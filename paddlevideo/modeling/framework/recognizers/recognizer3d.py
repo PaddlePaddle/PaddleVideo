@@ -58,3 +58,12 @@ class Recognizer3D(BaseRecognizer):
         cls_score = self.forward_net(imgs)
 
         return cls_score
+
+    def infer_step(self, data_batch):
+        """Infer step.
+        """
+        imgs = data_batch[0:2]
+        # call forward
+        cls_score = self.forward_net(imgs)
+
+        return cls_score

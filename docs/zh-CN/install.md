@@ -4,12 +4,16 @@
 
 ---
 
-## 一、简介
+- [简介](#简介)
+- [安装PaddlePaddle](#安装PaddlePaddle)
+- [安装PaddleVideo](#安装PaddleVideo)
 
-本章将介绍如何安装PaddleVideo及其依赖项。
+## 简介
+
+本章将介绍如何安装PaddlePaddle、PaddleVideo及其依赖项。
 
 
-## 二、安装PaddlePaddle
+## 安装PaddlePaddle
 
 运行PaddleVideo需要`PaddlePaddle 2.0`或更高版本。请参照[安装文档](http://www.paddlepaddle.org.cn/install/quick)中的说明进行操作。
 PaddleVideo只支持python3.7及以上的运行环境，依赖项请安装python3.7及以上的安装包
@@ -48,7 +52,7 @@ python3 -c "import paddle; print(paddle.__version__)"
 - nccl >= 2.1.2
 
 
-## 三、安装PaddleVideo
+## 安装PaddleVideo
 
 **克隆PaddleVideo模型库：**
 

@@ -25,7 +25,7 @@ For details, please refer to the ECCV 2016 paper [Temporal Segment Networks: Tow
 
 ## Data
 
-PaddleVide provides training and testing scripts on the Kinetics-400 dataset. Kinetics-400 data download and preparation please refer to [Kinetics-400 data preparation](../../dataset/K400.md)
+PaddleVide provides training and testing scripts on the Kinetics-400 dataset. Kinetics-400 data download and preparation please refer to [Kinetics-400 data preparation](../../dataset/k400.md)
 
 ## Train
 

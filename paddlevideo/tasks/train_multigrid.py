@@ -308,7 +308,7 @@ def train_model_multigrid(cfg, world_size=1, validate=True):
         # 5. Validation
         if is_eval_epoch(cfg, epoch, total_epochs, multigrid.schedule):
             logger.info(f"eval in {epoch+1} ...")
-            with paddle.fluid.dygraph.no_grad():
+            with paddle.no_grad():
                 best, save_best_flag = evaluate(best)
             # save best
             if save_best_flag:

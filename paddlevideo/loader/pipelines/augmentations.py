@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import paddle
+import paddle.nn.functional as F
 import random
 import numpy as np
 import math
@@ -67,13 +69,17 @@ class Scale(object):
                 if self.fixed_ratio:
                     oh = int(self.short_size * 4.0 / 3.0)
                 else:
-                    oh = int(round(h * self.short_size / w)) if self.do_round else int(h * self.short_size / w)
+                    oh = int(round(h * self.short_size /
+                                   w)) if self.do_round else int(
+                                       h * self.short_size / w)
             else:
                 oh = self.short_size
                 if self.fixed_ratio:
                     ow = int(self.short_size * 4.0 / 3.0)
                 else:
-                    ow = int(round(w * self.short_size / h)) if self.do_round else int(w * self.short_size / h)
+                    ow = int(round(w * self.short_size /
+                                   h)) if self.do_round else int(
+                                       w * self.short_size / h)
             if self.backend == 'pillow':
                 resized_imgs.append(img.resize((ow, oh), Image.BILINEAR))
             else:
@@ -105,7 +111,10 @@ class RandomCrop(object):
             crop_imgs: List where each item is a PIL.Image after random crop.
         """
         imgs = results['imgs']
-        w, h = imgs[0].size
+        if results['backend'] == 'pyav':  # [c,t,h,w]
+            h, w = imgs.shape[2:]
+        else:
+            w, h = imgs[0].size
         th, tw = self.target_size, self.target_size
 
         assert (w >= self.target_size) and (h >= self.target_size), \
@@ -113,14 +122,18 @@ class RandomCrop(object):
                 w, h, self.target_size)
 
         crop_images = []
-        x1 = random.randint(0, w - tw)
-        y1 = random.randint(0, h - th)
-
-        for img in imgs:
-            if w == tw and h == th:
-                crop_images.append(img)
-            else:
-                crop_images.append(img.crop((x1, y1, x1 + tw, y1 + th)))
+        if results['backend'] == 'pyav':
+            x1 = np.random.randint(0, w - tw)
+            y1 = np.random.randint(0, h - th)
+            crop_images = imgs[:, :, y1:y1 + th, x1:x1 + tw]  # [C, T, th, tw]
+        else:
+            x1 = random.randint(0, w - tw)
+            y1 = random.randint(0, h - th)
+            for img in imgs:
+                if w == tw and h == th:
+                    crop_images.append(img)
+                else:
+                    crop_images.append(img.crop((x1, y1, x1 + tw, y1 + th)))
         results['imgs'] = crop_images
         return results
 
@@ -307,9 +320,12 @@ class RandomFlip(object):
         imgs = results['imgs']
         v = random.random()
         if v < self.p:
-            results['imgs'] = [
-                img.transpose(Image.FLIP_LEFT_RIGHT) for img in imgs
-            ]
+            if results['backend'] == 'pyav':  # [c,t,h,w]
+                results['imgs'] = paddle.flip(imgs, axis=[3])
+            else:
+                results['imgs'] = [
+                    img.transpose(Image.FLIP_LEFT_RIGHT) for img in imgs
+                ]
         else:
             results['imgs'] = imgs
         return results
@@ -322,8 +338,12 @@ class Image2Array(object):
     Args:
         transpose: whether to transpose or not, default True, False for slowfast.
     """
-    def __init__(self, transpose=True):
+    def __init__(self, transpose=True, data_format='tchw'):
+        assert data_format in [
+            'tchw', 'cthw'
+        ], f"Target format must in ['tchw', 'cthw'], but got {data_format}"
         self.transpose = transpose
+        self.data_format = data_format
 
     def __call__(self, results):
         """
@@ -335,10 +355,22 @@ class Image2Array(object):
             np_imgs: Numpy array.
         """
         imgs = results['imgs']
-        np_imgs = (np.stack(imgs)).astype('float32')
-        if self.transpose:
-            np_imgs = np_imgs.transpose(0, 3, 1, 2)  # nchw
-        results['imgs'] = np_imgs
+        if 'backend' in results and results[
+                'backend'] == 'pyav':  # [T,H,W,C] in [0, 1]
+            if self.transpose:
+                if self.data_format == 'tchw':
+                    t_imgs = imgs.transpose((0, 3, 1, 2))  # tchw
+                else:
+                    t_imgs = imgs.transpose((3, 0, 1, 2))  # cthw
+            results['imgs'] = t_imgs
+        else:
+            np_imgs = (np.stack(imgs)).astype('float32')
+            if self.transpose:
+                if self.data_format == 'tchw':
+                    np_imgs = np_imgs.transpose(0, 3, 1, 2)  # tchw
+                else:
+                    np_imgs = np_imgs.transpose(3, 0, 1, 2)  # cthw
+            results['imgs'] = np_imgs
         return results
 
 
@@ -370,9 +402,11 @@ class Normalization(object):
             np_imgs: Numpy array after normalization.
         """
         imgs = results['imgs']
-        norm_imgs = imgs / 255.
+        norm_imgs = imgs / 255.0
         norm_imgs -= self.mean
         norm_imgs /= self.std
+        if 'backend' in results and results['backend'] == 'pyav':
+            norm_imgs = paddle.to_tensor(norm_imgs, dtype=paddle.float32)
         results['imgs'] = norm_imgs
         return results
 
@@ -416,7 +450,11 @@ class JitterScale(object):
         size = int(round(np.random.uniform(self.min_size, self.max_size)))
         assert (len(imgs) >= 1), \
             "len(imgs):{} should be larger than 1".format(len(imgs))
-        width, height = imgs[0].size
+
+        if 'backend' in results and results['backend'] == 'pyav':
+            height, width = imgs.shape[2:]
+        else:
+            width, height = imgs[0].size
         if (width <= height and width == size) or (height <= width
                                                    and height == size):
             return results
@@ -428,11 +466,17 @@ class JitterScale(object):
         else:
             new_width = int(math.floor((float(width) / height) * size))
 
-        frames_resize = []
-        for j in range(len(imgs)):
-            img = imgs[j]
-            scale_img = img.resize((new_width, new_height), Image.BILINEAR)
-            frames_resize.append(scale_img)
+        if 'backend' in results and results['backend'] == 'pyav':
+            frames_resize = F.interpolate(imgs,
+                                          size=(new_height, new_width),
+                                          mode="bilinear",
+                                          align_corners=False)  # [c,t,h,w]
+        else:
+            frames_resize = []
+            for j in range(len(imgs)):
+                img = imgs[j]
+                scale_img = img.resize((new_width, new_height), Image.BILINEAR)
+                frames_resize.append(scale_img)
 
         results['imgs'] = frames_resize
         return results
@@ -601,7 +645,6 @@ class TenCrop:
         self.target_size = (target_size, target_size)
 
     def __call__(self, results):
-
         imgs = results['imgs']
         img_w, img_h = imgs[0].size
         crop_w, crop_h = self.target_size
@@ -617,8 +660,9 @@ class TenCrop:
         img_crops = list()
         for x_offset, y_offset in offsets:
             crop = [
-                img.crop((x_offset, y_offset, x_offset + crop_w,
-                         y_offset + crop_h)) for img in imgs
+                img.crop(
+                    (x_offset, y_offset, x_offset + crop_w, y_offset + crop_h))
+                for img in imgs
             ]
             crop_fliped = [
                 timg.transpose(Image.FLIP_LEFT_RIGHT) for timg in crop
@@ -626,5 +670,56 @@ class TenCrop:
             img_crops.extend(crop)
             img_crops.extend(crop_fliped)
 
+        results['imgs'] = img_crops
+        return results
+
+
+@PIPELINES.register()
+class UniformCrop:
+    """
+    Perform uniform spatial sampling on the images,
+    select the two ends of the long side and the middle position (left middle right or top middle bottom) 3 regions.
+    Args:
+        target_size(int | tuple[int]): (w, h) of target size for crop.
+    """
+    def __init__(self, target_size):
+        if isinstance(target_size, tuple):
+            self.target_size = target_size
+        elif isinstance(target_size, int):
+            self.target_size = (target_size, target_size)
+        else:
+            raise TypeError(
+                f'target_size must be int or tuple[int], but got {type(target_size)}'
+            )
+
+    def __call__(self, results):
+
+        imgs = results['imgs']
+        if results['backend'] == 'pyav':  # [c,t,h,w]
+            img_h, img_w = imgs.shape[2:]
+        else:
+            img_w, img_h = imgs[0].size
+        crop_w, crop_h = self.target_size
+        if img_h > img_w:
+            offsets = [(0, 0), (0, int(math.ceil((img_h - crop_h) / 2))),
+                       (0, img_h - crop_h)]
+        else:
+            offsets = [(0, 0), (int(math.ceil((img_w - crop_w) / 2)), 0),
+                       (img_w - crop_w, 0)]
+        img_crops = []
+        if results['backend'] == 'pyav':  # [c,t,h,w]
+            for x_offset, y_offset in offsets:
+                crop = imgs[:, :, y_offset:y_offset + crop_h,
+                            x_offset:x_offset + crop_w]
+                img_crops.append(crop)
+            img_crops = paddle.concat(img_crops, axis=1)
+        else:
+            for x_offset, y_offset in offsets:
+                crop = [
+                    img.crop((x_offset, y_offset, x_offset + crop_w,
+                              y_offset + crop_h)) for img in imgs
+                ]
+                img_crops.extend(crop)
+                # [I1_left, ..., ITleft, ..., I1right, ..., ITright]
         results['imgs'] = img_crops
         return results

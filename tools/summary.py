@@ -20,6 +20,7 @@ import os.path as osp
 import paddle
 import paddle.nn.functional as F
 from paddle.jit import to_static
+import paddleslim
 
 __dir__ = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.abspath(os.path.join(__dir__, '../')))
@@ -54,7 +55,8 @@ def _trim(cfg, args):
     cfg = cfg.MODEL
     cfg.backbone.pretrained = ""
 
-    cfg.backbone.num_seg = args.num_seg
+    if 'num_seg' in cfg.backbone:
+        cfg.backbone.num_seg = args.num_seg
     return cfg, model_name
 
 
@@ -67,12 +69,11 @@ def main():
     img_size = args.img_size
     num_seg = args.num_seg
     #NOTE: only support tsm now, will refine soon
-    params_info = paddle.summary(model, (1, num_seg, 3, img_size, img_size))
+    params_info = paddle.summary(model, (1, 1, num_seg, 3, img_size, img_size))
     print(params_info)
 
     if args.FLOPs:
-        flops_info = paddle.flops(model, [1, num_seg, 3, img_size, img_size],
-                                  print_detail=True)
+        flops_info = paddleslim.analysis.flops(model, [1, 1, num_seg, 3, img_size, img_size])
         print(flops_info)
 
 

@@ -75,6 +75,26 @@ def get_input_spec(cfg, model_name):
                       dtype='float32',
                       name='feat_input'),
         ]]
+    elif model_name in ['TimeSformer']:
+        input_spec = [[
+            InputSpec(
+                shape=[None, 3, cfg.num_seg, cfg.target_size, cfg.target_size],
+                dtype='float32'),
+        ]]
+    elif model_name in ['SlowFast']:
+        input_spec = [[
+            InputSpec(shape=[
+                None, 3, cfg.num_frames // cfg.alpha, cfg.target_size,
+                cfg.target_size
+            ],
+                      dtype='float32',
+                      name='slow_input'),
+            InputSpec(shape=[
+                None, 3, cfg.num_frames, cfg.target_size, cfg.target_size
+            ],
+                      dtype='float32',
+                      name='fast_input'),
+        ]]
     return input_spec
 
 
