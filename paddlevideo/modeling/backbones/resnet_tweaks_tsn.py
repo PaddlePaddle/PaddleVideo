@@ -369,4 +369,4 @@ class ResNetTweaksTSN(nn.Layer):
 
     def optimize_convbn(self):
         self.apply(self.merge_fn)
-        print("======= Merging Conv and BN to speed up forward-pass =======")
+        print("======= Merging Conv and BN to accelerate forward pass =======")
