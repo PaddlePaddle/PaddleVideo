@@ -113,9 +113,11 @@ def main():
     print(f"Loading params from ({args.pretrained_params})...")
     params = paddle.load(args.pretrained_params)
     model.set_dict(params)
-    if cfg.INFERENCE.get('optimize_convbn', False) and hasattr(
+
+    if cfg.INFERENCE.get('OPTIMIZE_CONV_BN', False) and hasattr(
             model.backbone, 'optimize_convbn'):
         model.backbone.optimize_convbn()
+
     model.eval()
 
     input_spec = get_input_spec(cfg.INFERENCE, model_name)
