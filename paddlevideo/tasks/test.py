@@ -58,7 +58,7 @@ def test_model(cfg, weights, parallel=True):
 
     state_dicts = load(weights)
     model.set_state_dict(state_dicts)
-    
+
     # add params to metrics
     cfg.METRIC.data_size = len(dataset)
     cfg.METRIC.batch_size = batch_size
