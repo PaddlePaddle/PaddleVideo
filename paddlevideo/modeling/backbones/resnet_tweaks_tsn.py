@@ -77,37 +77,8 @@ class ConvBNLayer(nn.Layer):
         if self.is_tweaks_mode:
             inputs = self._pool2d_avg(inputs)
         y = self._conv(inputs)
-        if hasattr(self, '_batch_norm'):
-            y = self._batch_norm(y)
+        y = self._batch_norm(y)
         return y
-
-    def _fuse(self, conv, bn):
-        fused = paddle.nn.Conv2D(conv._in_channels,
-                                 conv._out_channels,
-                                 kernel_size=conv._kernel_size,
-                                 stride=conv._stride,
-                                 padding=conv._padding)
-
-        # setting weights
-        w_conv = conv.weight.clone().reshape_([conv._out_channels, -1])
-        w_bn = paddle.diag(
-            bn.weight.divide(paddle.sqrt(bn._epsilon + bn._variance)))
-        fused.weight.set_value(
-            paddle.mm(w_bn, w_conv).reshape_(fused.weight.shape))
-
-        # setting bias
-        if conv.bias is not None:
-            b_conv = conv.bias
-        else:
-            b_conv = paddle.zeros([conv.weight.shape[0]])
-
-        b_bn = bn.bias - (bn.weight * bn._mean).divide(
-            paddle.sqrt(bn._variance + bn._epsilon))
-        fused.bias.set_value(b_conv + b_bn)
-        if bn._act is None:
-            return fused
-        else:
-            return paddle.nn.Sequential(fused, paddle.nn.ReLU())
 
 
 class BottleneckBlock(nn.Layer):
@@ -355,18 +326,3 @@ class ResNetTweaksTSN(nn.Layer):
         for block in self.block_list:
             y = block(y)
         return y
-
-    def merge_fn(self, m):
-        """
-        This function will be called on all sub-modules.
-        If the sub-module contains _fuse operation,
-        then the _fuse function will be called to merge the
-        Conv and BN layers in the module
-        """
-        if hasattr(m, '_fuse'):
-            m._conv = m._fuse(m._conv, m._batch_norm)
-            delattr(m, '_batch_norm')
-
-    def optimize_convbn(self):
-        self.apply(self.merge_fn)
-        print("======= Merging Conv and BN to accelerate forward pass =======")
