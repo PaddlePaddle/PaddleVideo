@@ -59,17 +59,6 @@ def test_model(cfg, weights, parallel=True):
     state_dicts = load(weights)
     model.set_state_dict(state_dicts)
     
-    # merge adjacent Conv and BN layers to 
-    # slightly accelerate the forward pass of the model
-    if cfg.get('OPTIMIZE_CONV_BN', False):
-        if isinstance(model, paddle.DataParallel):
-            model._layers.backbone.optimize_convbn()
-        elif hasattr(model, 'backbone'):
-            model.backbone.optimize_convbn()
-        else:
-            raise NotImplementedError("Current model's \
-                backbone do not have '.optimize_convbn' method")
-
     # add params to metrics
     cfg.METRIC.data_size = len(dataset)
     cfg.METRIC.batch_size = batch_size
