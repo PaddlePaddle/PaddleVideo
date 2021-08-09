@@ -100,7 +100,7 @@ class Sampler(object):
         average_dur = int(frames_len / self.num_seg)
         frames_idx = []
         if self.linspace_sample:
-            if 'start_idx' in results and 'end_idx' in results['end_idx']:
+            if 'start_idx' in results and 'end_idx' in results:
                 offsets = np.linspace(results['start_idx'], results['end_idx'], self.num_seg)
             else:
                 offsets = np.linspace(0, frames_len - 1, self.num_seg)
