@@ -90,6 +90,7 @@ PIPELINE: #PIPELINE field
             num_seg: 25
             seg_len: 1
             valid_mode: True
+            linspace_sample: True
         transform:
             - Scale:
                 short_size: 256
