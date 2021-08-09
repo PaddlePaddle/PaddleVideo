@@ -69,8 +69,8 @@ When the test configuration uses the following parameters, the test indicators o
 
 | backbone | Sampling method | Training Strategy | num_seg | target_size | Top-1 |                         checkpoints                          |
 | :------: | :-------------: | :---------------: | :-----: | :---------: | :---: | :----------------------------------------------------------: |
-| ResNet50 |     TenCrop     |       NCHW        |   25    |     224     | 69.81 | [TSN_k400.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/TSN_k400.pdparams) |
-
+| ResNet50 |     TenCrop     |       NCHW        |   3    |     224     | 69.81 | [TSN_k400.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/TSN_k400.pdparams) |
+| ResNet50 |     TenCrop     |       NCHW        |   8    |     224     | 71.70 | [TSN_k400_8.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/TSN_k400.pdparams) |
 ## Inference
 
 ### export inference model
