@@ -100,9 +100,10 @@ class Sampler(object):
         average_dur = int(frames_len / self.num_seg)
         frames_idx = []
         if self.linspace_sample:
-            # Do uniformly temporal sampling using linspace function
-            offsets = np.linspace(results['start_idx'], results['end_idx'],
-                                  self.num_seg)
+            if 'start_idx' in results and 'end_idx' in results['end_idx']:
+                offsets = np.linspace(results['start_idx'], results['end_idx'], self.num_seg)
+            else:
+                offsets = np.linspace(0, frames_len - 1, self.num_seg)
             offsets = np.clip(offsets, 0, frames_len - 1).astype(np.long)
             if results['format'] == 'video':
                 frames_idx = list(offsets)
