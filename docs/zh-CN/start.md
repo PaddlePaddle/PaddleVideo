@@ -1,4 +1,4 @@
-简体中文 | [English](../en/getting_started.md)
+简体中文 | [English](../en/start.md)
 
 # 开始使用
 ---

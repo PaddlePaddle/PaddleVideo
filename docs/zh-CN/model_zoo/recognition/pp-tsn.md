@@ -18,9 +18,9 @@
 
 | Version | Top1 |
 | :------ | :----: |
-| Ours (distill) | TODO |
+| Ours (distill) | 75.06 |
 | Ours | **73.68** |
-| [mmaction2](https://github.com/open-mmlab/mmaction2/tree/master/configs/recognition/tsn#kinetics-400) | 71.11 |
+| [mmaction2](https://github.com/open-mmlab/mmaction2/tree/master/configs/recognition/tsn#kinetics-400) | 71.80 |
 
 
 ## 数据准备
@@ -102,7 +102,7 @@ UCF101数据下载及准备请参考[UCF-101数据准备](../../dataset/ucf101.m
   | backbone | Sampling method | distill | num_seg | target_size | Top-1 | checkpoints |
   | :------: | :----------: | :----: | :----: | :----: | :---- | :---: |
   | ResNet50 | TenCrop | False | 3 | 224 | 73.68 | [ppTSN_k400.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ppTSN_k400.pdparams) |
-  | ResNet50 | TenCrop | True | 3 | 224 | TODO | TODO |
+  | ResNet50 | TenCrop | True | 8 | 224 | 75.06 | [ppTSN_k400_8.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ppTSN_k400_8.pdparams) |
 
 - PP-TSN视频采样策略为TenCrop采样：时序上，将待输入视频均匀分成`num_seg`段区间，每段的中间位置采样1帧；空间上，从左上角、右上角、中心点、左下角、右下角5个子区域各采样224x224的区域，并加上水平翻转，一共得到10个采样结果。1个视频共采样1个clip。
 
@@ -137,7 +137,7 @@ python3.7 tools/predict.py --input_file data/example.avi \
 ```bash
 Current video file: data/example.avi
         top-1 class: 5
-        top-1 score: 0.9998553991317749
+        top-1 score: 0.998979389667511
 ```
 
 可以看到，使用在Kinetics-400上训练好的PP-TSN模型对`data/example.avi`进行预测，输出的top1类别id为`5`，置信度为0.99。通过查阅类别id与名称对应表`data/k400/Kinetics-400_label_list.txt`，可知预测类别名称为`archery`。
