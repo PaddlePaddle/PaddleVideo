@@ -111,7 +111,7 @@ class RandomCrop(object):
             crop_imgs: List where each item is a PIL.Image after random crop.
         """
         imgs = results['imgs']
-        if results['backend'] == 'pyav':  # [c,t,h,w]
+        if 'backend' in results and results['backend'] == 'pyav':  # [c,t,h,w]
             h, w = imgs.shape[2:]
         else:
             w, h = imgs[0].size
@@ -122,7 +122,7 @@ class RandomCrop(object):
                 w, h, self.target_size)
 
         crop_images = []
-        if results['backend'] == 'pyav':
+        if 'backend' in results and results['backend'] == 'pyav':
             x1 = np.random.randint(0, w - tw)
             y1 = np.random.randint(0, h - th)
             crop_images = imgs[:, :, y1:y1 + th, x1:x1 + tw]  # [C, T, th, tw]
@@ -320,7 +320,8 @@ class RandomFlip(object):
         imgs = results['imgs']
         v = random.random()
         if v < self.p:
-            if results['backend'] == 'pyav':  # [c,t,h,w]
+            if 'backend' in results and results[
+                    'backend'] == 'pyav':  # [c,t,h,w]
                 results['imgs'] = paddle.flip(imgs, axis=[3])
             else:
                 results['imgs'] = [
@@ -695,7 +696,7 @@ class UniformCrop:
     def __call__(self, results):
 
         imgs = results['imgs']
-        if results['backend'] == 'pyav':  # [c,t,h,w]
+        if 'backend' in results and results['backend'] == 'pyav':  # [c,t,h,w]
             img_h, img_w = imgs.shape[2:]
         else:
             img_w, img_h = imgs[0].size
@@ -707,7 +708,7 @@ class UniformCrop:
             offsets = [(0, 0), (int(math.ceil((img_w - crop_w) / 2)), 0),
                        (img_w - crop_w, 0)]
         img_crops = []
-        if results['backend'] == 'pyav':  # [c,t,h,w]
+        if 'backend' in results and results['backend'] == 'pyav':  # [c,t,h,w]
             for x_offset, y_offset in offsets:
                 crop = imgs[:, :, y_offset:y_offset + crop_h,
                             x_offset:x_offset + crop_w]
