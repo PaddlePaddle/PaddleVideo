@@ -1,6 +1,7 @@
+numpy
+pandas
 tqdm
 PyYAML>=5.1
-numpy
-decord
-pandas
 opencv-python==4.2.0.32
+decord==0.4.2
+av==8.0.3
