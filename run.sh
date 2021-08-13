@@ -40,6 +40,12 @@ python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=lo
 # run timesformer training
 # python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=log_timesformer  main.py  --validate -c configs/recognition/timesformer/timesformer_k400_videos.yaml
 
+# run st-gcn training
+# python3.7 main.py -c configs/recognition/stgcn/stgcn_fsd.yaml
+
+# run pp-agcn training
+# python3.7 main.py -c configs/recognition/ppagcn/ppagcn_fsd.yaml
+
 # run tsn dali training
 #python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3" --log_dir=log_tsn main.py --train_dali -c configs/recognition/tsn/tsn_dali.yaml
 

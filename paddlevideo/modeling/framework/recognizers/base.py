@@ -23,13 +23,15 @@ class BaseRecognizer(nn.Layer):
         super().__init__()
         if backbone != None:
             self.backbone = builder.build_backbone(backbone)
-            self.backbone.init_weights()
+            if hasattr(self.backbone, 'init_weights'):
+                self.backbone.init_weights()
         else:
             self.backbone = None
         if head != None:
             self.head_name = head.name
             self.head = builder.build_head(head)
-            self.head.init_weights()
+            if hasattr(self.head, 'init_weights'):
+                self.head.init_weights()
         else:
             self.head = None
 
@@ -65,5 +67,11 @@ class BaseRecognizer(nn.Layer):
     @abstractmethod
     def test_step(self, data_batch, **kwargs):
         """Test step.
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def infer_step(self, data_batch, **kwargs):
+        """Infer step.
         """
         raise NotImplementedError

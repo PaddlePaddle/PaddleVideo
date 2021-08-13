@@ -24,7 +24,8 @@ __dir__ = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.abspath(os.path.join(__dir__, '../')))
 
 from paddlevideo.loader.pipelines import VideoDecoder, Sampler, Scale, \
-    CenterCrop, TenCrop, Normalization, Image2Array, UniformCrop, JitterScale, DecodeSampler, MultiCrop, PackOutput
+    CenterCrop, TenCrop, Normalization, Image2Array, UniformCrop, JitterScale, \
+        DecodeSampler, MultiCrop, PackOutput, SampleFrame, SkeletonNorm
 from paddlevideo.utils import build, Registry
 from paddlevideo.metrics.bmn_metric import boundary_choose, soft_nms
 
@@ -352,6 +353,51 @@ class SlowFast_Inference_helper():
         output: list
         """
         output = output[0].flatten()
+        classes = np.argpartition(output, -self.top_k)[-self.top_k:]
+        classes = classes[np.argsort(-output[classes])]
+        scores = output[classes]
+        print("Current video file: {0}".format(self.input_file))
+        print("\ttop-1 class: {0}".format(classes[0]))
+        print("\ttop-1 score: {0}".format(scores[0]))
+
+
+@INFERENCE.register()
+class STGCN_Inference_helper():
+    def __init__(self, num_channels, window_size, vertex_nums, top_k=1):
+        self.num_channels = num_channels
+        self.window_size = window_size
+        self.vertex_nums = vertex_nums
+        self.top_k = top_k
+
+    def preprocess(self, input_file):
+        """
+        input_file: str, file path
+        return: list
+        """
+        self.input_file = input_file
+        assert os.path.isfile(input_file) is not None, "{0} not exists".format(
+            input_file)
+        data = np.load(self.input_file)
+        results = {'data': data}
+        ops = [SampleFrame(window_size=self.window_size), SkeletonNorm()]
+        for op in ops:
+            results = op(results)
+
+        res = np.expand_dims(results['data'], axis=0).copy()
+        return [res]
+
+    def postprocess(self, output):
+        """
+        output: list
+        """
+        output = output[0]
+        if output.ndim == 1:
+            pass
+        elif output.ndim == 2:
+            output = output.mean(axis=0)
+        if output.ndim > 1:
+            output = output.flatten()
+        output = F.softmax(paddle.to_tensor(output)).numpy()
         classes = np.argpartition(output, -self.top_k)[-self.top_k:]
         classes = classes[np.argsort(-output[classes])]
         scores = output[classes]

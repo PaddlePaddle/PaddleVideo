@@ -46,6 +46,7 @@ def test_model(cfg, weights, parallel=True):
     places = paddle.set_device('gpu')
     # default num worker: 0, which means no subprocess will be created
     num_workers = cfg.DATASET.get('num_workers', 0)
+    num_workers = cfg.DATASET.get('test_num_workers', num_workers)
     dataloader_setting = dict(batch_size=batch_size,
                               num_workers=num_workers,
                               places=places,

@@ -17,8 +17,9 @@ from .build import build_metric
 from .multi_crop_metric import MultiCropMetric
 from .bmn_metric import BMNMetric
 from .center_crop_metric import CenterCropMetric
+from .skeleton_metric import SkeletonMetric
 
 __all__ = [
     'METRIC', 'build_metric', 'MultiCropMetric', 'BMNMetric',
-    'CenterCropMetric'
+    'CenterCropMetric', 'SkeletonMetric'
 ]

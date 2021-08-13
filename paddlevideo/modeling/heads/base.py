@@ -59,12 +59,6 @@ class BaseHead(nn.Layer):
         self.ls_eps = ls_eps
 
     @abstractmethod
-    def init_weights(self):
-        """Initiate the parameters.
-        """
-        raise NotImplemented
-
-    @abstractmethod
     def forward(self, x):
         """Define how the head is going to run.
         """

@@ -22,6 +22,7 @@ from .sample import Sampler
 from .decode_sampler import DecodeSampler
 from .mix import Mixup, Cutmix
 from .anet_pipeline import LoadFeat, GetMatchMap, GetVideoLabel
+from .skeleton_pipeline import SampleFrame, SkeletonNorm
 
 __all__ = [
     'Scale',
@@ -45,4 +46,6 @@ __all__ = [
     'LoadFeat',
     'GetMatchMap',
     'GetVideoLabel',
+    'SampleFrame',
+    'SkeletonNorm',
 ]

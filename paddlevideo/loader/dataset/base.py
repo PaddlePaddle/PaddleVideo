@@ -39,7 +39,6 @@ class BaseDataset(Dataset, ABC):
 
     """
     def __init__(self, file_path, pipeline, data_prefix=None, test_mode=False):
-
         super().__init__()
         self.file_path = file_path
         self.data_prefix = osp.realpath(data_prefix) if \

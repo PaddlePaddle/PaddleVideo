@@ -19,8 +19,10 @@ from .resnet_tweaks_tsm import ResNetTweaksTSM
 from .resnet_tweaks_tsn import ResNetTweaksTSN
 from .bmn import BMN
 from .vit import VisionTransformer
+from .stgcn import STGCN
+from .pp_agcn import ppAGCN
 
 __all__ = [
     'ResNet', 'ResNetTSM', 'ResNetTweaksTSM', 'ResNetSlowFast', 'BMN',
-    'ResNetTweaksTSN', 'VisionTransformer'
+    'ResNetTweaksTSN', 'VisionTransformer', 'STGCN', 'ppAGCN'
 ]

@@ -20,7 +20,9 @@ from .pptsn_head import ppTSNHead
 from .slowfast_head import SlowFastHead
 from .attention_lstm_head import AttentionLstmHead
 from .timesformer_head import TimeSformerHead
+from .stgcn_head import STGCNHead
+
 __all__ = [
     'BaseHead', 'TSNHead', 'TSMHead', 'ppTSMHead', 'ppTSNHead', 'SlowFastHead',
-    'AttentionLstmHead', 'TimeSformerHead'
+    'AttentionLstmHead', 'TimeSformerHead', 'STGCNHead'
 ]
