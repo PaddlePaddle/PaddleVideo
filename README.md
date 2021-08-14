@@ -37,13 +37,13 @@ PaddleVideo is a toolset for video recognition, action localization, and spatio 
 
 | Field | Model | Dataset | Metrics | ACC% |
 | :--------------- | :--------: | :------------: | :------------: | :------------: |
-| action recgonition | [**PP-TSM**](./docs/zh-CN/model_zoo/recognition/pp-tsm.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | **76.16** |
-| action recgonition | [**PP-TSN**](./docs/zh-CN/model_zoo/recognition/pp-tsn.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | **75.06** |
-| action recgonition | [TimeSformer](./docs/zh-CN/model_zoo/recognition/timesformer.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | 77.29 |
-| action recgonition | [SlowFast](./docs/zh-CN/model_zoo/recognition/slowfast.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | 75.84 |
-| action recgonition | [TSM](./docs/zh-CN/model_zoo/recognition/tsm.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | 71.06 |
-| action recgonition | [TSN](./docs/zh-CN/model_zoo/recognition/tsn.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | 69.81 |
-| action recgonition | [AttentionLSTM](./docs/zh-CN/model_zoo/recognition/attention_lstm.md) | [Youtube-8M](./docs/zh-CN/dataset/youtube8m.md) | Hit@1 | 89.0 |
+| action recognition | [**PP-TSM**](./docs/zh-CN/model_zoo/recognition/pp-tsm.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | **76.16** |
+| action recognition | [**PP-TSN**](./docs/zh-CN/model_zoo/recognition/pp-tsn.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | **75.06** |
+| action recognition | [TimeSformer](./docs/zh-CN/model_zoo/recognition/timesformer.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | 77.29 |
+| action recognition | [SlowFast](./docs/zh-CN/model_zoo/recognition/slowfast.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | 75.84 |
+| action recognition | [TSM](./docs/zh-CN/model_zoo/recognition/tsm.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | 71.06 |
+| action recognition | [TSN](./docs/zh-CN/model_zoo/recognition/tsn.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | 69.81 |
+| action recognition | [AttentionLSTM](./docs/zh-CN/model_zoo/recognition/attention_lstm.md) | [Youtube-8M](./docs/zh-CN/dataset/youtube8m.md) | Hit@1 | 89.0 |
 | action detection| [BMN](./docs/zh-CN/model_zoo/localization/bmn.md) | [ActivityNet](./docs/zh-CN/dataset/ActivityNet.md) |  AUC | 67.23 |
 
 ### Changelog
