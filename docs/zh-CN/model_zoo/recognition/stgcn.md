@@ -55,11 +55,12 @@ python3.7 main.py --test -c configs/recognition/stgcn/stgcn_fsd.yaml -w output/S
 
 - 评估结果保存在submission.csv文件中，可在[评测官网]()提交查看得分。
 
-模型在FSD-10数据集上baseline实验精度如下:
+模型[STGCN_fsd.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/STGCN_fsd.pdparams)在FSD-10数据集上baseline实验精度如下:
 
 Test_Data| Top-1 | checkpoints |
 | :----: | :----: | :---- |
 | Test_A | 70.0 | [STGCN_fsd.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/STGCN_fsd.pdparams) |
+| Test_B | 61.33 | - |
 
 
 ## 参考论文
