@@ -1,6 +1,6 @@
 [English](../../../en/model_zoo/recognition/pp-agcn.md) | 简体中文
 
-# PP-AGCN基于骨骼关节点的行为识别模型
+# PP-AGCN基于骨骼的行为识别模型
 
 ---
 ## 内容
@@ -16,7 +16,7 @@
 ## 模型简介
 
 
-我们对ST-GCN模型进行了优化，并实现了精度更优的PP-AGCN模型，详见[PP-AGCN基于骨骼关节点的行为识别模型]().
+我们对ST-GCN模型进行了优化，并实现了精度更优的PP-AGCN模型，详见[PP-AGCN模型详解]().
 
 
 ## 数据准备
@@ -52,9 +52,10 @@ python3.7 main.py --test -c configs/recognition/ppagcn/ppagcn_fsd.yaml  -w outpu
 
 模型在FSD-10数据集上baseline实验精度如下:
 
-| Top-1 | checkpoints |
-| :----: | :---- |
-| 92.0 | [ppAGCN_fsd.pdparams]() |
+| Test_Data | Top-1 | checkpoints |
+| :----: | :----: | :---- |
+| Test_A | 92.33 | [ppAGCN_fsd.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ppAGCN_fsd.pdparams) |
+| Test_B | 90 | - |
 
 
 ## 模型推理
@@ -87,10 +88,10 @@ python3.7 tools/predict.py --input_file data/fsd10/example_skeleton.npy \
 ```
 Current video file: data/fsd10/example_skeleton.npy
         top-1 class: 0
-        top-1 score: 0.9993312358856201
+        top-1 score: 0.9062283635139465
 ```
 
-可以看到，使用在FSD-10上训练好的pp-AGCN模型对`data/example_skeleton.npy`进行预测，输出的top1类别id为`0`，置信度为0.99。
+可以看到，使用在FSD-10上训练好的pp-AGCN模型对`data/example_skeleton.npy`进行预测，输出的top1类别id为`0`，置信度为0.90。
 
 ## 参考论文
 
