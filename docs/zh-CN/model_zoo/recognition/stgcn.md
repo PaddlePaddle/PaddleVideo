@@ -17,7 +17,11 @@
 
 ST-GCN是AAAI 2018提出的经典的基于骨骼的行为识别模型，通过将图卷积应用在具有拓扑结构的人体骨骼数据上，使用时空图卷积提取时空特征进行行为识别，极大地提升了基于骨骼的行为识别任务精度。
 
-我们对ST-GCN模型进行了优化，并实现了精度更优的PP-AGCN模型，详见[PP-AGCN基于骨骼的行为识别模型]().
+<div align="center">
+<img src="../../../images/st-gcn.png" height=200 width=950 hspace='10'/> <br />
+</div>
+
+我们对ST-GCN模型进行了优化，并实现了精度更优的PP-AGCN模型，详见[PP-AGCN基于骨骼的行为识别模型](./pp-agcn.md).
 
 
 ## 数据准备
@@ -53,45 +57,10 @@ python3.7 main.py --test -c configs/recognition/stgcn/stgcn_fsd.yaml -w output/S
 
 模型在FSD-10数据集上baseline实验精度如下:
 
-| Top-1 | checkpoints |
-| :----: | :---- |
-| 70.0 | [STGCN_fsd.pdparams]() |
+Test_Data| Top-1 | checkpoints |
+| :----: | :----: | :---- |
+| Test_A | 70.0 | [STGCN_fsd.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/STGCN_fsd.pdparams) |
 
-
-## 模型推理
-
-### 导出inference模型
-
-```bash
-python3.7 tools/export_model.py -c configs/recognition/stgcn/stgcn_fsd.yaml \
-                                -p output/STGCN/STGCN_epoch_00060.pdparams \
-                                -o inference/STGCN
-```
-
-上述命令将生成预测所需的模型结构文件`STGCN.pdmodel`和模型权重文件`STGCN.pdiparams`。
-
-- 各参数含义可参考[模型推理方法](https://github.com/PaddlePaddle/PaddleVideo/blob/release/2.0/docs/zh-CN/start.md#2-%E6%A8%A1%E5%9E%8B%E6%8E%A8%E7%90%86)
-
-### 使用预测引擎推理
-
-```bash
-python3.7 tools/predict.py --input_file data/fsd10/example_skeleton.npy \
-                           --config configs/recognition/stgcn/stgcn_fsd.yaml \
-                           --model_file inference/STGCN/STGCN.pdmodel \
-                           --params_file inference/STGCN/STGCN.pdiparams \
-                           --use_gpu=True \
-                           --use_tensorrt=False
-```
-
-输出示例如下:
-
-```
-Current video file: data/fsd10/example_skeleton.npy
-        top-1 class: 0
-        top-1 score: 0.9993312358856201
-```
-
-可以看到，使用在FSD-10上训练好的ST-GCN模型对`data/example_skeleton.npy`进行预测，输出的top1类别id为`0`，置信度为0.99。
 
 ## 参考论文
 
