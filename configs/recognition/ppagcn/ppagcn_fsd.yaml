@@ -19,7 +19,6 @@ DATASET: #DATASET field
         format: "SkeletonDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
         file_path: "/workspace/huangjun12/ST-gcn/FSD-data/test_A_data.npy" #Mandatory, valid data index file path
         test_mode: True
-#        label_path: "/workspace/huangjun12/PaddleProject/PaddleVideo/Pr/ST-gcn/FSD-data/test_A_label.npy" #Mandatory, valid data index file path
 
 
 PIPELINE: #PIPELINE field
@@ -60,6 +59,5 @@ INFERENCE:
 
 
 model_name: "ppAGCN"
-#model_name: "STGCN"
 log_interval: 10 #Optional, the interal of logger, default:10
 epochs: 100 #Mandatory, total epoch
