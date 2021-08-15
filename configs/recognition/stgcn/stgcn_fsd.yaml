@@ -7,19 +7,18 @@ MODEL: #MODEL field
         num_classes: 10  #Optional, the number of classes to be classified.
 
 DATASET: #DATASET field
-    batch_size: 64 #128  #Mandatory, bacth size
+    batch_size: 64 #Mandatory, bacth size
     num_workers: 4 #Mandatory, the number of subprocess on each GPU.
     test_batch_size: 1
     test_num_workers: 0
     train:
         format: "SkeletonDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
-        file_path: "/workspace/huangjun12/ST-gcn/FSD-data/train_data.npy" #Mandatory, train data index file path
-        label_path: "/workspace/huangjun12/ST-gcn/FSD-data/train_label.npy"
+        file_path: "FSD-data/train_data.npy" #Mandatory, train data index file path
+        label_path: "FSD-data/train_label.npy"
     test:
         format: "SkeletonDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
-        file_path: "/workspace/huangjun12/ST-gcn/FSD-data/test_A_data.npy" #Mandatory, valid data index file path
+        file_path: "FSD-data/test_A_data.npy" #Mandatory, valid data index file path
         test_mode: True
-#        label_path: "/workspace/huangjun12/PaddleProject/PaddleVideo/Pr/ST-gcn/FSD-data/test_A_label.npy" #Mandatory, valid data index file path
 
 
 PIPELINE: #PIPELINE field
