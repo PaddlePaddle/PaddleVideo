@@ -55,7 +55,7 @@ python3.7 main.py --test -c configs/recognition/ppagcn/ppagcn_fsd.yaml  -w outpu
 | Test_Data | Top-1 | checkpoints |
 | :----: | :----: | :---- |
 | Test_A | 92.33 | [ppAGCN_fsd.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ppAGCN_fsd.pdparams) |
-| Test_B | 90 | - |
+| Test_B | 90.0 | - |
 
 
 ## 模型推理
