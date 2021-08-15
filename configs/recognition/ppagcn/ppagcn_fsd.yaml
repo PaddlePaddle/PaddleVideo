@@ -5,21 +5,21 @@ MODEL: #MODEL field
     head:
         name: "STGCNHead" #Mandatory, indicate the type of head, associate to the 'paddlevideo/modeling/heads'
         num_classes: 10  #Optional, the number of classes to be classified.
+        ls_eps: 0.1 
 
 DATASET: #DATASET field
-    batch_size: 64 #128  #Mandatory, bacth size
+    batch_size: 64 #Mandatory, bacth size
     num_workers: 4 #Mandatory, the number of subprocess on each GPU.
     test_batch_size: 1
     test_num_workers: 0
     train:
         format: "SkeletonDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
-        file_path: "/workspace/huangjun12/ST-gcn/FSD-data/train_data.npy" #Mandatory, train data index file path
-        label_path: "/workspace/huangjun12/ST-gcn/FSD-data/train_label.npy"
+        file_path: "FSD-data/train_data.npy" #Mandatory, train data index file path
+        label_path: "FSD-data/train_label.npy"
     test:
         format: "SkeletonDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
-        file_path: "/workspace/huangjun12/ST-gcn/FSD-data/test_A_data.npy" #Mandatory, valid data index file path
+        file_path: "FSD-data/test_A_data.npy" #Mandatory, valid data index file path
         test_mode: True
-
 
 PIPELINE: #PIPELINE field
     train: #Mandotary, indicate the pipeline to deal with the training data, associate to the 'paddlevideo/loader/pipelines/'
@@ -35,21 +35,29 @@ PIPELINE: #PIPELINE field
         transform: #Mandotary, image transfrom operator
             - SkeletonNorm:
 
-
 OPTIMIZER: #OPTIMIZER field
   name: 'Momentum'
   momentum: 0.9
   learning_rate:
-    name: 'CosineAnnealingDecay'
-    learning_rate: 0.05
-    T_max: 100
+    iter_step: True
+    name: 'CustomWarmupCosineDecay'
+    max_epoch: 100
+    warmup_epochs: 10
+    warmup_start_lr: 0.005
+    cosine_base_lr: 0.05
   weight_decay:
     name: 'L2'
     value: 1e-4
 
+MIX:
+    name: "Mixup"
+    alpha: 0.2
+
+
 METRIC:
     name: 'SkeletonMetric'
     out_file: 'submission.csv'
+
 
 INFERENCE:
     name: 'STGCN_Inference_helper'
