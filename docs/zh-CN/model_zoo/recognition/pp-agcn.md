@@ -1,4 +1,4 @@
-[English](../../../en/model_zoo/recognition/pp-agcn.md) | 简体中文
+[English]() | 简体中文
 
 # PP-AGCN基于骨骼的行为识别模型
 
