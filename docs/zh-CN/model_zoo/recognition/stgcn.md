@@ -1,4 +1,4 @@
-[English](../../../en/model_zoo/recognition/stgcn.md) | 简体中文
+[English]() | 简体中文
 
 # ST-GCN基于骨骼的行为识别模型
 
