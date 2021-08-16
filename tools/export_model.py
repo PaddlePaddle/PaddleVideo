@@ -120,6 +120,7 @@ def main():
     print(f"Loading params from ({args.pretrained_params})...")
     params = paddle.load(args.pretrained_params)
     model.set_dict(params)
+
     model.eval()
 
     input_spec = get_input_spec(cfg.INFERENCE, model_name)
