@@ -23,8 +23,8 @@ from ..modeling.builder import build_model
 from ..solver import build_lr, build_optimizer
 from ..utils import do_preciseBN
 from paddlevideo.utils import get_logger
-from paddlevideo.utils import (build_record, log_batch, log_epoch,
-                               save, load, mkdir)
+from paddlevideo.utils import (build_record, log_batch, log_epoch, save, load,
+                               mkdir)
 
 
 def train_model(cfg,
@@ -78,6 +78,7 @@ def train_model(cfg,
 
     # default num worker: 0, which means no subprocess will be created
     num_workers = cfg.DATASET.get('num_workers', 0)
+    valid_num_workers = cfg.DATASET.get('valid_num_workers', num_workers)
     model_name = cfg.model_name
     output_dir = cfg.get("output_dir", f"./output/{model_name}")
     mkdir(output_dir)
@@ -102,7 +103,7 @@ def train_model(cfg,
         valid_dataset = build_dataset((cfg.DATASET.valid, cfg.PIPELINE.valid))
         validate_dataloader_setting = dict(
             batch_size=valid_batch_size,
-            num_workers=num_workers,
+            num_workers=valid_num_workers,
             places=places,
             drop_last=False,
             shuffle=cfg.DATASET.get(
@@ -180,14 +181,14 @@ def train_model(cfg,
                 avg_loss.backward()
 
                 # 4.3 minimize
-                if use_gradient_accumulation: # Use gradient accumulation strategy
+                if use_gradient_accumulation:  # Use gradient accumulation strategy
                     if (i + 1) % cfg.GRADIENT_ACCUMULATION.num_iters == 0:
                         for p in model.parameters():
                             p.grad.set_value(
                                 p.grad / cfg.GRADIENT_ACCUMULATION.num_iters)
                         optimizer.step()
                         optimizer.clear_grad()
-                else: # Common case
+                else:  # Common case
                     optimizer.step()
                     optimizer.clear_grad()
 
