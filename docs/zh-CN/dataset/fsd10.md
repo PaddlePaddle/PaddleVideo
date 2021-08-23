@@ -19,7 +19,7 @@
 训练数据集与测试数据集的目录结构如下所示：
 
 ```txt
-train_data.npy.       # 1400
+train_data.npy        # 1400
 train_label.npy       # 1400
 test_A_data.npy       # 300
 test_B_data.npy       # 300
