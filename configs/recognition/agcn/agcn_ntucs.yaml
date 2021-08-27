@@ -68,6 +68,6 @@ INFERENCE:
     vertex_nums: 25
 
 
-model_name: "ppAGCN"
+model_name: "AGCN"
 log_interval: 10 #Optional, the interal of logger, default:10
 epochs: 60 #Mandatory, total epoch

@@ -97,8 +97,10 @@ class AGCN(nn.Layer):
 
         self.data_bn = nn.BatchNorm1D(25 * 2)
         self.agcn = nn.Sequential(
-            Block(in_channels=2, out_channels=64, residual=False, **kwargs),
-            Block(in_channels=64, out_channels=64, **kwargs),
+            Block(in_channels=in_channels,
+                  out_channels=64,
+                  residual=False,
+                  **kwargs), Block(in_channels=64, out_channels=64, **kwargs),
             Block(in_channels=64, out_channels=64, **kwargs),
             Block(in_channels=64, out_channels=64, **kwargs),
             Block(in_channels=64, out_channels=128, stride=2, **kwargs),
