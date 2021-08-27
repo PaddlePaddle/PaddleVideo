@@ -31,28 +31,37 @@ class SkeletonMetric(BaseMetric):
     Args:
         out_file: str, file to save test results.
     """
-    def __init__(self, out_file, data_size, batch_size, log_interval=1):
+    def __init__(self,
+                 data_size,
+                 batch_size,
+                 out_file='submission.csv',
+                 log_interval=1):
         """prepare for metrics
         """
         super().__init__(data_size, batch_size, log_interval)
         self.top1 = []
+        self.top5 = []
         self.values = []
         self.out_file = out_file
-        self.true_num = 0
 
     def update(self, batch_id, data, outputs):
         """update metrics during each iter
         """
-        prob = F.softmax(outputs)
-        clas = paddle.argmax(prob, axis=1).numpy()[0]
-        self.values.append((batch_id, clas))
-
         if len(data) == 2:  # data with label
             labels = data[1]
             top1 = paddle.metric.accuracy(input=outputs, label=labels, k=1)
+            top5 = paddle.metric.accuracy(input=outputs, label=labels, k=5)
+            if self.world_size > 1:
+                top1 = paddle.distributed.all_reduce(
+                    top1, op=paddle.distributed.ReduceOp.SUM) / self.world_size
+                top5 = paddle.distributed.all_reduce(
+                    top5, op=paddle.distributed.ReduceOp.SUM) / self.world_size
             self.top1.append(top1.numpy())
-            if clas == labels[0][0]:
-                self.true_num += 1
+            self.top5.append(top5.numpy())
+        else:  # data without label, only support batch_size=1. Used for fsd-10.
+            prob = F.softmax(outputs)
+            clas = paddle.argmax(prob, axis=1).numpy()[0]
+            self.values.append((batch_id, clas))
 
         # preds ensemble
         if batch_id % self.log_interval == 0:
@@ -63,17 +72,16 @@ class SkeletonMetric(BaseMetric):
     def accumulate(self):
         """accumulate metrics when finished all iters.
         """
-        headers = ['sample_index', 'predict_category']
-        with open(
-                self.out_file,
-                'w',
-        ) as fp:
-            writer = csv.writer(fp)
-            writer.writerow(headers)
-            writer.writerows(self.values)
-        if self.top1:
-            logger.info(
-                '[TEST] finished, true_number={}, total_number={}, avg_acc1= {}'
-                .format(self.true_num, len(self.values),
-                        np.mean(np.array(self.top1))))
-        logger.info("Results saved in {} !".format(self.out_file))
+        if self.top1:  # data with label
+            logger.info('[TEST] finished, avg_acc1= {}, avg_acc5= {}'.format(
+                np.mean(np.array(self.top1)), np.mean(np.array(self.top5))))
+        else:
+            headers = ['sample_index', 'predict_category']
+            with open(
+                    self.out_file,
+                    'w',
+            ) as fp:
+                writer = csv.writer(fp)
+                writer.writerow(headers)
+                writer.writerows(self.values)
+            logger.info("Results saved in {} !".format(self.out_file))

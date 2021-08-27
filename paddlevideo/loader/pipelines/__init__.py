@@ -22,30 +22,12 @@ from .sample import Sampler
 from .decode_sampler import DecodeSampler
 from .mix import Mixup, Cutmix
 from .anet_pipeline import LoadFeat, GetMatchMap, GetVideoLabel
-from .skeleton_pipeline import SampleFrame, SkeletonNorm
+from .skeleton_pipeline import AutoPadding, SkeletonNorm, Iden
 
 __all__ = [
-    'Scale',
-    'RandomCrop',
-    'CenterCrop',
-    'RandomFlip',
-    'Image2Array',
-    'Normalization',
-    'Compose',
-    'VideoDecoder',
-    'FrameDecoder',
-    'Sampler',
-    'Mixup',
-    'Cutmix',
-    'JitterScale',
-    'MultiCrop',
-    'PackOutput',
-    'TenCrop',
-    'UniformCrop',
-    'DecodeSampler',
-    'LoadFeat',
-    'GetMatchMap',
-    'GetVideoLabel',
-    'SampleFrame',
-    'SkeletonNorm',
+    'Scale', 'RandomCrop', 'CenterCrop', 'RandomFlip', 'Image2Array',
+    'Normalization', 'Compose', 'VideoDecoder', 'FrameDecoder', 'Sampler',
+    'Mixup', 'Cutmix', 'JitterScale', 'MultiCrop', 'PackOutput', 'TenCrop',
+    'UniformCrop', 'DecodeSampler', 'LoadFeat', 'GetMatchMap', 'GetVideoLabel',
+    'AutoPadding', 'SkeletonNorm', 'Iden'
 ]

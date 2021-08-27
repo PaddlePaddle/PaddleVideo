@@ -25,7 +25,7 @@ sys.path.append(os.path.abspath(os.path.join(__dir__, '../')))
 
 from paddlevideo.loader.pipelines import VideoDecoder, Sampler, Scale, \
     CenterCrop, TenCrop, Normalization, Image2Array, UniformCrop, JitterScale, \
-        DecodeSampler, MultiCrop, PackOutput, SampleFrame, SkeletonNorm
+        DecodeSampler, MultiCrop, PackOutput, AutoPadding, SkeletonNorm
 from paddlevideo.utils import build, Registry
 from paddlevideo.metrics.bmn_metric import boundary_choose, soft_nms
 
@@ -379,7 +379,7 @@ class STGCN_Inference_helper():
             input_file)
         data = np.load(self.input_file)
         results = {'data': data}
-        ops = [SampleFrame(window_size=self.window_size), SkeletonNorm()]
+        ops = [AutoPadding(window_size=self.window_size), SkeletonNorm()]
         for op in ops:
             results = op(results)
 

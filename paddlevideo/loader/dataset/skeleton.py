@@ -16,6 +16,7 @@ import os.path as osp
 import copy
 import random
 import numpy as np
+import pickle
 
 from ..registry import DATASETS
 from .base import BaseDataset
@@ -44,7 +45,11 @@ class SkeletonDataset(BaseDataset):
         logger.info("Loading data, it will take some moment...")
         self.data = np.load(self.file_path)
         if self.label_path:
-            self.label = np.load(self.label_path)
+            if self.label_path.endswith('npy'):
+                self.label = np.load(self.label_path)
+            elif self.label_path.endswith('pkl'):
+                with open(self.label_path, 'rb') as f:
+                    sample_name, self.label = pickle.load(f)
         else:
             logger.info(
                 "Label path not provided when test_mode={}, here just output predictions."

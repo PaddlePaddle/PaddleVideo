@@ -1,11 +1,11 @@
 MODEL: #MODEL field
     framework: "RecognizerGCN" #Mandatory, indicate the type of network, associate to the 'paddlevideo/modeling/framework/' .
     backbone: #Mandatory, indicate the type of backbone, associate to the 'paddlevideo/modeling/backbones/' .
-        name: "ppAGCN" #Mandatory, The name of backbone.
+        name: "AGCN" #Mandatory, The name of backbone.
     head:
         name: "STGCNHead" #Mandatory, indicate the type of head, associate to the 'paddlevideo/modeling/heads'
         num_classes: 10  #Optional, the number of classes to be classified.
-        ls_eps: 0.1 
+        ls_eps: 0.1
 
 DATASET: #DATASET field
     batch_size: 64 #Mandatory, bacth size
@@ -14,23 +14,23 @@ DATASET: #DATASET field
     test_num_workers: 0
     train:
         format: "SkeletonDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
-        file_path: "FSD-data/train_data.npy" #Mandatory, train data index file path
-        label_path: "FSD-data/train_label.npy"
+        file_path: "/workspace/huangjun12/ST-gcn/FSD-data/train_data.npy" #Mandatory, train data index file path
+        label_path: "/workspace/huangjun12/ST-gcn/FSD-data/train_label.npy"
     test:
         format: "SkeletonDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
-        file_path: "FSD-data/test_A_data.npy" #Mandatory, valid data index file path
+        file_path: "/workspace/huangjun12/ST-gcn/FSD-data/test_A_data.npy" #Mandatory, valid data index file path
         test_mode: True
 
 PIPELINE: #PIPELINE field
     train: #Mandotary, indicate the pipeline to deal with the training data, associate to the 'paddlevideo/loader/pipelines/'
         sample:
-            name: "SampleFrame"
+            name: "AutoPadding"
             window_size: 350
         transform: #Mandotary, image transfrom operator
             - SkeletonNorm:
     test: #Mandatory, indicate the pipeline to deal with the validing data. associate to the 'paddlevideo/loader/pipelines/'
         sample:
-            name: "SampleFrame"
+            name: "AutoPadding"
             window_size: 350
         transform: #Mandotary, image transfrom operator
             - SkeletonNorm:
@@ -66,6 +66,6 @@ INFERENCE:
     vertex_nums: 25
 
 
-model_name: "ppAGCN"
+model_name: "AGCN"
 log_interval: 10 #Optional, the interal of logger, default:10
 epochs: 100 #Mandatory, total epoch

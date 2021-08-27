@@ -27,6 +27,7 @@ ST-GCN是AAAI 2018提出的经典的基于骨骼的行为识别模型，通过�
 ## 数据准备
 
 FSD-10数据下载及准备请参考[FSD-10数据准备](../../dataset/fsd10.md)
+NTU-RGBD数据下载及准备请参考[NTU-RGBD数据准备](../../dataset/ntu-rgbd.md)
 
 ## 模型训练
 
@@ -43,9 +44,22 @@ python3.7 main.py -c configs/recognition/stgcn/stgcn_fsd.yaml
 - 您可以自定义修改参数配置，以达到在不同的数据集上进行训练/测试的目的，参数用法请参考[config](../../tutorials/config.md)。
 
 
+### NTU-RGBD数据集训练
+
+- NTU-RGBD数据集使用4卡训练，启动命令如下:
+
+```bash
+python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3"  --log_dir=log_stgcn  main.py  --validate -c configs/recognition/stgcn/stgcn_ntucs.yaml
+```
+
+- `stgcn_ntucs.yaml`配置文件为NTU-RGB+D数据集按cross-subject划分方式对应的训练配置。
+
+
 ## 模型测试
 
-- 训练完成后，模型测试的启动命令如下：
+### FSD-10数据集模型测试
+
+- 模型测试的启动命令如下：
 
 ```bash
 python3.7 main.py --test -c configs/recognition/stgcn/stgcn_fsd.yaml -w output/STGCN/STGCN_epoch_00060.pdparams
@@ -59,8 +73,24 @@ python3.7 main.py --test -c configs/recognition/stgcn/stgcn_fsd.yaml -w output/S
 
 Test_Data| Top-1 | checkpoints |
 | :----: | :----: | :---- |
-| Test_A | 70.0 | [STGCN_fsd.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/STGCN_fsd.pdparams) |
-| Test_B | 61.33 | - |
+| Test_A | 86.66 | [STGCN_fsd.pdparams]() |
+| Test_B | xxx | - |
+
+### NTU-RGB+D数据集模型测试
+
+- 模型测试的启动命令如下：
+
+```bash
+python3.7 main.py --test -c configs/recognition/stgcn/stgcn_ntucs.yaml -w output/STGCN/STGCN_best.pdparams
+```
+
+- 通过`-c`参数指定配置文件，通过`-w`指定权重存放路径进行模型测试。
+
+模型在NTU-RGB+D数据集上实验精度如下:
+
+| split | Top-1 | checkpoints |
+| :----: | :----: | :---- |
+| cross-subject | 82.07 | [STGCN_ntucs.pdparams]() |
 
 
 ## 参考论文

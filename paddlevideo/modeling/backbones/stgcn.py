@@ -17,6 +17,7 @@ import paddle.nn as nn
 import paddle.nn.functional as F
 import numpy as np
 from ..registry import BACKBONES
+from ..weight_init import weight_init_
 
 
 def zero(x):
@@ -87,7 +88,7 @@ class Graph():
     def get_edge(self, layout):
         # edge is a list of [child, parent] paris
 
-        if layout == 'openpose':
+        if layout == 'fsd10':
             self.num_node = 25
             self_link = [(i, i) for i in range(self.num_node)]
             neighbor_link = [(1, 8), (0, 1), (15, 0), (17, 15), (16, 0),
@@ -97,6 +98,17 @@ class Graph():
                              (21, 14), (19, 14), (20, 19)]
             self.edge = self_link + neighbor_link
             self.center = 8
+        elif layout == 'ntu-rgb+d':
+            self.num_node = 25
+            self_link = [(i, i) for i in range(self.num_node)]
+            neighbor_1base = [(1, 2), (2, 21), (3, 21), (4, 3), (5, 21), (6, 5),
+                              (7, 6), (8, 7), (9, 21), (10, 9), (11, 10),
+                              (12, 11), (13, 1), (14, 13), (15, 14), (16, 15),
+                              (17, 1), (18, 17), (19, 18), (20, 19), (22, 23),
+                              (23, 8), (24, 25), (25, 12)]
+            neighbor_link = [(i - 1, j - 1) for (i, j) in neighbor_1base]
+            self.edge = self_link + neighbor_link
+            self.center = 21 - 1
         else:
             raise ValueError("Do Not Exist This Layout.")
 
@@ -234,13 +246,15 @@ class STGCN(nn.Layer):
                  in_channels=2,
                  edge_importance_weighting=True,
                  data_bn=True,
+                 layout='fsd10',
+                 strategy='spatial',
                  **kwargs):
         super(STGCN, self).__init__()
         self.data_bn = data_bn
         # load graph
         self.graph = Graph(
-            layout='openpose',
-            strategy='spatial',
+            layout=layout,
+            strategy=strategy,
         )
         A = paddle.to_tensor(self.graph.A, dtype='float32')
         self.register_buffer('A', A)
@@ -281,20 +295,35 @@ class STGCN(nn.Layer):
         else:
             self.edge_importance = [1] * len(self.st_gcn_networks)
 
+        self.pool = nn.AdaptiveAvgPool2D(output_size=(1, 1))
+
+    def init_weights(self):
+        """Initiate the parameters.
+        """
+        for layer in self.sublayers():
+            if isinstance(layer, nn.Conv2D):
+                weight_init_(layer, 'Normal', mean=0.0, std=0.02)
+            elif isinstance(layer, nn.BatchNorm2D):
+                weight_init_(layer, 'Normal', mean=1.0, std=0.02)
+            elif isinstance(layer, nn.BatchNorm1D):
+                weight_init_(layer, 'Normal', mean=1.0, std=0.02)
+
     def forward(self, x):
         # data normalization
-        N, C, T, V = x.shape
-        x = x.transpose((0, 3, 1, 2))  # N, V, C, T
-        x = x.reshape((N, V * C, T))
+        N, C, T, V, M = x.shape
+        x = x.transpose((0, 4, 3, 1, 2))  # N, M, V, C, T
+        x = x.reshape((N * M, V * C, T))
         if self.data_bn:
             x.stop_gradient = False
         x = self.data_bn(x)
-        x = x.reshape((N, V, C, T))
-        x = x.transpose((0, 1, 3, 2))  # N, C, T, V
-        x = x.reshape((N, C, T, V))
+        x = x.reshape((N, M, V, C, T))
+        x = x.transpose((0, 1, 3, 4, 2))  # N, M, C, T, V
+        x = x.reshape((N * M, C, T, V))
 
         # forward
         for gcn, importance in zip(self.st_gcn_networks, self.edge_importance):
             x, _ = gcn(x, self.A * importance)
 
+        x = self.pool(x)  # NM,C,T,V --> NM,C,1,1
+        x = paddle.reshape(x, (N, M, -1, 1, 1)).mean(axis=1)  # N,C,1,1
         return x

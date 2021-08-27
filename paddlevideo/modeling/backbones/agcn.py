@@ -30,7 +30,7 @@ class GCN(nn.Layer):
                                kernel_size=1)
 
     def forward(self, x):
-        # x                                    # N,C,T,V
+        # x --- N,C,T,V
         x = self.conv1(x)  # N,3C,T,V
         N, C, T, V = x.shape
         x = paddle.reshape(x, [N, C // 3, 3, T, V])  # N,C,3,T,V
@@ -85,16 +85,18 @@ class Block(paddle.nn.Layer):
 
 
 @BACKBONES.register()
-class ppAGCN(nn.Layer):
+class AGCN(nn.Layer):
     """
-    PP-AGCN model improves the performance of ST-GCN using
+    AGCN model improves the performance of ST-GCN using
     Adaptive Graph Convolutional Networks.
     Args:
         in_channels: int, channels of vertex coordinate. 2 for (x,y), 3 for (x,y,z). Default 2.
     """
     def __init__(self, in_channels=2, **kwargs):
-        super(ppAGCN, self).__init__()
-        self.pp_agcn = nn.Sequential(
+        super(AGCN, self).__init__()
+
+        self.data_bn = nn.BatchNorm1D(25 * 2)
+        self.agcn = nn.Sequential(
             Block(in_channels=2, out_channels=64, residual=False, **kwargs),
             Block(in_channels=64, out_channels=64, **kwargs),
             Block(in_channels=64, out_channels=64, **kwargs),
@@ -106,6 +108,18 @@ class ppAGCN(nn.Layer):
             Block(in_channels=256, out_channels=256, **kwargs),
             Block(in_channels=256, out_channels=256, **kwargs))
 
+        self.pool = nn.AdaptiveAvgPool2D(output_size=(1, 1))
+
     def forward(self, x):
-        x = self.pp_agcn(x)
+        # data normalization
+        N, C, T, V, M = x.shape
+
+        x = x.transpose((0, 4, 1, 2, 3))  # N, M, C, T, V
+        x = x.reshape((N * M, C, T, V))
+
+        x = self.agcn(x)
+
+        x = self.pool(x)  # NM,C,T,V --> NM,C,1,1
+        x = paddle.reshape(x, (N, M, -1, 1, 1)).mean(axis=1)  # N,C,1,1
+
         return x
