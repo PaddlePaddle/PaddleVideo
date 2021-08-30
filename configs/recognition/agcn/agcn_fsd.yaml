@@ -14,11 +14,11 @@ DATASET: #DATASET field
     test_num_workers: 0
     train:
         format: "SkeletonDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
-        file_path: "/workspace/huangjun12/ST-gcn/FSD-data/train_data.npy" #Mandatory, train data index file path
-        label_path: "/workspace/huangjun12/ST-gcn/FSD-data/train_label.npy"
+        file_path: "FSD-data/train_data.npy" #Mandatory, train data index file path
+        label_path: "FSD-data/train_label.npy"
     test:
         format: "SkeletonDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
-        file_path: "/workspace/huangjun12/ST-gcn/FSD-data/test_A_data.npy" #Mandatory, valid data index file path
+        file_path: "FSD-data/test_A_data.npy" #Mandatory, valid data index file path
         test_mode: True
 
 PIPELINE: #PIPELINE field
@@ -64,6 +64,7 @@ INFERENCE:
     num_channels: 2
     window_size: 350
     vertex_nums: 25
+    person_nums: 1
 
 
 model_name: "AGCN"

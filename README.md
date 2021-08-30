@@ -19,7 +19,7 @@ PaddleVideo is a toolset for video recognition, action localization, and spatio 
 ## Features
 
 - **Various dataset and models**
-    PaddleVideo supports more datasets and models, including [Kinectics400](docs/zh-CN/dataset/k400.md), ucf101, YoutTube8M datasets, and video recognition models, such as TSN, TSM, SlowFast, AttentionLSTM and action localization model, like [BMN](./docs/zh-CN/model_zoo/localization/bmn.md).
+    PaddleVideo supports more datasets and models, including [Kinectics400](docs/zh-CN/dataset/k400.md), UCF101, YoutTube8M, NTU-RGB+D datasets, and video recognition models, such as TSN, TSM, SlowFast, TimeSformer, AttentionLSTM, ST-GCN and action localization model, like [BMN](./docs/zh-CN/model_zoo/localization/bmn.md).
 
 - **Higher performance**
     PaddleVideo has built-in solutions to improve accuracy on recognition models. [PP-TSM](docs/zh-CN/model_zoo/recognition/pp-tsm.md), which is based on the standard TSM, already archive the best performance in the 2D recognition network, has the same size of parameters but improve the Top1 Acc to 76.16%.
@@ -39,21 +39,19 @@ PaddleVideo is a toolset for video recognition, action localization, and spatio 
 | :--------------- | :--------: | :------------: | :------------: | :------------: |
 | action recognition | [**PP-TSM**](./docs/zh-CN/model_zoo/recognition/pp-tsm.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | **76.16** |
 | action recognition | [**PP-TSN**](./docs/zh-CN/model_zoo/recognition/pp-tsn.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | **75.06** |
-| action recognition | [**PP-AGCN**](./docs/zh-CN/model_zoo/recognition/pp-agcn.md) | [FSD-10](./docs/zh-CN/dataset/fsd10.md) | Top-1 | **92.33** |
+| action recognition | [AGCN](./docs/zh-CN/model_zoo/recognition/agcn.md) | [FSD-10](./docs/zh-CN/dataset/fsd10.md) | Top-1 | 90.66 |
+| action recognition | [ST-GCN](./docs/zh-CN/model_zoo/recognition/stgcn.md) | [FSD-10](./docs/zh-CN/dataset/fsd10.md) | Top-1 | 86.66 |
 | action recognition | [TimeSformer](./docs/zh-CN/model_zoo/recognition/timesformer.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | 77.29 |
 | action recognition | [SlowFast](./docs/zh-CN/model_zoo/recognition/slowfast.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | 75.84 |
 | action recognition | [TSM](./docs/zh-CN/model_zoo/recognition/tsm.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | 71.06 |
 | action recognition | [TSN](./docs/zh-CN/model_zoo/recognition/tsn.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | 69.81 |
 | action recognition | [AttentionLSTM](./docs/zh-CN/model_zoo/recognition/attention_lstm.md) | [Youtube-8M](./docs/zh-CN/dataset/youtube8m.md) | Hit@1 | 89.0 |
-| action recognition | [ST-GCN](./docs/zh-CN/model_zoo/recognition/stgcn.md) | [FSD-10](./docs/zh-CN/dataset/fsd10.md) | Top-1 | 70.0 |
 | action detection| [BMN](./docs/zh-CN/model_zoo/localization/bmn.md) | [ActivityNet](./docs/zh-CN/dataset/ActivityNet.md) |  AUC | 67.23 |
 
 ### Changelog
 
 release/2.1 was released in 20/05/2021. Please refer to [release notes](https://github.com/PaddlePaddle/PaddleVideo/releases) for details.
 
-Plan
-- ActBert
 
 <a name="Community"></a>
 ## Community
@@ -101,6 +99,9 @@ Plan
     - [SlowFast](docs/en/model_zoo/recognition/slowfast.md)
   - [Localization](docs/en/model_zoo/README.md)
     - [BMN](docs/en/model_zoo/localization/bmn.md)
+  - [Skeleton-based action recognition](docs/en/model_zoo/README.md)
+    - [ST-GCN](docs/en/model_zoo/recognition/stgcn.md)
+    - [AGCN](docs/en/model_zoo/recognition/agcn.md)
   - Spatio temporal action detection
     - Coming Soon!  
   - ActBERT: Learning Global-Local Video-Text Representations

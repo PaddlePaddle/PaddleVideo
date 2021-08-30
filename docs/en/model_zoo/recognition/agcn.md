@@ -1,95 +1,93 @@
-[English](../../../en/model_zoo/recognition/agcn.md) | 简体中文
+[简体中文](../../../zh-CN/model_zoo/recognition/agcn.md) | English
 
-# AGCN基于骨骼的行为识别模型
+# AGCN: Skeleton-based action recognition model
 
 ---
-## 内容
+## Contents
 
-- [模型简介](#模型简介)
-- [数据准备](#数据准备)
-- [模型训练](#模型训练)
-- [模型测试](#模型测试)
-- [模型推理](#模型推理)
-- [参考论文](#参考论文)
-
-
-## 模型简介
+- [Introduction](#Introduction)
+- [Data](#Data)
+- [Train](#Train)
+- [Test](#Test)
+- [Inference](#Inference)
+- [Reference](#Reference)
 
 
-我们对[ST-GCN模型](./stgcn.md)进行了优化，实现了精度更高的AGCN模型，模型优化细节参考[AGCN模型详解]().
+## Introduction
 
+We implemented Adaptive Graph Convolution Network to improve the accuracy of [ST-GCN](./stgcn.md).
 
-## 数据准备
+## Data
 
-FSD-10数据下载及准备请参考[FSD-10数据准备](../../dataset/fsd10.md)
-NTU-RGBD数据下载及准备请参考[NTU-RGBD数据准备](../../dataset/ntu-rgbd.md)
+Please refer to FSD-10 data download and preparation doc [FSD-10](../../dataset/fsd10.md)
+Please refer to NTU-RGBD data download and preparation doc [NTU-RGBD](../../dataset/ntu-rgbd.md)
 
-## 模型训练
+## Train
 
-### FSD-10数据集训练
+### Train on FSD-10
 
-- FSD-10数据集使用单卡训练，启动命令如下:
+- Train AGCN on FSD-10 scripts:
 
 ```bash
 python3.7 main.py -c configs/recognition/agcn/agcn_fsd.yaml
 ```
 
-- 由于赛事未提供验证集数据，因此训练时不做valid。
+- Turn off `valid` when training, as validation dataset is not available for the competition.
 
-- 您可以自定义修改参数配置，以达到在不同的数据集上进行训练/测试的目的，参数用法请参考[config](../../tutorials/config.md)。
+### Train on NTU-RGBD
 
-### NTU-RGBD数据集训练
-
-- NTU-RGBD数据集使用4卡训练，启动命令如下:
+- Train AGCN on NTU-RGBD scripts:
 
 ```bash
 python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3"  --log_dir=log_agcn  main.py  --validate -c configs/recognition/agcn/agcn_ntucs.yaml
 ```
 
-- `agcn_ntucs.yaml`配置文件为NTU-RGB+D数据集按cross-subject划分方式对应的训练配置。
+- config file `agcn_ntucs.yaml` corresponding to the config of AGCN on NTU-RGB+D dataset with cross-subject splits.
 
 
-## 模型测试
+## Test
 
-### FSD-10数据集模型测试
+### Test onf FSD-10
 
-- 模型测试的启动命令如下：
+- Test scripts：
 
 ```bash
 python3.7 main.py --test -c configs/recognition/agcn/agcn_fsd.yaml  -w output/AGCN/AGCN_epoch_00100.pdparams
 ```
 
-- 通过`-c`参数指定配置文件，通过`-w`指定权重存放路径进行模型测试。
+- Specify the config file with `-c`, specify the weight path with `-w`.
 
-- 评估结果保存在submission.csv文件中，可在[评测官网]()提交查看得分。
+- Evaluation results will be saved in `submission.csv` file, final score can be obtained in [competition website]().
 
-模型在FSD-10数据集上baseline实验精度如下:
+Accuracy on FSD-10 dataset:
 
 | Test_Data | Top-1 | checkpoints |
 | :----: | :----: | :---- |
 | Test_A | 90.66 | [AGCN_fsd.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/AGCN_fsd.pdparams) |
 | Test_B | 88.66 | - |
 
-### NTU-RGB+D数据集模型测试
+### Test on NTU-RGB+D
 
-- 模型测试的启动命令如下：
+- Test scripts：
 
 ```bash
 python3.7 main.py --test -c configs/recognition/agcn/agcn_ntucs.yaml -w output/AGCN/AGCN_best.pdparams
 ```
 
-- 通过`-c`参数指定配置文件，通过`-w`指定权重存放路径进行模型测试。
+- Specify the config file with `-c`, specify the weight path with `-w`.
 
-模型在NTU-RGB+D数据集上实验精度如下:
+Accuracy on NTU-RGB+D dataset:
 
 | split | Top-1 | checkpoints |
 | :----: | :----: | :---- |
 | cross-subject | 83.27 | [AGCN_ntucs.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/AGCN_ntucs.pdparams) |
 
 
-## 模型推理
+## Inference
 
-### 导出inference模型
+### export inference model
+
+ To get model architecture file `AGCN.pdmodel` and parameters file `AGCN.pdiparams`, use:
 
 ```bash
 python3.7 tools/export_model.py -c configs/recognition/agcn/agcn_fsd.yaml \
@@ -97,11 +95,9 @@ python3.7 tools/export_model.py -c configs/recognition/agcn/agcn_fsd.yaml \
                                 -o inference/AGCN
 ```
 
-上述命令将生成预测所需的模型结构文件`AGCN.pdmodel`和模型权重文件`AGCN.pdiparams`。
+- Args usage please refer to [Model Inference](https://github.com/PaddlePaddle/PaddleVideo/blob/release/2.0/docs/zh-CN/start.md#2-%E6%A8%A1%E5%9E%8B%E6%8E%A8%E7%90%86).
 
-- 各参数含义可参考[模型推理方法](https://github.com/PaddlePaddle/PaddleVideo/blob/release/2.0/docs/zh-CN/start.md#2-%E6%A8%A1%E5%9E%8B%E6%8E%A8%E7%90%86)
-
-### 使用预测引擎推理
+### infer
 
 ```bash
 python3.7 tools/predict.py --input_file data/fsd10/example_skeleton.npy \
@@ -112,7 +108,7 @@ python3.7 tools/predict.py --input_file data/fsd10/example_skeleton.npy \
                            --use_tensorrt=False
 ```
 
-输出示例如下:
+example of logs:
 
 ```
 Current video file: data/fsd10/example_skeleton.npy
@@ -120,9 +116,8 @@ Current video file: data/fsd10/example_skeleton.npy
         top-1 score: 0.8932635188102722
 ```
 
-可以看到，使用在FSD-10上训练好的pp-AGCN模型对`data/example_skeleton.npy`进行预测，输出的top1类别id为`0`，置信度为0.89。
 
-## 参考论文
+## Reference
 
 - [Spatial Temporal Graph Convolutional Networks for Skeleton-Based Action Recognition](https://arxiv.org/abs/1801.07455), Sijie Yan, Yuanjun Xiong, Dahua Lin
 

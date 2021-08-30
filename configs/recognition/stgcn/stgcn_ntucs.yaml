@@ -57,13 +57,6 @@ METRIC:
     name: 'SkeletonMetric'
 
 
-INFERENCE:
-    name: 'STGCN_Inference_helper'
-    num_channels: 2
-    window_size: 350
-    vertex_nums: 25
-
-
 model_name: "STGCN"
 log_interval: 10 #Optional, the interal of logger, default:10
 epochs: 50 #Mandatory, total epoch

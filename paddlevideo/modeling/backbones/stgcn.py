@@ -322,8 +322,9 @@ class STGCN(nn.Layer):
 
         # forward
         for gcn, importance in zip(self.st_gcn_networks, self.edge_importance):
-            x, _ = gcn(x, self.A * importance)
+            x, _ = gcn(x, paddle.multiply(self.A, importance))
 
         x = self.pool(x)  # NM,C,T,V --> NM,C,1,1
-        x = paddle.reshape(x, (N, M, -1, 1, 1)).mean(axis=1)  # N,C,1,1
+        C = x.shape[1]
+        x = paddle.reshape(x, (N, M, C, 1, 1)).mean(axis=1)  # N,C,1,1
         return x

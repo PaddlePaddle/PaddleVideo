@@ -363,10 +363,16 @@ class SlowFast_Inference_helper():
 
 @INFERENCE.register()
 class STGCN_Inference_helper():
-    def __init__(self, num_channels, window_size, vertex_nums, top_k=1):
+    def __init__(self,
+                 num_channels,
+                 window_size,
+                 vertex_nums,
+                 person_nums,
+                 top_k=1):
         self.num_channels = num_channels
         self.window_size = window_size
         self.vertex_nums = vertex_nums
+        self.person_nums = person_nums
         self.top_k = top_k
 
     def preprocess(self, input_file):

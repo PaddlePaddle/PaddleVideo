@@ -19,7 +19,7 @@ PaddleVideo飞桨视频模型开发套件，旨在帮助开发者更好的进行
 ## 特性
 
 - **更多的数据集和模型结构**
-    PaddleVideo 支持更多的数据集和模型结构，包括[Kinectics400](docs/zh-CN/dataset/k400.md)，ucf101，YoutTube8M等数据集，模型结构涵盖了视频分类模型TSN，TSM，SlowFast，AttentionLSTM和视频定位模型[BMN](./docs/zh-CN/model_zoo/localization/bmn.md)等。
+    PaddleVideo 支持更多的数据集和模型结构，包括[Kinectics400](docs/zh-CN/dataset/k400.md)，UCF101，YoutTube8M，NTU-RGB+D等数据集，模型结构涵盖了视频分类模型TSN，TSM，SlowFast，TimeSformer，AttentionLSTM，ST-GCN和视频定位模型[BMN](./docs/zh-CN/model_zoo/localization/bmn.md)等。
 
 - **更高指标的模型算法**
     PaddleVideo 提供更高精度的模型结构解决方案，在基于TSM标准版改进的[PP-TSM](docs/zh-CN/model_zoo/recognition/pp-tsm.md)上，在Kinectics400数据集上达到2D网络SOTA效果，Top1 Acc 76.16% 相较标准版TSM模型参数量持平，且取得更快的模型速度。
@@ -41,13 +41,13 @@ PaddleVideo飞桨视频模型开发套件，旨在帮助开发者更好的进行
 | :----------------- | :----------------------------------------------------------: | :------------------------------------------------: | :------: | :-------: |
 | 行为识别|   [**PP-TSM**](./docs/zh-CN/model_zoo/recognition/pp-tsm.md)  |    [Kinetics-400](./docs/zh-CN/dataset/k400.md)    |  Top-1   | **76.16** |
 | 行为识别 |  [**PP-TSN**](./docs/zh-CN/model_zoo/recognition/pp-tsn.md)  |    [Kinetics-400](./docs/zh-CN/dataset/k400.md)    |  Top-1   | **75.06** |
-| 行为识别 | [**PP-AGCN**](./docs/zh-CN/model_zoo/recognition/pp-agcn.md) | [FSD-10](./docs/zh-CN/dataset/fsd10.md) | Top-1 | **92.33** |
+| 行为识别 | [AGCN](./docs/zh-CN/model_zoo/recognition/pp-agcn.md) | [FSD-10](./docs/zh-CN/dataset/fsd10.md) | Top-1 | 90.66 |
+| 行为识别 | [ST-GCN](./docs/zh-CN/model_zoo/recognition/stgcn.md) | [FSD-10](./docs/zh-CN/dataset/fsd10.md) | Top-1 | 86.66 |
 | 行为识别 | [TimeSformer](./docs/zh-CN/model_zoo/recognition/timesformer.md) |    [Kinetics-400](./docs/zh-CN/dataset/k400.md)    |  Top-1   |   77.29   |
 | 行为识别 |  [SlowFast](./docs/zh-CN/model_zoo/recognition/slowfast.md)  |    [Kinetics-400](./docs/zh-CN/dataset/k400.md)    |  Top-1   |   75.84   |
 | 行为识别 |       [TSM](./docs/zh-CN/model_zoo/recognition/tsm.md)       |    [Kinetics-400](./docs/zh-CN/dataset/k400.md)    |  Top-1   |   71.06   |
 | 行为识别 |       [TSN](./docs/zh-CN/model_zoo/recognition/tsn.md)       |    [Kinetics-400](./docs/zh-CN/dataset/k400.md)    |  Top-1   |   69.81   |
 | 行为识别 | [AttentionLSTM](./docs/zh-CN/model_zoo/recognition/attention_lstm.md) |  [Youtube-8M](./docs/zh-CN/dataset/youtube8m.md)   |  Hit@1   |   89.0    |
-| 行为识别 | [ST-GCN](./docs/zh-CN/model_zoo/recognition/stgcn.md) | [FSD-10](./docs/zh-CN/dataset/fsd10.md) | Top-1 | 70.0 |
 | 视频动作定位   |      [BMN](./docs/zh-CN/model_zoo/localization/bmn.md)       | [ActivityNet](./docs/zh-CN/dataset/ActivityNet.md) |   AUC    |   67.23   |
 
 <a name="欢迎加入PaddleVideo技术交流群"></a>
@@ -93,6 +93,9 @@ PaddleVideo飞桨视频模型开发套件，旨在帮助开发者更好的进行
        - [Attention-LSTM](docs/zh-CN/model_zoo/recognition/attention_lstm.md)
     - [动作定位](docs/zh-CN/model_zoo/README.md)
        - [BMN](docs/zh-CN/model_zoo/localization/bmn.md)
+    - [基于骨骼的行为识别](docs/zh-CN/model_zoo/README.md)
+       - [ST-GCN](docs/zh-CN/model_zoo/recognition/stgcn.md)
+       - [AGCN](docs/zh-CN/model_zoo/recognition/agcn.md)
     - 时空动作检测 <sup>coming soon</sup>
     - ActBERT: 自监督多模态视频文字学习<sup>coming soon</sup>
 - 项目实战
