@@ -25,7 +25,9 @@ ST-GCN is skeleton-based action recognition model proposed in AAAI 2018.
 ## Data
 
 Please refer to FSD-10 data download and preparation doc [FSD-10](../../dataset/fsd10.md)
+
 Please refer to NTU-RGBD data download and preparation doc [NTU-RGBD](../../dataset/ntu-rgbd.md)
+
 
 ## Train
 
@@ -70,6 +72,7 @@ Test_Data| Top-1 | checkpoints |
 | :----: | :----: | :---- |
 | Test_A | 86.66 | [STGCN_fsd.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/STGCN_fsd.pdparams) |
 | Test_B | 85.0 | - |
+
 
 ### Test on NTU-RGB+D
 
