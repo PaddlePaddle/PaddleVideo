@@ -1,6 +1,6 @@
 [简体中文](../../../zh-CN/model_zoo/recognition/agcn.md) | English
 
-# AGCN: Skeleton-based action recognition model
+# AGCN
 
 ---
 ## Contents
@@ -20,6 +20,7 @@ We implemented Adaptive Graph Convolution Network to improve the accuracy of [ST
 ## Data
 
 Please refer to FSD-10 data download and preparation doc [FSD-10](../../dataset/fsd10.md)
+
 Please refer to NTU-RGBD data download and preparation doc [NTU-RGBD](../../dataset/ntu-rgbd.md)
 
 ## Train
@@ -65,6 +66,7 @@ Accuracy on FSD-10 dataset:
 | :----: | :----: | :---- |
 | Test_A | 90.66 | [AGCN_fsd.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/AGCN_fsd.pdparams) |
 | Test_B | 88.66 | - |
+
 
 ### Test on NTU-RGB+D
 
