@@ -1,6 +1,6 @@
 [English](../../../en/model_zoo/recognition/agcn.md) | 简体中文
 
-# AGCN
+# AGCN基于骨骼的行为识别模型
 
 ---
 ## 内容
@@ -16,7 +16,7 @@
 ## 模型简介
 
 
-我们对[ST-GCN模型](./stgcn.md)进行了优化，实现了精度更高的基于骨骼的行为识别模型AGCN，模型优化细节参考[AGCN模型详解]().
+我们对[ST-GCN模型](./stgcn.md)进行了优化，实现了精度更高的AGCN模型，模型优化细节参考[AGCN模型详解]().
 
 
 ## 数据准备
