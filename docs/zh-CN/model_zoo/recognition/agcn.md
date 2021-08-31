@@ -1,6 +1,6 @@
-[English](../../../en/model_zoo/recognition/stgcn.md)  | 简体中文
+[English](../../../en/model_zoo/recognition/agcn.md) | 简体中文
 
-# ST-GCN基于骨骼的行为识别模型
+# AGCN
 
 ---
 ## 内容
@@ -15,11 +15,8 @@
 
 ## 模型简介
 
-ST-GCN是AAAI 2018提出的经典的基于骨骼的行为识别模型，通过将图卷积应用在具有拓扑结构的人体骨骼数据上，使用时空图卷积提取时空特征进行行为识别，极大地提升了基于骨骼的行为识别任务精度。
 
-<div align="center">
-<img src="../../../images/st-gcn.png" height=200 width=950 hspace='10'/> <br />
-</div>
+我们对[ST-GCN模型](./stgcn.md)进行了优化，实现了精度更高的基于骨骼的行为识别模型AGCN，模型优化细节参考[AGCN模型详解]().
 
 
 ## 数据准备
@@ -28,7 +25,6 @@ FSD-10数据下载及准备请参考[FSD-10数据准备](../../dataset/fsd10.md)
 
 NTU-RGBD数据下载及准备请参考[NTU-RGBD数据准备](../../dataset/ntu-rgbd.md)
 
-
 ## 模型训练
 
 ### FSD-10数据集训练
@@ -36,23 +32,22 @@ NTU-RGBD数据下载及准备请参考[NTU-RGBD数据准备](../../dataset/ntu-r
 - FSD-10数据集使用单卡训练，启动命令如下:
 
 ```bash
-python3.7 main.py -c configs/recognition/stgcn/stgcn_fsd.yaml
+python3.7 main.py -c configs/recognition/agcn/agcn_fsd.yaml
 ```
 
 - 由于赛事未提供验证集数据，因此训练时不做valid。
 
 - 您可以自定义修改参数配置，以达到在不同的数据集上进行训练/测试的目的，参数用法请参考[config](../../tutorials/config.md)。
 
-
 ### NTU-RGBD数据集训练
 
 - NTU-RGBD数据集使用4卡训练，启动命令如下:
 
 ```bash
-python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3"  --log_dir=log_stgcn  main.py  --validate -c configs/recognition/stgcn/stgcn_ntucs.yaml
+python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3"  --log_dir=log_agcn  main.py  --validate -c configs/recognition/agcn/agcn_ntucs.yaml
 ```
 
-- 配置文件`stgcn_ntucs.yaml`为NTU-RGB+D数据集按cross-subject划分方式对应的训练配置。
+- `agcn_ntucs.yaml`配置文件为NTU-RGB+D数据集按cross-subject划分方式对应的训练配置。
 
 
 ## 模型测试
@@ -62,7 +57,7 @@ python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3"  --log_dir=log_stgcn 
 - 模型测试的启动命令如下：
 
 ```bash
-python3.7 main.py --test -c configs/recognition/stgcn/stgcn_fsd.yaml -w output/STGCN/STGCN_epoch_00060.pdparams
+python3.7 main.py --test -c configs/recognition/agcn/agcn_fsd.yaml  -w output/AGCN/AGCN_epoch_00100.pdparams
 ```
 
 - 通过`-c`参数指定配置文件，通过`-w`指定权重存放路径进行模型测试。
@@ -71,10 +66,10 @@ python3.7 main.py --test -c configs/recognition/stgcn/stgcn_fsd.yaml -w output/S
 
 模型在FSD-10数据集上baseline实验精度如下:
 
-Test_Data| Top-1 | checkpoints |
+| Test_Data | Top-1 | checkpoints |
 | :----: | :----: | :---- |
-| Test_A | 86.66 | [STGCN_fsd.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/STGCN_fsd.pdparams) |
-| Test_B | 85.0 | - |
+| Test_A | 90.66 | [AGCN_fsd.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/AGCN_fsd.pdparams) |
+| Test_B | 88.66 | - |
 
 
 ### NTU-RGB+D数据集模型测试
@@ -82,7 +77,7 @@ Test_Data| Top-1 | checkpoints |
 - 模型测试的启动命令如下：
 
 ```bash
-python3.7 main.py --test -c configs/recognition/stgcn/stgcn_ntucs.yaml -w output/STGCN/STGCN_best.pdparams
+python3.7 main.py --test -c configs/recognition/agcn/agcn_ntucs.yaml -w output/AGCN/AGCN_best.pdparams
 ```
 
 - 通过`-c`参数指定配置文件，通过`-w`指定权重存放路径进行模型测试。
@@ -91,7 +86,7 @@ python3.7 main.py --test -c configs/recognition/stgcn/stgcn_ntucs.yaml -w output
 
 | split | Top-1 | checkpoints |
 | :----: | :----: | :---- |
-| cross-subject | 82.28 | [STGCN_ntucs.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/STGCN_ntucs.pdparams) |
+| cross-subject | 83.27 | [AGCN_ntucs.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/AGCN_ntucs.pdparams) |
 
 
 ## 模型推理
@@ -99,12 +94,12 @@ python3.7 main.py --test -c configs/recognition/stgcn/stgcn_ntucs.yaml -w output
 ### 导出inference模型
 
 ```bash
-python3.7 tools/export_model.py -c configs/recognition/stgcn/stgcn_fsd.yaml \
-                                -p data/STGCN_fsd.pdparams \
-                                -o inference/STGCN
+python3.7 tools/export_model.py -c configs/recognition/agcn/agcn_fsd.yaml \
+                                -p data/AGCN_fsd.pdparams \
+                                -o inference/AGCN
 ```
 
-上述命令将生成预测所需的模型结构文件`STGCN.pdmodel`和模型权重文件`STGCN.pdiparams`。
+上述命令将生成预测所需的模型结构文件`AGCN.pdmodel`和模型权重文件`AGCN.pdiparams`。
 
 - 各参数含义可参考[模型推理方法](https://github.com/PaddlePaddle/PaddleVideo/blob/release/2.0/docs/zh-CN/start.md#2-%E6%A8%A1%E5%9E%8B%E6%8E%A8%E7%90%86)
 
@@ -112,9 +107,9 @@ python3.7 tools/export_model.py -c configs/recognition/stgcn/stgcn_fsd.yaml \
 
 ```bash
 python3.7 tools/predict.py --input_file data/fsd10/example_skeleton.npy \
-                           --config configs/recognition/stgcn/stgcn_fsd.yaml \
-                           --model_file inference/STGCN/STGCN.pdmodel \
-                           --params_file inference/STGCN/STGCN.pdiparams \
+                           --config configs/recognition/agcn/agcn_fsd.yaml \
+                           --model_file inference/AGCN/AGCN.pdmodel \
+                           --params_file inference/AGCN/AGCN.pdiparams \
                            --use_gpu=True \
                            --use_tensorrt=False
 ```
@@ -124,12 +119,17 @@ python3.7 tools/predict.py --input_file data/fsd10/example_skeleton.npy \
 ```
 Current video file: data/fsd10/example_skeleton.npy
         top-1 class: 0
-        top-1 score: 0.9847044944763184
+        top-1 score: 0.8932635188102722
 ```
 
-可以看到，使用在FSD-10上训练好的pp-AGCN模型对`data/example_skeleton.npy`进行预测，输出的top1类别id为`0`，置信度为0.98。
-
+可以看到，使用在FSD-10上训练好的pp-AGCN模型对`data/example_skeleton.npy`进行预测，输出的top1类别id为`0`，置信度为0.89。
 
 ## 参考论文
 
 - [Spatial Temporal Graph Convolutional Networks for Skeleton-Based Action Recognition](https://arxiv.org/abs/1801.07455), Sijie Yan, Yuanjun Xiong, Dahua Lin
+
+- [Two-Stream Adaptive Graph Convolutional Networks for Skeleton-Based Action Recognition](https://arxiv.org/abs/1805.07694), Lei Shi, Yifan Zhang, Jian Cheng, Hanqing Lu
+
+- [Skeleton-Based Action Recognition with Multi-Stream Adaptive Graph Convolutional Networks](https://arxiv.org/abs/1912.06971), Lei Shi, Yifan Zhang, Jian Cheng, Hanqing Lu
+
+- Many thanks to [li7819559](https://github.com/li7819559) and [ZhaoJingjing713](https://github.com/ZhaoJingjing713) for contributing the code.

@@ -1,39 +1,43 @@
 MODEL: #MODEL field
     framework: "RecognizerGCN" #Mandatory, indicate the type of network, associate to the 'paddlevideo/modeling/framework/' .
     backbone: #Mandatory, indicate the type of backbone, associate to the 'paddlevideo/modeling/backbones/' .
-        name: "ppAGCN" #Mandatory, The name of backbone.
+        name: "AGCN" #Mandatory, The name of backbone.
+        in_channels: 3
     head:
         name: "STGCNHead" #Mandatory, indicate the type of head, associate to the 'paddlevideo/modeling/heads'
-        num_classes: 10  #Optional, the number of classes to be classified.
-        ls_eps: 0.1 
+        num_classes: 60  #Optional, the number of classes to be classified.
+        ls_eps: 0.1
 
 DATASET: #DATASET field
-    batch_size: 64 #Mandatory, bacth size
+    batch_size: 16 #Mandatory, bacth size
     num_workers: 4 #Mandatory, the number of subprocess on each GPU.
     test_batch_size: 1
     test_num_workers: 0
     train:
         format: "SkeletonDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
-        file_path: "FSD-data/train_data.npy" #Mandatory, train data index file path
-        label_path: "FSD-data/train_label.npy"
+        file_path: "NTU-RGB-D/xsub/train_data.npy" #Mandatory, train data index file path
+        label_path: "NTU-RGB-D/xsub/train_label.pkl"
+    valid:
+        format: "SkeletonDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
+        file_path: "NTU-RGB-D/xsub/val_data.npy" #Mandatory, valid data index file path
+        label_path: "NTU-RGB-D/xsub/val_label.pkl"
+        test_mode: True
     test:
         format: "SkeletonDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
-        file_path: "FSD-data/test_A_data.npy" #Mandatory, valid data index file path
+        file_path: "NTU-RGB-D/xsub/val_data.npy" #Mandatory, valid data index file path
+        label_path: "NTU-RGB-D/xsub/val_label.pkl"
         test_mode: True
 
 PIPELINE: #PIPELINE field
     train: #Mandotary, indicate the pipeline to deal with the training data, associate to the 'paddlevideo/loader/pipelines/'
-        sample:
-            name: "SampleFrame"
-            window_size: 350
         transform: #Mandotary, image transfrom operator
-            - SkeletonNorm:
-    test: #Mandatory, indicate the pipeline to deal with the validing data. associate to the 'paddlevideo/loader/pipelines/'
-        sample:
-            name: "SampleFrame"
-            window_size: 350
+            - Iden:
+    valid: #Mandotary, indicate the pipeline to deal with the training data, associate to the 'paddlevideo/loader/pipelines/'
         transform: #Mandotary, image transfrom operator
-            - SkeletonNorm:
+            - Iden:
+    test: #Mandotary, indicate the pipeline to deal with the training data, associate to the 'paddlevideo/loader/pipelines/'
+        transform: #Mandotary, image transfrom operator
+            - Iden:
 
 OPTIMIZER: #OPTIMIZER field
   name: 'Momentum'
@@ -41,10 +45,10 @@ OPTIMIZER: #OPTIMIZER field
   learning_rate:
     iter_step: True
     name: 'CustomWarmupCosineDecay'
-    max_epoch: 100
+    max_epoch: 60
     warmup_epochs: 10
-    warmup_start_lr: 0.005
-    cosine_base_lr: 0.05
+    warmup_start_lr: 0.01
+    cosine_base_lr: 0.1
   weight_decay:
     name: 'L2'
     value: 1e-4
@@ -56,16 +60,8 @@ MIX:
 
 METRIC:
     name: 'SkeletonMetric'
-    out_file: 'submission.csv'
 
 
-INFERENCE:
-    name: 'STGCN_Inference_helper'
-    num_channels: 2
-    window_size: 350
-    vertex_nums: 25
-
-
-model_name: "ppAGCN"
+model_name: "AGCN"
 log_interval: 10 #Optional, the interal of logger, default:10
-epochs: 100 #Mandatory, total epoch
+epochs: 60 #Mandatory, total epoch

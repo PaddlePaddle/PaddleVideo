@@ -1,10 +1,11 @@
 MODEL: #MODEL field
     framework: "RecognizerGCN" #Mandatory, indicate the type of network, associate to the 'paddlevideo/modeling/framework/' .
     backbone: #Mandatory, indicate the type of backbone, associate to the 'paddlevideo/modeling/backbones/' .
-        name: "STGCN" #Mandatory, The name of backbone.
+        name: "AGCN" #Mandatory, The name of backbone.
     head:
         name: "STGCNHead" #Mandatory, indicate the type of head, associate to the 'paddlevideo/modeling/heads'
         num_classes: 10  #Optional, the number of classes to be classified.
+        ls_eps: 0.1
 
 DATASET: #DATASET field
     batch_size: 64 #Mandatory, bacth size
@@ -38,12 +39,19 @@ OPTIMIZER: #OPTIMIZER field
   name: 'Momentum'
   momentum: 0.9
   learning_rate:
-    name: 'CosineAnnealingDecay'
-    learning_rate: 0.05
-    T_max: 60
+    iter_step: True
+    name: 'CustomWarmupCosineDecay'
+    max_epoch: 100
+    warmup_epochs: 10
+    warmup_start_lr: 0.005
+    cosine_base_lr: 0.05
   weight_decay:
     name: 'L2'
     value: 1e-4
+
+MIX:
+    name: "Mixup"
+    alpha: 0.2
 
 
 METRIC:
@@ -59,6 +67,6 @@ INFERENCE:
     person_nums: 1
 
 
-model_name: "STGCN"
+model_name: "AGCN"
 log_interval: 10 #Optional, the interal of logger, default:10
-epochs: 60 #Mandatory, total epoch
+epochs: 100 #Mandatory, total epoch
