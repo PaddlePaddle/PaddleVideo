@@ -1,6 +1,6 @@
 [English](../../../en/model_zoo/recognition/agcn.md) | 简体中文
 
-# AGCN基于骨骼的行为识别模型
+# AGCN
 
 ---
 ## 内容
@@ -16,12 +16,13 @@
 ## 模型简介
 
 
-我们对[ST-GCN模型](./stgcn.md)进行了优化，实现了精度更高的AGCN模型，模型优化细节参考[AGCN模型详解]().
+我们对[ST-GCN模型](./stgcn.md)进行了优化，实现了精度更高的基于骨骼的行为识别模型AGCN，模型优化细节参考[AGCN模型详解]().
 
 
 ## 数据准备
 
 FSD-10数据下载及准备请参考[FSD-10数据准备](../../dataset/fsd10.md)
+
 NTU-RGBD数据下载及准备请参考[NTU-RGBD数据准备](../../dataset/ntu-rgbd.md)
 
 ## 模型训练
@@ -69,6 +70,7 @@ python3.7 main.py --test -c configs/recognition/agcn/agcn_fsd.yaml  -w output/AG
 | :----: | :----: | :---- |
 | Test_A | 90.66 | [AGCN_fsd.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/AGCN_fsd.pdparams) |
 | Test_B | 88.66 | - |
+
 
 ### NTU-RGB+D数据集模型测试
 
