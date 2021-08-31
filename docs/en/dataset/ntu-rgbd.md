@@ -16,16 +16,10 @@ The dataset contains two splits when dividing the training set and test set. For
 
 ## Download
 
-We provide the download link of the processed dataset [st-gcn-processed-data.zip](). Please download and unzip, the directory structure is as follows：
+We provide the download link of the processed dataset [NTU-RGB-D.tar](https://videotag.bj.bcebos.com/Data/NTU-RGB-D.tar)(~3.1G). Please download and unzip, the directory structure is as follows：
 
 ```txt
-├── Kinetics
-│   └── kinetics-skeleton
-│       ├── train_data.npy
-│       ├── train_label.pkl
-│       ├── val_data.npy
-│       └── val_label.pkl
-└── NTU-RGB-D
+─── NTU-RGB-D
     ├── xsub
     │   ├── train_data.npy
     │   ├── train_label.pkl
