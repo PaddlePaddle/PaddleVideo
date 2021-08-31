@@ -25,7 +25,9 @@ ST-GCN是AAAI 2018提出的经典的基于骨骼的行为识别模型，通过�
 ## 数据准备
 
 FSD-10数据下载及准备请参考[FSD-10数据准备](../../dataset/fsd10.md)
+
 NTU-RGBD数据下载及准备请参考[NTU-RGBD数据准备](../../dataset/ntu-rgbd.md)
+
 
 ## 模型训练
 
@@ -50,7 +52,7 @@ python3.7 main.py -c configs/recognition/stgcn/stgcn_fsd.yaml
 python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3"  --log_dir=log_stgcn  main.py  --validate -c configs/recognition/stgcn/stgcn_ntucs.yaml
 ```
 
-- `stgcn_ntucs.yaml`配置文件为NTU-RGB+D数据集按cross-subject划分方式对应的训练配置。
+- 配置文件`stgcn_ntucs.yaml`为NTU-RGB+D数据集按cross-subject划分方式对应的训练配置。
 
 
 ## 模型测试
@@ -73,6 +75,7 @@ Test_Data| Top-1 | checkpoints |
 | :----: | :----: | :---- |
 | Test_A | 86.66 | [STGCN_fsd.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/STGCN_fsd.pdparams) |
 | Test_B | 85.0 | - |
+
 
 ### NTU-RGB+D数据集模型测试
 
