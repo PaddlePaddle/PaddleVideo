@@ -73,9 +73,12 @@ PaddleVideo飞桨视频模型开发套件，旨在帮助开发者更好的进行
 
 
 ## 文档教程
-- 免费视频课程及PPT课件
-    - [2021.1月](https://aistudio.baidu.com/aistudio/course/introduce/6742)
+- 免费视频课程、PPT、AIStudio教程
+    - [飞桨视频库全面解析](https://aistudio.baidu.com/aistudio/course/introduce/6742)
     - [视频分类及动作识别介绍](https://github.com/PaddlePaddle/PaddleVideo/blob/main/docs/zh-CN/tutorials/summarize.md)
+    - [【官方】Paddle 2.1实现视频理解经典模型 - TSN](https://aistudio.baidu.com/aistudio/projectdetail/2250682)
+    - [【官方】Paddle 2.1实现视频理解经典模型 - TSM](https://aistudio.baidu.com/aistudio/projectdetail/2310889)
+    - [BMN视频动作定位](https://aistudio.baidu.com/aistudio/projectdetail/2250674)
 - 快速入门
     - [安装说明](docs/zh-CN/install.md)
     - [快速开始](docs/zh-CN/start.md)

@@ -42,7 +42,7 @@ UCF101 data download and preparation please refer to [UCF-101 data preparation](
    wget https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_vd_ssld_v2_pretrained.pdparams
    ```
 
-2. Open `PaddleVideo/configs/recognition/pptsn/pptsn_k400_frames_uniform.yaml`, and fill in the downloaded weight storage path below `pretrained:`
+2. Open `PaddleVideo/configs/recognition/pptsn/pptsn_k400_frames.yaml`, and fill in the downloaded weight storage path below `pretrained:`
 
     ```yaml
     MODEL:
