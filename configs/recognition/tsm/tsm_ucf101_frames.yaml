@@ -110,6 +110,12 @@ METRIC:
     name: 'CenterCropMetric'
 
 
+INFERENCE:
+    name: 'ppTSM_Inference_helper'
+    num_seg: 8
+    target_size: 224
+
+
 model_name: "TSM"
 log_interval: 20 #Optional, the interal of logger, default:10
 save_interval: 10
