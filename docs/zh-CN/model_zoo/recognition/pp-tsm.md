@@ -152,6 +152,7 @@ python3.7 tools/predict.py --input_file data/example.avi \
                            --use_tensorrt=False
 ```
 
+
 输出示例如下:
 
 ```
@@ -160,8 +161,18 @@ Current video file: data/example.avi
 	top-1 score: 0.9907386302947998
 ```
 
+
 可以看到，使用在Kinetics-400上训练好的PP-TSM模型对`data/example.avi`进行预测，输出的top1类别id为`5`，置信度为0.99。通过查阅类别id与名称对应表`data/k400/Kinetics-400_label_list.txt`，可知预测类别名称为`archery`。
 
+- **注意**：对于在计算时会合并N和T的模型（比如TSN、TSM），当`use_tensorrt=True`时，需要修改`predict.py`的`max_batch_size`。
+
+  ```python
+  if args.use_tensorrt:
+          config.enable_tensorrt_engine(
+              precision_mode=Config.Precision.Half
+              if args.use_fp16 else Config.Precision.Float32,
+              max_batch_size=推理模型对应config文件中的num_seg*args.batch_size)
+  ```
 ## 参考论文
 
 - [TSM: Temporal Shift Module for Efficient Video Understanding](https://arxiv.org/pdf/1811.08383.pdf), Ji Lin, Chuang Gan, Song Han

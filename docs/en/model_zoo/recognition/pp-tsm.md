@@ -43,9 +43,9 @@ Please refer to UCF101 data download and preparation doc [ucf101-data](../../dat
 
 ### Train on kinetics-400
 
-#### download pretrain-model 
+#### download pretrain-model
 
-Please download [ResNet50_vd_ssld_v2](https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_vd_ssld_v2_pretrained.pdparams) as pretraind model: 
+Please download [ResNet50_vd_ssld_v2](https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_vd_ssld_v2_pretrained.pdparams) as pretraind model:
 
 ```bash
 wget https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_vd_ssld_v2_pretrained.pdparams
@@ -121,7 +121,7 @@ Accuracy on Kinetics400:
 
 ### export inference model
 
- To get model architecture file `ppTSM.pdmodel` and parameters file `ppTSM.pdiparams`, use: 
+ To get model architecture file `ppTSM.pdmodel` and parameters file `ppTSM.pdiparams`, use:
 
 ```bash
 python3.7 tools/export_model.py -c configs/recognition/pptsm/pptsm_k400_frames_uniform.yaml \
@@ -150,8 +150,16 @@ Current video file: data/example.avi
 	top-1 score: 0.9907386302947998
 ```
 
-we can get the class name using class id and map file `data/k400/Kinetics-400_label_list.txt`. The top1 prediction of `data/example.avi` is `archery`. 
+we can get the class name using class id and map file `data/k400/Kinetics-400_label_list.txt`. The top1 prediction of `data/example.avi` is `archery`.
+- **Note**: For models that combine N and T during calculation (such as TSN, TSM), when `use_tensorrt=True`, the `max_batch_size` of `predict.py` needs to be modified.
 
+  ```python
+    if args.use_tensorrt:
+            config.enable_tensorrt_engine(
+                precision_mode=Config.Precision.Half
+                if args.use_fp16 else Config.Precision.Float32,
+                max_batch_size=num_seg*args.batch_size)
+  ```
 ## Reference
 
 - [TSM: Temporal Shift Module for Efficient Video Understanding](https://arxiv.org/pdf/1811.08383.pdf), Ji Lin, Chuang Gan, Song Han

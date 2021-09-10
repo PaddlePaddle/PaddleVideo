@@ -15,12 +15,12 @@ PaddleVideo
     ├── output #ouput 权重，优化器参数等存储路径
     |    ├── example
     |    |   ├── example_best.pdparams #path_to_weights
-    |    |   └── ...    
-    |    └── ...    
+    |    |   └── ...  
+    |    └── ...  
     ├── log  #log存储路径
     |    ├── worker.0
     |    ├── worker.1
-    |    └── ...    
+    |    └── ...  
     └── inference #预测文件存储路径
          ├── example.pdiparams file
          ├── example.pdimodel file
@@ -171,11 +171,22 @@ python tools/predict.py \
     --use_gpu=True \
     --use_tensorrt=False
 ```
+- **注意**：对于在计算时会合并N和T的模型（比如TSN、TSM），当`use_tensorrt=True`时，需要修改`predict.py`的`max_batch_size`。
+
+  ```python
+  if args.use_tensorrt:
+          config.enable_tensorrt_engine(
+              precision_mode=Config.Precision.Half
+              if args.use_fp16 else Config.Precision.Float32,
+              max_batch_size=num_seg*args.batch_size)
+  ```
+
 其中：
+
 + `video_file`：待预测的视频文件路径，如 `./test.avi`
 + `model_file`：模型结构文件路径，如 `./inference/example.pdmodel`
 + `params_file`：模型权重文件路径，如 `./inference/example.pdiparams`
-+ `use_tensorrt`：是否使用 TesorRT 预测引擎，默认值：`True`
++ `use_tensorrt`：是否使用 TesorRT 预测引擎，默认值：`False`
 + `use_gpu`：是否使用 GPU 预测，默认值：`True`
 
 benchmark 预测速度结果由 `tools/predict.py` 进行评测 ，具体参考[评测文档](benchmark.md) 。

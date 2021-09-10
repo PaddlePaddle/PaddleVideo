@@ -139,7 +139,15 @@ Current video file: data/example.avi
 ```
 
 It can be seen that using the PP-TSN model trained on Kinetics-400 to predict `data/example.avi`, the output top1 category id is `5`, and the confidence is 0.99. By consulting the category id and name correspondence table `data/k400/Kinetics-400_label_list.txt`, it can be known that the predicted category name is `archery`.
+- **Note**: For models that combine N and T during calculation (such as TSN, TSM), when `use_tensorrt=True`, the `max_batch_size` of `predict.py` needs to be modified.
 
+  ```python
+    if args.use_tensorrt:
+            config.enable_tensorrt_engine(
+                precision_mode=Config.Precision.Half
+                if args.use_fp16 else Config.Precision.Float32,
+                max_batch_size=num_seg*args.batch_size)
+  ```
 ## Reference
 
 - [Temporal Segment Networks: Towards Good Practices for Deep Action Recognition](https://arxiv.org/pdf/1608.00859.pdf), Limin Wang, Yuanjun Xiong, Zhe Wang
