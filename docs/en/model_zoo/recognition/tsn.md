@@ -95,15 +95,17 @@ python3.7 tools/predict.py --input_file data/example.avi \
                            --use_gpu=True \
                            --use_tensorrt=False
 ```
-- **Note**: For models that combine N and T during calculation (such as TSN, TSM), when `use_tensorrt=True`, the `max_batch_size` of `predict.py` needs to be modified.
+- **Note**: For models that combine N and T during calculation (such as TSN, TSM), when `use_tensorrt=True`, you need to specify the `batch_size` argument as batch_size\*num_seg.
 
-  ```python
-    if args.use_tensorrt:
-            config.enable_tensorrt_engine(
-                precision_mode=Config.Precision.Half
-                if args.use_fp16 else Config.Precision.Float32,
-                max_batch_size=num_seg*args.batch_size)
-  ```
+    ```bash
+    python3.7 tools/predict.py --input_file data/example.avi \
+                               --config configs/recognition/tsn/tsn_k400_frames.yaml \
+                               --model_file inference/TSN/TSN.pdmodel \
+                               --params_file inference/TSN/TSN.pdiparams \
+                               --batch_size 3 \
+                               --use_gpu=True \
+                               --use_tensorrt=True
+    ```
 ## Details
 
 **data processing:**
