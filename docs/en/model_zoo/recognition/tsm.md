@@ -64,7 +64,7 @@ Please refer to UCF101 data download and preparation [ucf101 data preparation](.
   ```bash
   python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_tsm main.py  --validate -c configs/recognition/tsm/tsm_k400_frames.yaml
   ```
-  
+
 - Training Kinetics-400 dataset of videos format using scripts.
 
   ```bash
@@ -195,6 +195,17 @@ python3.7 tools/predict.py --input_file data/example.avi \
                            --use_gpu=True \
                            --use_tensorrt=False
 ```
+- **Note**: For models that combine N and T during calculation (such as TSN, TSM), when `use_tensorrt=True`, you need to specify the `batch_size` argument as batch_size\*num_seg.
+
+    ```bash
+    python3.7 tools/predict.py --input_file data/example.avi \
+                               --config configs/recognition/tsm/tsm_k400_frames.yaml \
+                               --model_file inference/TSM/TSM.pdmodel \
+                               --params_file inference/TSM/TSM.pdiparams \
+                               --batch_size 8 \
+                               --use_gpu=True \
+                               --use_tensorrt=True
+    ```
 
 ## Implementation details
 

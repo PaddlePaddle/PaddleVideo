@@ -139,7 +139,17 @@ Current video file: data/example.avi
 ```
 
 It can be seen that using the PP-TSN model trained on Kinetics-400 to predict `data/example.avi`, the output top1 category id is `5`, and the confidence is 0.99. By consulting the category id and name correspondence table `data/k400/Kinetics-400_label_list.txt`, it can be known that the predicted category name is `archery`.
+- **Note**: For models that combine N and T during calculation (such as TSN, TSM), when `use_tensorrt=True`, you need to specify the `batch_size` argument as batch_size\*num_seg.
 
+    ```bash
+    python3.7 tools/predict.py --input_file data/example.avi \
+                               --config configs/recognition/pptsn/pptsn_k400_frames.yaml \
+                               --model_file inference/ppTSN/ppTSN.pdmodel \
+                               --params_file inference/ppTSN/ppTSN.pdiparams \
+                               --batch_size 8 \
+                               --use_gpu=True \
+                               --use_tensorrt=True
+    ```
 ## Reference
 
 - [Temporal Segment Networks: Towards Good Practices for Deep Action Recognition](https://arxiv.org/pdf/1608.00859.pdf), Limin Wang, Yuanjun Xiong, Zhe Wang

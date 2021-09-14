@@ -39,11 +39,11 @@ UCF101数据下载及准备请参考[ucf101数据准备](../../dataset/ucf101.md
 #### 下载并添加预训练模型
 
 1. 加载在ImageNet1000上训练好的ResNet50权重作为Backbone初始化参数[ResNet50_pretrain.pdparams](https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_pretrain.pdparams)，也可以通过命令行下载
-   
+
    ```bash
    wget https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_pretrain.pdparams
    ```
-   
+
 2. 打开`PaddleVideo/configs/recognition/tsm/tsm_k400_frames.yaml`，将下载好的权重路径填写到下方`pretrained:`之后
 
    ```yaml
@@ -61,7 +61,7 @@ UCF101数据下载及准备请参考[ucf101数据准备](../../dataset/ucf101.md
   ```bash
   python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_tsm main.py  --validate -c configs/recognition/tsm/tsm_k400_frames.yaml
   ```
-  
+
 - Kinetics400数据集使用8卡训练，videos格式数据的训练启动命令如下:
 
   ```bash
@@ -78,7 +78,7 @@ UCF101数据下载及准备请参考[ucf101数据准备](../../dataset/ucf101.md
    python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_tsm main.py  --amp --validate -c configs/recognition/tsm/tsm_k400_frames.yaml
    ```
 
-- 使用amp混合精度训练时，配合`nhwc`的数据格式有更好的加速效果，其训练启动方式如下: 
+- 使用amp混合精度训练时，配合`nhwc`的数据格式有更好的加速效果，其训练启动方式如下:
 
    ```bash
    export FLAGS_conv_workspace_size_limit=800 #MB
@@ -125,7 +125,7 @@ UCF101数据下载及准备请参考[ucf101数据准备](../../dataset/ucf101.md
   ```bash
   python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3" --log_dir=log_tsm main.py  --validate -c configs/recognition/tsm/tsm_ucf101_videos.yaml
   ```
-  
+
 - 开启amp混合精度训练，可加速训练过程，其训练启动命令如下：
 
    ```bash
@@ -136,7 +136,7 @@ UCF101数据下载及准备请参考[ucf101数据准备](../../dataset/ucf101.md
    python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3" --log_dir=log_tsm main.py  --amp --validate -c configs/recognition/tsm/tsm_ucf101_frames.yaml
    ```
 
-- 使用amp混合精度训练时，配合`nhwc`的数据格式有更好的加速效果，其训练启动方式如下: 
+- 使用amp混合精度训练时，配合`nhwc`的数据格式有更好的加速效果，其训练启动方式如下:
 
    ```bash
    export FLAGS_conv_workspace_size_limit=800 #MB
@@ -190,7 +190,7 @@ python3.7 tools/export_model.py -c configs/recognition/tsm/tsm_k400_frames.yaml 
 
 上述命令将生成预测所需的模型结构文件`TSM.pdmodel`和模型权重文件`TSM.pdiparams`。
 
-各参数含义可参考[模型推理方法](https://github.com/PaddlePaddle/PaddleVideo/blob/release/2.0/docs/zh-CN/start.md#2-%E6%A8%A1%E5%9E%8B%E6%8E%A8%E7%90%86) 
+各参数含义可参考[模型推理方法](https://github.com/PaddlePaddle/PaddleVideo/blob/release/2.0/docs/zh-CN/start.md#2-%E6%A8%A1%E5%9E%8B%E6%8E%A8%E7%90%86)
 
 ### 使用预测引擎推理
 
@@ -202,7 +202,17 @@ python3.7 tools/predict.py --input_file data/example.avi \
                            --use_gpu=True \
                            --use_tensorrt=False
 ```
+- **注意**：对于在计算时会合并N和T的模型（比如TSN、TSM），当`use_tensorrt=True`时，需要指定`batch_size`参数为batch_size*num_seg。
 
+    ```bash
+    python3.7 tools/predict.py --input_file data/example.avi \
+                               --config configs/recognition/tsm/tsm_k400_frames.yaml \
+                               --model_file inference/TSM/TSM.pdmodel \
+                               --params_file inference/TSM/TSM.pdiparams \
+                               --batch_size 8 \
+                               --use_gpu=True \
+                               --use_tensorrt=True
+    ```
 ## 实现细节
 
 **数据处理**

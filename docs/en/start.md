@@ -16,12 +16,12 @@ PaddleVideo
     ├── output #ouput destination
     |    ├── example
     |    |   ├── example_best.pdparams #path_to_weights
-    |    |   └── ...    
-    |    └── ...    
+    |    |   └── ...  
+    |    └── ...  
     ├── log  #log file destination.
     |    ├── worker.0
     |    ├── worker.1
-    |    └── ...    
+    |    └── ...  
     └── inference #inference files destination.
          ├── .pdiparams file
          ├── .pdimodel file
@@ -81,7 +81,7 @@ After starting training, log files will generated, and its format is shown as be
 
 
 [epoch end] current time, metrics, elapse time, ips, etc.
- 
+
     [12/28 17:31:38] END epoch:80  val loss_avg: 0.52208 top1_avg: 0.84398 top5_avg: 0.97393 elapse_avg: 0.234 reader_avg: 0.000 elapse_sum: 7.021s ips: 136.73686 instance/sec.
 
 [the best Acc]  
@@ -166,12 +166,22 @@ python tools/predict.py \
     --use_gpu=True \
     --use_tensorrt=False
 ```
+- **Note**: For models that combine N and T during calculation (such as TSN, TSM), when `use_tensorrt=True`, you need to specify the `batch_size` argument as batch_size\*num_seg.
 
+    ```bash
+    python tools/predict.py \
+        --video_file "data/example.avi" \
+        --model_file "./inference/example.pdmodel" \
+        --params_file "./inference/example.pdiparams" \
+        --batch_size 8 \
+        --use_gpu=True \
+        --use_tensorrt=True
+    ```
 Attributes:
 + `video_file`: video file path.
 + `model_file`: pdmodel file path.
 + `params_file`: pdiparams file path.
-+ `use_tensorrt`: use tensorrt to acclerate or not, default: True.
++ `use_tensorrt`: use tensorrt to acclerate or not, default: False.
 + `use_gpu`: use gpu to infer or not, default: True.
 
 benchmark results are shown in th [benchmark](./benchmark.md).
