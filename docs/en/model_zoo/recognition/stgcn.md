@@ -70,8 +70,7 @@ Accuracy on FSD-10 dataset:
 
 Test_Data| Top-1 | checkpoints |
 | :----: | :----: | :---- |
-| Test_A | 86.66 | [STGCN_fsd.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/STGCN_fsd.pdparams) |
-| Test_B | 85.0 | - |
+| Test_A | 86.66 | [STGCN_fsd.pdparams]() |
 
 
 ### Test on NTU-RGB+D
