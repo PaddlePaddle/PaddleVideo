@@ -40,10 +40,7 @@ OPTIMIZER: #OPTIMIZER field
   learning_rate:
     name: 'CosineAnnealingDecay'
     learning_rate: 0.05
-    T_max: 60
-  weight_decay:
-    name: 'L2'
-    value: 1e-4
+    T_max: 30
 
 
 METRIC:
@@ -61,4 +58,4 @@ INFERENCE:
 
 model_name: "STGCN"
 log_interval: 10 #Optional, the interal of logger, default:10
-epochs: 60 #Mandatory, total epoch
+epochs: 30 #Mandatory, total epoch
