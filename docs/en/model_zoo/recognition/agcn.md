@@ -58,7 +58,7 @@ python3.7 main.py --test -c configs/recognition/agcn/agcn_fsd.yaml  -w output/AG
 
 - Specify the config file with `-c`, specify the weight path with `-w`.
 
-- Evaluation results will be saved in `submission.csv` file, final score can be obtained in [competition website]().
+- Evaluation results will be saved in `submission.csv` file, final score can be obtained in [competition website](https://aistudio.baidu.com/aistudio/competition/detail/115).
 
 Accuracy on FSD-10 dataset:
 
