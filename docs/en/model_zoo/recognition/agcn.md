@@ -64,7 +64,7 @@ Accuracy on FSD-10 dataset:
 
 | Test_Data | Top-1 | checkpoints |
 | :----: | :----: | :---- |
-| Test_A | 90.66 | [AGCN_fsd.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/AGCN_fsd.pdparams) |
+| Test_A | 90.66 | AGCN_fsd.pdparams|
 | Test_B | 88.66 | - |
 
 
@@ -82,7 +82,7 @@ Accuracy on NTU-RGB+D dataset:
 
 | split | Top-1 | checkpoints |
 | :----: | :----: | :---- |
-| cross-subject | 83.27 | [AGCN_ntucs.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/AGCN_ntucs.pdparams) |
+| cross-subject | 83.27 | AGCN_ntucs.pdparams|
 
 
 ## Inference
