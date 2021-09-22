@@ -59,7 +59,7 @@ python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3"  --log_dir=log_stgcn 
 - Test scripts：
 
 ```bash
-python3.7 main.py --test -c configs/recognition/stgcn/stgcn_fsd.yaml -w output/STGCN/STGCN_epoch_00060.pdparams
+python3.7 main.py --test -c configs/recognition/stgcn/stgcn_fsd.yaml -w output/STGCN/STGCN_epoch_00030.pdparams
 ```
 
 - Specify the config file with `-c`, specify the weight path with `-w`.
@@ -70,7 +70,7 @@ Accuracy on FSD-10 dataset:
 
 Test_Data| Top-1 | checkpoints |
 | :----: | :----: | :---- |
-| Test_A | 71.33 | [STGCN_fsd.pdparams]() |
+| Test_A | 71.33 | [STGCN_fsd.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/STGCN_fsd_e30.pdparams) |
 
 
 ### Test on NTU-RGB+D
