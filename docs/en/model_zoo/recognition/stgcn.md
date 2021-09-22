@@ -70,7 +70,7 @@ Accuracy on FSD-10 dataset:
 
 Test_Data| Top-1 | checkpoints |
 | :----: | :----: | :---- |
-| Test_A | 86.66 | [STGCN_fsd.pdparams]() |
+| Test_A | 71.33 | [STGCN_fsd.pdparams]() |
 
 
 ### Test on NTU-RGB+D
