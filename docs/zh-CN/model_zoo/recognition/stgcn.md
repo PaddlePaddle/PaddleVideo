@@ -73,8 +73,7 @@ python3.7 main.py --test -c configs/recognition/stgcn/stgcn_fsd.yaml -w output/S
 
 Test_Data| Top-1 | checkpoints |
 | :----: | :----: | :---- |
-| Test_A | 86.66 | [STGCN_fsd.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/STGCN_fsd.pdparams) |
-| Test_B | 85.0 | - |
+| Test_A | 71.33 | [STGCN_fsd.pdparams]() |
 
 
 ### NTU-RGB+D数据集模型测试
