@@ -62,7 +62,7 @@ python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3"  --log_dir=log_stgcn 
 - 模型测试的启动命令如下：
 
 ```bash
-python3.7 main.py --test -c configs/recognition/stgcn/stgcn_fsd.yaml -w output/STGCN/STGCN_epoch_00060.pdparams
+python3.7 main.py --test -c configs/recognition/stgcn/stgcn_fsd.yaml -w output/STGCN/STGCN_epoch_00030.pdparams
 ```
 
 - 通过`-c`参数指定配置文件，通过`-w`指定权重存放路径进行模型测试。
@@ -73,7 +73,7 @@ python3.7 main.py --test -c configs/recognition/stgcn/stgcn_fsd.yaml -w output/S
 
 Test_Data| Top-1 | checkpoints |
 | :----: | :----: | :---- |
-| Test_A | 71.33 | [STGCN_fsd.pdparams]() |
+| Test_A | 71.33 | [STGCN_fsd.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/STGCN_fsd_e30.pdparams) |
 
 
 ### NTU-RGB+D数据集模型测试
