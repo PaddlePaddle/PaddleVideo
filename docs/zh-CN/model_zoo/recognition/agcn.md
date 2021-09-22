@@ -70,6 +70,8 @@ python3.7 main.py --test -c configs/recognition/agcn/agcn_fsd.yaml  -w output/AG
 | :----: | :----: | :---- |
 | Test_A | 90.66 | AGCN_fsd.pdparams |
 
+- 模型参数文件及配置将在赛事结束后提供。
+
 
 ### NTU-RGB+D数据集模型测试
 
@@ -121,7 +123,7 @@ Current video file: data/fsd10/example_skeleton.npy
         top-1 score: 0.8932635188102722
 ```
 
-可以看到，使用在FSD-10上训练好的pp-AGCN模型对`data/example_skeleton.npy`进行预测，输出的top1类别id为`0`，置信度为0.89。
+可以看到，使用在FSD-10上训练好的AGCN模型对`data/example_skeleton.npy`进行预测，输出的top1类别id为`0`，置信度为0.89。
 
 ## 参考论文
 
