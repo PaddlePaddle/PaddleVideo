@@ -69,7 +69,6 @@ python3.7 main.py --test -c configs/recognition/agcn/agcn_fsd.yaml  -w output/AG
 | Test_Data | Top-1 | checkpoints |
 | :----: | :----: | :---- |
 | Test_A | 90.66 | AGCN_fsd.pdparams |
-| Test_B | 88.66 | - |
 
 
 ### NTU-RGB+D数据集模型测试
