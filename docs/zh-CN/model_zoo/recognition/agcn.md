@@ -62,7 +62,7 @@ python3.7 main.py --test -c configs/recognition/agcn/agcn_fsd.yaml  -w output/AG
 
 - 通过`-c`参数指定配置文件，通过`-w`指定权重存放路径进行模型测试。
 
-- 评估结果保存在submission.csv文件中，可在[评测官网]()提交查看得分。
+- 评估结果保存在submission.csv文件中，可在[评测官网](https://aistudio.baidu.com/aistudio/competition/detail/115)提交查看得分。
 
 模型在FSD-10数据集上baseline实验精度如下:
 
