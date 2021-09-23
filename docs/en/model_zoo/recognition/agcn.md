@@ -66,8 +66,6 @@ Accuracy on FSD-10 dataset:
 | :----: | :----: | :---- |
 | Test_A | 90.66 | AGCN_fsd.pdparams|
 
-- checkpoint and config file will be provided after the event.
-
 
 ### Test on NTU-RGB+D
 
