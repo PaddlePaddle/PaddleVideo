@@ -70,8 +70,6 @@ python3.7 main.py --test -c configs/recognition/agcn/agcn_fsd.yaml  -w output/AG
 | :----: | :----: | :---- |
 | Test_A | 90.66 | AGCN_fsd.pdparams |
 
-- 模型参数文件及配置将在赛事结束后提供。
-
 
 ### NTU-RGB+D数据集模型测试
 
