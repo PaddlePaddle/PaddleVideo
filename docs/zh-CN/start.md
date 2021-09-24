@@ -48,8 +48,7 @@ wget https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_vd_ssld_v
 ```
 
 2. 打开 `PaddleVideo/configs/example.yaml`, 将下载好的权重存放路径填写到下方 `pretrained:` 之后
-```
-# PaddleVieo Example Configuration, please refer to "docs/en/config.md" for more information.
+``` bash
 MODEL: #MODEL field
     framework: "Recognizer2D" #Mandatory ["Recognizer1D", "Recognizer2D", "Recognizer3D", "BMNLocalizer"], indicate the type of network, please refer to the 'paddlevideo/modeling/framework/'.
     backbone:
@@ -57,6 +56,7 @@ MODEL: #MODEL field
         pretrained: "data/ResNet50_vd_ssld_v2_pretrained.pdparams" #Optional, pretrained backbone params path. pass "" or " " without loading from files.
         depth: 50 #Optional, the depth of backbone architecture.
 ```
+
 如不想修改配置文件，请将预训练权重存放在 `PaddleVideo/data/`文件夹下。
 
 3. 参考如下方式启动模型训练，`paddle.distributed.launch`通过设置`gpus`指定GPU运行卡号，
