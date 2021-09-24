@@ -22,31 +22,31 @@ pip3 install dist/paddlevideo-x.x.x-py3-none-any.whl
 
 ### 1. 快速开始
 
-* 指定 `video_file='data/example.mp4'`, 使用飞桨提供的推理模型 `model_name='ppTSM'`
+* 指定 `video_file='data/example.avi'`, 使用飞桨提供的推理模型 `model_name='ppTSM'`
 
 
 ```python
 from ppvideo import PaddleVideo
 clas = PaddleVideo(model_name='ppTSM',use_gpu=False,use_tensorrt=False)
-video_file='data/example.mp4.'
+video_file='data/example.avi'
 result=clas.predict(video_file)
 print(result)
 ```
 
 ```
     >>> result
-    [{'videoname': 'data/example.mp4', 'class_ids': [5], 'scores': [0.999963], 'label_names': ['archery']}]
+    [{'videoname': 'data/example.avi', 'class_ids': [5], 'scores': [0.999963], 'label_names': ['archery']}]
 ```
 
 * 使用命令行方式启动程序
 ```bash
-ppvideo --model_name='ppTSM' --video_file='data/example.mp4'
+ppvideo --model_name='ppTSM' --video_file='data/example.avi'
 ```
 
 ```
     >>> result
-    **********data/example.mp4**********
-    [{'videoname': 'data/example.mp4', 'class_ids': [5], 'scores': [0.999963], 'label_names': ['archery']}]
+    **********data/example.avi**********
+    [{'videoname': 'data/example.avi', 'class_ids': [5], 'scores': [0.999963], 'label_names': ['archery']}]
 ```
 
 ### 2. 参数介绍

@@ -1,9 +1,9 @@
 # PaddleVieo Example Configuration, please refer to "docs/en/config.md" for more information.
 MODEL: #MODEL field
-framework: "Recognizer2D" #Mandatory ["Recognizer1D", "Recognizer2D", "Recognizer3D", "BMNLocalizer"], indicate the type of network, please refer to the 'paddlevideo/modeling/framework/'.
+    framework: "Recognizer2D" #Mandatory ["Recognizer1D", "Recognizer2D", "Recognizer3D", "BMNLocalizer"], indicate the type of network, please refer to the 'paddlevideo/modeling/framework/'.
     backbone:
         name: "ResNet" #Optional, indicate the type of backbone, please refer to the 'paddlevideo/modeling/backbones/'.
-        pretrained: "/work/data/pretrained_dygraph/ResNet50/best_model/ppcls.pdparams" #Optional, pretrained backbone params path. pass "" or " " without loading from files.
+        pretrained: "data/ResNet50_vd_ssld_v2_pretrained.pdparams" #Optional, pretrained backbone params path. pass "" or " " without loading from files.
         depth: 50 #Optional, the depth of backbone architecture.
     head:
         name: "TSNHead" #Mandatory, indicate the type of head, please refer to the 'paddlevideo/modeling/heads'
@@ -20,16 +20,18 @@ DATASET: #DATASET field
     train:
         format: "VideoDataset" #Mandatory, indicate the type of train dataset, please refer to the 'paddlevidel/loader/dateset'.
         data_prefix: "" #Optional, train data root path.
-        file_path: "data/ucf101/ucf101_train_split_1_videos.txt" #Mandatory, train data index file path.
+        file_path: "data/ucf101/ucf101_train_split_1_videos.txt" #Mandatory, train data index file path
+        suffix: ".avi"
     valid:
         format: "VideoDataset" #Mandatory, indicate the type of valid dataset, please refer to the 'paddlevidel/loader/dateset'
         data_prefix: "" #Optional, valid data root path
         file_path: "data/ucf101/ucf101_val_split_1_videos.txt" #Mandatory, valid data index file path
+        suffix: ".avi"
     test:
         format: "VideoDataset" #Mandotary, indicate the type of test dataset, please refer to the 'paddlevideo/loader/dataset'.
         data_prefix: "" #Optional, test data root path.
         file_path: "data/ucf101/ucf101_val_split_1_videos.txt" #Mandotary, test data index file path.
-
+        suffix: ".avi"
 
 PIPELINE: #PIPELINE field
     train: #Mandotary, indicate the pipeline to deal with the training data, please refer to the 'paddlevideo/loader/pipelines/'
@@ -98,8 +100,15 @@ OPTIMIZER: #OPTIMIZER field
         name: 'L2'
         value: 1e-4
 
-model_name: "example" #Mandatory, model name.
+METRIC:
+    name: 'CenterCropMetric'
+
+INFERENCE:
+    name: 'ppTSM_Inference_helper'
+    num_seg: 8
+    target_size: 224
+
+model_name: "TSN" #Mandatory, model name.
 log_interval: 20 #Optional, the interval of logger.
-epochs: 2 #Mandatory, total epoch
+epochs: 5 #Mandatory, total epoch
 log_level: "DEBUG" #Optional, the logger level.
-resume_epoch: 6 #Optional, indicate the start epoch number to resume.
