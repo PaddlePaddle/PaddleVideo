@@ -40,7 +40,26 @@ sh run.sh
 <a name="model_train"></a>
 ### 1.1 模型训练
 
-参考如下方式启动模型训练，`paddle.distributed.launch`通过设置`gpus`指定GPU运行卡号，
+**下载并添加预训练模型**
+
+1. 下载图像蒸馏预训练模型ResNet50_vd_ssld_v2.pdparams作为Backbone初始化参数，或通过wget命令下载
+```
+wget https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_vd_ssld_v2_pretrained.pdparams
+```
+
+2. 打开 `PaddleVideo/configs/example.yaml`, 将下载好的权重存放路径填写到下方 `pretrained:` 之后
+``` bash
+MODEL: #MODEL field
+    framework: "Recognizer2D" #Mandatory ["Recognizer1D", "Recognizer2D", "Recognizer3D", "BMNLocalizer"], indicate the type of network, please refer to the 'paddlevideo/modeling/framework/'.
+    backbone:
+        name: "ResNet" #Optional, indicate the type of backbone, please refer to the 'paddlevideo/modeling/backbones/'.
+        pretrained: "data/ResNet50_vd_ssld_v2_pretrained.pdparams" #Optional, pretrained backbone params path. pass "" or " " without loading from files.
+        depth: 50 #Optional, the depth of backbone architecture.
+```
+
+如不想修改配置文件，请将预训练权重存放在 `PaddleVideo/data/`文件夹下。
+
+3. 参考如下方式启动模型训练，`paddle.distributed.launch`通过设置`gpus`指定GPU运行卡号，
 指定`--validate`来启动训练时评估。
 
 ```bash
@@ -72,24 +91,24 @@ python -m paddle.distributed.launch \
 【train阶段】打印当前时间，当前epoch/epoch总数，当前batch id，评估指标，耗时，ips等信息：
 
 
-    [12/28 17:31:26] epoch:[ 1/80 ] train step:0   loss: 0.04656 lr: 0.000100 top1: 1.00000 top5: 1.00000 elapse: 0.326 reader: 0.001s ips: 98.22489 instance/sec.
+    [09/24 14:13:00] epoch:[  1/1  ] train step:100  loss: 5.31382 lr: 0.000250 top1: 0.00000 top5: 0.00000 batch_cost: 0.73082 sec, reader_cost: 0.38075 sec, ips: 5.47330 instance/sec.
 
 
 【eval阶段】打印当前时间，当前epoch/epoch总数，当前batch id，评估指标，耗时，ips等信息：
 
 
-    [12/28 17:31:32] epoch:[ 80/80 ] val step:0    loss: 0.20538 top1: 0.88281 top5: 0.99219 elapse: 1.589 reader: 0.000s ips: 20.14003 instance/sec.
+    [09/24 14:16:55] epoch:[  1/1  ] val step:0    loss: 4.42741 top1: 0.00000 top5: 0.00000 batch_cost: 1.37882 sec, reader_cost: 0.00000 sec, ips: 2.90104 instance/sec.
 
 
 【epoch结束】打印当前时间，评估指标，耗时，ips等信息：
 
 
-    [12/28 17:31:38] END epoch:80  val loss_avg: 0.52208 top1_avg: 0.84398 top5_avg: 0.97393 elapse_avg: 0.234 reader_avg: 0.000 elapse_sum: 7.021s ips: 136.73686 instance/sec.
+    [09/24 14:18:46] END epoch:1   val loss_avg: 5.21620 top1_avg: 0.02215 top5_avg: 0.08808 avg_batch_cost: 0.04321 sec, avg_reader_cost: 0.00000 sec, batch_cost_sum: 112.69575 sec, avg_ips: 8.41203 instance/sec.
 
 
 当前为评估结果最好的epoch时，打印最优精度：
 
-    [12/28 17:28:42] Already save the best model (top1 acc)0.8494
+    [09/24 14:18:47] Already save the best model (top1 acc)0.0221
 
 
 <a name="model_resume"></a>
@@ -166,8 +185,8 @@ python tools/export_model.py \
 ```bash
 python tools/predict.py \
     --video_file "data/example.avi" \
-    --model_file "./inference/example.pdmodel" \
-    --params_file "./inference/example.pdiparams" \
+    --model_file "./inference/TSN.pdmodel" \
+    --params_file "./inference/TSN.pdiparams" \
     --use_gpu=True \
     --use_tensorrt=False
 ```
@@ -175,9 +194,9 @@ python tools/predict.py \
 
     ```bash
     python tools/predict.py \
-        --video_file "data/example.avi" \
-        --model_file "./inference/example.pdmodel" \
-        --params_file "./inference/example.pdiparams" \
+        -i "data/example.avi" \
+        --model_file "./inference/TSN.pdmodel" \
+        --params_file "./inference/TSN.pdiparams" \
         --batch_size 8 \
         --use_gpu=True \
         --use_tensorrt=True
@@ -185,9 +204,9 @@ python tools/predict.py \
 
 其中：
 
-+ `video_file`：待预测的视频文件路径，如 `./test.avi`
-+ `model_file`：模型结构文件路径，如 `./inference/example.pdmodel`
-+ `params_file`：模型权重文件路径，如 `./inference/example.pdiparams`
++ `i`：待预测的视频文件路径，如 `./test.avi`
++ `model_file`：模型结构文件路径，如 `./inference/TSN.pdmodel`
++ `params_file`：模型权重文件路径，如 `./inference/TSN.pdiparams`
 + `use_tensorrt`：是否使用 TesorRT 预测引擎，默认值：`False`
 + `use_gpu`：是否使用 GPU 预测，默认值：`True`
 

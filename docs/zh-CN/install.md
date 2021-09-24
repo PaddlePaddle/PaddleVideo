@@ -80,7 +80,7 @@ pip install paddlevideo==0.0.1
 
 安装完成后，可以使用命令行方式启动程序
 ```bash
-ppvideo --model_name='ppTSM' --video_file='data/example.mp4'
+ppvideo --model_name='ppTSM' --video_file='data/example.avi'
 ```
 
 python安装包更多使用方法参考[paddlevideo包使用教程](./whl_zh.md)。
