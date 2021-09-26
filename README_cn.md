@@ -1,6 +1,8 @@
 [English](README.md) | 中文
 
 # PaddleVideo
+## 最新动态
+2021年CCF大数据与计算智能大赛火热进行中，欢迎参加CCF和百度飞桨联合推出奖金100000元的[基于飞桨实现花样滑冰选手骨骼点动作识别](https://www.datafountain.cn/competitions/519)
 
 ## 简介
 
