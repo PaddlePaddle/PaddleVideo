@@ -24,16 +24,16 @@ ST-GCN is skeleton-based action recognition model proposed in AAAI 2018.
 
 ## Data
 
-Please refer to FSD-10 data download and preparation doc [FSD-10](../../dataset/fsd10.md)
+Please refer to FSD data download and preparation doc [FSD](../../dataset/fsd.md)
 
 Please refer to NTU-RGBD data download and preparation doc [NTU-RGBD](../../dataset/ntu-rgbd.md)
 
 
 ## Train
 
-### Train on FSD-10
+### Train on FSD
 
-- Train ST-GCN on FSD-10 scripts:
+- Train ST-GCN on FSD scripts:
 
 ```bash
 python3.7 main.py -c configs/recognition/stgcn/stgcn_fsd.yaml
@@ -54,12 +54,12 @@ python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3"  --log_dir=log_stgcn 
 
 ## Test
 
-### Test on FSD-10
+### Test on FSD
 
 - Test scripts：
 
 ```bash
-python3.7 main.py --test -c configs/recognition/stgcn/stgcn_fsd.yaml -w output/STGCN/STGCN_epoch_00030.pdparams
+python3.7 main.py --test -c configs/recognition/stgcn/stgcn_fsd.yaml -w output/STGCN/STGCN_epoch_00090.pdparams
 ```
 
 - Specify the config file with `-c`, specify the weight path with `-w`.
@@ -70,7 +70,7 @@ Accuracy on FSD-10 dataset:
 
 Test_Data| Top-1 | checkpoints |
 | :----: | :----: | :---- |
-| Test_A | 86.66 | [STGCN_fsd.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/STGCN_fsd.pdparams) |
+| Test_A | 59.07 | [STGCN_fsd.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/STGCN_fsd.pdparams) |
 
 
 ### Test on NTU-RGB+D
