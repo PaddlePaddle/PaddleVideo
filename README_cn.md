@@ -84,6 +84,7 @@ PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_githu
     - [【官方】Paddle 2.1实现视频理解经典模型 - TSN](https://aistudio.baidu.com/aistudio/projectdetail/2250682)
     - [【官方】Paddle 2.1实现视频理解经典模型 - TSM](https://aistudio.baidu.com/aistudio/projectdetail/2310889)
     - [BMN视频动作定位](https://aistudio.baidu.com/aistudio/projectdetail/2250674)
+    - [花样滑冰选手骨骼点动作识别ST-GCN教程](https://aistudio.baidu.com/aistudio/projectdetail/2403929)
 - 快速入门
     - [安装说明](docs/zh-CN/install.md)
     - [快速开始](docs/zh-CN/start.md)
