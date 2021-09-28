@@ -79,13 +79,11 @@ def main():
     elif args.train_dali:
         train_dali(cfg,
                    weights=args.weights,
-                   parallel=parallel,
-                   profiler_options=args.profiler_options)
+                   parallel=parallel)
     elif args.multigrid:
         train_model_multigrid(cfg,
                               world_size=world_size,
-                              validate=args.validate,
-                              profiler_options=args.profiler_options)
+                              validate=args.validate)
     else:
         train_model(cfg,
                     weights=args.weights,
