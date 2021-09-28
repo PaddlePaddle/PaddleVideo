@@ -42,7 +42,9 @@ def train_model(cfg,
         weights (str): weights path for finetuning.
         parallel (bool): Whether multi-cards training. Default: True.
         validate (bool): Whether to do evaluation. Default: False.
-
+        amp (bool): Whether to use automatic mixed precision during training. Default: False.
+        use_fleet (bool): 
+        profiler_options (str): Activate the profiler function Default: None.
     """
     if use_fleet:
         fleet.init(is_collective=True)
