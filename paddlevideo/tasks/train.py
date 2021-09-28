@@ -25,6 +25,7 @@ from ..utils import do_preciseBN
 from paddlevideo.utils import get_logger
 from paddlevideo.utils import (build_record, log_batch, log_epoch, save, load,
                                mkdir)
+from paddlevideo.utils import add_profiler_step
 
 
 def train_model(cfg,
@@ -32,13 +33,14 @@ def train_model(cfg,
                 parallel=True,
                 validate=True,
                 amp=False,
-                use_fleet=False):
+                use_fleet=False,
+                profiler_options=None):
     """Train model entry
 
     Args:
-    	cfg (dict): configuration.
+        cfg (dict): configuration.
         weights (str): weights path for finetuning.
-    	parallel (bool): Whether multi-cards training. Default: True.
+        parallel (bool): Whether multi-cards training. Default: True.
         validate (bool): Whether to do evaluation. Default: False.
 
     """
@@ -156,6 +158,9 @@ def train_model(cfg,
         tic = time.time()
         for i, data in enumerate(train_loader):
             record_list['reader_time'].update(time.time() - tic)
+
+            # Collect performance information when profiler_options is activate
+            add_profiler_step(profiler_options)
 
             # 4.1 forward
 

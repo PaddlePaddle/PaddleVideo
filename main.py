@@ -49,11 +49,17 @@ def parse_args():
     parser.add_argument('--amp',
                         action='store_true',
                         help='whether to open amp training.')
-
     parser.add_argument(
         '--validate',
         action='store_true',
         help='whether to evaluate the checkpoint during training')
+    parser.add_argument(
+        '-p',
+        '--profiler_options',
+        type=str,
+        default=None,
+        help='The option of profiler, which should be in format '
+        '\"key1=value1;key2=value2;key3=value3\".')
 
     args = parser.parse_args()
     return args
@@ -71,16 +77,23 @@ def main():
     if args.test:
         test_model(cfg, weights=args.weights, parallel=parallel)
     elif args.train_dali:
-        train_dali(cfg, weights=args.weights, parallel=parallel)
+        train_dali(cfg,
+                   weights=args.weights,
+                   parallel=parallel,
+                   profiler_options=args.profiler_options)
     elif args.multigrid:
-        train_model_multigrid(cfg, world_size, validate=args.validate)
+        train_model_multigrid(cfg,
+                              world_size=world_size,
+                              validate=args.validate,
+                              profiler_options=args.profiler_options)
     else:
         train_model(cfg,
                     weights=args.weights,
                     parallel=parallel,
                     validate=args.validate,
                     use_fleet=args.fleet,
-                    amp=args.amp)
+                    amp=args.amp,
+                    profiler_options=args.profiler_options)
 
 
 if __name__ == '__main__':
