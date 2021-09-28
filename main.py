@@ -77,13 +77,9 @@ def main():
     if args.test:
         test_model(cfg, weights=args.weights, parallel=parallel)
     elif args.train_dali:
-        train_dali(cfg,
-                   weights=args.weights,
-                   parallel=parallel)
+        train_dali(cfg, weights=args.weights, parallel=parallel)
     elif args.multigrid:
-        train_model_multigrid(cfg,
-                              world_size=world_size,
-                              validate=args.validate)
+        train_model_multigrid(cfg, world_size=world_size, validate=args.validate)
     else:
         train_model(cfg,
                     weights=args.weights,
