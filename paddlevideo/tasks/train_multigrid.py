@@ -135,7 +135,7 @@ def train_model_multigrid(cfg, world_size=1, validate=True):
 
     Args:
     	cfg (dict): configuration.
-    	parallel (bool): Whether multi-card training. Default: Treu
+    	parallel (bool): Whether multi-card training. Default: True
         validate (bool): Whether to do evaluation. Default: False.
 
     """
