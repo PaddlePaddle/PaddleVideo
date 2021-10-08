@@ -21,31 +21,28 @@ function _set_params(){
 function _train(){
     echo "Train on ${num_gpu_devices} GPUs"
     echo "current CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES, gpus=$num_gpu_devices, batch_size=$batch_size"
- 
+    
     case ${run_mode} in
     sp) 
         if [ ${fp_item} == 'fp32' ]; then
-            train_cmd="python3.7 -u main.py -c configs/recognition/${model_name}/${model_name}_ucf101_videos_benchmark_bs${batch_size}.yaml" 
-            # echo ${train_cmd};;
+            train_cmd="python3.7 -u main.py -c configs/recognition/timesformer/timesformer_ucf101_videos_benchmark_bs${batch_size}.yaml" 
         elif [ ${fp_item} == 'fp16' ]; then
-            train_cmd="python3.7 -u main.py --amp -c configs/recognition/${model_name}/${model_name}_ucf101_videos_benchmark_bs${batch_size}.yaml"
-            # echo excute: ${train_cmd}
+            train_cmd="python3.7 -u main.py --amp -c configs/recognition/timesformer/timesformer_ucf101_videos_benchmark_bs${batch_size}.yaml"
         else
             echo "choose fp_item(fp32 or fp16)"
             exit 1
         fi;;
-        log_parse_file="mylog/workerlog.0" ;;
     mp)
         if [ ${fp_item} == 'fp32' ]; then
-            train_cmd="python3.7 -u -B -m paddle.distributed.launch --gpus=$CUDA_VISIBLE_DEVICES --log_dir=./mylog main.py -c configs/recognition/${model_name}/${model_name}_ucf101_videos_benchmark_bs${batch_size}_mp.yaml"
-            # echo ${train_cmd}
-        elif if [ ${fp_item} == 'fp16' ]; then
-            train_cmd="python3.7 -u -B -m paddle.distributed.launch --gpus=$CUDA_VISIBLE_DEVICES --log_dir=./mylog main.py --amp -c configs/recognition/${model_name}/${model_name}_ucf101_videos_benchmark_bs${batch_size}_mp.yaml"
+            train_cmd="python3.7 -u -B -m paddle.distributed.launch --gpus=$CUDA_VISIBLE_DEVICES --log_dir=./mylog main.py -c configs/recognition/timesformer/timesformer_ucf101_videos_benchmark_bs${batch_size}_mp.yaml"
+            log_parse_file="mylog/workerlog.0"
+        elif [ ${fp_item} == 'fp16' ]; then
+            train_cmd="python3.7 -u -B -m paddle.distributed.launch --gpus=$CUDA_VISIBLE_DEVICES --log_dir=./mylog main.py --amp -c configs/recognition/timesformer/timesformer_ucf101_videos_benchmark_bs${batch_size}_mp.yaml"
+            log_parse_file="mylog/workerlog.0"
         else
             echo "choose fp_item(fp32 or fp16)"
             exit 1
         fi;;
-        log_parse_file="mylog/workerlog.0" ;;
     *) echo "choose run_mode(sp or mp)"; exit 1;
     esac
 # 以下不用修改
