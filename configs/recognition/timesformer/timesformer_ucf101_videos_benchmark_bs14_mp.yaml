@@ -128,7 +128,7 @@ OPTIMIZER: #OPTIMIZER field
     use_nesterov: True
 
 GRADIENT_ACCUMULATION:
-    global_batch_size: 52 # Specify the sum of batches to be calculated by all GPUs
+    global_batch_size: 112 # Specify the sum of batches to be calculated by all GPUs
 
 METRIC:
     name: 'CenterCropMetric'
