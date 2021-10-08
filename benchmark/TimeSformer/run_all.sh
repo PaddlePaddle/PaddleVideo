@@ -19,18 +19,18 @@ cd ../../ # 返回PaddleVideo
 
 model_mode_list=(TimeSformer)
 fp_item_list=(fp32 fp16)
-bs_item=(1 14)
+bs_item_list=(1 14)
 for model_mode in ${model_mode_list[@]}; do
       for fp_item in ${fp_item_list[@]}; do
-          for bs_item in ${bs_list[@]}
+          for bs_item in ${bs_item_list[@]}
             do
             echo "index is speed, 1gpus, begin, ${model_name}"
             run_mode=sp
-            CUDA_VISIBLE_DEVICES=0 bash run_benchmark.sh ${run_mode} ${bs_item} ${fp_item} ${model_mode}     #  (5min)
+            CUDA_VISIBLE_DEVICES=0 bash benchmark/${model_mode}/run_benchmark.sh ${run_mode} ${bs_item} ${fp_item} ${model_mode}
             sleep 60
             echo "index is speed, 8gpus, run_mode is multi_process, begin, ${model_name}"
             run_mode=mp
-            CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 bash run_benchmark.sh ${run_mode} ${bs_item} ${fp_item} ${model_mode} 
+            CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 bash benchmark/${model_mode}/run_benchmark.sh ${run_mode} ${bs_item} ${fp_item} ${model_mode} 
             sleep 60
             done
       done
