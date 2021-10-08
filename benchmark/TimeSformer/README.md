@@ -1,6 +1,6 @@
 执行
 ```bash
-./run_all.sh
+bash ./run_all.sh
 ```
 即可运行.
 
