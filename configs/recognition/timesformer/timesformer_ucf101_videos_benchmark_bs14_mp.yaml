@@ -21,7 +21,7 @@ MODEL: #MODEL field
         std: 0.02 #std value in params initialization
 
 DATASET: #DATASET field
-    batch_size: 13 #Mandatory, bacth size
+    batch_size: 14 #Mandatory, bacth size
     num_workers: 4 #Mandatory, XXX the number of subprocess on each GPU.
     test_batch_size: 8
     train:
