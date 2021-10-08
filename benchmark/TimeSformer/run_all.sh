@@ -8,6 +8,14 @@ git checkout benchmark_dev
 python3.7 -m pip install -r requirements.txt
 
 # 2 拷贝该模型需要数据、预训练模型
+unalias cp
+cp -f benchmark/TimeSformer/timesformer_ucf101_videos_benchmark_bs1.yaml configs/recognition/timesformer/
+cp -f benchmark/TimeSformer/timesformer_ucf101_videos_benchmark_bs1_mp.yaml configs/recognition/timesformer/
+cp -f benchmark/TimeSformer/timesformer_ucf101_videos_benchmark_bs14.yaml configs/recognition/timesformer/
+cp -f benchmark/TimeSformer/timesformer_ucf101_videos_benchmark_bs14_mp.yaml configs/recognition/timesformer/
+cp -f benchmark/TimeSformer/trainlist_benchmark_mp.txt data/ucf101/
+alias cp='cp -i'
+
 cd data/ucf101 # 进入PaddleVideo/data/ucf101
 wget --no-check-certificate "https://www.crcv.ucf.edu/data/UCF101/UCF101.rar" # 下载训练数据
 unrar x UCF101.rar # 解压
