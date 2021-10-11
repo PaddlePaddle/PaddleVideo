@@ -4,7 +4,6 @@
 
 - [数据集介绍](#数据集介绍)
 - [数据下载](#数据下载)
-- [参考文献](#参考文献)
 
 ---
 
@@ -46,6 +45,6 @@ test_B_data.npy       # 634
 
 ## 数据下载
 
-数据集即将开放下载~
+在[2021 CCF BDCI 基于飞桨实现花样滑冰选手骨骼点动作识别比赛](https://aistudio.baidu.com/aistudio/competition/detail/115/0/introduction)主页报名后即可获取下载链接
 
 > 由于版权原因，RGB数据暂不开放。
