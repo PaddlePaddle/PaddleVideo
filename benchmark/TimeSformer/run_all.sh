@@ -13,7 +13,9 @@ cp -f benchmark/TimeSformer/timesformer_ucf101_videos_benchmark_bs1.yaml configs
 cp -f benchmark/TimeSformer/timesformer_ucf101_videos_benchmark_bs1_mp.yaml configs/recognition/timesformer/
 cp -f benchmark/TimeSformer/timesformer_ucf101_videos_benchmark_bs14.yaml configs/recognition/timesformer/
 cp -f benchmark/TimeSformer/timesformer_ucf101_videos_benchmark_bs14_mp.yaml configs/recognition/timesformer/
-cp -f benchmark/TimeSformer/trainlist_benchmark_mp.txt data/ucf101/
+if [ ! -f "data/ucf101/trainlist_benchmark_mp.txt" ]; then
+    wget -P data/ucf101/ https://videotag.bj.bcebos.com/PaddleVideo-release2.2/trainlist_benchmark_mp.txt
+fi
 alias cp='cp -i'
 
 cd data/ucf101 # 进入PaddleVideo/data/ucf101
