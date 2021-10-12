@@ -101,7 +101,7 @@ python3.7 tools/predict.py --input_file data/example.avi \
                                --config configs/recognition/tsn/tsn_k400_frames.yaml \
                                --model_file inference/TSN/TSN.pdmodel \
                                --params_file inference/TSN/TSN.pdiparams \
-                               --batch_size 3 \
+                               --batch_size 250 \
                                --use_gpu=True \
                                --use_tensorrt=True
     ```
