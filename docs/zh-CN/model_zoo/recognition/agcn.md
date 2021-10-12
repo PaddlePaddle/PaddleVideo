@@ -21,15 +21,15 @@
 
 ## 数据准备
 
-FSD-10数据下载及准备请参考[FSD-10数据准备](../../dataset/fsd10.md)
+花样滑冰比赛数据下载及准备请参考[花样滑冰数据准备](../../dataset/fsd.md)
 
 NTU-RGBD数据下载及准备请参考[NTU-RGBD数据准备](../../dataset/ntu-rgbd.md)
 
 ## 模型训练
 
-### FSD-10数据集训练
+### 花样滑冰比赛数据集训练
 
-- FSD-10数据集使用单卡训练，启动命令如下:
+- 花样滑冰比赛数据集使用单卡训练，启动命令如下:
 
 ```bash
 python3.7 main.py -c configs/recognition/agcn/agcn_fsd.yaml
@@ -52,7 +52,7 @@ python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3"  --log_dir=log_agcn  
 
 ## 模型测试
 
-### FSD-10数据集模型测试
+### 花样滑冰比赛数据集模型测试
 
 - 模型测试的启动命令如下：
 
@@ -62,14 +62,13 @@ python3.7 main.py --test -c configs/recognition/agcn/agcn_fsd.yaml  -w output/AG
 
 - 通过`-c`参数指定配置文件，通过`-w`指定权重存放路径进行模型测试。
 
-- 评估结果保存在submission.csv文件中，可在[评测官网]()提交查看得分。
+- 评估结果保存在submission.csv文件中，可在[评测官网](https://aistudio.baidu.com/aistudio/competition/detail/115)提交查看得分。
 
-模型在FSD-10数据集上baseline实验精度如下:
+模型在花样滑冰比赛数据集上baseline实验精度如下:
 
 | Test_Data | Top-1 | checkpoints |
 | :----: | :----: | :---- |
-| Test_A | 90.66 | [AGCN_fsd.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/AGCN_fsd.pdparams) |
-| Test_B | 88.66 | - |
+| Test_A | 62.29 | AGCN_fsd.pdparams |
 
 
 ### NTU-RGB+D数据集模型测试
@@ -86,7 +85,7 @@ python3.7 main.py --test -c configs/recognition/agcn/agcn_ntucs.yaml -w output/A
 
 | split | Top-1 | checkpoints |
 | :----: | :----: | :---- |
-| cross-subject | 83.27 | [AGCN_ntucs.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/AGCN_ntucs.pdparams) |
+| cross-subject | 83.27 | AGCN_ntucs.pdparams |
 
 
 ## 模型推理
@@ -122,7 +121,7 @@ Current video file: data/fsd10/example_skeleton.npy
         top-1 score: 0.8932635188102722
 ```
 
-可以看到，使用在FSD-10上训练好的pp-AGCN模型对`data/example_skeleton.npy`进行预测，输出的top1类别id为`0`，置信度为0.89。
+可以看到，使用在FSD-10上训练好的AGCN模型对`data/example_skeleton.npy`进行预测，输出的top1类别id为`0`，置信度为0.89。
 
 ## 参考论文
 

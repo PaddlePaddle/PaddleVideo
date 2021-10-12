@@ -58,14 +58,13 @@ python3.7 main.py --test -c configs/recognition/agcn/agcn_fsd.yaml  -w output/AG
 
 - Specify the config file with `-c`, specify the weight path with `-w`.
 
-- Evaluation results will be saved in `submission.csv` file, final score can be obtained in [competition website]().
+- Evaluation results will be saved in `submission.csv` file, final score can be obtained in [competition website](https://aistudio.baidu.com/aistudio/competition/detail/115).
 
 Accuracy on FSD-10 dataset:
 
 | Test_Data | Top-1 | checkpoints |
 | :----: | :----: | :---- |
-| Test_A | 90.66 | [AGCN_fsd.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/AGCN_fsd.pdparams) |
-| Test_B | 88.66 | - |
+| Test_A | 90.66 | AGCN_fsd.pdparams|
 
 
 ### Test on NTU-RGB+D
@@ -82,7 +81,7 @@ Accuracy on NTU-RGB+D dataset:
 
 | split | Top-1 | checkpoints |
 | :----: | :----: | :---- |
-| cross-subject | 83.27 | [AGCN_ntucs.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/AGCN_ntucs.pdparams) |
+| cross-subject | 83.27 | AGCN_ntucs.pdparams|
 
 
 ## Inference

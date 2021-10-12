@@ -1,6 +1,11 @@
 [English](README.md) | 中文
 
 # PaddleVideo
+## 最新动态
+2021年CCF大数据与计算智能大赛火热进行中，欢迎参加CCF和百度飞桨联合推出奖金100000元的赛题
+[基于飞桨实现花样滑冰选手骨骼点动作识别](https://www.datafountain.cn/competitions/519)，
+赛题baseline由PaddleVideo提供[ST-GCN](https://github.com/PaddlePaddle/PaddleVideo/blob/develop/docs/zh-CN/model_zoo/recognition/stgcn.md)，
+[教程链接](https://aistudio.baidu.com/aistudio/projectdetail/2403929)
 
 ## 简介
 
@@ -41,8 +46,8 @@ PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_githu
 | :----------------- | :----------------------------------------------------------: | :------------------------------------------------: | :------: | :-------: |
 | 行为识别|   [**PP-TSM**](./docs/zh-CN/model_zoo/recognition/pp-tsm.md)  |    [Kinetics-400](./docs/zh-CN/dataset/k400.md)    |  Top-1   | **76.16** |
 | 行为识别 |  [**PP-TSN**](./docs/zh-CN/model_zoo/recognition/pp-tsn.md)  |    [Kinetics-400](./docs/zh-CN/dataset/k400.md)    |  Top-1   | **75.06** |
-| 行为识别 | [AGCN](./docs/zh-CN/model_zoo/recognition/pp-agcn.md) | [FSD-10](./docs/zh-CN/dataset/fsd10.md) | Top-1 | 90.66 |
-| 行为识别 | [ST-GCN](./docs/zh-CN/model_zoo/recognition/stgcn.md) | [FSD-10](./docs/zh-CN/dataset/fsd10.md) | Top-1 | 86.66 |
+| 行为识别 | [AGCN](./docs/zh-CN/model_zoo/recognition/agcn.md) | [FSD](./docs/zh-CN/dataset/fsd.md) | Top-1 | 90.66 |
+| 行为识别 | [ST-GCN](./docs/zh-CN/model_zoo/recognition/stgcn.md) | [FSD](./docs/zh-CN/dataset/fsd.md) | Top-1 | 86.66 |
 | 行为识别 | [TimeSformer](./docs/zh-CN/model_zoo/recognition/timesformer.md) |    [Kinetics-400](./docs/zh-CN/dataset/k400.md)    |  Top-1   |   77.29   |
 | 行为识别 |  [SlowFast](./docs/zh-CN/model_zoo/recognition/slowfast.md)  |    [Kinetics-400](./docs/zh-CN/dataset/k400.md)    |  Top-1   |   75.84   |
 | 行为识别 |       [TSM](./docs/zh-CN/model_zoo/recognition/tsm.md)       |    [Kinetics-400](./docs/zh-CN/dataset/k400.md)    |  Top-1   |   71.06   |
@@ -79,6 +84,7 @@ PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_githu
     - [【官方】Paddle 2.1实现视频理解经典模型 - TSN](https://aistudio.baidu.com/aistudio/projectdetail/2250682)
     - [【官方】Paddle 2.1实现视频理解经典模型 - TSM](https://aistudio.baidu.com/aistudio/projectdetail/2310889)
     - [BMN视频动作定位](https://aistudio.baidu.com/aistudio/projectdetail/2250674)
+    - [花样滑冰选手骨骼点动作识别ST-GCN教程](https://aistudio.baidu.com/aistudio/projectdetail/2403929)
 - 快速入门
     - [安装说明](docs/zh-CN/install.md)
     - [快速开始](docs/zh-CN/start.md)
