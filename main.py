@@ -80,7 +80,7 @@ def main():
                     parallel=parallel,
                     validate=args.validate,
                     use_fleet=args.fleet,
-                    amp=args.amp)
+                    amp=cfg.amp)
 
 
 if __name__ == '__main__':

@@ -2,7 +2,7 @@ MODEL: #MODEL field
     framework: "Recognizer2D" #Mandatory, indicate the type of network, associate to the 'paddlevideo/modeling/framework/' .
     backbone: #Mandatory, indicate the type of backbone, associate to the 'paddlevideo/modeling/backbones/' .
         name: "ResNetTSM" #Mandatory, The name of backbone.
-        pretrained: "data/TSM_k400.pdparams" #Optional, pretrained model path.
+        #pretrained: "data/TSM_k400.pdparams" #Optional, pretrained model path.
         num_seg: 8
         depth: 50 #Optional, the depth of backbone architecture.
     head:
@@ -121,3 +121,7 @@ log_interval: 20 #Optional, the interal of logger, default:10
 save_interval: 10
 epochs: 25 #Mandatory, total epoch
 log_level: "INFO" #Optional, the logger level. default: "INFO"
+max_iter : 100 # for bench mark
+to_static: False
+enable_pass: False
+amp: False # whether enable amp 
