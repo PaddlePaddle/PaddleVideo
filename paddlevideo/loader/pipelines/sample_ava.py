@@ -23,7 +23,6 @@ import cv2
 from cv2 import IMREAD_COLOR, IMREAD_GRAYSCALE, IMREAD_UNCHANGED
 import inspect
 
-#1017 by chajchaj#supported_backends = ['cv2', 'pillow']
 imread_backend = 'cv2'
 imread_flags = {
     'color': IMREAD_COLOR,
@@ -265,17 +264,6 @@ class RawFrameDecode:
     def _imfrombytes(self,content, flag='color', channel_order='bgr'):#, backend=None):
         """Read an image from bytes. """
 
-        #1017 by chajchaj# if backend is None:
-        #1017 by chajchaj#     backend = imread_backend
-        #1017 by chajchaj# if backend not in supported_backends:
-        #1017 by chajchaj#     raise ValueError(f'backend: {backend} is not supported. Supported '
-        #1017 by chajchaj#                      "backends are 'cv2', 'pillow'")
-        #1017 by chajchaj# elif backend == 'pillow':
-        #1017 by chajchaj#     buff = io.BytesIO(content)
-        #1017 by chajchaj#     img = Image.open(buff)
-        #1017 by chajchaj#     img = self._pillow2array(img, flag, channel_order)
-        #1017 by chajchaj#     return img
-        #1017 by chajchaj# else:
         img_np = np.frombuffer(content, np.uint8)
         flag = imread_flags[flag] if isinstance(flag, str) else flag
         img = cv2.imdecode(img_np, flag)
@@ -320,22 +308,16 @@ class RawFrameDecode:
         results['img_shape'] = imgs[0].shape[:2]
 
         # we resize the gt_bboxes and proposals to their real scale
-        #print('-------560--------',results['gt_bboxes'])
         if 'gt_bboxes' in results:
             h, w = results['img_shape']
             scale_factor = np.array([w, h, w, h])
             gt_bboxes = results['gt_bboxes']
-            #gt_bboxes = (gt_bboxes * scale_factor).astype(np.float32)
             gt_bboxes_new = (gt_bboxes * scale_factor).astype(np.float32)
-            #results['gt_bboxes'] = gt_bboxes
             results['gt_bboxes'] = gt_bboxes_new
             if 'proposals' in results and results['proposals'] is not None:
                 proposals = results['proposals']
                 proposals = (proposals * scale_factor).astype(np.float32)
                 results['proposals'] = proposals
-        #print('-------571--------',results['gt_bboxes'])
-        #print('-----results[imgs]----',results['imgs'])
-        #print('----results after rawframe decord ------ ',results.keys())
         return results
 
     def __repr__(self):
@@ -355,7 +337,6 @@ class SampleAVAFrames(SampleFrames):
         start = center_index - (self.clip_len // 2) * self.frame_interval
         end = center_index + ((self.clip_len + 1) // 2) * self.frame_interval
         frame_inds = list(range(start, end, self.frame_interval))
-        #if chaj_rand:#随机
         frame_inds = frame_inds + skip_offsets
         frame_inds = np.clip(frame_inds, shot_info[0], shot_info[1] - 1)
 

@@ -1,3 +1,17 @@
+# copyright (c) 2021 PaddlePaddle Authors. All Rights Reserve.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import csv
 import heapq
 import logging
@@ -21,8 +35,6 @@ from pathlib import Path
 def det2csv(dataset, results, custom_classes):
     csv_results = []
     for idx in range(len(dataset)):
-        #video_id = dataset.video_infos[idx]['video_id']
-        #timestamp = dataset.video_infos[idx]['timestamp']
         video_id = dataset.info[idx]['video_id']
         timestamp = dataset.info[idx]['timestamp']
  
@@ -316,7 +328,6 @@ def collect_results_cpu(result_part, size):
     #1. load results of all parts from tmp dir
     mkdir_or_exist(tmpdir)
     rank, world_size = get_dist_info()
-    #dist.barrier()
     dump_to_path(result_part, osp.join(tmpdir, f'part_{rank}.pkl'))
     dist.barrier()
     if rank != 0:
