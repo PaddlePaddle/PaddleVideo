@@ -151,7 +151,7 @@ Current video file: data/example.avi
 ```
 
 we can get the class name using class id and map file `data/k400/Kinetics-400_label_list.txt`. The top1 prediction of `data/example.avi` is `archery`.
-- **Note**: For models that combine N and T during calculation (such as TSN, TSM), when `use_tensorrt=True`, you need to specify the `batch_size` argument as batch_size*num_seg.
+- **Note**: For models that combine N and T during calculation (such as TSN, TSM), when `use_tensorrt=True`, you need to specify the `batch_size` argument as batch_size\*num_seg\*num_crop.
 
     ```bash
     python3.7 tools/predict.py --input_file data/example.avi \
