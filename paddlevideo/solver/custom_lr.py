@@ -119,7 +119,7 @@ class CustomWarmupPiecewiseDecay(LRScheduler):
                  max_epoch,
                  num_iters,
                  last_epoch=0,
-                 verbose=True): #False):
+                 verbose=False):
         self.warmup_start_lr = warmup_start_lr
         self.warmup_epochs = warmup_epochs
         self.step_base_lr = step_base_lr

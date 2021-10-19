@@ -97,7 +97,7 @@ class TwoStageDetector(BaseDetector):
         proposals, gt_bboxes, gt_labels, scores, entity_ids = self.get_unpad_datas(data)
         img_shape = data[7]
         img_metas=scores,entity_ids
-        x = self.extract_feat(img=[img_slow,img_fast],flag="val")
+        x = self.extract_feat(img=[img_slow,img_fast])
 
         return self.roi_head.simple_test(x, proposals[0], img_metas[0], img_shape, rescale=rescale)
 
