@@ -7,6 +7,9 @@ export CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7
 
 start_time=$(date +%s)
 
+# run ava training
+#python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3" --log_dir=logdir.ava_part main.py --validate -c configs/detection/ava/ava_part.yaml
+
 # run tsm training
 #python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_tsm main.py  --validate -c configs/recognition/tsm/tsm_k400_frames.yaml
 
