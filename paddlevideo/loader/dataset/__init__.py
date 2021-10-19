@@ -18,8 +18,9 @@ from .slowfast_video import SFVideoDataset
 from .bmn_dataset import BMNDataset
 from .feature import FeatureDataset
 from .skeleton import SkeletonDataset
+from .ava_dataset import AVADataset
 
 __all__ = [
     'VideoDataset', 'FrameDataset', 'SFVideoDataset', 'BMNDataset',
-    'FeatureDataset', 'SkeletonDataset'
+    'FeatureDataset', 'SkeletonDataset', 'AVADataset'
 ]

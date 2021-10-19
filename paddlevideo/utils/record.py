@@ -34,6 +34,15 @@ def build_record(cfg):
     elif 'Recognizer' in cfg.framework:
         record_list.append(("top1", AverageMeter("top1", '.5f')))
         record_list.append(("top5", AverageMeter("top5", '.5f')))
+    elif 'FastRCNN' in cfg.framework:
+        record_list.append(("recall@thr=0.5", AverageMeter("recall@thr=0.5", '.5f')))
+        record_list.append(("prec@thr=0.5", AverageMeter("prec@thr=0.5", '.5f')))
+        record_list.append(("recall@top3", AverageMeter("recall@top3", '.5f')))
+        record_list.append(("prec@top3", AverageMeter("prec@top3", '.5f')))
+        record_list.append(("recall@top5", AverageMeter("recall@top5", '.5f')))
+        record_list.append(("prec@top5", AverageMeter("prec@top5", '.5f')))
+        record_list.append(("mAP@0.5IOU", AverageMeter("mAP@0.5IOU", '.5f')))
+
 
     record_list.append(("batch_time", AverageMeter('batch_cost', '.5f')))
     record_list.append(("reader_time", AverageMeter('reader_cost', '.5f')))

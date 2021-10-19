@@ -16,7 +16,7 @@ import math
 import paddle
 import paddle.nn.initializer as init
 import numpy as np
-from scipy import special
+#from scipy import special
 
 
 def weight_init_(layer,
