@@ -42,7 +42,7 @@ DATASET: #DATASET field
   num_workers: 1 
   train:
     format: "AVADataset" #the Class name of the dataset used by youerself
-    data_prefix: '/mnt/chengjun/ava/from_134/mmaction2/data/ava/ava_videos_15min_frames' #Mandatory, train data root path
+    data_prefix: 'PATH_TO_AVA_FRAMES_OF_15min_VIDEOS' #Mandatory, train data root path
     file_path: "./data/ava/annotations/ava_train_v2.1_99320.csv" #Mandatory, train data index file path
     exclude_file: "./data/ava/annotations/ava_train_excluded_timestamps_v2.1.csv"
     proposal_file: "./data/ava/annotations/ava_dense_proposals_train.FAIR.recall_93.9.pkl"
@@ -53,7 +53,7 @@ DATASET: #DATASET field
     timestamp_end: 1800
   valid:
     format: "AVADataset"
-    data_prefix: '/mnt/chengjun/ava/from_134/mmaction2/data/ava/ava_videos_15min_frames' #Mandatory, train data root path
+    data_prefix: 'PATH_TO_AVA_FRAMES_OF_15min_VIDEOS' #Mandatory, train data root path
     file_path: "./data/ava/annotations/ava_val_v2.1_head27163.csv"
     exclude_file: "./data/ava/annotations/ava_val_excluded_timestamps_v2.1.csv"
     proposal_file: "./data/ava/annotations/ava_dense_proposals_val.FAIR.recall_93.9.pkl"
