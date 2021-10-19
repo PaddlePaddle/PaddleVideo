@@ -1,4 +1,4 @@
-# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.
+# Copyright (c) 2021  PaddlePaddle Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"
 # you may not use this file except in compliance with the License.
@@ -12,15 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .video import VideoDataset
-from .frame import FrameDataset
-from .slowfast_video import SFVideoDataset
-from .bmn_dataset import BMNDataset
-from .feature import FeatureDataset
-from .skeleton import SkeletonDataset
-from .ava_dataset import AVADataset
+from .max_iou_assigner_ava import MaxIoUAssignerAVA
 
-__all__ = [
-    'VideoDataset', 'FrameDataset', 'SFVideoDataset', 'BMNDataset',
-    'FeatureDataset', 'SkeletonDataset', 'AVADataset'
-]
+__all__ = ['MaxIoUAssignerAVA']

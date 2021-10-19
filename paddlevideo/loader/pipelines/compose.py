@@ -63,7 +63,7 @@ class Compose(object):
             else:
                 raise TypeError(f'pipelines must be callable or a dict,'
                                 f'but got {type(p)}')
-    def __call__(self, data):
+    def __call__(self, data, flag=""):
         for p in self.pipelines:
             try:
                 data = p(data)

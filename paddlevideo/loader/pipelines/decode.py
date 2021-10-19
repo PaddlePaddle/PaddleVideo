@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import numpy as np
-import av
+#import av
 import cv2
 import pickle
 import decord as de

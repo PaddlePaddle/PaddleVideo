@@ -119,7 +119,7 @@ class CustomWarmupPiecewiseDecay(LRScheduler):
                  max_epoch,
                  num_iters,
                  last_epoch=0,
-                 verbose=False):
+                 verbose=True): #False):
         self.warmup_start_lr = warmup_start_lr
         self.warmup_epochs = warmup_epochs
         self.step_base_lr = step_base_lr
@@ -150,8 +150,8 @@ class CustomWarmupPiecewiseDecay(LRScheduler):
         self.last_lr = self.get_lr()
 
         if self.verbose:
-            print('Epoch {}: {} set learning rate to {}.'.format(
-                self.last_epoch, self.__class__.__name__, self.last_lr))
+            print('step Epoch {}: {} set learning rate to {}.self.num_iters={}, 1/self.num_iters={}'.format(
+                self.last_epoch, self.__class__.__name__, self.last_lr, self.num_iters, 1/self.num_iters))
 
     def _lr_func_steps_with_relative_lrs(self, cur_epoch, lrs, base_lr, steps,
                                          max_epoch):
@@ -160,6 +160,10 @@ class CustomWarmupPiecewiseDecay(LRScheduler):
         for ind, step in enumerate(steps):
             if cur_epoch < step:
                 break
+        if self.verbose:
+            print('_lr_func_steps_with_relative_lrs, cur_epoch {}: {}, steps {}, ind {}, step{}, max_epoch{}'.format(
+                cur_epoch, self.__class__.__name__, steps, ind, step, max_epoch ))
+
 
         return lrs[ind - 1] * base_lr
 
@@ -185,6 +189,11 @@ class CustomWarmupPiecewiseDecay(LRScheduler):
             lr_start = self.warmup_start_lr
             alpha = (lr_end - lr_start) / self.warmup_epochs
             lr = self.last_epoch * alpha + lr_start
+        if self.verbose:
+            print('get_lr, Epoch {}: {}, lr {}, lr_end {}, self.lrs{}, self.step_base_lr{}, self.steps{}, self.max_epoch{}'.format(
+                self.last_epoch, self.__class__.__name__, lr, lr_end, self.lrs, self.step_base_lr, self.steps, self.max_epoch ))
+
+ 
         return lr
 
 
