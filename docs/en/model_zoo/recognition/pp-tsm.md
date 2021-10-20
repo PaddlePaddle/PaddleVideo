@@ -61,6 +61,8 @@ MODEL:
         pretrained: your weight path
 ```
 
+- If use ResNet101 as backbone, please download [ResNet101_vd_ssld_pretrained.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ResNet101_vd_ssld_pretrained.pdparams) as pretraind model.
+
 #### Start training
 
 - Train PP-TSM on kinetics-400 scripts:
@@ -91,6 +93,12 @@ python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=lo
 python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=log_pptsm  main.py  --validate -c configs/recognition/pptsm/pptsm_k400_frames_dense.yaml
 ```
 
+- Train PP-TSM on kinetics-400 with ResNet101 as backbone using dense sampling:
+
+```bash
+python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=log_pptsm  main.py  --validate -c configs/recognition/pptsm/pptsm_k400_frames_dense_r101.yaml
+```
+
 
 ## Test
 
@@ -115,7 +123,8 @@ Accuracy on Kinetics400:
 | ResNet50 | False | Dense | 8 | 224 | 75.69 | [ppTSM_k400_dense.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.1/PPTSM/ppTSM_k400_dense.pdparams) |
 | ResNet50 | True | Uniform | 8 | 224 | 75.11 | [ppTSM_k400_uniform_distill.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.1/PPTSM/ppTSM_k400_uniform_distill.pdparams) |
 | ResNet50 | True | Dense | 8 | 224 | 76.16 | [ppTSM_k400_dense_distill.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.1/PPTSM/ppTSM_k400_dense_distill.pdparams) |
-
+| ResNet101 | True | Uniform | 8 | 224 | 76.35 | [ppTSM_k400_uniform_distill_r101.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ppTSM_k400_uniform_distill_r101.pdparams) |
+| ResNet101 | False | Dense | 8 | 224 | 77.15 | [ppTSM_k400_dense_r101.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ppTSM_k400_dense_r101.pdparams) |
 
 ## Inference
 
