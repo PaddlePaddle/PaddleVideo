@@ -16,6 +16,7 @@ from .registry import Registry
 from .build_utils import build
 from .config import *
 from .logger import setup_logger, coloring, get_logger
+from .to_static import apply_to_static
 from .record import AverageMeter, build_record, log_batch, log_epoch
 from .dist_utils import get_dist_info, main_only
 from .save_load import save, load, load_ckpt, mkdir

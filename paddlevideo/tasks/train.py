@@ -22,37 +22,10 @@ from ..loader.builder import build_dataloader, build_dataset
 from ..modeling.builder import build_model
 from ..solver import build_lr, build_optimizer
 from ..utils import do_preciseBN
-from paddlevideo.utils import get_logger
+from paddlevideo.utils import get_logger, apply_to_static
 from paddlevideo.utils import (build_record, log_batch, log_epoch, save, load,
                                mkdir)
 
-def create_input_specs():
-    src_word = paddle.static.InputSpec(
-        name="src_word", shape=[None, None], dtype="int64")
-    trg_word = paddle.static.InputSpec(
-        name="trg_word", shape=[None, None], dtype="int64")
-    return [
-        src_word, trg_word
-    ]
-
-def apply_to_static(config, model):
-    logger = get_logger("paddlevideo")
-    support_to_static = config.get('to_static', False)
-    if support_to_static:
-        specs = None #create_input_specs()
-        is_pass = config.get('enable_pass', False)
-        if is_pass:
-            build_strategy = paddle.static.BuildStrategy()
-            build_strategy.fuse_elewise_add_act_ops = True
-            build_strategy.fuse_bn_act_ops = True
-            build_strategy.fuse_bn_add_act_ops = True
-            build_strategy.enable_addto = True
-        else: 
-            build_strategy = None
-        model = paddle.jit.to_static(model, input_spec=specs, build_strategy=build_strategy)
-        logger.info("Successfully to apply @to_static with specs: {}".format(
-            specs))
-    return model
 
 def train_model(cfg,
                 weights=None,
@@ -113,7 +86,7 @@ def train_model(cfg,
     # 1. Construct model
     model = build_model(cfg.MODEL)
     apply_to_static(cfg, model)
-        
+
     if parallel:
         model = paddle.DataParallel(model)
 
@@ -186,7 +159,7 @@ def train_model(cfg,
         tic = time.time()
         for i, data in enumerate(train_loader):
             current_step += 1
-            if current_step == cfg.max_iter: 
+            if current_step == cfg.max_iter:
                 exit()  # for benchmark
 
             record_list['reader_time'].update(time.time() - tic)

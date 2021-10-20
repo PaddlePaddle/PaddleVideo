@@ -122,6 +122,7 @@ save_interval: 10
 epochs: 25 #Mandatory, total epoch
 log_level: "INFO" #Optional, the logger level. default: "INFO"
 max_iter : 100 # for bench mark
-to_static: False
-enable_pass: False
-amp: False # whether enable amp 
+
+TO_STATIC:
+    enable_to_static: False
+    enable_pass: False
