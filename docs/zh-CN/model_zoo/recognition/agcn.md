@@ -68,7 +68,7 @@ python3.7 main.py --test -c configs/recognition/agcn/agcn_fsd.yaml  -w output/AG
 
 | Test_Data | Top-1 | checkpoints |
 | :----: | :----: | :---- |
-| Test_A | 62.29 | AGCN_fsd.pdparams |
+| Test_A | 62.29 | [AGCN_fsd.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/AGCN_fsd.pdparams) |
 
 
 ### NTU-RGB+D数据集模型测试
@@ -85,7 +85,7 @@ python3.7 main.py --test -c configs/recognition/agcn/agcn_ntucs.yaml -w output/A
 
 | split | Top-1 | checkpoints |
 | :----: | :----: | :---- |
-| cross-subject | 83.27 | AGCN_ntucs.pdparams |
+| cross-subject | 83.27 | [AGCN_ntucs.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/AGCN_ntucs.pdparams) |
 
 
 ## 模型推理
