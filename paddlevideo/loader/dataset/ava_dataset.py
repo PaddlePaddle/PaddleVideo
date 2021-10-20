@@ -49,6 +49,7 @@ class AVADataset(BaseDataset):
                  num_max_proposals=1000,
                  timestamp_start=900,
                  timestamp_end=1800):
+        self.flag = ""
         self.custom_classes = None
         self.exclude_file = exclude_file
         self.label_file = label_file
@@ -213,7 +214,7 @@ class AVADataset(BaseDataset):
         results['gt_labels'] = ann['gt_labels']
         results['entity_ids'] = ann['entity_ids']
        
-        ret = self.pipeline(results)
+        ret = self.pipeline(results, self.flag)
         #padding for dataloader
         len_proposals = ret['proposals'].shape[0]
         len_gt_bboxes = ret['gt_bboxes'].shape[0]
@@ -239,6 +240,7 @@ class AVADataset(BaseDataset):
         return feat_pad
  
     def prepare_test(self, idx):
+        self.flag = "prepare_test"
         return self.prepare_train(idx)
 
     def evaluate(self, results):
