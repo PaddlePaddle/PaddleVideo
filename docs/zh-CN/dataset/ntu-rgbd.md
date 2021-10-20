@@ -14,7 +14,7 @@ NTU-RGB+D是基于骨骼的行为识别数据集，包含60个种类的动作，
 
 ## 数据集下载
 
-我们提供处理好的数据集下载地址[NTU-RGB-D.tar](https://videotag.bj.bcebos.com/Data/NTU-RGB-D.tar)(~3.1G)，下载后解压，数据目录如下：
+我们提供处理好的数据集下载地址[NTU-RGB-D.tar](https://videotag.bj.bcebos.com/Data/NTU-RGB-D.tar)(~3.1G)，下载后通过命令```tar -zxvf NTU-RGB-D.tar ```进行解压，得到的数据目录如下：
 
 ```txt
 ─── NTU-RGB-D
