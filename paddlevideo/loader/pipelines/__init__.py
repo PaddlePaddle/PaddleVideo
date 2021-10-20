@@ -23,8 +23,6 @@ from .decode_sampler import DecodeSampler
 from .mix import Mixup, Cutmix
 from .anet_pipeline import LoadFeat, GetMatchMap, GetVideoLabel
 from .skeleton_pipeline import AutoPadding, SkeletonNorm, Iden
-from .augmentations_ava import *
-from .sample_ava import *
 
 __all__ = [
     'Scale', 'RandomCrop', 'CenterCrop', 'RandomFlip', 'Image2Array',

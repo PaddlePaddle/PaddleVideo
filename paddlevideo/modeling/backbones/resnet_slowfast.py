@@ -17,9 +17,6 @@ import paddle.nn.functional as F
 from paddle.nn.initializer import KaimingNormal
 from ..registry import BACKBONES
 from paddlevideo.utils.multigrid import get_norm
-import sys
-import numpy as np
-import paddle.distributed as dist
 
 # seed random seed
 paddle.framework.seed(0)
@@ -522,7 +519,6 @@ class FuseFastToSlow(paddle.nn.Layer):
                  fusion_conv_channel_ratio,
                  fusion_kernel,
                  alpha,
-                 fuse_bn_relu=1,
                  eps=1e-5,
                  norm_module=paddle.nn.BatchNorm3D):
         """
@@ -536,7 +532,6 @@ class FuseFastToSlow(paddle.nn.Layer):
             eps (float): epsilon for batch norm.
         """
         super(FuseFastToSlow, self).__init__()
-        self.fuse_bn_relu = fuse_bn_relu
         fan = (dim_in * fusion_conv_channel_ratio) * (fusion_kernel * 1 * 1)
         initializer_tmp = get_conv_init(fan)
 
@@ -557,10 +552,8 @@ class FuseFastToSlow(paddle.nn.Layer):
         x_s = x[0]
         x_f = x[1]
         fuse = self._conv_f2s(x_f)
-        #  TODO: For AVA, set fuse_bn_relu=1, check mAP's improve.
-        if self.fuse_bn_relu:
-            fuse = self._bn(fuse)
-            fuse = F.relu(fuse)
+        fuse = self._bn(fuse)
+        fuse = F.relu(fuse)
         x_s_fuse = paddle.concat(x=[x_s, fuse], axis=1, name=None)
 
         return [x_s_fuse, x_f]
@@ -589,9 +582,6 @@ class ResNetSlowFast(paddle.nn.Layer):
         fusion_conv_channel_ratio=2,
         fusion_kernel_sz=7,  #5?
         pool_size_ratio=[[1, 1, 1], [1, 1, 1]],
-        fuse_bn_relu = 1,
-        spatial_strides = [[1, 1], [2, 2], [2, 2], [2, 2]],
-        use_pool_af_s2 = 1,
     ):
         """
         Args:
@@ -611,9 +601,6 @@ class ResNetSlowFast(paddle.nn.Layer):
         self.fusion_conv_channel_ratio = fusion_conv_channel_ratio
         self.fusion_kernel_sz = fusion_kernel_sz  # NOTE: modify to 7 in 8*8, 5 in old implement
         self.pool_size_ratio = pool_size_ratio
-        self.fuse_bn_relu = fuse_bn_relu
-        self.spatial_strides = spatial_strides
-        self.use_pool_af_s2 = use_pool_af_s2
         self._construct_network()
 
     def _construct_network(self):
@@ -649,8 +636,7 @@ class ResNetSlowFast(paddle.nn.Layer):
             fusion_conv_channel_ratio=self.fusion_conv_channel_ratio,
             fusion_kernel=self.fusion_kernel_sz,
             alpha=self.alpha,
-            norm_module=self.norm_module,
-            fuse_bn_relu=self.fuse_bn_relu)
+            norm_module=self.norm_module)
 
         # ResNet backbone
         MODEL_STAGE_DEPTH = {50: (3, 4, 6, 3)}
@@ -658,9 +644,7 @@ class ResNetSlowFast(paddle.nn.Layer):
 
         num_block_temp_kernel = [[3, 3], [4, 4], [6, 6], [3, 3]]
         spatial_dilations = [[1, 1], [1, 1], [1, 1], [1, 1]]
-        spatial_strides = self.spatial_strides
-        #spatial_strides = [[1, 1], [2, 2], [2, 2], [2, 2]]
-        #spatial_strides = [[1, 1], [2, 2], [2, 2], [1, 1]] #TODO:check which value is FAIR's impliment
+        spatial_strides = [[1, 1], [2, 2], [2, 2], [2, 2]]
 
         out_dim_ratio = self.beta // self.fusion_conv_channel_ratio  #4
         dim_inner = self.width_per_group * self.num_groups  #64
@@ -688,7 +672,6 @@ class ResNetSlowFast(paddle.nn.Layer):
             fusion_kernel=self.fusion_kernel_sz,
             alpha=self.alpha,
             norm_module=self.norm_module,
-            fuse_bn_relu=self.fuse_bn_relu,
         )
 
         self.s3 = ResStage(
@@ -717,7 +700,6 @@ class ResNetSlowFast(paddle.nn.Layer):
             fusion_kernel=self.fusion_kernel_sz,
             alpha=self.alpha,
             norm_module=self.norm_module,
-            fuse_bn_relu=self.fuse_bn_relu,
         )
 
         self.s4 = ResStage(
@@ -746,7 +728,6 @@ class ResNetSlowFast(paddle.nn.Layer):
             fusion_kernel=self.fusion_kernel_sz,
             alpha=self.alpha,
             norm_module=self.norm_module,
-            fuse_bn_relu=self.fuse_bn_relu,
         )
 
         self.s5 = ResStage(
@@ -778,14 +759,12 @@ class ResNetSlowFast(paddle.nn.Layer):
         x = self.s2(x)  #ResStage
         x = self.s2_fuse(x)
 
-        #  TODO: For AVA, set use_pool_af_s2=1, check mAP's improve.
-        if self.use_pool_af_s2:
-            for pathway in range(self.num_pathways):
-                x[pathway] = F.max_pool3d(x=x[pathway],
-                                          kernel_size=self.pool_size_ratio[pathway],
-                                          stride=self.pool_size_ratio[pathway],
-                                          padding=[0, 0, 0],
-                                          data_format="NCDHW")
+        for pathway in range(self.num_pathways):
+            x[pathway] = F.max_pool3d(x=x[pathway],
+                                      kernel_size=self.pool_size_ratio[pathway],
+                                      stride=self.pool_size_ratio[pathway],
+                                      padding=[0, 0, 0],
+                                      data_format="NCDHW")
 
         x = self.s3(x)
         x = self.s3_fuse(x)
