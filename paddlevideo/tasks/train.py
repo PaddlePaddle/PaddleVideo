@@ -14,7 +14,9 @@
 
 import time
 import os.path as osp
-
+import sys
+from pathlib import Path
+import numpy as np
 import paddle
 import paddle.distributed as dist
 import paddle.distributed.fleet as fleet
@@ -24,13 +26,7 @@ from ..solver import build_lr, build_optimizer
 from ..utils import do_preciseBN
 from paddlevideo.utils import get_logger
 from paddlevideo.utils import (build_record, log_batch, log_epoch, save, load,
-                               mkdir)
-
-from paddlevideo.utils import add_profiler_step
-
-import sys
-import numpy as np
-from pathlib import Path
+                               mkdir, add_profiler_step)
 
 
 def train_model(cfg,
