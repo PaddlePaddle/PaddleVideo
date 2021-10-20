@@ -19,15 +19,15 @@ We implemented Adaptive Graph Convolution Network to improve the accuracy of [ST
 
 ## Data
 
-Please refer to FSD-10 data download and preparation doc [FSD-10](../../dataset/fsd10.md)
+Please refer to FSD-10 data download and preparation doc [FSD](../../dataset/fsd.md)
 
 Please refer to NTU-RGBD data download and preparation doc [NTU-RGBD](../../dataset/ntu-rgbd.md)
 
 ## Train
 
-### Train on FSD-10
+### Train on FSD
 
-- Train AGCN on FSD-10 scripts:
+- Train AGCN on FSD scripts:
 
 ```bash
 python3.7 main.py -c configs/recognition/agcn/agcn_fsd.yaml
@@ -48,7 +48,7 @@ python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3"  --log_dir=log_agcn  
 
 ## Test
 
-### Test onf FSD-10
+### Test onf FSD
 
 - Test scripts：
 
@@ -60,11 +60,11 @@ python3.7 main.py --test -c configs/recognition/agcn/agcn_fsd.yaml  -w output/AG
 
 - Evaluation results will be saved in `submission.csv` file, final score can be obtained in [competition website](https://aistudio.baidu.com/aistudio/competition/detail/115).
 
-Accuracy on FSD-10 dataset:
+Accuracy on FSD dataset:
 
 | Test_Data | Top-1 | checkpoints |
 | :----: | :----: | :---- |
-| Test_A | 90.66 | AGCN_fsd.pdparams|
+| Test_A | 62.29 | [AGCN_fsd.pdparams]((https://videotag.bj.bcebos.com/PaddleVideo-release2.2/AGCN_fsd.pdparams) )|
 
 
 ### Test on NTU-RGB+D
@@ -81,7 +81,7 @@ Accuracy on NTU-RGB+D dataset:
 
 | split | Top-1 | checkpoints |
 | :----: | :----: | :---- |
-| cross-subject | 83.27 | AGCN_ntucs.pdparams|
+| cross-subject | 83.27 | [AGCN_ntucs.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/AGCN_ntucs.pdparams)|
 
 
 ## Inference
@@ -113,8 +113,8 @@ example of logs:
 
 ```
 Current video file: data/fsd10/example_skeleton.npy
-        top-1 class: 0
-        top-1 score: 0.8932635188102722
+        top-1 class: 27
+        top-1 score: 0.8965644240379333
 ```
 
 
