@@ -84,6 +84,9 @@ def train_model(cfg,
     mkdir(output_dir)
 
     # 1. Construct model
+
+    # if cfg turns on enable_to_static, change model to static. 
+    # else, the raw model will be returned
     model = build_model(cfg.MODEL)
     apply_to_static(cfg, model)
 
