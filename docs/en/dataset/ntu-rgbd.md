@@ -16,7 +16,7 @@ The dataset contains two splits when dividing the training set and test set. For
 
 ## Download
 
-We provide the download link of the processed dataset [NTU-RGB-D.tar](https://videotag.bj.bcebos.com/Data/NTU-RGB-D.tar)(~3.1G). Please download and unzip, the directory structure is as follows：
+We provide the download link of the processed dataset [NTU-RGB-D.tar](https://videotag.bj.bcebos.com/Data/NTU-RGB-D.tar)(~3.1G). Please download and unzip with ```tar -zxvf NTU-RGB-D.tar ``` , the directory structure is as follows：
 
 ```txt
 ─── NTU-RGB-D
