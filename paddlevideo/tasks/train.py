@@ -14,7 +14,9 @@
 
 import time
 import os.path as osp
-
+import sys
+from pathlib import Path
+import numpy as np
 import paddle
 import paddle.distributed as dist
 import paddle.distributed.fleet as fleet
@@ -24,7 +26,7 @@ from ..solver import build_lr, build_optimizer
 from ..utils import do_preciseBN
 from paddlevideo.utils import get_logger
 from paddlevideo.utils import (build_record, log_batch, log_epoch, save, load,
-                               mkdir)
+                               mkdir, add_profiler_step)
 
 
 def train_model(cfg,
@@ -32,15 +34,18 @@ def train_model(cfg,
                 parallel=True,
                 validate=True,
                 amp=False,
-                use_fleet=False):
+                use_fleet=False,
+                profiler_options=None):
     """Train model entry
 
     Args:
-    	cfg (dict): configuration.
+        cfg (dict): configuration.
         weights (str): weights path for finetuning.
-    	parallel (bool): Whether multi-cards training. Default: True.
+        parallel (bool): Whether multi-cards training. Default: True.
         validate (bool): Whether to do evaluation. Default: False.
-
+        amp (bool): Whether to use automatic mixed precision during training. Default: False.
+        use_fleet (bool): 
+        profiler_options (str): Activate the profiler function Default: None.
     """
     if use_fleet:
         fleet.init(is_collective=True)
@@ -156,6 +161,9 @@ def train_model(cfg,
         tic = time.time()
         for i, data in enumerate(train_loader):
             record_list['reader_time'].update(time.time() - tic)
+
+            # Collect performance information when profiler_options is activate
+            add_profiler_step(profiler_options)
 
             # 4.1 forward
 
