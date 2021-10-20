@@ -21,12 +21,8 @@ from .slowfast_head import SlowFastHead
 from .attention_lstm_head import AttentionLstmHead
 from .timesformer_head import TimeSformerHead
 from .stgcn_head import STGCNHead
-from .single_straight3d import SingleRoIExtractor3D
-from .roi_head import AVARoIHead
-from .bbox_head import BBoxHeadAVA
 
 __all__ = [
     'BaseHead', 'TSNHead', 'TSMHead', 'ppTSMHead', 'ppTSNHead', 'SlowFastHead',
-    'AttentionLstmHead', 'TimeSformerHead', 'STGCNHead',
-    'SingleRoIExtractor3D', 'AVARoIHead', 'BBoxHeadAVA'
+    'AttentionLstmHead', 'TimeSformerHead', 'STGCNHead'
 ]
