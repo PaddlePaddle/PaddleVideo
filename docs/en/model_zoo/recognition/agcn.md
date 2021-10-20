@@ -64,7 +64,7 @@ Accuracy on FSD dataset:
 
 | Test_Data | Top-1 | checkpoints |
 | :----: | :----: | :---- |
-| Test_A | 62.29 | [AGCN_fsd.pdparams]((https://videotag.bj.bcebos.com/PaddleVideo-release2.2/AGCN_fsd.pdparams) )|
+| Test_A | 62.29 | [AGCN_fsd.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/AGCN_fsd.pdparams)|
 
 
 ### Test on NTU-RGB+D
