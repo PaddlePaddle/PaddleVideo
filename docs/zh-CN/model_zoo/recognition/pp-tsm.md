@@ -61,6 +61,8 @@ MODEL:
         pretrained: 将路径填写到此处
 ```
 
+- 如果使用ResNet101作为Backbone进行训练，请下载预训练模型[ResNet101_vd_ssld_pretrained.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ResNet101_vd_ssld_pretrained.pdparams).
+
 #### 开始训练
 
 - Kinetics400数据集使用8卡训练，frames格式数据，uniform训练方式的启动命令如下:
@@ -91,6 +93,12 @@ python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=lo
 python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=log_pptsm  main.py  --validate -c configs/recognition/pptsm/pptsm_k400_frames_dense.yaml
 ```
 
+- Kinetics400数据集frames格式数据，dense训练方式，ResNet101作为Backbone的启动命令如下:
+
+```bash
+python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=log_pptsm  main.py  --validate -c configs/recognition/pptsm/pptsm_k400_frames_dense_r101.yaml
+```
+
 - 另外您可以自定义修改参数配置，以达到在不同的数据集上进行训练/测试的目的，配置文件命名方式为`模型_数据集_文件格式_数据格式_采样方式.yaml`，参数用法请参考[config](../../tutorials/config.md)。
 
 
@@ -119,6 +127,8 @@ Kinetics400数据集测试精度:
 | ResNet50 | False | Dense | 8 | 224 | 75.69 | [ppTSM_k400_dense.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.1/PPTSM/ppTSM_k400_dense.pdparams) |
 | ResNet50 | True | Uniform | 8 | 224 | 75.11 | [ppTSM_k400_uniform_distill.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.1/PPTSM/ppTSM_k400_uniform_distill.pdparams) |
 | ResNet50 | True | Dense | 8 | 224 | 76.16 | [ppTSM_k400_dense_distill.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.1/PPTSM/ppTSM_k400_dense_distill.pdparams) |
+| ResNet101 | True | Uniform | 8 | 224 | 76.35 | [ppTSM_k400_uniform_distill_r101.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ppTSM_k400_uniform_distill_r101.pdparams) |
+| ResNet101 | False | Dense | 8 | 224 | 77.15 | [ppTSM_k400_dense_r101.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ppTSM_k400_dense_r101.pdparams) |
 
 - Uniform采样: 时序上，等分成`num_seg`段，每段中间位置采样1帧；空间上，中心位置采样。1个视频共采样1个clips。
 
