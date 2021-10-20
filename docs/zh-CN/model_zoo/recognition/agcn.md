@@ -117,8 +117,8 @@ python3.7 tools/predict.py --input_file data/fsd10/example_skeleton.npy \
 
 ```
 Current video file: data/fsd10/example_skeleton.npy
-        top-1 class: 0
-        top-1 score: 0.8932635188102722
+        top-1 class: 27
+        top-1 score: 0.8965644240379333
 ```
 
 可以看到，使用在FSD上训练好的AGCN模型对`data/example_skeleton.npy`进行预测，输出的top1类别id为`0`，置信度为0.89。
