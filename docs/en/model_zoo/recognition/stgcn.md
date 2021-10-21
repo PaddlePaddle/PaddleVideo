@@ -120,8 +120,8 @@ example of logs:
 
 ```
 Current video file: data/fsd10/example_skeleton.npy
-        top-1 class: 0
-        top-1 score: 0.9847044944763184
+        top-1 class: 27
+        top-1 score: 0.9912770986557007
 ```
 
 ## Reference
