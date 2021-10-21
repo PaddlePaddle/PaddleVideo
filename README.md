@@ -119,6 +119,12 @@ release/2.1 was released in 20/05/2021. Please refer to [release notes](https://
   - [Benchmark](docs/en/benchmark.md)
   - [Tools](docs/en/tools.md)
 
+## Competition
+
+- [CCKS 2021：Knowledge Enhanced Video Understanding](https://www.biendata.xyz/competition/ccks_2021_videounderstanding/)
+- [Figure Skating Action Recognition Competition](https://aistudio.baidu.com/aistudio/competition/detail/115/0/introduction)
+
+
 ## License
 
 PaddleVideo is released under the [Apache 2.0 license](LICENSE).
