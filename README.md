@@ -24,19 +24,19 @@ PaddleVideo is a toolset for video recognition, action localization, and spatio 
 ## Features
 
 - **Various dataset and models**
-    PaddleVideo supports more datasets and models, including [Kinetics400](docs/zh-CN/dataset/k400.md), UCF101, YoutTube8M, NTU-RGB+D datasets, and video recognition models, such as TSN, TSM, SlowFast, TimeSformer, AttentionLSTM, ST-GCN and action localization model, like [BMN](./docs/zh-CN/model_zoo/localization/bmn.md).
+    PaddleVideo supports more datasets and models, including [Kinetics400](docs/zh-CN/dataset/k400.md), UCF101, YoutTube8M, NTU-RGB+D datasets, and video recognition models, such as TSN, TSM, SlowFast, TimeSformer, AttentionLSTM, ST-GCN and action localization model, like BMN.
 
 - **Higher performance**
     PaddleVideo has built-in solutions to improve accuracy on recognition models. [PP-TSM](docs/zh-CN/model_zoo/recognition/pp-tsm.md), which is based on the standard TSM, already archive the best performance in the 2D recognition network, has the same size of parameters but improve the Top1 Acc to 76.16%.
 
 - **Faster training strategy**
-    PaddleVideo suppors faster training strategy, such as [AMP training](https://www.paddlepaddle.org.cn/documentation/docs/zh/guides/index_cn.html), Distributed training, Multigrid method for Slowfast, OP fusion method, Faster reader and so on.
+    PaddleVideo suppors faster training strategy, such as AMP training, Distributed training, Multigrid method for Slowfast, OP fusion method, Faster reader and so on.
 
 - **Deployable**
     PaddleVideo is powered by the Paddle Inference. There is no need to convert the model to ONNX format when deploying it, all you want can be found in this repository.
 
 - **Applications**
-    PaddleVideo provides some interesting and practical projects that are implemented using video recognition and detection techniques, such as [FootballAction](https://github.com/PaddlePaddle/PaddleVideo/tree/application/FootballAction) and VideoTag.
+    PaddleVideo provides some interesting and practical projects that are implemented using video recognition and detection techniques, such as FootballAction and VideoTag.
 
 ### Overview of the performance
 
