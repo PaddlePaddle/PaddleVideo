@@ -124,11 +124,11 @@ python3.7 tools/predict.py --input_file data/fsd10/example_skeleton.npy \
 
 ```
 Current video file: data/fsd10/example_skeleton.npy
-        top-1 class: 0
-        top-1 score: 0.9847044944763184
+        top-1 class: 27
+        top-1 score: 0.9912770986557007
 ```
 
-可以看到，使用在花样滑冰数据集上训练好的ST-GCN模型对`data/example_skeleton.npy`进行预测，输出的top1类别id为`0`，置信度为0.98。
+可以看到，使用在花样滑冰数据集上训练好的ST-GCN模型对`data/example_skeleton.npy`进行预测，输出的top1类别id为`27`，置信度为0.9912770986557007。
 
 
 ## 参考论文
