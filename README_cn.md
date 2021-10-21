@@ -115,7 +115,7 @@ PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_githu
     - [benchmark](docs/zh-CN/benchmark.md)
     - [工具](docs/zh-CN/tools.md)
 - [技术交流群](#欢迎加入PaddleVideo技术交流群)
-- [特色详解](#特色详解)
+- [赛事支持](#赛事支持)
 - [许可证书](#许可证书)
 - [贡献代码](#贡献代码)
  
