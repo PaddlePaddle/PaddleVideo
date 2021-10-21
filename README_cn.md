@@ -18,7 +18,7 @@ PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_githu
   <img src="docs/images/home.gif" width="450px"/><br>
 </div>
 
-### **如果本项目对您有帮助，欢迎点击页面右上方star⭐，方便访问**
+### **⭐如果本项目对您有帮助，欢迎点击页面右上方star~ ⭐**
 
 
 ## 特性
