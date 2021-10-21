@@ -18,7 +18,7 @@ PaddleVideo is a toolset for video recognition, action localization, and spatio 
   <img src="docs/images/home.gif" width="450px"/><br>
 </div>
 
-### **If you think this repo is helpful to you, welcome to star us~ ⭐**
+### ⭐ **If you think this repo is helpful to you, welcome to star us~ ⭐**
 
 
 ## Features
