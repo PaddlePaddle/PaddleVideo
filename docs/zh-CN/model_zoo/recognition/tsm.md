@@ -16,6 +16,8 @@
 
 Temporal Shift Module (TSM) 是当前比较受关注的视频分类模型，通过通道移动的方法在不增加任何额外参数量和计算量的情况下，极大地提升了模型对于视频时间信息的利用能力，并且由于其具有轻量高效的特点，十分适合工业落地。
 
+AI Studio项目使用链接：[Paddle2.1实现视频理解经典模型-TSM](https://aistudio.baidu.com/aistudio/projectdetail/2310889?contributionType=1)
+
 <div align="center">
 <img src="../../../images/tsm_architecture.png" height=250 width=700 hspace='10'/> <br />
 </div>
