@@ -2,6 +2,11 @@
 
 # PaddleVideo
 
+## News
+
+- 2021 CCF BDCI [Figure Skater Action Recognition Competition](https://www.datafountain.cn/competitions/519) with 100 thousand bonus is in progress.
+PaddleVideo provides baseline model [ST-GCN](https://github.com/PaddlePaddle/PaddleVideo/blob/develop/docs/zh-CN/model_zoo/recognition/stgcn.md), and related tutorials [AI Studio projects](https://aistudio.baidu.com/aistudio/projectdetail/2417717), [video course](https://www.bilibili.com/video/BV1w3411172G).
+
 ## Introduction
 
 ![python version](https://img.shields.io/badge/python-3.7+-orange.svg) ![paddle version](https://img.shields.io/badge/PaddlePaddle-2.0-blue)
