@@ -2,10 +2,10 @@
 
 # PaddleVideo
 ## 最新动态
-2021年CCF大数据与计算智能大赛火热进行中，欢迎参加CCF和百度飞桨联合推出奖金100000元的赛题
+- 2021年CCF大数据与计算智能大赛火热进行中，欢迎参加CCF和百度飞桨联合推出奖金100000元的赛题
 [基于飞桨实现花样滑冰选手骨骼点动作识别](https://www.datafountain.cn/competitions/519)，
 赛题baseline由PaddleVideo提供[ST-GCN](https://github.com/PaddlePaddle/PaddleVideo/blob/develop/docs/zh-CN/model_zoo/recognition/stgcn.md)，
-[教程链接](https://aistudio.baidu.com/aistudio/projectdetail/2403929)
+[教程链接](https://aistudio.baidu.com/aistudio/projectdetail/2417717)，[视频链接](https://www.bilibili.com/video/BV1w3411172G)
 
 ## 简介
 
@@ -84,7 +84,7 @@ PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_githu
     - [【官方】Paddle 2.1实现视频理解经典模型 - TSN](https://aistudio.baidu.com/aistudio/projectdetail/2250682)
     - [【官方】Paddle 2.1实现视频理解经典模型 - TSM](https://aistudio.baidu.com/aistudio/projectdetail/2310889)
     - [BMN视频动作定位](https://aistudio.baidu.com/aistudio/projectdetail/2250674)
-    - [花样滑冰选手骨骼点动作识别ST-GCN教程](https://aistudio.baidu.com/aistudio/projectdetail/2403929)
+    - [花样滑冰选手骨骼点动作识别ST-GCN教程](https://aistudio.baidu.com/aistudio/projectdetail/2417717)
 - 快速入门
     - [安装说明](docs/zh-CN/install.md)
     - [快速开始](docs/zh-CN/start.md)
@@ -118,23 +118,11 @@ PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_githu
 - [特色详解](#特色详解)
 - [许可证书](#许可证书)
 - [贡献代码](#贡献代码)
-
-## 特色详解
-
-- **丰富的模型种类**  
-    PaddleVideo包含视频分类和动作定位方向的多个主流领先模型，其中TSN, TSM和SlowFast是End-to-End的视频分类模型，Attention LSTM是比较流行的视频特征序列模型，BMN是视频动作定位模型。TSN是基于2D-CNN的经典解决方案，TSM是基于时序移位的简单高效视频时空建模方法，SlowFast是FAIR在ICCV2019提出的3D视频分类模型，特征序列模型Attention LSTM速度快精度高。BMN模型是百度自研模型，为2019年ActivityNet夺冠方案。基于百度飞桨产业实践，我们自研并开源了PP-TSM，该模型基于TSM进行优化，在保持模型参数量和计算量不增加的前提下，精度得到大幅提升。同时，我们的通用优化策略可以广泛适用于各种视频模型，未来我们将进行更多的模型优化工作，比如TSN、SlowFast、X3D等，敬请期待。  
-
-- **3000分类预训练模型**  
-    飞桨大规模视频分类模型VideoTag基于百度短视频业务千万级数据，支持3000个源于产业实践的实用标签，具有良好的泛化能力，非常适用于国内大规模（千万/亿/十亿级别）短视频分类场景的应用。VideoTag采用两阶段建模方式，即图像建模和序列学习。第一阶段，使用少量视频样本（十万级别）训练大规模视频特征提取模型(Extractor)；第二阶段，使用千万级数据训练预测器(Predictor)，最终实现在超大规模（千万/亿/十亿级别）短视频上产业应用。  
-
-- **SOTA算法PP-TSM**  
-    与图像任务相比，视频任务的难点在于时序信息的提取。传统的2D网络难以捕获时序信息，通过增加时序通道，3D网络能更好的联合时序特征建模。但3D网络的计算量较大，部署成本较高。TSM模型通过时序位移模块，有效平衡了计算效率和模型的性能，是一种高效实用视频理解模型，在工业界广泛应用。PaddleVideo基于飞桨框架2.0对TSM进行改进，在不增加参数量和计算量的情况下，在多个数据集上精度显著超过TSM论文精度，在仅用ImageNet pretrain情况下，PP-TSM在Kinetics400数据集top1分别达到76.16%，是至今为止开源的2D视频模型中在相同条件下的最高性能。
-
-- **更快的训练速度**  
-    视频任务相比于图像任务的训练往往更加耗时，其原因主要有两点: 一是模型上，视频任务使用的模型通常有更大的参数量与计算量；一是数据上，视频文件解码通常极为耗时。为优化视频模型训练速度，项目中分别从模型角度和数据预处理角度，实现了多种视频训练加速方案。针对TSM模型，通过op融合的方式实现了temporal shift op，在节省显存的同时加速训练过程。针对TSN模型，实现了基于DALI的纯GPU解码方案，训练速度较标准实现加速3.6倍。针对SlowFast模型，结合Decode解码库和DataLoader多子进程异步加速，训练速度较原始实现提升100%，使用Multigrid策略训练总耗时可以进一步减少。预先解码存成图像的方案也能显著加速训练过程，TSM/PP-TSM在训练全量Kinetics-400数据集80个epoch只需要2天。  
+ 
 
 ## 赛事支持
-[CCKS 2021：知识增强的视频语义理解](https://www.biendata.xyz/competition/ccks_2021_videounderstanding/)
+- [CCKS 2021：知识增强的视频语义理解](https://www.biendata.xyz/competition/ccks_2021_videounderstanding/)
+- [基于飞桨实现花样滑冰选手骨骼点动作识别大赛](https://aistudio.baidu.com/aistudio/competition/detail/115/0/introduction)
 
 ## 许可证书
 本项目的发布受[Apache 2.0 license](LICENSE)许可认证。
@@ -143,6 +131,4 @@ PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_githu
 ## 欢迎贡献
 我们欢迎您的任何贡献并感谢您的支持，更多信息请参考 [contribution guidelines](docs/CONTRIBUTING.md).
 
-- 非常感谢 [mohui37](https://github.com/mohui37) 贡献预测相关代码
-
-## [需求征集](https://github.com/PaddlePaddle/PaddleVideo/issues/68)
+- 非常感谢 [mohui37](https://github.com/mohui37)、[zephyr-fun](https://github.com/zephyr-fun) 贡献相关代码
