@@ -17,6 +17,8 @@
 
 ST-GCN是AAAI 2018提出的经典的基于骨骼的行为识别模型，通过将图卷积应用在具有拓扑结构的人体骨骼数据上，使用时空图卷积提取时空特征进行行为识别，极大地提升了基于骨骼的行为识别任务精度。
 
+AI Studio项目使用链接：[基于飞桨实现花样滑冰选手骨骼点动作识别大赛baseline](https://aistudio.baidu.com/aistudio/projectdetail/2417717?contributionType=1)
+
 <div align="center">
 <img src="../../../images/st-gcn.png" height=200 width=950 hspace='10'/> <br />
 </div>
