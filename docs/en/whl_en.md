@@ -23,13 +23,13 @@ python3.7 -m pip install dist/paddlevideo-0.0.1-py3-none-any.whl
 
 ### 1. Quick Start
 
-* Assign `video_file='data/example.mp4'`, Use inference model that Paddle provides `model_name='ppTSM'`
+* Assign `video_file='data/example.avi'`, Use inference model that Paddle provides `model_name='ppTSM'`
 
 
 ```python
 from ppvideo import PaddleVideo
 clas = PaddleVideo(model_name='ppTSM',use_gpu=False,use_tensorrt=False)
-video_file='data/example.mp4.'
+video_file='data/example.avi.'
 result = clas.predict(video_file)
 print(result)
 ```
@@ -41,12 +41,12 @@ print(result)
 
 * Using command line interactive programming
 ```bash
-ppvideo --model_name='ppTSM' --video_file='data/example.mp4'
+ppvideo --model_name='ppTSM' --video_file='data/example.avi'
 ```
 
 ```
     >>> result
-    **********data/example.mp4**********
+    **********data/example.avi**********
     [{'videoname': 'data/example.avi', 'class_ids': [5], 'scores': [0.9621570706367493], 'label_names': ['archery']}]
 ```
 
