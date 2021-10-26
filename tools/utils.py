@@ -12,24 +12,89 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import numpy as np
-import sys
-import paddle.nn.functional as F
-import paddle
-import os
 import json
+import os
+import sys
+
+import cv2
+import numpy as np
+import paddle
+import paddle.nn.functional as F
 import pandas
+from PIL import Image
 
 __dir__ = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.abspath(os.path.join(__dir__, '../')))
 
-from paddlevideo.loader.pipelines import VideoDecoder, Sampler, Scale, \
-    CenterCrop, TenCrop, Normalization, Image2Array, UniformCrop, JitterScale, \
-        DecodeSampler, MultiCrop, PackOutput, AutoPadding, SkeletonNorm
-from paddlevideo.utils import build, Registry
+from paddlevideo.loader.pipelines import (AutoPadding, CenterCrop,
+                                          DecodeSampler, Image2Array,
+                                          JitterScale, MultiCrop, Normalization,
+                                          PackOutput, Sampler, Scale,
+                                          SkeletonNorm, TenCrop, UniformCrop,
+                                          VideoDecoder)
 from paddlevideo.metrics.bmn_metric import boundary_choose, soft_nms
+from paddlevideo.utils import Registry, build
 
 INFERENCE = Registry('inference')
+
+
+def decode(filepath, args):
+    num_seg = args.num_seg
+    seg_len = args.seg_len
+
+    cap = cv2.VideoCapture(filepath)
+    videolen = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    sampledFrames = []
+    for i in range(videolen):
+        ret, frame = cap.read()
+        # maybe first frame is empty
+        if ret == False:
+            continue
+        img = frame[:, :, ::-1]
+        sampledFrames.append(img)
+    average_dur = int(len(sampledFrames) / num_seg)
+    imgs = []
+    for i in range(num_seg):
+        idx = 0
+        if average_dur >= seg_len:
+            idx = (average_dur - 1) // 2
+            idx += i * average_dur
+        elif average_dur >= 1:
+            idx += i * average_dur
+        else:
+            idx = i
+
+        for jj in range(idx, idx + seg_len):
+            imgbuf = sampledFrames[int(jj % len(sampledFrames))]
+            img = Image.fromarray(imgbuf, mode='RGB')
+            imgs.append(img)
+
+    return imgs
+
+
+def preprocess(img, args):
+    img = {"imgs": img}
+    resize_op = Scale(short_size=args.short_size)
+    img = resize_op(img)
+    ccrop_op = CenterCrop(target_size=args.target_size)
+    img = ccrop_op(img)
+    to_array = Image2Array()
+    img = to_array(img)
+    if args.normalize:
+        img_mean = [0.485, 0.456, 0.406]
+        img_std = [0.229, 0.224, 0.225]
+        normalize_op = Normalization(mean=img_mean, std=img_std)
+        img = normalize_op(img)
+    return img['imgs']
+
+
+def postprocess(output, args):
+    output = output.flatten()
+    output = F.softmax(paddle.to_tensor(output)).numpy()
+    classes = np.argpartition(output, -args.top_k)[-args.top_k:]
+    classes = classes[np.argsort(-output[classes])]
+    scores = output[classes]
+    return classes, scores
 
 
 def build_inference_helper(cfg):
