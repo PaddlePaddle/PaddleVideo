@@ -47,10 +47,12 @@ class Recognizer1D(BaseRecognizer):
         """
         return self.train_step(data_batch)
 
-    def test_step(self, data_batch):
+    def infer_step(self, data_batch):
+        """Infering setp.
+        """
         rgb_data, rgb_len, rgb_mask, audio_data, audio_len, audio_mask = data_batch
         imgs = [(rgb_data, rgb_len, rgb_mask),
                 (audio_data, audio_len, audio_mask)]
-
-        lstm_logit, lstm_output = self.forward_net(imgs)
-        return lstm_output
+        # call forward
+        lstm_logit, _ = self.forward_net(imgs)
+        return lstm_logit

@@ -13,11 +13,11 @@
 # limitations under the License.
 
 import paddle
-from paddlevideo.utils import get_logger
+from paddlevideo.utils import get_logger, load
+
 from ..loader.builder import build_dataloader, build_dataset
 from ..metrics import build_metric
 from ..modeling.builder import build_model
-from paddlevideo.utils import load
 
 logger = get_logger("paddlevideo")
 
@@ -33,7 +33,7 @@ def test_model(cfg, weights, parallel=True):
 
     """
     # 1. Construct model.
-    if cfg.MODEL.backbone.get('pretrained'):
+    if cfg.MODEL.get('backbone') and cfg.MODEL.backbone.get('pretrained'):
         cfg.MODEL.backbone.pretrained = ''  # disable pretrain model init
     model = build_model(cfg.MODEL)
     if parallel:

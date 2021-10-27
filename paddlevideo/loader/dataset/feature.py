@@ -56,3 +56,12 @@ class FeatureDataset(BaseDataset):
         return results['rgb_data'], results['rgb_len'], results[
             'rgb_mask'], results['audio_data'], results['audio_len'], results[
                 'audio_mask'], results['labels']
+
+    def prepare_test(self, idx):
+        """TEST. Prepare the data for testing given the index."""
+        results = copy.deepcopy(self.info[idx])
+        results = self.pipeline(results)
+
+        return results['rgb_data'], results['rgb_len'], results[
+            'rgb_mask'], results['audio_data'], results['audio_len'], results[
+                'audio_mask'], results['labels']
