@@ -4,7 +4,7 @@
 
 ## News
 
-- [2021 CCF BDCI Figure Skating Action Recognition Competition](https://www.datafountain.cn/competitions/519) with 100 thousand bonus is in progress.
+- 🔥🔥🔥 [2021 CCF BDCI Figure Skating Action Recognition Competition](https://www.datafountain.cn/competitions/519) with 100 thousand bonus is in progress ! :tada:  
 PaddleVideo provides baseline model [ST-GCN](https://github.com/PaddlePaddle/PaddleVideo/blob/develop/docs/zh-CN/model_zoo/recognition/stgcn.md), and related tutorials [AI Studio projects](https://aistudio.baidu.com/aistudio/projectdetail/2417717), [video course](https://www.bilibili.com/video/BV1w3411172G).
 
 ## Introduction
