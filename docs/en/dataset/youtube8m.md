@@ -1,15 +1,29 @@
-YouTube-8M is a large-scale labeled video dataset that consists of millions of YouTube video IDs,   
-with high-quality machine-generated annotations from a diverse vocabulary of 3,800+ visual entities.  
-we use YouTube-8M 2018 , which is Youtube-8M’s update version in May 14th, 2018,   
-with improved quality machine-generated labels, and reduced size / higher-quality video dataset.  
-We transform TFRecord to pickle format for PaddleVideo.  
+English | [Simplified Chinese](../../zh-CN/dataset/youtube8m.md)
 
-download  
-Please use Youtube-8M’s official link to download training setand validate set。  
-There’s 3844 files’ download link for each set. official download tools also can be used.   
-When the download is finished, you’ll get 3844 training files and 3844 validate files（TFRecord format）。  
+# YouTube-8MData Preparation
 
-Transform Data Format  
-To speed up，we transform TFRecord to pickle format using tf2pkl.py,   
-and split pkl to single video file using split_yt8m.py.  
-（ https://github.com/PaddlePaddle/PaddleVideo/blob/main/data/yt8m/split_yt8m.py ）
+- [Introduction](#Introduction)
+- [Download](#Download)
+- [Conversion](#Conversion)
+
+
+## Introduction
+
+YouTube-8M is a large-scale video classification data set, containing more than 8 million video URLs. The tag system covers more than 3800 knowledge graph entities. One video corresponds to multiple tags (3-4 on average) and is labeled by machine.
+Video features:
+-The length of each video is between 120s and 500s
+Because the amount of video data is too large, the frame-level feature is extracted using the image classification model, the video-level feature is extracted with xxx, and the feature is reduced in dimensionality using PCA. Audio characteristics?
+> The dataset used here is the updated YouTube-8M data set in 2018.
+  
+
+## Download
+Please use the official Youtube-8M link to download the training set (http://us.data.yt8m.org/2/frame/train/index.html) and
+Validation set (http://us.data.yt8m.org/2/frame/validate/index.html).
+Each link provides download addresses of 3844 files, and users can also download data using the official download script.
+After the data download is complete, you will get 3844 training data files and 3844 verification data files (TFRecord format).
+
+## Conversion
+We convert the downloaded TFRecord file into a pickle file for PaddlePaddle to use.
+In order to speed up, you need to convert the TFRecord file format to pickle format, please use the conversion script: tf2pkl.py.
+Then split pkl into a single video and a file, please use the split script: split_yt8m.py.
+(Https://github.com/PaddlePaddle/PaddleVideo/blob/main/data/yt8m/split_yt8m.py)
