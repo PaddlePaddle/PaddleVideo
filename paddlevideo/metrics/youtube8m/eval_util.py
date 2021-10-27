@@ -148,8 +148,6 @@ def top_k_triplets(predictions, labels, k=20):
 class HitOneMetric(BaseMetric):
     """A class to store the evaluation metrics."""
     def __init__(self,
-                 num_class,
-                 top_k,
                  data_size,
                  batch_size,
                  log_interval=20):
