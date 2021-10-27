@@ -1,6 +1,6 @@
 简体中文 | [English](../../../en/model_zoo/recognition/tsn.md)
 
-# TSN
+# AttentionLSTM
 
 ## 内容
 
@@ -48,6 +48,8 @@ python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log
 | :-----: | :---------: | :---: | ----- |
 |  224  | TODO | TODO | TODO        |
 
+## 模型推理
+
 ### 导出inference模型
 
 ```bash
@@ -73,4 +75,5 @@ python3.7 tools/predict.py --input_file data/example.pkl \
 ## 参考论文
 
 - [Attention Clusters: Purely Attention Based Local Feature Integration for Video Classification](https://arxiv.org/abs/1711.09550), Xiang Long, Chuang Gan, Gerard de Melo, Jiajun Wu, Xiao Liu, Shilei Wen
-- [YouTube-8M: A Large-Scale Video Classification Benchmark]([[1609.08675\] YouTube-8M: A Large-Scale Video Classification Benchmark (arxiv.org)](https://arxiv.org/abs/1609.08675)), Sami Abu-El-Haija, Nisarg Kothari, Joonseok Lee, Paul Natsev, George Toderici, Balakrishnan Varadarajan, Sudheendra Vijayanarasimhan
+- [YouTube-8M: A Large-Scale Video Classification Benchmark](https://arxiv.org/abs/1609.08675), Sami Abu-El-Haija, Nisarg Kothari, Joonseok Lee, Paul Natsev, George Toderici, Balakrishnan Varadarajan, Sudheendra Vijayanarasimhan
+
