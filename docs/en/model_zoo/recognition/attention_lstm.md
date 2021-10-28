@@ -39,7 +39,7 @@ PaddleVide provides training and testing scripts on the Youtube-8M dataset. Yout
 The command is as follows:
 
 ```bash
-python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_attetion_lstm main.py --test -c configs/recognition/ attention_lstm/attention_lstm_youtube-8m.yaml -w output/AttentionLSTM/AttentionLSTM_best.pdparams
+python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_attetion_lstm main.py --test -c configs/recognition/attention_lstm/attention_lstm_youtube-8m.yaml -w output/AttentionLSTM/AttentionLSTM_best.pdparams
 ```
 
 When the test configuration uses the following parameters, the test indicators on the validation data set of Youtube-8M are as follows:
