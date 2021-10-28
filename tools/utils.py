@@ -16,10 +16,12 @@ import json
 import os
 import sys
 
+import cv2
 import numpy as np
 import paddle
 import paddle.nn.functional as F
 import pandas
+from PIL import Image
 
 __dir__ = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.abspath(os.path.join(__dir__, '../')))
@@ -533,4 +535,3 @@ class AttentionLSTM_Inference_helper():
         print("Current video file: {0}".format(self.input_file))
         print("\ttop-1 class: {0}".format(classes[0]))
         print("\ttop-1 score: {0}".format(scores[0]))
-
