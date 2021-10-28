@@ -62,7 +62,7 @@ INFERENCE:
     embedding_size: 512
     lstm_size: 1024
 
-model_name: "AttentionLstm"
+model_name: "AttentionLSTM"
 log_interval: 1 #Optional, the interal of logger, default:10
 epochs: 10 #Mandatory, total epoch
 save_interval: 5
