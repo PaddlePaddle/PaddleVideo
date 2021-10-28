@@ -1,4 +1,4 @@
-简体中文 | [English](../../../en/model_zoo/recognition/tsn.md)
+简体中文 | [English](../../../en/model_zoo/recognition/attention_lstm.md)
 
 # AttentionLSTM
 
