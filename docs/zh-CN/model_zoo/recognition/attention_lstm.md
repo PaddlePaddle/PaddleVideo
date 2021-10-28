@@ -46,7 +46,7 @@ python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log
 
 | Hit@1 | PERR | GAP  | checkpoints |
 | :-----: | :---------: | :---: | ----- |
-|  224  | TODO | TODO | TODO        |
+|  89.05  | 80.49 | 86.30 |   TODO      |
 
 ## 模型推理
 
