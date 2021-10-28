@@ -72,6 +72,13 @@ python3.7 tools/predict.py --input_file data/example.pkl \
                            --use_gpu=True \
                            --use_tensorrt=False
 ```
+输出示例如下：
+```bash
+Current video file: data/example.pkl
+        top-1 class: 11
+        top-1 score: 0.9841002225875854
+```
+可以看到，使用在Youtube-8M上训练好的AttentionLSTM模型对data/example.pkl进行预测，输出的top1类别id为11，置信度为0.98。
 ## 参考论文
 
 - [Attention Clusters: Purely Attention Based Local Feature Integration for Video Classification](https://arxiv.org/abs/1711.09550), Xiang Long, Chuang Gan, Gerard de Melo, Jiajun Wu, Xiao Liu, Shilei Wen
