@@ -5,7 +5,7 @@
 ## content
 
 - [Introduction](#Introduction)
-- [DATA](#DATA)
+- [Data](#Data)
 - [Train](#Train)
 - [Test](#Test)
 - [Inference](#Inference)
@@ -18,7 +18,7 @@ This model uses a two-way long and short-term memory network (LSTM) to encode al
 
 The Attention layer can refer to the paper [AttentionCluster](https://arxiv.org/abs/1711.09550)
 
-## DATA
+## Data
 
 PaddleVide provides training and testing scripts on the Youtube-8M dataset. Youtube-8M data download and preparation please refer to [YouTube-8M data preparation](../../dataset/youtube8m.md)
 
