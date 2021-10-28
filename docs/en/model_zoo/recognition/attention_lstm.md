@@ -57,7 +57,7 @@ python3.7 tools/export_model.py -c configs/recognition/attention_lstm/attention_
                                 -o inference/AttentionLSTM
 ```
 
-The above command will generate the model structure file `TSN.pdmodel` and the model weight file `TSN.pdiparams` required for prediction.
+The above command will generate the model structure file `AttentionLSTM.pdmodel` and the model weight file `AttentionLSTM.pdiparams` required for prediction.
 
 For the meaning of each parameter, please refer to [Model Reasoning Method](https://github.com/PaddlePaddle/PaddleVideo/blob/release/2.0/docs/zh-CN/start.md#2-Model Reasoning)
 
