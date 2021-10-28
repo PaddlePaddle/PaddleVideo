@@ -46,7 +46,7 @@ When the test configuration uses the following parameters, the test indicators o
 
 | Hit@1 | PERR | GAP | checkpoints |
 | :-----: | :---------: | :---: | ----- |
-| 224 | TODO | TODO | TODO |
+| 89.05 | 80.49 | 86.30 | TODO |
 
 ## Inference
 
