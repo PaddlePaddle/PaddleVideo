@@ -148,19 +148,12 @@ def top_k_triplets(predictions, labels, k=20):
 class HitOneMetric(BaseMetric):
     """A class to store the evaluation metrics."""
     def __init__(self,
+                 num_class,
+                 top_k,
                  data_size,
                  batch_size,
                  log_interval=20):
-        """Construct an HitOneMetric object to store the evaluation metrics.
-
-        Args:
-        num_class: A positive integer specifying the number of classes.
-        top_k: A positive integer specifying how many predictions are considered per video.
-
-        Raises:
-        ValueError: An error occurred when MeanAveragePrecisionCalculator cannot
-            not be constructed.
-        """
+        """Construct an HitOneMetric object to store the evaluation metrics."""
         self.hit_at_one = []
         self.perr = []
         self.gap = []
