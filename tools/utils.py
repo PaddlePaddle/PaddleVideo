@@ -16,24 +16,85 @@ import json
 import os
 import sys
 
+import cv2
 import numpy as np
 import paddle
 import paddle.nn.functional as F
 import pandas
+from PIL import Image
 
 __dir__ = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.abspath(os.path.join(__dir__, '../')))
 
 from paddlevideo.loader.pipelines import (AutoPadding, CenterCrop,
-                                          DecodeSampler, FeatureDecoder,
-                                          Image2Array, JitterScale, MultiCrop,
-                                          Normalization, PackOutput, Sampler,
-                                          Scale, SkeletonNorm, TenCrop,
-                                          UniformCrop, VideoDecoder)
+                                          DecodeSampler, Image2Array,
+                                          JitterScale, MultiCrop, Normalization,
+                                          PackOutput, Sampler, Scale,
+                                          SkeletonNorm, TenCrop, UniformCrop,
+                                          VideoDecoder)
 from paddlevideo.metrics.bmn_metric import boundary_choose, soft_nms
 from paddlevideo.utils import Registry, build
 
 INFERENCE = Registry('inference')
+
+
+def decode(filepath, args):
+    num_seg = args.num_seg
+    seg_len = args.seg_len
+
+    cap = cv2.VideoCapture(filepath)
+    videolen = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    sampledFrames = []
+    for i in range(videolen):
+        ret, frame = cap.read()
+        # maybe first frame is empty
+        if ret == False:
+            continue
+        img = frame[:, :, ::-1]
+        sampledFrames.append(img)
+    average_dur = int(len(sampledFrames) / num_seg)
+    imgs = []
+    for i in range(num_seg):
+        idx = 0
+        if average_dur >= seg_len:
+            idx = (average_dur - 1) // 2
+            idx += i * average_dur
+        elif average_dur >= 1:
+            idx += i * average_dur
+        else:
+            idx = i
+
+        for jj in range(idx, idx + seg_len):
+            imgbuf = sampledFrames[int(jj % len(sampledFrames))]
+            img = Image.fromarray(imgbuf, mode='RGB')
+            imgs.append(img)
+
+    return imgs
+
+
+def preprocess(img, args):
+    img = {"imgs": img}
+    resize_op = Scale(short_size=args.short_size)
+    img = resize_op(img)
+    ccrop_op = CenterCrop(target_size=args.target_size)
+    img = ccrop_op(img)
+    to_array = Image2Array()
+    img = to_array(img)
+    if args.normalize:
+        img_mean = [0.485, 0.456, 0.406]
+        img_std = [0.229, 0.224, 0.225]
+        normalize_op = Normalization(mean=img_mean, std=img_std)
+        img = normalize_op(img)
+    return img['imgs']
+
+
+def postprocess(output, args):
+    output = output.flatten()
+    output = F.softmax(paddle.to_tensor(output)).numpy()
+    classes = np.argpartition(output, -args.top_k)[-args.top_k:]
+    classes = classes[np.argsort(-output[classes])]
+    scores = output[classes]
+    return classes, scores
 
 
 def build_inference_helper(cfg):
@@ -395,67 +456,6 @@ class STGCN_Inference_helper():
 
         res = np.expand_dims(results['data'], axis=0).copy()
         return [res]
-
-    def postprocess(self, output):
-        """
-        output: list
-        """
-        output = output[0]
-        if output.ndim == 1:
-            pass
-        elif output.ndim == 2:
-            output = output.mean(axis=0)
-        if output.ndim > 1:
-            output = output.flatten()
-        output = F.softmax(paddle.to_tensor(output)).numpy()
-        classes = np.argpartition(output, -self.top_k)[-self.top_k:]
-        classes = classes[np.argsort(-output[classes])]
-        scores = output[classes]
-        print("Current video file: {0}".format(self.input_file))
-        print("\ttop-1 class: {0}".format(classes[0]))
-        print("\ttop-1 score: {0}".format(scores[0]))
-
-
-@INFERENCE.register()
-class AttentionLSTM_Inference_helper():
-    def __init__(
-            self,
-            num_classes,  #Optional, the number of classes to be classified.
-            feature_num,
-            feature_dims,
-            embedding_size,
-            lstm_size,
-            top_k=1):
-        self.num_classes = num_classes
-        self.feature_num = feature_num
-        self.feature_dims = feature_dims
-        self.embedding_size = embedding_size
-        self.lstm_size = lstm_size
-        self.top_k = top_k
-
-    def preprocess(self, input_file):
-        """
-        input_file: str, file path
-        return: list
-        """
-        self.input_file = input_file
-        assert os.path.isfile(input_file) is not None, "{0} not exists".format(
-            input_file)
-        results = {'filename': input_file}
-        ops = [FeatureDecoder(num_classes=self.num_classes, has_label=False)]
-        for op in ops:
-            results = op(results)
-
-        # res = np.expand_dims(results['data'], axis=0).copy()
-        res = []
-        for modality in ['rgb', 'audio']:
-            res.append(
-                np.expand_dims(results[f'{modality}_data'], axis=0).copy())
-            res.append(
-                np.expand_dims(results[f'{modality}_len'], axis=0).copy())
-            res.append(
-                np.expand_dims(results[f'{modality}_mask'], axis=0).copy())
-        return res
 
     def postprocess(self, output):
         """
