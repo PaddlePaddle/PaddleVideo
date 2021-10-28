@@ -1,4 +1,4 @@
-English | [Simplified Chinese](../../zh-CN/dataset/youtube8m.md)
+English | [简体中文](../../zh-CN/dataset/youtube8m.md)
 
 # YouTube-8MData Preparation
 
