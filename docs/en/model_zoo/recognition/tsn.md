@@ -1,77 +1,133 @@
-[简体中文](../../../zh-CN/model_zoo/recognition/attention_lstm.md) | English
+[简体中文](../../../zh-CN/model_zoo/recognition/tsn.md) | English
 
-# AttentionLSTM
+# TSN
 
-## content
+## Content
 
 - [Introduction](#Introduction)
 - [Data](#Data)
 - [Train](#Train)
 - [Test](#Test)
 - [Inference](#Inference)
+- [Details](#Details)
 - [Reference](#Reference)
 
 ## Introduction
 
-Recurrent Neural Networks (RNN) are often used in the processing of sequence data, which can model the sequence information of multiple consecutive frames of video, and are commonly used methods in the field of video classification.
-This model uses a two-way long and short-term memory network (LSTM) to encode all the frame features of the video in sequence. Unlike the traditional method that directly uses the output of the last moment of LSTM, this model adds an Attention layer, and the hidden state output at each moment has an adaptive weight, and then linearly weights the final feature vector. The reference paper implements a two-layer LSTM structure, while **this model implements a two-way LSTM with Attention**.
+Temporal Segment Network (TSN) is a classic 2D-CNN-based solution in the field of video classification. This method mainly solves the problem of long-term behavior recognition of video, and replaces dense sampling by sparsely sampling video frames, which can not only capture the global information of the video, but also remove redundancy and reduce the amount of calculation. The core idea is to average the features of each frame as the overall feature of the video, and then enter the classifier for classification. The model implemented by this code is a TSN network based on a single-channel RGB image, and Backbone uses the ResNet-50 structure.
 
-The Attention layer can refer to the paper [AttentionCluster](https://arxiv.org/abs/1711.09550)
+<div align="center">
+<img src="../../../images/tsn_architecture.png" height=350 width=80000 hspace='10'/> <br />
+</div>
+
+
+For details, please refer to the ECCV 2016 paper [Temporal Segment Networks: Towards Good Practices for Deep Action Recognition](https://arxiv.org/abs/1608.00859)
 
 ## Data
 
-PaddleVide provides training and testing scripts on the Youtube-8M dataset. Youtube-8M data download and preparation please refer to [YouTube-8M data preparation](../../dataset/youtube8m.md)
+PaddleVide provides training and testing scripts on the Kinetics-400 dataset. Kinetics-400 data download and preparation please refer to [Kinetics-400 data preparation](../../dataset/k400.md)
 
 ## Train
 
-### Youtube-8M data set training
+### Kinetics-400 data set training
+
+#### Download and add pre-trained models
+
+1. Load the ResNet50 weights trained on ImageNet1000 as Backbone initialization parameters [ResNet50_pretrain.pdparams](https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_pretrain.pdparams), or download through the command line
+
+   ```bash
+   wget https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_pretrain.pdparams
+   ```
+
+2. Open `PaddleVideo/configs/recognition/tsn/tsn_k400_frames.yaml`, and fill in the downloaded weight path below `pretrained:`
+
+   ```yaml
+   MODEL:
+       framework: "Recognizer2D"
+       backbone:
+           name: "ResNet"
+           pretrained: fill in the path here
+   ```
 
 #### Start training
 
-- The Youtube-8M data set uses 8 cards for training. In the feature format, video and audio features will be used as input. The training start command of the data is as follows
+- Kinetics-400 data set uses 8 cards for training, the training start command for frames format data is as follows
 
   ```bash
-  python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_attetion_lstm main.py --validate -c configs/recognition/ attention_lstm/attention_lstm_youtube-8m.yaml
+  python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_tsn main.py --validate -c configs/recognition/ tsn/tsn_k400_frames.yaml
   ```
 
 ## Test
 
-The command is as follows:
+Since the sampling method of the TSN model test mode is **TenCrop** with a slower speed but higher accuracy, which is different from the **CenterCrop** used in the verification mode during the training process, the verification index `topk Acc` recorded in the training log It does not represent the final test score, so after the training is completed, you can use the test mode to test the best model to obtain the final index. The command is as follows:
 
 ```bash
-python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_attetion_lstm main.py --test -c configs/recognition/ attention_lstm/attention_lstm_youtube-8m.yaml -w output/AttentionLSTM/AttentionLSTM_best_best.pdparams
+python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_tsn main.py --test -c configs/recognition/ tsn/tsn_k400_frames.yaml -w "output/TSN/TSN_best.pdparams"
 ```
 
-When the test configuration uses the following parameters, the test indicators on the validation data set of Youtube-8M are as follows:
+When the test configuration uses the following parameters, the test indicators on the validation data set of Kinetics-400 are as follows:
 
-| Hit@1 | PERR | GAP | checkpoints |
-| :-----: | :---------: | :---: | ----- |
-| 224 | TODO | TODO | TODO |
-
+| backbone | Sampling method | Training Strategy | num_seg | target_size | Top-1 |                         checkpoints                          |
+| :------: | :-------------: | :---------------: | :-----: | :---------: | :---: | :----------------------------------------------------------: |
+| ResNet50 |     TenCrop     |       NCHW        |   3    |     224     | 69.81 | [TSN_k400.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/TSN_k400.pdparams) |
+| ResNet50 |     TenCrop     |       NCHW        |   8    |     224     | 71.70 | [TSN_k400_8.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/TSN_k400_8.pdparams) |
 ## Inference
 
-### Export inference model
+### export inference model
+
 ```bash
-python3.7 tools/export_model.py -c configs/recognition/attention_lstm/attention_lstm_youtube-8m.yaml \
-                                -p data/AttentionLSTM_best_youtube-8m.pdparams \
-                                -o inference/AttentionLSTM
+python3.7 tools/export_model.py -c configs/recognition/tsn/tsn_k400_frames.yaml \
+                                -p data/TSN_k400.pdparams \
+                                -o inference/TSN
 ```
 
 The above command will generate the model structure file `TSN.pdmodel` and the model weight file `TSN.pdiparams` required for prediction.
 
 For the meaning of each parameter, please refer to [Model Reasoning Method](https://github.com/PaddlePaddle/PaddleVideo/blob/release/2.0/docs/zh-CN/start.md#2-Model Reasoning)
 
-### Use prediction engine inference
+### infer
 
 ```bash
-python3.7 tools/predict.py --input_file data/example.pkl \
-                           --config configs/recognition/attention_lstm/attention_lstm_youtube-8m.yaml \
-                           --model_file inference/AttentionLSTM/AttentionLSTM.pdmodel \
-                           --params_file inference/AttentionLSTM/AttentionLSTM.pdiparams \
+python3.7 tools/predict.py --input_file data/example.avi \
+                           --config configs/recognition/tsn/tsn_k400_frames.yaml \
+                           --model_file inference/TSN/TSN.pdmodel \
+                           --params_file inference/TSN/TSN.pdiparams \
                            --use_gpu=True \
                            --use_tensorrt=False
 ```
-## Reference paper
+- **Note**: For models that combine N and T during calculation (such as TSN, TSM), when `use_tensorrt=True`, you need to specify the `batch_size` argument as batch_size\*num_seg\*num_crop.
 
-- [Attention Clusters: Purely Attention Based Local Feature Integration for Video Classification](https://arxiv.org/abs/1711.09550), Xiang Long, Chuang Gan, Gerard de Melo, Jiajun Wu, Xiao Liu, Shilei Wen
-- [YouTube-8M: A Large-Scale Video Classification Benchmark](https://arxiv.org/abs/1609.08675), Sami Abu-El-Haija, Nisarg Kothari, Joonseok Lee, Paul Natsev, George Toderici, Balakrishnan Varadarajan, Sudheendra Vijayanarasimhan
+    ```bash
+    python3.7 tools/predict.py --input_file data/example.avi \
+                               --config configs/recognition/tsn/tsn_k400_frames.yaml \
+                               --model_file inference/TSN/TSN.pdmodel \
+                               --params_file inference/TSN/TSN.pdiparams \
+                               --batch_size 250 \
+                               --use_gpu=True \
+                               --use_tensorrt=True
+    ```
+## Details
+
+**data processing:**
+
+- The model reads the `mp4` data in the Kinetics-400 data set, first divides each piece of video data into `seg_num` segments, and then evenly extracts 1 frame of image from each segment to obtain sparsely sampled `seg_num` video frames , And then do the same random data enhancement to this `seg_num` frame image, including multi-scale random cropping, random left and right flips, data normalization, etc., and finally zoom to `target_size`
+
+**training strategy:**
+
+- Use Momentum optimization algorithm for training, momentum=0.9
+
+- Using L2_Decay, the weight attenuation coefficient is 1e-4
+
+- Use global gradient clipping, with a clipping factor of 40.0
+
+- The total number of epochs is 100, and the learning rate will be attenuated by 0.1 times when the epoch reaches 40 and 80
+
+- Dropout_ratio=0.4
+
+**parameter initialization**
+
+- The convolutional layer of the TSN model uses Paddle's default [KaimingNormal](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/api/paddle/nn/initializer/KaimingNormal_cn.html#kaimingnormal) and [Constant](https://www.paddlepaddle.org.cn/documentation/docs/en/develop/api/paddle/nn/initializer/Constant_cn.html#constant) initialization method, with Normal(mean=0, std= 0.01) normal distribution to initialize the weight of the FC layer, and a constant 0 to initialize the bias of the FC layer
+
+## Reference
+
+- [Temporal Segment Networks: Towards Good Practices for Deep Action Recognition](https://arxiv.org/abs/1608.00859), Limin Wang, Yuanjun Xiong, Zhe Wang, Yu Qiao, Dahua Lin, Xiaoou Tang, Luc Van Gool
