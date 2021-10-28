@@ -58,7 +58,7 @@ python3.7 tools/export_model.py -c configs/recognition/attention_lstm/attention_
                                 -o inference/AttentionLSTM
 ```
 
-上述命令将生成预测所需的模型结构文件`TSN.pdmodel`和模型权重文件`TSN.pdiparams`。
+上述命令将生成预测所需的模型结构文件`AttentionLSTM.pdmodel`和模型权重文件`AttentionLSTM.pdiparams`。
 
 各参数含义可参考[模型推理方法](https://github.com/PaddlePaddle/PaddleVideo/blob/release/2.0/docs/zh-CN/start.md#2-模型推理)
 
