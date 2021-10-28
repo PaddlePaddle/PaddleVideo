@@ -11,10 +11,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import copy
+import os.path as osp
+
 from ..registry import DATASETS
 from .base import BaseDataset
-import os.path as osp
-import copy
 
 
 @DATASETS.register()
@@ -28,11 +29,11 @@ class FeatureDataset(BaseDataset):
         file_path,
         pipeline,
         data_prefix=None,
-        valid_mode=False,
+        test_mode=False,
         suffix=None,
     ):
         self.suffix = suffix
-        super().__init__(file_path, pipeline, data_prefix, valid_mode)
+        super().__init__(file_path, pipeline, data_prefix, test_mode)
 
     def load_file(self):
         """Load index file to get video information."""
