@@ -39,7 +39,7 @@ PaddleVide提供了在Youtube-8M数据集上训练和测试脚本。Youtube-8M�
 命令如下：
 
 ```bash
-python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_attetion_lstm  main.py  --test -c configs/recognition/attention_lstm/attention_lstm_youtube-8m.yaml -w output/AttentionLSTM/AttentionLSTM_best_best.pdparams
+python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_attetion_lstm  main.py  --test -c configs/recognition/attention_lstm/attention_lstm_youtube-8m.yaml -w output/AttentionLSTM/AttentionLSTM_best.pdparams
 ```
 
 当测试配置采用如下参数时，在Youtube-8M的validation数据集上的测试指标如下：
