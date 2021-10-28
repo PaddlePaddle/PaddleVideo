@@ -31,7 +31,7 @@ PaddleVide provides training and testing scripts on the Youtube-8M dataset. Yout
 - The Youtube-8M data set uses 8 cards for training. In the feature format, video and audio features will be used as input. The training start command of the data is as follows
 
   ```bash
-  python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_attetion_lstm main.py --validate -c configs/recognition/ attention_lstm/attention_lstm_youtube-8m.yaml
+  python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_attetion_lstm main.py --validate -c configs/recognition/attention_lstm/attention_lstm_youtube-8m.yaml
   ```
 
 ## Test
