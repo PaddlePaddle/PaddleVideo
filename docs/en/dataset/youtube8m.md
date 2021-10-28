@@ -1,6 +1,6 @@
 English | [简体中文](../../zh-CN/dataset/youtube8m.md)
 
-# YouTube-8MData Preparation
+# YouTube-8M Data Preparation
 
 - [Introduction](#Introduction)
 - [Download](#Download)
