@@ -47,6 +47,11 @@ class Recognizer1D(BaseRecognizer):
         """
         return self.train_step(data_batch)
 
+    def test_step(self, data_batch):
+        """Testing setp.
+        """
+        return self.train_step(data_batch)
+
     def infer_step(self, data_batch):
         """Infering setp.
         """
