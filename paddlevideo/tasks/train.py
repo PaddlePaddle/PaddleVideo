@@ -63,7 +63,7 @@ def train_model(cfg,
         assert isinstance(
             global_batch_size, int
         ), f"global_batch_size must be int, but got {type(global_batch_size)}"
-        assert batch_size <= global_batch_size, f"global_batch_size must not be less than than batch_size"
+        assert batch_size <= global_batch_size, f"global_batch_size must not be less than batch_size"
 
         cur_global_batch_size = batch_size * num_gpus  # The number of batches calculated by all GPUs at one time
         assert global_batch_size % cur_global_batch_size == 0, \
