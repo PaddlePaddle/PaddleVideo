@@ -132,4 +132,4 @@ PaddleVideo is released under the [Apache 2.0 license](LICENSE).
 ## Contributing
 This poject welcomes contributions and suggestions. Please see our [contribution guidelines](docs/CONTRIBUTING.md).
 
-- Many thanks to [mohui37](https://github.com/mohui37), [zephyr-fun](https://github.com/zephyr-fun) for contributing the code.
+- Many thanks to [mohui37](https://github.com/mohui37), [zephyr-fun](https://github.com/zephyr-fun), [voipchina](https://github.com/voipchina) for contributing the code.
