@@ -44,7 +44,7 @@ def train_model(cfg,
         parallel (bool): Whether multi-cards training. Default: True.
         validate (bool): Whether to do evaluation. Default: False.
         amp (bool): Whether to use automatic mixed precision during training. Default: False.
-        use_fleet (bool): 
+        use_fleet (bool):
         profiler_options (str): Activate the profiler function Default: None.
     """
     if use_fleet:
@@ -63,7 +63,7 @@ def train_model(cfg,
         assert isinstance(
             global_batch_size, int
         ), f"global_batch_size must be int, but got {type(global_batch_size)}"
-        assert batch_size < global_batch_size, f"global_batch_size must bigger than batch_size"
+        assert batch_size <= global_batch_size, f"global_batch_size must not be less than batch_size"
 
         cur_global_batch_size = batch_size * num_gpus  # The number of batches calculated by all GPUs at one time
         assert global_batch_size % cur_global_batch_size == 0, \
@@ -236,18 +236,18 @@ def train_model(cfg,
 
                 # log_record
                 for name, value in outputs.items():
-                    record_list[name].update(value, batch_size)
+                    record_list[name].update(value, valid_batch_size)
 
                 record_list['batch_time'].update(time.time() - tic)
                 tic = time.time()
 
                 if i % cfg.get("log_interval", 10) == 0:
                     ips = "ips: {:.5f} instance/sec.".format(
-                        batch_size / record_list["batch_time"].val)
+                        valid_batch_size / record_list["batch_time"].val)
                     log_batch(record_list, i, epoch + 1, cfg.epochs, "val", ips)
 
             ips = "avg_ips: {:.5f} instance/sec.".format(
-                batch_size * record_list["batch_time"].count /
+                valid_batch_size * record_list["batch_time"].count /
                 record_list["batch_time"].sum)
             log_epoch(record_list, epoch + 1, "val", ips)
 
@@ -283,7 +283,7 @@ def train_model(cfg,
                         f"Already save the best model (hit_at_one){best}")
                 else:
                     logger.info(
-                        f"Already save the best model (top1 acc){int(best *10000)/10000}"
+                        f"Already save the best model (top1 acc){int(best * 10000) / 10000}"
                     )
 
         # 6. Save model and optimizer
