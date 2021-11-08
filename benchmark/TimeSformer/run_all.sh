@@ -16,6 +16,7 @@ cp -f benchmark/TimeSformer/timesformer_ucf101_videos_benchmark_bs14_mp.yaml con
 if [ ! -f "data/ucf101/trainlist_benchmark_mp.txt" ]; then
     wget -P data/ucf101/ https://videotag.bj.bcebos.com/PaddleVideo-release2.2/trainlist_benchmark_mp.txt
 fi
+wget -P data/ wget https://paddle-imagenet-models-name.bj.bcebos.com/dygraph/ViT_base_patch16_224_pretrained.pdparams
 alias cp='cp -i'
 
 cd data/ucf101 # 进入PaddleVideo/data/ucf101
