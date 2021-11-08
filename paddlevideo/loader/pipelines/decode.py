@@ -202,11 +202,11 @@ class FeatureDecoder(object):
         data = pickle.load(open(filepath, 'rb'), encoding='bytes')
 
         record = data
-        nframes = record[b'nframes']
-        rgb = record[b'feature'].astype(float)
-        audio = record[b'audio'].astype(float)
+        nframes = record['nframes']
+        rgb = record['feature'].astype(float)
+        audio = record['audio'].astype(float)
         if self.has_label:
-            label = record[b'label']
+            label = record['label']
             one_hot_label = self.make_one_hot(label, self.num_classes)
 
         rgb = rgb[0:nframes, :]
