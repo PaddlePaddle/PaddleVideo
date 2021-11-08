@@ -39,7 +39,7 @@ YouTube-8M 是一个大规模视频分类数据集，包含800多万个视频url
 1. 将下载的TFRecord文件转化为pickle文件以便PaddlePaddle使用
     ```bash
     cd .. # 从frame目录回到yt8m目录
-    python3.7 tf2pkl.py ./frame ./pkl_files/ # 将frame文件夹下的train*.tfrecord和validate*.tfrecord转化为pkl格式
+    python3.7 tf2pkl.py ./frame ./pkl_frame/ # 将frame文件夹下的train*.tfrecord和validate*.tfrecord转化为pkl格式
     ```
 2. 生成单个pkl文件路径集合，并根据此文件将pkl拆分为多个小pkl文件，并生成最终需要的拆分pkl文件路径
     ```bash
