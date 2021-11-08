@@ -1,4 +1,4 @@
-# 提供可稳定复现性能的脚本，默认在标准docker环境内py37执行： paddlepaddle/paddle:latest-gpu-cuda10.1-cudnn7  paddle=2.1.2  py=37
+# 提供可稳定复现性能的脚本，默认在标准docker环境内py37执行： paddlepaddle/paddle:latest-gpu-cuda10.2-cudnn7  paddle=2.1.2  py=37
 
 # 执行目录：需说明
 cd ../../ # cd到PaddleVideo项目根目录下
