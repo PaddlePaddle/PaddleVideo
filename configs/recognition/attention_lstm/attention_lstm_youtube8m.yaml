@@ -14,13 +14,16 @@ DATASET: #DATASET field
     shuffle_valid: True
     train:
         format: "FeatureDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
-        file_path: "data/dataset/youtube-8m/train.list" #Mandatory, train data index file path
+        data_prefix: "data/yt8m"
+        file_path: "data/yt8m/train.list" #Mandatory, train data index file path
     valid:
         format: "FeatureDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
-        file_path: "data/dataset/youtube-8m/val.list" #Mandatory, train data index file path
+        data_prefix: "data/yt8m"
+        file_path: "data/yt8m/val.list" #Mandatory, train data index file path
     test:
         format: "FeatureDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
-        file_path: "data/dataset/youtube-8m/val.list" #Mandatory, train data index file path
+        data_prefix: "data/yt8m"
+        file_path: "data/yt8m/val.list" #Mandatory, train data index file path
 
 
 PIPELINE: #PIPELINE field
