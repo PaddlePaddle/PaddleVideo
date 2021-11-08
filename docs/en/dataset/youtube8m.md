@@ -37,7 +37,7 @@ Due to the large amount of video data, the image classification model was used t
 1. Convert the downloaded TFRecord file into a pickle file for PaddlePaddle to use
     ```bash
     cd .. # From the frame directory back to the yt8m directory
-    python3.7 tf2pkl.py ./frame ./pkl_files/ # Convert train*.tfrecord and validate*.tfrecord in the frame folder to pkl format
+    python3.7 tf2pkl.py ./frame ./pkl_frame/ # Convert train*.tfrecord and validate*.tfrecord in the frame folder to pkl format
     ```
 2. Generate a single pkl file path set, and split pkl into multiple small pkl files based on this file, and generate the final split pkl file path required
     ```bash
