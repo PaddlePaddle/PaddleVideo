@@ -267,6 +267,8 @@ def main(files_pattern):
 
     record_name = files_pattern.split('/')[-1].split('.')[0]
     outputdir = target_dir
+    if not os.path.exists(outputdir):
+        os.mkdir(outputdir)
     fn = '%s.pkl' % record_name
     outp = open(os.path.join(outputdir, fn), 'wb')
     pickle.dump(all_data, outp, protocol=2)
@@ -276,6 +278,7 @@ def main(files_pattern):
 if __name__ == '__main__':
     record_dir = source_dir
     record_files = os.listdir(record_dir)
+    record_files = [file for file in record_files if file.endswith(".tfrecord")]
     for f in record_files:
         record_path = os.path.join(record_dir, f)
         main(record_path)
