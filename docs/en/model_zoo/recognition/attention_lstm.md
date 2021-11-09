@@ -52,7 +52,7 @@ When the test configuration uses the following parameters, the test indicators o
 
 ### Export inference model
 ```bash
-python3.7 tools/export_model.py -c configs/recognition/attention_lstm/attention_lstm_youtube-8m.yaml \
+python3.7 tools/export_model.py -c configs/recognition/attention_lstm/attention_lstm_youtube8m.yaml \
                                 -p data/AttentionLSTM_yt8.pdparams \
                                 -o inference/AttentionLSTM
 ```
