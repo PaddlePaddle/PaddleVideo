@@ -31,7 +31,7 @@ PaddleVide provides training and testing scripts on the Youtube-8M dataset. Yout
 - The Youtube-8M data set uses 8 cards for training. In the feature format, video and audio features will be used as input. The training start command of the data is as follows
 
   ```bash
-  python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_attetion_lstm main.py --validate -c configs/recognition/attention_lstm/attention_lstm_youtube-8m.yaml
+  python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_attetion_lstm main.py --validate -c configs/recognition/attention_lstm/attention_lstm_youtube8m.yaml
   ```
 
 ## Test
@@ -39,21 +39,21 @@ PaddleVide provides training and testing scripts on the Youtube-8M dataset. Yout
 The command is as follows:
 
 ```bash
-python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_attetion_lstm main.py --test -c configs/recognition/attention_lstm/attention_lstm_youtube-8m.yaml -w "output/AttentionLSTM/AttentionLSTM_best.pdparams"
+python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_attetion_lstm main.py --test -c configs/recognition/attention_lstm/attention_lstm_youtube8m.yaml -w "output/AttentionLSTM/AttentionLSTM_best.pdparams"
 ```
 
 When the test configuration uses the following parameters, the test indicators on the validation data set of Youtube-8M are as follows:
 
 | Hit@1 | PERR | GAP | checkpoints |
 | :-----: | :---------: | :---: | ----- |
-| 89.05 | 80.49 | 86.30 | TODO |
+| 89.05 | 80.49 | 86.30 | [AttentionLSTM_yt8.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/AttentionLSTM_yt8.pdparams) |
 
 ## Inference
 
 ### Export inference model
 ```bash
 python3.7 tools/export_model.py -c configs/recognition/attention_lstm/attention_lstm_youtube-8m.yaml \
-                                -p data/AttentionLSTM_best_youtube-8m.pdparams \
+                                -p data/AttentionLSTM_yt8.pdparams \
                                 -o inference/AttentionLSTM
 ```
 
@@ -65,7 +65,7 @@ For the meaning of each parameter, please refer to [Model Reasoning Method](http
 
 ```bash
 python3.7 tools/predict.py --input_file data/example.pkl \
-                           --config configs/recognition/attention_lstm/attention_lstm_youtube-8m.yaml \
+                           --config configs/recognition/attention_lstm/attention_lstm_youtube8m.yaml \
                            --model_file inference/AttentionLSTM/AttentionLSTM.pdmodel \
                            --params_file inference/AttentionLSTM/AttentionLSTM.pdiparams \
                            --use_gpu=True \
