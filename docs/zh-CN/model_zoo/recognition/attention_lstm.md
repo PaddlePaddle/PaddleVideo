@@ -53,7 +53,7 @@ python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log
 ### 导出inference模型
 
 ```bash
-python3.7 tools/export_model.py -c configs/recognition/attention_lstm/attention_lstm_youtube-8m.yaml \
+python3.7 tools/export_model.py -c configs/recognition/attention_lstm/attention_lstm_youtube8m.yaml \
                                 -p data/AttentionLSTM_yt8.pdparams \
                                 -o inference/AttentionLSTM
 ```
