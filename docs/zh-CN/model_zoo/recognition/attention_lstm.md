@@ -31,7 +31,7 @@ PaddleVide提供了在Youtube-8M数据集上训练和测试脚本。Youtube-8M�
 - Youtube-8M数据集使用8卡训练，feature格式下会使用视频和音频特征作为输入，数据的训练启动命令如下
 
   ```bash
-  python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_attetion_lstm  main.py  --validate -c configs/recognition/attention_lstm/attention_lstm_youtube-8m.yaml
+  python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_attetion_lstm  main.py  --validate -c configs/recognition/attention_lstm/attention_lstm_youtube8m.yaml
   ```
 
 ## 模型测试
@@ -39,7 +39,7 @@ PaddleVide提供了在Youtube-8M数据集上训练和测试脚本。Youtube-8M�
 命令如下：
 
 ```bash
-python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_attetion_lstm  main.py  --test -c configs/recognition/attention_lstm/attention_lstm_youtube-8m.yaml -w "output/AttentionLSTM/AttentionLSTM_best.pdparams"
+python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_attetion_lstm  main.py  --test -c configs/recognition/attention_lstm/attention_lstm_youtube8m.yaml -w "output/AttentionLSTM/AttentionLSTM_best.pdparams"
 ```
 
 当测试配置采用如下参数时，在Youtube-8M的validation数据集上的测试指标如下：
@@ -66,7 +66,7 @@ python3.7 tools/export_model.py -c configs/recognition/attention_lstm/attention_
 
 ```bash
 python3.7 tools/predict.py --input_file data/example.pkl \
-                           --config configs/recognition/attention_lstm/attention_lstm_youtube-8m.yaml \
+                           --config configs/recognition/attention_lstm/attention_lstm_youtube8m.yaml \
                            --model_file inference/AttentionLSTM/AttentionLSTM.pdmodel \
                            --params_file inference/AttentionLSTM/AttentionLSTM.pdiparams \
                            --use_gpu=True \
