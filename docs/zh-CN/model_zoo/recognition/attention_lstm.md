@@ -46,7 +46,7 @@ python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log
 
 | Hit@1 | PERR | GAP  | checkpoints |
 | :-----: | :---------: | :---: | ----- |
-|  89.05  | 80.49 | 86.30 |   TODO      |
+|  89.05  | 80.49 | 86.30 |   [AttentionLSTM_yt8.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/AttentionLSTM_yt8.pdparams)      |
 
 ## 模型推理
 
@@ -54,7 +54,7 @@ python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log
 
 ```bash
 python3.7 tools/export_model.py -c configs/recognition/attention_lstm/attention_lstm_youtube-8m.yaml \
-                                -p data/AttentionLSTM_best_youtube-8m.pdparams \
+                                -p data/AttentionLSTM_yt8.pdparams \
                                 -o inference/AttentionLSTM
 ```
 
