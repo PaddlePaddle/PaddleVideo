@@ -34,12 +34,16 @@ Due to the large amount of video data, the image classification model was used t
     After the data download is complete, you will get 3844 training data files and 3844 verification data files (TFRecord format)
 
 ## Conversion
-1. Convert the downloaded TFRecord file into a pickle file for PaddlePaddle to use
+1. Install tensorflow to read tfrecord data
+    ```bash
+    python3.7 -m pip install tensorflow-gpu==1.14.0
+    ```
+2. Convert the downloaded TFRecord file into a pickle file for PaddlePaddle to use
     ```bash
     cd .. # From the frame directory back to the yt8m directory
     python3.7 tf2pkl.py ./frame ./pkl_frame/ # Convert train*.tfrecord and validate*.tfrecord in the frame folder to pkl format
     ```
-2. Generate a single pkl file path set, and split pkl into multiple small pkl files based on this file, and generate the final split pkl file path required
+3. Generate a single pkl file path set, and split pkl into multiple small pkl files based on this file, and generate the final split pkl file path required
     ```bash
     ls pkl_frame/train*.pkl> train.list # Write the path of train*.pkl to train.list
     ls pkl_frame/validate*.pkl> val.list # Write the path of validate*.pkl into val.list
