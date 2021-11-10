@@ -509,7 +509,6 @@ class AttentionLSTM_Inference_helper():
         for op in ops:
             results = op(results)
 
-        # res = np.expand_dims(results['data'], axis=0).copy()
         res = []
         for modality in ['rgb', 'audio']:
             res.append(np.expand_dims(results[f'{modality}_data'], axis=0).copy())
