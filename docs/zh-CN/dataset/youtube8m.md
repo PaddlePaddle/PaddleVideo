@@ -49,7 +49,7 @@ YouTube-8M 是一个大规模视频分类数据集，包含800多万个视频url
     python3.7 split_yt8m.py train.list # 拆分每个train*.pkl变成多个train*_split*.pkl
     python3.7 split_yt8m.py val.list # 拆分每个validate*.pkl变成多个validate*_split*.pkl
     
-    ls pkl_frame/train*.pkl > train.list # 将train*_split*.pkl的路径重新写入train.list
-    ls pkl_frame/validate*.pkl > val.list # 将validate*_split*.pkl的路径重新写入val.list
+    ls pkl_frame/train*_split*.pkl > train.list # 将train*_split*.pkl的路径重新写入train.list
+    ls pkl_frame/validate*_split*.pkl > val.list # 将validate*_split*.pkl的路径重新写入val.list
     ```
 
