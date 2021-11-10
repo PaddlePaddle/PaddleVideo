@@ -1,3 +1,5 @@
+English | [简体中文](./readme.md)
+
 # Server-side C++ prediction
 
 This chapter introduces the C++ deployment method of the PaddleVideo model. For the python prediction deployment method, please refer to the **Model Reasoning** chapter of the respective model.
