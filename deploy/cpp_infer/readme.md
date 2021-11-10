@@ -252,7 +252,7 @@ PaddleVideo模型部署。
 
 ​	以example_video_dir下的样例视频`example01.avi`为输入视频为例，最终屏幕上会输出检测结果如下。
 
-​	<img src="C:\Users\hesensen\Desktop\image-20211110161950440.png" alt="image-20211110161950440" style="zoom: 80%;" />
+​	<img src="./imgs/PPTSM_pred_result.png" />
 
 ### 3 注意
 
