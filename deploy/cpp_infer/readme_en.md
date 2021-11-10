@@ -251,7 +251,7 @@ More parameters are as follows:
 
 ​	Take the sample video `example01.avi` under example_video_dir as the input video as an example, the final 	screen will output the detection results as follows.
 
-​	 <img src="C:\Users\hesensen\Desktop\image-20211110161950440.png" alt="image-20211110161950440" style="zoom: 80%;" />
+​	 <img src="./imgs/PPTSM_pred_result.png" />
 
 ### 3 Attention
 
