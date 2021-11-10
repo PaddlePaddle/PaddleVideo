@@ -84,19 +84,19 @@ def get_input_spec(cfg, model_name):
     elif model_name in ['AttentionLSTM']:
         input_spec = [[
             InputSpec(shape=[None, cfg.embedding_size, cfg.feature_dims[0]],
-                      dtype='float32'),
+                      dtype='float32'),  # for rgb_data
             InputSpec(shape=[
                 None,
-            ], dtype='int64'),
+            ], dtype='int64'),  # for rgb_len
             InputSpec(shape=[None, cfg.embedding_size, cfg.feature_dims[0]],
-                      dtype='float32'),
+                      dtype='float32'),  # for rgb_mask
             InputSpec(shape=[None, cfg.embedding_size, cfg.feature_dims[1]],
-                      dtype='float32'),
+                      dtype='float32'),  # for audio_data
             InputSpec(shape=[
                 None,
-            ], dtype='int64'),
+            ], dtype='int64'),  # for audio_len
             InputSpec(shape=[None, cfg.embedding_size, cfg.feature_dims[1]],
-                      dtype='float32'),
+                      dtype='float32'),  # for audio_mask
         ]]
     elif model_name in ['SlowFast']:
         input_spec = [[
