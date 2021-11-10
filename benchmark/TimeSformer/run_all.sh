@@ -28,7 +28,7 @@ if [ $1 = "down_data" ];then
     rm -rf ./UCF101.rar
 else    # 使用本地数据
     rm -rf videos
-    ln -s ${DATA_PATH}/dygraph_data/TSM/ucf101/videos ./videos
+    ln -s ${data_path}/dygraph_data/TSM/ucf101/videos ./videos
 fi
 cd ../../ # 返回PaddleVideo
 
