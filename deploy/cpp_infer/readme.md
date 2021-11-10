@@ -1,3 +1,5 @@
+[English](./readme_en.md) | 简体中文
+
 # 服务器端C++预测
 
 本章节介绍PaddleVideo模型的的C++部署方法，python预测部署方法请参考各自模型的**模型推理**章节。
