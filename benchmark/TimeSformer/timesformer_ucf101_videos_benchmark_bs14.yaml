@@ -2,7 +2,7 @@ MODEL: #MODEL field
     framework: "RecognizerTransformer" #Mandatory, indicate the type of network, associate to the 'paddlevideo/modeling/framework/' .
     backbone: #Mandatory, indicate the type of backbone, associate to the 'paddlevideo/modeling/backbones/' .
         name: "VisionTransformer" #Mandatory, The name of backbone.
-        pretrained: None #Optional, pretrained model path.
+        pretrained: "data/ViT_base_patch16_224_pretrained.pdparams" #Optional, pretrained model path.
         img_size: 224
         patch_size: 16
         in_channels: 3
@@ -141,5 +141,5 @@ INFERENCE:
 model_name: "TimeSformer_ucf101"
 log_interval: 20 #Optional, the interal of logger, default:10
 save_interval: 20
-epochs: 1 #Mandatory, total epoch
+epochs: 2 #Mandatory, total epoch
 log_level: "INFO" #Optional, the logger level. default: "INFO"
