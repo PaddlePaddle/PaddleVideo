@@ -36,7 +36,11 @@ YouTube-8M 是一个大规模视频分类数据集，包含800多万个视频url
 
 
 ## 数据格式转化
-1. 将下载的TFRecord文件转化为pickle文件以便PaddlePaddle使用
+1. 安装tensorflow-gpu用于读入tfrecord数据
+    ```bash
+    python3.7 -m pip install tensorflow-gpu==1.14.0
+    ```
+3. 将下载的TFRecord文件转化为pickle文件以便PaddlePaddle使用
     ```bash
     cd .. # 从frame目录回到yt8m目录
     python3.7 tf2pkl.py ./frame ./pkl_frame/ # 将frame文件夹下的train*.tfrecord和validate*.tfrecord转化为pkl格式
