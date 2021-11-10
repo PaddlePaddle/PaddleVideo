@@ -32,7 +32,6 @@ PaddleVideo model deployment.
     Using a relatively simple apt installation, the installation command is as follows:
 
     ```bash
-    add-apt-repository ppa:djcj/hybrid
     apt-get update
 
     apt install libavformat-dev
@@ -51,7 +50,7 @@ PaddleVideo model deployment.
     ```bash
     cd opencv-3.4.7
 
-    root_path=pwd # That is the current opencv-3.4.7 directory
+    root_path=/xxx/xxx/xxx/xxx/opencv-3.4.7 # That is the absolute path of opencv-3.4.7
     install_path=${root_path}/opencv3
 
     rm -rf build
@@ -194,8 +193,8 @@ There are two ways to obtain the Paddle prediction library, which will be descri
     ```bash
     OPENCV_DIR=/xxx/xxx/xxx/xxx/xxx/xxx/opencv3
     LIB_DIR=/xxx/xxx/xxx/xxx/xxx/paddle_inference
-    CUDA_LIB_DIR=/usr/local/cuda-10.2/lib64
-    CUDNN_LIB_DIR=/usr/local/cuda-10.2/lib64
+    CUDA_LIB_DIR=/xxx/xxx/cuda-xxx/lib64
+    CUDNN_LIB_DIR=/xxx/xxx/cuda-xxx/lib64
     ```
 
     Among them, `OPENCV_DIR` is the address where opencv is compiled and installed; `LIB_DIR` is the download (`paddle_inference` folder) or compiled Paddle prediction library address (`build/paddle_inference_install_dir` folder); `CUDA_LIB_DIR` is the cuda library file address , In docker, it is `/usr/local/cuda/lib64`; `CUDNN_LIB_DIR` is the address of the cudnn library file, in docker it is `/usr/lib/x86_64-linux-gnu/`. **Note: The above paths are written as absolute paths, do not write relative paths. **
@@ -218,7 +217,7 @@ Among them, `mode` is a required parameter, which means the selected function, a
 ```bash
 ./build/ppvideo rec \
     --rec_model_dir=../../inference/ppTSM \
-    --video_dir=../example_video_dir \
+    --video_dir=./example_video_dir \
     --num_seg=8 \
     --seg_len=1
 ```
