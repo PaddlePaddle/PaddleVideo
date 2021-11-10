@@ -47,6 +47,6 @@ Due to the large amount of video data, the image classification model was used t
     python3.7 split_yt8m.py train.list # Split each train*.pkl into multiple train*_split*.pkl
     python3.7 split_yt8m.py val.list # Split each validate*.pkl into multiple validate*_split*.pkl
     
-    ls pkl_frame/train*.pkl> train.list # Rewrite the path of train*_split*.pkl into train.list
-    ls pkl_frame/validate*.pkl> val.list # Rewrite the path of validate*_split*.pkl into val.list
+    ls pkl_frame/train*_split*.pkl> train.list # Rewrite the path of train*_split*.pkl into train.list
+    ls pkl_frame/validate*_split*.pkl> val.list # Rewrite the path of validate*_split*.pkl into val.list
     ``` 
