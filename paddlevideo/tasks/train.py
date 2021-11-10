@@ -236,18 +236,18 @@ def train_model(cfg,
 
                 # log_record
                 for name, value in outputs.items():
-                    record_list[name].update(value, batch_size)
+                    record_list[name].update(value, valid_batch_size)
 
                 record_list['batch_time'].update(time.time() - tic)
                 tic = time.time()
 
                 if i % cfg.get("log_interval", 10) == 0:
                     ips = "ips: {:.5f} instance/sec.".format(
-                        batch_size / record_list["batch_time"].val)
+                        valid_batch_size / record_list["batch_time"].val)
                     log_batch(record_list, i, epoch + 1, cfg.epochs, "val", ips)
 
             ips = "avg_ips: {:.5f} instance/sec.".format(
-                batch_size * record_list["batch_time"].count /
+                valid_batch_size * record_list["batch_time"].count /
                 record_list["batch_time"].sum)
             log_epoch(record_list, epoch + 1, "val", ips)
 
@@ -283,7 +283,7 @@ def train_model(cfg,
                         f"Already save the best model (hit_at_one){best}")
                 else:
                     logger.info(
-                        f"Already save the best model (top1 acc){int(best *10000)/10000}"
+                        f"Already save the best model (top1 acc){int(best * 10000) / 10000}"
                     )
 
         # 6. Save model and optimizer

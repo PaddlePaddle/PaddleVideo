@@ -16,7 +16,7 @@
 ## 模型简介
 
 
-我们对[ST-GCN模型](./stgcn.md)进行了优化，实现了精度更高的AGCN模型，模型优化细节参考[AGCN模型详解]().
+我们对[ST-GCN模型](./stgcn.md)进行了优化，实现了精度更高的AGCN模型，模型优化细节参考[AGCN模型解析](https://www.bilibili.com/video/BV1w3411172G).
 
 
 ## 数据准备

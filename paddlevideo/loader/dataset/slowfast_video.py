@@ -23,11 +23,6 @@ from ...utils import get_logger
 
 logger = get_logger("paddlevideo")
 
-#set random seed
-random.seed(0)
-np.random.seed(0)
-
-
 @DATASETS.register()
 class SFVideoDataset(BaseDataset):
     """Video dataset for action recognition
@@ -67,6 +62,9 @@ class SFVideoDataset(BaseDataset):
         self.num_retries = num_retries
         self.num_samples_precise_bn = num_samples_precise_bn
         super().__init__(file_path, pipeline, **kwargs)
+        #set random seed
+        random.seed(0)
+        np.random.seed(0)
 
     def load_file(self):
         """Load index file to get video information."""

@@ -130,4 +130,4 @@ PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_githu
 ## 欢迎贡献
 我们欢迎您的任何贡献并感谢您的支持，更多信息请参考 [contribution guidelines](docs/CONTRIBUTING.md).
 
-- 非常感谢 [mohui37](https://github.com/mohui37)、[zephyr-fun](https://github.com/zephyr-fun) 贡献相关代码
+- 非常感谢 [mohui37](https://github.com/mohui37)、[zephyr-fun](https://github.com/zephyr-fun)、[voipchina](https://github.com/voipchina) 贡献相关代码
