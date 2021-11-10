@@ -8,6 +8,8 @@ git checkout benchmark_dev
 python3.7 -m pip install -r requirements.txt
 
 # 2 拷贝该模型需要数据、预训练模型
+wget -P data/ wget -P data/ wget https://paddle-imagenet-models-name.bj.bcebos.com/dygraph/ViT_base_patch16_224_pretrained.pdparams
+
 unalias cp
 cp -f benchmark/TimeSformer/timesformer_ucf101_videos_benchmark_bs1.yaml configs/recognition/timesformer/
 cp -f benchmark/TimeSformer/timesformer_ucf101_videos_benchmark_bs1_mp.yaml configs/recognition/timesformer/
@@ -40,7 +42,7 @@ for model_mode in ${model_mode_list[@]}; do
             sleep 60
             echo "index is speed, 8gpus, run_mode is multi_process, begin, ${model_name}"
             run_mode=mp
-            CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 bash benchmark/${model_mode}/run_benchmark.sh ${run_mode} ${bs_item} ${fp_item} ${model_mode} 
+            CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 bash benchmark/${model_mode}/run_benchmark.sh ${run_mode} ${bs_item} ${fp_item} ${model_mode}
             sleep 60
             done
       done
