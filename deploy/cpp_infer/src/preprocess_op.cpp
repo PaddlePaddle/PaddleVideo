@@ -41,7 +41,7 @@ namespace PaddleVideo
         int rc = im->channels();
         for (int i = 0; i < rc; ++i)
         {
-            // 提取出im的第i个通道，写入到data + i * rh * rw为起始地址的数组中去
+            // Extract the i-th channel of im and write it into the array with (data + i * rh * rw) as the starting address
             cv::extractChannel(*im, cv::Mat(rh, rw, CV_32FC1, data + i * rh * rw), 2 - i);
         }
     }
@@ -68,9 +68,6 @@ namespace PaddleVideo
     {
         int h = img.rows;
         int w = img.cols;
-        #ifdef DEBUG_HSS
-            printf("h, w = %d %d\n", h, w);
-        #endif
         if ((w <= h && w == short_size) || (h <= w && h == short_size))
         {
             img.copyTo(resize_img);
@@ -89,9 +86,6 @@ namespace PaddleVideo
                 ow = w * oh / h;
             }
             cv::resize(img, resize_img, cv::Size(ow, oh), 0.0f, 0.0f, cv::INTER_LINEAR);
-            #ifdef DEBUG_HSS
-                printf("oh, ow = %d %d\n", oh, ow);
-            #endif
         }
     }
 

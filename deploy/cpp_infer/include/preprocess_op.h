@@ -40,7 +40,7 @@ namespace PaddleVideo
                          const std::vector<float> &scale, const bool is_scale = true);
     };
 
-// RGB -> CHW
+    // RGB -> CHW
     class Permute
     {
     public:

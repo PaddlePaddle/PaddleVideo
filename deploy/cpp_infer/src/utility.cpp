@@ -20,8 +20,6 @@
 #include <sys/types.h>
 #include <vector>
 
-// #define DEBUG_HSS
-
 namespace PaddleVideo
 {
 
@@ -43,7 +41,7 @@ namespace PaddleVideo
                       << std::endl;
             exit(1);
         }
-        return m_vec; // 用fstream读取类别list并用vector返回
+        return m_vec; // Use fstream to read the category list and return with vector
     }
 
     void Utility::GetAllFiles(const char *dir_name, std::vector<std::string> &all_inputs)
@@ -75,7 +73,7 @@ namespace PaddleVideo
             while ((filename = readdir(dir)) != NULL)
             {
                 if (strcmp(filename->d_name, ".") == 0 ||
-                        strcmp(filename->d_name, "..") == 0)
+                    strcmp(filename->d_name, "..") == 0)
                     continue;
                 // img_dir + std::string("/") + all_inputs[0];
                 all_inputs.push_back(dir_name + std::string("/") +
@@ -143,10 +141,9 @@ namespace PaddleVideo
         }
     }
 
-
     std::vector<cv::Mat> Utility::SampleFramesFromVideo(const std::string &VideoPath, const int &num_seg, const int &seg_len)
     {
-        cv::VideoCapture capture(VideoPath); // 创建一个视频对象
+        cv::VideoCapture capture(VideoPath); // Create a video object
         if (!capture.isOpened())
         {
             printf("[Error] video cannot be opened, please check the video [%s]\n", VideoPath.c_str());
@@ -154,14 +151,10 @@ namespace PaddleVideo
             exit(1);
         }
 
-        int frames_len = capture.get(cv::CAP_PROP_FRAME_COUNT);
+        int frames_len = capture.get(cv::CAP_PROP_FRAME_COUNT); // Get the total number of video frames
 
         int average_dur = int(frames_len / num_seg);
         std::vector<int> frames_idx;
-        #ifdef DEBUG_HSS
-            printf("frames_len %d\n", frames_len);
-            printf("average_dur %d\n", average_dur);
-        #endif
 
         for (int i = 0; i < num_seg; ++i)
         {
@@ -185,19 +178,15 @@ namespace PaddleVideo
             }
         }
         std::vector<cv::Mat> sampled_frames;
-        cv::Mat frame; // 创建一个用于存储视频帧的对象
+        cv::Mat frame; // Create an object for storing sampled frames
         for (int i = 0; i < num_seg; ++i)
         {
             const int &frame_idx = frames_idx[i];
-            capture.set(cv::CAP_PROP_POS_FRAMES, frame_idx); // 设定到frame_idx帧
+            capture.set(cv::CAP_PROP_POS_FRAMES, frame_idx); // Set to frame_idx frame
             capture >> frame;
-            #ifdef DEBUG_HSS
-                // printf("frame.w, h = %d %d\n", frame.rows, frame.cols);
-                // printf("frame index = %d\n", frame_idx);
-            #endif
             sampled_frames.push_back(frame);
         }
-        capture.release();
+        capture.release(); // Release the video object
         return sampled_frames;
     }
 } // namespace PaddleVideo

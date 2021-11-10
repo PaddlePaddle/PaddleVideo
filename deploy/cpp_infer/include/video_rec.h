@@ -59,8 +59,6 @@ namespace PaddleVideo
             this->mean_ = _mean;
             this->scale_ = _scale;
             this->label_list_ = Utility::ReadDict(label_path);
-            // this->label_list_.insert(this->label_list_.begin(), "#"); // blank char for ctc
-            // this->label_list_.push_back(" ");
 
             LoadModel(model_dir);
         }
@@ -87,13 +85,14 @@ namespace PaddleVideo
         bool is_scale_ = true;
         bool use_tensorrt_ = false;
         std::string precision_ = "fp32";
-        // pre-process
+
+        // Instantiate pre-process operation object(s)
         Scale scale_op_;
         CenterCrop centercrop_op_;
         Normalize normalize_op_;
         Permute permute_op_;
 
-        // post-process
+        // Instantiate post-process operation object(s)
         Softmax softmax_op_;
 
     }; // class VideoRecognizer

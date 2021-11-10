@@ -34,22 +34,21 @@
 namespace PaddleVideo
 {
 
-class Utility
-{
-public:
-    static std::vector<std::string> ReadDict(const std::string &path);
-
-    static void GetAllFiles(const char *dir_name, std::vector<std::string> &all_inputs);
-
-    static cv::Mat GetRotateCropImage(const cv::Mat &srcimage, std::vector<std::vector<int>> box);
-
-    template <class ForwardIterator>
-    inline static size_t argmax(ForwardIterator first, ForwardIterator last)
+    class Utility
     {
-        return std::distance(first, std::max_element(first, last));
-    }
+    public:
+        static std::vector<std::string> ReadDict(const std::string &path);
 
-    static std::vector<cv::Mat> SampleFramesFromVideo(const std::string &VideoPath, const int &num_seg, const int &seg_len);
-};
+        static void GetAllFiles(const char *dir_name, std::vector<std::string> &all_inputs);
+
+        static cv::Mat GetRotateCropImage(const cv::Mat &srcimage, std::vector<std::vector<int>> box);
+
+        template <class ForwardIterator> inline static size_t argmax(ForwardIterator first, ForwardIterator last)
+        {
+            return std::distance(first, std::max_element(first, last));
+        }
+
+        static std::vector<cv::Mat> SampleFramesFromVideo(const std::string &VideoPath, const int &num_seg, const int &seg_len);
+    };
 
 } // namespace PaddleVideo

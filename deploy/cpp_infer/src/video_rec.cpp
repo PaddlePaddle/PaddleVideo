@@ -20,60 +20,51 @@ namespace PaddleVideo
 
     void VideoRecognizer::Run(std::vector<cv::Mat> &frames, std::vector<double> *times)
     {
-        // 复制参数到函数内部
+        // Copy parameters to the function
         std::vector<cv::Mat> srcframes(this->num_seg, cv::Mat());
         for (int i = 0; i < this->num_seg; ++i)
         {
             frames[i].copyTo(srcframes[i]);
         }
-        #ifdef DEBUG_HSS
-            printf("srcframes.size = %d\n", frames.size());
-        #endif
-        /* 数据增强
+        /* Consistent strategy with *.yaml
+        ========================================
         - Scale:
             short_size: 256
         - CenterCrop:
             target_size: 224
         - Image2Array:
         - Normalization:
-            mean: [0.485, 0.456, 0.406](r,g,b)
-            std: [0.229, 0.224, 0.225](r,g,b)
+            mean: [0.485, 0.456, 0.406] (r,g,b)
+            std: [0.229, 0.224, 0.225] (r,g,b)
+        ========================================
         */
-
         auto preprocess_start = std::chrono::steady_clock::now();
+
+        /* Preprocess */
         // 1. Scale
         std::vector<cv::Mat> resize_frames(this->num_seg, cv::Mat());
         for (int i = 0; i < this->num_seg; ++i)
         {
             this->scale_op_.Run(srcframes[i], resize_frames[i], this->use_tensorrt_, 256);
-            #ifdef DEBUG_HSS
-                printf("resize_frames.h, w = %d %d\n", resize_frames[i].rows, resize_frames[i].cols);
-            #endif
         }
-        #ifdef DEBUG_HSS
-            printf("resize_frames.size = %d\n", srcframes.size());
-        #endif
+
         // 2. CenterCrop
         std::vector<cv::Mat> crop_frames(this->num_seg, cv::Mat());
         for (int i = 0; i < this->num_seg; ++i)
         {
             this->centercrop_op_.Run(resize_frames[i], crop_frames[i], this->use_tensorrt_, 224);
         }
-        #ifdef DEBUG_HSS
-            printf("crop_frames.size = %d\n", crop_frames.size());
-        #endif
 
         // 3. Normalization
         for (int i = 0; i < this->num_seg; ++i)
         {
             this->normalize_op_.Run(&crop_frames[i], this->mean_, this->scale_, this->is_scale_);
         }
-        #ifdef DEBUG_HSS
-            printf("crop_frames.h, w = %d %d\n", crop_frames[0].rows, crop_frames[0].cols);
-        #endif
 
         // 4. Image2Array
+        // Declare a tensor to store video frames
         std::vector<float> input(1 * this->num_seg * 3 * crop_frames[0].rows * crop_frames[0].cols, 0.0f);
+
         int rh = crop_frames[0].rows;
         int rw = crop_frames[0].cols;
         int rc = crop_frames[0].channels();
@@ -91,7 +82,7 @@ namespace PaddleVideo
 
         auto inference_start = std::chrono::steady_clock::now();
         input_t->CopyFromCpu(input.data());
-        this->predictor_->Run();
+        this->predictor_->Run(); // Use the inference library to predict
 
         std::vector<float> predict_batch;
         auto output_names = this->predictor_->GetOutputNames();
@@ -100,12 +91,13 @@ namespace PaddleVideo
 
         int out_numel = std::accumulate(predict_shape.begin(), predict_shape.end(), 1, std::multiplies<int>());
         predict_batch.resize(out_numel);
-        output_t->CopyToCpu(predict_batch.data());
+        output_t->CopyToCpu(predict_batch.data()); // Copy the model output to predict_batch
 
-        // convert logits to prob
+        // Convert output (logits) into probabilities
         this->softmax_op_.Inplace_Run(predict_batch);
 
         auto inference_end = std::chrono::steady_clock::now();
+
         // output decode
         auto postprocess_start = std::chrono::steady_clock::now();
         std::vector<std::string> str_res;
@@ -114,10 +106,7 @@ namespace PaddleVideo
         float score = 0.f;
         int count = 0;
         float max_value = 0.0f;
-        #ifdef DEBUG_HSS
-            // printf("%.3f\n", *min_element(predict_batch.begin(), predict_batch.end()));
-            // printf("%.3f\n", *max_element(predict_batch.begin(), predict_batch.end()));
-        #endif
+
         argmax_idx = int(Utility::argmax(predict_batch.begin(), predict_batch.end()));
         score += predict_batch[argmax_idx];
         count += 1;
