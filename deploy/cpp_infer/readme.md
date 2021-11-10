@@ -32,7 +32,6 @@ PaddleVideo模型部署。
     采用较为简单的apt安装，安装命令如下：
 
     ```bash
-    add-apt-repository ppa:djcj/hybrid
     apt-get update
 
     apt install libavformat-dev
@@ -51,7 +50,7 @@ PaddleVideo模型部署。
     ```bash
     cd opencv-3.4.7
 
-    root_path=pwd # 即当前opencv-3.4.7目录
+    root_path=/xxx/xxx/xxx/xxx/opencv-3.4.7 # 填写为刚解压出来的opencv-3.4.7绝对路径
     install_path=${root_path}/opencv3
 
     rm -rf build
