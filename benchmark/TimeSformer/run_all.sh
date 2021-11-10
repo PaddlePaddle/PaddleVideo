@@ -21,14 +21,15 @@ fi
 alias cp='cp -i'
 
 cd data/ucf101 # 进入PaddleVideo/data/ucf101
-#wget --no-check-certificate "https://www.crcv.ucf.edu/data/UCF101/UCF101.rar" # 下载训练数据
-#unrar x UCF101.rar # 解压
-#mv ./UCF-101 ./videos # 重命名文件夹为./videos
-#rm -rf ./UCF101.rar
-# 使用本地模型
-rm -rf videos
-ln -s /ssd2/benchmark_material/dataset/dygraph_data/TSM/ucf101/videos ./videos
-
+if [ $1 = "down_data" ];then
+    wget --no-check-certificate "https://www.crcv.ucf.edu/data/UCF101/UCF101.rar" # 下载训练数据
+    unrar x UCF101.rar # 解压
+    mv ./UCF-101 ./videos # 重命名文件夹为./videos
+    rm -rf ./UCF101.rar
+else    # 使用本地数据
+    rm -rf videos
+    ln -s ${DATA_PATH}/dygraph_data/TSM/ucf101/videos ./videos
+fi
 cd ../../ # 返回PaddleVideo
 
 # 3 批量运行（如不方便批量，1，2需放到单个模型中）
