@@ -193,8 +193,8 @@ PaddleVideo模型部署。
     ```bash
     OPENCV_DIR=/xxx/xxx/xxx/xxx/xxx/xxx/opencv3
     LIB_DIR=/xxx/xxx/xxx/xxx/xxx/paddle_inference
-    CUDA_LIB_DIR=/usr/local/cuda-10.2/lib64
-    CUDNN_LIB_DIR=/usr/local/cuda-10.2/lib64
+    CUDA_LIB_DIR=/xxx/xxx/cuda-xxx/lib64
+    CUDNN_LIB_DIR=/xxx/xxx/cuda-xxx/lib64
     ```
 
     其中，`OPENCV_DIR`为opencv编译安装的地址；`LIB_DIR`为下载(`paddle_inference`文件夹)或者编译生成的Paddle预测库地址(`build/paddle_inference_install_dir`文件夹)；`CUDA_LIB_DIR`为cuda库文件地址，在docker中为`/usr/local/cuda/lib64`；`CUDNN_LIB_DIR`为cudnn库文件地址，在docker中为`/usr/lib/x86_64-linux-gnu/`。**注意：以上路径都写绝对路径，不要写相对路径。**
@@ -217,7 +217,7 @@ PaddleVideo模型部署。
 ```bash
 ./build/ppvideo rec \
     --rec_model_dir=../../inference/ppTSM \
-    --video_dir=../example_video_dir \
+    --video_dir=./example_video_dir \
     --num_seg=8 \
     --seg_len=1
 ```
