@@ -10,7 +10,7 @@ function _set_params(){
     run_log_path=${TRAIN_LOG_DIR:-$(pwd)}  # TRAIN_LOG_DIR 后续QA设置该参数
 # 添加benchmark日志解析所需参数
     base_batch_size=${batch_size}
-    mission_name="图像分割"
+    mission_name="视频分类"
     direction_id="0"
     ips_unit="instance/sec"
     skip_steps=1                     # 解析日志，有些模型前几个step耗时长，需要跳过                                    (必填)
