@@ -12,17 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .augmentations import (Scale, RandomCrop, CenterCrop, RandomFlip,
-                            Image2Array, Normalization, JitterScale, MultiCrop,
-                            PackOutput, TenCrop, UniformCrop)
-
+from .anet_pipeline import GetMatchMap, GetVideoLabel, LoadFeat
+from .augmentations import (CenterCrop, Image2Array, JitterScale, MultiCrop,
+                            Normalization, PackOutput, RandomCrop, RandomFlip,
+                            Scale, TenCrop, UniformCrop)
 from .compose import Compose
-from .decode import VideoDecoder, FrameDecoder
-from .sample import Sampler
+from .decode import FeatureDecoder, FrameDecoder, VideoDecoder
 from .decode_sampler import DecodeSampler
-from .mix import Mixup, Cutmix
-from .anet_pipeline import LoadFeat, GetMatchMap, GetVideoLabel
-from .skeleton_pipeline import AutoPadding, SkeletonNorm, Iden
+from .mix import Cutmix, Mixup
+from .sample import Sampler
+from .skeleton_pipeline import AutoPadding, Iden, SkeletonNorm
 
 __all__ = [
     'Scale', 'RandomCrop', 'CenterCrop', 'RandomFlip', 'Image2Array',

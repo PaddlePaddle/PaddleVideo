@@ -12,14 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .registry import METRIC
-from .build import build_metric
-from .multi_crop_metric import MultiCropMetric
 from .bmn_metric import BMNMetric
+from .build import build_metric
 from .center_crop_metric import CenterCropMetric
+from .multi_crop_metric import MultiCropMetric
+from .registry import METRIC
 from .skeleton_metric import SkeletonMetric
+from .youtube8m.eval_util import HitOneMetric
 
 __all__ = [
     'METRIC', 'build_metric', 'MultiCropMetric', 'BMNMetric',
-    'CenterCropMetric', 'SkeletonMetric'
+    'CenterCropMetric', 'SkeletonMetric', 'HitOneMetric'
 ]
