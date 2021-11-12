@@ -13,7 +13,6 @@
 // limitations under the License.
 
 #include <include/postprocess_op.h>
-#include <include/clipper.cpp>
 
 namespace PaddleVideo
 {
