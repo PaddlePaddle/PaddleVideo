@@ -1,6 +1,6 @@
 执行
 ```bash
-bash ./run_all.sh
+bash ./run_all.sh down_data
 ```
 即可运行.
 
