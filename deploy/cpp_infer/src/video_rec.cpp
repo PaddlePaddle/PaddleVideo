@@ -26,60 +26,101 @@ namespace PaddleVideo
         {
             frames[i].copyTo(srcframes[i]);
         }
-        /* Consistent strategy with *.yaml
-        ========================================
-        - Scale:
-            short_size: 256
-        - CenterCrop:
-            target_size: 224
-        - Image2Array:
-        - Normalization:
-            mean: [0.485, 0.456, 0.406] (r,g,b)
-            std: [0.229, 0.224, 0.225] (r,g,b)
-        ========================================
-        */
+
         auto preprocess_start = std::chrono::steady_clock::now();
-
         /* Preprocess */
-        // 1. Scale
-        std::vector<cv::Mat> resize_frames(this->num_seg, cv::Mat());
-        for (int i = 0; i < this->num_seg; ++i)
+        std::vector<cv::Mat> resize_frames;
+        std::vector<cv::Mat> crop_frames;
+        std::vector<float> input;
+        int num_views;
+        if (this->inference_model_name == "ppTSM")
         {
-            this->scale_op_.Run(srcframes[i], resize_frames[i], this->use_tensorrt_, 256);
-        }
+            num_views = 1;
+            // 1. Scale
+            resize_frames = std::vector<cv::Mat>(this->num_seg, cv::Mat());
+            for (int i = 0; i < this->num_seg; ++i)
+            {
+                this->scale_op_.Run(srcframes[i], resize_frames[i], this->use_tensorrt_, 256);
+            }
 
-        // 2. CenterCrop
-        std::vector<cv::Mat> crop_frames(this->num_seg, cv::Mat());
-        for (int i = 0; i < this->num_seg; ++i)
+            // 2. CenterCrop
+            crop_frames = std::vector<cv::Mat>(num_views * this->num_seg, cv::Mat());
+            for (int j = 0; j < this->num_seg; ++j)
+            {
+                this->centercrop_op_.Run(resize_frames[j], crop_frames[j], this->use_tensorrt_, 224);
+            }
+
+            // 3. Normalization(inplace operation)
+            for (int i = 0; i < num_views; ++i)
+            {
+                for (int j = 0; j < this->num_seg; ++j)
+                {
+                    this->normalize_op_.Run(&crop_frames[i * this->num_seg + j], this->mean_, this->scale_, this->is_scale_);
+                }
+            }
+
+            // 4. Image2Array
+            input = std::vector<float>(1 * num_views * this->num_seg * 3 * crop_frames[0].rows * crop_frames[0].cols, 0.0f);
+            int rh = crop_frames[0].rows;
+            int rw = crop_frames[0].cols;
+            int rc = crop_frames[0].channels();
+            for (int i=0; i<num_views; ++i)
+            {
+                for (int j = 0; j < this->num_seg; ++j)
+                {
+                    this->permute_op_.Run(&crop_frames[i * this->num_seg + j], input.data() + i * j * rh * rw * rc);
+                }
+            }
+        }
+        else if(this->inference_model_name == "ppTSN")
         {
-            this->centercrop_op_.Run(resize_frames[i], crop_frames[i], this->use_tensorrt_, 224);
-        }
+            num_views = 10;
+            // 1. Scale
+            resize_frames = std::vector<cv::Mat>(this->num_seg, cv::Mat());
+            for (int i = 0; i < this->num_seg; ++i)
+            {
+                this->scale_op_.Run(srcframes[i], resize_frames[i], this->use_tensorrt_, 256);
+            }
 
-        // 3. Normalization
-        for (int i = 0; i < this->num_seg; ++i)
+            // 2. TenCrop
+            crop_frames = std::vector<cv::Mat>(num_views * this->num_seg, cv::Mat());
+            for (int i = 0; i < this->num_seg; ++i)
+            {
+                this->tencrop_op_.Run(resize_frames[i], crop_frames, i * num_views, this->use_tensorrt_, 224);
+            }
+
+            // 3. Normalization(inplace operation)
+            for (int i = 0; i < num_views; ++i)
+            {
+                for (int j = 0; j < this->num_seg; ++j)
+                {
+                    this->normalize_op_.Run(&crop_frames[i * this->num_seg + j], this->mean_, this->scale_, this->is_scale_);
+                }
+            }
+
+            // 4. Image2Array
+            input = std::vector<float>(1 * num_views * this->num_seg * 3 * crop_frames[0].rows * crop_frames[0].cols, 0.0f);
+            int rh = crop_frames[0].rows;
+            int rw = crop_frames[0].cols;
+            int rc = crop_frames[0].channels();
+            for (int i = 0; i < this->num_seg; ++i)
+            {
+                for (int j = 0; j < num_views; ++j)
+                {
+                    this->permute_op_.Run(&crop_frames[i * num_views + j], input.data() + (i * num_views + j) * rh * rw * rc);
+                }
+            }
+        }
+        else
         {
-            this->normalize_op_.Run(&crop_frames[i], this->mean_, this->scale_, this->is_scale_);
+            throw "[Error] Not implemented yet";
         }
-
-        // 4. Image2Array
-        // Declare a tensor to store video frames
-        std::vector<float> input(1 * this->num_seg * 3 * crop_frames[0].rows * crop_frames[0].cols, 0.0f);
-
-        int rh = crop_frames[0].rows;
-        int rw = crop_frames[0].cols;
-        int rc = crop_frames[0].channels();
-        for (int i = 0; i < this->num_seg; ++i)
-        {
-            this->permute_op_.Run(&crop_frames[i], input.data() + i * rh * rw * rc);
-        }
-
         auto preprocess_end = std::chrono::steady_clock::now();
 
         /* Inference */
         auto input_names = this->predictor_->GetInputNames();
         auto input_t = this->predictor_->GetInputHandle(input_names[0]);
-        input_t->Reshape({1 * this->num_seg, 3, crop_frames[0].rows, crop_frames[0].cols});
-
+        input_t->Reshape({1 * num_views * this->num_seg, 3, crop_frames[0].rows, crop_frames[0].cols});
         auto inference_start = std::chrono::steady_clock::now();
         input_t->CopyFromCpu(input.data());
         this->predictor_->Run(); // Use the inference library to predict
@@ -153,21 +194,21 @@ namespace PaddleVideo
                     1 << 20, 10, 3,
                     precision,
                     false, false);
-                std::map<std::string, std::vector<int>> min_input_shape =
-                {
-                    {"x", {1, 3, 224, 224}}
-                };
-                std::map<std::string, std::vector<int>> max_input_shape =
-                {
-                    {"x", {1 * this->num_seg, 3, 224, 224}}
-                };
-                std::map<std::string, std::vector<int>> opt_input_shape =
-                {
-                    {"x", {1, 400}}
-                };
+//                 std::map<std::string, std::vector<int>> min_input_shape =
+//                 {
+//                     {"x", {1, 1, 3, 224, 224}}
+//                 };
+//                 std::map<std::string, std::vector<int>> max_input_shape =
+//                 {
+//                     {"x", {4, 1 * this->num_seg, 3, 224, 224}}
+//                 };
+//                 std::map<std::string, std::vector<int>> opt_input_shape =
+//                 {
+//                     {"x", {1, 1 * this->num_seg, 3, 224, 224}}
+//                 };
 
-                config.SetTRTDynamicShapeInfo(min_input_shape, max_input_shape,
-                                              opt_input_shape);
+//                 config.SetTRTDynamicShapeInfo(min_input_shape, max_input_shape,
+//                                               opt_input_shape);
             }
         }
         else

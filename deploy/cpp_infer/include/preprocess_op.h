@@ -63,4 +63,12 @@ namespace PaddleVideo
                          const int &target_size = 224);
     };
 
+    class TenCrop
+    {
+    public:
+        virtual void Run(const cv::Mat &img, std::vector<cv::Mat> &crop_frames,
+                         const int &begin_index,
+                         bool use_tensorrt = false,
+                         const int &target_size = 224);
+    };
 } // namespace PaddleVideo

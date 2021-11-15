@@ -8,9 +8,9 @@ PaddleVideo model deployment.
 
 ## 1. Prepare the environment
 
--For Linux environment, docker is recommended.
+- For Linux environment, docker is recommended.
 
--Windows environment, currently supports compilation based on `Visual Studio 2019 Community` (TODO)
+- Windows environment, currently supports compilation based on `Visual Studio 2019 Community` (TODO)
 
 * This document mainly introduces the PaddleVideo C++ prediction process based on the Linux environment. If you need to perform C++ prediction based on the prediction library under Windows, please refer to [Windows Compilation Tutorial](./docs/windows_vs2019_build.md)(TODO) for the specific compilation method
 * **The purpose of preparing the environment is to get the compiled opencv library and paddle prediction library**.
@@ -39,7 +39,6 @@ PaddleVideo model deployment.
     apt install libavformat-dev
     apt install libavcodec-dev
     apt install libswresample-dev
-    apt install libswscale-dev
     apt install libswscale-dev
     apt install libavutil-dev
     apt install libsdl1.2-dev
@@ -102,7 +101,7 @@ There are two ways to obtain the Paddle prediction library, which will be descri
 
 #### 1.2.1 Download and install directly
 
-* [Paddle prediction library official website](https://www.paddlepaddle.org.cn/documentation/docs/zh/2.0/guides/05_inference_deployment/inference/build_and_install_lib_cn.html) provides different cuda versions of Linux prediction libraries, you can Check and select the appropriate prediction library version on the official website (it is recommended to select the prediction library with paddle version>=2.0.1).
+* [Paddle prediction library official website](https://paddleinference.paddlepaddle.org.cn/v2.1/user_guides/download_lib.html) provides different cuda versions of Linux prediction libraries, you can Check and select the appropriate prediction library version on the official website (it is recommended to select the prediction library with paddle version>=2.0.1).
 
 * After downloading, you will get a `paddle_inference.tgz` compressed package, use the following command to decompress:
 
@@ -114,7 +113,7 @@ There are two ways to obtain the Paddle prediction library, which will be descri
 
 #### 1.2.2 Prediction library source code compilation
 * If you want to get the latest prediction library features, you can clone the latest code from Paddle github and compile the prediction library from source code.
-* You can refer to [Paddle prediction library installation and compilation instructions](https://www.paddlepaddle.org.cn/documentation/docs/zh/2.0/guides/05_inference_deployment/inference/build_and_install_lib_cn.html#congyuanmabianyi) instructions from github Obtain the Paddle code, and then compile it to generate the latest prediction library. The method of using git to get the code is as follows.
+* You can refer to [Paddle prediction library installation and compilation instructions](https://paddleinference.paddlepaddle.org.cn/user_guides/source_compile.html) instructions from github Obtain the Paddle code, and then compile it to generate the latest prediction library. The method of using git to get the code is as follows.
 
     ```shell
     git clone https://github.com/PaddlePaddle/Paddle.git
@@ -138,7 +137,7 @@ There are two ways to obtain the Paddle prediction library, which will be descri
         -DON_INFER=ON \
         -DWITH_PYTHON=ON
     make -j
-    make inference_lib_dist
+    make inference_lib_dist -j4 # 4为编译时使用核数，可根据机器情况自行修改
     ```
 
     You can refer to [documentation](https://www.paddlepaddle.org.cn/documentation/docs/zh/2.0/guides/05_inference_deployment/inference/build_and_install_lib_cn.html#congyuanmabianyi) for more introduction of compilation parameter options.
@@ -160,7 +159,7 @@ There are two ways to obtain the Paddle prediction library, which will be descri
 
 ### 2.1 Export the model as an inference model
 
-* This step is the same as the export prediction model under the python deployment mode. You can refer to the model prediction chapter of the respective model. Several related inference model files exported are used for model prediction. Taking PP-TSM as an example, the directory structure of the derived prediction model is as follows.
+* This step is the same as the export prediction model under the python deployment mode. You can refer to the model prediction chapter of the respective model. Several related inference model files exported are used for model prediction. **Taking PP-TSM as an example**, the directory structure of the derived prediction model is as follows.
 
     ```
     inference/
@@ -176,7 +175,7 @@ There are two ways to obtain the Paddle prediction library, which will be descri
 * Enter the `deploy/cpp_infer` directory and execute the following compile command
 
     ```shell
-    sh tools/build.sh
+    bash tools/build.sh
     ```
 
     The addresses of the Paddle C++ prediction library, opencv and other dependent libraries in `tools/build.sh` need to be replaced with the actual addresses on your own machine.
@@ -188,6 +187,7 @@ There are two ways to obtain the Paddle prediction library, which will be descri
     LIB_DIR=your_paddle_inference_dir
     CUDA_LIB_DIR=your_cuda_lib_dir
     CUDNN_LIB_DIR=your_cudnn_lib_dir
+    TENSORRT_DIR=your_tensorRT_dir
     ```
 
     Take PP-TSM as an example, the above parameters are as follows (the xxx part is modified according to the user's own machine situation)
@@ -197,6 +197,7 @@ There are two ways to obtain the Paddle prediction library, which will be descri
     LIB_DIR=/xxx/xxx/xxx/xxx/xxx/paddle_inference
     CUDA_LIB_DIR=/xxx/xxx/cuda-xxx/lib64
     CUDNN_LIB_DIR=/xxx/xxx/cuda-xxx/lib64
+    TENSORRT_DIR=/xxx/xxx/TensorRT-7.0.0.11
     ```
 
     Among them, `OPENCV_DIR` is the address where opencv is compiled and installed; `LIB_DIR` is the download (`paddle_inference` folder) or compiled Paddle prediction library address (`build/paddle_inference_install_dir` folder); `CUDA_LIB_DIR` is the cuda library file address , In docker, it is `/usr/local/cuda/lib64`; `CUDNN_LIB_DIR` is the address of the cudnn library file, in docker it is `/usr/lib/x86_64-linux-gnu/`. **Note: The above paths are written as absolute paths, do not write relative paths. **
@@ -217,10 +218,20 @@ Among them, `mode` is a required parameter, which means the selected function, a
 
 ##### 1. Call video recognition:
 ```bash
+# run PP-TSM inference
 ./build/ppvideo rec \
     --rec_model_dir=../../inference/ppTSM \
+    --inference_model_name=ppTSM \
     --video_dir=./example_video_dir \
     --num_seg=8 \
+    --seg_len=1
+
+# run PP-TSN inference
+./build/ppvideo rec \
+    --rec_model_dir=../../inference/ppTSN \
+    --inference_model_name=ppTSN \
+    --video_dir=./example_video_dir \
+    --num_seg=25 \
     --seg_len=1
 ```
 More parameters are as follows:
@@ -245,6 +256,7 @@ More parameters are as follows:
     | -------------- | ------ | --------------------------------------------- | ------------------------------------ |
     | video_dir | string | "../example_video_dir" | The path of the folder where the video to be recognized is stored |
     | rec_model_dir | string | "" | The folder path where the exported prediction model is stored |
+    | inference_model_name | string | "ppTSM" | The name of the model used in the prediction |
     | num_seg | int | 8 | Number of video segments |
     | seg_len | int | 1 | The number of frames extracted in each segment of the video |
     | rec_batch_num | int | 1 | Batch size during model prediction |
@@ -252,8 +264,30 @@ More parameters are as follows:
 
 ​	Take the sample video `example01.avi` under example_video_dir as the input video as an example, the final 	screen will output the detection results as follows.
 
-​	 <img src="./imgs/PPTSM_pred_result.png" />
+```bash
+[./inference/ppTSM]
+[./deploy/cpp_infer/example_video_dir]
+total videos num: 1
+./example_video_dir/example01.avi   class: 5 archery       score: 0.999556
+I1125 08:10:45.834288 13955 autolog.h:50] ----------------------- Config info -----------------------
+I1125 08:10:45.834458 13955 autolog.h:51] runtime_device: cpu
+I1125 08:10:45.834467 13955 autolog.h:52] ir_optim: True
+I1125 08:10:45.834475 13955 autolog.h:53] enable_memory_optim: True
+I1125 08:10:45.834483 13955 autolog.h:54] enable_tensorrt: 0
+I1125 08:10:45.834518 13955 autolog.h:55] enable_mkldnn: False
+I1125 08:10:45.834525 13955 autolog.h:56] cpu_math_library_num_threads: 10
+I1125 08:10:45.834532 13955 autolog.h:57] ----------------------- Data info -----------------------
+I1125 08:10:45.834540 13955 autolog.h:58] batch_size: 1
+I1125 08:10:45.834547 13955 autolog.h:59] input_shape: dynamic
+I1125 08:10:45.834556 13955 autolog.h:60] data_num: 1
+I1125 08:10:45.834564 13955 autolog.h:61] ----------------------- Model info -----------------------
+I1125 08:10:45.834573 13955 autolog.h:62] model_name: rec
+I1125 08:10:45.834579 13955 autolog.h:63] precision: fp32
+I1125 08:10:45.834586 13955 autolog.h:64] ----------------------- Perf info ------------------------
+I1125 08:10:45.834594 13955 autolog.h:65] Total time spent(ms): 2739
+I1125 08:10:45.834602 13955 autolog.h:67] preprocess_time(ms): 10.6524, inference_time(ms): 1269.55, postprocess_time(ms): 0.009118
+```
 
 ### 3 Attention
 
-* When using the Paddle prediction library, it is recommended to use the prediction library of version 2.0.0.
+* When using the Paddle prediction library, it is recommended to use the prediction library of version 2.1.0.
