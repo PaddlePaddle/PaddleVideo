@@ -27,13 +27,14 @@ __dir__ = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.abspath(os.path.join(__dir__, '../')))
 
 from paddlevideo.loader.pipelines import (AutoPadding, CenterCrop,
-                                          DecodeSampler, Image2Array,
-                                          JitterScale, MultiCrop, Normalization,
-                                          PackOutput, Sampler, Scale,
-                                          SkeletonNorm, TenCrop, UniformCrop,
-                                          VideoDecoder)
+                                          DecodeSampler, FeatureDecoder,
+                                          Image2Array, JitterScale, MultiCrop,
+                                          Normalization, PackOutput, Sampler,
+                                          Scale, SkeletonNorm, TenCrop,
+                                          UniformCrop, VideoDecoder)
 from paddlevideo.metrics.bmn_metric import boundary_choose, soft_nms
 from paddlevideo.utils import Registry, build
+
 
 INFERENCE = Registry('inference')
 
@@ -456,6 +457,64 @@ class STGCN_Inference_helper():
 
         res = np.expand_dims(results['data'], axis=0).copy()
         return [res]
+
+    def postprocess(self, output):
+        """
+        output: list
+        """
+        output = output[0]
+        if output.ndim == 1:
+            pass
+        elif output.ndim == 2:
+            output = output.mean(axis=0)
+        if output.ndim > 1:
+            output = output.flatten()
+        output = F.softmax(paddle.to_tensor(output)).numpy()
+        classes = np.argpartition(output, -self.top_k)[-self.top_k:]
+        classes = classes[np.argsort(-output[classes])]
+        scores = output[classes]
+        print("Current video file: {0}".format(self.input_file))
+        print("\ttop-1 class: {0}".format(classes[0]))
+        print("\ttop-1 score: {0}".format(scores[0]))
+
+
+@INFERENCE.register()
+class AttentionLSTM_Inference_helper():
+    def __init__(self,
+                 num_classes, #Optional, the number of classes to be classified.
+                 feature_num,
+                 feature_dims,
+                 embedding_size,
+                 lstm_size,
+                 top_k=1):
+        self.num_classes = num_classes
+        self.feature_num = feature_num
+        self.feature_dims = feature_dims
+        self.embedding_size = embedding_size
+        self.lstm_size = lstm_size
+        self.top_k = top_k
+
+    def preprocess(self, input_file):
+        """
+        input_file: str, file path
+        return: list
+        """
+        self.input_file = input_file
+        assert os.path.isfile(input_file) is not None, "{0} not exists".format(
+            input_file)
+        results = {'filename': input_file}
+        ops = [
+            FeatureDecoder(num_classes=self.num_classes, has_label=False)
+        ]
+        for op in ops:
+            results = op(results)
+
+        res = []
+        for modality in ['rgb', 'audio']:
+            res.append(np.expand_dims(results[f'{modality}_data'], axis=0).copy())
+            res.append(np.expand_dims(results[f'{modality}_len'], axis=0).copy())
+            res.append(np.expand_dims(results[f'{modality}_mask'], axis=0).copy())
+        return res
 
     def postprocess(self, output):
         """

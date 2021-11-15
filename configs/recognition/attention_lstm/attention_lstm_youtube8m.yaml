@@ -4,23 +4,26 @@ MODEL: #MODEL field
         name: "AttentionLstmHead" #Mandatory, indicate the type of head, associate to the 'paddlevideo/modeling/heads'
         num_classes: 3862 #Optional, the number of classes to be classified.
         feature_num: 2
+        feature_dims: [1024, 128]
         embedding_size: 512
         lstm_size: 1024
 
 DATASET: #DATASET field
     batch_size: 128  #Mandatory, bacth size
-    num_workers: 0  #Mandatory, the number of subprocess on each GPU.
+    num_workers: 4  #Mandatory, the number of subprocess on each GPU.
     shuffle_valid: True
     train:
         format: "FeatureDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
-        file_path:   "data/dataset/youtube-8m/train.list" #Mandatory, train data index file path
+        data_prefix: "data/yt8m"
+        file_path: "data/yt8m/train.list" #Mandatory, train data index file path
     valid:
         format: "FeatureDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
-        file_path:   "data/dataset/youtube-8m/val.list" #Mandatory, train data index file path
+        data_prefix: "data/yt8m"
+        file_path: "data/yt8m/val.list" #Mandatory, train data index file path
     test:
         format: "FeatureDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
-        data_prefix: ""  #Mandatory, valid data root path
-        file_path:   "data/dataset/youtube-8m/val.list" #Mandatory, train data index file path
+        data_prefix: "data/yt8m"
+        file_path: "data/yt8m/val.list" #Mandatory, train data index file path
 
 
 PIPELINE: #PIPELINE field
@@ -46,10 +49,23 @@ OPTIMIZER: #OPTIMIZER field
         values: [0.00025, 0.000025, 0.0000025]
     weight_decay:
         name: 'L2'
-        value: 4e-4
+        value: 0.0004
 
-model_name: "AttentionLstm"
-log_interval: 1 #Optional, the interal of logger, default:10
+METRIC:
+    name: 'HitOneMetric'
+    num_class: 3862
+    top_k: 5
+
+INFERENCE:
+    name: 'AttentionLSTM_Inference_helper'
+    num_classes: 3862 #Optional, the number of classes to be classified.
+    feature_num: 2
+    feature_dims: [1024, 128]
+    embedding_size: 512
+    lstm_size: 1024
+
+model_name: "AttentionLSTM"
+log_interval: 20 #Optional, the interal of logger, default:10
 epochs: 10 #Mandatory, total epoch
-save_interval: 5
+save_interval: 2
 log_level: "INFO"

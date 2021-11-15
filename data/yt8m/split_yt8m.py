@@ -20,6 +20,11 @@ except ImportError:
     import pickle
     from io import BytesIO
 
+assert len(sys.argv) == 2, \
+    f"split_yt8m.py need (train/val).list"
+
+file_list = sys.argv[1]
+
 def split_yt8m(filelist):
     print(__file__, sys._getframe().f_lineno, "filelist:",filelist)
     fl = open(filelist).readlines()
@@ -37,4 +42,4 @@ def split_yt8m(filelist):
            output.close()
 
 if __name__ == "__main__":
-    split_yt8m("data/val.list")
+    split_yt8m(file_list)

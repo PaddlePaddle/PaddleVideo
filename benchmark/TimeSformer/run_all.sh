@@ -1,4 +1,4 @@
-# 提供可稳定复现性能的脚本，默认在标准docker环境内py37执行： paddlepaddle/paddle:latest-gpu-cuda10.1-cudnn7  paddle=2.1.2  py=37
+# 提供可稳定复现性能的脚本，默认在标准docker环境内py37执行： paddlepaddle/paddle:latest-gpu-cuda10.2-cudnn7  paddle=2.1.2  py=37
 # 执行目录：需说明
 sed -i '/set\ -xe/d' run_benchmark.sh
 cd ../../ # cd到PaddleVideo项目根目录下
@@ -18,6 +18,7 @@ cp -f benchmark/TimeSformer/timesformer_ucf101_videos_benchmark_bs14_mp.yaml con
 if [ ! -f "data/ucf101/trainlist_benchmark_mp.txt" ]; then
     wget -P data/ucf101/ https://videotag.bj.bcebos.com/PaddleVideo-release2.2/trainlist_benchmark_mp.txt
 fi
+wget -P data/ wget https://paddle-imagenet-models-name.bj.bcebos.com/dygraph/ViT_base_patch16_224_pretrained.pdparams
 alias cp='cp -i'
 
 cd data/ucf101 # 进入PaddleVideo/data/ucf101
