@@ -2,6 +2,10 @@
 
 # PaddleVideo
 
+## News
+
+- 🔥🔥🔥 [2021 CCF BDCI Figure Skating Action Recognition Competition](https://www.datafountain.cn/competitions/519) with 100 thousand bonus is in progress ! :tada: PaddleVideo provides baseline model [ST-GCN](https://github.com/PaddlePaddle/PaddleVideo/blob/develop/docs/zh-CN/model_zoo/recognition/stgcn.md), and related tutorials [AI Studio projects](https://aistudio.baidu.com/aistudio/projectdetail/2417717), [video course](https://www.bilibili.com/video/BV1w3411172G).
+
 ## Introduction
 
 ![python version](https://img.shields.io/badge/python-3.7+-orange.svg) ![paddle version](https://img.shields.io/badge/PaddlePaddle-2.0-blue)
@@ -13,25 +17,25 @@ PaddleVideo is a toolset for video recognition, action localization, and spatio 
   <img src="docs/images/home.gif" width="450px"/><br>
 </div>
 
-### **If you think this repo is helpful to you, welcome to star us~ ⭐**
+### ⭐ **If you think this repo is helpful to you, welcome to star us~ ⭐**
 
 
 ## Features
 
 - **Various dataset and models**
-    PaddleVideo supports more datasets and models, including [Kinetics400](docs/zh-CN/dataset/k400.md), UCF101, YoutTube8M, NTU-RGB+D datasets, and video recognition models, such as TSN, TSM, SlowFast, TimeSformer, AttentionLSTM, ST-GCN and action localization model, like [BMN](./docs/zh-CN/model_zoo/localization/bmn.md).
+    PaddleVideo supports more datasets and models, including [Kinetics400](docs/zh-CN/dataset/k400.md), UCF101, YoutTube8M, NTU-RGB+D datasets, and video recognition models, such as TSN, TSM, SlowFast, TimeSformer, AttentionLSTM, ST-GCN and action localization model, like BMN.
 
 - **Higher performance**
     PaddleVideo has built-in solutions to improve accuracy on recognition models. [PP-TSM](docs/zh-CN/model_zoo/recognition/pp-tsm.md), which is based on the standard TSM, already archive the best performance in the 2D recognition network, has the same size of parameters but improve the Top1 Acc to 76.16%.
 
 - **Faster training strategy**
-    PaddleVideo suppors faster training strategy, such as [AMP training](https://www.paddlepaddle.org.cn/documentation/docs/zh/guides/index_cn.html), Distributed training, Multigrid method for Slowfast, OP fusion method, Faster reader and so on.
+    PaddleVideo suppors faster training strategy, such as AMP training, Distributed training, Multigrid method for Slowfast, OP fusion method, Faster reader and so on.
 
 - **Deployable**
     PaddleVideo is powered by the Paddle Inference. There is no need to convert the model to ONNX format when deploying it, all you want can be found in this repository.
 
 - **Applications**
-    PaddleVideo provides some interesting and practical projects that are implemented using video recognition and detection techniques, such as [FootballAction](https://github.com/PaddlePaddle/PaddleVideo/tree/application/FootballAction) and VideoTag.
+    PaddleVideo provides some interesting and practical projects that are implemented using video recognition and detection techniques, such as FootballAction and VideoTag.
 
 ### Overview of the performance
 
@@ -45,7 +49,7 @@ PaddleVideo is a toolset for video recognition, action localization, and spatio 
 | action recognition | [SlowFast](./docs/zh-CN/model_zoo/recognition/slowfast.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | 75.84 |
 | action recognition | [TSM](./docs/zh-CN/model_zoo/recognition/tsm.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | 71.06 |
 | action recognition | [TSN](./docs/zh-CN/model_zoo/recognition/tsn.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | 69.81 |
-| action recognition | [AttentionLSTM](./docs/zh-CN/model_zoo/recognition/attention_lstm.md) | [Youtube-8M](./docs/zh-CN/dataset/youtube8m.md) | Hit@1 | 89.0 |
+| action recognition | [AttentionLSTM](./docs/zh-CN/model_zoo/recognition/attention_lstm.md) | [Youtube-8M](./docs/zh-CN/dataset/youtube8m.md) | Hit@1 | 89.05 |
 | action detection| [BMN](./docs/zh-CN/model_zoo/localization/bmn.md) | [ActivityNet](./docs/zh-CN/dataset/ActivityNet.md) |  AUC | 67.23 |
 
 ### Changelog
@@ -114,6 +118,12 @@ release/2.1 was released in 20/05/2021. Please refer to [release notes](https://
   - [Benchmark](docs/en/benchmark.md)
   - [Tools](docs/en/tools.md)
 
+## Competition
+
+- [CCKS 2021：Knowledge Enhanced Video Understanding](https://www.biendata.xyz/competition/ccks_2021_videounderstanding/)
+- [Figure Skating Action Recognition Competition](https://aistudio.baidu.com/aistudio/competition/detail/115/0/introduction)
+
+
 ## License
 
 PaddleVideo is released under the [Apache 2.0 license](LICENSE).
@@ -122,4 +132,4 @@ PaddleVideo is released under the [Apache 2.0 license](LICENSE).
 ## Contributing
 This poject welcomes contributions and suggestions. Please see our [contribution guidelines](docs/CONTRIBUTING.md).
 
-- Many thanks to [mohui37](https://github.com/mohui37) for contributing the code for prediction.
+- Many thanks to [mohui37](https://github.com/mohui37), [zephyr-fun](https://github.com/zephyr-fun), [voipchina](https://github.com/voipchina) for contributing the code.

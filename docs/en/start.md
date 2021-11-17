@@ -52,8 +52,8 @@ export CUDA_VISIBLE_DEVICES=0,1,2,3
 python3 -m paddle.distributed.launch \
     --gpus="0,1,2,3" \
     main.py \
-        --validate \
-        -c ./configs/example.yaml
+    --validate \
+    -c ./configs/example.yaml
 ```
 
 Indicating `-c` to set configuration, and one can flexible add `-o` in the script to update it.
@@ -62,9 +62,9 @@ Indicating `-c` to set configuration, and one can flexible add `-o` in the scrip
 python -m paddle.distributed.launch \
     --gpus="0,1,2,3" \
     main.py \
-        -c ./configs/example.yaml \
-        --validate \
-        -o DATASET.batch_size=16
+    -c ./configs/example.yaml \
+    --validate \
+    -o DATASET.batch_size=16
 ```
 Indicating `-o DATASET.batch_size=16` can update batch size to 16, please refer to [configuration](tutorials/config.md#config-yaml-details) for more information.
 
@@ -99,9 +99,9 @@ export CUDA_VISIBLE_DEVICES=0,1,2,3
 python3 -m paddle.distributed.launch \
     --gpus="0,1,2,3" \
     main.py \
-        -c ./configs/example.yaml \
-        --validate \
-        -o resume_epoch=5
+    -c ./configs/example.yaml \
+    --validate \
+    -o resume_epoch=5
 
 ```
 
@@ -116,9 +116,9 @@ export CUDA_VISIBLE_DEVICES=0,1,2,3
 python3 -m paddle.distributed.launch \
     --gpus="0,1,2,3" \
     main.py \
-        -c ./configs/example.yaml \
-        --validate \
-        --weights=./outputs/example/path_to_weights
+    -c ./configs/example.yaml \
+    --validate \
+    --weights=./outputs/example/path_to_weights
 ```
 
 Note: PaddleVideo will NOT load shape unmatched parameters.
@@ -134,9 +134,9 @@ export CUDA_VISIBLE_DEVICES=0,1,2,3
 python3 -m paddle.distributed.launch \
     --gpus="0,1,2,3" \
     main.py \
-        -c ./configs/example.yaml \
-        --test \
-        --weights=./output/example/path_to_weights
+    -c ./configs/example.yaml \
+    --test \
+    --weights=./output/example/path_to_weights
 ```
 
 

@@ -70,8 +70,8 @@ export CUDA_VISIBLE_DEVICES=0,1,2,3
 python3 -m paddle.distributed.launch \
     --gpus="0,1,2,3" \
     main.py \
-        --validate \
-        -c ./configs/example.yaml
+    --validate \
+    -c ./configs/example.yaml
 ```
 
 其中，`-c`用于指定配置文件的路径，可通过配置文件修改相关训练配置信息，也可以通过添加`-o`参数来更新配置：
@@ -80,9 +80,9 @@ python3 -m paddle.distributed.launch \
 python -m paddle.distributed.launch \
     --gpus="0,1,2,3" \
     main.py \
-        -c ./configs/example.yaml \
-        --validate \
-        -o DATASET.batch_size=16
+    -c ./configs/example.yaml \
+    --validate \
+    -o DATASET.batch_size=16
 ```
 `-o`用于指定需要修改或者添加的参数，其中`-o DATASET.batch_size=16`表示更改batch_size大小为16。具体配置参数含义参考[配置文档](./tutorials/config.md#config-yaml-details)
 
@@ -123,9 +123,9 @@ export CUDA_VISIBLE_DEVICES=0,1,2,3
 python3 -m paddle.distributed.launch \
     --gpus="0,1,2,3" \
     main.py \
-        -c ./configs/example.yaml \
-        --validate \
-        -o resume_epoch=5
+    -c ./configs/example.yaml \
+    --validate \
+    -o resume_epoch=5
 
 ```
 
@@ -141,9 +141,9 @@ export CUDA_VISIBLE_DEVICES=0,1,2,3
 python3 -m paddle.distributed.launch \
     --gpus="0,1,2,3" \
     main.py \
-        -c ./configs/example.yaml \
-        --validate \
-        --weights=./output/example/path_to_weights
+    -c ./configs/example.yaml \
+    --validate \
+    --weights=./output/example/path_to_weights
 ```
 
 PaddleVideo会自动**不加载**shape不匹配的参数
@@ -158,9 +158,9 @@ PaddleVideo会自动**不加载**shape不匹配的参数
 python3 -m paddle.distributed.launch \
     --gpus="0,1,2,3" \
     main.py \
-        -c ./configs/example.yaml \
-        --test \
-        --weights=./output/example/path_to_weights
+    -c ./configs/example.yaml \
+    --test \
+    --weights=./output/example/path_to_weights
 ```
 
 
