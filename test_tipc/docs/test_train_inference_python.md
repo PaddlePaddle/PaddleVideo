@@ -14,7 +14,7 @@ Linux端基础训练预测功能测试的主程序为`test_train_inference_pytho
     |  TSM  | pptsm_k400_frames_uniform | 正常训练 | 正常训练 | - | - |
     |  TSM  | tsm_k400_frames | 正常训练 | 正常训练 | - | - |
     |  TSN  | pptsn_k400_videos | 正常训练 | 正常训练 | - | - |
-    |  TSN  | pptsn_k400_videos | 正常训练 | 正常训练 | - | - |
+    |  TSN  | tsn_k400_frames | 正常训练 | 正常训练 | - | - |
 
 
 - 预测相关：基于训练是否使用量化，可以将训练产出的模型可以分为`正常模型`和`量化模型(TODO)`，这两类模型对应的预测功能汇总如下，
@@ -68,23 +68,23 @@ Linux端基础训练预测功能测试的主程序为`test_train_inference_pytho
 
 - 模式2：lite_train_whole_infer，使用少量数据训练，一定量数据预测，用于验证训练后的模型执行预测，预测速度是否合理；
     ```shell
-    bash test_tipc/prepare.sh ./test_tipc/configs/PP-TSM.txt  'lite_train_whole_infer'
-    bash test_tipc/test_train_inference_python.sh ../test_tipc/configs/PP-TSM.txt 'lite_train_whole_infer'
+    bash test_tipc/prepare.sh test_tipc/configs/PP-TSM.txt  'lite_train_whole_infer'
+    bash test_tipc/test_train_inference_python.sh test_tipc/configs/PP-TSM.txt 'lite_train_whole_infer'
     ```
 
 - 模式3：whole_infer，不训练，全量数据预测，走通开源模型评估、动转静，检查inference model预测时间和精度；
     ```shell
-    bash test_tipc/prepare.sh ./test_tipc/configs/PP-TSM.txt 'whole_infer'
+    bash test_tipc/prepare.sh test_tipc/configs/PP-TSM.txt 'whole_infer'
     # 用法1:
-    bash test_tipc/test_train_inference_python.sh ../test_tipc/configs/PP-TSM.txt 'whole_infer'
+    bash test_tipc/test_train_inference_python.sh test_tipc/configs/PP-TSM.txt 'whole_infer'
     # 用法2: 指定GPU卡预测，第三个传入参数为GPU卡号
-    bash test_tipc/test_train_inference_python.sh ./test_tipc/configs/PP-TSM.txt 'whole_infer' '1'
+    bash test_tipc/test_train_inference_python.sh test_tipc/configs/PP-TSM.txt 'whole_infer' '1'
     ```
 
 - 模式4：whole_train_whole_infer，CE： 全量数据训练，全量数据预测，验证模型训练精度，预测精度，预测速度；
     ```shell
-    bash test_tipc/prepare.sh ./test_tipc/configs/PP-TSM.txt 'whole_train_whole_infer'
-    bash test_tipc/test_train_inference_python.sh ./test_tipc/configs/PP-TSM.txt 'whole_train_whole_infer'
+    bash test_tipc/prepare.sh test_tipc/configs/PP-TSM.txt 'whole_train_whole_infer'
+    bash test_tipc/test_train_inference_python.sh test_tipc/configs/PP-TSM.txt 'whole_train_whole_infer'
     ```
 
 
@@ -101,7 +101,7 @@ Linux端基础训练预测功能测试的主程序为`test_train_inference_pytho
 #### 使用方式
 运行命令：
 ```shell
-python3.7 test_tipc/compare_results.py --gt_file=./test_tipc/results/python_*.txt  --log_file=./test_tipc/output/python_*.log --atol=1e-3 --rtol=1e-3
+python3.7 test_tipc/compare_results.py --gt_file=test_tipc/results/python_*.txt  --log_file=test_tipc/output/python_*.log --atol=1e-3 --rtol=1e-3
 ```
 
 参数介绍：  
