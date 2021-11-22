@@ -17,15 +17,14 @@ from collections.abc import Callable
 import numpy as np
 import paddle
 import paddle.nn as nn
-from paddle.nn.initializer import TruncatedNormal, Constant, Normal
 import paddle.nn.functional as F
-from ..registry import BACKBONES
+from paddle.nn.initializer import Constant
+
 from ...utils import load_ckpt
+from ..registry import BACKBONES
 from ..weight_init import trunc_normal_
 
-
 __all__ = ['VisionTransformer']
-
 
 zeros_ = Constant(value=0.)
 ones_ = Constant(value=1.)
@@ -77,7 +76,7 @@ class Mlp(nn.Layer):
                  hidden_features=None,
                  out_features=None,
                  act_layer=nn.GELU,
-                 drop=0.):
+                 drop=0.0):
         super().__init__()
         out_features = out_features or in_features
         hidden_features = hidden_features or in_features
@@ -101,8 +100,8 @@ class Attention(nn.Layer):
                  num_heads=8,
                  qkv_bias=False,
                  qk_scale=None,
-                 attn_drop=0.,
-                 proj_drop=0.):
+                 attn_drop=0.0,
+                 proj_drop=0.0):
         super().__init__()
 
         self.num_heads = num_heads
@@ -151,7 +150,7 @@ class Block(nn.Layer):
         if isinstance(norm_layer, str):
             self.norm1 = eval(norm_layer)(dim, epsilon=epsilon)
         elif isinstance(norm_layer, Callable):
-            self.norm1 = norm_layer(dim)
+            self.norm1 = norm_layer(dim, epsilon=epsilon)
         else:
             raise TypeError(
                 "The norm_layer must be str or paddle.nn.layer.Layer class")
@@ -185,7 +184,7 @@ class Block(nn.Layer):
         if isinstance(norm_layer, str):
             self.norm2 = eval(norm_layer)(dim, epsilon=epsilon)
         elif isinstance(norm_layer, Callable):
-            self.norm2 = norm_layer(dim)
+            self.norm2 = norm_layer(dim, epsilon=epsilon)
         else:
             raise TypeError(
                 "The norm_layer must be str or paddle.nn.layer.Layer class")
@@ -205,14 +204,14 @@ class Block(nn.Layer):
         elif self.attention_type == 'divided_space_time':
             ########## Temporal ##########
             xt = x[:, 1:, :]
-            _b, _h, _w, _t, _m = B, H, W, T, xt.shape[-1]
-            xt = xt.reshape([_b * _h * _w if _b > 0 else -1, _t, _m])
+            _, _, _, _t, _m = B, H, W, T, xt.shape[-1]
+            xt = xt.reshape([-1, _t, _m])
 
             res_temporal = self.drop_path(
                 self.temporal_attn(self.temporal_norm1(xt)))
 
-            _b, _h, _w, _t, _m = B, H, W, T, res_temporal.shape[-1]
-            res_temporal = res_temporal.reshape([_b, _h * _w * _t, _m])
+            _, _h, _w, _t, _m = B, H, W, T, res_temporal.shape[-1]
+            res_temporal = res_temporal.reshape([-1, _h * _w * _t, _m])
 
             res_temporal = self.temporal_fc(res_temporal)
             xt = x[:, 1:, :] + res_temporal
@@ -221,26 +220,26 @@ class Block(nn.Layer):
             init_cls_token = x[:, 0, :].unsqueeze(1)
             cls_token = init_cls_token.tile((1, T, 1))
             _b, _t, _m = cls_token.shape
-            cls_token = cls_token.reshape([_b * _t, _m]).unsqueeze(1)
+            cls_token = cls_token.reshape([-1, _m]).unsqueeze(1)
 
             xs = xt
-            _b, _h, _w, _t, _m = B, H, W, T, xs.shape[-1]
-            xs = xs.reshape([_b, _h, _w, _t, _m]).transpose(
-                (0, 3, 1, 2, 4)).reshape([_b * _t if _b > 0 else -1, _h * _w, _m])
+            _, _h, _w, _t, _m = B, H, W, T, xs.shape[-1]
+            xs = xs.reshape([-1, _h, _w, _t, _m]).transpose(
+                (0, 3, 1, 2, 4)).reshape([-1, _h * _w, _m])
             xs = paddle.concat((cls_token, xs), axis=1)
             res_spatial = self.drop_path(self.attn(self.norm1(xs)))
 
             # Taking care of CLS token
             cls_token = res_spatial[:, 0, :]
-            _b, _t, _m = B, T, cls_token.shape[-1]
-            cls_token = cls_token.reshape([_b, _t, _m])
+            _, _t, _m = B, T, cls_token.shape[-1]
+            cls_token = cls_token.reshape([-1, _t, _m])
             # averaging for every frame
             cls_token = paddle.mean(cls_token, axis=1, keepdim=True)
 
             res_spatial = res_spatial[:, 1:, :]
-            _b, _t, _h, _w, _m = B, T, H, W, res_spatial.shape[-1]
-            res_spatial = res_spatial.reshape([_b, _t, _h, _w, _m]).transpose(
-                (0, 2, 3, 1, 4)).reshape([_b, _h * _w * _t, _m])
+            _, _t, _h, _w, _m = B, T, H, W, res_spatial.shape[-1]
+            res_spatial = res_spatial.reshape([-1, _t, _h, _w, _m]).transpose(
+                (0, 2, 3, 1, 4)).reshape([-1, _h * _w * _t, _m])
 
             res = res_spatial
             x = xt
@@ -282,7 +281,7 @@ class PatchEmbed(nn.Layer):
         assert H == self.img_size[0] and W == self.img_size[1], \
             f"Input image size ({H}*{W}) doesn't match model ({self.img_size[0]}*{self.img_size[1]})."
         x = x.transpose((0, 2, 1, 3, 4))
-        x = x.reshape([B * T if B > 0 else -1, C, H, W])
+        x = x.reshape([-1, C, H, W])
         x = self.proj(x)
         W = x.shape[-1]
         x = x.flatten(2).transpose((0, 2, 1))
@@ -316,7 +315,6 @@ class VisionTransformer(nn.Layer):
         self.pretrained = pretrained
         self.seg_num = seg_num
         self.attention_type = attention_type
-
         self.num_features = self.embed_dim = embed_dim
 
         self.patch_embed = PatchEmbed(img_size=img_size,
@@ -375,32 +373,30 @@ class VisionTransformer(nn.Layer):
                         zeros_(m.temporal_fc.weight)
                         zeros_(m.temporal_fc.bias)
                     i += 1
-
         """Second, if provide pretrained ckpt, load it"""
         if isinstance(
                 self.pretrained, str
         ) and self.pretrained.strip() != "":  # load pretrained weights
-            load_ckpt(self, self.pretrained, num_patches=self.patch_embed.num_patches,
-                      seg_num=self.seg_num, attention_type=self.attention_type)
-        elif self.pretrained is None or self.pretrained.strip() == "":
-            pass
-        else:
-            raise NotImplementedError
+            load_ckpt(self,
+                      self.pretrained,
+                      num_patches=self.patch_embed.num_patches,
+                      seg_num=self.seg_num,
+                      attention_type=self.attention_type)
 
     def _init_fn(self, m):
         if isinstance(m, nn.Linear):
             trunc_normal_(m.weight)
-            if isinstance(m, nn.Linear) and m.bias is not None:
+            if m.bias is not None:
                 zeros_(m.bias)
         elif isinstance(m, nn.LayerNorm):
             ones_(m.weight)
             zeros_(m.bias)
 
     def forward_features(self, x):
-        B = x.shape[0]
-        # B = paddle.shape(x)[0]
-        x, T, W = self.patch_embed(x)
-        cls_tokens = self.cls_token.expand((x.shape[0] if B > 0 else 3 * T, -1, -1))
+        # B = x.shape[0]
+        B = paddle.shape(x)[0]
+        x, T, W = self.patch_embed(x)  # [BT,nH*nW,F]
+        cls_tokens = self.cls_token.expand((B * T, -1, -1))  # [1,1,F]->[BT,1,F]
         x = paddle.concat((cls_tokens, x), axis=1)
         pos_interp = (x.shape[1] != self.pos_embed.shape[1])
         if pos_interp:
@@ -426,14 +422,14 @@ class VisionTransformer(nn.Layer):
 
         # Time Embeddings
         if self.attention_type != 'space_only':
-            # cls_tokens = x[:B, 0, :].unsqueeze(1)
-            cls_tokens = x[:B, 0, :].unsqueeze(1) if B > 0 else x.split(T)[0].index_select(paddle.to_tensor([0]), axis=1)
+            cls_tokens = x[:B, 0, :].unsqueeze(1) if B > 0 else x.split(
+                T)[0].index_select(paddle.to_tensor([0]), axis=1)
             x = x[:, 1:]
-            _bt, _n, _m = x.shape
-            _b = B
-            _t = _bt // _b if _b != -1 else T
-            x = x.reshape([_b, _t, _n, _m]).transpose(
-                (0, 2, 1, 3)).reshape([_b * _n if _b > 0 else -1, _t, _m])
+            _, _n, _m = x.shape
+            # _b = B
+            _t = T
+            x = x.reshape([-1, _t, _n, _m]).transpose(
+                (0, 2, 1, 3)).reshape([-1, _t, _m])
             # Resizing time embeddings in case they don't match
             time_interp = (T != self.time_embed.shape[1])
             if time_interp:  # T' != T
@@ -447,9 +443,9 @@ class VisionTransformer(nn.Layer):
                 x = x + self.time_embed
 
             x = self.time_drop(x)
-            _bn, _t, _m = x.shape
-            _b = B
-            x = x.reshape([_b, _n * _t, _m] if _n > 0 else [_b, W * W * T, _m])
+            _, _t, _m = x.shape
+            # _b = B
+            x = x.reshape([-1, W * W * T, _m])
             x = paddle.concat((cls_tokens, x), axis=1)
 
         # Attention blocks
@@ -458,14 +454,14 @@ class VisionTransformer(nn.Layer):
 
         # Predictions for space-only baseline
         if self.attention_type == 'space_only':
-            _bt, _n, _m = x.shape
-            _b = B
+            _, _n, _m = x.shape
+            # _b = B
             _t = T
-            x = x.reshape([_b, _t, _n, _m])
+            x = x.reshape([-1, _t, _n, _m])
             x = paddle.mean(x, 1)  # averaging predictions for every frame
 
         x = self.norm(x)
-        return x[:, 0]  # [B, 1, embed_dim]
+        return x[:, 0]  # [B,  embed_dim]
 
     def forward(self, x):
         x = self.forward_features(x)
