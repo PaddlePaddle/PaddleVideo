@@ -18,15 +18,15 @@ DATASET: #DATASET field
     test_batch_size: 1
     train:
         format: "VideoDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
-        data_prefix: "data/k400" #Mandatory, train data root path
+        data_prefix: "data/k400/videos" #Mandatory, train data root path
         file_path: "data/k400/train.list" #Mandatory, train data index file path
     valid:
         format: "VideoDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
-        data_prefix: "data/k400" #Mandatory, train data root path
+        data_prefix: "data/k400/videos" #Mandatory, train data root path
         file_path: "data/k400/val.list" #Mandatory, valid data index file path
     test:
         format: "VideoDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
-        data_prefix: "data/k400" #Mandatory, train data root path
+        data_prefix: "data/k400/videos" #Mandatory, train data root path
         file_path: "data/k400/val.list" #Mandatory, valid data index file path
 
 PIPELINE: #PIPELINE field
