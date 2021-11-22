@@ -53,12 +53,14 @@ Linux端基础训练预测功能测试的主程序为`test_train_inference_pytho
    ```
 
 
-### 2.2 功能测试
-1. 先运行`prepare.sh`准备数据和模型
-2. 运行`test_train_inference_python.sh`进行测试
+### 2.2 基本功能测试
+1. 先运行`prepare.sh`，根据传入模型名字，准备对应数据和预训练模型参数
+2. 再运行`test_train_inference_python.sh`，根据传入模型名字，进行对应测试
 3. 在`test_tipc/output`目录下生成 `python_infer_*.log` 格式的日志文件
 
-    其中 `test_train_inference_python.sh` 包含5种运行模式，每种模式的运行数据不同，分别用于测试速度和精度，分别是（以PP-TSM的测试链条为例）：
+具体地，以PP-TSM的测试链条为例，运行细节如下：
+
+`test_train_inference_python.sh` 包含5种运行模式，每种模式的运行数据不同，分别用于测试速度和精度，分别是：
 
 - 模式1：**lite_train_lite_infer**，使用少量数据训练，用于快速验证训练到预测的走通流程，不验证精度和速度；
     ```shell
@@ -94,7 +96,7 @@ Linux端基础训练预测功能测试的主程序为`test_train_inference_pytho
 ### 2.3 精度测试
 
 使用compare_results.py脚本比较模型预测的结果是否符合预期，主要步骤包括：
-- 提取`*.log'日志中的预测结果，包括类别和概率
+- 提取`*.log`日志中的预测结果，包括类别和概率
 - 从本地文件中提取保存好的真值结果；
 - 比较上述两个结果是否符合精度预期，误差大于设置阈值时会报错。
 
@@ -121,9 +123,3 @@ Assert allclose passed! The results of python_infer_cpu_usemkldnn_False_threads_
 ```bash
 ValueError: The results of python_infer_gpu_usetrt_False_precision_fp32_batchsize_8.log and the results of ./test_tipc/results/PP-TSM/python_ppvideo_PP-TSM_results_fp32.txt are inconsistent!
 ```
-
-
-## 3. 更多教程
-本文档为功能测试用，更丰富的训练预测使用教程请参考：  
-[模型训练](https://github.com/PaddlePaddle/PaddleOCR/blob/dygraph/doc/doc_ch/training.md)
-[基于Python预测引擎推理](https://github.com/PaddlePaddle/PaddleOCR/blob/dygraph/doc/doc_ch/inference.md)
