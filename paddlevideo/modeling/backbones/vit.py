@@ -426,7 +426,6 @@ class VisionTransformer(nn.Layer):
                 T)[0].index_select(paddle.to_tensor([0]), axis=1)
             x = x[:, 1:]
             _, _n, _m = x.shape
-            # _b = B
             _t = T
             x = x.reshape([-1, _t, _n, _m]).transpose(
                 (0, 2, 1, 3)).reshape([-1, _t, _m])
@@ -444,7 +443,6 @@ class VisionTransformer(nn.Layer):
 
             x = self.time_drop(x)
             _, _t, _m = x.shape
-            # _b = B
             x = x.reshape([-1, W * W * T, _m])
             x = paddle.concat((cls_tokens, x), axis=1)
 
@@ -455,7 +453,6 @@ class VisionTransformer(nn.Layer):
         # Predictions for space-only baseline
         if self.attention_type == 'space_only':
             _, _n, _m = x.shape
-            # _b = B
             _t = T
             x = x.reshape([-1, _t, _n, _m])
             x = paddle.mean(x, 1)  # averaging predictions for every frame
