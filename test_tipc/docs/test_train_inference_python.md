@@ -11,9 +11,9 @@ Linux端基础训练预测功能测试的主程序为`test_train_inference_pytho
 
     | 算法名称 | 模型名称 | 单机单卡 | 单机多卡 | 多机多卡 | 模型压缩（单机多卡） |
     |  :----  |   :----  |    :----  |  :----   |  :----   |  :----   |
-    |  TSM  | pptsm_k400_frames_uniform | 正常训练 | 正常训练 | - | - |
+    |  PP-TSM  | pptsm_k400_frames_uniform | 正常训练 | 正常训练 | - | - |
     |  TSM  | tsm_k400_frames | 正常训练 | 正常训练 | - | - |
-    |  TSN  | pptsn_k400_videos | 正常训练 | 正常训练 | - | - |
+    |  PP-TSN  | pptsn_k400_videos | 正常训练 | 正常训练 | - | - |
     |  TSN  | tsn_k400_frames | 正常训练 | 正常训练 | - | - |
 
 
