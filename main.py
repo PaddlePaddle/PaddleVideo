@@ -54,26 +54,26 @@ def parse_args():
                         action='store_true',
                         help='whether to open amp training.')
     parser.add_argument(
-        '--validate',
-        action='store_true',
-        help='whether to evaluate the checkpoint during training')
+                        '--validate',
+                        action='store_true',
+                        help='whether to evaluate the checkpoint during training')
     parser.add_argument(
-        '--seed',
-        type=int,
-        default=None,
-        help='fixed all random seeds when the program is running')
+                        '--seed',
+                        type=int,
+                        default=None,
+                        help='fixed all random seeds when the program is running')
     parser.add_argument(
-        '--seed',
-        type=int,
-        default=None,
-        help='fixed all random seeds when the program is running')
+                        '--seed',
+                        type=int,
+                        default=None,
+                        help='fixed all random seeds when the program is running')
     parser.add_argument(
-        '-p',
-        '--profiler_options',
-        type=str,
-        default=None,
-        help='The option of profiler, which should be in format '
-        '\"key1=value1;key2=value2;key3=value3\".')
+                        '-p',
+                        '--profiler_options',
+                        type=str,
+                        default=None,
+                        help='The option of profiler, which should be in format '
+                        '\"key1=value1;key2=value2;key3=value3\".')
 
     args = parser.parse_args()
     return args
