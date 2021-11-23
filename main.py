@@ -63,11 +63,6 @@ def parse_args():
                         default=None,
                         help='fixed all random seeds when the program is running')
     parser.add_argument(
-                        '--seed',
-                        type=int,
-                        default=None,
-                        help='fixed all random seeds when the program is running')
-    parser.add_argument(
                         '-p',
                         '--profiler_options',
                         type=str,
