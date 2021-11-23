@@ -19,18 +19,18 @@ DATASET: #DATASET field
     num_workers: 4 #Mandatory, XXX the number of subprocess on each GPU.
     train:
         format: "FrameDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
-        data_prefix: "" #Mandatory, train data root path
-        file_path: "data/k400_frames/train.list" #Mandatory, train data index file path
+        data_prefix: "data/k400/rawframes" #Mandatory, train data root path
+        file_path: "data/k400/train_frames.list" #Mandatory, train data index file path
         suffix: 'img_{:05}.jpg'
     valid:
         format: "FrameDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
-        data_prefix: "" #Mandatory, valid data root path
-        file_path: "data/k400_frames/val.list" #Mandatory, valid data index file path
+        data_prefix: "data/k400/rawframes" #Mandatory, valid data root path
+        file_path: "data/k400/val_frames.list" #Mandatory, valid data index file path
         suffix: 'img_{:05}.jpg'
     test:
         format: "FrameDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
-        data_prefix: "" #Mandatory, valid data root path
-        file_path: "data/k400_frames/val.list" #Mandatory, valid data index file path
+        data_prefix: "data/k400/rawframes" #Mandatory, valid data root path
+        file_path: "data/k400/val_frames.list" #Mandatory, valid data index file path
         suffix: 'img_{:05}.jpg'
 
 

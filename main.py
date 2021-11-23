@@ -11,11 +11,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import paddle
 import argparse
-from paddlevideo.utils import get_config
-from paddlevideo.tasks import train_model, train_model_multigrid, test_model, train_dali
-from paddlevideo.utils import get_dist_info
+import random
+
+import numpy as np
+import paddle
+
+from paddlevideo.tasks import (test_model, train_dali, train_model,
+                               train_model_multigrid)
+from paddlevideo.utils import get_config, get_dist_info
 
 
 def parse_args():
@@ -50,16 +54,21 @@ def parse_args():
                         action='store_true',
                         help='whether to open amp training.')
     parser.add_argument(
-        '--validate',
-        action='store_true',
-        help='whether to evaluate the checkpoint during training')
+                        '--validate',
+                        action='store_true',
+                        help='whether to evaluate the checkpoint during training')
     parser.add_argument(
-        '-p',
-        '--profiler_options',
-        type=str,
-        default=None,
-        help='The option of profiler, which should be in format '
-        '\"key1=value1;key2=value2;key3=value3\".')
+                        '--seed',
+                        type=int,
+                        default=None,
+                        help='fixed all random seeds when the program is running')
+    parser.add_argument(
+                        '-p',
+                        '--profiler_options',
+                        type=str,
+                        default=None,
+                        help='The option of profiler, which should be in format '
+                        '\"key1=value1;key2=value2;key3=value3\".')
 
     args = parser.parse_args()
     return args
@@ -68,6 +77,15 @@ def parse_args():
 def main():
     args = parse_args()
     cfg = get_config(args.config, overrides=args.override)
+
+    # set seed if specified
+    seed = args.seed
+    if seed is not None:
+        assert isinstance(
+            seed, int), f"seed must be a integer when specified, but got {seed}"
+        paddle.seed(seed)
+        np.random.seed(seed)
+        random.seed(seed)
 
     _, world_size = get_dist_info()
     parallel = world_size != 1
@@ -79,7 +97,9 @@ def main():
     elif args.train_dali:
         train_dali(cfg, weights=args.weights, parallel=parallel)
     elif args.multigrid:
-        train_model_multigrid(cfg, world_size=world_size, validate=args.validate)
+        train_model_multigrid(cfg,
+                              world_size=world_size,
+                              validate=args.validate)
     else:
         train_model(cfg,
                     weights=args.weights,

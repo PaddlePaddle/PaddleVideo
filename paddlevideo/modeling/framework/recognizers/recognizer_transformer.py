@@ -10,10 +10,12 @@
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 
+import paddle
+import paddle.nn.functional as F
+from paddlevideo.utils import get_logger
+
 from ...registry import RECOGNIZERS
 from .base import BaseRecognizer
-import paddle
-from paddlevideo.utils import get_logger
 
 logger = get_logger("paddlevideo")
 
@@ -52,21 +54,42 @@ class RecognizerTransformer(BaseRecognizer):
         return loss_metrics
 
     def test_step(self, data_batch):
-        """Define how the model is going to test, from input to output."""
-        # NOTE: (shipping) when testing, the net won't call head.loss, we deal with the test processing in /paddlevideo/metrics
-        clips_list = paddle.split(
-            data_batch[0], num_or_sections=3,
-            axis=2
-        )  # [N, 3, T, H, W], [N, 3, T, H, W], [N, 3, T, H, W]
-        cls_score = [
-            self.forward_net(imgs)
-            for imgs in clips_list
-        ]  # [N, C], [N, C], [N, C]
-        cls_score = paddle.add_n(cls_score)  # [N, C] in [0,1]
+        """Define how the model is going to infer, from input to output."""
+        imgs = data_batch[0]
+        num_views = imgs.shape[2] // self.backbone.seg_num
+        cls_score = []
+        for i in range(num_views):
+            view = imgs[:, :, i * self.backbone.seg_num:(i + 1) *
+                        self.backbone.seg_num]
+            cls_score.append(self.forward_net(view))
+        cls_score = self.average_view(cls_score)
         return cls_score
 
     def infer_step(self, data_batch):
-        """Define how the model is going to test, from input to output."""
+        """Define how the model is going to infer, from input to output."""
         imgs = data_batch[0]
-        cls_score = self.forward_net(imgs)
+        num_views = imgs.shape[2] // self.backbone.seg_num
+        cls_score = []
+        for i in range(num_views):
+            view = imgs[:, :, i * self.backbone.seg_num:(i + 1) *
+                        self.backbone.seg_num]
+            cls_score.append(self.forward_net(view))
+        cls_score = self.average_view(cls_score)
         return cls_score
+
+    def average_view(self, cls_score, average_type='score'):
+        """Combine the scores of different views
+
+        Args:
+            cls_score (list): Scores of multiple views
+            average_type (str, optional): Average calculation method. Defaults to 'score'.
+        """
+        assert average_type in ['score', 'prob'], \
+            f"Currently only the average of 'score' or 'prob' is supported, but got {average_type}"
+        if average_type == 'score':
+            return paddle.add_n(cls_score) / len(cls_score)
+        elif average_type == 'avg':
+            return paddle.add_n([F.softmax(score)
+                                 for score in cls_score]) / len(cls_score)
+        else:
+            raise NotImplementedError
