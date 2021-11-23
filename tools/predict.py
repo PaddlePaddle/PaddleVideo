@@ -126,12 +126,6 @@ def main():
 
         # Post process output
         InferenceHelper.postprocess(output)
-
-        # fp_message = "FP16" if args.use_fp16 else "FP32"
-        # trt_msg = "using tensorrt" if args.use_tensorrt else "not using tensorrt"
-        # print("{0}\t{1}\t{2}\tbatch size: {3}\ttime(ms): {4}".format(
-        #     model_name, trt_msg, fp_message, args.batch_size,
-        #     1000 * test_time / test_num))
     else:
         test_num = 500
         test_time = 0.0
