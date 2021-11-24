@@ -101,8 +101,42 @@ def build_inference_helper(cfg):
     return build(cfg, INFERENCE)
 
 
+class Base_Inference_helper():
+    def __init__(self,
+                 num_seg=8,
+                 seg_len=1,
+                 short_size=256,
+                 target_size=224,
+                 top_k=1):
+        self.num_seg = num_seg
+        self.seg_len = seg_len
+        self.short_size = short_size
+        self.target_size = target_size
+        self.top_k = top_k
+
+    def preprocess(self, input_file):
+        raise NotImplementedError
+
+    def postprocess(self, output, print_output=True, top_k=1):
+        """
+        output: list
+        """
+        output = output[0]  # [B, num_cls]
+        N = output.shape[0]
+        output = F.softmax(paddle.to_tensor(output), axis=-1).numpy()
+        for i in range(N):
+            classes = np.argpartition(output[i], -self.top_k)[-self.top_k:]
+            classes = classes[np.argsort(-output[i, classes])]
+            scores = output[i, classes]
+            if print_output:
+                print("Current video file: {0}".format(self.input_file[i]))
+                for j in range(self.top_k):
+                    print("\ttop-{0} class: {1}".format(j + 1, classes[j]))
+                    print("\ttop-{0} score: {1}".format(j + 1, scores[j]))
+
+
 @INFERENCE.register()
-class ppTSM_Inference_helper():
+class ppTSM_Inference_helper(Base_Inference_helper):
     def __init__(self,
                  num_seg=8,
                  seg_len=1,
@@ -120,7 +154,7 @@ class ppTSM_Inference_helper():
         input_file: str, file path
         return: list
         """
-        self.input_file = input_file
+        self.input_file = [input_file]
         assert os.path.isfile(input_file) is not None, "{0} not exists".format(
             input_file)
         results = {'filename': input_file}
@@ -140,23 +174,9 @@ class ppTSM_Inference_helper():
         res = np.expand_dims(results['imgs'], axis=0).copy()
         return [res]
 
-    def postprocess(self, output, print_output=True):
-        """
-        output: list
-        """
-        output = output[0].flatten()
-        output = F.softmax(paddle.to_tensor(output)).numpy()
-        classes = np.argpartition(output, -self.top_k)[-self.top_k:]
-        classes = classes[np.argsort(-output[classes])]
-        scores = output[classes]
-        if print_output:
-            print("Current video file: {0}".format(self.input_file))
-            print("\ttop-1 class: {0}".format(classes[0]))
-            print("\ttop-1 score: {0}".format(scores[0]))
-
 
 @INFERENCE.register()
-class ppTSN_Inference_helper():
+class ppTSN_Inference_helper(Base_Inference_helper):
     def __init__(self,
                  num_seg=25,
                  seg_len=1,
@@ -174,7 +194,7 @@ class ppTSN_Inference_helper():
         input_file: str, file path
         return: list
         """
-        self.input_file = input_file
+        self.input_file = [input_file]
         assert os.path.isfile(input_file) is not None, "{0} not exists".format(
             input_file)
         results = {'filename': input_file}
@@ -200,29 +220,9 @@ class ppTSN_Inference_helper():
         res = np.expand_dims(results['imgs'], axis=0).copy()
         return [res]
 
-    def postprocess(self, output, print_output=True):
-        """
-        output: list
-        """
-        output = output[0]
-        if output.ndim == 1:
-            pass
-        elif output.ndim == 2:
-            output = output.mean(axis=0)
-        if output.ndim > 1:
-            output = output.flatten()
-        output = F.softmax(paddle.to_tensor(output)).numpy()
-        classes = np.argpartition(output, -self.top_k)[-self.top_k:]
-        classes = classes[np.argsort(-output[classes])]
-        scores = output[classes]
-        if print_output:
-            print("Current video file: {0}".format(self.input_file))
-            print("\ttop-1 class: {0}".format(classes[0]))
-            print("\ttop-1 score: {0}".format(scores[0]))
-
 
 @INFERENCE.register()
-class BMN_Inference_helper():
+class BMN_Inference_helper(Base_Inference_helper):
     def __init__(self, feat_dim, dscale, tscale, result_path):
         self.feat_dim = feat_dim
         self.dscale = dscale
@@ -308,7 +308,7 @@ class BMN_Inference_helper():
 
 
 @INFERENCE.register()
-class TimeSformer_Inference_helper():
+class TimeSformer_Inference_helper(Base_Inference_helper):
     def __init__(self,
                  num_seg=8,
                  seg_len=1,
@@ -320,13 +320,14 @@ class TimeSformer_Inference_helper():
         self.short_size = short_size
         self.target_size = target_size
         self.top_k = top_k
+        self.input_file_list = []
 
     def preprocess(self, input_file):
         """
         input_file: str, file path
         return: list
         """
-        self.input_file = input_file
+        self.input_file = [input_file]
         assert os.path.isfile(input_file) is not None, "{0} not exists".format(
             input_file)
         results = {'filename': input_file}
@@ -350,29 +351,9 @@ class TimeSformer_Inference_helper():
         res = np.expand_dims(results['imgs'], axis=0).copy()
         return [res]
 
-    def postprocess(self, output, print_output=True):
-        """
-        output: list
-        """
-        output = output[0]
-        if output.ndim == 1:
-            pass
-        elif output.ndim == 2:
-            output = output.mean(axis=0)
-        if output.ndim > 1:
-            output = output.flatten()
-        output = F.softmax(paddle.to_tensor(output)).numpy()
-        classes = np.argpartition(output, -self.top_k)[-self.top_k:]
-        classes = classes[np.argsort(-output[classes])]
-        scores = output[classes]
-        if print_output:
-            print("Current video file: {0}".format(self.input_file))
-            print("\ttop-1 class: {0}".format(classes[0]))
-            print("\ttop-1 score: {0}".format(scores[0]))
-
 
 @INFERENCE.register()
-class SlowFast_Inference_helper():
+class SlowFast_Inference_helper(Base_Inference_helper):
     def __init__(self,
                  num_frames=32,
                  sampling_rate=2,
@@ -390,7 +371,7 @@ class SlowFast_Inference_helper():
         input_file: str, file path
         return: list
         """
-        self.input_file = input_file
+        self.input_file = [input_file]
         assert os.path.isfile(input_file) is not None, "{0} not exists".format(
             input_file)
         results = {
@@ -418,21 +399,9 @@ class SlowFast_Inference_helper():
             res.append(np.expand_dims(item, axis=0).copy())
         return res
 
-    def postprocess(self, output):
-        """
-        output: list
-        """
-        output = output[0].flatten()
-        classes = np.argpartition(output, -self.top_k)[-self.top_k:]
-        classes = classes[np.argsort(-output[classes])]
-        scores = output[classes]
-        print("Current video file: {0}".format(self.input_file))
-        print("\ttop-1 class: {0}".format(classes[0]))
-        print("\ttop-1 score: {0}".format(scores[0]))
-
 
 @INFERENCE.register()
-class STGCN_Inference_helper():
+class STGCN_Inference_helper(Base_Inference_helper):
     def __init__(self,
                  num_channels,
                  window_size,
@@ -450,7 +419,7 @@ class STGCN_Inference_helper():
         input_file: str, file path
         return: list
         """
-        self.input_file = input_file
+        self.input_file = [input_file]
         assert os.path.isfile(input_file) is not None, "{0} not exists".format(
             input_file)
         data = np.load(self.input_file)
@@ -462,28 +431,9 @@ class STGCN_Inference_helper():
         res = np.expand_dims(results['data'], axis=0).copy()
         return [res]
 
-    def postprocess(self, output):
-        """
-        output: list
-        """
-        output = output[0]
-        if output.ndim == 1:
-            pass
-        elif output.ndim == 2:
-            output = output.mean(axis=0)
-        if output.ndim > 1:
-            output = output.flatten()
-        output = F.softmax(paddle.to_tensor(output)).numpy()
-        classes = np.argpartition(output, -self.top_k)[-self.top_k:]
-        classes = classes[np.argsort(-output[classes])]
-        scores = output[classes]
-        print("Current video file: {0}".format(self.input_file))
-        print("\ttop-1 class: {0}".format(classes[0]))
-        print("\ttop-1 score: {0}".format(scores[0]))
-
 
 @INFERENCE.register()
-class AttentionLSTM_Inference_helper():
+class AttentionLSTM_Inference_helper(Base_Inference_helper):
     def __init__(
             self,
             num_classes,  #Optional, the number of classes to be classified.
@@ -504,7 +454,7 @@ class AttentionLSTM_Inference_helper():
         input_file: str, file path
         return: list
         """
-        self.input_file = input_file
+        self.input_file = [input_file]
         assert os.path.isfile(input_file) is not None, "{0} not exists".format(
             input_file)
         results = {'filename': input_file}
@@ -521,23 +471,3 @@ class AttentionLSTM_Inference_helper():
             res.append(
                 np.expand_dims(results[f'{modality}_mask'], axis=0).copy())
         return res
-
-    def postprocess(self, output, print_output=True):
-        """
-        output: list
-        """
-        output = output[0]
-        if output.ndim == 1:
-            pass
-        elif output.ndim == 2:
-            output = output.mean(axis=0)
-        if output.ndim > 1:
-            output = output.flatten()
-        output = F.softmax(paddle.to_tensor(output)).numpy()
-        classes = np.argpartition(output, -self.top_k)[-self.top_k:]
-        classes = classes[np.argsort(-output[classes])]
-        scores = output[classes]
-        if print_output:
-            print("Current video file: {0}".format(self.input_file))
-            print("\ttop-1 class: {0}".format(classes[0]))
-            print("\ttop-1 score: {0}".format(scores[0]))
