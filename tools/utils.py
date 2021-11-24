@@ -320,7 +320,6 @@ class TimeSformer_Inference_helper(Base_Inference_helper):
         self.short_size = short_size
         self.target_size = target_size
         self.top_k = top_k
-        self.input_file_list = []
 
     def preprocess(self, input_file):
         """
