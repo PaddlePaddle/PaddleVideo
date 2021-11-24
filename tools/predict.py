@@ -162,7 +162,6 @@ def main():
                 # Post process output
                 InferenceHelper.input_file = files[st_idx:ed_idx]
                 InferenceHelper.postprocess(output)
-
     else:
         test_video_num = 300
         test_time = 0.0
