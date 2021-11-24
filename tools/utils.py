@@ -121,6 +121,8 @@ class Base_Inference_helper():
         """
         output: list
         """
+        if not isinstance(self.input_file, list):
+            self.input_file = [self.input_file, ]
         output = output[0]  # [B, num_cls]
         N = output.shape[0]
         output = F.softmax(paddle.to_tensor(output), axis=-1).numpy()
