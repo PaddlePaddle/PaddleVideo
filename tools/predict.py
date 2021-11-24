@@ -15,6 +15,7 @@
 import argparse
 import os
 import time
+from os import path as osp
 
 import numpy as np
 from paddle import inference
@@ -48,7 +49,7 @@ def parse_args():
     parser.add_argument("--gpu_mem", type=int, default=8000)
     parser.add_argument("--enable_benchmark", type=str2bool, default=False)
     parser.add_argument("--enable_mkldnn", type=bool, default=False)
-    parser.add_argument("--cpu_threads", type=int)
+    parser.add_argument("--cpu_threads", type=int, default=None)
     # parser.add_argument("--hubserving", type=str2bool, default=False)  #TODO
 
     return parser.parse_args()
@@ -56,12 +57,11 @@ def parse_args():
 
 def create_paddle_predictor(args):
     config = Config(args.model_file, args.params_file)
-
     if args.use_gpu:
         config.enable_use_gpu(args.gpu_mem, 0)
     else:
         config.disable_gpu()
-        if hasattr(args, "cpu_threads"):
+        if args.cpu_threads is not None:
             config.set_cpu_math_library_num_threads(args.cpu_threads)
         if args.enable_mkldnn:
             # cache 10 different shapes for mkldnn to avoid memory leak
@@ -70,7 +70,7 @@ def create_paddle_predictor(args):
             if args.precision == "fp16":
                 config.enable_mkldnn_bfloat16()
 
-    #config.disable_glog_info()
+    # config.disable_glog_info()
     config.switch_ir_optim(args.ir_optim)  # default true
     if args.use_tensorrt:
         # choose precision
@@ -81,8 +81,16 @@ def create_paddle_predictor(args):
         else:
             precision = inference.PrecisionType.Float32
 
+        # calculate real max batch size during inference when tenrotRT enabled
+        max_batch_size = args.batch_size
+        cfg_yaml = cfg = get_config(args.config, show=False)
+        if 'tsm' in cfg_yaml.model_name.lower():
+            max_batch_size *= 8
+        elif 'tsn' in cfg_yaml.model_name.lower():
+            max_batch_size *= 250
+
         config.enable_tensorrt_engine(precision_mode=precision,
-                                      max_batch_size=args.batch_size)
+                                      max_batch_size=max_batch_size)
 
     config.enable_memory_optim()
     # use zero copy
@@ -113,21 +121,50 @@ def main():
         output_tensor_list.append(predictor.get_output_handle(item))
 
     if not args.enable_benchmark:
-        # Pre process input
-        inputs = InferenceHelper.preprocess(args.input_file)
+        # solve an file
+        if not osp.isdir(args.input_file):
+            # Pre process input
+            inputs = InferenceHelper.preprocess(args.input_file)
 
-        # Run inference
-        for i in range(len(input_tensor_list)):
-            input_tensor_list[i].copy_from_cpu(inputs[i])
-        predictor.run()
-        output = []
-        for j in range(len(output_tensor_list)):
-            output.append(output_tensor_list[j].copy_to_cpu())
+            # Run inference
+            for i in range(len(input_tensor_list)):
+                input_tensor_list[i].copy_from_cpu(inputs[i])
+            predictor.run()
+            output = []
+            for j in range(len(output_tensor_list)):
+                output.append(output_tensor_list[j].copy_to_cpu())
 
-        # Post process output
-        InferenceHelper.postprocess(output)
+            # Post process output
+            InferenceHelper.postprocess(output)
+        else:
+            # solve an directory
+            files = os.listdir(args.input_file)
+            files = [file for file in files if (file.endswith(".avi") or file.endswith(".mp4"))]
+            files = [osp.join(args.input_file, file) for file in files]
+            batch_num = args.batch_size
+            for st_idx in range(0, len(files), batch_num):
+                ed_idx = min(st_idx + batch_num, len(files))
+                batched_inputs = []
+                for i in range(st_idx, ed_idx):
+                    inputs = InferenceHelper.preprocess(files[i])
+                    batched_inputs.append(inputs)
+                batched_inputs = [np.concatenate([item[i] for item in batched_inputs]) for i in range(len(batched_inputs[0]))]
+
+                # Run inference
+                for i in range(len(input_tensor_list)):
+                    input_tensor_list[i].copy_from_cpu(batched_inputs[i])
+                predictor.run()
+                output = []
+
+                for j in range(len(output_tensor_list)):
+                    output.append(output_tensor_list[j].copy_to_cpu())
+
+                # Post process output
+                InferenceHelper.input_file = files[st_idx:ed_idx]
+                InferenceHelper.postprocess(output)
+
     else:
-        test_num = 500
+        test_video_num = 300
         test_time = 0.0
         log_interval = 20
         num_warmup = 10
@@ -148,10 +185,10 @@ def main():
             time_keys=['preprocess_time', 'inference_time', 'postprocess_time'],
             warmup=num_warmup)
 
-        for i in range(0, test_num + num_warmup):
-            if (i + 1) % log_interval == 0 or (i + 1) == test_num + num_warmup:
-                print(f"Benchmark process {i + 1}/{test_num + num_warmup}")
-            input_list = []
+        files = [args.input_file for _ in range(test_video_num + num_warmup)]
+        batch_num = args.batch_size
+        for st_idx in range(0, len(files), batch_num):
+            ed_idx = min(st_idx + batch_num, len(files))
 
             start_time = time.time()
             # auto log start
@@ -159,33 +196,24 @@ def main():
                 autolog.times.start()
 
             # Pre process input
-            batched_inputs_list = []
-            batch_count = 0
-            while batch_count < args.batch_size:
-                inputs = InferenceHelper.preprocess(args.input_file)
-                batched_inputs_list.append(inputs)
-                if 'tsm' in cfg.model_name.lower():
-                    batch_count += (inputs[0].shape[1] * 1)  # centercrop
-                elif 'tsn' in cfg.model_name.lower():
-                    batch_count += (inputs[0].shape[1] * 10)  # tencrop
-                elif 'timesformer' in cfg.model_name.lower():
-                    batch_count += (inputs[0].shape[2] * 3)  # threecrop
-                else:
-                    batch_count += inputs[0].shape[0]
-
-            batched_inputs = np.concatenate(batched_inputs_list, axis=0)
-            input_list.extend(batched_inputs)
+            batched_inputs = []
+            for i in range(st_idx, ed_idx):
+                if (i + 1) % log_interval == 0 or (i + 1) == len(files):
+                    print(f"Benchmark process {i + 1} / {len(files)}")
+                inputs = InferenceHelper.preprocess(files[i])
+                batched_inputs.append(inputs)
+            batched_inputs = [np.concatenate([item[i] for item in batched_inputs]) for i in range(len(batched_inputs[0]))]
+            # batched_inputs = [batched_inputs, ]
 
             # get pre process time cost
             if args.enable_benchmark:
                 autolog.times.stamp()
 
-            for j in range(len(input_tensor_list)):
-                input_tensor_list[j].copy_from_cpu(input_list[j])
-
+            for i in range(len(input_tensor_list)):
+                input_tensor_list[i].copy_from_cpu(batched_inputs[i])
             predictor.run()
-
             output = []
+
             for j in range(len(output_tensor_list)):
                 output.append(output_tensor_list[j].copy_to_cpu())
 
