@@ -202,7 +202,6 @@ def main():
                 inputs = InferenceHelper.preprocess(files[i])
                 batched_inputs.append(inputs)
             batched_inputs = [np.concatenate([item[i] for item in batched_inputs]) for i in range(len(batched_inputs[0]))]
-            # batched_inputs = [batched_inputs, ]
 
             # get pre process time cost
             if args.enable_benchmark:
