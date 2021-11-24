@@ -8,9 +8,9 @@ PaddleVideo model deployment.
 
 ## 1. Prepare the environment
 
--For Linux environment, docker is recommended.
+- For Linux environment, docker is recommended.
 
--Windows environment, currently supports compilation based on `Visual Studio 2019 Community` (TODO)
+- Windows environment, currently supports compilation based on `Visual Studio 2019 Community` (TODO)
 
 * This document mainly introduces the PaddleVideo C++ prediction process based on the Linux environment. If you need to perform C++ prediction based on the prediction library under Windows, please refer to [Windows Compilation Tutorial](./docs/windows_vs2019_build.md)(TODO) for the specific compilation method
 * **The purpose of preparing the environment is to get the compiled opencv library and paddle prediction library**.
