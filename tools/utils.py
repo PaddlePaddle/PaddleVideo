@@ -122,11 +122,12 @@ class Base_Inference_helper():
         output: list
         """
         if not isinstance(self.input_file, list):
-            self.input_file = [
-                self.input_file,
-            ]
+            self.input_file = [self.input_file, ]
         output = output[0]  # [B, num_cls]
-        N = output.shape[0]
+        N = len(self.input_file)
+        if output.shape[0] != N:
+            output = output.reshape([N] + [output.shape[0] // N] + list(output.shape[1:])) # [N, T, C]
+            output = output.mean(axis=1) # [N, C]
         output = F.softmax(paddle.to_tensor(output), axis=-1).numpy()
         for i in range(N):
             classes = np.argpartition(output[i], -self.top_k)[-self.top_k:]
@@ -137,6 +138,8 @@ class Base_Inference_helper():
                 for j in range(self.top_k):
                     print("\ttop-{0} class: {1}".format(j + 1, classes[j]))
                     print("\ttop-{0} score: {1}".format(j + 1, scores[j]))
+
+
 
 
 @INFERENCE.register()
@@ -419,8 +422,12 @@ class SlowFast_Inference_helper(Base_Inference_helper):
                 self.input_file,
             ]
         output = output[0]  # [B, num_cls]
+
+        N = len(self.input_file)
+        if output.shape[0] != N:
+            output = output.reshape([N] + [output.shape[0] // N] + list(output.shape[1:])) # [N, T, C]
+            output = output.mean(axis=1) # [N, C]
         # output = F.softmax(paddle.to_tensor(output), axis=-1).numpy() # done in it's head
-        N = output.shape[0]
         for i in range(N):
             classes = np.argpartition(output[i], -self.top_k)[-self.top_k:]
             classes = classes[np.argsort(-output[i, classes])]
