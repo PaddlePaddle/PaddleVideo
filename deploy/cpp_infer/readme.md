@@ -40,7 +40,6 @@ PaddleVideo模型部署。
     apt install libavcodec-dev
     apt install libswresample-dev
     apt install libswscale-dev
-    apt install libswscale-dev
     apt install libavutil-dev
     apt install libsdl1.2-dev
 
@@ -102,7 +101,7 @@ PaddleVideo模型部署。
 
 #### 1.2.1 直接下载安装
 
-* [Paddle预测库官网](https://www.paddlepaddle.org.cn/documentation/docs/zh/2.0/guides/05_inference_deployment/inference/build_and_install_lib_cn.html) 上提供了不同cuda版本的Linux预测库，可以在官网查看并选择合适的预测库版本（建议选择paddle版本>=2.0.1版本的预测库）。
+* [Paddle预测库官网](https://paddleinference.paddlepaddle.org.cn/v2.1/user_guides/download_lib.html) 上提供了不同cuda版本的Linux预测库，可以在官网查看并选择合适的预测库版本（建议选择paddle版本>=2.0.1版本的预测库）。
 
 * 下载之后会得到一个`paddle_inference.tgz`压缩包，使用下面的命令解压：
 
@@ -137,8 +136,8 @@ PaddleVideo模型部署。
         -DWITH_INFERENCE_API_TEST=OFF \
         -DON_INFER=ON \
         -DWITH_PYTHON=ON
-    make -j
-    make inference_lib_dist
+    make -j4
+    make inference_lib_dist -j4 # 4为编译时使用核数，可根据机器情况自行修改
     ```
 
     更多编译参数选项介绍可以参考[文档说明](https://www.paddlepaddle.org.cn/documentation/docs/zh/2.0/guides/05_inference_deployment/inference/build_and_install_lib_cn.html#congyuanmabianyi)。
@@ -253,8 +252,28 @@ PaddleVideo模型部署。
 
 ​	以example_video_dir下的样例视频`example01.avi`为输入视频为例，最终屏幕上会输出检测结果如下。
 
-​	<img src="./imgs/PPTSM_pred_result.png" />
+```bash
+I1125 08:10:42.753679 13955 main.cpp:88] The predict video: ./example_video_dir/example01.avi
+5 archery       score: 0.999556
+I1125 08:10:45.834288 13955 autolog.h:50] ----------------------- Config info -----------------------
+I1125 08:10:45.834458 13955 autolog.h:51] runtime_device: cpu
+I1125 08:10:45.834467 13955 autolog.h:52] ir_optim: True
+I1125 08:10:45.834475 13955 autolog.h:53] enable_memory_optim: True
+I1125 08:10:45.834483 13955 autolog.h:54] enable_tensorrt: 0
+I1125 08:10:45.834518 13955 autolog.h:55] enable_mkldnn: False
+I1125 08:10:45.834525 13955 autolog.h:56] cpu_math_library_num_threads: 10
+I1125 08:10:45.834532 13955 autolog.h:57] ----------------------- Data info -----------------------
+I1125 08:10:45.834540 13955 autolog.h:58] batch_size: 1
+I1125 08:10:45.834547 13955 autolog.h:59] input_shape: dynamic
+I1125 08:10:45.834556 13955 autolog.h:60] data_num: 1
+I1125 08:10:45.834564 13955 autolog.h:61] ----------------------- Model info -----------------------
+I1125 08:10:45.834573 13955 autolog.h:62] model_name: rec
+I1125 08:10:45.834579 13955 autolog.h:63] precision: fp32
+I1125 08:10:45.834586 13955 autolog.h:64] ----------------------- Perf info ------------------------
+I1125 08:10:45.834594 13955 autolog.h:65] Total time spent(ms): 2739
+I1125 08:10:45.834602 13955 autolog.h:67] preprocess_time(ms): 10.6524, inference_time(ms): 1269.55, postprocess_time(ms): 0.009118
+```
 
 ### 3 注意
 
-* 在使用Paddle预测库时，推荐使用2.0.0版本的预测库。
+* 在使用Paddle预测库时，推荐使用2.1.0版本的预测库。
