@@ -40,7 +40,6 @@ PaddleVideo model deployment.
     apt install libavcodec-dev
     apt install libswresample-dev
     apt install libswscale-dev
-    apt install libswscale-dev
     apt install libavutil-dev
     apt install libsdl1.2-dev
 
@@ -102,7 +101,7 @@ There are two ways to obtain the Paddle prediction library, which will be descri
 
 #### 1.2.1 Download and install directly
 
-* [Paddle prediction library official website](https://www.paddlepaddle.org.cn/documentation/docs/zh/2.0/guides/05_inference_deployment/inference/build_and_install_lib_cn.html) provides different cuda versions of Linux prediction libraries, you can Check and select the appropriate prediction library version on the official website (it is recommended to select the prediction library with paddle version>=2.0.1).
+* [Paddle prediction library official website](https://paddleinference.paddlepaddle.org.cn/v2.1/user_guides/download_lib.html) provides different cuda versions of Linux prediction libraries, you can Check and select the appropriate prediction library version on the official website (it is recommended to select the prediction library with paddle version>=2.0.1).
 
 * After downloading, you will get a `paddle_inference.tgz` compressed package, use the following command to decompress:
 
@@ -114,7 +113,7 @@ There are two ways to obtain the Paddle prediction library, which will be descri
 
 #### 1.2.2 Prediction library source code compilation
 * If you want to get the latest prediction library features, you can clone the latest code from Paddle github and compile the prediction library from source code.
-* You can refer to [Paddle prediction library installation and compilation instructions](https://www.paddlepaddle.org.cn/documentation/docs/zh/2.0/guides/05_inference_deployment/inference/build_and_install_lib_cn.html#congyuanmabianyi) instructions from github Obtain the Paddle code, and then compile it to generate the latest prediction library. The method of using git to get the code is as follows.
+* You can refer to [Paddle prediction library installation and compilation instructions](https://paddleinference.paddlepaddle.org.cn/user_guides/source_compile.html) instructions from github Obtain the Paddle code, and then compile it to generate the latest prediction library. The method of using git to get the code is as follows.
 
     ```shell
     git clone https://github.com/PaddlePaddle/Paddle.git
@@ -138,7 +137,7 @@ There are two ways to obtain the Paddle prediction library, which will be descri
         -DON_INFER=ON \
         -DWITH_PYTHON=ON
     make -j
-    make inference_lib_dist
+    make inference_lib_dist -j4 # 4为编译时使用核数，可根据机器情况自行修改
     ```
 
     You can refer to [documentation](https://www.paddlepaddle.org.cn/documentation/docs/zh/2.0/guides/05_inference_deployment/inference/build_and_install_lib_cn.html#congyuanmabianyi) for more introduction of compilation parameter options.
@@ -252,8 +251,28 @@ More parameters are as follows:
 
 ​	Take the sample video `example01.avi` under example_video_dir as the input video as an example, the final 	screen will output the detection results as follows.
 
-​	 <img src="./imgs/PPTSM_pred_result.png" />
+```bash
+I1125 08:10:42.753679 13955 main.cpp:88] The predict video: ./example_video_dir/example01.avi
+5 archery       score: 0.999556
+I1125 08:10:45.834288 13955 autolog.h:50] ----------------------- Config info -----------------------
+I1125 08:10:45.834458 13955 autolog.h:51] runtime_device: cpu
+I1125 08:10:45.834467 13955 autolog.h:52] ir_optim: True
+I1125 08:10:45.834475 13955 autolog.h:53] enable_memory_optim: True
+I1125 08:10:45.834483 13955 autolog.h:54] enable_tensorrt: 0
+I1125 08:10:45.834518 13955 autolog.h:55] enable_mkldnn: False
+I1125 08:10:45.834525 13955 autolog.h:56] cpu_math_library_num_threads: 10
+I1125 08:10:45.834532 13955 autolog.h:57] ----------------------- Data info -----------------------
+I1125 08:10:45.834540 13955 autolog.h:58] batch_size: 1
+I1125 08:10:45.834547 13955 autolog.h:59] input_shape: dynamic
+I1125 08:10:45.834556 13955 autolog.h:60] data_num: 1
+I1125 08:10:45.834564 13955 autolog.h:61] ----------------------- Model info -----------------------
+I1125 08:10:45.834573 13955 autolog.h:62] model_name: rec
+I1125 08:10:45.834579 13955 autolog.h:63] precision: fp32
+I1125 08:10:45.834586 13955 autolog.h:64] ----------------------- Perf info ------------------------
+I1125 08:10:45.834594 13955 autolog.h:65] Total time spent(ms): 2739
+I1125 08:10:45.834602 13955 autolog.h:67] preprocess_time(ms): 10.6524, inference_time(ms): 1269.55, postprocess_time(ms): 0.009118
+```
 
 ### 3 Attention
 
-* When using the Paddle prediction library, it is recommended to use the prediction library of version 2.0.0.
+* When using the Paddle prediction library, it is recommended to use the prediction library of version 2.1.0.
