@@ -187,6 +187,7 @@ PaddleVideo模型部署。
     LIB_DIR=your_paddle_inference_dir
     CUDA_LIB_DIR=your_cuda_lib_dir
     CUDNN_LIB_DIR=your_cudnn_lib_dir
+    TENSORRT_DIR=your_tensorRT_dir
     ```
 
     以PP-TSM为例，上述参数如下(xxx部分根据用户自己机器情况对应修改)
@@ -196,6 +197,7 @@ PaddleVideo模型部署。
     LIB_DIR=/xxx/xxx/xxx/xxx/xxx/paddle_inference
     CUDA_LIB_DIR=/xxx/xxx/cuda-xxx/lib64
     CUDNN_LIB_DIR=/xxx/xxx/cuda-xxx/lib64
+    TENSORRT_DIR=/xxx/xxx/TensorRT-7.0.0.11
     ```
 
     其中，`OPENCV_DIR`为opencv编译安装的地址；`LIB_DIR`为下载(`paddle_inference`文件夹)或者编译生成的Paddle预测库地址(`build/paddle_inference_install_dir`文件夹)；`CUDA_LIB_DIR`为cuda库文件地址，在docker中为`/usr/local/cuda/lib64`；`CUDNN_LIB_DIR`为cudnn库文件地址，在docker中为`/usr/lib/x86_64-linux-gnu/`。**注意：以上路径都写绝对路径，不要写相对路径。**
