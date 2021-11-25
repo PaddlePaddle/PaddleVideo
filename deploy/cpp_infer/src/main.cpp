@@ -27,7 +27,6 @@
 #include <fstream>
 #include <numeric>
 
-#include <glog/logging.h>
 #include <include/video_rec.h>
 #include <include/utility.h>
 #include <sys/stat.h>
