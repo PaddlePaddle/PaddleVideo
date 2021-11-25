@@ -124,7 +124,10 @@ class Base_Inference_helper():
         if not isinstance(self.input_file, list):
             self.input_file = [self.input_file, ]
         output = output[0]  # [B, num_cls]
-        N = output.shape[0]
+        N = len(self.input_file)
+        if output.shape[0] != N:
+            output = output.reshape([N] + [output.shape[0] // N] + list(output.shape[1:])) # [N, T, C]
+            output = output.mean(axis=1) # [N, C]
         output = F.softmax(paddle.to_tensor(output), axis=-1).numpy()
         for i in range(N):
             classes = np.argpartition(output[i], -self.top_k)[-self.top_k:]
@@ -135,6 +138,8 @@ class Base_Inference_helper():
                 for j in range(self.top_k):
                     print("\ttop-{0} class: {1}".format(j + 1, classes[j]))
                     print("\ttop-{0} score: {1}".format(j + 1, scores[j]))
+
+
 
 
 @INFERENCE.register()
@@ -156,7 +161,9 @@ class ppTSM_Inference_helper(Base_Inference_helper):
         input_file: str, file path
         return: list
         """
-        self.input_file = [input_file]
+        self.input_file = input_file
+        if not isinstance(self.input_file, list):
+            self.input_file = [self.input_file, ]
         assert os.path.isfile(input_file) is not None, "{0} not exists".format(
             input_file)
         results = {'filename': input_file}
@@ -196,7 +203,9 @@ class ppTSN_Inference_helper(Base_Inference_helper):
         input_file: str, file path
         return: list
         """
-        self.input_file = [input_file]
+        self.input_file = input_file
+        if not isinstance(self.input_file, list):
+            self.input_file = [self.input_file, ]
         assert os.path.isfile(input_file) is not None, "{0} not exists".format(
             input_file)
         results = {'filename': input_file}
@@ -298,7 +307,7 @@ class BMN_Inference_helper(Base_Inference_helper):
 
         # print top-5 predictions
         if print_output:
-            print("BMN Inference results of {0} :".format(self.feat_path))
+            print("Current video file: {0} :".format(self.feat_path))
             for pred in proposal_list[:5]:
                 print(pred)
 
@@ -328,7 +337,9 @@ class TimeSformer_Inference_helper(Base_Inference_helper):
         input_file: str, file path
         return: list
         """
-        self.input_file = [input_file]
+        self.input_file = input_file
+        if not isinstance(self.input_file, list):
+            self.input_file = [self.input_file, ]
         assert os.path.isfile(input_file) is not None, "{0} not exists".format(
             input_file)
         results = {'filename': input_file}
@@ -372,7 +383,9 @@ class SlowFast_Inference_helper(Base_Inference_helper):
         input_file: str, file path
         return: list
         """
-        self.input_file = [input_file]
+        self.input_file = input_file
+        if not isinstance(self.input_file, list):
+            self.input_file = [self.input_file, ]
         assert os.path.isfile(input_file) is not None, "{0} not exists".format(
             input_file)
         results = {
@@ -400,6 +413,31 @@ class SlowFast_Inference_helper(Base_Inference_helper):
             res.append(np.expand_dims(item, axis=0).copy())
         return res
 
+    def postprocess(self, output, print_output=True):
+        """
+        output: list
+        """
+        if not isinstance(self.input_file, list):
+            self.input_file = [
+                self.input_file,
+            ]
+        output = output[0]  # [B, num_cls]
+
+        N = len(self.input_file)
+        if output.shape[0] != N:
+            output = output.reshape([N] + [output.shape[0] // N] + list(output.shape[1:])) # [N, T, C]
+            output = output.mean(axis=1) # [N, C]
+        # output = F.softmax(paddle.to_tensor(output), axis=-1).numpy() # done in it's head
+        for i in range(N):
+            classes = np.argpartition(output[i], -self.top_k)[-self.top_k:]
+            classes = classes[np.argsort(-output[i, classes])]
+            scores = output[i, classes]
+            if print_output:
+                print("Current video file: {0}".format(self.input_file[i]))
+                for j in range(self.top_k):
+                    print("\ttop-{0} class: {1}".format(j + 1, classes[j]))
+                    print("\ttop-{0} score: {1}".format(j + 1, scores[j]))
+
 
 @INFERENCE.register()
 class STGCN_Inference_helper(Base_Inference_helper):
@@ -420,10 +458,12 @@ class STGCN_Inference_helper(Base_Inference_helper):
         input_file: str, file path
         return: list
         """
-        self.input_file = [input_file]
+        self.input_file = input_file
+        if not isinstance(self.input_file, list):
+            self.input_file = [self.input_file, ]
         assert os.path.isfile(input_file) is not None, "{0} not exists".format(
             input_file)
-        data = np.load(self.input_file)
+        data = np.load(input_file)
         results = {'data': data}
         ops = [AutoPadding(window_size=self.window_size), SkeletonNorm()]
         for op in ops:
@@ -455,7 +495,9 @@ class AttentionLSTM_Inference_helper(Base_Inference_helper):
         input_file: str, file path
         return: list
         """
-        self.input_file = [input_file]
+        self.input_file = input_file
+        if not isinstance(self.input_file, list):
+            self.input_file = [self.input_file, ]
         assert os.path.isfile(input_file) is not None, "{0} not exists".format(
             input_file)
         results = {'filename': input_file}
