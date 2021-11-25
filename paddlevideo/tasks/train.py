@@ -12,21 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import time
 import os.path as osp
-import sys
-from pathlib import Path
-import numpy as np
+import time
+
 import paddle
 import paddle.distributed as dist
 import paddle.distributed.fleet as fleet
+from paddlevideo.utils import (add_profiler_step, build_record, get_logger,
+                               load, log_batch, log_epoch, mkdir, save)
+
 from ..loader.builder import build_dataloader, build_dataset
 from ..modeling.builder import build_model
 from ..solver import build_lr, build_optimizer
 from ..utils import do_preciseBN
-from paddlevideo.utils import get_logger
-from paddlevideo.utils import (build_record, log_batch, log_epoch, save, load,
-                               mkdir, add_profiler_step)
 
 
 def train_model(cfg,
@@ -34,6 +32,7 @@ def train_model(cfg,
                 parallel=True,
                 validate=True,
                 amp=False,
+                max_iters=None,
                 use_fleet=False,
                 profiler_options=None):
     """Train model entry
@@ -160,14 +159,18 @@ def train_model(cfg,
         record_list = build_record(cfg.MODEL)
         tic = time.time()
         for i, data in enumerate(train_loader):
+            """Next two line of code only used in test_tipc,
+            ignore it most of the time"""
+            if max_iters is not None and i >= max_iters:
+                break
+
             record_list['reader_time'].update(time.time() - tic)
 
             # Collect performance information when profiler_options is activate
             add_profiler_step(profiler_options)
 
             # 4.1 forward
-
-            ###AMP###
+            # AMP #
             if amp:
                 with paddle.amp.auto_cast(custom_black_list={"reduce_mean"}):
                     outputs = model(data, mode='train')

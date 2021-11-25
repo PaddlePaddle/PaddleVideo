@@ -105,6 +105,39 @@ if [ ${MODE} = "lite_train_lite_infer" ];then
         ls pkl_frame/train*_split*.pkl > train.list # 将train*_split*.pkl的路径重新写入train.list
         ls pkl_frame/validate*_split*.pkl > val.list # 将validate*_split*.pkl的路径重新写入val.list
         popd
+    # elif [ ${model_name} == "AGCN" ]; then
+    #     # pretrain lite train data
+    #     pushd data
+    #     ## download & decompression training data
+    #     wget -nc https://videotag.bj.bcebos.com/Data/NTU-RGB-D.tar
+    #     tar -zxvf NTU-RGB-D.tar
+    #     popd
+    # elif [ ${model_name} == "ST-GCN" ]; then
+    #     # pretrain lite train data
+    #     pushd data
+    #     ## download & decompression training data
+    #     wget -nc https://videotag.bj.bcebos.com/Data/NTU-RGB-D.tar
+    #     tar -zxvf NTU-RGB-D.tar
+    #     popd
+    elif [ ${model_name} == "SlowFast" ]; then
+        # pretrain lite train data
+        pushd ./data/k400
+        wget -nc https://ai-rank.bj.bcebos.com/Kinetics400/train_link.list
+        wget -nc https://ai-rank.bj.bcebos.com/Kinetics400/val_link.list
+        bash download_k400_train.sh
+        bash download_k400_val.sh
+        popd
+    elif [ ${model_name} == "BMN" ]; then
+        # pretrain lite train data
+        pushd ./data
+        mkdir bmn_data
+        cd bmn_data
+        wget -nc https://paddlemodels.bj.bcebos.com/video_detection/bmn_feat.tar.gz
+        tar -zcvf bmn_feat.tar.gz
+        wget -nc https://paddlemodels.bj.bcebos.com/video_detection/activitynet_1.3_annotations.json
+        wget -nc https://paddlemodels.bj.bcebos.com/video_detection/activity_net_1_3_new.json
+        popd
+
     else
         echo "Not added into TIPC yet."
     fi
@@ -184,6 +217,38 @@ elif [ ${MODE} = "whole_train_whole_infer" ];then
 
         ls pkl_frame/train*_split*.pkl > train.list # 将train*_split*.pkl的路径重新写入train.list
         ls pkl_frame/validate*_split*.pkl > val.list # 将validate*_split*.pkl的路径重新写入val.list
+        popd
+    # elif [ ${model_name} == "AGCN" ]; then
+    #     # pretrain lite train data
+    #     pushd data
+    #     ## download & decompression training data
+    #     wget -nc https://videotag.bj.bcebos.com/Data/NTU-RGB-D.tar
+    #     tar -zxvf NTU-RGB-D.tar
+    #     popd
+    # elif [ ${model_name} == "ST-GCN" ]; then
+    #     # pretrain lite train data
+    #     pushd data
+    #     ## download & decompression training data
+    #     wget -nc https://videotag.bj.bcebos.com/Data/NTU-RGB-D.tar
+    #     tar -zxvf NTU-RGB-D.tar
+    #     popd
+    elif [ ${model_name} == "SlowFast" ]; then
+        # pretrain lite train data
+        pushd ./data/k400
+        wget -nc https://ai-rank.bj.bcebos.com/Kinetics400/train_link.list
+        wget -nc https://ai-rank.bj.bcebos.com/Kinetics400/val_link.list
+        bash download_k400_train.sh
+        bash download_k400_val.sh
+        popd
+    elif [ ${model_name} == "BMN" ]; then
+        # pretrain lite train data
+        pushd ./data
+        mkdir bmn_data
+        cd bmn_data
+        wget -nc https://paddlemodels.bj.bcebos.com/video_detection/bmn_feat.tar.gz
+        tar -zcvf bmn_feat.tar.gz
+        wget -nc https://paddlemodels.bj.bcebos.com/video_detection/activitynet_1.3_annotations.json
+        wget -nc https://paddlemodels.bj.bcebos.com/video_detection/activity_net_1_3_new.json
         popd
     else
         echo "Not added into TIPC yet."
@@ -265,6 +330,38 @@ elif [ ${MODE} = "lite_train_whole_infer" ];then
         ls pkl_frame/train*_split*.pkl > train.list # 将train*_split*.pkl的路径重新写入train.list
         ls pkl_frame/validate*_split*.pkl > val.list # 将validate*_split*.pkl的路径重新写入val.list
         popd
+    # elif [ ${model_name} == "AGCN" ]; then
+    #     # pretrain lite train data
+    #     pushd data
+    #     ## download & decompression training data
+    #     wget -nc https://videotag.bj.bcebos.com/Data/NTU-RGB-D.tar
+    #     tar -zxvf NTU-RGB-D.tar
+    #     popd
+    # elif [ ${model_name} == "ST-GCN" ]; then
+    #     # pretrain lite train data
+    #     pushd data
+    #     ## download & decompression training data
+    #     wget -nc https://videotag.bj.bcebos.com/Data/NTU-RGB-D.tar
+    #     tar -zxvf NTU-RGB-D.tar
+    #     popd
+    elif [ ${model_name} == "SlowFast" ]; then
+        # pretrain lite train data
+        pushd ./data/k400
+        wget -nc https://ai-rank.bj.bcebos.com/Kinetics400/train_link.list
+        wget -nc https://ai-rank.bj.bcebos.com/Kinetics400/val_link.list
+        bash download_k400_train.sh
+        bash download_k400_val.sh
+        popd
+    elif [ ${model_name} == "BMN" ]; then
+        # pretrain lite train data
+        pushd ./data
+        mkdir bmn_data
+        cd bmn_data
+        wget -nc https://paddlemodels.bj.bcebos.com/video_detection/bmn_feat.tar.gz
+        tar -zcvf bmn_feat.tar.gz
+        wget -nc https://paddlemodels.bj.bcebos.com/video_detection/activitynet_1.3_annotations.json
+        wget -nc https://paddlemodels.bj.bcebos.com/video_detection/activity_net_1_3_new.json
+        popd
     else
         echo "Not added into TIPC yet."
     fi
@@ -337,6 +434,38 @@ elif [ ${MODE} = "whole_infer" ];then
 
         ls pkl_frame/train*_split*.pkl > train.list # 将train*_split*.pkl的路径重新写入train.list
         ls pkl_frame/validate*_split*.pkl > val.list # 将validate*_split*.pkl的路径重新写入val.list
+        popd
+    # elif [ ${model_name} == "AGCN" ]; then
+    #     # pretrain lite train data
+    #     pushd data
+    #     ## download & decompression training data
+    #     wget -nc https://videotag.bj.bcebos.com/Data/NTU-RGB-D.tar
+    #     tar -zxvf NTU-RGB-D.tar
+    #     popd
+    # elif [ ${model_name} == "ST-GCN" ]; then
+    #     # pretrain lite train data
+    #     pushd data
+    #     ## download & decompression training data
+    #     wget -nc https://videotag.bj.bcebos.com/Data/NTU-RGB-D.tar
+    #     tar -zxvf NTU-RGB-D.tar
+    #     popd
+    elif [ ${model_name} == "SlowFast" ]; then
+        # pretrain lite train data
+        pushd ./data/k400
+        wget -nc https://ai-rank.bj.bcebos.com/Kinetics400/train_link.list
+        wget -nc https://ai-rank.bj.bcebos.com/Kinetics400/val_link.list
+        bash download_k400_train.sh
+        bash download_k400_val.sh
+        popd
+    elif [ ${model_name} == "BMN" ]; then
+        # pretrain lite train data
+        pushd ./data
+        mkdir bmn_data
+        cd bmn_data
+        wget -nc https://paddlemodels.bj.bcebos.com/video_detection/bmn_feat.tar.gz
+        tar -zcvf bmn_feat.tar.gz
+        wget -nc https://paddlemodels.bj.bcebos.com/video_detection/activitynet_1.3_annotations.json
+        wget -nc https://paddlemodels.bj.bcebos.com/video_detection/activity_net_1_3_new.json
         popd
     else
         echo "Not added into TIPC yet."

@@ -73,6 +73,10 @@ def load_gt_from_file(gt_file):
             split_items = line.split(' ')
             split_items = [item for item in split_items if len(item) > 0]
             parser_gt['top-1 score'] = float(split_items[-1])
+        elif "score" in line and 'segment' in line:
+            location_dict = eval(line)
+            parser_gt[f"score_{len(parser_gt)}"] = location_dict['score']
+            parser_gt[f"segment_{len(parser_gt)}"] = location_dict['segment']
     return parser_gt
 
 
