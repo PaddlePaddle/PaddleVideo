@@ -45,7 +45,6 @@ def parser_results_from_log_by_name(log_path, names_list):
     parser_results = {}
     lines = open(log_path, 'r').read().splitlines()
     for line in lines:
-        # if any([(name in line) for name in names_list]):
         split_items = line.split(' ')
         for name in names_list:
             if name in line:
