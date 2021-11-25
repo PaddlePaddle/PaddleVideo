@@ -122,7 +122,9 @@ class Base_Inference_helper():
         output: list
         """
         if not isinstance(self.input_file, list):
-            self.input_file = [self.input_file, ]
+            self.input_file = [
+                self.input_file,
+            ]
         output = output[0]  # [B, num_cls]
         N = output.shape[0]
         output = F.softmax(paddle.to_tensor(output), axis=-1).numpy()
@@ -298,7 +300,7 @@ class BMN_Inference_helper(Base_Inference_helper):
 
         # print top-5 predictions
         if print_output:
-            print("BMN Inference results of {0} :".format(self.feat_path))
+            print("Current video file: {0} :".format(self.feat_path))
             for pred in proposal_list[:5]:
                 print(pred)
 
@@ -399,6 +401,27 @@ class SlowFast_Inference_helper(Base_Inference_helper):
         for item in results['imgs']:
             res.append(np.expand_dims(item, axis=0).copy())
         return res
+
+    def postprocess(self, output, print_output=True):
+        """
+        output: list
+        """
+        if not isinstance(self.input_file, list):
+            self.input_file = [
+                self.input_file,
+            ]
+        output = output[0]  # [B, num_cls]
+        # output = F.softmax(paddle.to_tensor(output), axis=-1).numpy() # done in it's head
+        N = output.shape[0]
+        for i in range(N):
+            classes = np.argpartition(output[i], -self.top_k)[-self.top_k:]
+            classes = classes[np.argsort(-output[i, classes])]
+            scores = output[i, classes]
+            if print_output:
+                print("Current video file: {0}".format(self.input_file[i]))
+                for j in range(self.top_k):
+                    print("\ttop-{0} class: {1}".format(j + 1, classes[j]))
+                    print("\ttop-{0} score: {1}".format(j + 1, scores[j]))
 
 
 @INFERENCE.register()
