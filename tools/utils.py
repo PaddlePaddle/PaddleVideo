@@ -158,7 +158,9 @@ class ppTSM_Inference_helper(Base_Inference_helper):
         input_file: str, file path
         return: list
         """
-        self.input_file = [input_file]
+        self.input_file = input_file
+        if not isinstance(self.input_file, list):
+            self.input_file = [self.input_file, ]
         assert os.path.isfile(input_file) is not None, "{0} not exists".format(
             input_file)
         results = {'filename': input_file}
@@ -198,7 +200,9 @@ class ppTSN_Inference_helper(Base_Inference_helper):
         input_file: str, file path
         return: list
         """
-        self.input_file = [input_file]
+        self.input_file = input_file
+        if not isinstance(self.input_file, list):
+            self.input_file = [self.input_file, ]
         assert os.path.isfile(input_file) is not None, "{0} not exists".format(
             input_file)
         results = {'filename': input_file}
@@ -330,7 +334,9 @@ class TimeSformer_Inference_helper(Base_Inference_helper):
         input_file: str, file path
         return: list
         """
-        self.input_file = [input_file]
+        self.input_file = input_file
+        if not isinstance(self.input_file, list):
+            self.input_file = [self.input_file, ]
         assert os.path.isfile(input_file) is not None, "{0} not exists".format(
             input_file)
         results = {'filename': input_file}
@@ -374,7 +380,9 @@ class SlowFast_Inference_helper(Base_Inference_helper):
         input_file: str, file path
         return: list
         """
-        self.input_file = [input_file]
+        self.input_file = input_file
+        if not isinstance(self.input_file, list):
+            self.input_file = [self.input_file, ]
         assert os.path.isfile(input_file) is not None, "{0} not exists".format(
             input_file)
         results = {
@@ -443,10 +451,12 @@ class STGCN_Inference_helper(Base_Inference_helper):
         input_file: str, file path
         return: list
         """
-        self.input_file = [input_file]
+        self.input_file = input_file
+        if not isinstance(self.input_file, list):
+            self.input_file = [self.input_file, ]
         assert os.path.isfile(input_file) is not None, "{0} not exists".format(
             input_file)
-        data = np.load(self.input_file)
+        data = np.load(input_file)
         results = {'data': data}
         ops = [AutoPadding(window_size=self.window_size), SkeletonNorm()]
         for op in ops:
@@ -478,7 +488,9 @@ class AttentionLSTM_Inference_helper(Base_Inference_helper):
         input_file: str, file path
         return: list
         """
-        self.input_file = [input_file]
+        self.input_file = input_file
+        if not isinstance(self.input_file, list):
+            self.input_file = [self.input_file, ]
         assert os.path.isfile(input_file) is not None, "{0} not exists".format(
             input_file)
         results = {'filename': input_file}
