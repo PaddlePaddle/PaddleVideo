@@ -100,7 +100,15 @@ for epoch in range(epochs):
         optim.step()
         optim.clear_grad()
 ```
-
+上述代码的运行输出日志如下：
+```txt
+epoch: 0, batch_id: 0, loss is: [2.5613842], acc is: [0.]
+epoch: 0, batch_id: 1, loss is: [2.5776138], acc is: [0.1]
+epoch: 0, batch_id: 2, loss is: [2.551022], acc is: [0.1]
+epoch: 0, batch_id: 3, loss is: [2.782001], acc is: [0.]
+epoch: 0, batch_id: 4, loss is: [2.787499], acc is: [0.1]
+```
+将以上代码集成进PaddleVideo的示例pr参考 [#257](https://github.com/PaddlePaddle/PaddleVideo/pull/257)
 
 下面将分别对每个部分进行介绍，并介绍如何在该部分里添加新算法所需模块。
 
