@@ -184,7 +184,7 @@ git push origin new_branch
 点击 new pull request，选择本地分支和目标分支，如下图所示。在 PR 的描述说明中，填写该 PR 所完成的功能。接下来等待 review ，如果有需要修改的地方，参照上述步骤更新 origin 中的对应分支即可。
 
 <div align="center">
-<img src="../../images/contribute/004_create_pr.png"  width = "600" />
+<img src="../../images/contribute/004_pr.png"  width = "600" />
 </div>
 
 <a name="1.2.9"></a>
