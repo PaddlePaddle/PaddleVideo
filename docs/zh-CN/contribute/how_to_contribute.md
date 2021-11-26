@@ -48,7 +48,7 @@ PaddleVideo 欢迎大家向 repo 中积极贡献代码，下面给出一些贡�
 
 
 <div align="center">
-<img src="../../images/quick_start/community/001_fork.png"  width = "600" />
+<img src="../../images/contribute/001_fork.png"  width = "600" />
 </div>
 
 
@@ -63,7 +63,7 @@ cd PaddleVideo
 clone 的地址可以从下面获取
 
 <div align="center">
-<img src="../../images/quick_start/community/002_clone.png"  width = "600" />
+<img src="../../images/contribute/002_clone.png"  width = "600" />
 </div>
 
 <a name="1.2.2"></a>
@@ -150,7 +150,7 @@ pre-commit
 重复上述步骤，直到 pre-comit 格式检查不报错。如下所示。
 
 <div align="center">
-<img src="../../images/quick_start/community/003_precommit_pass.png"  width = "600" />
+<img src="../../images/contribute/003_precommit.png"  width = "600" />
 </div>
 
 
@@ -184,7 +184,7 @@ git push origin new_branch
 点击 new pull request，选择本地分支和目标分支，如下图所示。在 PR 的描述说明中，填写该 PR 所完成的功能。接下来等待 review ，如果有需要修改的地方，参照上述步骤更新 origin 中的对应分支即可。
 
 <div align="center">
-<img src="../../images/quick_start/community/004_create_pr.png"  width = "600" />
+<img src="../../images/contribute/004_create_pr.png"  width = "600" />
 </div>
 
 <a name="1.2.9"></a>
