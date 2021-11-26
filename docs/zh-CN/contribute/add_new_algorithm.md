@@ -7,7 +7,6 @@ PaddleVideo将一个算法分解为以下几个部分，并对各部分进行模
 * [3. 优化器](#3)
 * [4. 训练策略](#4)
 * [5. 指标评估](#5)
-* [6. 参考文献](#6)
 
 示例代码如下：
 ```python
@@ -405,7 +404,3 @@ python3.7 main.py --test -c config_path/your_config.yaml -w weight_path/your_wei
 - `-c`参数指定配置文件
 - `-w`参数指定训练好的权重保存路径
 
-<a name="6"></a>
-
-## 6. 参考文献
-1. [添加新算法](https://github.com/PaddlePaddle/PaddleOCR/blob/dygraph/doc/doc_ch/add_new_algorithm.md)
