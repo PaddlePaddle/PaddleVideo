@@ -152,7 +152,7 @@ class MyDataset:
         return results['image'], results['labels'] #return your data item
 ```
 
-3. 在 [paddlevideo/loader/dataset\__init\__.py](../../../paddlevideo/loader/dataset/__init__.py) 文件内导入添加的模块。
+3. 在 [paddlevideo/loader/dataset/\_\_init\_\_.py](../../../paddlevideo/loader/dataset/__init__.py) 文件内导入添加的模块。
 
 最后在config文件中指定Dataset类名即可使用。如:
 
@@ -202,7 +202,7 @@ class MyPipeline:
         return results
 ```
 
-3. 在 [paddlevideo/loader/pipelines\__init\__.py](../../../paddlevideo/loader/pipelines/__init__.py) 文件内导入添加的模块。
+3. 在 [paddlevideo/loader/pipelines/\_\_init\_\_.py](../../../paddlevideo/loader/pipelines/__init__.py) 文件内导入添加的模块。
 
 数据处理的所有处理步骤由不同的模块顺序执行而成，在config文件中按照列表的形式组合并执行。如:
 
@@ -254,7 +254,7 @@ class MyBackbone(nn.Layer):
         return y
 ```
 
-3. 在 [paddlevideo/modeling/backbones/\__init\__.py](../../../paddlevideo/modeling/backbones/__init__.py)文件内导入添加的模块。
+3. 在 [paddlevideo/modeling/backbones/\_\_init\_\_.py](../../../paddlevideo/modeling/backbones/__init__.py)文件内导入添加的模块。
 
 在完成网络的四部分模块添加之后，只需要配置文件中进行配置即可使用，如:
 
@@ -388,7 +388,7 @@ class MyMetric(BaseMetric):
 
 ```
 
-3. 在 [paddlevideo/metrics/\__init\__.py](../../../paddlevideo/metrics/__init__.py)文件内导入添加的模块。
+3. 在 [paddlevideo/metrics/\_\_init\_\_.py](../../../paddlevideo/metrics/__init__.py)文件内导入添加的模块。
 
 在指标评估模块添加之后，只需要配置文件中进行配置即可使用，如:
 
