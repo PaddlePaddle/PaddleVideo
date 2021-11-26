@@ -153,21 +153,21 @@ namespace PaddleVideo
                     1 << 20, 10, 3,
                     precision,
                     false, false);
-                std::map<std::string, std::vector<int>> min_input_shape =
-                {
-                    {"x", {1, 1, 3, 224, 224}}
-                };
-                std::map<std::string, std::vector<int>> max_input_shape =
-                {
-                    {"x", {4, 1 * this->num_seg, 3, 224, 224}}
-                };
-                std::map<std::string, std::vector<int>> opt_input_shape =
-                {
-                    {"x", {1, 1 * this->num_seg, 3, 224, 224}}
-                };
+//                 std::map<std::string, std::vector<int>> min_input_shape =
+//                 {
+//                     {"x", {1, 1, 3, 224, 224}}
+//                 };
+//                 std::map<std::string, std::vector<int>> max_input_shape =
+//                 {
+//                     {"x", {4, 1 * this->num_seg, 3, 224, 224}}
+//                 };
+//                 std::map<std::string, std::vector<int>> opt_input_shape =
+//                 {
+//                     {"x", {1, 1 * this->num_seg, 3, 224, 224}}
+//                 };
 
-                config.SetTRTDynamicShapeInfo(min_input_shape, max_input_shape,
-                                              opt_input_shape);
+//                 config.SetTRTDynamicShapeInfo(min_input_shape, max_input_shape,
+//                                               opt_input_shape);
             }
         }
         else
