@@ -109,7 +109,7 @@ for epoch in range(epochs):
 
 ## 1. 数据加载和处理
 
-数据加载和处理部分由`Dataset类`、`预处理Pipeline`和`Dataloader对象`组成。`Dataset类`是数据集类，其中的`__getitem__`方法定义了每一个视频样本数据的处理方式。`预处理Pipeline`定义了数据预处理步骤，包括视频的读取，解码以及数据增强等操作。`预处理定义的Pipeline`通常在`Dataset类`的`__getitem__`方法中被调用，以完成对视频预处理操作。这一部分在[paddlevideo/loader](../../..paddlevideo/loader)下。 各个文件及文件夹作用说明如下:
+数据加载和处理部分由`Dataset类`、`预处理Pipeline`和`Dataloader对象`组成。`Dataset类`是数据集类，其中的`__getitem__`方法定义了每一个视频样本数据的处理方式。`预处理Pipeline`定义了数据预处理步骤，包括视频的读取，解码以及数据增强等操作。`预处理定义的Pipeline`通常在`Dataset类`的`__getitem__`方法中被调用，以完成对视频预处理操作。这一部分在[paddlevideo/loader](../../../paddlevideo/loader)下。 各个文件及文件夹作用说明如下:
 
 ```txt
 paddlevideo/loader/
