@@ -27,7 +27,6 @@
 #include <fstream>
 #include <numeric>
 
-#include <glog/logging.h>
 #include <include/video_rec.h>
 #include <include/utility.h>
 #include <sys/stat.h>
@@ -42,7 +41,7 @@ DEFINE_int32(gpu_mem, 4000, "GPU id when infering with GPU.");
 DEFINE_int32(cpu_threads, 10, "Num of threads with CPU.");
 DEFINE_bool(enable_mkldnn, false, "Whether use mkldnn with CPU.");
 DEFINE_bool(use_tensorrt, false, "Whether use tensorrt.");
-DEFINE_string(precision, "fp32", "Precision be one of fp32/fp16/int8");
+DEFINE_string(precision, "fp32", "Precision be one of fp32/fp16/int8.");
 DEFINE_bool(benchmark, true, "Whether use benchmark.");
 DEFINE_string(save_log_path, "./log_output/", "Save benchmark log path.");
 
@@ -78,33 +77,39 @@ int main_rec(std::vector<cv::String> &cv_all_video_names)
 {
     std::vector<double> time_info = {0, 0, 0}; // Statement time statistics vector
     VideoRecognizer rec(FLAGS_rec_model_dir, FLAGS_inference_model_name, FLAGS_use_gpu, FLAGS_num_seg,
-                       FLAGS_gpu_id, FLAGS_gpu_mem,
-                       FLAGS_cpu_threads,
-                       FLAGS_enable_mkldnn, FLAGS_char_list_file,
-                       FLAGS_use_tensorrt, FLAGS_precision); // Instantiate a video recognition object
+                        FLAGS_rec_batch_num, FLAGS_gpu_id,
+                        FLAGS_gpu_mem, FLAGS_cpu_threads,
+                        FLAGS_enable_mkldnn, FLAGS_char_list_file,
+                        FLAGS_use_tensorrt, FLAGS_precision); // Instantiate a video recognition object
 
-    for (int i = 0; i < cv_all_video_names.size(); ++i) // Process each video
+    int batch_num = FLAGS_rec_batch_num;
+    for (int i = 0, n = cv_all_video_names.size(); i < n; i += batch_num) // Process each video
     {
-        LOG(INFO) << "The predict video: " << cv_all_video_names[i]; // Print information before processing
-
-        std::vector<cv::Mat> frames = Utility::SampleFramesFromVideo(cv_all_video_names[i], FLAGS_num_seg, FLAGS_seg_len);
-
+        int start_idx = i;
+        int end_idx = min(i + batch_num, n);
+        std::vector<std::vector<cv::Mat> > frames_batch;
+        for (int j = start_idx; j < end_idx; ++j)
+        {
+            std::vector<cv::Mat> frames = Utility::SampleFramesFromVideo(cv_all_video_names[i], FLAGS_num_seg, FLAGS_seg_len);
+            frames_batch.emplace_back(frames);
+        }
         std::vector<double> rec_times; // Initialization time consumption statistics
 
         // Take the read several video frames and send them to the run method of the recognition class to predict
-        rec.Run(frames, &rec_times);
+        rec.Run(std::vector<string>(cv_all_video_names.begin() + start_idx, cv_all_video_names.begin() + end_idx), frames_batch, &rec_times);
 
         time_info[0] += rec_times[0];
         time_info[1] += rec_times[1];
         time_info[2] += rec_times[2];
     }
-    if (FLAGS_benchmark) {
+    if (FLAGS_benchmark)
+    {
         AutoLogger autolog("rec",
                            FLAGS_use_gpu,
                            FLAGS_use_tensorrt,
                            FLAGS_enable_mkldnn,
                            FLAGS_cpu_threads,
-                           1,
+                           FLAGS_rec_batch_num,
                            "dynamic",
                            FLAGS_precision,
                            time_info,

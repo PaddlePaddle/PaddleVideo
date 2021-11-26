@@ -29,16 +29,14 @@
 
 #include "include/utility.h"
 
-// using namespace std;
-
 namespace PaddleVideo
 {
 
     class Softmax
     {
     public:
-        virtual void Inplace_Run(std::vector<float> &arr);
-        virtual std::vector<float> Run(const std::vector<float> &arr);
+        virtual void Inplace_Run(const std::vector<float>::iterator &_begin, const std::vector<float>::iterator &_end);
+        virtual std::vector<float> Run(const std::vector<float>::iterator &_begin, const std::vector<float>::iterator &_end);
     };
 
 } // namespace PaddleVideo

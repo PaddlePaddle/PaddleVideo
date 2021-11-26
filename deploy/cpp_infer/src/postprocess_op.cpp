@@ -16,33 +16,33 @@
 
 namespace PaddleVideo
 {
-    void Softmax::Inplace_Run(std::vector<float> &arr)
+    void Softmax::Inplace_Run(const std::vector<float>::iterator &_begin, const std::vector<float>::iterator &_end)
     {
-        const float max_value = *std::max_element(arr.begin(), arr.end());
+        const float max_value = *std::max_element(_begin, _end);
         float denominator = 0.0f;
-        for (size_t i = 0, sz = arr.size(); i < sz; ++i)
+        for (auto it = _begin; it != _end; ++it)
         {
-            arr[i] = std::exp(arr[i] - max_value);
-            denominator += arr[i];
+            *it = std::exp((*it) - max_value);
+            denominator += (*it);
         }
-        for (size_t i = 0, sz = arr.size(); i < sz; ++i)
+        for (auto it = _begin; it != _end; ++it)
         {
-            arr[i] /= denominator;
+            *it /= denominator;
         }
     }
-    std::vector<float> Softmax::Run(const std::vector<float> &arr)
+    std::vector<float> Softmax::Run(const std::vector<float>::iterator &_begin, const std::vector<float>::iterator &_end)
     {
-        std::vector<float> prob(arr.begin(), arr.end());
-        const float max_value = *std::max_element(arr.begin(), arr.end());
+        std::vector<float> prob(_begin, _end);
+        const float max_value = *std::max_element(prob.begin(), prob.end());
         float denominator = 0.0f;
-        for (size_t i = 0, sz = arr.size(); i < sz; ++i)
+        for (auto it = _begin, it_p = prob.begin(); it != _end; ++it, ++it_p)
         {
-            prob[i] = std::exp(arr[i] - max_value);
-            denominator += prob[i];
+            (*it_p) = std::exp((*it) - max_value);
+            denominator += (*it_p);
         }
-        for (size_t i = 0, sz = arr.size(); i < sz; ++i)
+        for (auto it = prob.begin(); it != prob.end(); ++it)
         {
-            prob[i] /= denominator;
+            (*it) /= denominator;
         }
         return prob;
     }

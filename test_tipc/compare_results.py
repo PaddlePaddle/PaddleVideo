@@ -44,15 +44,21 @@ def parser_results_from_log_by_name(log_path, names_list):
 
     parser_results = {}
     lines = open(log_path, 'r').read().splitlines()
-    for line in lines:
-        split_items = line.split(' ')
-        for name in names_list:
-            if name in line:
-                if '.' in split_items[-1]:
-                    parser_results[name] = float(split_items[-1])
-                else:
-                    parser_results[name] = int(split_items[-1])
-
+    if 'python' in log_path:  # parse python inference
+        for line in lines:
+            split_items = line.split(' ')
+            for name in names_list:
+                if name in line:
+                    if '.' in split_items[-1]:
+                        parser_results[name] = float(split_items[-1])
+                    else:
+                        parser_results[name] = int(split_items[-1])
+    else:  # parse cpp inference
+        for line in lines:
+            split_items = line.split(' ')
+            if all([name in split_items for name in names_list]):
+                parser_results['class'] = split_items[2]
+                parser_results['score'] = float(split_items[-1])
     return parser_results
 
 
@@ -76,6 +82,9 @@ def load_gt_from_file(gt_file):
             location_dict = eval(line)
             parser_gt[f"score_{len(parser_gt)}"] = location_dict['score']
             parser_gt[f"segment_{len(parser_gt)}"] = location_dict['segment']
+        elif "class:" in line and "score:" in line:
+            parser_gt['class'] = line.split(' ')[2]
+            parser_gt['score'] = float(line.split(' ')[-1])
     return parser_gt
 
 
