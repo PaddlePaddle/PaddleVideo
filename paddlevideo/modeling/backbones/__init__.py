@@ -21,8 +21,9 @@ from .bmn import BMN
 from .vit import VisionTransformer
 from .stgcn import STGCN
 from .agcn import AGCN
+from .example_backbone import ExampleBackbone
 
 __all__ = [
     'ResNet', 'ResNetTSM', 'ResNetTweaksTSM', 'ResNetSlowFast', 'BMN',
-    'ResNetTweaksTSN', 'VisionTransformer', 'STGCN', 'AGCN'
+    'ResNetTweaksTSN', 'VisionTransformer', 'STGCN', 'AGCN', 'ExampleBackbone'
 ]

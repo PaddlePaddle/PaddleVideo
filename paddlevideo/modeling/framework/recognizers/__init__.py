@@ -16,8 +16,9 @@ from .recognizer2d import Recognizer2D
 from .recognizer3d import Recognizer3D
 from .recognizer_transformer import RecognizerTransformer
 from .recognizer_gcn import RecognizerGCN
+from .example_recognizer import ExampleRecognizer
 
 __all__ = [
     'BaseRecognizer', 'Recognizer1D', 'Recognizer2D', 'Recognizer3D',
-    'RecognizerTransformer', 'RecognizerGCN'
+    'RecognizerTransformer', 'RecognizerGCN', 'ExampleRecognizer'
 ]

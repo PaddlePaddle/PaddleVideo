@@ -1,4 +1,4 @@
-# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.
+# Copyright (c) 2021  PaddlePaddle Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"
 # you may not use this file except in compliance with the License.
@@ -12,15 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .video import VideoDataset
-from .frame import FrameDataset
-from .slowfast_video import SFVideoDataset
-from .bmn_dataset import BMNDataset
-from .feature import FeatureDataset
-from .skeleton import SkeletonDataset
-from .example_dataset import ExampleDataset
+import paddle
+import paddle.nn as nn
+from ..registry import HEADS
+from .base import BaseHead
 
-__all__ = [
-    'VideoDataset', 'FrameDataset', 'SFVideoDataset', 'BMNDataset',
-    'FeatureDataset', 'SkeletonDataset', 'ExampleDataset'
-]
+
+@HEADS.register()
+class ExampleHead(BaseHead):
+    """ Example Head """
+    def __init__(self, num_classes=10, in_channels=512):
+        super().__init__(num_classes, in_channels)
+        self.head = paddle.nn.Linear(in_channels, num_classes)
+
+    def forward(self, x):
+        """model forward """
+        y = self.head(x)
+        return y
