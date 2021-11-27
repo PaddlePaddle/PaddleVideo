@@ -1,6 +1,6 @@
-[简体中文](../zh-CN/start.md) | English
+[简体中文](../zh-CN/usage.md) | English
 
-# Start
+# Usage
 ---
 
 Please refer to [installation documents](./install.md) to prepare the enviroment, and follow the steps mentioned in the [data preparation documents](./dataset/) to construct dataset, we will take you through the basic functions supported by PaddleVideo, all of it takes the ucf101 dataset with frame format as example.
