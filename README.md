@@ -83,15 +83,9 @@ release/2.1 was released in 20/05/2021. Please refer to [release notes](https://
 
 ## Tutorials and Docs
 
-- Tutorials and Slides
-  - [2021.01](https://aistudio.baidu.com/aistudio/course/introduce/6742)
-  - [Summarize of video understanding](docs/en/tutorials/summarize.md)
 - Quick Start
   - [Install](docs/en/install.md)
-  - [Start](docs/en/start.md)
-- Project design
-  - [Modular design](docs/en/tutorials/modular_design.md)
-  - [Configuration design](docs/en/tutorials/config.md)
+  - [Usage](docs/en/usage.md)
 - Model zoo
   - [recognition](docs/en/model_zoo/README.md)
     - [TimeSformer](docs/en/model_zoo/recognition/timesformer.md)
@@ -110,6 +104,9 @@ release/2.1 was released in 20/05/2021. Please refer to [release notes](https://
     - Coming Soon!  
   - ActBERT: Learning Global-Local Video-Text Representations
     - Coming Soon!  
+- Tutorials and Slides
+  - [2021.01](https://aistudio.baidu.com/aistudio/course/introduce/6742)
+  - [Summarize of video understanding](docs/en/tutorials/summarize.md)
 - Practice
   - [Higher performance PP-TSM](docs/en/tutorials/pp-tsm.md)
   - [Accelerate training](docs/en/tutorials/accelerate.md)
@@ -117,6 +114,10 @@ release/2.1 was released in 20/05/2021. Please refer to [release notes](https://
 - Others
   - [Benchmark](docs/en/benchmark.md)
   - [Tools](docs/en/tools.md)
+- Contribute
+  - [Configuration design](docs/zh-CN/contribute/config.md)
+  - [Add new algorithm](docs/zh-CN/contribute/add_new_algorithm.md)
+  - [pr](docs/zh-CN/contribute/how_to_contribute.md)
 
 ## Competition
 
