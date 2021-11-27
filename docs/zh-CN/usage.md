@@ -9,9 +9,7 @@
 * [4. 模型测试](#4)
 * [5. 模型推理](#5)
 
-请参考[安装指南](./install.md)配置运行环境，并根据[数据](./dataset/)文档准备数据集，本章节下面所有的实验均以ucf101数据集为例。
-
-PaddleVideo目前支持Linux下的GPU单卡和多卡运行环境。
+请参考[安装指南](./install.md)配置运行环境，PaddleVideo目前支持Linux下的GPU单卡和多卡运行环境。
 
 - PaddleVideo各文件夹的默认存储路径， 以运行[example](../../configs/example.yaml)配置为例。
 
@@ -35,14 +33,34 @@ PaddleVideo
 ```
 
 <a name="1"></a>
-## 1. 模型训练与评估
+## 1. 模型训练
 
-使用`paddle.distributed.launch`启动模型训练和测试脚本（`main.py`），可以更方便地启动多卡训练与测试，或直接运行(./run.sh)
+PaddleVideo支持单机单卡和单机多卡训练，单卡训练和多卡训练的启动方式略有不同。
 
+单卡训练启动方式如下:
+
+```bash
+export CUDA_VISIBLE_DEVICES=0         #指定使用的GPU显卡id
+python3.7 main.py  --validate -c configs_path/your_config.yaml
+```
+- `-c` 必选参数，指定运行的配置文件路径
+- `--validate` 可选参数，指定训练时是否做validation
+-  `-o`: 可选参数，指定重写参数，例如： `-o DATASET.batch_size=16` 用于重写train时batch size大小
+
+多卡训练通过`paddle.distributed.launch`启动，方式如下:
+```bash
+export CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7
+python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=your_log_dir  main.py  --validate -c configs_path/your_config.yaml
+```
+- `--gpus`参数指定使用的GPU显卡id
+- `--log_dir`参数指定日志保存目录
+多卡训练详细说明可以参考[单机多卡训练](https://www.paddlepaddle.org.cn/documentation/docs/zh/2.1/guides/02_paddle2.0_develop/06_device_cn.html#danjiduokaxunlian)
+
+
+我们将所有标准的启动命令都放在了```run.sh```中，直接运行(./run.sh)可以方便地启动多卡训练与测试，注意选择想要运行的脚本
 ```shell
 sh run.sh
 ```
-我们将所有标准的启动命令都放在了```run.sh```中，注意选择想要运行的脚本。
 
 <a name="model_train"></a>
 ### 1.1 模型训练
