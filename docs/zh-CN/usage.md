@@ -27,7 +27,7 @@ PaddleVideo支持单机单卡和单机多卡训练，单卡训练和多卡训练
 export CUDA_VISIBLE_DEVICES=0         #指定使用的GPU显卡id
 python3.7 main.py  --validate -c configs_path/your_config.yaml
 ```
-- `-c` 必选参数，指定运行的配置文件路径，具体配置参数含义参考[配置文档](./tutorials/config.md#config-yaml-details)
+- `-c` 必选参数，指定运行的配置文件路径，具体配置参数含义参考[配置文档](./contribute/config.md#config-yaml-details)
 - `--validate` 可选参数，指定训练时是否评估
 -  `-o`: 可选参数，指定重写参数，例如： `-o DATASET.batch_size=16` 用于重写train时batch size大小
 
