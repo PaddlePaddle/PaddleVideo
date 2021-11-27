@@ -197,4 +197,4 @@ python tools/predict.py \
 + `use_tensorrt`：是否使用 TesorRT 预测引擎，默认值：`False`
 + `use_gpu`：是否使用 GPU 预测，默认值：`True`
 
-benchmark 预测速度结果由 `tools/predict.py` 进行评测 ，具体参考[评测文档](benchmark.md) 。
+各模型的具体使用文档，可以参考[Models](./model_zoo/README.md)
