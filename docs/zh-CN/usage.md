@@ -9,9 +9,72 @@
 * [4. 模型测试](#4)
 * [5. 模型推理](#5)
 
+
 请参考[安装指南](./install.md)配置运行环境，PaddleVideo目前支持Linux下的GPU单卡和多卡运行环境。
 
-- PaddleVideo各文件夹的默认存储路径， 以运行[example](../../configs/example.yaml)配置为例。
+
+
+<a name="1"></a>
+## 1. 模型训练
+
+PaddleVideo支持单机单卡和单机多卡训练，单卡训练和多卡训练的启动方式略有不同。
+
+### 1.1 单卡训练
+
+启动脚本示例:
+
+```bash
+export CUDA_VISIBLE_DEVICES=0         #指定使用的GPU显卡id
+python3.7 main.py  --validate -c configs_path/your_config.yaml
+```
+- `-c` 必选参数，指定运行的配置文件路径，具体配置参数含义参考[配置文档](./tutorials/config.md#config-yaml-details)
+- `--validate` 可选参数，指定训练时是否评估
+-  `-o`: 可选参数，指定重写参数，例如： `-o DATASET.batch_size=16` 用于重写train时batch size大小
+
+### 1.2 多卡训练
+
+通过`paddle.distributed.launch`启动，启动脚本示例:
+```bash
+export CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7
+python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=your_log_dir  main.py  --validate -c configs_path/your_config.yaml
+```
+- `--gpus`参数指定使用的GPU显卡id
+- `--log_dir`参数指定日志保存目录
+多卡训练详细说明可以参考[单机多卡训练](https://www.paddlepaddle.org.cn/documentation/docs/zh/2.1/guides/02_paddle2.0_develop/06_device_cn.html#danjiduokaxunlian)
+
+
+我们将所有标准的启动命令都放在了```run.sh```中，直接运行(./run.sh)可以方便地启动多卡训练与测试，注意选择想要运行的脚本
+```shell
+sh run.sh
+```
+
+### 1.3 输出日志
+
+运行训练命令，将会输出运行日志，并默认保存在./log目录下，如：`worker.0` , `worker.1` ... , worker日志文件对应每张卡上的输出
+
+【train阶段】打印当前时间，当前epoch/epoch总数，当前batch id，评估指标，耗时，ips等信息：
+```txt
+[09/24 14:13:00] epoch:[  1/1  ] train step:100  loss: 5.31382 lr: 0.000250 top1: 0.00000 top5: 0.00000 batch_cost: 0.73082 sec, reader_cost: 0.38075 sec, ips: 5.47330 instance/sec.
+```
+
+【eval阶段】打印当前时间，当前epoch/epoch总数，当前batch id，评估指标，耗时，ips等信息：
+```txt
+[09/24 14:16:55] epoch:[  1/1  ] val step:0    loss: 4.42741 top1: 0.00000 top5: 0.00000 batch_cost: 1.37882 sec, reader_cost: 0.00000 sec, ips: 2.90104 instance/sec.
+```
+
+【epoch结束】打印当前时间，评估指标，耗时，ips等信息：
+```txt
+[09/24 14:18:46] END epoch:1   val loss_avg: 5.21620 top1_avg: 0.02215 top5_avg: 0.08808 avg_batch_cost: 0.04321 sec, avg_reader_cost: 0.00000 sec, batch_cost_sum: 112.69575 sec, avg_ips: 8.41203 instance/sec.
+```
+
+当前为评估结果最好的epoch时，打印最优精度：
+```txt
+[09/24 14:18:47] Already save the best model (top1 acc)0.0221
+```
+
+### 1.4 输出存储路径
+
+- PaddleVideo各文件夹的默认存储路径如下：
 
 ```
 PaddleVideo
@@ -32,112 +95,12 @@ PaddleVideo
          └── example.pdiparmas.info file
 ```
 
-<a name="1"></a>
-## 1. 模型训练
-
-PaddleVideo支持单机单卡和单机多卡训练，单卡训练和多卡训练的启动方式略有不同。
-
-单卡训练启动方式如下:
-
-```bash
-export CUDA_VISIBLE_DEVICES=0         #指定使用的GPU显卡id
-python3.7 main.py  --validate -c configs_path/your_config.yaml
-```
-- `-c` 必选参数，指定运行的配置文件路径
-- `--validate` 可选参数，指定训练时是否做validation
--  `-o`: 可选参数，指定重写参数，例如： `-o DATASET.batch_size=16` 用于重写train时batch size大小
-
-多卡训练通过`paddle.distributed.launch`启动，方式如下:
-```bash
-export CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7
-python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=your_log_dir  main.py  --validate -c configs_path/your_config.yaml
-```
-- `--gpus`参数指定使用的GPU显卡id
-- `--log_dir`参数指定日志保存目录
-多卡训练详细说明可以参考[单机多卡训练](https://www.paddlepaddle.org.cn/documentation/docs/zh/2.1/guides/02_paddle2.0_develop/06_device_cn.html#danjiduokaxunlian)
+- 训练Epoch默认从1开始计数，参数文件的保存格式为`ModelName_epoch_00001.pdparams`，命名中的数字对应Epoch编号。
 
 
-我们将所有标准的启动命令都放在了```run.sh```中，直接运行(./run.sh)可以方便地启动多卡训练与测试，注意选择想要运行的脚本
-```shell
-sh run.sh
-```
+<a name="2"></a>
 
-<a name="model_train"></a>
-### 1.1 模型训练
-
-**下载并添加预训练模型**
-
-1. 下载图像蒸馏预训练模型ResNet50_vd_ssld_v2.pdparams作为Backbone初始化参数，或通过wget命令下载
-```
-wget https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_vd_ssld_v2_pretrained.pdparams
-```
-
-2. 打开 `PaddleVideo/configs/example.yaml`, 将下载好的权重存放路径填写到下方 `pretrained:` 之后
-``` bash
-MODEL: #MODEL field
-    framework: "Recognizer2D" #Mandatory ["Recognizer1D", "Recognizer2D", "Recognizer3D", "BMNLocalizer"], indicate the type of network, please refer to the 'paddlevideo/modeling/framework/'.
-    backbone:
-        name: "ResNet" #Optional, indicate the type of backbone, please refer to the 'paddlevideo/modeling/backbones/'.
-        pretrained: "data/ResNet50_vd_ssld_v2_pretrained.pdparams" #Optional, pretrained backbone params path. pass "" or " " without loading from files.
-        depth: 50 #Optional, the depth of backbone architecture.
-```
-
-如不想修改配置文件，请将预训练权重存放在 `PaddleVideo/data/`文件夹下。
-
-3. 参考如下方式启动模型训练，`paddle.distributed.launch`通过设置`gpus`指定GPU运行卡号，
-指定`--validate`来启动训练时评估。
-
-```bash
-# PaddleVideo通过launch方式启动多卡多进程训练
-
-export CUDA_VISIBLE_DEVICES=0,1,2,3
-
-python3 -m paddle.distributed.launch \
-    --gpus="0,1,2,3" \
-    main.py \
-    --validate \
-    -c ./configs/example.yaml
-```
-
-其中，`-c`用于指定配置文件的路径，可通过配置文件修改相关训练配置信息，也可以通过添加`-o`参数来更新配置：
-
-```bash
-python -m paddle.distributed.launch \
-    --gpus="0,1,2,3" \
-    main.py \
-    -c ./configs/example.yaml \
-    --validate \
-    -o DATASET.batch_size=16
-```
-`-o`用于指定需要修改或者添加的参数，其中`-o DATASET.batch_size=16`表示更改batch_size大小为16。具体配置参数含义参考[配置文档](./tutorials/config.md#config-yaml-details)
-
-运行上述命令，将会输出运行日志，并默认保存在./log目录下，如：`worker.0` , `worker.1` ... , worker日志文件对应每张卡上的输出
-
-【train阶段】打印当前时间，当前epoch/epoch总数，当前batch id，评估指标，耗时，ips等信息：
-
-
-    [09/24 14:13:00] epoch:[  1/1  ] train step:100  loss: 5.31382 lr: 0.000250 top1: 0.00000 top5: 0.00000 batch_cost: 0.73082 sec, reader_cost: 0.38075 sec, ips: 5.47330 instance/sec.
-
-
-【eval阶段】打印当前时间，当前epoch/epoch总数，当前batch id，评估指标，耗时，ips等信息：
-
-
-    [09/24 14:16:55] epoch:[  1/1  ] val step:0    loss: 4.42741 top1: 0.00000 top5: 0.00000 batch_cost: 1.37882 sec, reader_cost: 0.00000 sec, ips: 2.90104 instance/sec.
-
-
-【epoch结束】打印当前时间，评估指标，耗时，ips等信息：
-
-
-    [09/24 14:18:46] END epoch:1   val loss_avg: 5.21620 top1_avg: 0.02215 top5_avg: 0.08808 avg_batch_cost: 0.04321 sec, avg_reader_cost: 0.00000 sec, batch_cost_sum: 112.69575 sec, avg_ips: 8.41203 instance/sec.
-
-
-当前为评估结果最好的epoch时，打印最优精度：
-
-    [09/24 14:18:47] Already save the best model (top1 acc)0.0221
-
-
-<a name="model_resume"></a>
-### 1.2 模型恢复训练
+## 2. 模型恢复训练
 
 如果训练任务终止，可以加载断点权重文件(优化器-学习率参数，断点文件)继续训练。
 需要指定`-o resume_epoch`参数，该参数表示从```resume_epoch```轮开始继续训练.
@@ -151,12 +114,11 @@ python3 -m paddle.distributed.launch \
     -c ./configs/example.yaml \
     --validate \
     -o resume_epoch=5
-
 ```
 
+<a name="3"></a>
 
-<a name="model_finetune"></a>
-### 1.3 模型微调
+## 3. 模型微调
 
 进行模型微调（Finetune），对自定义数据集进行模型微调，需要指定 `--weights` 参数来加载预训练模型。
 
@@ -174,8 +136,9 @@ python3 -m paddle.distributed.launch \
 PaddleVideo会自动**不加载**shape不匹配的参数
 
 
-<a name="model_test"></a>
-### 1.4 模型测试
+<a name="4"></a>
+
+## 4. 模型测试
 
 需要指定 `--test`来启动测试模式，并指定`--weights`来加载预训练模型。
 
@@ -188,10 +151,9 @@ python3 -m paddle.distributed.launch \
     --weights=./output/example/path_to_weights
 ```
 
+<a name="5"></a>
 
-
-<a name="model_inference"></a>
-## 2. 模型推理
+## 5. 模型推理
 
 通过导出inference模型，PaddlePaddle支持使用预测引擎进行预测推理。接下来介绍如何用预测引擎进行推理：
 首先，对训练好的模型进行转换
