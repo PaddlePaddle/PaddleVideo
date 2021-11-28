@@ -113,7 +113,7 @@ Linux端基础训练预测功能测试的主程序为`test_train_inference_pytho
 #### 使用方式
 运行命令：
 ```shell
-python3.7 test_tipc/compare_results.py --gt_file=test_tipc/results/python_*.txt  --log_file=test_tipc/output/python_*.log --atol=1e-3 --rtol=1e-3
+python3.7 test_tipc/compare_results.py --gt_file=test_tipc/results/PP-TSM/python_*.txt  --log_file=test_tipc/output/PP-TSM/python_*.log --atol=1e-3 --rtol=1e-3
 ```
 
 参数介绍：  
