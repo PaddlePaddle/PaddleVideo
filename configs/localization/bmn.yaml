@@ -33,8 +33,8 @@ DATASET: #DATASET field
 PIPELINE: #PIPELINE field
     train: #Mandotary, indicate the pipeline to deal with the training data, associate to the 'paddlevideo/loader/pipelines/'
         load_feat:
-        name: "LoadFeat"
-        feat_path: "data/bmn_data/fix_feat_100"
+            name: "LoadFeat"
+            feat_path: "data/bmn_data/fix_feat_100"
         transform: #Mandotary, image transfrom operator
         - GetMatchMap:
             tscale: 100
@@ -44,8 +44,8 @@ PIPELINE: #PIPELINE field
 
     valid: #Mandotary, indicate the pipeline to deal with the training data, associate to the 'paddlevideo/loader/pipelines/'
         load_feat:
-        name: "LoadFeat"
-        feat_path: "data/bmn_data/fix_feat_100"
+            name: "LoadFeat"
+            feat_path: "data/bmn_data/fix_feat_100"
         transform: #Mandotary, image transfrom operator
         - GetMatchMap:
             tscale: 100
@@ -55,8 +55,8 @@ PIPELINE: #PIPELINE field
 
     test: #Mandatory, indicate the pipeline to deal with the validing data. associate to the 'paddlevideo/loader/pipelines/'
         load_feat:
-        name: "LoadFeat"
-        feat_path: "data/bmn_data/fix_feat_100"
+            name: "LoadFeat"
+            feat_path: "data/bmn_data/fix_feat_100"
         transform: #Mandotary, image transfrom operator
         - GetMatchMap:
             tscale: 100
