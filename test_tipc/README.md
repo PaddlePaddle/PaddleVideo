@@ -1,4 +1,4 @@
-# Linux端基础训练预测功能测试
+# Linux端从训练到推理部署工具链测试方法介绍
 
 Linux端基础训练预测功能测试的主程序为`test_train_inference_python.sh`，可以测试基于Python的模型训练、评估、推理等基本功能，包括裁剪(TODO)、量化(TODO)、蒸馏。
 
@@ -58,11 +58,10 @@ Linux端基础训练预测功能测试的主程序为`test_train_inference_pytho
 
 
 ### 2.2 基本功能测试
+以PP-TSM的测试链条为例，细节介绍如下：
 1. 先运行`prepare.sh`，根据传入模型名字，准备对应数据和预训练模型参数
 2. 再运行`test_train_inference_python.sh`，根据传入模型名字，进行对应测试
-3. 在`test_tipc/output`目录下生成 `python_infer_*.log` 格式的日志文件
-
-具体地，以PP-TSM的测试链条为例，运行细节如下：
+3. 在`test_tipc/output/PP-TSM`目录下生成 `python_infer_*.log` 格式的日志文件
 
 `test_train_inference_python.sh` 包含5种运行模式，每种模式的运行数据不同，分别用于测试速度和精度，分别是：
 
@@ -93,14 +92,15 @@ Linux端基础训练预测功能测试的主程序为`test_train_inference_pytho
     bash test_tipc/test_train_inference_python.sh test_tipc/configs/PP-TSM.txt 'whole_train_whole_infer'
     ```
 
-- 模式5：**cpp_infer**，CE： 验证inference model的c++预测是否走通；
+`test_inference_cpp.sh`负责验证inference model的**C++预测**是否能跑通：
+- 命令如下
     ```shell
     bash test_tipc/prepare.sh test_tipc/configs/PP-TSM_CPP.txt
     bash test_tipc/test_inference_cpp.sh test_tipc/configs/PP-TSM_CPP.txt
     ```
 
 
-最终在tests/output目录下生成.log后缀的日志文件
+最终在`test_tipc/output/PP-TSM`目录下生成.log后缀的日志文件
 
 
 ### 2.3 精度测试
