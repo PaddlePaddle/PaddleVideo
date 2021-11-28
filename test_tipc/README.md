@@ -91,6 +91,7 @@ Linux端基础训练预测功能测试的主程序为`test_train_inference_pytho
     bash test_tipc/prepare.sh test_tipc/configs/PP-TSM.txt 'whole_train_whole_infer'
     bash test_tipc/test_train_inference_python.sh test_tipc/configs/PP-TSM.txt 'whole_train_whole_infer'
     ```
+    最终在`test_tipc/output/PP-TSM`目录下生成.log后缀的日志文件
 
 `test_inference_cpp.sh`负责验证inference model的**C++预测**是否能跑通：
 - 命令如下
@@ -99,8 +100,7 @@ Linux端基础训练预测功能测试的主程序为`test_train_inference_pytho
     bash test_tipc/test_inference_cpp.sh test_tipc/configs/PP-TSM_CPP.txt
     ```
 
-
-最终在`test_tipc/output/PP-TSM`目录下生成.log后缀的日志文件
+    最终在`test_tipc/output/PP-TSM_CPP`目录下生成.log后缀的日志文件
 
 
 ### 2.3 精度测试

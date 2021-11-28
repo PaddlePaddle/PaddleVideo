@@ -60,7 +60,7 @@ def parser_results_from_log_by_name(log_path, names_list):
             split_items = line.replace('\t', ' ')
             split_items = split_items.split(' ')
             split_items = [item for item in split_items if len(item) > 0]
-            if all([(name+':') in split_items for name in names_list]):
+            if all([(name + ':') in split_items for name in names_list]):
                 # print(split_items)
                 parser_results['class'] = int(split_items[2])
                 parser_results['score'] = float(split_items[-1])
@@ -136,7 +136,10 @@ def testing_assert_allclose(dict_x, dict_y, atol=1e-7, rtol=1e-7):
 
 if __name__ == "__main__":
     # Usage example:
-    # python3.7 test_tipc/compare_results.py --gt_file=./test_tipc/results/PP-TSM/*.txt  --log_file=./test_tipc/output/PP-TSM/python_infer_*.log
+    # test python infer:
+    ## python3.7 test_tipc/compare_results.py --gt_file=./test_tipc/results/PP-TSM/*.txt  --log_file=./test_tipc/output/PP-TSM/python_infer_*.log
+    # test cpp infer:
+    ## python3.7 test_tipc/compare_results.py --gt_file=./test_tipc/results/PP-TSM_CPP/*.txt  --log_file=./test_tipc/output/PP-TSM_CPP/cpp_infer_*.log
 
     args = parse_args()
 
