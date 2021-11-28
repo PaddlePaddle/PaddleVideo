@@ -159,6 +159,7 @@ function func_inference(){
                             set_precision=$(func_set_params "${precision_key}" "${precision}")
 
                             _save_log_path="${_log_path}/python_infer_cpu_usemkldnn_${use_mkldnn}_threads_${threads}_precision_${precision}_batchsize_${batch_size}.log"
+                            mkdir -p ${_log_path}
                             set_infer_data=$(func_set_params "${video_dir_key}" "${infer_video_dir}")
                             if [[ $MODE =~ "lite_infer" ]]; then
                                 benchmark_value="False"
@@ -193,6 +194,7 @@ function func_inference(){
                         _save_log_path="${_log_path}/python_infer_gpu_usetrt_${use_trt}_precision_${precision}_batchsize_${batch_size}.log"
                         set_infer_data=$(func_set_params "${video_dir_key}" "${infer_video_dir}")
 
+                        mkdir -p ${_log_path}
                         if [[ $MODE =~ "lite_infer" ]]; then
                             benchmark_value="False"
                         fi

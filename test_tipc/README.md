@@ -13,6 +13,8 @@ Linux端基础训练预测功能测试的主程序为`test_train_inference_pytho
     |  :----  |   :----  |    :----  |  :----   |  :----   |  :----   |
     |  PP-TSM  | pptsm_k400_frames_uniform | 正常训练 | 正常训练 | - | - |
     |  PP-TSN  | pptsn_k400_videos | 正常训练 | 正常训练 | - | - |
+    |  AGCN  | agcn_fsd | 正常训练 | 正常训练 | - | - |
+    |  STGCN  | stgcn_fsd | 正常训练 | 正常训练 | - | - |
     |  TimeSformer  | timesformer_k400_videos | 正常训练 | 正常训练 | - | - |
     |  SlowFast  | slowfast | 正常训练 | 正常训练 | - | - |
     |  TSM  | tsm_k400_frames | 正常训练 | 正常训练 | - | - |
