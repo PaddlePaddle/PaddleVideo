@@ -93,6 +93,12 @@ Linux端基础训练预测功能测试的主程序为`test_train_inference_pytho
     bash test_tipc/test_train_inference_python.sh test_tipc/configs/PP-TSM.txt 'whole_train_whole_infer'
     ```
 
+- 模式5：whole_train_whole_infer，CE： 验证inference model的c++预测是否走通；
+    ```shell
+    bash test_tipc/prepare.sh test_tipc/configs/PP-TSM_CPP.txt
+    bash test_tipc/test_inference_cpp.sh test_tipc/configs/PP-TSM_CPP.txt
+    ```
+
 
 最终在tests/output目录下生成.log后缀的日志文件
 
