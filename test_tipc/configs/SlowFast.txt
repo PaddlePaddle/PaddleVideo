@@ -35,7 +35,7 @@ export1:null
 export2:null
 inference_dir:null
 infer_model:./inference/SlowFast/SlowFast.pdmodel
-infer_export:null
+infer_export:tools/export_model.py -c configs/recognition/slowfast/slowfast.yaml
 infer_quant:False
 inference:tools/predict.py --config configs/recognition/slowfast/slowfast.yaml
 --use_gpu:True|False

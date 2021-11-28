@@ -15,4 +15,4 @@ inference:./deploy/cpp_infer/build/ppvideo rec
 --inference_model_name:ppTSN
 --benchmark:True
 --char_list_file:data/k400/Kinetics-400_label_list.txt
---num_seg:8
+--num_seg:25

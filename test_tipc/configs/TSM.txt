@@ -35,7 +35,7 @@ export1:null
 export2:null
 inference_dir:null
 infer_model:./inference/TSM/TSM.pdmodel
-infer_export:null
+infer_export: tools/export_model.py -c configs/recognition/tsm/tsm_k400_frames.yaml
 infer_quant:False
 inference:tools/predict.py --config configs/recognition/tsm/tsm_k400_frames.yaml
 --use_gpu:True|False

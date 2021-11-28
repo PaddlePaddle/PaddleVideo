@@ -39,7 +39,7 @@ cpp_infer_value2=$(func_parser_value "${lines[16]}")
 cpp_infer_key3=$(func_parser_key "${lines[17]}")
 cpp_infer_value3=$(func_parser_value "${lines[17]}")
 
-LOG_PATH="./test_tipc/output"
+LOG_PATH="./test_tipc/output/${model_name}"
 mkdir -p ${LOG_PATH}
 status_log="${LOG_PATH}/results_cpp.log"
 
@@ -125,7 +125,7 @@ if [ ${use_opencv} = "True" ]; then
     if [ -d "opencv-3.4.7/opencv3/" ] && [ $(md5sum opencv-3.4.7.tar.gz | awk -F ' ' '{print $1}') = "faa2b5950f8bee3f03118e600c74746a" ];then
         echo "################### build opencv skipped ###################"
     else
-        echo "################### build opencv ###################"
+        echo "################### building opencv ###################"
         rm -rf opencv-3.4.7.tar.gz opencv-3.4.7/
         wget https://paddleocr.bj.bcebos.com/dygraph_v2.0/test/opencv-3.4.7.tar.gz
         tar -xf opencv-3.4.7.tar.gz
@@ -159,12 +159,21 @@ if [ ${use_opencv} = "True" ]; then
         make -j
         make install
         cd ../
-        echo "################### build opencv finished ###################"
+        echo "################### building opencv finished ###################"
     fi
 fi
 
 
-echo "################### build PaddleVideo demo ####################"
+if [ !-d "paddle_inference" ]; then
+    echo "################### download inference lib skipped ###################"
+else
+    echo "################### downloading inference lib ###################"
+    wget -nc https://paddle-inference-lib.bj.bcebos.com/2.1.1-gpu-cuda10.1-cudnn7-mkl-gcc8.2/paddle_inference.tgz
+    tar -xf paddle_inference.tgz
+    echo "################### downloading inference lib finished ###################"
+fi
+
+echo "################### building PaddleVideo demo ####################"
 if [ ${use_opencv} = "True" ]; then
     OPENCV_DIR=$(pwd)/opencv-3.4.7/opencv3
 else
@@ -192,7 +201,7 @@ cmake .. \
 
 make -j
 cd ../../../
-echo "################### build PaddleVideo demo finished ###################"
+echo "################### building PaddleVideo demo finished ###################"
 
 
 # set cuda device
@@ -206,7 +215,7 @@ set CUDA_VISIBLE_DEVICES
 eval $env
 
 
-echo "################### run test ###################"
+echo "################### running test ###################"
 export Count=0
 IFS="|"
 infer_quant_flag=(${cpp_infer_is_quant})

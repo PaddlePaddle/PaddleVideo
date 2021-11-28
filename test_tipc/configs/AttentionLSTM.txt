@@ -35,7 +35,7 @@ export1:null
 export2:null
 inference_dir:null
 infer_model:./inference/AttentionLSTM/AttentionLSTM.pdmodel
-infer_export:null
+infer_export:tools/export_model.py -c configs/recognition/attention_lstm/attention_lstm_youtube8m.yaml
 infer_quant:False
 inference:tools/predict.py --config configs/recognition/attention_lstm/attention_lstm_youtube8m.yaml
 --use_gpu:True|False
@@ -45,7 +45,7 @@ inference:tools/predict.py --config configs/recognition/attention_lstm/attention
 --use_tensorrt:False|True
 --precision:fp32|fp16
 --model_file:inference/AttentionLSTM/AttentionLSTM.pdmodel
---input_file:./data/example.avi
+--input_file:./data/example.pkl
 null:null
 --enable_benchmark:True
 --params_file:inference/AttentionLSTM/AttentionLSTM.pdiparams

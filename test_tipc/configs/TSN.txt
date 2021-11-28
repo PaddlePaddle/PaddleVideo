@@ -35,13 +35,13 @@ export1:null
 export2:null
 inference_dir:null
 infer_model:./inference/TSN/TSN.pdmodel
-infer_export:null
+infer_export:tools/export_model.py -c configs/recognition/tsn/tsn_k400_frames.yaml
 infer_quant:False
 inference:tools/predict.py --config configs/recognition/tsn/tsn_k400_frames.yaml
 --use_gpu:True|False
 --enable_mkldnn:True|False
 --cpu_threads:1|6
---batch_size:250|500
+--batch_size:1|2
 --use_tensorrt:False|True
 --precision:fp32|fp16
 --model_file:inference/TSN/TSN.pdmodel

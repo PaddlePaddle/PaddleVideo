@@ -2,7 +2,7 @@
 source test_tipc/common_func.sh
 
 FILENAME=$1
-# MODE be one of ['lite_train_lite_infer' 'lite_train_whole_infer' 'whole_train_whole_infer', 'whole_infer', 'klquant_whole_infer']
+# MODE be one of ['lite_train_lite_infer' 'lite_train_whole_infer' 'whole_train_whole_infer', 'whole_infer']
 MODE=$2
 
 dataline=$(awk 'NR==1, NR==51{print}'  $FILENAME)
@@ -197,9 +197,6 @@ function func_inference(){
                             benchmark_value="False"
                         fi
                         set_benchmark=$(func_set_params "${benchmark_key}" "${benchmark_value}")
-                        if [[ $use_trt = "True" ]]; then
-                            batch_size=8
-                        fi
                         set_batchsize=$(func_set_params "${batch_size_key}" "${batch_size}")
                         set_tensorrt=$(func_set_params "${use_trt_key}" "${use_trt}")
                         set_precision=$(func_set_params "${precision_key}" "${precision}")
