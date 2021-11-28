@@ -72,13 +72,13 @@ Linux端基础训练预测功能测试的主程序为`test_train_inference_pytho
     bash test_tipc/test_train_inference_python.sh test_tipc/configs/PP-TSM.txt 'lite_train_lite_infer'
     ```
 
-- 模式2：lite_train_whole_infer，使用少量数据训练，一定量数据预测，用于验证训练后的模型执行预测，预测速度是否合理；
+- 模式2：**lite_train_whole_infer**，使用少量数据训练，一定量数据预测，用于验证训练后的模型执行预测，预测速度是否合理；
     ```shell
     bash test_tipc/prepare.sh test_tipc/configs/PP-TSM.txt  'lite_train_whole_infer'
     bash test_tipc/test_train_inference_python.sh test_tipc/configs/PP-TSM.txt 'lite_train_whole_infer'
     ```
 
-- 模式3：whole_infer，不训练，全量数据预测，走通开源模型评估、动转静，检查inference model预测时间和精度；
+- 模式3：**whole_infer**，不训练，全量数据预测，走通开源模型评估、动转静，检查inference model预测时间和精度；
     ```shell
     bash test_tipc/prepare.sh test_tipc/configs/PP-TSM.txt 'whole_infer'
     # 用法1:
@@ -87,13 +87,13 @@ Linux端基础训练预测功能测试的主程序为`test_train_inference_pytho
     bash test_tipc/test_train_inference_python.sh test_tipc/configs/PP-TSM.txt 'whole_infer' '1'
     ```
 
-- 模式4：whole_train_whole_infer，CE： 全量数据训练，全量数据预测，验证模型训练精度，预测精度，预测速度；
+- 模式4：**whole_train_whole_infer**，CE： 全量数据训练，全量数据预测，验证模型训练精度，预测精度，预测速度；
     ```shell
     bash test_tipc/prepare.sh test_tipc/configs/PP-TSM.txt 'whole_train_whole_infer'
     bash test_tipc/test_train_inference_python.sh test_tipc/configs/PP-TSM.txt 'whole_train_whole_infer'
     ```
 
-- 模式5：whole_train_whole_infer，CE： 验证inference model的c++预测是否走通；
+- 模式5：**cpp_infer**，CE： 验证inference model的c++预测是否走通；
     ```shell
     bash test_tipc/prepare.sh test_tipc/configs/PP-TSM_CPP.txt
     bash test_tipc/test_inference_cpp.sh test_tipc/configs/PP-TSM_CPP.txt
