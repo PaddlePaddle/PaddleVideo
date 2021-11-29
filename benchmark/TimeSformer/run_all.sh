@@ -9,7 +9,6 @@ log_path=${LOG_PATH_INDEX_DIR:-$(pwd)}  #  benchmark系统指定该参数,不需
 python -m pip install -r requirements.txt
 
 # 2 拷贝该模型需要数据、预训练模型
-wget -P data/ wget https://paddle-imagenet-models-name.bj.bcebos.com/dygraph/ViT_base_patch16_224_pretrained.pdparams
 unalias cp
 cp -f benchmark/TimeSformer/timesformer_ucf101_videos_benchmark_bs1.yaml configs/recognition/timesformer/
 cp -f benchmark/TimeSformer/timesformer_ucf101_videos_benchmark_bs1_mp.yaml configs/recognition/timesformer/
@@ -18,7 +17,7 @@ cp -f benchmark/TimeSformer/timesformer_ucf101_videos_benchmark_bs14_mp.yaml con
 if [ ! -f "data/ucf101/trainlist_benchmark_mp.txt" ]; then
     wget -P data/ucf101/ https://videotag.bj.bcebos.com/PaddleVideo-release2.2/trainlist_benchmark_mp.txt
 fi
-wget -P data/ wget https://paddle-imagenet-models-name.bj.bcebos.com/dygraph/ViT_base_patch16_224_pretrained.pdparams
+wget -P data/ https://paddle-imagenet-models-name.bj.bcebos.com/dygraph/ViT_base_patch16_224_pretrained.pdparams
 alias cp='cp -i'
 
 cd data/ucf101 # 进入PaddleVideo/data/ucf101

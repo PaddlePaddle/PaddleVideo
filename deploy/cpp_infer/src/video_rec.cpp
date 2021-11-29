@@ -103,11 +103,11 @@ namespace PaddleVideo
             int rh = crop_frames[0].rows;
             int rw = crop_frames[0].cols;
             int rc = crop_frames[0].channels();
-            for (int i=0; i<num_views; ++i)
+            for (int i = 0; i < this->num_seg; ++i)
             {
-                for (int j = 0; j < this->num_seg; ++j)
+                for (int j = 0; j < num_views; ++j)
                 {
-                    this->permute_op_.Run(&crop_frames[i * this->num_seg + j], input.data() + i * j * rh * rw * rc);
+                    this->permute_op_.Run(&crop_frames[i * num_views + j], input.data() + (i * num_views + j) * rh * rw * rc);
                 }
             }
         }
@@ -194,21 +194,21 @@ namespace PaddleVideo
                     1 << 20, 10, 3,
                     precision,
                     false, false);
-                std::map<std::string, std::vector<int>> min_input_shape =
-                {
-                    {"x", {1, 3, 224, 224}}
-                };
-                std::map<std::string, std::vector<int>> max_input_shape =
-                {
-                    {"x", {1 * this->num_seg, 3, 224, 224}}
-                };
-                std::map<std::string, std::vector<int>> opt_input_shape =
-                {
-                    {"x", {1, 400}}
-                };
+//                 std::map<std::string, std::vector<int>> min_input_shape =
+//                 {
+//                     {"x", {1, 1, 3, 224, 224}}
+//                 };
+//                 std::map<std::string, std::vector<int>> max_input_shape =
+//                 {
+//                     {"x", {4, 1 * this->num_seg, 3, 224, 224}}
+//                 };
+//                 std::map<std::string, std::vector<int>> opt_input_shape =
+//                 {
+//                     {"x", {1, 1 * this->num_seg, 3, 224, 224}}
+//                 };
 
-                config.SetTRTDynamicShapeInfo(min_input_shape, max_input_shape,
-                                              opt_input_shape);
+//                 config.SetTRTDynamicShapeInfo(min_input_shape, max_input_shape,
+//                                               opt_input_shape);
             }
         }
         else
