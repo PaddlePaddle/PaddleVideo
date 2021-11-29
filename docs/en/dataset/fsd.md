@@ -46,5 +46,10 @@ skeleton example：
 
 You can get the download link after registering on the [competition homepage](https://www.datafountain.cn/competitions/519).
 
+| Set | Data | Label	| 
+| :---- | :----: | :----: | 
+| Train	| [train_data.npy](https://videotag.bj.bcebos.com/Data/FSD_train_data.npy)	| [train_label.npy](https://videotag.bj.bcebos.com/Data/FSD_train_label.npy) |
+| TestA	| comming soon	| comming soon |
+
 
 > RGB datasets would not be provided for copyright reasons.

@@ -126,13 +126,117 @@ head:
 - log_level
 ...
 
-训练脚本的启动参数如下：
+## 模块概览
 
--  **--validate**: 是否打开训练时评估
--  **--test**: 是否打开测试模式
--  **--weights**: 权重路径
--  **-c**: 配置文件路径
--  **-o**: 指定重写参数，例如： `-o DATASET.batch_size=16` 用于重写train时batch size大小
+<table>
+  <tbody>
+    <tr align="center" valign="bottom">
+      <td>
+        <b>Architectures</b>
+      </td>
+      <td>
+        <b>Frameworks</b>
+      </td>
+      <td>
+        <b>Components</b>
+      </td>
+      <td>
+        <b>Data Augmentation</b>
+      </td>
+    </tr>
+    <tr valign="top">
+      <td>
+        <ul><li><b>Recognition</b></li>
+          <ul>
+            <li>TSN</li>
+            <li>TSM</li>
+            <li>SlowFast</li>
+            <li>PP-TSM</li>
+            <li>VideoTag</li>
+            <li>AttentionLSTM</li>
+          </ul>
+        </ul>
+        <ul><li><b>Localization</b></li>
+          <ul>
+            <li>BMN</li>
+          </ul>
+        </ul>
+      </td>
+      <td>
+          <li>Recognizer1D</li>
+          <li>Recognizer2D</li>
+          <li>Recognizer3D</li>
+          <li>Localizer</li>
+        <HR></HR>
+        <ul>Backbone
+            <li>resnet</li>
+            <li>resnet_tsm</li>
+            <li>resnet_tweaks_tsm</li>
+            <li>bmn</li>
+        </ul>
+        <ul>Head
+            <li>pptsm_head</li>
+            <li>tsm_head</li>
+            <li>tsn_head</li>
+            <li>bmn_head</li>
+            <slowfast_head></li>
+            <bmn_head></li>
+        </ul>
+      </td>
+      <td>
+        <ul><li><b>Solver</b></li>
+          <ul><li><b>Optimizer</b></li>
+              <ul>
+                <li>Momentum</li>
+                <li>RMSProp</li>
+              </ul>
+          </ul>
+          <ul><li><b>LearningRate</b></li>
+              <ul>
+                <li>PiecewiseDecay</li>
+              </ul>
+          </ul>
+        </ul>
+        <ul><li><b>Loss</b></li>
+          <ul>
+            <li>CrossEntropy</li>
+            <li>BMNLoss</li>  
+          </ul>  
+        </ul>  
+        <ul><li><b>Metrics</b></li>
+          <ul>
+            <li>CenterCrop</li>
+            <li>MultiCrop</li>  
+          </ul>  
+        </ul>
+      </td>
+      <td>
+        <ul><li><b>Video</b></li>
+          <ul>
+            <li>Mixup</li>
+            <li>Cutmix</li>  
+          </ul>  
+        </ul>
+        <ul><li><b>Image</b></li>
+            <ul>
+                <li>Scale</li>
+                <li>Random FLip</li>
+                <li>Jitter Scale</li>  
+                <li>Crop</li>
+                <li>MultiCrop</li>
+                <li>Center Crop</li>
+                <li>MultiScaleCrop</li>
+                <li>Random Crop</li>
+                <li>PackOutput</li>
+            </ul>
+         </ul>
+      </td>  
+    </tr>
 
 
+</td>
+    </tr>
+  </tbody>
+</table>
 
+---

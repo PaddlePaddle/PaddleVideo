@@ -265,10 +265,8 @@ More parameters are as follows:
 ​	Take the sample video `example01.avi` under example_video_dir as the input video as an example, the final 	screen will output the detection results as follows.
 
 ```bash
-[./inference/ppTSM]
-[./deploy/cpp_infer/example_video_dir]
-total videos num: 1
-./example_video_dir/example01.avi   class: 5 archery       score: 0.999556
+I1125 08:10:42.753679 13955 main.cpp:88] The predict video: ./example_video_dir/example01.avi
+5 archery       score: 0.999556
 I1125 08:10:45.834288 13955 autolog.h:50] ----------------------- Config info -----------------------
 I1125 08:10:45.834458 13955 autolog.h:51] runtime_device: cpu
 I1125 08:10:45.834467 13955 autolog.h:52] ir_optim: True

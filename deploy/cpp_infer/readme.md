@@ -266,10 +266,8 @@ PaddleVideo模型部署。
 ​	以example_video_dir下的样例视频`example01.avi`为输入视频为例，最终屏幕上会输出检测结果如下。
 
 ```bash
-[./inference/ppTSM]
-[./deploy/cpp_infer/example_video_dir]
-total videos num: 1
-./example_video_dir/example01.avi   class: 5 archery       score: 0.999556
+I1125 08:10:42.753679 13955 main.cpp:88] The predict video: ./example_video_dir/example01.avi
+5 archery       score: 0.999556
 I1125 08:10:45.834288 13955 autolog.h:50] ----------------------- Config info -----------------------
 I1125 08:10:45.834458 13955 autolog.h:51] runtime_device: cpu
 I1125 08:10:45.834467 13955 autolog.h:52] ir_optim: True

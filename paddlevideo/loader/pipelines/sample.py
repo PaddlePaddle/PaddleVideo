@@ -101,10 +101,11 @@ class Sampler(object):
         frames_idx = []
         if self.linspace_sample:
             if 'start_idx' in results and 'end_idx' in results:
-                offsets = np.linspace(results['start_idx'], results['end_idx'], self.num_seg)
+                offsets = np.linspace(results['start_idx'], results['end_idx'],
+                                      self.num_seg)
             else:
                 offsets = np.linspace(0, frames_len - 1, self.num_seg)
-            offsets = np.clip(offsets, 0, frames_len - 1).astype(np.long)
+            offsets = np.clip(offsets, 0, frames_len - 1).astype(np.int64)
             if results['format'] == 'video':
                 frames_idx = list(offsets)
                 frames_idx = [x % frames_len for x in frames_idx]

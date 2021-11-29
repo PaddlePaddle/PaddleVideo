@@ -35,7 +35,6 @@ from paddlevideo.loader.pipelines import (AutoPadding, CenterCrop,
 from paddlevideo.metrics.bmn_metric import boundary_choose, soft_nms
 from paddlevideo.utils import Registry, build
 
-
 INFERENCE = Registry('inference')
 
 
@@ -141,7 +140,7 @@ class ppTSM_Inference_helper():
         res = np.expand_dims(results['imgs'], axis=0).copy()
         return [res]
 
-    def postprocess(self, output):
+    def postprocess(self, output, print_output=True):
         """
         output: list
         """
@@ -150,9 +149,10 @@ class ppTSM_Inference_helper():
         classes = np.argpartition(output, -self.top_k)[-self.top_k:]
         classes = classes[np.argsort(-output[classes])]
         scores = output[classes]
-        print("Current video file: {0}".format(self.input_file))
-        print("\ttop-1 class: {0}".format(classes[0]))
-        print("\ttop-1 score: {0}".format(scores[0]))
+        if print_output:
+            print("Current video file: {0}".format(self.input_file))
+            print("\ttop-1 class: {0}".format(classes[0]))
+            print("\ttop-1 score: {0}".format(scores[0]))
 
 
 @INFERENCE.register()
@@ -200,7 +200,7 @@ class ppTSN_Inference_helper():
         res = np.expand_dims(results['imgs'], axis=0).copy()
         return [res]
 
-    def postprocess(self, output):
+    def postprocess(self, output, print_output=True):
         """
         output: list
         """
@@ -215,9 +215,10 @@ class ppTSN_Inference_helper():
         classes = np.argpartition(output, -self.top_k)[-self.top_k:]
         classes = classes[np.argsort(-output[classes])]
         scores = output[classes]
-        print("Current video file: {0}".format(self.input_file))
-        print("\ttop-1 class: {0}".format(classes[0]))
-        print("\ttop-1 score: {0}".format(scores[0]))
+        if print_output:
+            print("Current video file: {0}".format(self.input_file))
+            print("\ttop-1 class: {0}".format(classes[0]))
+            print("\ttop-1 score: {0}".format(scores[0]))
 
 
 @INFERENCE.register()
@@ -252,7 +253,7 @@ class BMN_Inference_helper():
         pred_bm, pred_start, pred_end = outputs
         self._gen_props(pred_bm, pred_start[0], pred_end[0])
 
-    def _gen_props(self, pred_bm, pred_start, pred_end):
+    def _gen_props(self, pred_bm, pred_start, pred_end, print_output=True):
         snippet_xmins = [1.0 / self.tscale * i for i in range(self.tscale)]
         snippet_xmaxs = [
             1.0 / self.tscale * i for i in range(1, self.tscale + 1)
@@ -294,9 +295,10 @@ class BMN_Inference_helper():
         result_dict[self.feat_path] = proposal_list
 
         # print top-5 predictions
-        print("BMN Inference results of {0} :".format(self.feat_path))
-        for pred in proposal_list[:5]:
-            print(pred)
+        if print_output:
+            print("BMN Inference results of {0} :".format(self.feat_path))
+            for pred in proposal_list[:5]:
+                print(pred)
 
         # save result
         outfile = open(
@@ -344,10 +346,11 @@ class TimeSformer_Inference_helper():
         for op in ops:
             results = op(results)
 
+        # [N,C,Tx3,H,W]
         res = np.expand_dims(results['imgs'], axis=0).copy()
         return [res]
 
-    def postprocess(self, output):
+    def postprocess(self, output, print_output=True):
         """
         output: list
         """
@@ -362,9 +365,10 @@ class TimeSformer_Inference_helper():
         classes = np.argpartition(output, -self.top_k)[-self.top_k:]
         classes = classes[np.argsort(-output[classes])]
         scores = output[classes]
-        print("Current video file: {0}".format(self.input_file))
-        print("\ttop-1 class: {0}".format(classes[0]))
-        print("\ttop-1 score: {0}".format(scores[0]))
+        if print_output:
+            print("Current video file: {0}".format(self.input_file))
+            print("\ttop-1 class: {0}".format(classes[0]))
+            print("\ttop-1 score: {0}".format(scores[0]))
 
 
 @INFERENCE.register()
@@ -480,13 +484,14 @@ class STGCN_Inference_helper():
 
 @INFERENCE.register()
 class AttentionLSTM_Inference_helper():
-    def __init__(self,
-                 num_classes, #Optional, the number of classes to be classified.
-                 feature_num,
-                 feature_dims,
-                 embedding_size,
-                 lstm_size,
-                 top_k=1):
+    def __init__(
+            self,
+            num_classes,  #Optional, the number of classes to be classified.
+            feature_num,
+            feature_dims,
+            embedding_size,
+            lstm_size,
+            top_k=1):
         self.num_classes = num_classes
         self.feature_num = feature_num
         self.feature_dims = feature_dims
@@ -503,20 +508,21 @@ class AttentionLSTM_Inference_helper():
         assert os.path.isfile(input_file) is not None, "{0} not exists".format(
             input_file)
         results = {'filename': input_file}
-        ops = [
-            FeatureDecoder(num_classes=self.num_classes, has_label=False)
-        ]
+        ops = [FeatureDecoder(num_classes=self.num_classes, has_label=False)]
         for op in ops:
             results = op(results)
 
         res = []
         for modality in ['rgb', 'audio']:
-            res.append(np.expand_dims(results[f'{modality}_data'], axis=0).copy())
-            res.append(np.expand_dims(results[f'{modality}_len'], axis=0).copy())
-            res.append(np.expand_dims(results[f'{modality}_mask'], axis=0).copy())
+            res.append(
+                np.expand_dims(results[f'{modality}_data'], axis=0).copy())
+            res.append(
+                np.expand_dims(results[f'{modality}_len'], axis=0).copy())
+            res.append(
+                np.expand_dims(results[f'{modality}_mask'], axis=0).copy())
         return res
 
-    def postprocess(self, output):
+    def postprocess(self, output, print_output=True):
         """
         output: list
         """
@@ -531,6 +537,7 @@ class AttentionLSTM_Inference_helper():
         classes = np.argpartition(output, -self.top_k)[-self.top_k:]
         classes = classes[np.argsort(-output[classes])]
         scores = output[classes]
-        print("Current video file: {0}".format(self.input_file))
-        print("\ttop-1 class: {0}".format(classes[0]))
-        print("\ttop-1 score: {0}".format(scores[0]))
+        if print_output:
+            print("Current video file: {0}".format(self.input_file))
+            print("\ttop-1 class: {0}".format(classes[0]))
+            print("\ttop-1 score: {0}".format(scores[0]))

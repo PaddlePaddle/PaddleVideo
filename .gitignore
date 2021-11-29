@@ -5,7 +5,6 @@ __pycache__/
 *.swp
 *.swo
 *.swn
-test_*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
