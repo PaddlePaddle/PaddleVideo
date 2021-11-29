@@ -159,7 +159,7 @@ PaddleVideo模型部署。
 
 ### 2.1 将模型导出为inference model
 
-* 该步骤与python部署方式下的导出预测模型相同，可以参考各自模型的模型预测章节。导出的几个相关inference model文件用于模型预测。以PP-TSM为例，导出预测模型的目录结构如下。
+* 该步骤与python部署方式下的导出预测模型相同，可以参考各自模型的模型预测章节。导出的几个相关inference model文件用于模型预测。**以PP-TSM为例**，导出预测模型的目录结构如下。
 
     ```
     inference/
@@ -175,7 +175,7 @@ PaddleVideo模型部署。
 * 进入到`deploy/cpp_infer`目录下，执行以下编译命令
 
     ```shell
-    sh tools/build.sh
+    bash tools/build.sh
     ```
 
     `tools/build.sh`中的Paddle C++预测库、opencv等其他依赖库的地址需要换成自己机器上的实际地址。
@@ -218,10 +218,20 @@ PaddleVideo模型部署。
 
 ##### 1. 调用视频识别：
 ```bash
+# 调用PP-TSM识别
 ./build/ppvideo rec \
     --rec_model_dir=../../inference/ppTSM \
+    --inference_model_name=ppTSM \
     --video_dir=./example_video_dir \
     --num_seg=8 \
+    --seg_len=1
+
+# 调用PP-TSN识别
+./build/ppvideo rec \
+    --rec_model_dir=../../inference/ppTSN \
+    --inference_model_name=ppTSN \
+    --video_dir=./example_video_dir \
+    --num_seg=25 \
     --seg_len=1
 ```
 更多参数如下：
@@ -247,6 +257,7 @@ PaddleVideo模型部署。
     | -------------- | ------ | --------------------------------------------- | ------------------------------------ |
     | video_dir      | string | "../example_video_dir"                        | 存放将要识别的视频的文件夹路径       |
     | rec_model_dir  | string | ""                                            | 存放导出的预测模型的文件夹路径       |
+    | inference_model_name | string | "ppTSM"                                 | 预测模型的名称 |
     | num_seg        | int    | 8                                             | 视频分段的段数                       |
     | seg_len        | int    | 1                                             | 视频每段抽取的帧数                   |
     | rec_batch_num  | int    | 1                                             | 模型预测时的batch size               |

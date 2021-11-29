@@ -8,9 +8,9 @@ PaddleVideo model deployment.
 
 ## 1. Prepare the environment
 
--For Linux environment, docker is recommended.
+- For Linux environment, docker is recommended.
 
--Windows environment, currently supports compilation based on `Visual Studio 2019 Community` (TODO)
+- Windows environment, currently supports compilation based on `Visual Studio 2019 Community` (TODO)
 
 * This document mainly introduces the PaddleVideo C++ prediction process based on the Linux environment. If you need to perform C++ prediction based on the prediction library under Windows, please refer to [Windows Compilation Tutorial](./docs/windows_vs2019_build.md)(TODO) for the specific compilation method
 * **The purpose of preparing the environment is to get the compiled opencv library and paddle prediction library**.
@@ -159,7 +159,7 @@ There are two ways to obtain the Paddle prediction library, which will be descri
 
 ### 2.1 Export the model as an inference model
 
-* This step is the same as the export prediction model under the python deployment mode. You can refer to the model prediction chapter of the respective model. Several related inference model files exported are used for model prediction. Taking PP-TSM as an example, the directory structure of the derived prediction model is as follows.
+* This step is the same as the export prediction model under the python deployment mode. You can refer to the model prediction chapter of the respective model. Several related inference model files exported are used for model prediction. **Taking PP-TSM as an example**, the directory structure of the derived prediction model is as follows.
 
     ```
     inference/
@@ -175,7 +175,7 @@ There are two ways to obtain the Paddle prediction library, which will be descri
 * Enter the `deploy/cpp_infer` directory and execute the following compile command
 
     ```shell
-    sh tools/build.sh
+    bash tools/build.sh
     ```
 
     The addresses of the Paddle C++ prediction library, opencv and other dependent libraries in `tools/build.sh` need to be replaced with the actual addresses on your own machine.
@@ -218,10 +218,20 @@ Among them, `mode` is a required parameter, which means the selected function, a
 
 ##### 1. Call video recognition:
 ```bash
+# run PP-TSM inference
 ./build/ppvideo rec \
     --rec_model_dir=../../inference/ppTSM \
+    --inference_model_name=ppTSM \
     --video_dir=./example_video_dir \
     --num_seg=8 \
+    --seg_len=1
+
+# run PP-TSN inference
+./build/ppvideo rec \
+    --rec_model_dir=../../inference/ppTSN \
+    --inference_model_name=ppTSN \
+    --video_dir=./example_video_dir \
+    --num_seg=25 \
     --seg_len=1
 ```
 More parameters are as follows:
@@ -246,6 +256,7 @@ More parameters are as follows:
     | -------------- | ------ | --------------------------------------------- | ------------------------------------ |
     | video_dir | string | "../example_video_dir" | The path of the folder where the video to be recognized is stored |
     | rec_model_dir | string | "" | The folder path where the exported prediction model is stored |
+    | inference_model_name | string | "ppTSM" | The name of the model used in the prediction |
     | num_seg | int | 8 | Number of video segments |
     | seg_len | int | 1 | The number of frames extracted in each segment of the video |
     | rec_batch_num | int | 1 | Batch size during model prediction |

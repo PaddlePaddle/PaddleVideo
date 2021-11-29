@@ -49,6 +49,7 @@ DEFINE_string(save_log_path, "./log_output/", "Save benchmark log path.");
 // video recognition related
 DEFINE_string(video_dir, "", "Dir of input video(s).");
 DEFINE_string(rec_model_dir, "../example_video_dir", "Path of video rec inference model.");
+DEFINE_string(inference_model_name, "ppTSM", "The name of the model used in the prediction.");
 DEFINE_int32(num_seg, 8, "number of frames input to model, which are extracted from a video.");
 DEFINE_int32(seg_len, 1, "number of frames from a segment.");
 DEFINE_int32(rec_batch_num, 1, "rec_batch_num.");
@@ -72,10 +73,10 @@ static bool PathExists(const std::string& path)
 }
 
 
-int main_rec(std::vector<cv::String> cv_all_video_names)
+int main_rec(std::vector<cv::String> &cv_all_video_names)
 {
     std::vector<double> time_info = {0, 0, 0}; // Statement time statistics vector
-    VideoRecognizer rec(FLAGS_rec_model_dir, FLAGS_use_gpu, FLAGS_num_seg,
+    VideoRecognizer rec(FLAGS_rec_model_dir, FLAGS_inference_model_name, FLAGS_use_gpu, FLAGS_num_seg,
                        FLAGS_gpu_id, FLAGS_gpu_mem,
                        FLAGS_cpu_threads,
                        FLAGS_enable_mkldnn, FLAGS_char_list_file,

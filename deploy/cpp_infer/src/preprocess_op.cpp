@@ -108,4 +108,29 @@ namespace PaddleVideo
         }
     }
 
+    void TenCrop::Run(const cv::Mat &img, std::vector<cv::Mat> &crop_imgs, const int &begin_index, bool use_tensorrt, const int &target_size)
+    {
+        int h = img.rows;
+        int w = img.cols;
+        int crop_h = target_size;
+        int crop_w = target_size;
+        int w_step = (w - crop_w) / 4;
+        int h_step = (h - crop_h) / 4;
+        pair<int, int>offsets[5] =
+        {
+            {0,          0},
+            {4 * w_step, 0},
+            {0,          4 * h_step},
+            {4 * w_step, 4 * h_step},
+            {2 * w_step, 2 * h_step}
+        };
+        for (int i = 0; i < 5; ++i)
+        {
+            const int &j = i * 2;
+            const int &x1 = offsets[i].first;
+            const int &y1 = offsets[i].second;
+            crop_imgs[begin_index + j] = img(cv::Rect(x1, y1, crop_w, crop_h)); // cropped
+            cv::flip(img(cv::Rect(x1, y1, crop_w, crop_h)), crop_imgs[begin_index + j + 1], 0); // cropped
+        }
+    }
 } // namespace PaddleVideo

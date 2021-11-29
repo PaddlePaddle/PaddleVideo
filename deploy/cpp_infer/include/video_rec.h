@@ -41,13 +41,14 @@ namespace PaddleVideo
     class VideoRecognizer
     {
     public:
-        explicit VideoRecognizer(const std::string &model_dir, const bool &use_gpu, const int &num_seg,
+        explicit VideoRecognizer(const std::string &model_dir, const std::string &inference_model_name, const bool &use_gpu, const int &num_seg,
                                  const int &gpu_id, const int &gpu_mem,
                                  const int &cpu_math_library_num_threads,
                                  const bool &use_mkldnn, const std::string &label_path,
                                  const bool &use_tensorrt, const std::string &precision, const std::vector<float> &_mean = {0.406, 0.456, 0.485},
                                  const std::vector<float> &_scale = {0.225, 0.224, 0.229})
         {
+            this->inference_model_name = inference_model_name;
             this->use_gpu_ = use_gpu;
             this->num_seg = num_seg;
             this->gpu_id_ = gpu_id;
@@ -59,7 +60,6 @@ namespace PaddleVideo
             this->mean_ = _mean;
             this->scale_ = _scale;
             this->label_list_ = Utility::ReadDict(label_path);
-
             LoadModel(model_dir);
         }
 
@@ -69,7 +69,7 @@ namespace PaddleVideo
         void Run(std::vector<cv::Mat> &frames, std::vector<double> *times);
 
     private:
-        std::string inference_model_name = "ppTSM";
+        std::string inference_model_name;
         std::shared_ptr<Predictor> predictor_;
 
         bool use_gpu_ = false;
@@ -79,7 +79,6 @@ namespace PaddleVideo
         bool use_mkldnn_ = false;
         int num_seg = 8;
         std::vector<std::string> label_list_;
-
         std::vector<float> mean_ = {0.406, 0.456, 0.485};
         std::vector<float> scale_ = {0.225, 0.224, 0.229};
         bool is_scale_ = true;
@@ -88,7 +87,10 @@ namespace PaddleVideo
 
         // Instantiate pre-process operation object(s)
         Scale scale_op_;
+
         CenterCrop centercrop_op_;
+        TenCrop tencrop_op_;
+
         Normalize normalize_op_;
         Permute permute_op_;
 
