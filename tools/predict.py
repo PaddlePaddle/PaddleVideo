@@ -48,7 +48,7 @@ def parse_args():
     parser.add_argument("--use_tensorrt", type=str2bool, default=False)
     parser.add_argument("--gpu_mem", type=int, default=8000)
     parser.add_argument("--enable_benchmark", type=str2bool, default=False)
-    parser.add_argument("--enable_mkldnn", type=bool, default=False)
+    parser.add_argument("--enable_mkldnn", type=str2bool, default=False)
     parser.add_argument("--cpu_threads", type=int, default=None)
     # parser.add_argument("--hubserving", type=str2bool, default=False)  #TODO
 
@@ -139,7 +139,10 @@ def main():
         else:
             # solve an directory
             files = os.listdir(args.input_file)
-            files = [file for file in files if (file.endswith(".avi") or file.endswith(".mp4"))]
+            files = [
+                file for file in files
+                if (file.endswith(".avi") or file.endswith(".mp4"))
+            ]
             files = [osp.join(args.input_file, file) for file in files]
             batch_num = args.batch_size
             for st_idx in range(0, len(files), batch_num):
@@ -148,7 +151,10 @@ def main():
                 for i in range(st_idx, ed_idx):
                     inputs = InferenceHelper.preprocess(files[i])
                     batched_inputs.append(inputs)
-                batched_inputs = [np.concatenate([item[i] for item in batched_inputs]) for i in range(len(batched_inputs[0]))]
+                batched_inputs = [
+                    np.concatenate([item[i] for item in batched_inputs])
+                    for i in range(len(batched_inputs[0]))
+                ]
 
                 # Run inference
                 for i in range(len(input_tensor_list)):
@@ -201,7 +207,10 @@ def main():
                     print(f"Benchmark process {i + 1} / {len(files)}")
                 inputs = InferenceHelper.preprocess(files[i])
                 batched_inputs.append(inputs)
-            batched_inputs = [np.concatenate([item[i] for item in batched_inputs]) for i in range(len(batched_inputs[0]))]
+            batched_inputs = [
+                np.concatenate([item[i] for item in batched_inputs])
+                for i in range(len(batched_inputs[0]))
+            ]
 
             # get pre process time cost
             if args.enable_benchmark:
