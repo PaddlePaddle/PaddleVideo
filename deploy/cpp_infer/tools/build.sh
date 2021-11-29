@@ -2,6 +2,7 @@ OPENCV_DIR=your_opencv_dir
 LIB_DIR=your_paddle_inference_dir
 CUDA_LIB_DIR=your_cuda_lib_dir
 CUDNN_LIB_DIR=your_cudnn_lib_dir
+TENSORRT_DIR=your_tensorRT_dir
 
 BUILD_DIR=build
 rm -rf ${BUILD_DIR}

@@ -16,7 +16,6 @@
 
 namespace PaddleVideo
 {
-
     void VideoRecognizer::Run(const std::vector<string> &frames_batch_path, const std::vector<std::vector<cv::Mat> > &frames_batch, std::vector<double> *times)
     {
         // Copy parameters to the function

@@ -75,6 +75,7 @@ namespace PaddleVideo
 
         bool use_gpu_ = false;
         int gpu_id_ = 0;
+
         int rec_batch_num = 1;
         int gpu_mem_ = 4000;
         int cpu_math_library_num_threads_ = 4;

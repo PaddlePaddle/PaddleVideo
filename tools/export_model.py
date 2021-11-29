@@ -63,11 +63,18 @@ def trim_config(cfg):
 
 
 def get_input_spec(cfg, model_name):
-    if model_name in ['ppTSM', 'TSM', 'TSN', 'ppTSN']:
+    if model_name in ['ppTSM', 'TSM']:
         input_spec = [[
             InputSpec(
                 shape=[None, cfg.num_seg, 3, cfg.target_size, cfg.target_size],
                 dtype='float32'),
+        ]]
+    elif model_name in ['TSN', 'ppTSN']:
+        input_spec = [[
+            InputSpec(shape=[
+                None, cfg.num_seg * 10, 3, cfg.target_size, cfg.target_size
+            ],
+                      dtype='float32'),
         ]]
     elif model_name in ['BMN']:
         input_spec = [[
