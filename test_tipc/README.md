@@ -30,7 +30,7 @@
 | TSM  |tsm_k400_frames | 动作识别 | 支持 | 混合精度 | - | - |
 | TSN  |tsn_k400_frames          | 动作识别 |支持|混合精度|-|-|
 | AttentionLSTM |attention_lstm_youtube8m | 动作识别 | 支持 | 混合精度 | - | - |
-| BMN |bmn | 动作定位 | 支持 | 混合精度 | - | - |
+| BMN |bmn | 动作时间定位 | 支持 | 混合精度 | - | - |
 
 
 
