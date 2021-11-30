@@ -217,7 +217,7 @@ namespace PaddleVideo
                 {
                     precision = paddle_infer::Config::Precision::kHalf;
                 }
-                if (this->precision_ == "int8")
+                else if (this->precision_ == "int8")
                 {
                     precision = paddle_infer::Config::Precision::kInt8;
                 }
