@@ -45,7 +45,7 @@ inference:tools/predict.py --config configs/recognition/attention_lstm/attention
 --use_tensorrt:False|True
 --precision:fp32|fp16
 --model_file:inference/AttentionLSTM/AttentionLSTM.pdmodel
---input_file:./data/example.avi
+--input_file:./data/example.pkl
 null:null
 --enable_benchmark:True
 --params_file:inference/AttentionLSTM/AttentionLSTM.pdiparams
