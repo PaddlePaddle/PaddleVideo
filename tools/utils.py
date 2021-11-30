@@ -416,7 +416,7 @@ class SlowFast_Inference_helper(Base_Inference_helper):
             res.append(np.expand_dims(item, axis=0).copy())
         return res
 
-    def postprocess_batch(self, output, print_output=True):
+    def postprocess(self, output, print_output=True):
         """
         output: list
         """
