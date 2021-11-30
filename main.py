@@ -53,17 +53,18 @@ def parse_args():
     parser.add_argument('--amp',
                         action='store_true',
                         help='whether to open amp training.')
-    parser.add_argument(
-                        '--validate',
+    parser.add_argument('--validate',
                         action='store_true',
                         help='whether to evaluate the checkpoint during training')
-    parser.add_argument(
-                        '--seed',
+    parser.add_argument('--seed',
                         type=int,
                         default=None,
                         help='fixed all random seeds when the program is running')
-    parser.add_argument(
-                        '-p',
+    parser.add_argument('--max_iters',
+                        type=int,
+                        default=None,
+                        help='max iterations when training(this argonly used in test_tipc)')
+    parser.add_argument('-p',
                         '--profiler_options',
                         type=str,
                         default=None,
@@ -107,6 +108,7 @@ def main():
                     validate=args.validate,
                     use_fleet=args.fleet,
                     amp=args.amp,
+                    max_iters=args.max_iters,
                     profiler_options=args.profiler_options)
 
 

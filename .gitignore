@@ -114,3 +114,7 @@ venv.bak/
 # data
 data/
 output_dir/
+
+# IDE
+.vscode
+.idea

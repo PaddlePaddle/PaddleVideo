@@ -12,9 +12,13 @@ Linux端基础训练预测功能测试的主程序为`test_train_inference_pytho
     | 算法名称 | 模型名称 | 单机单卡 | 单机多卡 | 多机多卡 | 模型压缩（单机多卡） |
     |  :----  |   :----  |    :----  |  :----   |  :----   |  :----   |
     |  PP-TSM  | pptsm_k400_frames_uniform | 正常训练 | 正常训练 | - | - |
-    |  TSM  | tsm_k400_frames | 正常训练 | 正常训练 | - | - |
     |  PP-TSN  | pptsn_k400_videos | 正常训练 | 正常训练 | - | - |
+    |  TimeSformer  | timesformer_k400_videos | 正常训练 | 正常训练 | - | - |
+    |  SlowFast  | slowfast | 正常训练 | 正常训练 | - | - |
+    |  TSM  | tsm_k400_frames | 正常训练 | 正常训练 | - | - |
     |  TSN  | tsn_k400_frames | 正常训练 | 正常训练 | - | - |
+    |  AttentionLSTM  | attention_lstm_youtube8m | 正常训练 | 正常训练 | - | - |
+    |  BMN  | bmn | 正常训练 | 正常训练 | - | - |
 
 
 - 预测相关：基于训练是否使用量化，可以将训练产出的模型可以分为`正常模型`和`量化模型(TODO)`，这两类模型对应的预测功能汇总如下，

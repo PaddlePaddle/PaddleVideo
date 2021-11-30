@@ -1,19 +1,19 @@
 ===========================train_params===========================
-model_name:TSM
+model_name:BMN
 python:python3.7
-gpu_list:0|0,1,2,3,4,5,6,7
+gpu_list:0|0,1,2,3
 Global.use_gpu:null|null
 Global.auto_cast:null
 -o epochs:2
 null:null
-DATASET.batch_size:null
--o MODEL.backbone.pretrained:'data/ResNet50_pretrain.pdparams'
+-o DATASET.batch_size:16
+-o MODEL.backbone.pretrained:null
 train_model_name:null
 train_infer_video_dir:null
--o DATASET.train.file_path:'data/k400/train_small.list'
+-o DATASET.train.file_path:null
 ##
 trainer:norm_train
-norm_train:main.py --validate -c configs/recognition/tsm/tsm_k400_frames.yaml --seed 1234
+norm_train:main.py --validate -c configs/localization/bmn.yaml --seed 1234 --max_iters=10
 pact_train:null
 fpgm_train:null
 distill_train:null
@@ -21,31 +21,31 @@ null:null
 null:null
 ##
 ===========================eval_params===========================
-eval:main.py --test -c configs/recognition/tsm/tsm_k400_frames.yaml
--w:output/TSM/TSM_best.pdparams
+eval:main.py --test -c configs/localization/bmn.yaml
+-w:output/BMN/BMN_best.pdparams
 ##
 ===========================infer_params===========================
--o:inference/TSM
+-o:inference/BMN
 -p:null
-norm_export:tools/export_model.py -c configs/recognition/tsm/tsm_k400_frames.yaml
+norm_export:tools/export_model.py -c configs/localization/bmn.yaml
 quant_export:null
 fpgm_export:null
 distill_export:null
 export1:null
 export2:null
 inference_dir:null
-infer_model:./inference/TSM/TSM.pdmodel
+infer_model:./inference/BMN/BMN.pdmodel
 infer_export:null
 infer_quant:False
-inference:tools/predict.py --config configs/recognition/tsm/tsm_k400_frames.yaml
+inference:tools/predict.py --config configs/localization/bmn.yaml
 --use_gpu:True|False
 --enable_mkldnn:True|False
 --cpu_threads:1|6
---batch_size:8|16
+--batch_size:1
 --use_tensorrt:False|True
 --precision:fp32|fp16
---model_file:inference/TSM/TSM.pdmodel
---input_file:./data/example.avi
+--model_file:inference/BMN/BMN.pdmodel
+--input_file:./data/example_feat.list
 null:null
 --enable_benchmark:True
---params_file:inference/TSM/TSM.pdiparams
+--params_file:inference/BMN/BMN.pdiparams
