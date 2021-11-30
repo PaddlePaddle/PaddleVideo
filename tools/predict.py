@@ -156,7 +156,7 @@ def main():
             inference_config=inference_config,
             pids=pid,
             process_name=None,
-            gpu_ids=0 if args.use_gpu else None,
+            gpu_ids=0,
             time_keys=['preprocess_time', 'inference_time', 'postprocess_time'],
             warmup=num_warmup)
 
