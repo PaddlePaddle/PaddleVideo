@@ -14,7 +14,7 @@ function _set_params(){
     direction_id="0"
     ips_unit="instance/sec"
     skip_steps=1                     # 解析日志，有些模型前几个step耗时长，需要跳过                                    (必填)
-    keyword="avg_ips:"                 # 解析日志，筛选出数据所在行的关键字                                             (必填)
+    keyword="ips:"                 # 解析日志，筛选出数据所在行的关键字                                             (必填)
     index="1"
     model_name=${model_item}_bs${batch_size}_${fp_item}
 
