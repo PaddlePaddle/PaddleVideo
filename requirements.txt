@@ -6,3 +6,5 @@ opencv-python==4.2.0.32
 decord==0.4.2
 av==8.0.3
 scipy==1.6.3
+einops
+fvcore==0.1.5.post20210630
