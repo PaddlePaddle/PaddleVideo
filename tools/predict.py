@@ -102,6 +102,21 @@ def create_paddle_predictor(args, cfg):
     return config, predictor
 
 
+def parse_file_paths(input_path: str) -> list:
+    if osp.isfile(input_path):
+        files = [
+            input_path,
+        ]
+    else:
+        files = os.listdir(input_path)
+        files = [
+            file for file in files
+            if (file.endswith(".avi") or file.endswith(".mp4"))
+        ]
+        files = [osp.join(input_path, file) for file in files]
+    return files
+
+
 def main():
     args = parse_args()
     cfg = get_config(args.config, show=False)
@@ -123,21 +138,10 @@ def main():
         output_tensor_list.append(predictor.get_output_handle(item))
 
     # get the absolute file path(s) to be processed
-    if osp.isfile(args.input_file):
-        files = [
-            args.input_file,
-        ]
-    else:
-        files = os.listdir(args.input_file)
-        files = [
-            file for file in files
-            if (file.endswith(".avi") or file.endswith(".mp4"))
-        ]
-        files = [osp.join(args.input_file, file) for file in files]
+    files = parse_file_paths(args.input_file)
 
     if args.enable_benchmark:
         test_video_num = 300
-        log_interval = 20
         num_warmup = 10
 
         # instantiate auto log
@@ -167,42 +171,27 @@ def main():
         if args.enable_benchmark:
             autolog.times.start()
 
-        # Pre process input
-        batched_inputs = []
-        for i in range(st_idx, ed_idx):
-            # print process
-            if args.enable_benchmark and ((i + 1) % log_interval == 0 or
-                                          (i + 1) == len(files)):
-                print(f"Benchmark process {i + 1} / {len(files)}")
-
-            # preprocess multiple data
-            inputs = InferenceHelper.preprocess(files[i])
-            batched_inputs.append(inputs)
-
-        # merge into an batched data
-        batched_inputs = [
-            np.concatenate([item[i] for item in batched_inputs])
-            for i in range(len(batched_inputs[0]))
-        ]
+        # Pre process batched input
+        batched_inputs = InferenceHelper.preprocess_batch(files[st_idx:ed_idx])
 
         # get pre process time cost
         if args.enable_benchmark:
             autolog.times.stamp()
 
+        # run inference
         for i in range(len(input_tensor_list)):
             input_tensor_list[i].copy_from_cpu(batched_inputs[i])
         predictor.run()
-        batched_output = []
 
+        batched_outputs = []
         for j in range(len(output_tensor_list)):
-            batched_output.append(output_tensor_list[j].copy_to_cpu())
+            batched_outputs.append(output_tensor_list[j].copy_to_cpu())
 
         # get inference process time cost
         if args.enable_benchmark:
             autolog.times.stamp()
 
-        InferenceHelper.input_file = files[st_idx:ed_idx]
-        InferenceHelper.postprocess(batched_output, not args.enable_benchmark)
+        InferenceHelper.postprocess(batched_outputs, not args.enable_benchmark)
 
         # get post process time cost
         if args.enable_benchmark:
