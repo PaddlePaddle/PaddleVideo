@@ -99,6 +99,7 @@ def create_paddle_predictor(args, cfg):
     config.enable_memory_optim()
     # use zero copy
     config.switch_use_feed_fetch_ops(False)
+    config.delete_pass("shuffle_channel_detect_pass")
     predictor = create_predictor(config)
 
     return config, predictor
