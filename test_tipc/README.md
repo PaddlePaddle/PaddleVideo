@@ -25,6 +25,8 @@
 | :--- | :--- |  :----:  | :--------: |  :----  |   :----  |   :----  |
 | PP-TSM     |pptsm_k400_frames_uniform | 动作识别 | 支持 | 混合精度 | - | Paddle Inference: C++ |
 | PP-TSN |pptsn_k400_videos | 动作识别 | 支持 | 混合精度 | - | Paddle Inference: C++ |
+| AGCN |agcn_fsd	 | 动作识别 | 支持 | 混合精度 | - | - |
+| STGCN |stgcn_fsd | 动作识别 | 支持 | 混合精度 | - | - |
 | TimeSformer |timesformer_k400_videos | 动作识别 | 支持 | 混合精度 | - | - |
 | SlowFast |slowfast | 动作识别 | 支持 | 混合精度 | - | - |
 | TSM  |tsm_k400_frames | 动作识别 | 支持 | 混合精度 | - | - |
