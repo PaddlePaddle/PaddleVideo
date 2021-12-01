@@ -101,11 +101,12 @@ PaddleVideo模型部署。
 
 #### 1.2.1 直接下载安装
 
-* [Paddle预测库官网](https://paddleinference.paddlepaddle.org.cn/v2.1/user_guides/download_lib.html) 上提供了不同cuda版本的Linux预测库，可以在官网查看并选择合适的预测库版本（建议选择paddle版本>=2.0.1版本的预测库）。
+* [Paddle预测库官网](https://paddleinference.paddlepaddle.org.cn/v2.1/user_guides/download_lib.html) 上提供了不同cuda版本的Linux预测库，可以在官网查看并**选择合适的预测库版本**（建议选择paddle版本>=2.0.1版本的预测库）。
 
-* 下载之后会得到一个`paddle_inference.tgz`压缩包，使用下面的命令解压：
+* 下载得到一个`paddle_inference.tgz`压缩包，然后将它解压成文件夹，命令如下(以机器环境为gcc8.2为例)：
 
     ```bash
+    wget https://paddle-inference-lib.bj.bcebos.com/2.1.1-gpu-cuda10.1-cudnn7-mkl-gcc8.2/paddle_inference.tgz
     tar -xf paddle_inference.tgz
     ```
 
@@ -266,10 +267,8 @@ PaddleVideo模型部署。
 ​	以example_video_dir下的样例视频`example01.avi`为输入视频为例，最终屏幕上会输出检测结果如下。
 
 ```bash
-[./inference/ppTSM]
-[./deploy/cpp_infer/example_video_dir]
-total videos num: 1
-./example_video_dir/example01.avi   class: 5 archery       score: 0.999556
+I1125 08:10:42.753679 13955 main.cpp:88] The predict video: ./example_video_dir/example01.avi
+5 archery       score: 0.999556
 I1125 08:10:45.834288 13955 autolog.h:50] ----------------------- Config info -----------------------
 I1125 08:10:45.834458 13955 autolog.h:51] runtime_device: cpu
 I1125 08:10:45.834467 13955 autolog.h:52] ir_optim: True

@@ -34,7 +34,7 @@ distill_export:null
 export1:null
 export2:null
 inference_dir:null
-infer_model:./inference/ppTSN/ppTSN.pdmodel
+infer_model:./data/ppTSN_k400.pdparams
 infer_export:tools/export_model.py -c configs/recognition/pptsn/pptsn_k400_videos.yaml
 infer_quant:False
 inference:tools/predict.py --config configs/recognition/pptsn/pptsn_k400_videos.yaml

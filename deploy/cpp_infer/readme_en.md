@@ -101,11 +101,12 @@ There are two ways to obtain the Paddle prediction library, which will be descri
 
 #### 1.2.1 Download and install directly
 
-* [Paddle prediction library official website](https://paddleinference.paddlepaddle.org.cn/v2.1/user_guides/download_lib.html) provides different cuda versions of Linux prediction libraries, you can Check and select the appropriate prediction library version on the official website (it is recommended to select the prediction library with paddle version>=2.0.1).
+* [Paddle prediction library official website](https://paddleinference.paddlepaddle.org.cn/v2.1/user_guides/download_lib.html) provides different cuda versions of Linux prediction libraries, you can Check and **select the appropriate prediction library version** on the official website (it is recommended to select the prediction library with paddle version>=2.0.1).
 
-* After downloading, you will get a `paddle_inference.tgz` compressed package, use the following command to decompress:
+* Download and get a `paddle_inference.tgz` compressed package, and then unzip it into a folder, the command is as follows (taking the machine environment as gcc8.2 as an example):
 
     ```bash
+    wget https://paddle-inference-lib.bj.bcebos.com/2.1.1-gpu-cuda10.1-cudnn7-mkl-gcc8.2/paddle_inference.tgz
     tar -xf paddle_inference.tgz
     ```
 
@@ -265,10 +266,8 @@ More parameters are as follows:
 ​	Take the sample video `example01.avi` under example_video_dir as the input video as an example, the final 	screen will output the detection results as follows.
 
 ```bash
-[./inference/ppTSM]
-[./deploy/cpp_infer/example_video_dir]
-total videos num: 1
-./example_video_dir/example01.avi   class: 5 archery       score: 0.999556
+I1125 08:10:42.753679 13955 main.cpp:88] The predict video: ./example_video_dir/example01.avi
+5 archery       score: 0.999556
 I1125 08:10:45.834288 13955 autolog.h:50] ----------------------- Config info -----------------------
 I1125 08:10:45.834458 13955 autolog.h:51] runtime_device: cpu
 I1125 08:10:45.834467 13955 autolog.h:52] ir_optim: True

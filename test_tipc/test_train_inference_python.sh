@@ -2,7 +2,7 @@
 source test_tipc/common_func.sh
 
 FILENAME=$1
-# MODE be one of ['lite_train_lite_infer' 'lite_train_whole_infer' 'whole_train_whole_infer', 'whole_infer']
+# MODE be one of ['lite_train_lite_infer' 'lite_train_whole_infer' 'whole_train_whole_infer', 'whole_infer', 'klquant_whole_infer']
 MODE=$2
 
 dataline=$(awk 'NR==1, NR==51{print}'  $FILENAME)
@@ -194,7 +194,6 @@ function func_inference(){
                         _save_log_path="${_log_path}/python_infer_gpu_usetrt_${use_trt}_precision_${precision}_batchsize_${batch_size}.log"
                         set_infer_data=$(func_set_params "${video_dir_key}" "${infer_video_dir}")
 
-                        mkdir -p ${_log_path}
                         if [[ $MODE =~ "lite_infer" ]]; then
                             benchmark_value="False"
                         fi

@@ -1,137 +1,115 @@
-# Linux端从训练到推理部署工具链测试方法介绍
 
-Linux端基础训练预测功能测试的主程序为`test_train_inference_python.sh`，可以测试基于Python的模型训练、评估、推理等基本功能，包括裁剪(TODO)、量化(TODO)、蒸馏。
+# 飞桨训推一体认证（TIPC）
 
-- Mac端基础训练预测功能测试参考[TODO]()
-- Windows端基础训练预测功能测试参考[TODO]()
+## 1. 简介
 
-## 1. 测试结论汇总
+飞桨除了基本的模型训练和预测，还提供了支持多端多平台的高性能推理部署工具。本文档提供了PaddleVideo中所有模型的飞桨训推一体认证 (Training and Inference Pipeline Certification(TIPC)) 信息和测试工具，方便用户查阅每种模型的训练推理部署打通情况，并可以进行一键测试。
 
-- 训练相关：
+<div align="center">
+    <img src="docs/guide.png" width="1000">
+</div>
 
-    | 算法名称 | 模型名称 | 单机单卡 | 单机多卡 | 多机多卡 | 模型压缩（单机多卡） |
-    |  :----  |   :----  |    :----  |  :----   |  :----   |  :----   |
-    |  PP-TSM  | pptsm_k400_frames_uniform | 正常训练 | 正常训练 | - | - |
-    |  PP-TSN  | pptsn_k400_videos | 正常训练 | 正常训练 | - | - |
-    |  AGCN  | agcn_fsd | 正常训练 | 正常训练 | - | - |
-    |  STGCN  | stgcn_fsd | 正常训练 | 正常训练 | - | - |
-    |  TimeSformer  | timesformer_k400_videos | 正常训练 | 正常训练 | - | - |
-    |  SlowFast  | slowfast | 正常训练 | 正常训练 | - | - |
-    |  TSM  | tsm_k400_frames | 正常训练 | 正常训练 | - | - |
-    |  TSN  | tsn_k400_frames | 正常训练 | 正常训练 | - | - |
-    |  AttentionLSTM  | attention_lstm_youtube8m | 正常训练 | 正常训练 | - | - |
-    |  BMN  | bmn | 正常训练 | 正常训练 | - | - |
+## 2. 汇总信息
 
+打通情况汇总如下，已填写的部分表示可以使用本工具进行一键测试，未填写的表示正在支持中。
 
-- 预测相关：基于训练是否使用量化，可以将训练产出的模型可以分为`正常模型`和`量化模型(TODO)`，这两类模型对应的预测功能汇总如下，
+**字段说明：**
+- 基础训练预测：包括模型训练、Paddle Inference Python预测。
+- 更多训练方式(TODO)：包括多机多卡、混合精度。
+- 模型压缩(TODO)：包括裁剪、离线/在线量化、蒸馏。
+- 其他预测部署：包括Paddle Inference C++预测、Paddle Serving部署(TODO)、Paddle-Lite部署(TODO)等。
 
-    | 模型类型 |device | batchsize | tensorrt | mkldnn | cpu多线程 |
-    |  ----   |  ---- |   ----   |  :----:  |   :----:   |  :----:  |
-    | 正常模型 | GPU | 1/2 | fp32/fp16 | - | 1/6 |
-    | 正常模型 | CPU | 1/2 | - | fp32/fp16 | 1/6 |
+更详细的mkldnn、Tensorrt等预测加速相关功能的支持情况可以查看各测试工具的[更多教程](#more)。
 
-
-## 2. 测试流程
-
-运行环境配置请参考[文档](./install.md)的内容配置TIPC的运行环境。
-
-### 2.1 安装依赖
-- 安装对应软硬件环境下的PaddlePaddle（>=2.0）
-
-- 安装PaddleVideo依赖
-    ```
-    # 需在PaddleVideo目录下执行
-    python3.7 -m pip install -r requirements.txt
-    ```
-- 安装autolog（规范化日志输出工具）
-    ```
-    git clone https://github.com/LDOUBLEV/AutoLog
-    cd AutoLog
-    python3.7 -m pip install -r requirements.txt
-    python3 setup.py bdist_wheel
-    python3.7 -m pip install ./dist/auto_log-1.0.0-py3-none-any.whl
-    cd ../
-    ```
-- 安装PaddleSlim (可选)
-   ```
-   # 如果要测试量化、裁剪等功能，则需用以下命令安装PaddleSlim
-   python3.7 -m pip install paddleslim
-   ```
+| 算法名称 | 模型名称 | 模型类型 | 基础<br>训练预测 | 更多<br>训练方式 | 模型压缩 |  其他预测部署  |
+| :--- | :--- |  :----:  | :--------: |  :----  |   :----  |   :----  |
+| PP-TSM     |pptsm_k400_frames_uniform | 动作识别 | 支持 | 混合精度 | - | Paddle Inference: C++ |
+| PP-TSN |pptsn_k400_videos | 动作识别 | 支持 | 混合精度 | - | Paddle Inference: C++ |
+| AGCN |agcn_fsd	 | 动作识别 | 支持 | 混合精度 | - | - |
+| STGCN |stgcn_fsd | 动作识别 | 支持 | 混合精度 | - | - |
+| TimeSformer |timesformer_k400_videos | 动作识别 | 支持 | 混合精度 | - | - |
+| SlowFast |slowfast | 动作识别 | 支持 | 混合精度 | - | - |
+| TSM  |tsm_k400_frames | 动作识别 | 支持 | 混合精度 | - | - |
+| TSN  |tsn_k400_frames          | 动作识别 |支持|混合精度|-|-|
+| AttentionLSTM |attention_lstm_youtube8m | 动作识别 | 支持 | 混合精度 | - | - |
+| BMN |bmn | 动作时间定位 | 支持 | 混合精度 | - | - |
 
 
-### 2.2 基本功能测试
-以PP-TSM的测试链条为例，细节介绍如下：
-1. 先运行`prepare.sh`，根据传入模型名字，准备对应数据和预训练模型参数
-2. 再运行`test_train_inference_python.sh`，根据传入模型名字，进行对应测试
-3. 在`test_tipc/output/PP-TSM`目录下生成 `python_infer_*.log` 格式的日志文件
 
-`test_train_inference_python.sh` 包含5种运行模式，每种模式的运行数据不同，分别用于测试速度和精度，分别是：
+## 3. 测试工具简介
+### 目录介绍
 
-- 模式1：**lite_train_lite_infer**，使用少量数据训练，用于快速验证训练到预测的走通流程，不验证精度和速度；
-    ```shell
-    bash test_tipc/prepare.sh test_tipc/configs/PP-TSM.txt 'lite_train_lite_infer'
-    bash test_tipc/test_train_inference_python.sh test_tipc/configs/PP-TSM.txt 'lite_train_lite_infer'
-    ```
-
-- 模式2：**lite_train_whole_infer**，使用少量数据训练，一定量数据预测，用于验证训练后的模型执行预测，预测速度是否合理；
-    ```shell
-    bash test_tipc/prepare.sh test_tipc/configs/PP-TSM.txt  'lite_train_whole_infer'
-    bash test_tipc/test_train_inference_python.sh test_tipc/configs/PP-TSM.txt 'lite_train_whole_infer'
-    ```
-
-- 模式3：**whole_infer**，不训练，全量数据预测，走通开源模型评估、动转静，检查inference model预测时间和精度；
-    ```shell
-    bash test_tipc/prepare.sh test_tipc/configs/PP-TSM.txt 'whole_infer'
-    # 用法1:
-    bash test_tipc/test_train_inference_python.sh test_tipc/configs/PP-TSM.txt 'whole_infer'
-    # 用法2: 指定GPU卡预测，第三个传入参数为GPU卡号
-    bash test_tipc/test_train_inference_python.sh test_tipc/configs/PP-TSM.txt 'whole_infer' '1'
-    ```
-
-- 模式4：**whole_train_whole_infer**，CE： 全量数据训练，全量数据预测，验证模型训练精度，预测精度，预测速度；
-    ```shell
-    bash test_tipc/prepare.sh test_tipc/configs/PP-TSM.txt 'whole_train_whole_infer'
-    bash test_tipc/test_train_inference_python.sh test_tipc/configs/PP-TSM.txt 'whole_train_whole_infer'
-    ```
-    最终在`test_tipc/output/PP-TSM`目录下生成.log后缀的日志文件
-
-`test_inference_cpp.sh`负责验证inference model的**C++预测**是否能跑通：
-- 命令如下
-    ```shell
-    bash test_tipc/prepare.sh test_tipc/configs/PP-TSM_CPP.txt
-    bash test_tipc/test_inference_cpp.sh test_tipc/configs/PP-TSM_CPP.txt
-    ```
-
-    最终在`test_tipc/output/PP-TSM_CPP`目录下生成.log后缀的日志文件
-
-
-### 2.3 精度测试
-
-使用compare_results.py脚本比较模型预测的结果是否符合预期，主要步骤包括：
-- 提取`*.log`日志中的预测结果，包括类别和概率
-- 从本地文件中提取保存好的真值结果；
-- 比较上述两个结果是否符合精度预期，误差大于设置阈值时会报错。
-
-#### 使用方式
-运行命令：
 ```shell
-python3.7 test_tipc/compare_results.py --gt_file=test_tipc/results/PP-TSM/python_*.txt  --log_file=test_tipc/output/PP-TSM/python_*.log --atol=1e-3 --rtol=1e-3
+test_tipc/
+├── configs/  # 配置文件目录
+    ├── PP-TSM.txt # PP-TSM在Linux上进行python训练预测（基础训练预测）的配置文件
+    ├── PP-TSN.txt # PP-TSN在Linux上进行python训练预测（基础训练预测）的配置文件
+    ├── ...
+    └── ...  
+├── results/   # 预先保存的预测结果，用于和实际预测结果进行精度比对
+    ├── PP-TSM/
+    	├── python_ppvideo_PP-TSM_results_fp16.txt # 预存的PP-TSM识别识别模型python预测fp16精度的结果
+    	└── python_ppvideo_PP-TSM_results_fp32.txt # 预存的PP-TSM识别识别模型python预测fp32精度的结果
+    ├── PP-TSN/
+    	├── python_ppvideo_PP-TSN_results_fp32.txt # 预存的PP-TSN识别识别模型python预测fp16精度的结果
+    	└── python_ppvideo_PP-TSN_results_fp32.txt # 预存的PP-TSN识别识别模型python预测fp32精度的结果
+    ├── PP-TSN_CPP/
+    	├── python_ppvideo_PP-TSN_results_fp32.txt # 预存的PP-TSN识别识别模型C++预测fp16精度的结果
+    	└── python_ppvideo_PP-TSN_results_fp32.txt # 预存的PP-TSN识别识别模型C++预测fp32精度的结果
+    ├── ...
+    └── ...
+├── prepare.sh                        # 完成test_*.sh运行所需要的数据和模型下载
+├── test_train_inference_python.sh    # 测试python训练预测的主程序
+├── test_inference_cpp.sh             # 测试C++预测的主程序
+├── compare_results.py                # 用于对比log中的预测结果与results中的预存结果精度误差是否在限定范围内
+└── README.md                         # 介绍文档
 ```
 
-参数介绍：  
-- gt_file: 指向事先保存好的预测结果路径，支持*.txt 结尾，会自动索引*.txt格式的文件，文件默认保存在`test_tipc/result/模型名称`文件夹下
-- log_file: 指向运行`test_tipc/test_train_inference_python.sh` 脚本的infer模式保存的预测日志，预测日志中打印的有预测结果，比如：文本框，预测文本，类别等等，同样支持python_infer_\*.log格式传入
-- atol: 设置的绝对误差
-- rtol: 设置的相对误差
+### 测试流程概述
 
-#### 运行结果
+使用本工具，可以测试不同功能的支持情况，以及预测结果是否对齐，测试流程概括如下：
+<div align="center">
+    <img src="docs/Video_TIPC.png" width="800">
+</div>
 
-正常运行效果如下：
-```bash
-Assert allclose passed! The results of python_infer_cpu_usemkldnn_False_threads_6_precision_fp32_batchsize_16.log and ./test_tipc/results/PP-TSM/python_ppvideo_PP-TSM_results_fp32.txt are consistent!
+
+1. 运行prepare.sh准备测试所需数据和模型；
+2. 运行要测试的功能对应的测试脚本`test_*.sh`，产出log，由log可以看到不同配置是否运行成功；
+3. 用`compare_results.py`对比log中的预测结果和预存在results目录下的结果，判断预测精度是否符合预期（在误差范围内）。
+
+测试单项功能仅需两行命令，**如需测试不同模型/功能，替换配置文件即可**，命令格式如下：
+```shell
+# 功能：准备数据
+# 格式：bash + 运行脚本 + 参数1: 配置文件选择 + 参数2: 模式选择
+bash test_tipc/prepare.sh  configs/[model_params_file_name]  [Mode]
+
+# 功能：运行测试
+# 格式：bash + 运行脚本 + 参数1: 配置文件选择 + 参数2: 模式选择
+bash test_tipc/test_train_inference_python.sh configs/[model_params_file_name]  [Mode]
 ```
 
-出现不一致结果时的样例输出如下：
-```bash
-ValueError: The results of python_infer_gpu_usetrt_False_precision_fp32_batchsize_8.log and the results of ./test_tipc/results/PP-TSM/python_ppvideo_PP-TSM_results_fp32.txt are inconsistent!
+例如，测试基本训练预测功能的`lite_train_lite_infer`模式，运行：
+```shell
+# 准备数据
+bash test_tipc/prepare.sh ./test_tipc/configs/PP-TSM.txt 'lite_train_lite_infer'
+# 运行测试
+bash test_tipc/test_train_inference_python.sh ./test_tipc/configs/PP-TSM.txt 'lite_train_lite_infer'
 ```
+关于本示例命令的更多信息可查看[基础训练预测使用文档](./docs/test_train_inference_python.md)。
+
+### 配置文件命名规范
+在`configs`目录下存放所有模型测试需要用到的配置文件，配置文件的命名遵循如下规范：
+
+1. 基础训练预测配置简单命名为：`train_infer_python.txt`，表示**Linux环境下单机、不使用混合精度训练+python预测**，其完整命名对应`train_linux_gpu_normal_normal_infer_python_linux_gpu_cpu.txt`，由于本配置文件使用频率较高，这里进行了名称简化。
+
+2. 其他带训练配置命名格式为：`train_训练硬件环境(linux_gpu/linux_dcu/…)_是否多机(fleet/normal)_是否混合精度(amp/normal)_预测模式(infer/lite/serving/js)_语言(cpp/python/java)_预测硬件环境(linux_gpu/mac/jetson/opencl_arm_gpu/...).txt`。如，linux gpu下多机多卡+混合精度链条测试对应配置 `train_linux_gpu_fleet_amp_infer_python_linux_gpu_cpu.txt`，linux dcu下基础训练预测对应配置 `train_linux_dcu_normal_normal_infer_python_linux_dcu.txt`。
+
+3. 仅预测的配置（如serving、lite等）命名格式：`model_训练硬件环境(linux_gpu/linux_dcu/…)_是否多机(fleet/normal)_是否混合精度(amp/normal)_(infer/lite/serving/js)_语言(cpp/python/java)_预测硬件环境(linux_gpu/mac/jetson/opencl_arm_gpu/...).txt`，即，与2相比，仅第一个字段从train换为model，测试时模型直接下载获取，这里的“训练硬件环境”表示所测试的模型是在哪种环境下训练得到的。
+
+**根据上述命名规范，可以直接从子目录名称和配置文件名找到需要测试的场景和功能对应的配置文件。**
+
+<a name="more"></a>
+
+## 4. 开始测试
+各功能测试中涉及混合精度、裁剪、量化等训练相关，及mkldnn、Tensorrt等多种预测相关参数配置，请点击下方相应链接了解更多细节和使用教程：  
+- [test_train_inference_python 使用](docs/test_train_inference_python.md) ：测试基于Python的模型训练、评估、推理等基本功能。

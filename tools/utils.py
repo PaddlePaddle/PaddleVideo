@@ -25,6 +25,7 @@ from PIL import Image
 
 __dir__ = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.abspath(os.path.join(__dir__, '../')))
+from abc import ABC, abstractmethod
 
 from paddlevideo.loader.pipelines import (AutoPadding, CenterCrop,
                                           DecodeSampler, FeatureDecoder,
@@ -114,20 +115,36 @@ class Base_Inference_helper():
         self.target_size = target_size
         self.top_k = top_k
 
+    @abstractmethod
     def preprocess(self, input_file):
-        raise NotImplementedError
+        pass
 
-    def postprocess(self, output, print_output=True, top_k=1):
+    def preprocess_batch(self, file_list):
+        batched_inputs = []
+        for file in file_list:
+            inputs = self.preprocess(file)
+            batched_inputs.append(inputs)
+        batched_inputs = [
+            np.concatenate([item[i] for item in batched_inputs])
+            for i in range(len(batched_inputs[0]))
+        ]
+        self.input_file = file_list
+        return batched_inputs
+
+    def postprocess(self, output, print_output=True):
         """
         output: list
         """
         if not isinstance(self.input_file, list):
-            self.input_file = [self.input_file, ]
+            self.input_file = [
+                self.input_file,
+            ]
         output = output[0]  # [B, num_cls]
         N = len(self.input_file)
         if output.shape[0] != N:
-            output = output.reshape([N] + [output.shape[0] // N] + list(output.shape[1:])) # [N, T, C]
-            output = output.mean(axis=1) # [N, C]
+            output = output.reshape([N] + [output.shape[0] // N] +
+                                    list(output.shape[1:]))  # [N, T, C]
+            output = output.mean(axis=1)  # [N, C]
         output = F.softmax(paddle.to_tensor(output), axis=-1).numpy()
         for i in range(N):
             classes = np.argpartition(output[i], -self.top_k)[-self.top_k:]
@@ -138,8 +155,6 @@ class Base_Inference_helper():
                 for j in range(self.top_k):
                     print("\ttop-{0} class: {1}".format(j + 1, classes[j]))
                     print("\ttop-{0} score: {1}".format(j + 1, scores[j]))
-
-
 
 
 @INFERENCE.register()
@@ -161,9 +176,6 @@ class ppTSM_Inference_helper(Base_Inference_helper):
         input_file: str, file path
         return: list
         """
-        self.input_file = input_file
-        if not isinstance(self.input_file, list):
-            self.input_file = [self.input_file, ]
         assert os.path.isfile(input_file) is not None, "{0} not exists".format(
             input_file)
         results = {'filename': input_file}
@@ -203,9 +215,6 @@ class ppTSN_Inference_helper(Base_Inference_helper):
         input_file: str, file path
         return: list
         """
-        self.input_file = input_file
-        if not isinstance(self.input_file, list):
-            self.input_file = [self.input_file, ]
         assert os.path.isfile(input_file) is not None, "{0} not exists".format(
             input_file)
         results = {'filename': input_file}
@@ -257,14 +266,14 @@ class BMN_Inference_helper(Base_Inference_helper):
 
         return [res]
 
-    def postprocess(self, outputs):
+    def postprocess(self, outputs, print_output=True):
         """
         output: list
         """
         pred_bm, pred_start, pred_end = outputs
-        self._gen_props(pred_bm, pred_start[0], pred_end[0])
+        self._gen_props(pred_bm, pred_start[0], pred_end[0], print_output)
 
-    def _gen_props(self, pred_bm, pred_start, pred_end, print_output=True):
+    def _gen_props(self, pred_bm, pred_start, pred_end, print_output):
         snippet_xmins = [1.0 / self.tscale * i for i in range(self.tscale)]
         snippet_xmaxs = [
             1.0 / self.tscale * i for i in range(1, self.tscale + 1)
@@ -337,9 +346,6 @@ class TimeSformer_Inference_helper(Base_Inference_helper):
         input_file: str, file path
         return: list
         """
-        self.input_file = input_file
-        if not isinstance(self.input_file, list):
-            self.input_file = [self.input_file, ]
         assert os.path.isfile(input_file) is not None, "{0} not exists".format(
             input_file)
         results = {'filename': input_file}
@@ -383,9 +389,6 @@ class SlowFast_Inference_helper(Base_Inference_helper):
         input_file: str, file path
         return: list
         """
-        self.input_file = input_file
-        if not isinstance(self.input_file, list):
-            self.input_file = [self.input_file, ]
         assert os.path.isfile(input_file) is not None, "{0} not exists".format(
             input_file)
         results = {
@@ -425,8 +428,9 @@ class SlowFast_Inference_helper(Base_Inference_helper):
 
         N = len(self.input_file)
         if output.shape[0] != N:
-            output = output.reshape([N] + [output.shape[0] // N] + list(output.shape[1:])) # [N, T, C]
-            output = output.mean(axis=1) # [N, C]
+            output = output.reshape([N] + [output.shape[0] // N] +
+                                    list(output.shape[1:]))  # [N, T, C]
+            output = output.mean(axis=1)  # [N, C]
         # output = F.softmax(paddle.to_tensor(output), axis=-1).numpy() # done in it's head
         for i in range(N):
             classes = np.argpartition(output[i], -self.top_k)[-self.top_k:]
@@ -458,9 +462,6 @@ class STGCN_Inference_helper(Base_Inference_helper):
         input_file: str, file path
         return: list
         """
-        self.input_file = input_file
-        if not isinstance(self.input_file, list):
-            self.input_file = [self.input_file, ]
         assert os.path.isfile(input_file) is not None, "{0} not exists".format(
             input_file)
         data = np.load(input_file)
@@ -495,9 +496,6 @@ class AttentionLSTM_Inference_helper(Base_Inference_helper):
         input_file: str, file path
         return: list
         """
-        self.input_file = input_file
-        if not isinstance(self.input_file, list):
-            self.input_file = [self.input_file, ]
         assert os.path.isfile(input_file) is not None, "{0} not exists".format(
             input_file)
         results = {'filename': input_file}
