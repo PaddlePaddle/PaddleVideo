@@ -21,8 +21,9 @@ from .slowfast_head import SlowFastHead
 from .attention_lstm_head import AttentionLstmHead
 from .timesformer_head import TimeSformerHead
 from .stgcn_head import STGCNHead
+from .transnetv2_head import TransNetV2Head
 
 __all__ = [
     'BaseHead', 'TSNHead', 'TSMHead', 'ppTSMHead', 'ppTSNHead', 'SlowFastHead',
-    'AttentionLstmHead', 'TimeSformerHead', 'STGCNHead'
+    'AttentionLstmHead', 'TimeSformerHead', 'STGCNHead', 'TransNetV2Head'
 ]

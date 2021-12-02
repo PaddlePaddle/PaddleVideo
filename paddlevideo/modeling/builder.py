@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .registry import BACKBONES, HEADS, LOSSES, RECOGNIZERS, LOCALIZERS
+from .registry import BACKBONES, HEADS, LOSSES, RECOGNIZERS, LOCALIZERS, PARTITIONERS
 from ..utils import build
 
 
@@ -41,6 +41,11 @@ def build_localizer(cfg):
     return build(cfg, LOCALIZERS, key='framework')
 
 
+def build_partitioner(cfg):
+    """Build partitioner."""
+    return build(cfg, PARTITIONERS, key='framework')
+
+
 def build_model(cfg):
     cfg_copy = cfg.copy()
     framework_type = cfg_copy.get('framework')
@@ -48,5 +53,7 @@ def build_model(cfg):
         return build_recognizer(cfg)
     elif framework_type in LOCALIZERS:
         return build_localizer(cfg)
+    elif framework_type in PARTITIONERS:
+        return build_partitioner(cfg)
     else:
         raise NotImplementedError

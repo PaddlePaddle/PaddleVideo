@@ -18,7 +18,7 @@ from .builder import (build_backbone, build_head, build_recognizer,
 from .heads import BaseHead, TSNHead
 from .losses import CrossEntropyLoss
 from .framework.recognizers import BaseRecognizer, recognizer2d
-from .registry import BACKBONES, HEADS, LOSSES, RECOGNIZERS, LOCALIZERS
+from .registry import BACKBONES, HEADS, LOSSES, RECOGNIZERS, LOCALIZERS, PARTITIONERS
 from .weight_init import weight_init_
 
 __all__ = [
@@ -26,6 +26,7 @@ __all__ = [
     'HEADS',
     'RECOGNIZERS',
     'LOCALIZERS',
+    'PARTITIONERS',
     'LOSSES',
     'build_recognizer',
     'build_localizer',
