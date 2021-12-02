@@ -82,15 +82,17 @@ def create_paddle_predictor(args, cfg):
             precision = inference.PrecisionType.Float32
 
         # calculate real max batch size during inference when tenrotRT enabled
-        num_seg = cfg.INFERENCE.num_seg
-        num_views = 1
-        if 'tsm' in cfg.model_name.lower():
-            num_views = 1  # CenterCrop
-        elif 'tsn' in cfg.model_name.lower():
-            num_views = 10  # TenCrop
-        elif 'timesformer' in cfg.model_name.lower():
-            num_views = 3  # UniformCrop
-        max_batch_size = args.batch_size * num_views * num_seg
+        max_batch_size = args.batch_size
+        if 'num_seg' in cfg.INFERENCE:
+            num_seg = cfg.INFERENCE.num_seg
+            num_views = 1
+            if 'tsm' in cfg.model_name.lower():
+                num_views = 1  # CenterCrop
+            elif 'tsn' in cfg.model_name.lower():
+                num_views = 10  # TenCrop
+            elif 'timesformer' in cfg.model_name.lower():
+                num_views = 3  # UniformCrop
+            max_batch_size = args.batch_size * num_views * num_seg
         config.enable_tensorrt_engine(precision_mode=precision,
                                       max_batch_size=max_batch_size)
 
