@@ -1,0 +1,30 @@
+# PaddleVieo Example Configuration
+MODEL:
+    framework: "ExampleRecognizer"
+    backbone:
+        name: "ExampleBackbone"
+    head:
+        name: "ExampleHead"
+
+DATASET:
+    batch_size: 10
+    num_workers: 0
+    train:
+        format: "ExampleDataset"
+
+PIPELINE:
+    train:
+        norm:
+            name: "ExamplePipeline"  # NOTE: indent
+
+OPTIMIZER:
+    name: 'Adam'
+    learning_rate:
+        name: 'StepDecay'
+        learning_rate: 0.001
+        step_size: 10
+
+
+model_name: "ExampleModel"
+log_interval: 1
+epochs: 5

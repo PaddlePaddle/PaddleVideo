@@ -7,6 +7,9 @@ export CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7
 
 start_time=$(date +%s)
 
+# run example model
+python3.7 main.py -c configs/my_example.yaml
+
 # run tsm training
 #python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_tsm main.py  --validate -c configs/recognition/tsm/tsm_k400_frames.yaml
 
@@ -32,7 +35,7 @@ start_time=$(date +%s)
 #python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_attetion_lstm  main.py  --validate -c configs/recognition/attention_lstm/attention_lstm_youtube-8m.yaml
 
 # run pp-tsm training
-python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=log_pptsm  main.py  --validate -c configs/recognition/pptsm/pptsm_k400_frames_uniform.yaml
+#python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=log_pptsm  main.py  --validate -c configs/recognition/pptsm/pptsm_k400_frames_uniform.yaml
 
 # run pp-tsn training
 # python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=log_pptsn  main.py  --validate -c configs/recognition/pptsn/pptsn_k400_frames.yaml
