@@ -2,7 +2,7 @@
 
 # PaddleVideo
 ## 最新动态
-- 🔥🔥🔥 2021年CCF大数据与计算智能大赛火热进行中，欢迎参加CCF和百度飞桨联合推出奖金10万元的赛题[基于飞桨实现花样滑冰选手骨骼点动作识别](https://www.datafountain.cn/competitions/519)！:tada: 
+- 🔥🔥🔥 2021年CCF大数据与计算智能大赛火热进行中，欢迎参加CCF和百度飞桨联合推出奖金10万元的赛题[基于飞桨实现花样滑冰选手骨骼点动作识别](https://www.datafountain.cn/competitions/519)！:tada:
 赛题baseline由PaddleVideo提供[ST-GCN](https://github.com/PaddlePaddle/PaddleVideo/blob/develop/docs/zh-CN/model_zoo/recognition/stgcn.md)，
 [教程链接](https://aistudio.baidu.com/aistudio/projectdetail/2417717)，[视频链接](https://www.bilibili.com/video/BV1w3411172G)
 
@@ -45,6 +45,7 @@ PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_githu
 | :----------------- | :----------------------------------------------------------: | :------------------------------------------------: | :------: | :-------: |
 | 行为识别|   [**PP-TSM**](./docs/zh-CN/model_zoo/recognition/pp-tsm.md)  |    [Kinetics-400](./docs/zh-CN/dataset/k400.md)    |  Top-1   | **76.16** |
 | 行为识别 |  [**PP-TSN**](./docs/zh-CN/model_zoo/recognition/pp-tsn.md)  |    [Kinetics-400](./docs/zh-CN/dataset/k400.md)    |  Top-1   | **75.06** |
+| 行为识别 | [**PP-TimeSformer**](./docs/zh-CN/model_zoo/recognition/pptimesformer.md) |    [Kinetics-400](./docs/zh-CN/dataset/k400.md)    |  Top-1   |   79.49   |
 | 行为识别 | [AGCN](./docs/zh-CN/model_zoo/recognition/agcn.md) | [FSD](./docs/zh-CN/dataset/fsd.md) | Top-1 | 62.29 |
 | 行为识别 | [ST-GCN](./docs/zh-CN/model_zoo/recognition/stgcn.md) | [FSD](./docs/zh-CN/dataset/fsd.md) | Top-1 | 59.07 |
 | 行为识别 | [TimeSformer](./docs/zh-CN/model_zoo/recognition/timesformer.md) |    [Kinetics-400](./docs/zh-CN/dataset/k400.md)    |  Top-1   |   77.29   |
@@ -96,6 +97,7 @@ PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_githu
        - [TSM](docs/zh-CN/model_zoo/recognition/tsm.md)
        - [PP-TSM](docs/zh-CN/model_zoo/recognition/pp-tsm.md)
        - [PP-TSN](docs/zh-CN/model_zoo/recognition/pp-tsn.md)
+       - [PP-TimeSformer](docs/zh-CN/model_zoo/recognition/pptimesformer.md)
        - [SlowFast](docs/zh-CN/model_zoo/recognition/slowfast.md)
        - [TimeSformer](docs/zh-CN/model_zoo/recognition/timesformer.md)
        - [Attention-LSTM](docs/zh-CN/model_zoo/recognition/attention_lstm.md)
@@ -117,7 +119,7 @@ PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_githu
 - [赛事支持](#赛事支持)
 - [许可证书](#许可证书)
 - [贡献代码](#贡献代码)
- 
+
 
 ## 赛事支持
 - [CCKS 2021：知识增强的视频语义理解](https://www.biendata.xyz/competition/ccks_2021_videounderstanding/)

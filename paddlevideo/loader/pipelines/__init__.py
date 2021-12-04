@@ -19,7 +19,7 @@ from .augmentations import (CenterCrop, Image2Array, JitterScale, MultiCrop,
 from .compose import Compose
 from .decode import FeatureDecoder, FrameDecoder, VideoDecoder
 from .decode_sampler import DecodeSampler
-from .mix import Cutmix, Mixup
+from .mix import Cutmix, Mixup, VideoMix
 from .sample import Sampler
 from .skeleton_pipeline import AutoPadding, Iden, SkeletonNorm
 
@@ -28,5 +28,5 @@ __all__ = [
     'Normalization', 'Compose', 'VideoDecoder', 'FrameDecoder', 'Sampler',
     'Mixup', 'Cutmix', 'JitterScale', 'MultiCrop', 'PackOutput', 'TenCrop',
     'UniformCrop', 'DecodeSampler', 'LoadFeat', 'GetMatchMap', 'GetVideoLabel',
-    'AutoPadding', 'SkeletonNorm', 'Iden'
+    'AutoPadding', 'SkeletonNorm', 'Iden', 'VideoMix', 'FeatureDecoder'
 ]

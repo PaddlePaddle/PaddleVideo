@@ -160,25 +160,15 @@ Second, start PaddleInference engine to infer a video.
 
 ```bash
 python tools/predict.py \
-    --video_file "data/example.avi" \
+    --input_file "data/example.avi" \
     --model_file "./inference/example.pdmodel" \
     --params_file "./inference/example.pdiparams" \
     --use_gpu=True \
     --use_tensorrt=False
 ```
-- **Note**: For models that combine N and T during calculation (such as TSN, TSM), when `use_tensorrt=True`, you need to specify the `batch_size` argument as batch_size\*num_seg.
 
-    ```bash
-    python tools/predict.py \
-        --video_file "data/example.avi" \
-        --model_file "./inference/example.pdmodel" \
-        --params_file "./inference/example.pdiparams" \
-        --batch_size 8 \
-        --use_gpu=True \
-        --use_tensorrt=True
-    ```
 Attributes:
-+ `video_file`: video file path.
++ `input_file`: input file path or input directory, which contains input files(s).
 + `model_file`: pdmodel file path.
 + `params_file`: pdiparams file path.
 + `use_tensorrt`: use tensorrt to acclerate or not, default: False.
