@@ -13,18 +13,22 @@
 // limitations under the License.
 
 #include <include/video_rec.h>
-// #define DEBUG_HSS
 
 namespace PaddleVideo
 {
-
-    void VideoRecognizer::Run(std::vector<cv::Mat> &frames, std::vector<double> *times)
+    void VideoRecognizer::Run(const std::vector<string> &frames_batch_path, const std::vector<std::vector<cv::Mat> > &frames_batch, std::vector<double> *times)
     {
         // Copy parameters to the function
-        std::vector<cv::Mat> srcframes(this->num_seg, cv::Mat());
-        for (int i = 0; i < this->num_seg; ++i)
+        int real_batch_num = frames_batch.size();
+
+        std::vector<cv::Mat> srcframes(real_batch_num * this->num_seg, cv::Mat());
+
+        for (int i = 0; i < real_batch_num; ++i)
         {
-            frames[i].copyTo(srcframes[i]);
+            for (int j = 0; j < this->num_seg; ++j)
+            {
+                frames_batch[i][j].copyTo(srcframes[i * this->num_seg + j]);
+            }
         }
 
         auto preprocess_start = std::chrono::steady_clock::now();
@@ -32,43 +36,56 @@ namespace PaddleVideo
         std::vector<cv::Mat> resize_frames;
         std::vector<cv::Mat> crop_frames;
         std::vector<float> input;
-        int num_views;
+        int num_views = 1;
+
         if (this->inference_model_name == "ppTSM")
         {
             num_views = 1;
             // 1. Scale
-            resize_frames = std::vector<cv::Mat>(this->num_seg, cv::Mat());
-            for (int i = 0; i < this->num_seg; ++i)
-            {
-                this->scale_op_.Run(srcframes[i], resize_frames[i], this->use_tensorrt_, 256);
-            }
-
-            // 2. CenterCrop
-            crop_frames = std::vector<cv::Mat>(num_views * this->num_seg, cv::Mat());
-            for (int j = 0; j < this->num_seg; ++j)
-            {
-                this->centercrop_op_.Run(resize_frames[j], crop_frames[j], this->use_tensorrt_, 224);
-            }
-
-            // 3. Normalization(inplace operation)
-            for (int i = 0; i < num_views; ++i)
+            resize_frames = std::vector<cv::Mat>(real_batch_num * this->num_seg, cv::Mat());
+            for (int i = 0; i < real_batch_num; ++i)
             {
                 for (int j = 0; j < this->num_seg; ++j)
                 {
-                    this->normalize_op_.Run(&crop_frames[i * this->num_seg + j], this->mean_, this->scale_, this->is_scale_);
+                    this->scale_op_.Run(srcframes[i * this->num_seg + j], resize_frames[i * this->num_seg + j], this->use_tensorrt_, 256);
+                }
+            }
+
+            // 2. CenterCrop
+            crop_frames = std::vector<cv::Mat>(real_batch_num * num_views * this->num_seg, cv::Mat());
+            for (int i = 0; i < real_batch_num; ++i)
+            {
+                for (int j = 0; j < this->num_seg; ++j)
+                {
+                    this->centercrop_op_.Run(resize_frames[i * this->num_seg + j], crop_frames[i * this->num_seg + j], this->use_tensorrt_, 224);
+                }
+            }
+
+            // 3. Normalization(inplace operation)
+            for (int i = 0; i < real_batch_num; ++i)
+            {
+                for (int j = 0; j < num_views; ++j)
+                {
+                    for (int k = 0; k < this->num_seg; ++k)
+                    {
+                        this->normalize_op_.Run(&crop_frames[i * num_views * this->num_seg + j * this->num_seg + k], this->mean_, this->scale_, this->is_scale_);
+                    }
                 }
             }
 
             // 4. Image2Array
-            input = std::vector<float>(1 * num_views * this->num_seg * 3 * crop_frames[0].rows * crop_frames[0].cols, 0.0f);
             int rh = crop_frames[0].rows;
             int rw = crop_frames[0].cols;
             int rc = crop_frames[0].channels();
-            for (int i=0; i<num_views; ++i)
+            input = std::vector<float>(real_batch_num * num_views * this->num_seg *  crop_frames[0].rows * crop_frames[0].cols * rc, 0.0f);
+            for (int i = 0; i < real_batch_num; ++i)
             {
-                for (int j = 0; j < this->num_seg; ++j)
+                for (int j = 0; j < num_views; ++j)
                 {
-                    this->permute_op_.Run(&crop_frames[i * this->num_seg + j], input.data() + i * j * rh * rw * rc);
+                    for (int k = 0; k < this->num_seg; ++k)
+                    {
+                        this->permute_op_.Run(&crop_frames[i * num_views * this->num_seg + j * this->num_seg + k], input.data() + (i * num_views * this->num_seg + j * this->num_seg + k) * (rh * rw * rc));
+                    }
                 }
             }
         }
@@ -76,30 +93,38 @@ namespace PaddleVideo
         {
             num_views = 10;
             // 1. Scale
-            resize_frames = std::vector<cv::Mat>(this->num_seg, cv::Mat());
-            for (int i = 0; i < this->num_seg; ++i)
-            {
-                this->scale_op_.Run(srcframes[i], resize_frames[i], this->use_tensorrt_, 256);
-            }
-
-            // 2. TenCrop
-            crop_frames = std::vector<cv::Mat>(num_views * this->num_seg, cv::Mat());
-            for (int i = 0; i < this->num_seg; ++i)
-            {
-                this->tencrop_op_.Run(resize_frames[i], crop_frames, i * num_views, this->use_tensorrt_, 224);
-            }
-
-            // 3. Normalization(inplace operation)
-            for (int i = 0; i < num_views; ++i)
+            resize_frames = std::vector<cv::Mat>(real_batch_num * this->num_seg, cv::Mat());
+            for (int i = 0; i < real_batch_num; ++i)
             {
                 for (int j = 0; j < this->num_seg; ++j)
                 {
-                    this->normalize_op_.Run(&crop_frames[i * this->num_seg + j], this->mean_, this->scale_, this->is_scale_);
+                    this->scale_op_.Run(srcframes[i * this->num_seg + j], resize_frames[i * this->num_seg + j], this->use_tensorrt_, 256);
+                }
+            }
+
+            // 2. TenCrop
+            crop_frames = std::vector<cv::Mat>(real_batch_num * this->num_seg * num_views, cv::Mat());
+            for (int i = 0; i < real_batch_num; ++i)
+            {
+                for (int j = 0; j < this->num_seg; ++j)
+                {
+                    this->tencrop_op_.Run(resize_frames[i * this->num_seg + j], crop_frames, (i * this->num_seg  + j) * num_views, this->use_tensorrt_, 224);
+                }
+            }
+
+            // 3. Normalization(inplace operation)
+            for (int i = 0; i < real_batch_num; ++i)
+            {
+                for (int j = 0; j < num_views; ++j)
+                {
+                    for (int k = 0; k < this->num_seg; ++k)
+                    {
+                        this->normalize_op_.Run(&crop_frames[i * num_views * this->num_seg + j * this->num_seg + k], this->mean_, this->scale_, this->is_scale_);
+                    }
                 }
             }
 
             // 4. Image2Array
-            input = std::vector<float>(1 * num_views * this->num_seg * 3 * crop_frames[0].rows * crop_frames[0].cols, 0.0f);
             int rh = crop_frames[0].rows;
             int rw = crop_frames[0].cols;
             int rc = crop_frames[0].channels();
@@ -120,7 +145,7 @@ namespace PaddleVideo
         /* Inference */
         auto input_names = this->predictor_->GetInputNames();
         auto input_t = this->predictor_->GetInputHandle(input_names[0]);
-        input_t->Reshape({1 * num_views * this->num_seg, 3, crop_frames[0].rows, crop_frames[0].cols});
+        input_t->Reshape({real_batch_num * num_views * this->num_seg, 3, crop_frames[0].rows, crop_frames[0].cols});
         auto inference_start = std::chrono::steady_clock::now();
         input_t->CopyFromCpu(input.data());
         this->predictor_->Run(); // Use the inference library to predict
@@ -130,36 +155,38 @@ namespace PaddleVideo
         auto output_t = this->predictor_->GetOutputHandle(output_names[0]);
         auto predict_shape = output_t->shape();
 
+        // Get the number of class
+        int class_num = predict_shape[1];
+
         int out_numel = std::accumulate(predict_shape.begin(), predict_shape.end(), 1, std::multiplies<int>());
-        predict_batch.resize(out_numel);
+        predict_batch.resize(out_numel); // NxC
         output_t->CopyToCpu(predict_batch.data()); // Copy the model output to predict_batch
 
         // Convert output (logits) into probabilities
-        this->softmax_op_.Inplace_Run(predict_batch);
+        for (int i = 0; i < real_batch_num; ++i)
+        {
+            this->softmax_op_.Inplace_Run(predict_batch.begin() + i * class_num, predict_batch.begin() + (i + 1) * class_num);
+        }
 
         auto inference_end = std::chrono::steady_clock::now();
 
         // output decode
         auto postprocess_start = std::chrono::steady_clock::now();
         std::vector<std::string> str_res;
-        int argmax_idx = 0;
-        int last_index = 0;
-        float score = 0.f;
-        int count = 0;
-        float max_value = 0.0f;
+        std::vector<float>scores;
 
-        argmax_idx = int(Utility::argmax(predict_batch.begin(), predict_batch.end()));
-        score += predict_batch[argmax_idx];
-        count += 1;
-        str_res.push_back(this->label_list_[argmax_idx]);
-
+        for (int i = 0; i < real_batch_num; ++i)
+        {
+            int argmax_idx = int(Utility::argmax(predict_batch.begin() + i * class_num, predict_batch.begin() + (i + 1) * class_num));
+            float score = predict_batch[argmax_idx];
+            scores.push_back(score);
+            str_res.push_back(this->label_list_[argmax_idx]);
+        }
         auto postprocess_end = std::chrono::steady_clock::now();
-        score /= count;
         for (int i = 0; i < str_res.size(); i++)
         {
-            std::cout << str_res[i];
+            std::cout << frames_batch_path[i] << "\tclass: " << str_res[i] << "\tscore: " << scores[i] << endl;
         }
-        std::cout << "\tscore: " << score << std::endl;
 
         std::chrono::duration<float> preprocess_diff = preprocess_end - preprocess_start;
         times->push_back(double(preprocess_diff.count() * 1000));

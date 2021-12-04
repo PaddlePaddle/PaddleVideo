@@ -25,6 +25,8 @@
 | :--- | :--- |  :----:  | :--------: |  :----  |   :----  |   :----  |
 | PP-TSM     |pptsm_k400_frames_uniform | 动作识别 | 支持 | 混合精度 | - | Paddle Inference: C++ |
 | PP-TSN |pptsn_k400_videos | 动作识别 | 支持 | 混合精度 | - | Paddle Inference: C++ |
+| AGCN |agcn_fsd	 | 动作识别 | 支持 | 混合精度 | - | - |
+| STGCN |stgcn_fsd | 动作识别 | 支持 | 混合精度 | - | - |
 | TimeSformer |timesformer_k400_videos | 动作识别 | 支持 | 混合精度 | - | - |
 | SlowFast |slowfast | 动作识别 | 支持 | 混合精度 | - | - |
 | TSM  |tsm_k400_frames | 动作识别 | 支持 | 混合精度 | - | - |
@@ -40,8 +42,10 @@
 ```shell
 test_tipc/
 ├── configs/  # 配置文件目录
-    ├── PP-TSM.txt # PP-TSM在Linux上进行python训练预测（基础训练预测）的配置文件
-    ├── PP-TSN.txt # PP-TSN在Linux上进行python训练预测（基础训练预测）的配置文件
+    ├── PP-TSM/
+        ├── PP-TSM_train_infer_python.txt # PP-TSM在Linux上进行python训练预测（基础训练预测）的配置文件
+    ├── PP-TSN/
+        ├── PP-TSN_train_infer_python.txt # PP-TSN在Linux上进行python训练预测（基础训练预测）的配置文件
     ├── ...
     └── ...  
 ├── results/   # 预先保存的预测结果，用于和实际预测结果进行精度比对
@@ -79,19 +83,19 @@ test_tipc/
 ```shell
 # 功能：准备数据
 # 格式：bash + 运行脚本 + 参数1: 配置文件选择 + 参数2: 模式选择
-bash test_tipc/prepare.sh  configs/[model_params_file_name]  [Mode]
+bash test_tipc/prepare.sh  configs/[model_name]/[params_file_name]  [Mode]
 
 # 功能：运行测试
 # 格式：bash + 运行脚本 + 参数1: 配置文件选择 + 参数2: 模式选择
-bash test_tipc/test_train_inference_python.sh configs/[model_params_file_name]  [Mode]
+bash test_tipc/test_train_inference_python.sh configs/[model_name]/[params_file_name]  [Mode]
 ```
 
 例如，测试基本训练预测功能的`lite_train_lite_infer`模式，运行：
 ```shell
 # 准备数据
-bash test_tipc/prepare.sh ./test_tipc/configs/PP-TSM.txt 'lite_train_lite_infer'
+bash test_tipc/prepare.sh ./test_tipc/configs/PP-TSM/PP-TSM_train_infer_python.txt 'lite_train_lite_infer'
 # 运行测试
-bash test_tipc/test_train_inference_python.sh ./test_tipc/configs/PP-TSM.txt 'lite_train_lite_infer'
+bash test_tipc/test_train_inference_python.sh ./test_tipc/configs/PP-TSM/PP-TSM_train_infer_python.txt 'lite_train_lite_infer'
 ```
 关于本示例命令的更多信息可查看[基础训练预测使用文档](./docs/test_train_inference_python.md)。
 

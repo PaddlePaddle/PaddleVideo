@@ -42,8 +42,8 @@ namespace PaddleVideo
     {
     public:
         explicit VideoRecognizer(const std::string &model_dir, const std::string &inference_model_name, const bool &use_gpu, const int &num_seg,
-                                 const int &gpu_id, const int &gpu_mem,
-                                 const int &cpu_math_library_num_threads,
+                                 const int &rec_batch_num, const int &gpu_id,
+                                 const int &gpu_mem, const int &cpu_math_library_num_threads,
                                  const bool &use_mkldnn, const std::string &label_path,
                                  const bool &use_tensorrt, const std::string &precision, const std::vector<float> &_mean = {0.406, 0.456, 0.485},
                                  const std::vector<float> &_scale = {0.225, 0.224, 0.229})
@@ -51,6 +51,7 @@ namespace PaddleVideo
             this->inference_model_name = inference_model_name;
             this->use_gpu_ = use_gpu;
             this->num_seg = num_seg;
+            this->rec_batch_num = rec_batch_num;
             this->gpu_id_ = gpu_id;
             this->gpu_mem_ = gpu_mem;
             this->cpu_math_library_num_threads_ = cpu_math_library_num_threads;
@@ -66,7 +67,7 @@ namespace PaddleVideo
         // Load Paddle inference model
         void LoadModel(const std::string &model_dir);
 
-        void Run(std::vector<cv::Mat> &frames, std::vector<double> *times);
+        void Run(const std::vector<string> &frames_batch_path, const std::vector<std::vector<cv::Mat> > &frames_batch, std::vector<double> *times);
 
     private:
         std::string inference_model_name;
@@ -74,6 +75,8 @@ namespace PaddleVideo
 
         bool use_gpu_ = false;
         int gpu_id_ = 0;
+
+        int rec_batch_num = 1;
         int gpu_mem_ = 4000;
         int cpu_math_library_num_threads_ = 4;
         bool use_mkldnn_ = false;
