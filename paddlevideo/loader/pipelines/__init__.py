@@ -22,6 +22,8 @@ from .decode_sampler import DecodeSampler
 from .mix import Cutmix, Mixup, VideoMix
 from .sample import Sampler
 from .skeleton_pipeline import AutoPadding, Iden, SkeletonNorm
+from .augmentations_ava import *
+from .sample_ava import *
 
 __all__ = [
     'Scale', 'RandomCrop', 'CenterCrop', 'RandomFlip', 'Image2Array',
