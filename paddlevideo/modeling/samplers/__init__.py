@@ -12,15 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .video import VideoDataset
-from .frame import FrameDataset
-from .slowfast_video import SFVideoDataset
-from .bmn_dataset import BMNDataset
-from .feature import FeatureDataset
-from .skeleton import SkeletonDataset
-from .ava_dataset import AVADataset
+from .random_sampler import RandomSampler
 
-__all__ = [
-    'VideoDataset', 'FrameDataset', 'SFVideoDataset', 'BMNDataset',
-    'FeatureDataset', 'SkeletonDataset', 'AVADataset'
-]
+__all__ = ['RandomSampler']

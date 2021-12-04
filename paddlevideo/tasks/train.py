@@ -12,6 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from ..metrics.ava_utils import collect_results_cpu
+import shutil
+import pickle
+import time
+import os
 import os.path as osp
 import time
 
@@ -25,7 +30,14 @@ from ..loader.builder import build_dataloader, build_dataset
 from ..modeling.builder import build_model
 from ..solver import build_lr, build_optimizer
 from ..utils import do_preciseBN
-
+from paddlevideo.utils import get_logger
+from paddlevideo.utils import (build_record, log_batch, log_epoch, save, load,
+                               mkdir)
+import sys
+import numpy as np
+from pathlib import Path
+paddle.framework.seed(1234)
+np.random.seed(1234)
 
 def train_model(cfg,
                 weights=None,
@@ -231,15 +243,23 @@ def train_model(cfg,
 
         def evaluate(best):
             model.eval()
+            results = []
             record_list = build_record(cfg.MODEL)
             record_list.pop('lr')
             tic = time.time()
+            if parallel:
+                rank = dist.get_rank()
+            #single_gpu_test and multi_gpu_test
             for i, data in enumerate(valid_loader):
                 outputs = model(data, mode='valid')
+                if cfg.MODEL.framework == "FastRCNN":
+                    results.extend(outputs)
 
-                # log_record
-                for name, value in outputs.items():
-                    record_list[name].update(value, valid_batch_size)
+                #log_record
+                if cfg.MODEL.framework != "FastRCNN":
+                    for name, value in outputs.items():
+                        record_list[name].update(value, batch_size)
+ 
 
                 record_list['batch_time'].update(time.time() - tic)
                 tic = time.time()
@@ -248,6 +268,14 @@ def train_model(cfg,
                     ips = "ips: {:.5f} instance/sec.".format(
                         valid_batch_size / record_list["batch_time"].val)
                     log_batch(record_list, i, epoch + 1, cfg.epochs, "val", ips)
+            if cfg.MODEL.framework == "FastRCNN":
+                if parallel:
+                    results = collect_results_cpu(results, len(valid_dataset))
+                if not parallel or (parallel and rank==0):
+                    eval_res = valid_dataset.evaluate( results) 
+                    for name, value in eval_res.items():
+                        record_list[name].update(value, valid_batch_size)
+
 
             ips = "avg_ips: {:.5f} instance/sec.".format(
                 valid_batch_size * record_list["batch_time"].count /
@@ -255,6 +283,12 @@ def train_model(cfg,
             log_epoch(record_list, epoch + 1, "val", ips)
 
             best_flag = False
+            if cfg.MODEL.framework == "FastRCNN" and (not parallel or (parallel and rank==0)):
+                if record_list["mAP@0.5IOU"].val > best:
+                    best = record_list["mAP@0.5IOU"].val 
+                    best_flag = True
+                return best, best_flag
+            #best2, cfg.MODEL.framework != "FastRCNN":
             for top_flag in ['hit_at_one', 'top1']:
                 if record_list.get(
                         top_flag) and record_list[top_flag].avg > best:
@@ -284,6 +318,10 @@ def train_model(cfg,
                 if model_name == "AttentionLstm":
                     logger.info(
                         f"Already save the best model (hit_at_one){best}")
+                elif cfg.MODEL.framework == "FastRCNN":
+                    logger.info(
+                        f"Already save the best model (mAP@0.5IOU){int(best *10000)/10000}"
+                    )
                 else:
                     logger.info(
                         f"Already save the best model (top1 acc){int(best * 10000) / 10000}"
