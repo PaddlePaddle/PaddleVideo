@@ -9,18 +9,9 @@
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 
-from .video import VideoDataset
-from .frame import FrameDataset
-from .slowfast_video import SFVideoDataset
-from .bmn_dataset import BMNDataset
-from .feature import FeatureDataset
-from .skeleton import SkeletonDataset
-from .ava_dataset import AVADataset
+from .base import BaseDetector
+from .fast_rcnn import FastRCNN
+from .two_stage import TwoStageDetector
 
-__all__ = [
-    'VideoDataset', 'FrameDataset', 'SFVideoDataset', 'BMNDataset',
-    'FeatureDataset', 'SkeletonDataset', 'AVADataset'
-]
+__all__ = ['BaseDetector', 'TwoStageDetector', 'FastRCNN']

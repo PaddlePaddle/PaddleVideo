@@ -43,7 +43,7 @@ PaddleVideo is a toolset for video recognition, action localization, and spatio 
 | :--------------- | :--------: | :------------: | :------------: | :------------: |
 | action recognition | [**PP-TSM**](./docs/zh-CN/model_zoo/recognition/pp-tsm.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | **76.16** |
 | action recognition | [**PP-TSN**](./docs/zh-CN/model_zoo/recognition/pp-tsn.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | **75.06** |
-| action recognition | [**PP-TimeSformer**](./docs/zh-CN/model_zoo/recognition/pptimesformer.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | 77.29 |
+| action recognition | [**PP-TimeSformer**](./docs/zh-CN/model_zoo/recognition/pptimesformer.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | 79.49 |
 | action recognition | [AGCN](./docs/zh-CN/model_zoo/recognition/agcn.md) | [FSD](./docs/zh-CN/dataset/fsd.md) | Top-1 | 62.29 |
 | action recognition | [ST-GCN](./docs/zh-CN/model_zoo/recognition/stgcn.md) | [FSD](./docs/zh-CN/dataset/fsd.md) | Top-1 | 59.07 |
 | action recognition | [TimeSformer](./docs/zh-CN/model_zoo/recognition/timesformer.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | 77.29 |
@@ -136,3 +136,6 @@ PaddleVideo is released under the [Apache 2.0 license](LICENSE).
 This poject welcomes contributions and suggestions. Please see our [contribution guidelines](docs/CONTRIBUTING.md).
 
 - Many thanks to [mohui37](https://github.com/mohui37), [zephyr-fun](https://github.com/zephyr-fun), [voipchina](https://github.com/voipchina) for contributing the code.
+
+## Thanks
+- Many thanks to the following repo: [SlowFast](https://github.com/facebookresearch/SlowFast), [Mmaction2](https://github.com/open-mmlab/mmaction2), the implementation of some models refer to them.

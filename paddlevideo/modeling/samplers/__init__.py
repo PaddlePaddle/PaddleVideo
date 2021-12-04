@@ -12,19 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .agcn import AGCN
-from .bmn import BMN
-from .resnet import ResNet
-from .resnet_slowfast import ResNetSlowFast
-from .resnet_tsm import ResNetTSM
-from .resnet_tweaks_tsm import ResNetTweaksTSM
-from .resnet_tweaks_tsn import ResNetTweaksTSN
-from .stgcn import STGCN
-from .vit import VisionTransformer
-from .vit_tweaks import VisionTransformer_tweaks
+from .random_sampler import RandomSampler
 
-__all__ = [
-    'ResNet', 'ResNetTSM', 'ResNetTweaksTSM', 'ResNetSlowFast', 'BMN',
-    'ResNetTweaksTSN', 'VisionTransformer', 'VisionTransformer_tweaks', 'STGCN',
-    'AGCN'
-]
+__all__ = ['RandomSampler']

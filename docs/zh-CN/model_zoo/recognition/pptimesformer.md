@@ -95,8 +95,8 @@ UCF101数据下载及准备请参考[UCF-101数据准备](../../dataset/ucf101.m
    |      backbone      | Sampling method | num_seg | target_size | Top-1 |                         checkpoints                          |
    | :----------------: | :-------------: | :-----: | :---------: | :---- | :----------------------------------------------------------: |
    | Vision Transformer |   UniformCrop   |   8    |     224     | 78.54 | [ppTimeSformer_k400.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ppTimeSformer_k400.pdparams) |
-   | Vision Transformer(distill) |   UniformCrop   |   8    |     224     | 78.82 | [ppTimeSformer_k400_distill.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ppTimeSformer_k400.pdparams) |
-   | Vision Transformer(distill) |   UniformCrop   |   16    |     224     | 79.49 | [ppTimeSformer_k400_distill_8.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ppTimeSformer_k400.pdparams) |
+   | Vision Transformer |   UniformCrop   |   8    |     224     | 78.82 | [ppTimeSformer_k400_distill.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ppTimeSformer_k400.pdparams) |
+   | Vision Transformer |   UniformCrop   |   16    |     224     | 79.49 | [ppTimeSformer_k400_distill_8.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ppTimeSformer_k400.pdparams) |
 
 
 - 测试时，PP-TimeSformer视频采样策略为使用linspace采样：时序上，从待采样视频序列的第一帧到最后一帧区间内，均匀生成`num_seg`个稀疏采样点（包括端点）；空间上，选择长边两端及中间位置（左中右 或 上中下）3个区域采样。1个视频共采样1个clip。
@@ -107,7 +107,7 @@ UCF101数据下载及准备请参考[UCF-101数据准备](../../dataset/ucf101.m
 
 ```bash
 python3.7 tools/export_model.py -c configs/recognition/pptimesformer/pptimesformer_k400_videos.yaml \
-                                -p data/TimeSformer_k400.pdparams \
+                                -p data/ppTimeSformer_k400.pdparams \
                                 -o inference/ppTimeSformer
 ```
 
@@ -141,3 +141,4 @@ Current video file: data/example.avi
 - [Is Space-Time Attention All You Need for Video Understanding?](https://arxiv.org/pdf/2102.05095.pdf), Gedas Bertasius, Heng Wang, Lorenzo Torresani
 - [Distilling the Knowledge in a Neural Network](https://arxiv.org/abs/1503.02531), Geoffrey Hinton, Oriol Vinyals, Jeff Dean
 - [Averaging Weights Leads to Wider Optima and Better Generalization](https://arxiv.org/abs/1803.05407v3), Pavel Izmailov, Dmitrii Podoprikhin, Timur Garipov
+- [ImageNet-21K Pretraining for the Masses](https://arxiv.org/pdf/2104.10972v4.pdf), Tal Ridnik, Emanuel Ben-Baruch, Asaf Noy

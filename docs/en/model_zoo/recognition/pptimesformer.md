@@ -94,8 +94,9 @@ UCF101 data download and preparation please refer to [UCF-101 data preparation](
 
    | backbone | Sampling method | num_seg | target_size | Top-1 | checkpoints |
    | :----------------: | :-------------: | :-----: | :----- ----: | :---- | :------------------------------------- ---------------------: |
-   | Vision Transformer(distill) | UniformCrop | 8 | 224 | 78.82 | [ppTimeSformer_k400_distill.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ppTimeSformer_k400.pdparams) |
-   | Vision Transformer(distill) | UniformCrop | 16 | 224 | 79.49 | [ppTimeSformer_k400_distill_8.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ppTimeSformer_k400.pdparams) |
+   | Vision Transformer |   UniformCrop   |   8    |     224     | 78.54 | [ppTimeSformer_k400.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ppTimeSformer_k400.pdparams) |
+   | Vision Transformer | UniformCrop | 8 | 224 | 78.82 | [ppTimeSformer_k400_distill.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ppTimeSformer_k400.pdparams) |
+   | Vision Transformer | UniformCrop | 16 | 224 | 79.49 | [ppTimeSformer_k400_distill_16.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ppTimeSformer_k400.pdparams) |
 
 
 - During the test, the PP-TimeSformer video sampling strategy is to use linspace sampling: in time sequence, from the first frame to the last frame of the video sequence to be sampled, `num_seg` sparse sampling points (including endpoints) are uniformly generated; spatially , Select 3 areas to sample at both ends of the long side and the middle position (left, middle, right or top, middle, and bottom). A total of 1 clip is sampled for 1 video.
@@ -106,7 +107,7 @@ UCF101 data download and preparation please refer to [UCF-101 data preparation](
 
 ```bash
 python3.7 tools/export_model.py -c configs/recognition/pptimesformer/pptimesformer_k400_videos.yaml \
-                                -p data/TimeSformer_k400.pdparams \
+                                -p data/ppTimeSformer_k400.pdparams \
                                 -o inference/ppTimeSformer
 ```
 
@@ -140,3 +141,4 @@ It can be seen that using the ppTimeSformer model trained on Kinetics-400 to pre
 - [Is Space-TimeAttention All You Need for Video Understanding?](https://arxiv.org/pdf/2102.05095.pdf), Gedas Bertasius, Heng Wang, Lorenzo Torresani
 - [Distilling the Knowledge in a Neural Network](https://arxiv.org/abs/1503.02531), Geoffrey Hinton, Oriol Vinyals, Jeff Dean
 - [Averaging Weights Leads to Wider Optima and Better Generalization](https://arxiv.org/abs/1803.05407v3), Pavel Izmailov, Dmitrii Podoprikhin, Timur Garipov
+- [ImageNet-21K Pretraining for the Masses](https://arxiv.org/pdf/2104.10972v4.pdf), Tal Ridnik, Emanuel Ben-Baruch, Asaf Noy

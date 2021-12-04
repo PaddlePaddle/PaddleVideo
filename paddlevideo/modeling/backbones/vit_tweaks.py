@@ -26,7 +26,7 @@ from ...utils import load_ckpt
 from ..registry import BACKBONES
 from ..weight_init import trunc_normal_
 
-__all__ = ['VisionTransformer_delta']
+__all__ = ['VisionTransformer_tweaks']
 
 zeros_ = Constant(value=0.)
 ones_ = Constant(value=1.)
@@ -317,7 +317,7 @@ class PatchEmbed(nn.Layer):
         assert H == self.img_size[0] and W == self.img_size[1], \
             f"Input image size ({H}*{W}) doesn't match model ({self.img_size[0]}*{self.img_size[1]})."
         x = x.transpose((0, 2, 1, 3, 4))  # [B,T,C,H,W]
-        x = x.reshape([B * T if B > 0 else -1, C, H, W])  # [BT,C,H,W]
+        x = x.reshape([-1, C, H, W])  # [BT,C,H,W]
         x = self.proj(x)  # [BT,F,nH,nW]
         W = x.shape[-1]
         x = x.flatten(2).transpose((0, 2, 1))  # [BT,F,nHnW]
@@ -325,7 +325,7 @@ class PatchEmbed(nn.Layer):
 
 
 @BACKBONES.register()
-class VisionTransformer_delta(nn.Layer):
+class VisionTransformer_tweaks(nn.Layer):
     """ Vision Transformer with support for patch input
     """
     def __init__(self,
@@ -346,8 +346,6 @@ class VisionTransformer_delta(nn.Layer):
                  epsilon=1e-5,
                  seg_num=8,
                  attention_type='divided_space_time',
-                 mix_token=None,
-                 mix_factor=None,
                  wd_bias=True,
                  lr_mult_list=[1.0, 1.0, 1.0, 1.0, 1.0],
                  **args):
@@ -383,9 +381,6 @@ class VisionTransformer_delta(nn.Layer):
                 default_initializer=zeros_,
                 attr=ParamAttr(regularizer=L2Decay(0.0)))
             self.time_drop = nn.Dropout(p=drop_rate)
-
-        self.mix_token = mix_token
-        self.mix_factor = mix_factor
 
         self.add_parameter("pos_embed", self.pos_embed)
         self.add_parameter("cls_token", self.cls_token)

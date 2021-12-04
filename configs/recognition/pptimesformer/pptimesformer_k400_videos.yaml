@@ -1,7 +1,7 @@
 MODEL: #MODEL field
     framework: "RecognizerTransformer" #Mandatory, indicate the type of network, associate to the 'paddlevideo/modeling/framework/' .
     backbone: #Mandatory, indicate the type of backbone, associate to the 'paddlevideo/modeling/backbones/' .
-        name: "VisionTransformer_delta" #Mandatory, The name of backbone.
+        name: "VisionTransformer_tweaks" #Mandatory, The name of backbone.
         pretrained: "data/vit_base_patch16_224_miil_21k_trans.pdparams" #Optional, pretrained model path.
         img_size: 224
         patch_size: 16
