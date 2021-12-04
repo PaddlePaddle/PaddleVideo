@@ -92,11 +92,11 @@ UCF101数据下载及准备请参考[UCF-101数据准备](../../dataset/ucf101.m
 
   当测试配置采用如下参数时，在Kinetics-400的validation数据集上的测试指标如下：
 
-   |      backbone      | Sampling method | num_seg | target_size | Top-1 |                         checkpoints                          |
-   | :----------------: | :-------------: | :-----: | :---------: | :---- | :----------------------------------------------------------: |
-   | Vision Transformer |   UniformCrop   |   8    |     224     | 78.54 | [ppTimeSformer_k400.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ppTimeSformer_k400.pdparams) |
-   | Vision Transformer |   UniformCrop   |   8    |     224     | 78.82 | [ppTimeSformer_k400_distill.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ppTimeSformer_k400.pdparams) |
-   | Vision Transformer |   UniformCrop   |   16    |     224     | 79.49 | [ppTimeSformer_k400_distill_8.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ppTimeSformer_k400.pdparams) |
+   | backbone           | Sampling method | num_seg | target_size | Top-1 | checkpoints |
+   | :----------------: | :-------------: | :-----: | :----- ----: | :---- | :------------------------------------- ---------------------: |
+   | Vision Transformer |   UniformCrop   |   8    |     224     | 78.54 | [ppTimeSformer_k400_8f.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ppTimeSformer_k400_8f.pdparams) |
+   | Vision Transformer | UniformCrop | 8 | 224 | 78.82 | [ppTimeSformer_k400_8f_distill.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ppTimeSformer_k400_8f_distill.pdparams) |
+   | Vision Transformer | UniformCrop | 16 | 224 | 79.49 | [ppTimeSformer_k400_16f_distill_16f.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ppTimeSformer_k400_16f_distill_16f.pdparams) |
 
 
 - 测试时，PP-TimeSformer视频采样策略为使用linspace采样：时序上，从待采样视频序列的第一帧到最后一帧区间内，均匀生成`num_seg`个稀疏采样点（包括端点）；空间上，选择长边两端及中间位置（左中右 或 上中下）3个区域采样。1个视频共采样1个clip。
