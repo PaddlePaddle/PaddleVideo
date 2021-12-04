@@ -12,13 +12,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .registry import BACKBONES, HEADS, LOSSES, RECOGNIZERS, LOCALIZERS
+from .registry import BACKBONES, HEADS, LOSSES, RECOGNIZERS, LOCALIZERS, ROI_EXTRACTORS, DETECTORS, BBOX_ASSIGNERS, BBOX_SAMPLERS, BBOX_CODERS
 from ..utils import build
 
 
 def build_backbone(cfg):
     """Build backbone."""
     return build(cfg, BACKBONES)
+
+def build_roi_extractor(cfg):
+    """Build roi extractor."""
+    return build(cfg, ROI_EXTRACTORS)
+
+
+def build_assigner(cfg, **default_args):
+    """Builder of box assigner."""
+    return build(cfg, BBOX_ASSIGNERS)
+
+
+def build_sampler(cfg, **default_args):
+    """Builder of box sampler."""
+    return build(cfg, BBOX_SAMPLERS)
 
 
 def build_head(cfg):
@@ -40,6 +54,10 @@ def build_localizer(cfg):
     """Build localizer."""
     return build(cfg, LOCALIZERS, key='framework')
 
+def build_detector(cfg, train_cfg=None, test_cfg=None):
+    """Build detector."""
+    return build(cfg, DETECTORS, key='framework')
+
 
 def build_model(cfg):
     cfg_copy = cfg.copy()
@@ -48,5 +66,7 @@ def build_model(cfg):
         return build_recognizer(cfg)
     elif framework_type in LOCALIZERS:
         return build_localizer(cfg)
+    elif framework_type in DETECTORS:
+        return build_detector(cfg)
     else:
         raise NotImplementedError
