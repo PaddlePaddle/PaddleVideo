@@ -29,7 +29,6 @@
 
 #include <include/preprocess_op.h>
 
-// #define DEBUG_HSS
 
 namespace PaddleVideo
 {
@@ -42,7 +41,7 @@ namespace PaddleVideo
         for (int i = 0; i < rc; ++i)
         {
             // Extract the i-th channel of im and write it into the array with (data + i * rh * rw) as the starting address
-            cv::extractChannel(*im, cv::Mat(rh, rw, CV_32FC1, data + i * rh * rw), 2 - i);
+            cv::extractChannel(*im, cv::Mat(rh, rw, CV_32FC1, data + i * rh * rw), rc - 1 - i);
         }
     }
 

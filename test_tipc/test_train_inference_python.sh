@@ -159,6 +159,7 @@ function func_inference(){
                             set_precision=$(func_set_params "${precision_key}" "${precision}")
 
                             _save_log_path="${_log_path}/python_infer_cpu_usemkldnn_${use_mkldnn}_threads_${threads}_precision_${precision}_batchsize_${batch_size}.log"
+                            mkdir -p ${_log_path}
                             set_infer_data=$(func_set_params "${video_dir_key}" "${infer_video_dir}")
                             if [[ $MODE =~ "lite_infer" ]]; then
                                 benchmark_value="False"
@@ -197,9 +198,6 @@ function func_inference(){
                             benchmark_value="False"
                         fi
                         set_benchmark=$(func_set_params "${benchmark_key}" "${benchmark_value}")
-                        if [[ $use_trt = "True" ]]; then
-                            batch_size=8
-                        fi
                         set_batchsize=$(func_set_params "${batch_size_key}" "${batch_size}")
                         set_tensorrt=$(func_set_params "${use_trt_key}" "${use_trt}")
                         set_precision=$(func_set_params "${precision_key}" "${precision}")

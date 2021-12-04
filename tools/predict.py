@@ -14,15 +14,13 @@
 
 import argparse
 import os
-import time
 from os import path as osp
 
-import numpy as np
 from paddle import inference
 from paddle.inference import Config, create_predictor
 
-from utils import build_inference_helper
 from paddlevideo.utils import get_config
+from utils import build_inference_helper
 
 
 def parse_args():
@@ -82,21 +80,27 @@ def create_paddle_predictor(args, cfg):
             precision = inference.PrecisionType.Float32
 
         # calculate real max batch size during inference when tenrotRT enabled
-        num_seg = cfg.INFERENCE.num_seg
-        num_views = 1
-        if 'tsm' in cfg.model_name.lower():
-            num_views = 1  # CenterCrop
-        elif 'tsn' in cfg.model_name.lower():
-            num_views = 10  # TenCrop
-        elif 'timesformer' in cfg.model_name.lower():
-            num_views = 3  # UniformCrop
-        max_batch_size = args.batch_size * num_views * num_seg
+        max_batch_size = args.batch_size
+        if 'num_seg' in cfg.INFERENCE:
+            num_seg = cfg.INFERENCE.num_seg
+            num_views = 1
+            if 'tsm' in cfg.model_name.lower():
+                num_views = 1  # CenterCrop
+            elif 'tsn' in cfg.model_name.lower():
+                num_views = 10  # TenCrop
+            elif 'timesformer' in cfg.model_name.lower():
+                num_views = 3  # UniformCrop
+            max_batch_size = args.batch_size * num_views * num_seg
         config.enable_tensorrt_engine(precision_mode=precision,
                                       max_batch_size=max_batch_size)
 
     config.enable_memory_optim()
     # use zero copy
     config.switch_use_feed_fetch_ops(False)
+
+    # for ST-GCN tensorRT case usage
+    # config.delete_pass("shuffle_channel_detect_pass")
+
     predictor = create_predictor(config)
 
     return config, predictor
@@ -156,7 +160,7 @@ def main():
             inference_config=inference_config,
             pids=pid,
             process_name=None,
-            gpu_ids=0 if args.use_gpu else None,
+            gpu_ids=0,
             time_keys=['preprocess_time', 'inference_time', 'postprocess_time'],
             warmup=num_warmup)
 

@@ -14,10 +14,11 @@ from .base import BaseRecognizer
 from .recognizer1d import Recognizer1D
 from .recognizer2d import Recognizer2D
 from .recognizer3d import Recognizer3D
-from .recognizer_transformer import RecognizerTransformer
 from .recognizer_gcn import RecognizerGCN
+from .recognizer_movinet_frame import MoViNetRecognizerFrame
+from .recognizer_transformer import RecognizerTransformer
 
 __all__ = [
     'BaseRecognizer', 'Recognizer1D', 'Recognizer2D', 'Recognizer3D',
-    'RecognizerTransformer', 'RecognizerGCN'
+    'RecognizerTransformer', 'RecognizerGCN', 'MoViNetRecognizerFrame'
 ]

@@ -12,17 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from .attention_lstm_head import AttentionLstmHead
 from .base import BaseHead
-from .tsn_head import TSNHead
-from .tsm_head import TSMHead
+from .movinet_head import MoViNetHead
 from .pptsm_head import ppTSMHead
 from .pptsn_head import ppTSNHead
 from .slowfast_head import SlowFastHead
-from .attention_lstm_head import AttentionLstmHead
-from .timesformer_head import TimeSformerHead
 from .stgcn_head import STGCNHead
+from .timesformer_head import TimeSformerHead
+from .tsm_head import TSMHead
+from .tsn_head import TSNHead
 
 __all__ = [
     'BaseHead', 'TSNHead', 'TSMHead', 'ppTSMHead', 'ppTSNHead', 'SlowFastHead',
-    'AttentionLstmHead', 'TimeSformerHead', 'STGCNHead'
+    'AttentionLstmHead', 'TimeSformerHead', 'STGCNHead', 'MoViNetHead'
 ]

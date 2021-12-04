@@ -18,9 +18,9 @@ import time
 import paddle
 import paddle.distributed as dist
 import paddle.distributed.fleet as fleet
+
 from paddlevideo.utils import (add_profiler_step, build_record, get_logger,
                                load, log_batch, log_epoch, mkdir, save)
-
 from ..loader.builder import build_dataloader, build_dataset
 from ..modeling.builder import build_model
 from ..solver import build_lr, build_optimizer
@@ -155,7 +155,8 @@ def train_model(cfg,
             )
             continue
         model.train()
-
+        if model_name == "MoViNet":
+            model.backbone.clean_activation_buffers()
         record_list = build_record(cfg.MODEL)
         tic = time.time()
         for i, data in enumerate(train_loader):
@@ -163,7 +164,6 @@ def train_model(cfg,
             ignore it most of the time"""
             if max_iters is not None and i >= max_iters:
                 break
-
             record_list['reader_time'].update(time.time() - tic)
 
             # Collect performance information when profiler_options is activate
@@ -181,7 +181,8 @@ def train_model(cfg,
                 # keep prior to 2.0 design
                 scaler.minimize(optimizer, scaled)
                 optimizer.clear_grad()
-
+                if model_name == "MoViNet":
+                    model.clean_activation_buffers()
             else:
                 outputs = model(data, mode='train')
 
@@ -199,10 +200,13 @@ def train_model(cfg,
                                 p.grad / cfg.GRADIENT_ACCUMULATION.num_iters)
                         optimizer.step()
                         optimizer.clear_grad()
+                    if model_name == "MoViNet":
+                        model.backbone.clean_activation_buffers()
                 else:  # Common case
                     optimizer.step()
                     optimizer.clear_grad()
-
+                    if model_name == "MoViNet":
+                        model.backbone.clean_activation_buffers()
             # log record
             record_list['lr'].update(optimizer.get_lr(), batch_size)
             for name, value in outputs.items():
@@ -231,12 +235,15 @@ def train_model(cfg,
 
         def evaluate(best):
             model.eval()
+            if model_name == "MoViNet":
+                model.backbone.clean_activation_buffers()
             record_list = build_record(cfg.MODEL)
             record_list.pop('lr')
             tic = time.time()
             for i, data in enumerate(valid_loader):
                 outputs = model(data, mode='valid')
-
+                if model_name == "MoViNet":
+                    model.backbone.clean_activation_buffers()
                 # log_record
                 for name, value in outputs.items():
                     record_list[name].update(value, valid_batch_size)
@@ -264,8 +271,9 @@ def train_model(cfg,
             return best, best_flag
 
         # use precise bn to improve acc
-        if cfg.get("PRECISEBN") and (epoch % cfg.PRECISEBN.preciseBN_interval
-                                     == 0 or epoch == cfg.epochs - 1):
+        if cfg.get("PRECISEBN") and (epoch %
+                                     cfg.PRECISEBN.preciseBN_interval == 0
+                                     or epoch == cfg.epochs - 1):
             do_preciseBN(
                 model, train_loader, parallel,
                 min(cfg.PRECISEBN.num_iters_preciseBN, len(train_loader)))
