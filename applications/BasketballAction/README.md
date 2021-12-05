@@ -1,8 +1,7 @@
 # 篮球动作检测模型
 
----
-## 内容
 
+## 内容
 - [模型简介](#模型简介)
 - [数据准备](#数据准备)
 - [模型训练](#模型训练)
@@ -30,7 +29,6 @@
 ```
 
 - 数据集label格式
-
 ```
 {
     "0": "背景",
@@ -134,11 +132,7 @@ python tools/export_model.py -c ${BasketballAcation}/configs_train/pptsm_basketb
                                -o {BasketballAcation}/checkpoints/ppTSM
 ```
 
-### step2 BMN训练
-BMN训练代码为：https://github.com/PaddlePaddle/PaddleVideo
-BMN文档参考：https://github.com/PaddlePaddle/PaddleVideo/blob/develop/docs/zh-CN/model_zoo/localization/bmn.md
-
-####  step2.1  视频特征提取
+####  step1.4 基于ppTSM视频特征提取
 image and audio特征提取，保存到datasets features文件夹下
 ```
 cd ${BasketballAcation}
@@ -156,7 +150,13 @@ video_features = {'image_feature': np_image_features,
             |--  features          # 视频的图像+音频特征
 ```
 
-#### step2.2 BMN训练数据处理
+
+
+### step2 BMN训练
+BMN训练代码为：https://github.com/PaddlePaddle/PaddleVideo
+BMN文档参考：https://github.com/PaddlePaddle/PaddleVideo/blob/develop/docs/zh-CN/model_zoo/localization/bmn.md
+
+#### step2.1 BMN训练数据处理
 用于提取二分类的proposal，windows=40，根据gts和特征得到BMN训练所需要的数据集
 ```
 cd ${BasketballAcation}
@@ -189,7 +189,7 @@ cd datasets/script && python get_instance_for_bmn.py
             |--  input_for_bmn     # bmn训练的proposal         
 ```
 
-#### step2.3  BMN模型训练
+#### step2.2  BMN模型训练
 ```
 cd ${PaddleVideo}
 # 修改config.yaml：参考${BasketballAcation}/predict/configs_basketball/configs_basketball.yaml 将${PaddleVideo}/configs/localization/bmn.yaml参数修存为${BasketballAcation}/configs_train/bmn_basketball.yaml
@@ -202,7 +202,7 @@ python -B -m paddle.distributed.launch \
      -o output_dir=$out_dir
 ```
 
-#### step2.4 BMN模型转为预测模式
+#### step2.3 BMN模型转为预测模式
 ```
 ${PaddleVideo}
 python tools/export_model.py -c $${BasketballAcation}/configs_train/bmn_basketball.yaml \
@@ -210,7 +210,7 @@ python tools/export_model.py -c $${BasketballAcation}/configs_train/bmn_basketba
                                -o {BasketballAcation}/checkpoints/BMN
 ```
 
-#### step2.5  BMN模型预测
+#### step2.4  BMN模型预测
 得到动作proposal信息： start_id, end_id, score
 ```
 cd ${BasketballAcation}
@@ -305,6 +305,7 @@ cd datasets/script && python get_instance_for_lstm.py
         |--  basketball            # xx数据集
             |--  input_for_lstm    # LSTM训练数据集
 ```
+
 #### step3.2  LSTM训练
 ```
 # 修改config.yaml：参考${BasketballAcation}/predict/configs_basketball/configs_basketball.yaml 修改${BasketballAcation}/train_lstm/conf/conf.yaml 参数
@@ -325,8 +326,8 @@ python tools/export_model.py -c ${FootballAction}/train_lstm/conf/conf.yaml \
                                -o {BasketballAcation}/checkpoints/LSTM
 ```
 
-## 模型推理
 
+## 模型推理
 测试数据格式，可参考使用样例
 ```
 wget https://bj.bcebos.com/v1/acg-algo/PaddleVideo_application/basketball/datasets.tar.gz
@@ -370,6 +371,7 @@ python eval.py results.json
 <div align="center">
   <img src="images/BasketballAction.gif" width="480px"/><br>
 </div>
+
 
 ## 参考论文
 
