@@ -1,17 +1,18 @@
+# 足球动作检测模型
 
-# 更新说明
- - v1.1 pptsm, vggish, bmn, lstm, 基于paddle-2.0环境
- - v1.0 tsn, vggish, bmn, lstm, 基于paddle-1.8环境
 
-# 新版本说明
- - 基础特征模型（图像）替换为ppTSM，准确率由84%提升到94%
- - 基础特征模型（音频）没变动
- - BMN，请使用paddlevideo最新版
- - LSTM，暂时提供v1.8训练代码（后续升级为v2.0），也可自行尝试使用paddlevideo-2.0中的attentation lstm
- - 为兼容paddle-v1.8和paddle-v2.0，将模型预测改为inference model，训练代码可以使用v1.8或v2.0，只要export为inference model即可进行预测
- - 准确率提升，precision和recall均有大幅提升，F1-score从0.57提升到0.82
+## 内容
+- [模型简介](#模型简介)
+- [数据准备](#数据准备)
+- [模型训练](#模型训练)
+- [模型评估](#模型评估)
+- [模型推理](#模型推理)
+- [模型优化](#模型优化)
+- [模型部署](#模型部署)
+- [参考论文](#参考论文)
 
-# 简介
+
+## 模型简介
 该代码库用于体育动作检测+识别, 基于paddle2.0版本开发，结合PaddleVideo中的ppTSM, BMN, attentionLSTM的多个视频模型进行视频时空二阶段检测算法。
 主要分为如下几步
  - 特征抽取
@@ -20,12 +21,9 @@
  - proposal提取，BMN
  - LSTM，动作分类 + 回归
 
-# 基础镜像
-```
-docker pull tmtalgo/paddleaction:action-detection-v2
-```
 
-# 数据集
+## 数据准备
+- 数据集label格式
 ```
 数据集来自欧洲杯2016，共49个足球视频，其中训练集44个，验证集5个
 数据集地址: datasets/EuroCup2016/dataset_url.list
@@ -45,11 +43,46 @@ datasets/EuroCup2016/label_cls8_train.json
 datasets/EuroCup2016/label_cls8_val.json
 ```
 
-# 简单说明
- - image 采样频率fps=5，如果有些动作时间较短，可以适当提高采样频率
- - BMN windows=200，即40s，所以测试自己的数据时，视频时长需大于40s
+- 数据集gts处理, 将原始标注数据处理成如下json格式
+```
+{
+    'fps': 5,
+    'gts': [
+        {
+            'url': 'xxx.mp4',
+            'total_frames': 6341,
+            'actions': [
+                {
+                    "label_ids": [7],
+                    "label_names": ["界外球"],
+                    "start_id": 395,
+                    "end_id": 399
+                },
+                ...
+            ]
+        },
+        ...
+    ]
+}
+```
 
-# 代码结构
+- 数据集抽帧, 由mp4, 得到frames和pcm, 这里需要添加ffmpeg环境
+```
+cd datasets/script && python get_frames_pcm.py
+```
+
+
+## 模型训练
+采样方式：
+- image 采样频率fps=5，如果有些动作时间较短，可以适当提高采样频率
+- BMN windows=200，即40s，所以测试自己的数据时，视频时长需大于40s
+
+### 基础镜像
+```
+docker pull tmtalgo/paddleaction:action-detection-v2
+```
+
+### 代码结构
 ```
 |-- root_dir
    |--  checkpoints                # 保存训练后的模型和log
@@ -76,43 +109,25 @@ datasets/EuroCup2016/label_cls8_val.json
     |--  train_bmn.sh              # bmn训练启动脚本
     |--  train_lstm.sh             # lstm训练启动脚本
 ```
-# 训练与评估步骤
-## step1, gts处理, 将原始标注数据处理成如下json格式
-```
-{
-    'fps': 5,
-    'gts': [
-        {
-            'url': 'xxx.mp4',
-            'total_frames': 6341,
-            'actions': [
-                {
-                    "label_ids": [7],
-                    "label_names": ["界外球"],
-                    "start_id": 395,
-                    "end_id": 399
-                },
-                ...
-            ]
-        },
-        ...
-    ]
-}
-```
 
-## step2 抽帧, 由mp4, 得到frames和pcm, 这里需要添加ffmpeg环境
-```
-cd datasets/script && python get_frames_pcm.py
-```
+### step1 ppTSM训练
 
-## step3 基础图像特征数据处理，由frames结合gts生成训练所需要的正负样本
+#### step1.1  ppTSM 训练数据处理
+由frames结合gts生成训练所需要的正负样本
 ```
 cd datasets/script && python get_instance_for_tsn.py
+
 # 文件名按照如下格式
 '{}_{}_{}_{}'.format(video_basename, start_id, end_id, label)
 ```
+完成该步骤后，数据存储位置
+```
+   |--  datasets                   # 训练数据集和处理脚本
+        |--  EuroCup2016           # xx数据集
+            |--  input_for_tsn     # tsn/tsm训练的数据
+```
 
-## step4 ppTSM训练
+#### step1.2 ppTSM模型训练
 ```
 我们提供了足球数据训练的模型，参考checkpoints
 如果需要在自己的数据上训练，可参考
@@ -120,8 +135,18 @@ https://github.com/PaddlePaddle/PaddleVideo/tree/release/2.0
 config.yaml参考configs文件夹下pptsm_football_v2.0.yaml
 ```
 
-## step 5 image and audio特征提取，保存到datasets features文件夹下
+#### step1.3 ppTSM模型转为预测模式
 ```
+${PaddleVideo}
+python tools/export_model.py -c ${BasketballAcation}/configs_train/pptsm_basketball.yaml \
+                               -p ${pptsm_train_dir}/checkpoints/models_pptsm/ppTSM_epoch_00057.pdparams \
+                               -o {BasketballAcation}/checkpoints/ppTSM
+```
+
+####  step1.4  基于ppTSM的视频特征提取
+image and audio特征提取，保存到datasets features文件夹下
+```
+cd ${FootballAcation}
 cd extractor && python extract_feat.py
 # 特征维度, image(2048) + audio(1024)
 # 特征保存格式如下，将如下dict保存在pkl格式，用于接下来的BMN训练
@@ -129,7 +154,12 @@ video_features = {'image_feature': np_image_features,
                   'audio_feature': np_audio_features}
 ```
 
-## step 6 BMN特征处理，用于提取二分类的proposal，windows=40，根据gts和特征得到BMN训练所需要的数据集
+### step2 BMN训练
+BMN训练代码为：https://github.com/PaddlePaddle/PaddleVideo
+BMN文档参考：https://github.com/PaddlePaddle/PaddleVideo/blob/develop/docs/zh-CN/model_zoo/localization/bmn.md
+
+#### step2.1 BMN训练数据处理
+用于提取二分类的proposal，windows=40，根据gts和特征得到BMN训练所需要的数据集
 ```
 cd datasets/script && python get_instance_for_bmn.py
 # 数据格式
@@ -153,11 +183,16 @@ cd datasets/script && python get_instance_for_bmn.py
     ...
 }
 ```
-## step 7 BMN训练
+
+#### step2.2  BMN模型训练
 我们同样提供了足球数据训练的模型，参考checkpoints
 如果要在自己的数据上训练，具体步骤参考step4 ppTSM 训练
 
-## step 8 BMN预测，得到 start_id, end_id, score
+#### step2.3 BMN模型转为预测模式
+参考step1.3
+
+#### step2.4  BMN模型预测
+得到动作proposal信息： start_id, end_id, score
 ```
 cd extractor && python extract_bmn.py
 # 数据格式
@@ -183,7 +218,10 @@ cd extractor && python extract_bmn.py
 ]
 ```
 
-## step 9 LSTM数据处理，将BMN得到的proposal截断并处理成LSTM训练所需数据集
+### step3 LSTM训练
+
+#### step3.1  LSTM训练数据处理
+将BMN得到的proposal截断并处理成LSTM训练所需数据集
 ```
 cd datasets/script && python get_instance_for_lstm.py
 # 数据格式1，label_info
@@ -233,19 +271,43 @@ cd datasets/script && python get_instance_for_lstm.py
 '{} {}'.format(filename, label)
 ```
 
-## step 10 LSTM训练
+#### step3.2  LSTM训练
 ```
 sh run.sh	# LSTM 模块
 ```
 
-## step 11 整个预测流程
+#### step3.3 LSTM模型转为预测模式
+参考step1.3
+
+## 模型推理
+整个预测流程先将各模型export为inference model,  参考step1.3
 ```
-# 先将各模型export为inference model
 cd predict && python predict.py
 ```
 
-## step 12 结果评估
+
+## 模型评估
 ```
 # 包括bmn proposal 评估和最终action评估
 cd predict && python eval.py results.json
 ```
+
+
+## 模型优化
+- 基础特征模型（图像）替换为ppTSM，准确率由84%提升到94%
+- 基础特征模型（音频）没变动
+- BMN，请使用paddlevideo最新版
+- LSTM，暂时提供v1.8训练代码（后续升级为v2.0），也可自行尝试使用paddlevideo-2.0中的attentation lstm
+- 为兼容paddle-v1.8和paddle-v2.0，将模型预测改为inference model，训练代码可以使用v1.8或v2.0，只要export为inference model即可进行预测
+- 准确率提升，precision和recall均有大幅提升，F1-score从0.57提升到0.82
+
+
+## 模型部署
+本代码解决方案在动作的检测和召回指标F1-score=82%
+
+
+## 参考论文
+- [TSM: Temporal Shift Module for Efficient Video Understanding](https://arxiv.org/pdf/1811.08383.pdf), Ji Lin, Chuang Gan, Song Han
+- [BMN: Boundary-Matching Network for Temporal Action Proposal Generation](https://arxiv.org/abs/1907.09702), Tianwei Lin, Xiao Liu, Xin Li, Errui Ding, Shilei Wen.
+- [Attention Clusters: Purely Attention Based Local Feature Integration for Video Classification](https://arxiv.org/abs/1711.09550), Xiang Long, Chuang Gan, Gerard de Melo, Jiajun Wu, Xiao Liu, Shilei Wen
+- [YouTube-8M: A Large-Scale Video Classification Benchmark](https://arxiv.org/abs/1609.08675), Sami Abu-El-Haija, Nisarg Kothari, Joonseok Lee, Paul Natsev, George Toderici, Balakrishnan Varadarajan, Sudheendra Vijayanarasimhan
