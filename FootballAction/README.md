@@ -70,6 +70,17 @@ datasets/EuroCup2016/label_cls8_val.json
 ```
 cd datasets/script && python get_frames_pcm.py
 ```
+- 数据预处理后保存格式如下
+```
+   |--  datasets                   # 训练数据集和处理脚本
+        |--  EuroCup2016            # xx数据集
+            |--  mp4               # 原始视频.mp4
+            |--  frames            # 图像帧, fps=5, '.jpg'格式
+            |--  pcm               # 音频pcm, 音频采样率16000，采用通道数1
+            |--  url.list          # 视频列表
+            |--  label_train.json  # 训练集原始gts
+            |--  label_val.json    # 验证集原始gts
+```
 
 
 ## 模型训练
@@ -128,19 +139,29 @@ cd datasets/script && python get_instance_for_tsn.py
 ```
 
 #### step1.2 ppTSM模型训练
-```
 我们提供了足球数据训练的模型，参考checkpoints
 如果需要在自己的数据上训练，可参考
 https://github.com/PaddlePaddle/PaddleVideo/tree/release/2.0
 config.yaml参考configs文件夹下pptsm_football_v2.0.yaml
 ```
+# https://github.com/PaddlePaddle/PaddleVideo/tree/release/2.0
+cd ${PaddleVideo}
+python -B -m paddle.distributed.launch \
+    --gpus="0,1,2,3" \
+    --log_dir=$save_dir/logs \
+    main.py  \
+    --validate \
+    -c ${FootballAcation}/train_proposal/configs/pptsm_football_v2.0.yaml \
+    -o output_dir=$save_dir
+```
 
 #### step1.3 ppTSM模型转为预测模式
 ```
-${PaddleVideo}
-python tools/export_model.py -c ${BasketballAcation}/configs_train/pptsm_basketball.yaml \
+# https://github.com/PaddlePaddle/PaddleVideo/tree/release/2.0
+cd ${PaddleVideo}
+python tools/export_model.py -c ${FootballAcation}/train_proposal/configs/pptsm_football_v2.0.yaml \
                                -p ${pptsm_train_dir}/checkpoints/models_pptsm/ppTSM_epoch_00057.pdparams \
-                               -o {BasketballAcation}/checkpoints/ppTSM
+                               -o {FootballAcation}/checkpoints/ppTSM
 ```
 
 ####  step1.4  基于ppTSM的视频特征提取
@@ -153,9 +174,16 @@ cd extractor && python extract_feat.py
 video_features = {'image_feature': np_image_features,
                   'audio_feature': np_audio_features}
 ```
+完成该步骤后，数据存储位置
+```
+   |--  datasets                   # 训练数据集和处理脚本
+        |--  EuroCup2016            # xx数据集
+            |--  features          # 视频的图像+音频特征
+```
+
 
 ### step2 BMN训练
-BMN训练代码为：https://github.com/PaddlePaddle/PaddleVideo
+BMN训练代码为：https://github.com/PaddlePaddle/PaddleVideo/tree/release/2.0
 BMN文档参考：https://github.com/PaddlePaddle/PaddleVideo/blob/develop/docs/zh-CN/model_zoo/localization/bmn.md
 
 #### step2.1 BMN训练数据处理
@@ -183,13 +211,39 @@ cd datasets/script && python get_instance_for_bmn.py
     ...
 }
 ```
+完成该步骤后，数据存储位置
+```
+   |--  datasets                   # 训练数据集和处理脚本
+        |--  EuroCup2016            # xx数据集
+            |--  input_for_bmn     # bmn训练的proposal         
+```
 
 #### step2.2  BMN模型训练
 我们同样提供了足球数据训练的模型，参考checkpoints
-如果要在自己的数据上训练，具体步骤参考step4 ppTSM 训练
+如果要在自己的数据上训练，步骤与step1.2 ppTSM 训练相似，可参考
+https://github.com/PaddlePaddle/PaddleVideo/tree/release/2.0
+config.yaml参考configs文件夹下bmn_football_v2.0.yaml
+```
+# https://github.com/PaddlePaddle/PaddleVideo/tree/release/2.0
+cd ${PaddleVideo}
+python -B -m paddle.distributed.launch \
+     --gpus="0,1" \
+     --log_dir=$out_dir/logs \
+     main.py  \
+     --validate \
+     -c ${FootballAcation}/train_proposal/configs/bmn_football_v2.0.yaml \
+     -o output_dir=$out_dir
+```
 
 #### step2.3 BMN模型转为预测模式
-参考step1.3
+同step1.3
+```
+# https://github.com/PaddlePaddle/PaddleVideo/tree/release/2.0
+$cd {PaddleVideo}
+python tools/export_model.py -c ${FootballAcation}/train_proposal/configs/bmn_football_v2.yaml \
+                               -p ${bmn_train_dir}/checkpoints/models_bmn/bmn_epoch16.pdparams \
+                               -o {FootballAcation}/checkpoints/ppTSM
+```
 
 #### step2.4  BMN模型预测
 得到动作proposal信息： start_id, end_id, score
@@ -216,6 +270,13 @@ cd extractor && python extract_bmn.py
     },
     ...
 ]
+```
+完成该步骤后，数据存储位置
+```
+   |--  datasets                   # 训练数据集和处理脚本
+        |--  EuroCup2016            # xx数据集
+            |--  feature_bmn
+                 |--  prop.json    # bmn 预测结果
 ```
 
 ### step3 LSTM训练
@@ -277,13 +338,19 @@ sh run.sh	# LSTM 模块
 ```
 
 #### step3.3 LSTM模型转为预测模式
-参考step1.3
+```
+${FootballAction}
+python tools/export_model.py -c ${FootballAction}/train_lstm/conf/conf.yaml \
+                               -p ${lstm_train_dir}/checkpoints/models_lstm/bmn_epoch29.pdparams \
+                               -o {FootballAction}/checkpoints/LSTM
+```
 
 ## 模型推理
-整个预测流程先将各模型export为inference model,  参考step1.3
+运行预测代码
 ```
 cd predict && python predict.py
 ```
+产出文件：results.json
 
 
 ## 模型评估
