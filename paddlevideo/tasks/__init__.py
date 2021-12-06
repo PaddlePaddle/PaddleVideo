@@ -12,9 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .train import train_model
 from .test import test_model
+from .train import train_model
+from .train_clip import train_clip
 from .train_dali import train_dali
 from .train_multigrid import train_model_multigrid
 
-__all__ = ['train_model', 'test_model', 'train_dali', 'train_model_multigrid']
+__all__ = ['train_model', 'test_model', 'train_dali', 'train_model_multigrid', 'train_clip']

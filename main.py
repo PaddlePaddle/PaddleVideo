@@ -18,7 +18,7 @@ import numpy as np
 import paddle
 
 from paddlevideo.tasks import (test_model, train_dali, train_model,
-                               train_model_multigrid)
+                               train_model_multigrid, train_clip)
 from paddlevideo.utils import get_config, get_dist_info
 
 
@@ -69,7 +69,10 @@ def parse_args():
                         type=str,
                         default=None,
                         help='The option of profiler, which should be in format '
-                        '\"key1=value1;key2=value2;key3=value3\".')
+                             '\"key1=value1;key2=value2;key3=value3\".')
+    parser.add_argument('--train_clip',
+                        action='store_true',
+                        help='whether to evaluate the checkpoint during training')
 
     args = parser.parse_args()
     return args
@@ -101,6 +104,15 @@ def main():
         train_model_multigrid(cfg,
                               world_size=world_size,
                               validate=args.validate)
+    elif args.train_clip:
+        train_clip(cfg,
+                   weights=args.weights,
+                   validate=args.validate,
+                   max_iters=args.max_iters,
+                   parallel=parallel,
+                   use_fleet=args.fleet,
+                   amp=args.amp
+                   )
     else:
         train_model(cfg,
                     weights=args.weights,

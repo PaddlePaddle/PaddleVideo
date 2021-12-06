@@ -12,17 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from .agcn import AGCN
+from .bmn import BMN
+from .movinet import MoViNet
 from .resnet import ResNet
-from .resnet_tsm import ResNetTSM
 from .resnet_slowfast import ResNetSlowFast
+from .resnet_tsm import ResNetTSM
 from .resnet_tweaks_tsm import ResNetTweaksTSM
 from .resnet_tweaks_tsn import ResNetTweaksTSN
-from .bmn import BMN
-from .vit import VisionTransformer
 from .stgcn import STGCN
-from .agcn import AGCN
+from .vit import VisionTransformer
 
 __all__ = [
     'ResNet', 'ResNetTSM', 'ResNetTweaksTSM', 'ResNetSlowFast', 'BMN',
-    'ResNetTweaksTSN', 'VisionTransformer', 'STGCN', 'AGCN'
+    'ResNetTweaksTSN', 'VisionTransformer', 'STGCN', 'AGCN', 'MoViNet'
 ]
