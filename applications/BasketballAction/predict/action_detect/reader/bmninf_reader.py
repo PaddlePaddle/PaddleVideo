@@ -60,7 +60,6 @@ class BMNINFReader(DataReader):
         self.mode = mode
         self.tscale = cfg[self.name.upper()]['tscale']  # 200
         self.dscale = cfg[self.name.upper()]['dscale']  # 200
-        # self.subset = cfg[self.name.upper()]['subset']
         self.tgap = 1. / self.tscale
         self.step = cfg[self.name.upper()]['window_step']
 
@@ -70,10 +69,7 @@ class BMNINFReader(DataReader):
         image_feature = src_feature['image_feature']
         pcm_feature = src_feature['pcm_feature']
         pcm_feature = pcm_feature.reshape((pcm_feature.shape[0] * 5, 640))
-        # print(rgb_feature.shape, audio_feature.shape, pcm_feature.shape)
         min_length = min(image_feature.shape[0], pcm_feature.shape[0])
-        #if min_length == 0:
-        #    continue
         image_feature = image_feature[:min_length, :]
         pcm_feature = pcm_feature[:min_length, :]
         self.features = np.concatenate((image_feature, pcm_feature), axis=1)

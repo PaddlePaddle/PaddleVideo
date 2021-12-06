@@ -85,14 +85,19 @@ cd datasets/script && python get_frames_pcm.py
 ## 模型训练
 代码参考足球动作检测：https://github.com/PaddlePaddle/PaddleVideo/tree/application/FootballAction
 
-将该代码库的文件夹 [datasets](https://github.com/PaddlePaddle/PaddleVideo/tree/application/FootballAction/datasets)，[extractor](https://github.com/PaddlePaddle/PaddleVideo/tree/application/FootballAction/extractor)，[train_lstm](https://github.com/PaddlePaddle/PaddleVideo/tree/application/FootballAction/train_lstm)，[train_proposal/](https://github.com/PaddlePaddle/PaddleVideo/tree/application/FootballAction/train_proposal/configs)， 拷贝到本代码库复用。
+将该代码库的文件夹 [datasets](https://github.com/PaddlePaddle/PaddleVideo/tree/application/FootballAction/datasets)，[extractor](https://github.com/PaddlePaddle/PaddleVideo/tree/application/FootballAction/extractor)，[train_lstm](https://github.com/PaddlePaddle/PaddleVideo/tree/application/FootballAction/train_lstm)， 拷贝到本代码库复用。
 
  - image 采样频率fps=5，如果有些动作时间较短，可以适当提高采样频率
  - BMN windows=200，即40s，所以测试自己的数据时，视频时长需大于40s
 
+### 基础镜像
+```
+docker pull tmtalgo/paddleaction:action-detection-v2
+```
+
 ### step1 ppTSM训练
 我们提供了篮球数据训练的模型，参考checkpoints_basketball。如果使用提供的pptsm模型，可直接跳过下边的pptsm训练数据处理和训练步骤。
-如果需要在自己的数据上训练，ppTSM训练代码为：https://github.com/PaddlePaddle/PaddleVideo
+如果需要在自己的数据上训练，ppTSM训练代码为：https://github.com/PaddlePaddle/PaddleVideo/tree/release/2.0
 ppTSM文档参考：https://github.com/PaddlePaddle/PaddleVideo/blob/develop/docs/zh-CN/model_zoo/recognition/pp-tsm.md
 
 #### step1.1  ppTSM 训练数据处理
@@ -113,8 +118,9 @@ cd datasets/script && python get_instance_for_tsn.py
 
 #### step1.2 ppTSM模型训练
 ```
+# https://github.com/PaddlePaddle/PaddleVideo/tree/release/2.0
 cd ${PaddleVideo}
-# 修改config.yaml：参考${BasketballAcation}/predict/configs_basketball/configs_basketball.yaml 将${PaddleVideo}/configs/recognition/pptsm/**.yml 参数修改存为 ${BasketballAcation}/configs_train/pptsm_basketball.yaml
+# 修改config.yaml参数修改为 ${BasketballAcation}/configs_train/pptsm_basketball.yaml
 python -B -m paddle.distributed.launch \
     --gpus="0,1,2,3" \
     --log_dir=$save_dir/logs \
@@ -126,7 +132,8 @@ python -B -m paddle.distributed.launch \
 
 #### step1.3 ppTSM模型转为预测模式
 ```
-${PaddleVideo}
+# https://github.com/PaddlePaddle/PaddleVideo/tree/release/2.0
+$cd {PaddleVideo}
 python tools/export_model.py -c ${BasketballAcation}/configs_train/pptsm_basketball.yaml \
                                -p ${pptsm_train_dir}/checkpoints/models_pptsm/ppTSM_epoch_00057.pdparams \
                                -o {BasketballAcation}/checkpoints/ppTSM
@@ -151,9 +158,8 @@ video_features = {'image_feature': np_image_features,
 ```
 
 
-
 ### step2 BMN训练
-BMN训练代码为：https://github.com/PaddlePaddle/PaddleVideo
+BMN训练代码为：https://github.com/PaddlePaddle/PaddleVideo/tree/release/2.0
 BMN文档参考：https://github.com/PaddlePaddle/PaddleVideo/blob/develop/docs/zh-CN/model_zoo/localization/bmn.md
 
 #### step2.1 BMN训练数据处理
@@ -191,8 +197,9 @@ cd datasets/script && python get_instance_for_bmn.py
 
 #### step2.2  BMN模型训练
 ```
+# https://github.com/PaddlePaddle/PaddleVideo/tree/release/2.0
 cd ${PaddleVideo}
-# 修改config.yaml：参考${BasketballAcation}/predict/configs_basketball/configs_basketball.yaml 将${PaddleVideo}/configs/localization/bmn.yaml参数修存为${BasketballAcation}/configs_train/bmn_basketball.yaml
+# 修改config.yaml参数修为${BasketballAcation}/configs_train/bmn_basketball.yaml
 python -B -m paddle.distributed.launch \
      --gpus="0,1" \
      --log_dir=$out_dir/logs \
@@ -204,6 +211,7 @@ python -B -m paddle.distributed.launch \
 
 #### step2.3 BMN模型转为预测模式
 ```
+# https://github.com/PaddlePaddle/PaddleVideo/tree/release/2.0
 ${PaddleVideo}
 python tools/export_model.py -c $${BasketballAcation}/configs_train/bmn_basketball.yaml \
                                -p ${bmn_train_dir}/checkpoints/models_bmn/bmn_epoch16.pdparams \
@@ -246,7 +254,7 @@ cd extractor && python extract_bmn.py
 ```
 
 ### step3 LSTM训练
-LSTM训练代码为：https://github.com/PaddlePaddle/PaddleVideo/tree/application/FootballAction/train_lstm
+LSTM训练代码为：train_lstm
 
 #### step3.1  LSTM训练数据处理
 将BMN得到的proposal截断并处理成LSTM训练所需数据集
@@ -308,11 +316,11 @@ cd datasets/script && python get_instance_for_lstm.py
 
 #### step3.2  LSTM训练
 ```
-# 修改config.yaml：参考${BasketballAcation}/predict/configs_basketball/configs_basketball.yaml 修改${BasketballAcation}/train_lstm/conf/conf.yaml 参数
-cd ${FootballAction}
+#conf.yaml修改为 ${BasketballAcation}/configs_train/lstm_basketball.yaml
+cd ${BasketballAcation}
 python -u scenario_lib/train.py \
     --model_name=ActionNet \
-    --config=conf/conf.yaml \
+    --config=${BasketballAcation}/configs_train/lstm_basketball.yaml \
     --save_dir=${out_dir}"/models_lstm/" \
     --log_interval=5 \
     --valid_interval=1
@@ -321,7 +329,7 @@ python -u scenario_lib/train.py \
 #### step3.3 LSTM模型转为预测模式
 ```
 ${BasketballAcation}
-python tools/export_model.py -c ${FootballAction}/train_lstm/conf/conf.yaml \
+python tools/export_model.py -c ${BasketballAction}/train_lstm/conf/conf.yaml \
                                -p ${lstm_train_dir}/checkpoints/models_lstm/bmn_epoch29.pdparams \
                                -o {BasketballAcation}/checkpoints/LSTM
 ```

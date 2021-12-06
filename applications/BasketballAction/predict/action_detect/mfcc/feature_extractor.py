@@ -13,15 +13,9 @@ def frame(data, window_length, hop_length):
     frame
     """
     num_samples = data.shape[0]
-    #print("window_length , hop_length", window_length, hop_length)
-    #print("num_sample = ", num_samples)
     num_frames = 1 + int(np.floor((num_samples - window_length) / hop_length))
-    #print(" num_frames = ", num_frames)
     shape = (num_frames, window_length) + data.shape[1:]
-    #print(" shape = ", shape)
     strides = (data.strides[0] * hop_length, ) + data.strides
-    #print("data.strides = ", data.strides)
-    #print("strides = ", strides)
     return np.lib.stride_tricks.as_strided(data, shape=shape, strides=strides)
 
 
@@ -97,18 +91,12 @@ def log_mel_spectrogram(data,
     log_mel_spectrogram
     """
     window_length_samples = int(round(audio_sample_rate * window_length_secs))
-    #print("audio_sample_rate = ", audio_sample_rate)
-    #print("window_length_secs = ", window_length_secs)
-    #print("window_length_sample ", window_length_samples)
     hop_length_samples = int(round(audio_sample_rate * hop_length_secs))
-    #print("hop_length_samples ", hop_length_samples)
     fft_length = 2**int(np.ceil(np.log(window_length_samples) / np.log(2.0)))
-    #print(" fft_lengt = ", fft_length)
     spectrogram = stft_magnitude(data,
                                  fft_length=fft_length,
                                  hop_length=hop_length_samples,
                                  window_length=window_length_samples)
-    #print(" spectrogram.shape = ", spectrogram.shape)
     mel_spectrogram = np.dot(
         spectrogram,
         spectrogram_to_mel_matrix(num_spectrogram_bins=spectrogram.shape[1],
@@ -122,26 +110,14 @@ def wav_to_example(wav_data, sample_rate):
     """
     wav_to_example
     """
-    #sample_rate, wav_data = wavfile.read(wav_file)
     assert wav_data.dtype == np.int16, 'Bad sample type: %r' % wav_data.dtype
-    #wav_data = wav_data[:16000*30]
-    #print(" wav_data ", wav_data.shape)
-    #print(" wav_data ", wav_data.shape)
     pad_zero_num = int(sample_rate * (vgg_params.STFT_WINDOW_LENGTH_SECONDS -
                                       vgg_params.STFT_HOP_LENGTH_SECONDS))
     wav_data_extend = np.hstack((wav_data, np.zeros(pad_zero_num)))
     wav_data = wav_data_extend
-    #print(" wav_data ", wav_data.shape)
     wav_data = wav_data / 32768.0  # Convert to [-1.0, +1.0]
-    #print(" wav_data after convert to -1 1", wav_data)
-    #if wav_data.shape[0] > max_second * sample_rate:
-    #    wav_data = wav_data[:max_second * sample_rate, :]
     if len(wav_data.shape) > 1:
         wav_data = np.mean(wav_data, axis=1)
-    #print(" wav_data after mean", wav_data.shape, len(wav_data.shape), wav_data)
-    # Resample to the rate assumed by vgg.
-    #if sample_rate != vgg_params.SAMPLE_RATE:
-    #    wav_data = resampy.resample(wav_data, sample_rate, vgg_params.SAMPLE_RATE)
     log_mel = log_mel_spectrogram(
         wav_data,
         audio_sample_rate=vgg_params.SAMPLE_RATE,

@@ -146,7 +146,6 @@ if __name__ == "__main__":
 
     t0 = time.time()
     outputs = model.predict(cfg, video_features)
-    # outputs = model.infer(np.random.rand(32, 8, 3, 224, 224).astype(np.float32))
     t1 = time.time()
 
     results = {'proposal': outputs}

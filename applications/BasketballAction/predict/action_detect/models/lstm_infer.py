@@ -80,8 +80,6 @@ class InferModel(object):
             input_arr.extend(sub_item)
             start_lod = end_lod
         input_arr = np.array(input_arr)
-        # print(input_arr.shape)
-        # print([input_lod])
         return input_arr, [input_lod]
 
     def predict(self, infer_config, material):
@@ -91,10 +89,7 @@ class InferModel(object):
         for infer_iter, data in enumerate(infer_reader()):
             video_id = [[items[-2], items[-1]] for items in data]
             input1 = [items[0] for items in data]
-            #input2 = [items[1] for items in data]
             input1_arr, input1_lod = self.pre_process(input1)
-            #input2_arr, input2_lod = self.pre_process(input2)
-            #output1, output2 = self.infer(input1_arr, input1_lod, input2_arr, input2_lod)
             output1, output2 = self.infer(input1_arr, input1_lod)
 
             predictions_id = output1 
@@ -141,8 +136,6 @@ if __name__ == "__main__":
 
     t0 = time.time()
     outputs = model.predict(cfg, material)
-    # outputs = model.infer(np.random.rand(32, 8, 3, 224, 224).astype(np.float32))
-    # print(outputs.shape)
     t1 = time.time()
     results = {'actions': outputs}
     with open('results.json', 'w', encoding='utf-8') as f:
