@@ -86,7 +86,7 @@ PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_githu
     - [花样滑冰选手骨骼点动作识别ST-GCN教程](https://aistudio.baidu.com/aistudio/projectdetail/2417717)
 - 快速入门
     - [安装说明](docs/zh-CN/install.md)
-    - [快速开始](docs/zh-CN/start.md)
+    - [快速开始](docs/zh-CN/usage.md)
 - 代码组织
     - [模型库设计思路详解](docs/zh-CN/tutorials/modular_design.md)
     - [配置模块参数详解](docs/zh-CN/tutorials/config.md)
