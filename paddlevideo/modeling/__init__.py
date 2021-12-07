@@ -18,7 +18,11 @@ from .builder import (build_backbone, build_head, build_recognizer,
 from .heads import BaseHead, TSNHead
 from .losses import CrossEntropyLoss
 from .framework.recognizers import BaseRecognizer, recognizer2d
-from .registry import BACKBONES, HEADS, LOSSES, RECOGNIZERS, LOCALIZERS, PARTITIONERS
+from .framework.detectors import BaseDetector, TwoStageDetector, FastRCNN
+from .heads import SingleRoIExtractor3D, AVARoIHead, BBoxHeadAVA
+from .assigners import MaxIoUAssignerAVA
+from .samplers import RandomSampler
+from .registry import BACKBONES, HEADS, LOSSES, RECOGNIZERS, LOCALIZERS, ROI_EXTRACTORS, DETECTORS, PARTITIONERS
 from .weight_init import weight_init_
 
 __all__ = [
@@ -39,4 +43,11 @@ __all__ = [
     'BaseRecognizer',
     'Recognizer2d',
     'CrossEntropyLoss',
+    'ROI_EXTRACTORS',
+    'SingleRoIExtractor3D',
+    'AVARoIHead',
+    'BBoxHeadAVA',
+    'MaxIoUAssignerAVA',
+    'RandomSampler',
+    'DETECTORS',
 ]

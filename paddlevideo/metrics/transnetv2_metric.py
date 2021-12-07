@@ -62,6 +62,8 @@ def evaluate_scenes(gt_scenes, pred_scenes, n_frames_miss_tolerance=2):
       gt_scenes:   [[0, 4], [5, 9]] -> gt_trans:   [[3.5, 5.5]] -> HIT
       gt_scenes:   [[0, 3], [4, 9]] -> gt_trans:   [[2.5, 4.5]] -> HIT
       gt_scenes:   [[0, 2], [3, 9]] -> gt_trans:   [[1.5, 3.5]] -> MISS
+
+      Users should be careful about adopting these functions in any commercial matters.
     """
 
     shift = n_frames_miss_tolerance / 2

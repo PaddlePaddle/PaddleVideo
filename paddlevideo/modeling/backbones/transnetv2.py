@@ -21,9 +21,6 @@ from paddle import ParamAttr
 
 from ..registry import BACKBONES
 
-MEAN = np.array([0.485, 0.456, 0.406], np.float32).reshape([1, 3, 1, 1]) * 255
-STD = np.array([0.229, 0.224, 0.225], np.float32).reshape([1, 3, 1, 1]) * 255
-
 
 class OctConv3D(nn.Layer):
     def __init__(self, in_filters, filters, kernel_size=3, dilation_rate=(1, 1, 1), alpha=0.25,
@@ -256,7 +253,9 @@ class ResNetBlock(nn.Layer):
 
 
 class ResNetFeatures(nn.Layer):
-    def __init__(self, in_filters=3):
+    def __init__(self, in_filters=3,
+                 mean=[0.485, 0.456, 0.406],
+                 std=[0.229, 0.224, 0.225]):
         super(ResNetFeatures, self).__init__()
         self.conv1 = nn.Conv2D(in_channels=in_filters, out_channels=64, kernel_size=(7, 7),
                                stride=(2, 2), padding=(3, 3),
@@ -271,8 +270,8 @@ class ResNetFeatures(nn.Layer):
         self.layer2a = ResNetBlock(64, 64)
         self.layer2b = ResNetBlock(64, 64)
 
-        self.mean = paddle.to_tensor(MEAN)
-        self.std = paddle.to_tensor(STD)
+        self.mean = paddle.to_tensor(mean)
+        self.std = paddle.to_tensor(std)
 
     def forward(self, inputs):
         shape = inputs.shape
@@ -462,11 +461,16 @@ class TransNetV2(nn.Layer):
                  use_convex_comb_reg=False,
                  use_resnet_features=False,
                  use_resnet_like_top=False,
-                 frame_similarity_on_last_layer=False):
+                 frame_similarity_on_last_layer=False,
+                 mean=[0.485, 0.456, 0.406],
+                 std=[0.229, 0.224, 0.225]):
         super(TransNetV2, self).__init__()
 
+        self.mean = np.array(mean, np.float32).reshape([1, 3, 1, 1]) * 255
+        self.std = np.array(std, np.float32).reshape([1, 3, 1, 1]) * 255
+
         self.use_resnet_features = use_resnet_features
-        self.resnet_layers = ResNetFeatures(in_filters=3) if self.use_resnet_features else None
+        self.resnet_layers = ResNetFeatures(in_filters=3, mean=self.mean, std=self.std) if self.use_resnet_features else None
         self.resnet_like_top = use_resnet_like_top
         if self.resnet_like_top:
             self.resnet_like_top_conv = nn.Conv3D(64 if self.use_resnet_features else 3, 32, kernel_size=(3, 7, 7),

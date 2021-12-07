@@ -20,7 +20,6 @@ TransNetV2是一种基于深度学习的视频切分模型，通过DDCNN V2结�
 
 本代码当前仅支持模型推理，模型的训练和测试将在后续提供。
 
-详细内容请参考论文[TransNet V2: An effective deep network architecture for fast shot transition detection](https://arxiv.org/abs/2008.04838)
 
 ## 数据准备
 
@@ -38,10 +37,6 @@ coming soon
 
 
 ## 模型推理
-
-### 模型准备
-
-#### 下载预训练模型
 
 下载在ClipShots和TRECVID IACC.3上训练好的TransNetV2模型参数 [TransNetV2_shots.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/TransNetV2_shots.pdparams )，也可以通过命令行下载
 
@@ -69,6 +64,9 @@ python3.7 tools/predict.py --input_file data/example.avi \
                            --use_gpu=True \
                            --use_tensorrt=False
 ```
+
+通过定义配置文件`transnetv2.yaml`中`output_path`参数，可以将每帧的预测概率输出到`{output_path}/example_predictions.txt`中，预测得到的镜头边界输出到`{output_path}/example_scenes.txt`中。
+通过定义配置文件`transnetv2.yaml`中`visualize`参数为True，可以将预测结果可视化，可视化结果保存至`{output_path}/example_vis.png`。
 
 输出示例如下:
 

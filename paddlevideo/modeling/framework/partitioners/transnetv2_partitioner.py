@@ -65,5 +65,4 @@ class TransNetV2Partitioner(BasePartitioner):
         """Define how the model is going to test, from input to output."""
         frame_sequence = data_batch[0]
         one_hot_pred = self.forward_net(frame_sequence)
-        #print(type(one_hot_pred[1]))
         return one_hot_pred

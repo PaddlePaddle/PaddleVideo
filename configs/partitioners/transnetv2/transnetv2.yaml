@@ -15,11 +15,12 @@ MODEL:
         use_resnet_features: False
         use_resnet_like_top: False
         frame_similarity_on_last_layer: False
+        mean: [0.485, 0.456, 0.406]
+        std: [0.229, 0.224, 0.225]
     head:
         name: "TransNetV2Head"
         num_classes: 2 # not used
         in_channels: 3 # not used
-
 
 
 # OPTIMIZER: #OPTIMIZER field
@@ -46,7 +47,7 @@ INFERENCE:
     width: 48
     num_channels: 3
     threshold: 0.5
-    output_path: output
+    output_path: inference_results
     visualize: True
 
 

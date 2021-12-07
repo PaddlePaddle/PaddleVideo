@@ -40,9 +40,6 @@ coming soon
 
 ## Inference
 
-### model preparation
-
-#### download pretrain-model
 
 Load the TransNetV2 weights trained on ClipShots and TRECVID IACC.3 dataset [TransNetV2_shots.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/TransNetV2_shots.pdparams ), or download through the command line
 
@@ -70,6 +67,9 @@ python3.7 tools/predict.py --input_file data/example.avi \
                            --use_gpu=True \
                            --use_tensorrt=False
 ```
+
+By defining the `output_path` parameters in `transnetv2.yaml`, the prediction probability of each frame can be output to `{output_path}/example_predictions.txt`, and the predicted lens boundary is output to `{output_path}/example_scenes.txt`.
+By defining the `visualize` parameter in `transnetv2.yaml`, the predicted results can be visualized, and the visual results are saved to `{output_path}/example_vis.png`.
 
 ## Reference
 
