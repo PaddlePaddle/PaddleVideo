@@ -77,7 +77,7 @@ PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_githu
 
 
 ## 文档教程
-- 免费视频课程、PPT、AIStudio教程
+- 免费视频课程、PPT、AIStudio教程（提供免费在线GPU算力）
     - [飞桨视频库全面解析](https://aistudio.baidu.com/aistudio/course/introduce/6742)
     - [视频分类及动作识别介绍](https://github.com/PaddlePaddle/PaddleVideo/blob/main/docs/zh-CN/tutorials/summarize.md)
     - [【官方】Paddle 2.1实现视频理解经典模型 - TSN](https://aistudio.baidu.com/aistudio/projectdetail/2250682)
@@ -86,7 +86,7 @@ PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_githu
     - [花样滑冰选手骨骼点动作识别ST-GCN教程](https://aistudio.baidu.com/aistudio/projectdetail/2417717)
 - 快速入门
     - [安装说明](docs/zh-CN/install.md)
-    - [快速开始](docs/zh-CN/start.md)
+    - [使用指南](docs/zh-CN/usage.md)
 - 代码组织
     - [模型库设计思路详解](docs/zh-CN/tutorials/modular_design.md)
     - [配置模块参数详解](docs/zh-CN/tutorials/config.md)

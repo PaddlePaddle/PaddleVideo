@@ -59,6 +59,7 @@ python3 -c "import paddle; print(paddle.__version__)"
 ```
 cd path_to_clone_PaddleVideo
 git clone https://github.com/PaddlePaddle/PaddleVideo.git
+cd PaddleVideo
 ```
 
 **安装Python依赖库：**

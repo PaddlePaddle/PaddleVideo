@@ -36,6 +36,21 @@ def build_sampler(cfg, **default_args):
     return build(cfg, BBOX_SAMPLERS)
 
 
+def build_roi_extractor(cfg):
+    """Build roi extractor."""
+    return build(cfg, ROI_EXTRACTORS)
+
+
+def build_assigner(cfg, **default_args):
+    """Builder of box assigner."""
+    return build(cfg, BBOX_ASSIGNERS)
+
+
+def build_sampler(cfg, **default_args):
+    """Builder of box sampler."""
+    return build(cfg, BBOX_SAMPLERS)
+
+
 def build_head(cfg):
     """Build head."""
     return build(cfg, HEADS)
@@ -54,6 +69,11 @@ def build_recognizer(cfg):
 def build_localizer(cfg):
     """Build localizer."""
     return build(cfg, LOCALIZERS, key='framework')
+
+
+def build_detector(cfg, train_cfg=None, test_cfg=None):
+    """Build detector."""
+    return build(cfg, DETECTORS, key='framework')
 
 
 def build_detector(cfg, train_cfg=None, test_cfg=None):

@@ -99,6 +99,10 @@ def create_paddle_predictor(args, cfg):
     config.enable_memory_optim()
     # use zero copy
     config.switch_use_feed_fetch_ops(False)
+
+    # for ST-GCN tensorRT case usage
+    # config.delete_pass("shuffle_channel_detect_pass")
+
     predictor = create_predictor(config)
 
     return config, predictor
@@ -155,7 +159,7 @@ def main():
                 for j in range(len(output_tensor_list)):
                     output.append(output_tensor_list[j].copy_to_cpu())
                 outputs.append(output)
-                    
+
             # Post process output
             InferenceHelper.postprocess(outputs)
     else:
@@ -166,19 +170,24 @@ def main():
             # instantiate auto log
             import auto_log
             pid = os.getpid()
-            autolog = auto_log.AutoLogger(
-                model_name=cfg.model_name,
-                model_precision=args.precision,
-                batch_size=args.batch_size,
-                data_shape="dynamic",
-                save_path="./output/auto_log.lpg",
-                inference_config=inference_config,
-                pids=pid,
-                process_name=None,
-                gpu_ids=0 if args.use_gpu else None,
-                time_keys=['preprocess_time', 'inference_time', 'postprocess_time'],
-                warmup=num_warmup)
-            files = [args.input_file for _ in range(test_video_num + num_warmup)]
+            autolog = auto_log.AutoLogger(model_name=cfg.model_name,
+                                          model_precision=args.precision,
+                                          batch_size=args.batch_size,
+                                          data_shape="dynamic",
+                                          save_path="./output/auto_log.lpg",
+                                          inference_config=inference_config,
+                                          pids=pid,
+                                          process_name=None,
+                                          gpu_ids=0 if args.use_gpu else None,
+                                          time_keys=[
+                                              'preprocess_time',
+                                              'inference_time',
+                                              'postprocess_time'
+                                          ],
+                                          warmup=num_warmup)
+            files = [
+                args.input_file for _ in range(test_video_num + num_warmup)
+            ]
 
         # Inferencing process
         batch_num = args.batch_size
@@ -190,7 +199,8 @@ def main():
                 autolog.times.start()
 
             # Pre process batched input
-            batched_inputs = InferenceHelper.preprocess_batch(files[st_idx:ed_idx])
+            batched_inputs = InferenceHelper.preprocess_batch(
+                files[st_idx:ed_idx])
 
             # get pre process time cost
             if args.enable_benchmark:
@@ -209,15 +219,14 @@ def main():
             if args.enable_benchmark:
                 autolog.times.stamp()
 
-            InferenceHelper.postprocess(batched_outputs, not args.enable_benchmark)
+            InferenceHelper.postprocess(batched_outputs,
+                                        not args.enable_benchmark)
 
             # get post process time cost
             if args.enable_benchmark:
                 autolog.times.end(stamp=True)
 
             # time.sleep(0.01)  # sleep for T4 GPU
-
-
 
     # report benchmark log if enabled
     if args.enable_benchmark:

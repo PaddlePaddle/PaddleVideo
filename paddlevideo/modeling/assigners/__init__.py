@@ -1,4 +1,4 @@
-# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.
+# Copyright (c) 2021  PaddlePaddle Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"
 # you may not use this file except in compliance with the License.
@@ -12,16 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from ..utils import Registry
+from .max_iou_assigner_ava import MaxIoUAssignerAVA
 
-BACKBONES = Registry('backbone')
-HEADS = Registry('head')
-RECOGNIZERS = Registry('recognizer')
-LOCALIZERS = Registry('localizer')
-PARTITIONERS = Registry('partitioner')
-LOSSES = Registry('loss')
-ROI_EXTRACTORS = Registry('roi_extractor')
-DETECTORS = Registry('detectors')
-BBOX_ASSIGNERS = Registry('bbox_assigner')
-BBOX_SAMPLERS = Registry('bbox_sampler')
-BBOX_CODERS = Registry('bbox_coder')
+__all__ = ['MaxIoUAssignerAVA']
