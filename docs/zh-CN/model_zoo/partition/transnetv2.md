@@ -23,17 +23,17 @@ TransNetV2是一种基于深度学习的视频切分模型，通过DDCNN V2结�
 
 ## 数据准备
 
-coming soon 
+coming soon
 
 
 ## 模型训练
 
-coming soon 
+coming soon
 
 
 ## 模型测试
 
-coming soon 
+coming soon
 
 
 ## 模型推理
@@ -79,5 +79,3 @@ Current video file: data/example.avi
 ## 参考论文
 
 - [TransNet V2: An effective deep network architecture for fast shot transition detection](https://arxiv.org/abs/2008.04838), Tomáš Souček, Jakub Lokoč
-
-  

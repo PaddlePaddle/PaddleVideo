@@ -25,17 +25,17 @@ Please refer to the paper for details. [TransNet V2: An effective deep network a
 
 ## Data
 
-coming soon 
+coming soon
 
 
 ## Train
 
-coming soon 
+coming soon
 
 
 ## Test
 
-coming soon 
+coming soon
 
 
 ## Inference
@@ -74,5 +74,3 @@ By defining the `visualize` parameter in `transnetv2.yaml`, the predicted result
 ## Reference
 
 - [TransNet V2: An effective deep network architecture for fast shot transition detection](https://arxiv.org/abs/2008.04838), Tomáš Souček, Jakub Lokoč
-
-  
