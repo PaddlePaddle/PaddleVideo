@@ -92,7 +92,7 @@ if [ ${MODE} = "lite_train_lite_infer" ];then
     elif [ ${model_name} == "AttentionLSTM" ]; then
         pushd data/yt8m
         ## download & decompression training data
-        wget -nc ...
+        wget -nc https://videotag.bj.bcebos.com/Data/yt8m_rawframe_small.tar
         tar -xf yt8m_frame_small.tar
         python3.7 -m pip install tensorflow-gpu==1.14.0
         python3.7 tf2pkl.py ./frame ./pkl_frame/
@@ -307,7 +307,7 @@ elif [ ${MODE} = "lite_train_whole_infer" ];then
         # pretrain lite train data
         pushd data/yt8m
         ## download & decompression training data
-        wget -nc ...
+        wget -nc https://videotag.bj.bcebos.com/Data/yt8m_rawframe_small.tar
         tar -xf yt8m_frame_small.tar
         python3.7 -m pip install tensorflow-gpu==1.14.0
         python3.7 tf2pkl.py ./frame ./pkl_frame/
