@@ -134,3 +134,6 @@ PaddleVideo is released under the [Apache 2.0 license](LICENSE).
 This poject welcomes contributions and suggestions. Please see our [contribution guidelines](docs/CONTRIBUTING.md).
 
 - Many thanks to [mohui37](https://github.com/mohui37), [zephyr-fun](https://github.com/zephyr-fun), [voipchina](https://github.com/voipchina) for contributing the code.
+
+## Thanks
+- Many thanks to the following repo: [SlowFast](https://github.com/facebookresearch/SlowFast), [Mmaction2](https://github.com/open-mmlab/mmaction2), the implementation of some models refer to them.

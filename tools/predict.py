@@ -82,21 +82,27 @@ def create_paddle_predictor(args, cfg):
             precision = inference.PrecisionType.Float32
 
         # calculate real max batch size during inference when tenrotRT enabled
-        num_seg = cfg.INFERENCE.num_seg
-        num_views = 1
-        if 'tsm' in cfg.model_name.lower():
-            num_views = 1  # CenterCrop
-        elif 'tsn' in cfg.model_name.lower():
-            num_views = 10  # TenCrop
-        elif 'timesformer' in cfg.model_name.lower():
-            num_views = 3  # UniformCrop
-        max_batch_size = args.batch_size * num_views * num_seg
+        max_batch_size = args.batch_size
+        if 'num_seg' in cfg.INFERENCE:
+            num_seg = cfg.INFERENCE.num_seg
+            num_views = 1
+            if 'tsm' in cfg.model_name.lower():
+                num_views = 1  # CenterCrop
+            elif 'tsn' in cfg.model_name.lower():
+                num_views = 10  # TenCrop
+            elif 'timesformer' in cfg.model_name.lower():
+                num_views = 3  # UniformCrop
+            max_batch_size = args.batch_size * num_views * num_seg
         config.enable_tensorrt_engine(precision_mode=precision,
                                       max_batch_size=max_batch_size)
 
     config.enable_memory_optim()
     # use zero copy
     config.switch_use_feed_fetch_ops(False)
+
+    # for ST-GCN tensorRT case usage
+    # config.delete_pass("shuffle_channel_detect_pass")
+
     predictor = create_predictor(config)
 
     return config, predictor
@@ -140,64 +146,87 @@ def main():
     # get the absolute file path(s) to be processed
     files = parse_file_paths(args.input_file)
 
-    if args.enable_benchmark:
-        test_video_num = 300
-        num_warmup = 10
+    if model_name == 'TransNetV2':
+        for file in files:
+            inputs = InferenceHelper.preprocess(file)
+            outputs = []
+            for input in inputs:
+                # Run inference
+                for i in range(len(input_tensor_list)):
+                    input_tensor_list[i].copy_from_cpu(input)
+                predictor.run()
+                output = []
+                for j in range(len(output_tensor_list)):
+                    output.append(output_tensor_list[j].copy_to_cpu())
+                outputs.append(output)
 
-        # instantiate auto log
-        import auto_log
-        pid = os.getpid()
-        autolog = auto_log.AutoLogger(
-            model_name=cfg.model_name,
-            model_precision=args.precision,
-            batch_size=args.batch_size,
-            data_shape="dynamic",
-            save_path="./output/auto_log.lpg",
-            inference_config=inference_config,
-            pids=pid,
-            process_name=None,
-            gpu_ids=0,
-            time_keys=['preprocess_time', 'inference_time', 'postprocess_time'],
-            warmup=num_warmup)
-
-        files = [args.input_file for _ in range(test_video_num + num_warmup)]
-
-    # Inferencing process
-    batch_num = args.batch_size
-    for st_idx in range(0, len(files), batch_num):
-        ed_idx = min(st_idx + batch_num, len(files))
-
-        # auto log start
+            # Post process output
+            InferenceHelper.postprocess(outputs)
+    else:
         if args.enable_benchmark:
-            autolog.times.start()
+            test_video_num = 300
+            num_warmup = 10
 
-        # Pre process batched input
-        batched_inputs = InferenceHelper.preprocess_batch(files[st_idx:ed_idx])
+            # instantiate auto log
+            import auto_log
+            pid = os.getpid()
+            autolog = auto_log.AutoLogger(model_name=cfg.model_name,
+                                          model_precision=args.precision,
+                                          batch_size=args.batch_size,
+                                          data_shape="dynamic",
+                                          save_path="./output/auto_log.lpg",
+                                          inference_config=inference_config,
+                                          pids=pid,
+                                          process_name=None,
+                                          gpu_ids=0 if args.use_gpu else None,
+                                          time_keys=[
+                                              'preprocess_time',
+                                              'inference_time',
+                                              'postprocess_time'
+                                          ],
+                                          warmup=num_warmup)
+            files = [
+                args.input_file for _ in range(test_video_num + num_warmup)
+            ]
 
-        # get pre process time cost
-        if args.enable_benchmark:
-            autolog.times.stamp()
+        # Inferencing process
+        batch_num = args.batch_size
+        for st_idx in range(0, len(files), batch_num):
+            ed_idx = min(st_idx + batch_num, len(files))
 
-        # run inference
-        for i in range(len(input_tensor_list)):
-            input_tensor_list[i].copy_from_cpu(batched_inputs[i])
-        predictor.run()
+            # auto log start
+            if args.enable_benchmark:
+                autolog.times.start()
 
-        batched_outputs = []
-        for j in range(len(output_tensor_list)):
-            batched_outputs.append(output_tensor_list[j].copy_to_cpu())
+            # Pre process batched input
+            batched_inputs = InferenceHelper.preprocess_batch(
+                files[st_idx:ed_idx])
 
-        # get inference process time cost
-        if args.enable_benchmark:
-            autolog.times.stamp()
+            # get pre process time cost
+            if args.enable_benchmark:
+                autolog.times.stamp()
 
-        InferenceHelper.postprocess(batched_outputs, not args.enable_benchmark)
+            # run inference
+            for i in range(len(input_tensor_list)):
+                input_tensor_list[i].copy_from_cpu(batched_inputs[i])
+            predictor.run()
 
-        # get post process time cost
-        if args.enable_benchmark:
-            autolog.times.end(stamp=True)
+            batched_outputs = []
+            for j in range(len(output_tensor_list)):
+                batched_outputs.append(output_tensor_list[j].copy_to_cpu())
 
-        # time.sleep(0.01)  # sleep for T4 GPU
+            # get inference process time cost
+            if args.enable_benchmark:
+                autolog.times.stamp()
+
+            InferenceHelper.postprocess(batched_outputs,
+                                        not args.enable_benchmark)
+
+            # get post process time cost
+            if args.enable_benchmark:
+                autolog.times.end(stamp=True)
+
+            # time.sleep(0.01)  # sleep for T4 GPU
 
     # report benchmark log if enabled
     if args.enable_benchmark:

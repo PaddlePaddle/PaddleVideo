@@ -2,7 +2,7 @@
 source test_tipc/common_func.sh
 
 FILENAME=$1
-# MODE be one of ['lite_train_lite_infer' 'lite_train_whole_infer' 'whole_train_whole_infer', 'whole_infer']
+# MODE be one of ['lite_train_lite_infer' 'lite_train_whole_infer' 'whole_train_whole_infer', 'whole_infer', 'klquant_whole_infer']
 MODE=$2
 
 dataline=$(awk 'NR==1, NR==51{print}'  $FILENAME)
@@ -159,6 +159,7 @@ function func_inference(){
                             set_precision=$(func_set_params "${precision_key}" "${precision}")
 
                             _save_log_path="${_log_path}/python_infer_cpu_usemkldnn_${use_mkldnn}_threads_${threads}_precision_${precision}_batchsize_${batch_size}.log"
+                            mkdir -p ${_log_path}
                             set_infer_data=$(func_set_params "${video_dir_key}" "${infer_video_dir}")
                             if [[ $MODE =~ "lite_infer" ]]; then
                                 benchmark_value="False"
@@ -366,7 +367,11 @@ else
                 # run test
                 if [ ${eval_py} != "null" ]; then
                     set_eval_params1=$(func_set_params "${eval_key1}" "${eval_value1}")
-                    eval_cmd="${python} ${eval_py} ${set_use_gpu} ${set_eval_params1}"
+                    if [[ $MODE =~ "lite_infer" ]] && [[ ${train_param_key1} != "null" ]]; then
+                        eval_cmd="${python} ${eval_py} ${set_use_gpu} ${set_eval_params1} ${train_param_key1}=${train_param_value1}"
+                    else
+                        eval_cmd="${python} ${eval_py} ${set_use_gpu} ${set_eval_params1}"
+                    fi
                     eval $eval_cmd
                     status_check $? "${eval_cmd}" "${status_log}"
                 fi

@@ -16,7 +16,7 @@
 
 Temporal Segment Network (TSN) 是视频分类领域经典的基于2D-CNN的解决方案。该方法主要解决视频的长时间行为识别问题，通过稀疏采样视频帧的方式代替稠密采样，既能捕获视频的全局信息，也能去除冗余，降低计算量。核心思想是将每帧的特征做平均融合作为视频的整体特征，再输入分类器进行分类。本代码实现的模型为**基于单路RGB图像**的TSN网络，Backbone采用ResNet-50结构。
 
-AI Studio项目使用链接：[Paddle 2.1实现视频理解经典模型-TSN](https://aistudio.baidu.com/aistudio/projectdetail/2250682?contributionType=1)
+我们提供了详尽理论及代码讲解，并可使用免费在线GPU算力资源，一键运行的AI Studio Notebook项目，使用链接：[Paddle 2.1实现视频理解经典模型-TSN](https://aistudio.baidu.com/aistudio/projectdetail/2250682?contributionType=1)
 
 <div align="center">
 <img src="../../../images/tsn_architecture.png" height=350 width=80000 hspace='10'/> <br />

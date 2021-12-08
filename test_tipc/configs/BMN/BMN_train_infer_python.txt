@@ -22,7 +22,7 @@ null:null
 ##
 ===========================eval_params===========================
 eval:main.py --test -c configs/localization/bmn.yaml
--w:output/BMN/BMN_best.pdparams
+-w:output/BMN/BMN_epoch_00001.pdparams
 ##
 ===========================infer_params===========================
 -o:inference/BMN
@@ -34,14 +34,14 @@ distill_export:null
 export1:null
 export2:null
 inference_dir:null
-infer_model:./inference/BMN/BMN.pdmodel
+infer_model:./data/BMN.pdparams
 infer_export:tools/export_model.py -c configs/localization/bmn.yaml
 infer_quant:False
 inference:tools/predict.py --config configs/localization/bmn.yaml
 --use_gpu:True|False
 --enable_mkldnn:False
 --cpu_threads:1|6
---batch_size:1|2
+--batch_size:1
 --use_tensorrt:False|True
 --precision:fp32|fp16
 --model_file:inference/BMN/BMN.pdmodel
