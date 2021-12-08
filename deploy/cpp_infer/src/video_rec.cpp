@@ -64,11 +64,11 @@ namespace PaddleVideo
             // 3. Normalization(inplace operation)
             for (int i = 0; i < real_batch_num; ++i)
             {
-                for (int j = 0; j < num_views; ++j)
+                for (int j = 0; k < this->num_seg; ++k)
                 {
-                    for (int k = 0; k < this->num_seg; ++k)
+                    for (int k = 0; k < num_views; ++k)
                     {
-                        this->normalize_op_.Run(&crop_frames[i * num_views * this->num_seg + j * this->num_seg + k], this->mean_, this->scale_, this->is_scale_);
+                        this->normalize_op_.Run(&crop_frames[i * num_views * this->num_seg + j * num_views + k], this->mean_, this->scale_, this->is_scale_);
                     }
                 }
             }
@@ -80,11 +80,11 @@ namespace PaddleVideo
             input = std::vector<float>(real_batch_num * num_views * this->num_seg *  crop_frames[0].rows * crop_frames[0].cols * rc, 0.0f);
             for (int i = 0; i < real_batch_num; ++i)
             {
-                for (int j = 0; j < num_views; ++j)
+                for (int j = 0; k < this->num_seg; ++k)
                 {
-                    for (int k = 0; k < this->num_seg; ++k)
+                    for (int k = 0; k < num_views; ++k)
                     {
-                        this->permute_op_.Run(&crop_frames[i * num_views * this->num_seg + j * this->num_seg + k], input.data() + (i * num_views * this->num_seg + j * this->num_seg + k) * (rh * rw * rc));
+                        this->permute_op_.Run(&crop_frames[i * num_views * this->num_seg + j * num_views + k], input.data() + (i * num_views * this->num_seg + j * num_views + k) * (rh * rw * rc));
                     }
                 }
             }
@@ -115,11 +115,11 @@ namespace PaddleVideo
             // 3. Normalization(inplace operation)
             for (int i = 0; i < real_batch_num; ++i)
             {
-                for (int j = 0; j < num_views; ++j)
+                for (int j = 0; j < this->num_seg; ++j)
                 {
-                    for (int k = 0; k < this->num_seg; ++k)
+                    for (int k = 0; k < num_views; ++k)
                     {
-                        this->normalize_op_.Run(&crop_frames[i * num_views * this->num_seg + j * this->num_seg + k], this->mean_, this->scale_, this->is_scale_);
+                        this->normalize_op_.Run(&crop_frames[i * this->num_seg * num_views + j * num_views + k], this->mean_, this->scale_, this->is_scale_);
                     }
                 }
             }
@@ -128,14 +128,14 @@ namespace PaddleVideo
             int rh = crop_frames[0].rows;
             int rw = crop_frames[0].cols;
             int rc = crop_frames[0].channels();
-            input = std::vector<float>(real_batch_num * num_views * this->num_seg *  crop_frames[0].rows * crop_frames[0].cols * rc, 0.0f);
+            input = std::vector<float>(real_batch_num * this->num_seg * num_views *  crop_frames[0].rows * crop_frames[0].cols * rc, 0.0f);
             for (int i = 0; i < real_batch_num; ++i)
             {
-                for (int j = 0; j < num_views; ++j)
+                for (int j = 0; j < this->num_seg; ++j)
                 {
-                    for (int k = 0; k < this->num_seg; ++k)
+                    for (int k = 0; k < num_views; ++k)
                     {
-                        this->permute_op_.Run(&crop_frames[i * num_views * this->num_seg + j * this->num_seg + k], input.data() + (i * num_views * this->num_seg + j * this->num_seg + k) * (rh * rw * rc));
+                        this->permute_op_.Run(&crop_frames[i * this->num_seg * num_views + j * num_views + k], input.data() + (i * this->num_seg * num_views + j * num_views + k) * (rh * rw * rc));
                     }
                 }
             }
