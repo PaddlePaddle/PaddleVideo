@@ -112,7 +112,6 @@ venv.bak/
 .mypy_cache/
 
 # data
-data/
 output_dir/
 
 # IDE
