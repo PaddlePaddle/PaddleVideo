@@ -19,8 +19,9 @@ from .multi_crop_metric import MultiCropMetric
 from .registry import METRIC
 from .skeleton_metric import SkeletonMetric
 from .youtube8m.eval_util import HitOneMetric
+from .transnetv2_metric import TransNetV2Metric
 
 __all__ = [
     'METRIC', 'build_metric', 'MultiCropMetric', 'BMNMetric',
-    'CenterCropMetric', 'SkeletonMetric', 'HitOneMetric'
+    'CenterCropMetric', 'SkeletonMetric', 'HitOneMetric', 'TransNetV2Metric'
 ]
