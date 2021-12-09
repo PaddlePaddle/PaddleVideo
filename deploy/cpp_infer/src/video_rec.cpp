@@ -64,7 +64,7 @@ namespace PaddleVideo
             // 3. Normalization(inplace operation)
             for (int i = 0; i < real_batch_num; ++i)
             {
-                for (int j = 0; k < this->num_seg; ++k)
+                for (int j = 0; j < this->num_seg; ++j)
                 {
                     for (int k = 0; k < num_views; ++k)
                     {
@@ -80,7 +80,7 @@ namespace PaddleVideo
             input = std::vector<float>(real_batch_num * num_views * this->num_seg *  crop_frames[0].rows * crop_frames[0].cols * rc, 0.0f);
             for (int i = 0; i < real_batch_num; ++i)
             {
-                for (int j = 0; k < this->num_seg; ++k)
+                for (int j = 0; j < this->num_seg; ++j)
                 {
                     for (int k = 0; k < num_views; ++k)
                     {
