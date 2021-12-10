@@ -116,9 +116,10 @@ python3.7 tools/predict.py --input_file data/example.png \
 
 At the end of the inference, the depth map estimated by the model will be saved in pseudo-color by default.
 
-Original image:
+The following is a sample picture and the corresponding predicted depth map：
+
 <img src="../../../images/oxford_image.png" width = "512" height = "256" alt="image" align=center />
-Depth map:
+
 <img src="../../../images/oxford_image_depth.png" width = "512" height = "256" alt="depth" align=center />
 
 

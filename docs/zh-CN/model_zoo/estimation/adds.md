@@ -116,9 +116,10 @@ python3.7 tools/predict.py --input_file data/example.png \
 
 推理结束会默认以伪彩的方式保存下模型估计出的深度图。
 
-原图：
+以下是样例图片和对应的预测深度图：
+
 <img src="../../../images/oxford_image.png" width = "512" height = "256" alt="image" align=center />
-深度图：
+
 <img src="../../../images/oxford_image_depth.png" width = "512" height = "256" alt="depth" align=center />
 
 
