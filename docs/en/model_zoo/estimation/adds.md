@@ -84,7 +84,7 @@ For data download and preparation of Oxford RobotCar dataset, please refer to [O
 
     The test indicators on the validation dataset of Oxford RobotCar dataset are as follows:
 
-  | version | Max Depth | Abs Rel | Sq Rel | RMSE | RMSE log | $\delta \lt 1.25$ | $\delta \lt 1.25^2$ | $\delta \lt 1.25^3$ |
+  | version | Max Depth | Abs Rel | Sq Rel | RMSE | RMSE log | <img src="https://latex.codecogs.com/svg.image?\delta&space;<&space;1.25&space;" title="\delta < 1.25 " /> | <img src="https://latex.codecogs.com/svg.image?\delta&space;<&space;1.25^2" title="\delta < 1.25^2" /> | <img src="https://latex.codecogs.com/svg.image?\delta&space;<&space;1.25^3" title="\delta < 1.25^3" /> |
   | ----------- | --------- | ------- | ------ | ----- | ------- | ----------------- |------------------- | ------------------- |
   | ours(night) | 40 | 0.209 | 1.741 | 6.031 | 0.243 | 0.708 | 0.923 | 0.975 |
   | ours(night) | 60 | 0.207 | 2.052 | 7.888 | 0.258 | 0.686 | 0.909 | 0.970 |
