@@ -36,7 +36,7 @@ cd ../../ # 返回PaddleVideo
 
 model_mode_list=(TimeSformer)
 fp_item_list=(fp32 fp16)
-bs_item_list=(1 14)
+bs_item_list=(1)    #  14
 for model_mode in ${model_mode_list[@]}; do
       for fp_item in ${fp_item_list[@]}; do
           for bs_item in ${bs_item_list[@]}
