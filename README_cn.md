@@ -2,7 +2,7 @@
 
 # PaddleVideo
 ## 最新动态
-- 🔥🔥🔥 2021年CCF大数据与计算智能大赛火热进行中，欢迎参加CCF和百度飞桨联合推出奖金10万元的赛题[基于飞桨实现花样滑冰选手骨骼点动作识别](https://www.datafountain.cn/competitions/519)！:tada: 
+- 🔥🔥🔥 2021年CCF大数据与计算智能大赛火热进行中，欢迎参加CCF和百度飞桨联合推出奖金10万元的赛题[基于飞桨实现花样滑冰选手骨骼点动作识别](https://www.datafountain.cn/competitions/519)！:tada:
 赛题baseline由PaddleVideo提供[ST-GCN](https://github.com/PaddlePaddle/PaddleVideo/blob/develop/docs/zh-CN/model_zoo/recognition/stgcn.md)，
 [教程链接](https://aistudio.baidu.com/aistudio/projectdetail/2417717)，[视频链接](https://www.bilibili.com/video/BV1w3411172G)
 
@@ -53,6 +53,7 @@ PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_githu
 | 行为识别 |       [TSN](./docs/zh-CN/model_zoo/recognition/tsn.md)       |    [Kinetics-400](./docs/zh-CN/dataset/k400.md)    |  Top-1   |   69.81   |
 | 行为识别 | [AttentionLSTM](./docs/zh-CN/model_zoo/recognition/attention_lstm.md) |  [Youtube-8M](./docs/zh-CN/dataset/youtube8m.md)   |  Hit@1   |   89.05    |
 | 视频动作定位   |      [BMN](./docs/zh-CN/model_zoo/localization/bmn.md)       | [ActivityNet](./docs/zh-CN/dataset/ActivityNet.md) |   AUC    |   67.23   |
+| 单目深度估计   |      [ADDS](./docs/zh-CN/model_zoo/estimation/adds.md)       | [Oxford_RobotCar](./docs/zh-CN/dataset/Oxford_RobotCar.md) |   Abs Rel    |   0.209   |
 
 <a name="欢迎加入PaddleVideo技术交流群"></a>
 ## 欢迎加入PaddleVideo技术交流群
@@ -104,6 +105,8 @@ PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_githu
     - [基于骨骼的行为识别](docs/zh-CN/model_zoo/README.md)
        - [ST-GCN](docs/zh-CN/model_zoo/recognition/stgcn.md)
        - [AGCN](docs/zh-CN/model_zoo/recognition/agcn.md)
+    - [基于自监督的单目深度估计]
+       - [ADDS](./docs/zh-CN/model_zoo/estimation/adds.md)
     - 时空动作检测 <sup>coming soon</sup>
     - ActBERT: 自监督多模态视频文字学习<sup>coming soon</sup>
 - 项目实战
@@ -117,7 +120,7 @@ PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_githu
 - [赛事支持](#赛事支持)
 - [许可证书](#许可证书)
 - [贡献代码](#贡献代码)
- 
+
 
 ## 赛事支持
 - [CCKS 2021：知识增强的视频语义理解](https://www.biendata.xyz/competition/ccks_2021_videounderstanding/)
