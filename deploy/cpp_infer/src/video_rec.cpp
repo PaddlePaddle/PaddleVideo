@@ -64,11 +64,11 @@ namespace PaddleVideo
             // 3. Normalization(inplace operation)
             for (int i = 0; i < real_batch_num; ++i)
             {
-                for (int j = 0; j < num_views; ++j)
+                for (int j = 0; j < this->num_seg; ++j)
                 {
-                    for (int k = 0; k < this->num_seg; ++k)
+                    for (int k = 0; k < num_views; ++k)
                     {
-                        this->normalize_op_.Run(&crop_frames[i * num_views * this->num_seg + j * this->num_seg + k], this->mean_, this->scale_, this->is_scale_);
+                        this->normalize_op_.Run(&crop_frames[i * num_views * this->num_seg + j * num_views + k], this->mean_, this->scale_, this->is_scale_);
                     }
                 }
             }
@@ -80,11 +80,11 @@ namespace PaddleVideo
             input = std::vector<float>(real_batch_num * num_views * this->num_seg *  crop_frames[0].rows * crop_frames[0].cols * rc, 0.0f);
             for (int i = 0; i < real_batch_num; ++i)
             {
-                for (int j = 0; j < num_views; ++j)
+                for (int j = 0; j < this->num_seg; ++j)
                 {
-                    for (int k = 0; k < this->num_seg; ++k)
+                    for (int k = 0; k < num_views; ++k)
                     {
-                        this->permute_op_.Run(&crop_frames[i * num_views * this->num_seg + j * this->num_seg + k], input.data() + (i * num_views * this->num_seg + j * this->num_seg + k) * (rh * rw * rc));
+                        this->permute_op_.Run(&crop_frames[i * num_views * this->num_seg + j * num_views + k], input.data() + (i * num_views * this->num_seg + j * num_views + k) * (rh * rw * rc));
                     }
                 }
             }
@@ -115,11 +115,11 @@ namespace PaddleVideo
             // 3. Normalization(inplace operation)
             for (int i = 0; i < real_batch_num; ++i)
             {
-                for (int j = 0; j < num_views; ++j)
+                for (int j = 0; j < this->num_seg; ++j)
                 {
-                    for (int k = 0; k < this->num_seg; ++k)
+                    for (int k = 0; k < num_views; ++k)
                     {
-                        this->normalize_op_.Run(&crop_frames[i * num_views * this->num_seg + j * this->num_seg + k], this->mean_, this->scale_, this->is_scale_);
+                        this->normalize_op_.Run(&crop_frames[i * this->num_seg * num_views + j * num_views + k], this->mean_, this->scale_, this->is_scale_);
                     }
                 }
             }
@@ -128,11 +128,15 @@ namespace PaddleVideo
             int rh = crop_frames[0].rows;
             int rw = crop_frames[0].cols;
             int rc = crop_frames[0].channels();
-            for (int i = 0; i < this->num_seg; ++i)
+            input = std::vector<float>(real_batch_num * this->num_seg * num_views *  crop_frames[0].rows * crop_frames[0].cols * rc, 0.0f);
+            for (int i = 0; i < real_batch_num; ++i)
             {
-                for (int j = 0; j < num_views; ++j)
+                for (int j = 0; j < this->num_seg; ++j)
                 {
-                    this->permute_op_.Run(&crop_frames[i * num_views + j], input.data() + (i * num_views + j) * rh * rw * rc);
+                    for (int k = 0; k < num_views; ++k)
+                    {
+                        this->permute_op_.Run(&crop_frames[i * this->num_seg * num_views + j * num_views + k], input.data() + (i * this->num_seg * num_views + j * num_views + k) * (rh * rw * rc));
+                    }
                 }
             }
         }
@@ -213,29 +217,47 @@ namespace PaddleVideo
                 {
                     precision = paddle_infer::Config::Precision::kHalf;
                 }
-                if (this->precision_ == "int8")
+                else if (this->precision_ == "int8")
                 {
                     precision = paddle_infer::Config::Precision::kInt8;
                 }
-                config.EnableTensorRtEngine(
-                    1 << 20, 10, 3,
-                    precision,
-                    false, false);
-//                 std::map<std::string, std::vector<int>> min_input_shape =
-//                 {
-//                     {"x", {1, 1, 3, 224, 224}}
-//                 };
-//                 std::map<std::string, std::vector<int>> max_input_shape =
-//                 {
-//                     {"x", {4, 1 * this->num_seg, 3, 224, 224}}
-//                 };
-//                 std::map<std::string, std::vector<int>> opt_input_shape =
-//                 {
-//                     {"x", {1, 1 * this->num_seg, 3, 224, 224}}
-//                 };
 
-//                 config.SetTRTDynamicShapeInfo(min_input_shape, max_input_shape,
-//                                               opt_input_shape);
+                if (this->inference_model_name == "ppTSM" || this->inference_model_name == "TSM")
+                {
+                    config.EnableTensorRtEngine(
+                        1 << 20, this->rec_batch_num * this->num_seg * 1, 3,
+                        precision,
+                        false, false);
+                }
+                else if(this->inference_model_name == "ppTSN" || this->inference_model_name == "TSN")
+                {
+                    config.EnableTensorRtEngine(
+                        1 << 20, this->rec_batch_num * this->num_seg * 10, 3,
+                        precision,
+                        false, false);
+                }
+                else
+                {
+                    config.EnableTensorRtEngine(
+                        1 << 20, this->rec_batch_num, 3,
+                        precision,
+                        false, false);
+                }
+                // std::map<std::string, std::vector<int>> min_input_shape =
+                // {
+                //     {"data_batch", {1, 1, 1, 1, 1}}
+                // };
+                // std::map<std::string, std::vector<int>> max_input_shape =
+                // {
+                //     {"data_batch", {10,  this->num_seg, 3, 224, 224}}
+                // };
+                // std::map<std::string, std::vector<int>> opt_input_shape =
+                // {
+                //     {"data_batch", {this->rec_batch_num,  this->num_seg, 3, 224, 224}}
+                // };
+
+                // config.SetTRTDynamicShapeInfo(min_input_shape, max_input_shape,
+                //                               opt_input_shape);
             }
         }
         else

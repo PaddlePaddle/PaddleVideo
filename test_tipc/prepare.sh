@@ -117,7 +117,7 @@ if [ ${MODE} = "lite_train_lite_infer" ];then
         mkdir bmn_data
         cd bmn_data
         wget -nc https://paddlemodels.bj.bcebos.com/video_detection/bmn_feat.tar.gz
-        tar -zcvf bmn_feat.tar.gz
+        tar -xf bmn_feat.tar.gz
         wget -nc https://paddlemodels.bj.bcebos.com/video_detection/activitynet_1.3_annotations.json
         wget -nc https://paddlemodels.bj.bcebos.com/video_detection/activity_net_1_3_new.json
         popd
@@ -243,7 +243,7 @@ elif [ ${MODE} = "whole_train_whole_infer" ];then
         mkdir bmn_data
         cd bmn_data
         wget -nc https://paddlemodels.bj.bcebos.com/video_detection/bmn_feat.tar.gz
-        tar -zcvf bmn_feat.tar.gz
+        tar -xf bmn_feat.tar.gz
         wget -nc https://paddlemodels.bj.bcebos.com/video_detection/activitynet_1.3_annotations.json
         wget -nc https://paddlemodels.bj.bcebos.com/video_detection/activity_net_1_3_new.json
         popd
@@ -332,7 +332,7 @@ elif [ ${MODE} = "lite_train_whole_infer" ];then
         mkdir bmn_data
         cd bmn_data
         wget -nc https://paddlemodels.bj.bcebos.com/video_detection/bmn_feat.tar.gz
-        tar -zcvf bmn_feat.tar.gz
+        tar -xf bmn_feat.tar.gz
         wget -nc https://paddlemodels.bj.bcebos.com/video_detection/activitynet_1.3_annotations.json
         wget -nc https://paddlemodels.bj.bcebos.com/video_detection/activity_net_1_3_new.json
         popd
@@ -380,12 +380,26 @@ if [ ${MODE} = "klquant_whole_infer" ]; then
 fi
 
 if [ ${MODE} = "cpp_infer" ];then
+    # install required packages
+    apt-get update
+    apt install libavformat-dev
+    apt install libavcodec-dev
+    apt install libswresample-dev
+    apt install libswscale-dev
+    apt install libavutil-dev
+    apt install libsdl1.2-dev
+    apt-get install ffmpeg
+
     if [ ${model_name} = "PP-TSM" ]; then
         # download pretrained weights
         wget -nc -P data/ https://videotag.bj.bcebos.com/PaddleVideo-release2.1/PPTSM/ppTSM_k400_uniform.pdparams --no-check-certificate
+        # export inference model
+        python3.7 tools/export_model.py -c configs/recognition/pptsm/pptsm_k400_frames_uniform.yaml -p data/ppTSM_k400_uniform.pdparams -o ./inference/ppTSM
     elif [ ${model_name} = "PP-TSN" ]; then
         # download pretrained weights
         wget -nc -P data/ https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ppTSN_k400.pdparams --no-check-certificate
+        # export inference model
+        python3.7 tools/export_model.py -c configs/recognition/pptsn/pptsn_k400_videos.yaml -p data/ppTSN_k400.pdparams -o ./inference/ppTSN
     else
         echo "Not added into TIPC now."
     fi
