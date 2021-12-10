@@ -35,15 +35,15 @@ DATASET: #DATASET field
     train:
         format: "MonoDataset"
         file_path: "data/splits/oxford_day/train_files.txt"
-        data_prefix: "data/oxford_processing_new"
+        data_prefix: "data/oxford/oxford_processing_new"
     valid:
         format: "MonoDataset"
-        file_path: "data/splits/oxford_day/val_day_files.txt"
-        data_prefix: "data/oxford_processing_new"
+        file_path: "data/oxford/splits/oxford_day/val_day_files.txt"
+        data_prefix: "data/oxford/oxford_processing_new"
     test:
         format: "MonoDataset"
-        file_path: "data/splits/oxford_day/val_night_files.txt"
-        data_prefix: "data/oxford_processing_new"
+        file_path: "data/oxford/splits/oxford_day/val_night_files.txt"
+        data_prefix: "data/oxford/oxford_processing_new"
 
 PIPELINE: #PIPELINE field TODO.....
     train: #Mandotary, indicate the pipeline to deal with the training data, associate to the 'paddlevideo/loader/pipelines/'

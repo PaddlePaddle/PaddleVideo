@@ -794,7 +794,6 @@ class ResnetEncoder(nn.Layer):
         self.convtf = nn.Conv2D(64, 3, kernel_size=1, stride=1, padding=0)
 
     def forward(self, input_image, is_night, istrain):
-        print(f"istrain: {istrain}")
         if istrain == 'train':
             result = []
             input_data = (input_image - 0.45) / 0.225
@@ -833,8 +832,6 @@ class ResnetEncoder(nn.Layer):
         self.features = []
         x = (input_image - 0.45) / 0.225
         if is_night == 'day':
-            print(is_night)
-            print(f"input_image.shape", input_image.shape)
             x = self.encoder.conv1(x)
             x = self.encoder.bn1(x)
             self.features.append(self.encoder.relu(x))
@@ -891,8 +888,7 @@ class ResnetEncoder_pose(nn.Layer):
                 "{} is not a valid number of resnet layers".format(num_layers))
 
         if num_input_images > 1:
-            self.encoder = resnet_multiimage_input(num_layers, pretrained,
-                                                   num_input_images)
+            self.encoder = resnet_multiimage_input(num_layers, num_input_images)
         else:
             self.encoder = resnets[num_layers](pretrained)
 
@@ -1041,7 +1037,6 @@ class ADDS_DepthNet(nn.Layer):
 
             pred_disp = pred_disp[:, 0]
             outputs = paddle.squeeze(pred_disp)
-            # print("=================")
         return outputs
 
     def predict_poses(self, inputs, features, is_night):

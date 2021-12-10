@@ -105,7 +105,7 @@ PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_githu
     - [基于骨骼的行为识别](docs/zh-CN/model_zoo/README.md)
        - [ST-GCN](docs/zh-CN/model_zoo/recognition/stgcn.md)
        - [AGCN](docs/zh-CN/model_zoo/recognition/agcn.md)
-    - [基于自监督的单目深度估计]
+    - [基于自监督的单目深度估计](docs/zh-CN/model_zoo/README.md)
        - [ADDS](./docs/zh-CN/model_zoo/estimation/adds.md)
     - 时空动作检测 <sup>coming soon</sup>
     - ActBERT: 自监督多模态视频文字学习<sup>coming soon</sup>

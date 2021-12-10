@@ -111,7 +111,7 @@ class ImageDecoder(object):
         return:
             List where each item is a numpy array after decoder.
         """
-        if results['mode'] == 'infer':
+        if results.get('mode', None) == 'infer':
             imgs = {}
             imgs[("color", 0,
                   -1)] = Image.open(results["filename"]).convert("RGB")

@@ -35,7 +35,7 @@ For data download and preparation of Oxford RobotCar dataset, please refer to [O
    wget -P ./data https://videotag.bj.bcebos.com/PaddleVideo-release2.2/Resnet18_Imagenet.pdparams
    ```
 
-2. Open `PaddleVideo/configs/depthestimation/adds/adds.yaml`, and fill in the downloaded weight storage path below `pretrained:`
+2. Open `PaddleVideo/configs/estimation/adds/adds.yaml`, and fill in the downloaded weight storage path below `pretrained:`
 
     ```yaml
     MODEL: #MODEL field
@@ -50,7 +50,7 @@ For data download and preparation of Oxford RobotCar dataset, please refer to [O
 - The Oxford RobotCar dataset uses a single card for training, and the starting command for the training method is as follows:
 
     ```bash
-    python3.7 main.py --validate -c configs/depthestimation/adds/adds.yaml --seed 20
+    python3.7 main.py --validate -c configs/estimation/adds/adds.yaml --seed 20
     ```
 
 
@@ -70,16 +70,16 @@ For data download and preparation of Oxford RobotCar dataset, please refer to [O
 
   ```bash
   # Night 40m
-  python3.7 main.py --test -c configs/depthestimation/adds/adds.yaml -w "output/ADDS/ADDS_car.pdparams" -o DATASET.test.file_path="data/splits/oxford_day/val_night_files.txt" -o MODEL.head.max_gt_depth=40
+  python3.7 main.py --test -c configs/estimation/adds/adds.yaml -w "output/ADDS/ADDS_best.pdparams" -o DATASET.test.file_path="data/oxford/splits/oxford_day/val_night_files.txt" -o MODEL.head.max_gt_depth=40
 
   # Night 60m
-  python3.7 main.py --test -c configs/depthestimation/adds/adds.yaml -w "output/ADDS/ADDS_car.pdparams" -o DATASET.test.file_path="data/splits/oxford_day/val_night_files.txt" -o MODEL.head.max_gt_depth=60
+  python3.7 main.py --test -c configs/estimation/adds/adds.yaml -w "output/ADDS/ADDS_best.pdparams" -o DATASET.test.file_path="data/oxford/splits/oxford_day/val_night_files.txt" -o MODEL.head.max_gt_depth=60
 
   # Daytime 40m
-  python3.7 main.py --test -c configs/depthestimation/adds/adds.yaml -w "output/ADDS/ADDS_car.pdparams" -o DATASET.test.file_path="data/splits/oxford_day/val_day_files.txt" -o MODEL.head.max_gt_depth=40
+  python3.7 main.py --test -c configs/estimation/adds/adds.yaml -w "output/ADDS/ADDS_best.pdparams" -o DATASET.test.file_path="data/oxford/splits/oxford_day/val_day_files.txt" -o MODEL.head.max_gt_depth=40
 
   # Daytime 60m
-  python3.7 main.py --test -c configs/depthestimation/adds/adds.yaml -w "output/ADDS/ADDS_car.pdparams" -o DATASET.test.file_path="data/splits/oxford_day/val_day_files.txt" -o MODEL.head.max_gt_depth=60
+  python3.7 main.py --test -c configs/estimation/adds/adds.yaml -w "output/ADDS/ADDS_best.pdparams" -o DATASET.test.file_path="data/oxford/splits/oxford_day/val_day_files.txt" -o MODEL.head.max_gt_depth=60
   ```
 
     The test indicators on the validation dataset of Oxford RobotCar dataset are as follows:
@@ -96,7 +96,7 @@ For data download and preparation of Oxford RobotCar dataset, please refer to [O
 ### Export inference model
 
 ```bash
-python3.7 tools/export_model.py -c configs/depthestimation/adds/adds.yaml -p data/ADDS_car.pdparams -o inference/ADDS
+python3.7 tools/export_model.py -c configs/estimation/adds/adds.yaml -p data/ADDS_car.pdparams -o inference/ADDS
 ```
 
 The above command will generate the model structure file `ADDS.pdmodel` and model weight files `ADDS.pdiparams` and `ADDS.pdiparams.info` files needed for prediction, all of which are stored in the `inference/ppTSN/` directory
@@ -107,7 +107,7 @@ For the meaning of each parameter in the above bash command, please refer to [Mo
 
 ```bash
 python3.7 tools/predict.py --input_file data/example.png \
-                           --config configs/depthestimation/adds/adds.yaml \
+                           --config configs/estimation/adds/adds.yaml \
                            --model_file inference/ADDS/ADDS.pdmodel \
                            --params_file inference/ADDS/ADDS.pdiparams \
                            --use_gpu=True \

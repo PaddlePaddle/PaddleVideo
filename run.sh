@@ -12,7 +12,7 @@ start_time=$(date +%s)
 python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=logdir.ava_all.1203 main.py --validate -w paddle.init_param.pdparams -c configs/detection/ava/ava_all.yaml
 
 # run adds training
-# python3.7 main.py --validate -c configs/depthestimation/adds/adds.yaml --seed 20
+# python3.7 main.py --validate -c configs/estimation/adds/adds.yaml --seed 20
 
 # run tsm training
 # python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_tsm main.py  --validate -c configs/recognition/tsm/tsm_k400_frames.yaml

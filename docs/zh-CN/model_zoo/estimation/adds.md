@@ -35,7 +35,7 @@ Oxford RobotCar dataset数据下载及准备请参考[Oxford RobotCar dataset数
    wget -P ./data https://videotag.bj.bcebos.com/PaddleVideo-release2.2/Resnet18_Imagenet.pdparams
    ```
 
-2. 打开`PaddleVideo/configs/depthestimation/adds/adds.yaml`，将下载好的权重存放路径填写到下方`pretrained:`之后
+2. 打开`PaddleVideo/configs/estimation/adds/adds.yaml`，将下载好的权重存放路径填写到下方`pretrained:`之后
 
     ```yaml
     MODEL: #MODEL field
@@ -50,7 +50,7 @@ Oxford RobotCar dataset数据下载及准备请参考[Oxford RobotCar dataset数
 - Oxford RobotCar dataset数据集使用单卡训练，训练方式的启动命令如下：
 
     ```bash
-    python3.7 main.py --validate -c configs/depthestimation/adds/adds.yaml --seed 20
+    python3.7 main.py --validate -c configs/estimation/adds/adds.yaml --seed 20
     ```
 
 
@@ -70,16 +70,16 @@ Oxford RobotCar dataset数据下载及准备请参考[Oxford RobotCar dataset数
 
   ```bash
   # 夜晚40m
-  python3.7 main.py --test -c configs/depthestimation/adds/adds.yaml -w "output/ADDS/ADDS_car.pdparams" -o DATASET.test.file_path="data/splits/oxford_day/val_night_files.txt" -o MODEL.head.max_gt_depth=40
+  python3.7 main.py --test -c configs/estimation/adds/adds.yaml -w "output/ADDS/ADDS_best.pdparams" -o DATASET.test.file_path="data/oxford/splits/oxford_day/val_night_files.txt" -o MODEL.head.max_gt_depth=40
 
   # 夜晚60m
-  python3.7 main.py --test -c configs/depthestimation/adds/adds.yaml -w "output/ADDS/ADDS_car.pdparams" -o DATASET.test.file_path="data/splits/oxford_day/val_night_files.txt" -o MODEL.head.max_gt_depth=60
+  python3.7 main.py --test -c configs/estimation/adds/adds.yaml -w "output/ADDS/ADDS_best.pdparams" -o DATASET.test.file_path="data/oxford/splits/oxford_day/val_night_files.txt" -o MODEL.head.max_gt_depth=60
 
   # 白天40m
-  python3.7 main.py --test -c configs/depthestimation/adds/adds.yaml -w "output/ADDS/ADDS_car.pdparams" -o DATASET.test.file_path="data/splits/oxford_day/val_day_files.txt" -o MODEL.head.max_gt_depth=40
+  python3.7 main.py --test -c configs/estimation/adds/adds.yaml -w "output/ADDS/ADDS_best.pdparams" -o DATASET.test.file_path="data/oxford/splits/oxford_day/val_day_files.txt" -o MODEL.head.max_gt_depth=40
 
   # 白天60m
-  python3.7 main.py --test -c configs/depthestimation/adds/adds.yaml -w "output/ADDS/ADDS_car.pdparams" -o DATASET.test.file_path="data/splits/oxford_day/val_day_files.txt" -o MODEL.head.max_gt_depth=60
+  python3.7 main.py --test -c configs/estimation/adds/adds.yaml -w "output/ADDS/ADDS_best.pdparams" -o DATASET.test.file_path="data/oxford/splits/oxford_day/val_day_files.txt" -o MODEL.head.max_gt_depth=60
   ```
 
     在Oxford RobotCar dataset的validation数据集上的测试指标如下：
@@ -96,7 +96,7 @@ Oxford RobotCar dataset数据下载及准备请参考[Oxford RobotCar dataset数
 ### 导出inference模型
 
 ```bash
-python3.7 tools/export_model.py -c configs/depthestimation/adds/adds.yaml -p data/ADDS_car.pdparams -o inference/ADDS
+python3.7 tools/export_model.py -c configs/estimation/adds/adds.yaml -p data/ADDS_car.pdparams -o inference/ADDS
 ```
 
 上述命令将生成预测所需的模型结构文件`ADDS.pdmodel`和模型权重文件`ADDS.pdiparams`以及`ADDS.pdiparams.info`文件，均存放在`inference/ppTSN/`目录下
@@ -107,7 +107,7 @@ python3.7 tools/export_model.py -c configs/depthestimation/adds/adds.yaml -p dat
 
 ```bash
 python3.7 tools/predict.py --input_file data/example.png \
-                           --config configs/depthestimation/adds/adds.yaml \
+                           --config configs/estimation/adds/adds.yaml \
                            --model_file inference/ADDS/ADDS.pdmodel \
                            --params_file inference/ADDS/ADDS.pdiparams \
                            --use_gpu=True \
