@@ -12,8 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .registry import BACKBONES, HEADS, LOSSES, RECOGNIZERS, LOCALIZERS, ROI_EXTRACTORS, DETECTORS, BBOX_ASSIGNERS, BBOX_SAMPLERS, BBOX_CODERS, PARTITIONERS
 from ..utils import build
+from .registry import (BACKBONES, BBOX_ASSIGNERS, BBOX_CODERS, BBOX_SAMPLERS,
+                       DETECTORS, ESTIMATORS, HEADS, LOCALIZERS, LOSSES,
+                       PARTITIONERS, RECOGNIZERS, ROI_EXTRACTORS)
 
 
 def build_backbone(cfg):
@@ -86,6 +88,11 @@ def build_partitioner(cfg):
     return build(cfg, PARTITIONERS, key='framework')
 
 
+def build_estimator(cfg):
+    """Build estimator."""
+    return build(cfg, ESTIMATORS, key='framework')
+
+
 def build_model(cfg):
     cfg_copy = cfg.copy()
     framework_type = cfg_copy.get('framework')
@@ -97,5 +104,7 @@ def build_model(cfg):
         return build_partitioner(cfg)
     elif framework_type in DETECTORS:
         return build_detector(cfg)
+    elif framework_type in ESTIMATORS:
+        return build_estimator(cfg)
     else:
         raise NotImplementedError

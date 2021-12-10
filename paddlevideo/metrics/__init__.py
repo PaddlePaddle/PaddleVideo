@@ -15,13 +15,15 @@
 from .bmn_metric import BMNMetric
 from .build import build_metric
 from .center_crop_metric import CenterCropMetric
+from .depth_metric import DepthMetric
 from .multi_crop_metric import MultiCropMetric
 from .registry import METRIC
 from .skeleton_metric import SkeletonMetric
-from .youtube8m.eval_util import HitOneMetric
 from .transnetv2_metric import TransNetV2Metric
+from .youtube8m.eval_util import HitOneMetric
 
 __all__ = [
     'METRIC', 'build_metric', 'MultiCropMetric', 'BMNMetric',
-    'CenterCropMetric', 'SkeletonMetric', 'HitOneMetric', 'TransNetV2Metric'
+    'CenterCropMetric', 'SkeletonMetric', 'HitOneMetric', 'TransNetV2Metric',
+    'DepthMetric'
 ]

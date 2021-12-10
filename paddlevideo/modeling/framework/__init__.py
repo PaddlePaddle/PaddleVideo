@@ -12,15 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .recognizers import BaseRecognizer, Recognizer2D
+from .estimators import BaseEstimator, DepthEstimator
 from .localizers import BaseLocalizer, BMNLocalizer
 from .partitioners import BasePartitioner, TransNetV2Partitioner
+from .recognizers import BaseRecognizer, Recognizer2D
 
 __all__ = [
-    'BaseRecognizer',
-    'Recognizer2D',
-    'BaseLocalizer',
-    'BMNLocalizer',
-    'BasePartitioner',
-    'TransNetV2Partitioner',
+    'BaseRecognizer', 'Recognizer2D', 'BaseLocalizer', 'BMNLocalizer',
+    'BasePartitioner', 'TransNetV2Partitioner', 'BaseRecognizer',
+    'Recognizer2D', 'BaseEstimator', 'DepthEstimator'
 ]

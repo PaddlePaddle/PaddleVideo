@@ -131,9 +131,18 @@ def get_input_spec(cfg, model_name):
     elif model_name in ['TransNetV2']:
         input_spec = [[
             InputSpec(shape=[
-                None, cfg.num_frames, cfg.height, cfg.width, cfg.num_channels, 
+                None,
+                cfg.num_frames,
+                cfg.height,
+                cfg.width,
+                cfg.num_channels,
             ],
-                dtype='float32'),
+                      dtype='float32'),
+        ]]
+    elif model_name in ['ADDS']:
+        input_spec = [[
+            InputSpec(shape=[None, cfg.num_channels, cfg.height, cfg.width],
+                      dtype='float32'),
         ]]
     return input_spec
 
