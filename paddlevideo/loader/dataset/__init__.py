@@ -19,8 +19,9 @@ from .bmn_dataset import BMNDataset
 from .feature import FeatureDataset
 from .skeleton import SkeletonDataset
 from .ava_dataset import AVADataset
+from .msrvtt import MSRVTTDataset
 
 __all__ = [
     'VideoDataset', 'FrameDataset', 'SFVideoDataset', 'BMNDataset',
-    'FeatureDataset', 'SkeletonDataset', 'AVADataset'
+    'FeatureDataset', 'SkeletonDataset', 'AVADataset', 'MSRVTTDataset'
 ]
