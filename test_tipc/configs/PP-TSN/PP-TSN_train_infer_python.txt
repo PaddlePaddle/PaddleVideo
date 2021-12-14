@@ -10,7 +10,7 @@ DATASET.batch_size:null
 -o MODEL.backbone.pretrained:'data/ResNet50_vd_ssld_v2_pretrained.pdparams'
 train_model_name:null
 train_infer_video_dir:null
--o DATASET.train.file_path:'data/k400/train_small.list'
+-o DATASET.train.file_path:'data/k400/train_small_videos.list' -o DATASET.valid.file_path='data/k400/train_small_videos.list' -o DATASET.test.file_path='data/k400/train_small_videos.list'
 ##
 trainer:norm_train
 norm_train:main.py --validate -c configs/recognition/pptsn/pptsn_k400_videos.yaml --seed 1234
