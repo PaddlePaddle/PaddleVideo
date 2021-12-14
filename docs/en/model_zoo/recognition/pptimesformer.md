@@ -20,7 +20,7 @@ We have improved the [TimeSformer model](./timesformer.md) and obtained a more a
 | :------ | :----: |
 | Ours (distill+16frame) | 79.49 |
 | Ours (distill) | 78.82 |
-| Ours | **77.29** |
+| Ours | **77.54** |
 | [mmaction2](https://github.com/open-mmlab/mmaction2/tree/master/configs/recognition/tsn#kinetics-400) | 77.92 |
 
 
@@ -93,7 +93,7 @@ UCF101 data download and preparation please refer to [UCF-101 data preparation](
   When the test configuration uses the following parameters, the test indicators on the validation data set of Kinetics-400 are as follows:
 
    | backbone           | Sampling method | num_seg | target_size | Top-1 | checkpoints |
-   | :----------------: | :-------------: | :-----: | :----- ----: | :---- | :------------------------------------- ---------------------: |
+   | :----------------: | :-------------: | :-----: | :---------: | :---- | :----------------------------------------------------------: |
    | Vision Transformer |   UniformCrop   |   8    |     224     | 78.54 | [ppTimeSformer_k400_8f.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ppTimeSformer_k400_8f.pdparams) |
    | Vision Transformer | UniformCrop | 8 | 224 | 78.82 | [ppTimeSformer_k400_8f_distill.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ppTimeSformer_k400_8f_distill.pdparams) |
    | Vision Transformer | UniformCrop | 16 | 224 | 79.49 | [ppTimeSformer_k400_16f_distill_16f.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ppTimeSformer_k400_16f_distill_16f.pdparams) |
