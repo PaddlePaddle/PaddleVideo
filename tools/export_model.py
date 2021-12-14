@@ -82,7 +82,7 @@ def get_input_spec(cfg, model_name):
                       dtype='float32',
                       name='feat_input'),
         ]]
-    elif model_name in ['TimeSformer']:
+    elif model_name in ['TimeSformer', 'ppTimeSformer']:
         input_spec = [[
             InputSpec(shape=[
                 None, 3, cfg.num_seg * 3, cfg.target_size, cfg.target_size
@@ -131,9 +131,13 @@ def get_input_spec(cfg, model_name):
     elif model_name in ['TransNetV2']:
         input_spec = [[
             InputSpec(shape=[
-                None, cfg.num_frames, cfg.height, cfg.width, cfg.num_channels, 
+                None,
+                cfg.num_frames,
+                cfg.height,
+                cfg.width,
+                cfg.num_channels,
             ],
-                dtype='float32'),
+                      dtype='float32'),
         ]]
     return input_spec
 

@@ -195,17 +195,6 @@ python3.7 tools/predict.py --input_file data/example.avi \
                            --use_gpu=True \
                            --use_tensorrt=False
 ```
-- **Note**: For models that combine N and T during calculation (such as TSN, TSM), when `use_tensorrt=True`, you need to specify the `batch_size` argument as batch_size\*num_seg\*num_crop.
-
-    ```bash
-    python3.7 tools/predict.py --input_file data/example.avi \
-                               --config configs/recognition/tsm/tsm_k400_frames.yaml \
-                               --model_file inference/TSM/TSM.pdmodel \
-                               --params_file inference/TSM/TSM.pdiparams \
-                               --batch_size 8 \
-                               --use_gpu=True \
-                               --use_tensorrt=True
-    ```
 
 ## Implementation details
 

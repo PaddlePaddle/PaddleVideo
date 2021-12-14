@@ -12,12 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import paddle
-from paddle.nn import AdaptiveAvgPool2D, Linear, Dropout
+from paddle.nn import Linear
 
-from .base import BaseHead
 from ..registry import HEADS
-from ..weight_init import weight_init_, trunc_normal_
+from ..weight_init import trunc_normal_, weight_init_
+from .base import BaseHead
 
 
 @HEADS.register()
