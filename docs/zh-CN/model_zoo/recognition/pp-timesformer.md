@@ -1,4 +1,4 @@
-[English](../../../en/model_zoo/recognition/pptimesformer.md) | 简体中文
+[English](../../../en/model_zoo/recognition/pp-timesformer.md) | 简体中文
 
 # TimeSformer视频分类模型
 
@@ -21,7 +21,7 @@
 | Ours (distill+16frame) | 79.49 |
 | Ours (distill)  | 78.82 |
 | Ours | **78.54** |
-| [mmaction2](https://github.com/open-mmlab/mmaction2/tree/master/configs/recognition/tsn#kinetics-400) | 77.92 |
+| [mmaction2](https://github.com/open-mmlab/mmaction2/tree/master/configs/recognition/timesformer#kinetics-400) | 77.92 |
 
 
 ## 数据准备
@@ -93,7 +93,7 @@ UCF101数据下载及准备请参考[UCF-101数据准备](../../dataset/ucf101.m
   当测试配置采用如下参数时，在Kinetics-400的validation数据集上的测试指标如下：
 
    | backbone           | Sampling method | num_seg | target_size | Top-1 | checkpoints |
-   | :----------------: | :-------------: | :-----: | :----- ----: | :---- | :------------------------------------- ---------------------: |
+   | :----------------: | :-------------: | :-----: | :---------: | :---- | :----------------------------------------------------------: |
    | Vision Transformer |   UniformCrop   |   8    |     224     | 78.54 | [ppTimeSformer_k400_8f.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ppTimeSformer_k400_8f.pdparams) |
    | Vision Transformer | UniformCrop | 8 | 224 | 78.82 | [ppTimeSformer_k400_8f_distill.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ppTimeSformer_k400_8f_distill.pdparams) |
    | Vision Transformer | UniformCrop | 16 | 224 | 79.49 | [ppTimeSformer_k400_16f_distill_16f.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ppTimeSformer_k400_16f_distill_16f.pdparams) |
