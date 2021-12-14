@@ -171,27 +171,16 @@ python tools/export_model.py \
 
 ```bash
 python tools/predict.py \
-    --video_file "data/example.avi" \
+    --input_file "data/example.avi" \
     --model_file "./inference/TSN.pdmodel" \
     --params_file "./inference/TSN.pdiparams" \
     --use_gpu=True \
     --use_tensorrt=False
 ```
-- **注意**：对于在计算时会合并N和T的模型（比如TSN、TSM），当`use_tensorrt=True`时，需要指定`batch_size`参数为batch_size*num_seg。
-
-    ```bash
-    python tools/predict.py \
-        -i "data/example.avi" \
-        --model_file "./inference/TSN.pdmodel" \
-        --params_file "./inference/TSN.pdiparams" \
-        --batch_size 8 \
-        --use_gpu=True \
-        --use_tensorrt=True
-    ```
 
 其中：
 
-+ `i`：待预测的视频文件路径，如 `./test.avi`
++ `input_file`：待预测的文件路径或文件夹路径，如 `./test.avi`
 + `model_file`：模型结构文件路径，如 `./inference/TSN.pdmodel`
 + `params_file`：模型权重文件路径，如 `./inference/TSN.pdiparams`
 + `use_tensorrt`：是否使用 TesorRT 预测引擎，默认值：`False`

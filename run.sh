@@ -47,6 +47,9 @@ python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=lo
 # run timesformer training
 # python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=log_timesformer  main.py  --validate -c configs/recognition/timesformer/timesformer_k400_videos.yaml
 
+# run pp-timesformer training
+# python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=log_pptimesformer  main.py  --validate -c configs/recognition/pptimesformer/pptimesformer_k400_videos.yaml
+
 # run st-gcn training
 # python3.7 main.py -c configs/recognition/stgcn/stgcn_fsd.yaml
 

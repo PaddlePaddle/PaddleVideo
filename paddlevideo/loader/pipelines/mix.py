@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import random
 import numpy as np
+
 from ..registry import PIPELINES
 
 
@@ -87,3 +87,30 @@ class Cutmix(object):
         lams = np.array([lam] * bs, dtype=np.float32)
 
         return list(zip(imgs, labels, labels[idx], lams))
+
+
+@PIPELINES.register()
+class VideoMix(object):
+    """
+    VideoMix operator.
+    Args:
+        cutmix_prob(float): prob choose cutmix
+        mixup_alpha(float): alpha for mixup aug
+        cutmix_alpha(float): alpha for cutmix aug
+    """
+    def __init__(self, cutmix_prob=0.5, mixup_alpha=0.2, cutmix_alpha=1.0):
+        assert cutmix_prob > 0., \
+                'parameter cutmix_prob[%f] should > 0.0' % (cutmix_prob)
+        assert mixup_alpha > 0., \
+                'parameter mixup_alpha[%f] should > 0.0' % (mixup_alpha)
+        assert cutmix_alpha > 0., \
+                'parameter cutmix_alpha[%f] should > 0.0' % (cutmix_alpha)
+        self.cutmix_prob = cutmix_prob
+        self.mixup = Mixup(mixup_alpha)
+        self.cutmix = Cutmix(cutmix_alpha)
+
+    def __call__(self, batch):
+        if np.random.random() < self.cutmix_prob:
+            return self.cutmix(batch)
+        else:
+            return self.mixup(batch)
