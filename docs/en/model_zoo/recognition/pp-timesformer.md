@@ -20,7 +20,7 @@ We have improved the [TimeSformer model](./timesformer.md) and obtained a more a
 | :------ | :----: |
 | Ours (distill+16frame) | 79.49 |
 | Ours (distill) | 78.82 |
-| Ours | **77.54** |
+| Ours | **78.54** |
 | [mmaction2](https://github.com/open-mmlab/mmaction2/tree/master/configs/recognition/timesformer#kinetics-400) | 77.92 |
 
 
