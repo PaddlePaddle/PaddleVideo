@@ -72,7 +72,7 @@ if [ ${MODE} = "lite_train_lite_infer" ];then
         tar -xf k400_rawframes_small.tar
         popd
         # download pretrained weights
-        wget -nc -P ./data https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_vd_ssld_v2_pretrained.pdparams --no-check-certificate
+        wget -nc -P ./data https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_pretrain.pdparams --no-check-certificate
     elif [ ${model_name} == "TSN" ]; then
         # pretrain lite train data
         pushd ./data/k400
@@ -80,7 +80,7 @@ if [ ${MODE} = "lite_train_lite_infer" ];then
         tar -xf k400_rawframes_small.tar
         popd
         # download pretrained weights
-        wget -nc -P ./data https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_vd_ssld_v2_pretrained.pdparams --no-check-certificate
+        wget -nc -P ./data https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_pretrain.pdparams --no-check-certificate
     elif [ ${model_name} == "TimeSformer" ]; then
         # pretrain lite train data
         pushd ./data/k400
@@ -93,8 +93,8 @@ if [ ${MODE} = "lite_train_lite_infer" ];then
         pushd data/yt8m
         ## download & decompression training data
         wget -nc https://videotag.bj.bcebos.com/Data/yt8m_rawframe_small.tar
-        tar -xf yt8m_frame_small.tar
-        python3.7 -m pip install tensorflow-gpu==1.14.0
+        tar -xf yt8m_rawframe_small.tar
+        python3.7 -m pip install tensorflow-gpu==1.14.0 -i https://pypi.tuna.tsinghua.edu.cn/simple
         python3.7 tf2pkl.py ./frame ./pkl_frame/
         ls pkl_frame/train*.pkl > train_small.list # 将train*.pkl的路径写入train_small.list
         ls pkl_frame/validate*.pkl > val_small.list # 将validate*.pkl的路径写入val_small.list
@@ -178,7 +178,7 @@ elif [ ${MODE} = "whole_train_whole_infer" ];then
         wget -nc https://videotag.bj.bcebos.com/PaddleVideo/Data/Kinetic400/val_frames.list
         popd
         # download pretrained weights
-        wget -nc -P ./data https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_vd_ssld_v2_pretrained.pdparams --no-check-certificate
+        wget -nc -P ./data https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_pretrain.pdparams --no-check-certificate
     elif [ ${model_name} == "TSN" ]; then
         # pretrain whole train data
         pushd ./data/k400
@@ -192,7 +192,7 @@ elif [ ${MODE} = "whole_train_whole_infer" ];then
         wget -nc https://videotag.bj.bcebos.com/PaddleVideo/Data/Kinetic400/val_frames.list
         popd
         # download pretrained weights
-        wget -nc -P ./data https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_vd_ssld_v2_pretrained.pdparams --no-check-certificate
+        wget -nc -P ./data https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_pretrain.pdparams --no-check-certificate
     elif [ ${model_name} == "TimeSformer" ]; then
         # pretrain whole train data
         pushd ./data/k400
@@ -214,7 +214,7 @@ elif [ ${MODE} = "whole_train_whole_infer" ];then
         ## download & decompression training data
         curl data.yt8m.org/download.py | partition=2/frame/train mirror=asia python
         curl data.yt8m.org/download.py | partition=2/frame/validate mirror=asia python
-        python3.7 -m pip install tensorflow-gpu==1.14.0
+        python3.7 -m pip install tensorflow-gpu==1.14.0 -i https://pypi.tuna.tsinghua.edu.cn/simple
         cd ..
         python3.7 tf2pkl.py ./frame ./pkl_frame/
         ls pkl_frame/train*.pkl > train.list # 将train*.pkl的路径写入train.list
@@ -286,7 +286,7 @@ elif [ ${MODE} = "lite_train_whole_infer" ];then
         tar -xf k400_rawframes_small.tar
         popd
         # download pretrained weights
-        wget -nc -P ./data https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_vd_ssld_v2_pretrained.pdparams --no-check-certificate
+        wget -nc -P ./data https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_pretrain.pdparams --no-check-certificate
     elif [ ${model_name} == "TSN" ]; then
         # pretrain lite train data
         pushd ./data/k400
@@ -294,7 +294,7 @@ elif [ ${MODE} = "lite_train_whole_infer" ];then
         tar -xf k400_rawframes_small.tar
         popd
         # download pretrained weights
-        wget -nc -P ./data https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_vd_ssld_v2_pretrained.pdparams --no-check-certificate
+        wget -nc -P ./data https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_pretrain.pdparams --no-check-certificate
     elif [ ${model_name} == "TimeSformer" ]; then
         # pretrain lite train data
         pushd ./data/k400
@@ -308,8 +308,8 @@ elif [ ${MODE} = "lite_train_whole_infer" ];then
         pushd data/yt8m
         ## download & decompression training data
         wget -nc https://videotag.bj.bcebos.com/Data/yt8m_rawframe_small.tar
-        tar -xf yt8m_frame_small.tar
-        python3.7 -m pip install tensorflow-gpu==1.14.0
+        tar -xf yt8m_rawframe_small.tar
+        python3.7 -m pip install tensorflow-gpu==1.14.0 -i https://pypi.tuna.tsinghua.edu.cn/simple
         python3.7 tf2pkl.py ./frame ./pkl_frame/
         ls pkl_frame/train*.pkl > train_small.list # 将train*.pkl的路径写入train_small.list
         ls pkl_frame/validate*.pkl > val_small.list # 将validate*.pkl的路径写入val_small.list

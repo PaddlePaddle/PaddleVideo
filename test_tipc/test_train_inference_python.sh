@@ -322,6 +322,10 @@ else
                 fi
 
                 set_pretrain=$(func_set_params "${pretrain_model_key}" "${pretrain_model_value}")
+                if [[ $MODE =~ "whole_train" ]]; then
+                    train_batch_key=""
+                    train_batch_value=""
+                fi
                 set_batchsize=$(func_set_params "${train_batch_key}" "${train_batch_value}")
                 if [[ $MODE =~ "whole_train" ]]; then
                     train_param_key1=""
