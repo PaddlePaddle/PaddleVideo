@@ -862,7 +862,6 @@ class To_tensor(object):
                 imgs[(n, im, i)] = imgs[(n, im, i)].transpose((2, 0, 1))
         if "depth_gt" in imgs:
             imgs['depth_gt'] = np.array(imgs['depth_gt']).astype('float32')
-            imgs['depth_gt'] = paddle.to_tensor(imgs['depth_gt'])
 
         results['imgs'] = imgs
         return results
