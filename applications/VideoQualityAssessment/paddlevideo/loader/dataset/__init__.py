@@ -15,7 +15,7 @@
 """
 
 from .video import VideoDataset
-from .frame import FrameDataset
+#from .frame import FrameDataset
 from .frame_rec import FrameRecDataset
 
-__all__ = ['VideoDataset', 'FrameDataset', 'FrameRecDataset']
+__all__ = ['VideoDataset', 'FrameRecDataset']

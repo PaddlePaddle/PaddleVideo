@@ -18,7 +18,7 @@ from .backbones import ResNet
 from .builder import (build_backbone, build_head, build_recognizer,
                       build_localizer, build_loss)
 from .heads import BaseHead, TSNHead, TSMRecHead
-from .losses import CrossEntropyLoss, SmoothL1Loss, L1Loss
+from .losses import SmoothL1Loss, L1Loss
 from .framework.recognizers import BaseRecognizer, recognizer2d
 from .registry import BACKBONES, HEADS, LOSSES, RECOGNIZERS, LOCALIZERS
 from .weight_init import weight_init_
@@ -32,15 +32,14 @@ __all__ = [
     'build_recognizer',
     'build_localizer',
     'build_head',
+    'ResNet',
     'build_backbone',
     'build_loss',
-    'ResNet',
     'TSNHead',
     'BaseHead',
     'TSMRecHead',
     'BaseRecognizer',
     'Recognizer2d',
-    'CrossEntropyLoss',
     'SmoothL1Loss',
     'L1Loss',
 ]

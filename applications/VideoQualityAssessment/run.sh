@@ -1,7 +1,7 @@
-export CUDA_VISIBLE_DEVICES=0,1,2,3
+export CUDA_VISIBLE_DEVICES=0
 
 # run  training
-#python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3"  --log_dir=log_pptsm  main.py --amp  --validate -c configs/recognition/tsm/pptsm_regression.yaml
+python3.7 -B -m paddle.distributed.launch --gpus="0"  --log_dir=log_pptsm  main.py --amp  --validate -c configs/recognition/tsm/pptsm_regression.yaml
 
 # run testing
 #python3.7 -m paddle.distributed.launch --gpus="0,1,2,3" --log_dir=log_pptsm main.py -c configs/recognition/tsm/pptsm_regression.yaml --test --weights=output/model_name/ppTSM_best.pdparams

@@ -16,9 +16,6 @@
 
 from .base import BaseHead
 from .tsn_head import TSNHead
-from .tsm_head import TSMHead
-from .slowfast_head import SlowFastHead
-from .attention_lstm_head import AttentionLstmHead
 from .tsm_rec_head import TSMRecHead
 
-__all__ = ['BaseHead', 'TSNHead', 'TSMHead', 'SlowFastHead', 'AttentionLstmHead', 'TSMRecHead']
+__all__ = ['BaseHead', 'TSNHead', 'TSMRecHead']

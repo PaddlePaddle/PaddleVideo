@@ -15,9 +15,7 @@
 """
 
 from .base import BaseWeightedLoss
-from .cross_entropy_loss import CrossEntropyLoss
-from .bmn_loss import BMNLoss
 from .smooth_l1_loss import SmoothL1Loss
 from .l1_loss import L1Loss
 
-__all__ = ['CrossEntropyLoss', 'BMNLoss', 'SmoothL1Loss', 'L1Loss']
+__all__ = ['SmoothL1Loss', 'L1Loss']

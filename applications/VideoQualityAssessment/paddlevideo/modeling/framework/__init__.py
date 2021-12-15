@@ -15,11 +15,8 @@
 """
 
 from .recognizers import BaseRecognizer, Recognizer2D
-from .localizers import BaseLocalizer, BMNLocalizer
 
 __all__ = [
     'BaseRecognizer',
     'Recognizer2D',
-    'BaseLocalizer',
-    'BMNLocalizer',
 ]
