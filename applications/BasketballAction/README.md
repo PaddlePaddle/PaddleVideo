@@ -377,7 +377,7 @@ python eval.py results.json
 ## 模型部署
 本代码解决方案在动作的检测和召回指标F1-score=80.14%
 <div align="center">
-  <img src="images/BasketballAction.gif" width="480px"/><br>
+  <img src="images/BasketballAction_demo.gif" width="640px"/><br>
 </div>
 
 
