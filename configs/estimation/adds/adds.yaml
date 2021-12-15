@@ -34,7 +34,7 @@ DATASET: #DATASET field
     num_workers: 2 #Mandatory, XXX the number of subprocess on each GPU.
     train:
         format: "MonoDataset"
-        file_path: "data/splits/oxford_day/train_files.txt"
+        file_path: "data/oxford/splits/oxford_day/train_files.txt"
         data_prefix: "data/oxford/oxford_processing_new"
     valid:
         format: "MonoDataset"

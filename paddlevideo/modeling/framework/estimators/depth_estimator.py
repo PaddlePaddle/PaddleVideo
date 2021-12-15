@@ -24,9 +24,9 @@ logger = get_logger("paddlevideo")
 class DepthEstimator(BaseEstimator):
     """DepthEstimator
     """
-    def forward_net(self, inputs, day_or_night='day_and_night', mode='train'):
+    def forward_net(self, inputs, day_or_night='day_and_night'):
         if self.backbone is not None:
-            outputs = self.backbone(inputs, day_or_night, mode)
+            outputs = self.backbone(inputs, day_or_night)
         else:
             outputs = inputs
         return outputs
@@ -35,31 +35,25 @@ class DepthEstimator(BaseEstimator):
         """Define how the model is going to train, from input to output.
         """
         inputs, _ = data_batch
-        outputs = self.forward_net(inputs,
-                                   day_or_night='day_and_night',
-                                   mode='train')
-        loss_metrics = self.head.loss(inputs, outputs, 'train')
+        outputs = self.forward_net(inputs, day_or_night='day_and_night')
+        loss_metrics = self.head.loss(inputs, outputs)
         return loss_metrics
 
     def val_step(self, data_batch):
         inputs, day_or_night = data_batch
-        outputs = self.forward_net(inputs,
-                                   day_or_night=day_or_night,
-                                   mode='val')
-        loss_metrics = self.head.loss(inputs, outputs, mode='val')
+        outputs = self.forward_net(inputs, day_or_night=day_or_night)
+        loss_metrics = self.head.loss(inputs, outputs)
         return loss_metrics
 
     def test_step(self, data_batch):
         """Define how the model is going to test, from input to output."""
         inputs, day_or_night = data_batch
-        outputs = self.forward_net(inputs,
-                                   day_or_night=day_or_night,
-                                   mode='val')
-        loss_metrics = self.head.loss(inputs, outputs, mode='val')
+        outputs = self.forward_net(inputs, day_or_night=day_or_night)
+        loss_metrics = self.head.loss(inputs, outputs)
         return loss_metrics
 
     def infer_step(self, data_batch):
         """Define how the model is going to infer, from input to output."""
         inputs = data_batch[0]
-        outputs = self.forward_net(inputs, day_or_night='day', mode='infer')
+        outputs = self.forward_net(inputs, day_or_night='day')
         return outputs

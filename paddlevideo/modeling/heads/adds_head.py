@@ -55,8 +55,8 @@ class AddsHead(nn.Layer):
     def forward(self):
         raise NotImplemented
 
-    def loss(self, inputs, outputs, mode='train'):
-        if mode == 'train':
+    def loss(self, inputs, outputs):
+        if self.training:
             return self.loss_func(inputs, outputs)
         else:
             abs_rel, sq_rel, rmse, rmse_log, a1, a2, a3 = self.get_metrics(

@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from genericpath import isdir
 import math
 from collections import OrderedDict
 
@@ -793,8 +794,8 @@ class ResnetEncoder(nn.Layer):
                                     output_padding=1)
         self.convtf = nn.Conv2D(64, 3, kernel_size=1, stride=1, padding=0)
 
-    def forward(self, input_image, is_night, istrain):
-        if istrain == 'train':
+    def forward(self, input_image, is_night):
+        if self.training:
             result = []
             input_data = (input_image - 0.45) / 0.225
             if is_night == 'day':
@@ -846,7 +847,7 @@ class ResnetEncoder(nn.Layer):
         self.features.append(self.encoder.layer3(self.features[-1]))
         self.features.append(self.encoder.layer4(self.features[-1]))
 
-        if istrain == 'train':
+        if self.training:
             shared_code = self.conv_shared(self.features[-1])
             shared_gram = gram_matrix(self.features[-1])
             result.append(shared_code)  # use this to calculate loss of diff
@@ -988,19 +989,17 @@ class ADDS_DepthNet(nn.Layer):
         if self.pretrained:  # load pretrained weights
             load_ckpt(self, self.pretrained)
 
-    def forward(self, inputs, day_or_night='day', mode='train'):
-        if mode == "train":
-            features, result = self.encoder(inputs["color_aug", 0, 0], 'day',
-                                            'train')
+    def forward(self, inputs, day_or_night='day'):
+        if self.training:
+            features, result = self.encoder(inputs["color_aug", 0, 0], 'day')
             features_night, result_night = self.encoder(
-                inputs[("color_n_aug", 0, 0)], 'night', 'train')
+                inputs[("color_n_aug", 0, 0)], 'night')
 
             outputs = self.depth(features)
             outputs_night = self.depth(features_night)
             if self.use_pose_net and not self.only_depth_encoder:
-                outputs.update(self.predict_poses(inputs, features, 'day'))
-                outputs_night.update(
-                    self.predict_poses(inputs, features_night, 'night'))
+                outputs.update(self.predict_poses(inputs, 'day'))
+                outputs_night.update(self.predict_poses(inputs, 'night'))
 
                 self.generate_images_pred(inputs, outputs, 'day')
                 self.generate_images_pred(inputs, outputs_night, 'night')
@@ -1012,34 +1011,33 @@ class ADDS_DepthNet(nn.Layer):
             outputs_night['frame_ids'] = self.frame_ids
             outputs_night['scales'] = self.scales
             outputs['outputs_night'] = outputs_night
+        else:
+            if isinstance(inputs, dict):
+                input_color = inputs[("color", 0, 0)]
+                features = self.encoder(input_color, day_or_night[0])
+                outputs = self.depth(features)
 
-        elif mode == 'val':
-            input_color = inputs[("color", 0, 0)]
-            features = self.encoder(input_color, day_or_night[0], 'val')
-            outputs = self.depth(features)
+                pred_disp, _ = disp_to_depth(outputs[("disp", 0)],
+                                             self.min_depth, self.max_depth)
 
-            pred_disp, _ = disp_to_depth(outputs[("disp", 0)], self.min_depth,
-                                         self.max_depth)
+                pred_disp = pred_disp[:, 0].numpy()
 
-            pred_disp = pred_disp[:, 0].numpy()
+                outputs['pred_disp'] = np.squeeze(pred_disp)
 
-            outputs['pred_disp'] = np.squeeze(pred_disp)
+                outputs['gt'] = np.squeeze(inputs['depth_gt'].numpy())
+            else:
+                input_color = inputs
+                features = self.encoder(input_color, day_or_night)
+                outputs = self.depth(features)
 
-            outputs['gt'] = np.squeeze(inputs['depth_gt'].numpy())
+                pred_disp, _ = disp_to_depth(outputs[("disp", 0)],
+                                             self.min_depth, self.max_depth)
 
-        elif mode == 'infer':
-            input_color = inputs
-            features = self.encoder(input_color, day_or_night, 'val')
-            outputs = self.depth(features)
-
-            pred_disp, _ = disp_to_depth(outputs[("disp", 0)], self.min_depth,
-                                         self.max_depth)
-
-            pred_disp = pred_disp[:, 0]
-            outputs = paddle.squeeze(pred_disp)
+                pred_disp = pred_disp[:, 0]
+                outputs = paddle.squeeze(pred_disp)
         return outputs
 
-    def predict_poses(self, inputs, features, is_night):
+    def predict_poses(self, inputs, is_night):
         """Predict poses between input frames for monocular sequences.
         """
         outputs = {}

@@ -42,13 +42,13 @@ class ImageDecoder(object):
         self.full_res_shape = full_res_shape
         self.img_ext = img_ext
 
-    def loader(self, path):
+    def _pil_loader(self, path):
         with open(path, 'rb') as f:
             with Image.open(f) as img:
                 return img.convert('RGB')
 
     def get_color(self, folder, frame_index, side):
-        color = self.loader(
+        color = self._pil_loader(
             self.get_image_path(self.dataset, folder, frame_index, side))
         return color
 
