@@ -1,7 +1,7 @@
 ===========================train_params===========================
 model_name:BMN
 python:python3.7
-gpu_list:0|0,1,2,3
+gpu_list:0|0,1
 Global.use_gpu:null|null
 Global.auto_cast:null
 -o epochs:2
