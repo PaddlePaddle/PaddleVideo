@@ -1,4 +1,4 @@
-[简体中文](../../../zh-CN/model_zoo/recognition/video-swin.md) | English
+[简体中文](../../../zh-CN/model_zoo/recognition/timesformer.md) | English
 
 # TimeSformer
 
