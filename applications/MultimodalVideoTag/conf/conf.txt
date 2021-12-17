@@ -1,0 +1,56 @@
+[MODEL]
+name = ""
+dataset = "Baidudata"
+bone_nework = None
+drop_rate = 0.5
+feature_num = 3
+feature_names = ['rgb', 'audio', 'text']
+text_max_len = 50
+feature_dims = [[2048], [128], [5, 50, 1]]
+feature_dtypes = ['float32', 'float32', 'int64']
+feature_lod_level = [1, 1, 0]
+embedding_size = 512
+lstm_size_img = 512
+lstm_size_audio = 128 
+num_classes = 110
+top_n = [1,2,3,5]
+num_first_classes = 20
+class_name_file = "./datasets/class.txt"
+ernie_freeze = True
+lstm_pool_mode = 'text_guide'
+
+[TRAIN]
+epoch = 30
+learning_rate = 0.0007
+decay_gamma = 0.2
+l2_weight_decay = 8e-4
+decay_epochs = [5, 10, 15, 20]
+num_samples = 70000
+batch_size = 64
+use_gpu = True
+warmup_epoch = 5
+loss_type = "sigmoid"
+modal_drop_rate = 0.0
+ernie_pretrain_dict_path = "model_pretrained/ernie_v1_params/"
+filelist = "./datasets/feature_files/"
+url_title_label_file = "./datasets/train.txt"
+warmup_proportion = 0.0 
+early_stop = 15 
+
+[VALID]
+batch_size = 16
+num_samples = 464
+filelist = "./datasets/feature_files/"
+url_title_label_file = "./datasets/val.txt"
+
+[TEST]
+batch_size = 16
+num_samples = 464
+filelist = "./datasets/feature_files/"
+url_title_label_file = "./datasets/val.txt"
+
+[INFER]
+batch_size = 64
+threshold = 0.5
+filelist = "./datasets/feature_files/"
+url_title_label_file = "./datasets/val.txt"
