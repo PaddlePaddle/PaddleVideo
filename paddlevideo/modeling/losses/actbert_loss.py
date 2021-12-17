@@ -25,11 +25,12 @@ from .base import BaseWeightedLoss
 class ActBertLoss(BaseWeightedLoss):
     """Loss for ActBert model
     """
-    def __init__(self):
+    def __init__(self, vocab_size=30522, a_target_size=700):
         super().__init__()
+        self.vocab_size = vocab_size
+        self.a_target_size = a_target_size
         self.loss_fct = nn.CrossEntropyLoss(ignore_index=-1)
         self.vis_criterion = nn.KLDivLoss(reduction="none")
-
 
     def forward(self, prediction_scores_t, prediction_scores_v, prediction_scores_a, seq_relationship_score, \
                 text_labels, image_label, image_target, action_label, next_sentence_label):
@@ -59,7 +60,7 @@ class ActBertLoss(BaseWeightedLoss):
         )
 
         masked_action_loss = self.loss_fct(
-            prediction_scores_a.reshape([-1, self.a_target_size]),  #8,5,401
+            prediction_scores_a.reshape([-1, self.a_target_size]),  #8,5,700
             action_label.reshape([-1]),  #8,5
         )
 
@@ -68,5 +69,7 @@ class ActBertLoss(BaseWeightedLoss):
             next_sentence_label.reshape([-1])  #8,2
         )
 
-        return masked_text_loss.unsqueeze(0), masked_img_loss.unsqueeze(
-            0), masked_action_loss.unsqueeze(0), next_sentence_loss.unsqueeze(0)
+        total_loss = masked_text_loss.unsqueeze(0) + masked_img_loss.unsqueeze(
+            0) + masked_action_loss.unsqueeze(0) + next_sentence_loss.unsqueeze(
+                0)
+        return total_loss

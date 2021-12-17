@@ -20,7 +20,6 @@ class BaseMultimodal(nn.Layer):
 
     """
     def __init__(self, backbone=None, head=None, loss=None):
-
         super().__init__()
         if backbone != None:
             self.backbone = builder.build_backbone(backbone)

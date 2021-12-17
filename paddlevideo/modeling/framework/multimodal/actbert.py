@@ -28,22 +28,27 @@ class ActBert(BaseMultimodal):
         return pred
 
     def train_step(self, data_batch):
-        """Define how the model is going to train, from input to output.
+        """For ActBert Dataset. Define how the model is going to train, from input to output.
         """
-        pred = self.forward_net(data_batch)
-        loss_metrics = self.loss(pred)
+        text_ids, action_feat, image_feat, image_loc, \
+        token_type_ids, text_mask, image_mask, action_mask, \
+        text_labels, action_label, next_sentence_label, image_label, image_target = data_batch
+        loss_metrics = dict()
+        pred = self.backbone(text_ids, action_feat, image_feat, image_loc,
+                             token_type_ids, text_mask, image_mask, action_mask)
+        prediction_scores_t, prediction_scores_v, prediction_scores_a, seq_relationship_score = pred
+        total_loss = self.loss(prediction_scores_t, prediction_scores_v, prediction_scores_a, seq_relationship_score, \
+                text_labels, image_label, image_target, action_label, next_sentence_label)
+        loss_metrics['loss'] = paddle.mean(total_loss)
         return loss_metrics
 
     def val_step(self, data_batch):
-        #     imgs = data_batch[0]
-        #     labels = data_batch[1:]
-        #     cls_score = self.forward_net(imgs)
-        #     loss_metrics = self.head.loss(cls_score, labels, valid_mode=True)
-        #     return loss_metrics
-        pass
+        """For ActBert Dataset. Define how the model is going to val, from input to output.
+        """
+        return self.train_step(data_batch)
 
     def test_step(self, data_batch):
-        """Define how the model is going to test, from input to output."""
+        """For MSR-VTT Dataset. Define how the model is going to test, from input to output."""
         text_ids, action_feat, image_feat, image_loc, token_type_ids, text_mask, image_mask, action_mask = data_batch[:
                                                                                                                       -1]
         action_feat = action_feat.squeeze(0)
@@ -57,7 +62,3 @@ class ActBert(BaseMultimodal):
 
     def infer_step(self, data_batch):
         pass
-        # """Define how the model is going to test, from input to output."""
-        # imgs = data_batch[0]
-        # cls_score = self.forward_net(imgs)
-        # return cls_score

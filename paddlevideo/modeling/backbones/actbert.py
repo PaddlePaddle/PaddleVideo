@@ -22,34 +22,11 @@ import paddle.nn as nn
 import paddle.nn.functional as F
 from paddle.nn import (Conv2D, BatchNorm2D, Linear, Dropout)
 from paddle.nn.initializer import Constant, Normal
+from ...utils.save_load import load_ckpt
 from ..registry import BACKBONES
+from ..weight_init import weight_init_
 
 ACT2FN = {"gelu": F.gelu, "relu": F.relu, "swish": F.swish}
-
-
-class BertPreTrainedModel(nn.Layer):
-    """ An abstract class to handle weights initialization.
-    """
-    def __init__(self, initializer_range=0.02):
-        """
-        initializer_range: std for Normal initializer.
-        """
-        super(BertPreTrainedModel, self).__init__()
-        self.initializer_range = initializer_range
-        self.normal_ = Normal(std=self.initializer_range)
-        self.zeros_ = Constant(value=0.)
-        self.ones_ = Constant(value=1.)
-
-    def init_bert_weights(self, module):
-        """ Initialize the weights.
-        """
-        if isinstance(module, (nn.Linear, nn.Embedding)):
-            self.normal_(module.weight)
-        elif isinstance(module, nn.LayerNorm):  #Bert LayerNorm
-            self.zeros_(module.bias)
-            self.ones_(module.weight)
-        if isinstance(module, nn.Linear) and module.bias is not None:
-            self.zeros_(module.bias)
 
 
 class BertEmbeddings(nn.Layer):
@@ -734,7 +711,7 @@ class BertPooler(nn.Layer):
         return pooled_output
 
 
-class BertModel(BertPreTrainedModel):
+class BertModel(nn.Layer):
     def __init__(
         self,
         vocab_size,
@@ -801,8 +778,6 @@ class BertModel(BertPreTrainedModel):
         self.t_pooler = BertPooler(hidden_size, bi_hidden_size)
         self.v_pooler = BertPooler(v_hidden_size, bi_hidden_size)
         self.a_pooler = BertPooler(a_hidden_size, bi_hidden_size)
-
-        self.apply(self.init_bert_weights)
 
     def forward(
         self,
@@ -997,7 +972,7 @@ class BertPreTrainingHeads(nn.Layer):
 
 
 @BACKBONES.register()
-class BertForMultiModalPreTraining(BertPreTrainedModel):
+class BertForMultiModalPreTraining(nn.Layer):
     """BERT model with multi modal pre-training heads.
     """
     def __init__(
@@ -1006,7 +981,7 @@ class BertForMultiModalPreTraining(BertPreTrainedModel):
         max_position_embeddings=512,
         type_vocab_size=2,
         v_target_size=1601,
-        a_target_size=401,
+        a_target_size=700,
         v_feature_size=2048,
         a_feature_size=2048,
         num_hidden_layers=12,
@@ -1040,13 +1015,14 @@ class BertForMultiModalPreTraining(BertPreTrainedModel):
         a_num_attention_heads=12,
         bi_num_attention_heads=8,
         fusion_method="mul",
+        pretrained=None,
     ):
         """
         vocab_size: vocabulary size. Default: 30522.
         max_position_embeddings: max position id. Default: 512.
         type_vocab_size: max segment id. Default: 2.
         v_target_size: class number of visual word. Default: 1601.
-        a_target_size: class number of action word. Default: 401.
+        a_target_size: class number of action word. Default: 700.
         v_feature_size: input visual feature dimension. Default: 2048.
         a_feature_size: input action feature dimension. Default: 2048.
         num_hidden_layers: number of BertLayer in text transformer. Default: 12.
@@ -1082,6 +1058,7 @@ class BertForMultiModalPreTraining(BertPreTrainedModel):
         fusion_method: methods of fusing pooled output from 3 transformer. Default: "mul".
         """
         super(BertForMultiModalPreTraining, self).__init__()
+        self.pretrained = pretrained
         self.vocab_size = vocab_size
         self.a_target_size = a_target_size
 
@@ -1128,7 +1105,17 @@ class BertForMultiModalPreTraining(BertPreTrainedModel):
             a_target_size, fusion_method,
             self.bert.embeddings.word_embeddings.weight)
 
-        self.apply(self.init_bert_weights)
+    def init_weights(self):
+        """Initiate the parameters.
+        """
+        if isinstance(self.pretrained, str) and self.pretrained.strip() != "":
+            load_ckpt(self, self.pretrained)
+        elif self.pretrained is None or self.pretrained.strip() == "":
+            for layer in self.sublayers():
+                if isinstance(layer, (nn.Linear, nn.Embedding)):
+                    weight_init_(layer, 'Normal', std=0.02)
+                elif isinstance(layer, nn.LayerNorm):
+                    weight_init_(layer, 'Constant', value=1)
 
     def forward(
             self,
