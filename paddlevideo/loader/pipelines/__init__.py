@@ -15,15 +15,16 @@
 from .anet_pipeline import GetMatchMap, GetVideoLabel, LoadFeat
 from .augmentations import (CenterCrop, Image2Array, JitterScale, MultiCrop,
                             Normalization, PackOutput, RandomCrop, RandomFlip,
-                            Scale, TenCrop, UniformCrop, RandomResizedCrop)
+                            RandomResizedCrop, Scale, TenCrop, UniformCrop)
+from .augmentations_ava import *
 from .compose import Compose
 from .decode import FeatureDecoder, FrameDecoder, VideoDecoder
 from .decode_sampler import DecodeSampler
 from .mix import Cutmix, Mixup, VideoMix
+from .multimodal import FeaturePadding, RandomCap, RandomMask, Tokenize
 from .sample import Sampler
-from .skeleton_pipeline import AutoPadding, Iden, SkeletonNorm
-from .augmentations_ava import *
 from .sample_ava import *
+from .skeleton_pipeline import AutoPadding, Iden, SkeletonNorm
 
 __all__ = [
     'Scale', 'RandomCrop', 'CenterCrop', 'RandomFlip', 'Image2Array',
@@ -31,5 +32,5 @@ __all__ = [
     'Mixup', 'Cutmix', 'JitterScale', 'MultiCrop', 'PackOutput', 'TenCrop',
     'UniformCrop', 'DecodeSampler', 'LoadFeat', 'GetMatchMap', 'GetVideoLabel',
     'AutoPadding', 'SkeletonNorm', 'Iden', 'VideoMix', 'FeatureDecoder',
-    'RandomResizedCrop'
+    'RandomResizedCrop', 'FeaturePadding', 'RandomCap', 'Tokenize', 'RandomMask'
 ]
