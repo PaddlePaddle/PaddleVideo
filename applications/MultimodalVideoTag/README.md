@@ -65,7 +65,7 @@ sh inference.sh
 | 文本分支ERNIE 不finetune +extcnn finetune + text-guide-attention | 73.29 | 85.59 |
 
 ## 模型部署
-模型已经上线到百度智能云媒体分析，欢迎试用。
+
 <div align="center">
   <img src="images/show.gif" width="480px"/><br>
 </div>
