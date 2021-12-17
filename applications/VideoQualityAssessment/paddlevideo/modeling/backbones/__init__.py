@@ -14,6 +14,7 @@
 # limitations under the License.
 """
 
-from .resnet_tweaks_tsm import ResNetTweaksTSM
 from .resnet import ResNet
-__all__ = ['ResNetTweaksTSM', 'ResNet']
+from .resnet_tweaks_tsm import ResNetTweaksTSM
+
+__all__ = ['ResNet', 'ResNetTweaksTSM']

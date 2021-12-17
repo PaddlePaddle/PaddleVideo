@@ -21,7 +21,6 @@ from .registry import DATASETS, PIPELINES
 from ..utils.build_utils import build
 from .pipelines.compose import Compose
 from paddlevideo.utils import get_logger
-from paddlevideo.utils.multigrid import DistributedShortSampler
 import numpy as np
 
 logger = get_logger("paddlevideo")
@@ -75,16 +74,10 @@ def build_dataloader(dataset,
         num_worker (int): num_worker
         shuffle(bool): whether to shuffle the data at every epoch.
     """
-    if multigrid:
-        sampler = DistributedShortSampler(dataset,
-                                          batch_sizes=batch_size,
-                                          shuffle=True,
-                                          drop_last=True)
-    else:
-        sampler = DistributedBatchSampler(dataset,
-                                          batch_size=batch_size,
-                                          shuffle=shuffle,
-                                          drop_last=drop_last)
+    sampler = DistributedBatchSampler(dataset,
+                                      batch_size=batch_size,
+                                      shuffle=shuffle,
+                                      drop_last=drop_last)
 
     #NOTE(shipping): when switch the mix operator on, such as: mixup, cutmix.
     # batch like: [[img, label, attibute, ...], [imgs, label, attribute, ...], ...] will recollate to:

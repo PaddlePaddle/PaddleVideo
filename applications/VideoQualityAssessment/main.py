@@ -17,7 +17,7 @@
 import paddle
 import argparse
 from paddlevideo.utils import get_config
-from paddlevideo.tasks import train_model, test_model, train_dali#train_model_multigrid
+from paddlevideo.tasks import train_model, test_model
 from paddlevideo.utils import get_dist_info
 
 
@@ -75,10 +75,6 @@ def main():
 
     if args.test:
         test_model(cfg, weights=args.weights, parallel=parallel)
-    elif args.train_dali:
-        train_dali(cfg, weights=args.weights, parallel=parallel)
-    #elif args.multigrid:
-        #train_model_multigrid(cfg, world_size, validate=args.validate)
     else:
         train_model(cfg,
                     weights=args.weights,

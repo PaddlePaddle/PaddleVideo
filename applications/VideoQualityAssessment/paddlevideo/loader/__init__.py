@@ -15,9 +15,7 @@
 """
 
 from .builder import build_dataset, build_dataloader, build_batch_pipeline
-from .dali_loader import TSN_Dali_loader, get_input_data
 from .dataset import VideoDataset
 __all__ = [
-    'build_dataset', 'build_dataloader', 'build_batch_pipeline', 'VideoDataset',
-    'TSN_Dali_loader', 'get_input_data'
+    'build_dataset', 'build_dataloader', 'build_batch_pipeline', 'VideoDataset'
 ]
