@@ -62,7 +62,7 @@ class RecognizerTransformer(BaseRecognizer):
             view = imgs[:, :, i * self.backbone.seg_num:(i + 1) *
                         self.backbone.seg_num]
             cls_score.append(self.forward_net(view))
-        cls_score = self.average_view(cls_score)
+        cls_score = self._average_view(cls_score)
         return cls_score
 
     def infer_step(self, data_batch):
@@ -74,10 +74,10 @@ class RecognizerTransformer(BaseRecognizer):
             view = imgs[:, :, i * self.backbone.seg_num:(i + 1) *
                         self.backbone.seg_num]
             cls_score.append(self.forward_net(view))
-        cls_score = self.average_view(cls_score)
+        cls_score = self._average_view(cls_score)
         return cls_score
 
-    def average_view(self, cls_score, average_type='score'):
+    def _average_view(self, cls_score, average_type='score'):
         """Combine the scores of different views
 
         Args:

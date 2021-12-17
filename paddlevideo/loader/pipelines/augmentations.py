@@ -36,11 +36,14 @@ class Scale(object):
     def __init__(self,
                  short_size,
                  fixed_ratio=True,
+                 keep_ratio=None,
                  do_round=False,
                  backend='pillow'):
         self.short_size = short_size
         self.fixed_ratio = fixed_ratio
         self.do_round = do_round
+        self.keep_ratio = keep_ratio
+
         assert backend in [
             'pillow', 'cv2'
         ], f"Scale's backend must be pillow or cv2, but get {backend}"
@@ -59,12 +62,14 @@ class Scale(object):
         resized_imgs = []
         for i in range(len(imgs)):
             img = imgs[i]
-            w, h = img.size
-            if (w <= h and w == self.short_size) or (h <= w
-                                                     and h == self.short_size):
-                resized_imgs.append(img)
-                continue
-            if w < h:
+            if self.backend == 'pillow':
+                w, h = img.size
+            elif self.backend == 'cv2':
+                h, w, _ = img.shape
+            else:
+                raise NotImplementedError
+
+            if w <= h:
                 ow = self.short_size
                 if self.fixed_ratio:
                     oh = int(self.short_size * 4.0 / 3.0)
@@ -82,6 +87,9 @@ class Scale(object):
                                        w * self.short_size / h)
             if self.backend == 'pillow':
                 resized_imgs.append(img.resize((ow, oh), Image.BILINEAR))
+            elif self.backend == 'cv2' and (self.keep_ratio is not None):
+                resized_imgs.append(
+                    cv2.resize(img, (ow, oh), interpolation=cv2.INTER_LINEAR))
             else:
                 resized_imgs.append(
                     Image.fromarray(
@@ -135,6 +143,84 @@ class RandomCrop(object):
                 else:
                     crop_images.append(img.crop((x1, y1, x1 + tw, y1 + th)))
         results['imgs'] = crop_images
+        return results
+
+
+@PIPELINES.register()
+class RandomResizedCrop(RandomCrop):
+    def __init__(self,
+                 area_range=(0.08, 1.0),
+                 aspect_ratio_range=(3 / 4, 4 / 3),
+                 target_size=224,
+                 backend='cv2'):
+
+        self.area_range = area_range
+        self.aspect_ratio_range = aspect_ratio_range
+        self.target_size = target_size
+        self.backend = backend
+
+    @staticmethod
+    def get_crop_bbox(img_shape,
+                      area_range,
+                      aspect_ratio_range,
+                      max_attempts=10):
+
+        assert 0 < area_range[0] <= area_range[1] <= 1
+        assert 0 < aspect_ratio_range[0] <= aspect_ratio_range[1]
+
+        img_h, img_w = img_shape
+        area = img_h * img_w
+
+        min_ar, max_ar = aspect_ratio_range
+        aspect_ratios = np.exp(
+            np.random.uniform(np.log(min_ar), np.log(max_ar),
+                              size=max_attempts))
+        target_areas = np.random.uniform(*area_range, size=max_attempts) * area
+        candidate_crop_w = np.round(np.sqrt(target_areas *
+                                            aspect_ratios)).astype(np.int32)
+        candidate_crop_h = np.round(np.sqrt(target_areas /
+                                            aspect_ratios)).astype(np.int32)
+
+        for i in range(max_attempts):
+            crop_w = candidate_crop_w[i]
+            crop_h = candidate_crop_h[i]
+            if crop_h <= img_h and crop_w <= img_w:
+                x_offset = random.randint(0, img_w - crop_w)
+                y_offset = random.randint(0, img_h - crop_h)
+                return x_offset, y_offset, x_offset + crop_w, y_offset + crop_h
+
+        # Fallback
+        crop_size = min(img_h, img_w)
+        x_offset = (img_w - crop_size) // 2
+        y_offset = (img_h - crop_size) // 2
+        return x_offset, y_offset, x_offset + crop_size, y_offset + crop_size
+
+    def __call__(self, results):
+        imgs = results['imgs']
+        if self.backend == 'pillow':
+            img_w, img_h = imgs[0].size
+        elif self.backend == 'cv2':
+            img_h, img_w, _ = imgs[0].shape
+        elif self.backend == 'pyav':
+            img_h, img_w = imgs.shape[2:]  # [cthw]
+        else:
+            raise NotImplementedError
+
+        left, top, right, bottom = self.get_crop_bbox(
+            (img_h, img_w), self.area_range, self.aspect_ratio_range)
+
+        if self.backend == 'pillow':
+            img_w, img_h = imgs[0].size
+            imgs = [img.crop(left, top, right, bottom) for img in imgs]
+        elif self.backend == 'cv2':
+            img_h, img_w, _ = imgs[0].shape
+            imgs = [img[top:bottom, left:right] for img in imgs]
+        elif self.backend == 'pyav':
+            img_h, img_w = imgs.shape[2:]  # [cthw]
+            imgs = imgs[:, :, top:bottom, left:right]
+        else:
+            raise NotImplementedError
+        results['imgs'] = imgs
         return results
 
 
@@ -323,10 +409,15 @@ class RandomFlip(object):
             if 'backend' in results and results[
                     'backend'] == 'pyav':  # [c,t,h,w]
                 results['imgs'] = paddle.flip(imgs, axis=[3])
-            else:
+            elif results['backend'] == 'pillow':
                 results['imgs'] = [
                     img.transpose(Image.FLIP_LEFT_RIGHT) for img in imgs
                 ]
+            elif results['backend'] == 'cv2' or results['backend'] == 'decord':
+                results['imgs'] = [cv2.flip(img, 1) for img in imgs
+                                   ]  # [[h,w,c], [h,w,c], ..., [h,w,c]]
+            else:
+                raise NotImplementedError
         else:
             results['imgs'] = imgs
         return results
@@ -384,15 +475,21 @@ class Normalization(object):
         std(Sequence[float]): std values of different channels.
         tensor_shape(list): size of mean, default [3,1,1]. For slowfast, [1,1,1,3]
     """
-    def __init__(self, mean, std, tensor_shape=[3, 1, 1]):
+    def __init__(self, mean, std, tensor_shape=[3, 1, 1], inplace=False):
         if not isinstance(mean, Sequence):
             raise TypeError(
                 f'Mean must be list, tuple or np.ndarray, but got {type(mean)}')
         if not isinstance(std, Sequence):
             raise TypeError(
                 f'Std must be list, tuple or np.ndarray, but got {type(std)}')
-        self.mean = np.array(mean).reshape(tensor_shape).astype(np.float32)
-        self.std = np.array(std).reshape(tensor_shape).astype(np.float32)
+
+        self.inplace = inplace
+        if not inplace:
+            self.mean = np.array(mean).reshape(tensor_shape).astype(np.float32)
+            self.std = np.array(std).reshape(tensor_shape).astype(np.float32)
+        else:
+            self.mean = np.array(mean, dtype=np.float32)
+            self.std = np.array(std, dtype=np.float32)
 
     def __call__(self, results):
         """
@@ -402,12 +499,25 @@ class Normalization(object):
         return:
             np_imgs: Numpy array after normalization.
         """
-        imgs = results['imgs']
-        norm_imgs = imgs / 255.0
-        norm_imgs -= self.mean
-        norm_imgs /= self.std
-        if 'backend' in results and results['backend'] == 'pyav':
-            norm_imgs = paddle.to_tensor(norm_imgs, dtype=paddle.float32)
+        if self.inplace:
+            n = len(results['imgs'])
+            h, w, c = results['imgs'][0].shape
+            norm_imgs = np.empty((n, h, w, c), dtype=np.float32)
+            for i, img in enumerate(results['imgs']):
+                norm_imgs[i] = img
+
+            for img in norm_imgs:  # [n,h,w,c]
+                mean = np.float64(self.mean.reshape(1, -1))  # [1, 3]
+                stdinv = 1 / np.float64(self.std.reshape(1, -1))  # [1, 3]
+                cv2.subtract(img, mean, img)
+                cv2.multiply(img, stdinv, img)
+        else:
+            imgs = results['imgs']
+            norm_imgs = imgs / 255.0
+            norm_imgs -= self.mean
+            norm_imgs /= self.std
+            if 'backend' in results and results['backend'] == 'pyav':
+                norm_imgs = paddle.to_tensor(norm_imgs, dtype=paddle.float32)
         results['imgs'] = norm_imgs
         return results
 

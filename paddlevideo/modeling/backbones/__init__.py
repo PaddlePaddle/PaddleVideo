@@ -20,6 +20,7 @@ from .resnet_tsm import ResNetTSM
 from .resnet_tweaks_tsm import ResNetTweaksTSM
 from .resnet_tweaks_tsn import ResNetTweaksTSN
 from .stgcn import STGCN
+from .swin_transformer import SwinTransformer3D
 from .transnetv2 import TransNetV2
 from .vit import VisionTransformer
 from .vit_tweaks import VisionTransformer_tweaks
@@ -27,5 +28,5 @@ from .vit_tweaks import VisionTransformer_tweaks
 __all__ = [
     'ResNet', 'ResNetTSM', 'ResNetTweaksTSM', 'ResNetSlowFast', 'BMN',
     'ResNetTweaksTSN', 'VisionTransformer', 'STGCN', 'AGCN', 'TransNetV2',
-    'VisionTransformer_tweaks'
+    'VisionTransformer_tweaks', 'SwinTransformer3D'
 ]

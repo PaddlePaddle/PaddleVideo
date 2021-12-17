@@ -12,12 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import random
-from PIL import Image
-from ..registry import PIPELINES
 import os
+import random
+
 import numpy as np
-import paddle
+from PIL import Image
+
+from ..registry import PIPELINES
 
 
 @PIPELINES.register()
@@ -39,13 +40,15 @@ class Sampler(object):
                  valid_mode=False,
                  select_left=False,
                  dense_sample=False,
-                 linspace_sample=False):
+                 linspace_sample=False,
+                 use_pil=True):
         self.num_seg = num_seg
         self.seg_len = seg_len
         self.valid_mode = valid_mode
         self.select_left = select_left
         self.dense_sample = dense_sample
         self.linspace_sample = linspace_sample
+        self.use_pil = use_pil
 
     def _get(self, frames_idx, results):
         data_format = results['format']
@@ -68,13 +71,20 @@ class Sampler(object):
                     imgs.append(img)
             elif results['backend'] == 'decord':
                 vr = results['frames']
-                frames_select = vr.get_batch(frames_idx)
-                # dearray_to_img
-                np_frames = frames_select.asnumpy()
-                imgs = []
-                for i in range(np_frames.shape[0]):
-                    imgbuf = np_frames[i]
-                    imgs.append(Image.fromarray(imgbuf, mode='RGB'))
+                if self.use_pil:
+                    frames_select = vr.get_batch(frames_idx)
+                    # dearray_to_img
+                    np_frames = frames_select.asnumpy()
+                    imgs = []
+                    for i in range(np_frames.shape[0]):
+                        imgbuf = np_frames[i]
+                        imgs.append(Image.fromarray(imgbuf, mode='RGB'))
+                else:
+                    frame_dict = {
+                        idx: vr[idx].asnumpy()
+                        for idx in np.unique(frames_idx)
+                    }
+                    imgs = [frame_dict[idx] for idx in frames_idx]
             elif results['backend'] == 'pyav':
                 imgs = []
                 frames = np.array(results['frames'])
@@ -89,6 +99,35 @@ class Sampler(object):
         results['imgs'] = imgs
         return results
 
+    def _get_train_clips(self, num_frames):
+        ori_num_seg = self.num_seg * self.frame_interval
+        avg_interval = (num_frames - ori_num_seg + 1) // self.seg_len
+
+        if avg_interval > 0:
+            base_offsets = np.arange(self.seg_len) * avg_interval
+            clip_offsets = base_offsets + np.random.randint(avg_interval,
+                                                            size=self.seg_len)
+        elif num_frames > max(self.seg_len, ori_num_seg):
+            clip_offsets = np.sort(
+                np.random.randint(num_frames - ori_num_seg + 1,
+                                  size=self.seg_len))
+        elif avg_interval == 0:
+            ratio = (num_frames - ori_num_seg + 1.0) / self.seg_len
+            clip_offsets = np.around(np.arange(self.seg_len) * ratio)
+        else:
+            clip_offsets = np.zeros((self.seg_len, ), dtype=np.int)
+        return clip_offsets
+
+    def _get_test_clips(self, num_frames):
+        ori_num_seg = self.num_seg * self.frame_interval
+        avg_interval = (num_frames - ori_num_seg + 1) / float(self.seg_len)
+        if num_frames > ori_num_seg - 1:
+            base_offsets = np.arange(self.seg_len) * avg_interval
+            clip_offsets = (base_offsets + avg_interval / 2.0).astype(np.int)
+        else:
+            clip_offsets = np.zeros((self.seg_len, ), dtype=np.int)
+        return clip_offsets
+
     def __call__(self, results):
         """
         Args:
@@ -97,8 +136,28 @@ class Sampler(object):
             sampling id.
         """
         frames_len = int(results['frames_len'])
-        average_dur = int(frames_len / self.num_seg)
         frames_idx = []
+        if self.frame_interval is not None:
+            assert isinstance(self.frame_interval, int)
+            if not self.valid_mode:
+                offsets = self._get_train_clips(frames_len)
+            else:
+                offsets = self._get_test_clips(frames_len)
+
+            offsets = offsets[:, None] + np.arange(
+                self.num_seg)[None, :] * self.frame_interval
+            offsets = np.concatenate(offsets)
+
+            if results['format'] == 'video':
+                frames_idx = list(offsets)
+                frames_idx = [x % frames_len for x in frames_idx]
+            elif results['format'] == 'frame':
+                frames_idx = list(offsets + 1)
+            else:
+                raise NotImplementedError
+
+            return self._get(frames_idx, results)
+
         if self.linspace_sample:
             if 'start_idx' in results and 'end_idx' in results:
                 offsets = np.linspace(results['start_idx'], results['end_idx'],
@@ -140,6 +199,7 @@ class Sampler(object):
                         ]
                     frames_idx = offsets
             else:
+                average_dur = int(frames_len / self.num_seg)
                 for i in range(self.num_seg):
                     idx = 0
                     if not self.valid_mode:

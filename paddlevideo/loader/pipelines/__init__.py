@@ -15,7 +15,7 @@
 from .anet_pipeline import GetMatchMap, GetVideoLabel, LoadFeat
 from .augmentations import (CenterCrop, Image2Array, JitterScale, MultiCrop,
                             Normalization, PackOutput, RandomCrop, RandomFlip,
-                            Scale, TenCrop, UniformCrop)
+                            Scale, TenCrop, UniformCrop, RandomResizedCrop)
 from .compose import Compose
 from .decode import FeatureDecoder, FrameDecoder, VideoDecoder
 from .decode_sampler import DecodeSampler
@@ -30,5 +30,6 @@ __all__ = [
     'Normalization', 'Compose', 'VideoDecoder', 'FrameDecoder', 'Sampler',
     'Mixup', 'Cutmix', 'JitterScale', 'MultiCrop', 'PackOutput', 'TenCrop',
     'UniformCrop', 'DecodeSampler', 'LoadFeat', 'GetMatchMap', 'GetVideoLabel',
-    'AutoPadding', 'SkeletonNorm', 'Iden', 'VideoMix', 'FeatureDecoder'
+    'AutoPadding', 'SkeletonNorm', 'Iden', 'VideoMix', 'FeatureDecoder',
+    'RandomResizedCrop'
 ]

@@ -23,6 +23,9 @@ python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log
 # run tsn training
 #python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_tsn main.py  --validate -c configs/recognition/tsn/tsn_k400_frames.yaml
 
+# run video-swin-transformer training
+python3.7 -u -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=log_video_swin_transformer main.py --amp --validate -c configs/recognition/video_swin_transformer/video_swin_transformer_k400_videos.yaml
+
 # run slowfast training
 #python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_slowfast  main.py --validate -c configs/recognition/slowfast/slowfast.yaml
 

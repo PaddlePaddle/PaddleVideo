@@ -14,9 +14,10 @@
 
 import copy
 import paddle
+from paddle.regularizer import L1Decay, L2Decay
 
 
-def build_optimizer(cfg, lr_scheduler, parameter_list=None):
+def build_optimizer(cfg, lr_scheduler, model=None):
     """
     Build an optimizer and learning rate scheduler to optimize parameters accroding to ```OPTIMIZER``` field in configuration .
 
@@ -62,11 +63,15 @@ def build_optimizer(cfg, lr_scheduler, parameter_list=None):
     # deal with weight decay
     if cfg_copy.get('weight_decay'):
         if isinstance(cfg_copy.get('weight_decay'),
-                      float) or 'L1' in cfg_copy.get('weight_decay').get(
-                          'name').upper():
-            cfg_copy['weight_decay'] = cfg_copy.get('weight_decay').get('value')
-        elif 'L2' in cfg_copy.get('weight_decay').get('name').upper():
-            cfg_copy['weight_decay'] = paddle.regularizer.L2Decay(
+                      float):  # just an float factor
+            cfg_copy['weight_decay'] = cfg_copy.get('weight_decay')
+        elif 'L1' in cfg_copy.get('weight_decay').get(
+                'name').upper():  # specify L2 wd and it's float factor
+            cfg_copy['weight_decay'] = L1Decay(
+                cfg_copy.get('weight_decay').get('value'))
+        elif 'L2' in cfg_copy.get('weight_decay').get(
+                'name').upper():  # specify L1 wd and it's float factor
+            cfg_copy['weight_decay'] = L2Decay(
                 cfg_copy.get('weight_decay').get('value'))
         else:
             raise ValueError
@@ -81,8 +86,24 @@ def build_optimizer(cfg, lr_scheduler, parameter_list=None):
         else:
             raise ValueError
 
-    cfg_copy.pop('learning_rate')
+    # Set for optimizers that cannot be applied to l2decay, i.e. AdamW
+    if cfg_copy.get('no_weight_decay_name'):
+        no_weight_decay_name = cfg_copy.pop('no_weight_decay_name')
+        no_weight_decay_name_list = no_weight_decay_name.split(' ')
 
+        # NOTE: use param.name not name
+        weight_decay_param_white_list = [
+            param.name for name, param in model.named_parameters()
+            if any(key_word in name for key_word in no_weight_decay_name_list)
+        ]
+
+        _apply_decay_param_fun = lambda name: name not in weight_decay_param_white_list
+        cfg_copy['apply_decay_param_fun'] = _apply_decay_param_fun
+        white_list_num = len(weight_decay_param_white_list)
+        print(f"Weight Decay white list :({white_list_num})",
+              weight_decay_param_white_list)
+
+    cfg_copy.pop('learning_rate')
     return getattr(paddle.optimizer, opt_name)(lr_scheduler,
-                                               parameters=parameter_list,
+                                               parameters=model.parameters(),
                                                **cfg_copy)

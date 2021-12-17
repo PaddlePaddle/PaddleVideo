@@ -36,8 +36,7 @@ from paddlevideo.utils import (build_record, log_batch, log_epoch, save, load,
 import sys
 import numpy as np
 from pathlib import Path
-paddle.framework.seed(1234)
-np.random.seed(1234)
+
 
 def train_model(cfg,
                 weights=None,
@@ -259,7 +258,6 @@ def train_model(cfg,
                 if cfg.MODEL.framework != "FastRCNN":
                     for name, value in outputs.items():
                         record_list[name].update(value, batch_size)
- 
 
                 record_list['batch_time'].update(time.time() - tic)
                 tic = time.time()
@@ -271,11 +269,10 @@ def train_model(cfg,
             if cfg.MODEL.framework == "FastRCNN":
                 if parallel:
                     results = collect_results_cpu(results, len(valid_dataset))
-                if not parallel or (parallel and rank==0):
-                    eval_res = valid_dataset.evaluate( results) 
+                if not parallel or (parallel and rank == 0):
+                    eval_res = valid_dataset.evaluate(results)
                     for name, value in eval_res.items():
                         record_list[name].update(value, valid_batch_size)
-
 
             ips = "avg_ips: {:.5f} instance/sec.".format(
                 valid_batch_size * record_list["batch_time"].count /
@@ -283,9 +280,10 @@ def train_model(cfg,
             log_epoch(record_list, epoch + 1, "val", ips)
 
             best_flag = False
-            if cfg.MODEL.framework == "FastRCNN" and (not parallel or (parallel and rank==0)):
+            if cfg.MODEL.framework == "FastRCNN" and (not parallel or
+                                                      (parallel and rank == 0)):
                 if record_list["mAP@0.5IOU"].val > best:
-                    best = record_list["mAP@0.5IOU"].val 
+                    best = record_list["mAP@0.5IOU"].val
                     best_flag = True
                 return best, best_flag
             #best2, cfg.MODEL.framework != "FastRCNN":
