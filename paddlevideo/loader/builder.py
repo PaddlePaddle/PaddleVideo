@@ -30,6 +30,8 @@ def build_pipeline(cfg):
     Args:
         cfg (dict): root config dict.
     """
+    if cfg == None:
+        return
     return Compose(cfg)
 
 

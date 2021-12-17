@@ -1,4 +1,4 @@
-# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.
+# Copyright (c) 2021  PaddlePaddle Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"
 # you may not use this file except in compliance with the License.
@@ -9,13 +9,8 @@
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 
-from .base import BaseWeightedLoss
-from .cross_entropy_loss import CrossEntropyLoss
-from .bmn_loss import BMNLoss
-from .transnetv2_loss import TransNetV2Loss
-from .actbert_loss import ActBertLoss
+from .base import BaseMultimodal
+from .actbert import ActBert
 
-__all__ = ['CrossEntropyLoss', 'BMNLoss', 'TransNetV2Loss', 'ActBertLoss']
+__all__ = ['BaseMultimodal', 'ActBert']

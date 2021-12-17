@@ -15,12 +15,9 @@
 from .recognizers import BaseRecognizer, Recognizer2D
 from .localizers import BaseLocalizer, BMNLocalizer
 from .partitioners import BasePartitioner, TransNetV2Partitioner
+from .multimodal import BaseMultimodal, ActBert
 
 __all__ = [
-    'BaseRecognizer',
-    'Recognizer2D',
-    'BaseLocalizer',
-    'BMNLocalizer',
-    'BasePartitioner',
-    'TransNetV2Partitioner',
+    'BaseRecognizer', 'Recognizer2D', 'BaseLocalizer', 'BMNLocalizer',
+    'BasePartitioner', 'TransNetV2Partitioner', 'BaseMultimodal', 'ActBert'
 ]
