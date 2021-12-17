@@ -1,12 +1,12 @@
 ===========================train_params===========================
 model_name:PP-TSN
 python:python3.7
-gpu_list:0|0,1,2,3,4,5,6,7
+gpu_list:0|0,1
 Global.use_gpu:null|null
 Global.auto_cast:null
 -o epochs:2
 null:null
-DATASET.batch_size:null
+-o DATASET.batch_size:2
 -o MODEL.backbone.pretrained:'data/ResNet50_vd_ssld_v2_pretrained.pdparams'
 train_model_name:null
 train_infer_video_dir:null

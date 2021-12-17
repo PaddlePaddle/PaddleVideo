@@ -1,0 +1,36 @@
+[MODEL]
+name = "ActionNet"
+dataset = "Actiondata"
+bone_nework = None
+modelbn_min_everygpu_bs = 10
+drop_rate = 0.5
+feature_num = 1
+feature_names = ['rgb', 'audio']
+feature_dims = [2688, 1024]  # [2688, 640]
+embedding_size = 512
+lstm_size_img = 512         
+lstm_size_audio = 128        
+num_classes = 7         
+save_dir = "."
+
+[TRAIN]
+epoch = 30      
+learning_rate = 0.0007
+decay_gamma = 0.2
+l2_weight_decay = 8e-4
+decay_epochs = [5,10,15,20]
+num_samples = 397885    
+batch_size = 1200       
+droplast = False
+use_gpu = True
+num_gpus = 4
+filelist = "dataset/basketball/tsm_bmn_lstm/train/train_list/basketball_lstm_train.list"
+[VALID]
+batch_size = 16
+num_samples = 20902  
+droplast = True
+filelist = "dataset/basketball/tsm_bmn_lstm/train/train_list/basketball_lstm_train.list"
+[INFER]
+batch_size = 1
+droplast = True
+filelist = "data_demo/batch_val/val.list"

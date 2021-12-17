@@ -1,8 +1,8 @@
-[English](../../../zh-CN/model_zoo/recognition/pp-timesformer.md) | Simplified Chinese
+[简体中文](../../../zh-CN/model_zoo/recognition/pp-timesformer.md) | English
 
 # TimeSformer Video Classification Model
 
-## content
+## Content
 
 - [Introduction](#Introduction)
 - [Data](#Data)
