@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from .actbert import BertForMultiModalPreTraining
 from .adds import ADDS_DepthNet
 from .agcn import AGCN
 from .bmn import BMN
@@ -28,5 +29,5 @@ from .vit_tweaks import VisionTransformer_tweaks
 __all__ = [
     'ResNet', 'ResNetTSM', 'ResNetTweaksTSM', 'ResNetSlowFast', 'BMN',
     'ResNetTweaksTSN', 'VisionTransformer', 'STGCN', 'AGCN', 'TransNetV2',
-    'ADDS_DepthNet', 'VisionTransformer_tweaks'
+    'ADDS_DepthNet', 'VisionTransformer_tweaks', 'BertForMultiModalPreTraining'
 ]

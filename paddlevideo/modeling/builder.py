@@ -15,7 +15,7 @@
 from ..utils import build
 from .registry import (BACKBONES, BBOX_ASSIGNERS, BBOX_CODERS, BBOX_SAMPLERS,
                        DETECTORS, ESTIMATORS, HEADS, LOCALIZERS, LOSSES,
-                       PARTITIONERS, RECOGNIZERS, ROI_EXTRACTORS)
+                       MULTIMODAL, PARTITIONERS, RECOGNIZERS, ROI_EXTRACTORS)
 
 
 def build_backbone(cfg):
@@ -78,11 +78,6 @@ def build_detector(cfg, train_cfg=None, test_cfg=None):
     return build(cfg, DETECTORS, key='framework')
 
 
-def build_detector(cfg, train_cfg=None, test_cfg=None):
-    """Build detector."""
-    return build(cfg, DETECTORS, key='framework')
-
-
 def build_partitioner(cfg):
     """Build partitioner."""
     return build(cfg, PARTITIONERS, key='framework')
@@ -91,6 +86,11 @@ def build_partitioner(cfg):
 def build_estimator(cfg):
     """Build estimator."""
     return build(cfg, ESTIMATORS, key='framework')
+
+
+def build_multimodal(cfg):
+    """Build multimodal."""
+    return build(cfg, MULTIMODAL, key='framework')
 
 
 def build_model(cfg):
@@ -106,5 +106,7 @@ def build_model(cfg):
         return build_detector(cfg)
     elif framework_type in ESTIMATORS:
         return build_estimator(cfg)
+    elif framework_type in MULTIMODAL:
+        return build_multimodal(cfg)
     else:
         raise NotImplementedError

@@ -1,0 +1,2 @@
+示例数据集：https://bj.bcebos.com/acg-algo/PaddleVideo_application/VideoQualityAssessment/KonVid-150k.tar.gz
+官网数据集下载地址：http://database.mmsp-kn.de/konvid-150k-vqa-database.html

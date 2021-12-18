@@ -56,6 +56,9 @@ python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=lo
 # run agcn training
 # python3.7 main.py -c configs/recognition/agcn/agcn_fsd.yaml
 
+# run actbert training
+# python3.7 main.py  --validate -c configs/multimodal/actbert/actbert.yaml
+
 # run tsn dali training
 # python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3" --log_dir=log_tsn main.py --train_dali -c configs/recognition/tsn/tsn_dali.yaml
 
