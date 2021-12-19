@@ -90,8 +90,6 @@ K400数据下载及准备请参考[Kinetics-400数据准备](../../dataset/k400.
    | Swin Transformer |   UniformCrop   |   32    |     224     | 82.4 | [VideoSwin_k400.pdparams](TODO) |
 
 
-- 测试时，Video-Swin-Transformer视频采样策略为使用Linspace采样：时序上，从待采样视频序列的第一帧到最后一帧区间内，均匀生成`num_seg`个稀疏采样点（包括端点）；空间上，选择长边两端及中间位置（左中右 或 上中下）3个区域采样。1个视频共采样1个clip。
-
 ## 模型推理
 
 ### 导出inference模型

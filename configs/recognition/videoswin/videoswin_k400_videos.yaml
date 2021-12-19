@@ -155,7 +155,12 @@ METRIC:
 GRADIENT_ACCUMULATION:
     global_batch_size: 64 # Specify the sum of batches to be calculated by all GPUs
 
-model_name: "VideoSwinTransformer_opt_align"
+INFERENCE:
+    name: 'VideoSwin_Inference_helper'
+    num_seg: 32
+    target_size: 224
+
+model_name: "VideoSwin"
 log_interval: 20 #Optional, the interal of logger, default:10
 save_interval: 5
 epochs: 30 #Mandatory, total epoch

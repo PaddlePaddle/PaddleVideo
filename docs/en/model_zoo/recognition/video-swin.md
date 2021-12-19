@@ -90,8 +90,6 @@ K400 data download and preparation please refer to [Kinetics-400 data preparatio
    | Swin Transformer | UniformCrop | 32 | 224 | 82.4 | [VideoSwin_k400.pdparams](TODO) |
 
 
-- During the test, the Video-Swin-Transformer video sampling strategy is to use Linspace sampling: in terms of timing, from the first frame to the last frame of the video sequence to be sampled, `num_seg` sparse sampling points (including endpoints) are uniformly generated; Spatially, select 3 regions to sample at both ends of the long side and the middle position (left middle right or top middle bottom). A total of 1 clip is sampled for 1 video.
-
 ## Inference
 
 ### Export inference model
