@@ -88,7 +88,7 @@ class RecognizerTransformer(BaseRecognizer):
             f"Currently only the average of 'score' or 'prob' is supported, but got {average_type}"
         if average_type == 'score':
             return paddle.add_n(cls_score) / len(cls_score)
-        elif average_type == 'avg':
+        elif average_type == 'prob':
             return paddle.add_n([F.softmax(score)
                                  for score in cls_score]) / len(cls_score)
         else:
