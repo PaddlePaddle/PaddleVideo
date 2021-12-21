@@ -330,7 +330,7 @@ class SwinTransformerBlock3D(nn.Layer):
         pad_d1 = (window_size[0] - D % window_size[0]) % window_size[0]
         pad_b = (window_size[1] - H % window_size[1]) % window_size[1]
         pad_r = (window_size[2] - W % window_size[2]) % window_size[2]
-        x = F.pad(x, (pad_d0, pad_d1, pad_l, pad_r, pad_t, pad_b),
+        x = F.pad(x, (pad_l, pad_r, pad_t, pad_b, pad_d0, pad_d1),
                   data_format='NDHWC')
         _, Dp, Hp, Wp, _ = x.shape
         # cyclic shift
@@ -408,7 +408,7 @@ class PatchMerging(nn.Layer):
         # padding
         pad_input = (H % 2 == 1) or (W % 2 == 1)
         if pad_input:
-            x = F.pad(x, (0, 0, 0, W % 2, 0, H % 2), data_format='NDHWC')
+            x = F.pad(x, (0, W % 2, 0, H % 2, 0, 0), data_format='NDHWC')
 
         x0 = x[:, :, 0::2, 0::2, :]  # B D H/2 W/2 C
         x1 = x[:, :, 1::2, 0::2, :]  # B D H/2 W/2 C
@@ -570,9 +570,13 @@ class PatchEmbed3D(nn.Layer):
     def forward(self, x):
         _, _, D, H, W = x.shape
         if W % self.patch_size[2] != 0:
-            x = F.pad(x, (0, self.patch_size[2] - W % self.patch_size[2]))
+            x = F.pad(
+                x, (0, self.patch_size[2] - W % self.patch_size[2], 0, 0, 0, 0),
+                data_format='NCDHW')
         if H % self.patch_size[1] != 0:
-            x = F.pad(x, (0, 0, 0, self.patch_size[1] - H % self.patch_size[1]))
+            x = F.pad(
+                x, (0, 0, 0, self.patch_size[1] - H % self.patch_size[1], 0, 0),
+                data_format='NCDHW')
         if D % self.patch_size[0] != 0:
             x = F.pad(
                 x, (0, 0, 0, 0, 0, self.patch_size[0] - D % self.patch_size[0]),
