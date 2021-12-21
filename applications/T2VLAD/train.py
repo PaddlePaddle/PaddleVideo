@@ -109,14 +109,9 @@ def run_exp(config):
             cache_targets=set(config.get("cache_targets", [])),
         )
         trainer.train()
-        best_ckpt_path = config.save_dir / "trained_model.pdparams"
+        best_model_path = config.save_dir / "trained_model.pdparams"
         duration = time.strftime('%Hh%Mm%Ss', time.gmtime(time.time() - tic))
         logger.info(f"Training took {duration}")
-
-        if config._config.get("eval_settings", True):
-            eval_config = copy.deepcopy(config)
-            merge(eval_config._config, config["eval_settings"], strategy=Strategy.REPLACE)
-            evaluation(eval_config, logger=logger, trainer=trainer)
 
     # If multiple runs were conducted, report relevant statistics
     if len(seeds) > 1:
@@ -128,17 +123,17 @@ def run_exp(config):
         )
     print(f"Log file stored at {config.log_path}")
 
-    # Report the location of the "best" checkpoint of the final seeded run (here
+    # Report the location of the "best" model of the final seeded run (here
     # "best" corresponds to the model with the highest geometric mean over the
     # R@1, R@5 and R@10 metrics when a validation set is used, or simply the final
     # epoch of training for fixed-length schedules).
-    print(f"The best performing ckpt can be found at {str(best_ckpt_path)}")
+    print(f"The best performing model can be found at {str(best_model_path)}")
 
 
 def main():
     args = argparse.ArgumentParser(description='Main entry point for training')
     args.add_argument('--config', help='config file path')
-    args.add_argument('--resume', help='path to latest checkpoint (default: None)')
+    args.add_argument('--resume', help='path to latest model (default: None)')
     args.add_argument('--device', help="indices of GPUs to enable")
     args.add_argument('--mini_train', action="store_true")
     args.add_argument('--group_id', help="if supplied, group these experiments")
@@ -162,8 +157,6 @@ def main():
            f"to exceed the save period ({args['trainer']['save_period']}), otherwise"
            " no checkpoints will be saved.")
     assert args["trainer"]["epochs"] >= args["trainer"]["save_period"], msg
-    #print("Launching experiment with config:")
-    #print(args)
     run_exp(config=args)
 
 

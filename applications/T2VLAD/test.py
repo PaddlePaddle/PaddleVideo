@@ -60,7 +60,7 @@ def compress_predictions(query_masks: np.ndarray, sims: np.ndarray, topk: int = 
 def get_model_and_data_loaders(
         config: ConfigParser,
         logger: logging.Logger,
-        ckpt_path: Path,
+        model_path: Path,
 ) -> Tuple[paddle.nn.Layer, module_data.ExpertDataLoader]:
     expert_dims, raw_input_dims = compute_dims(config)
     trn_config = compute_trn_config(config)
@@ -91,9 +91,9 @@ def get_model_and_data_loaders(
         feat_aggregation=config["data_loader"]["args"]["feat_aggregation"],
         trn_cat=config["data_loader"]["args"].get("trn_cat", 0),
     )
-    ckpt_path = config._args.resume
-    logger.info(f"Loading checkpoint: {ckpt_path} ...")
-    checkpoint = paddle.load(ckpt_path)
+    model_path = config._args.resume
+    logger.info(f"Loading checkpoint: {model_path} ...")
+    checkpoint = paddle.load(model_path)
     state_dict = checkpoint
     #state_dict = checkpoint['state_dict']
     if config['n_gpu'] > 1:
@@ -126,7 +126,7 @@ def evaluation(config, logger=None, trainer=None):
     model, data_loaders = get_model_and_data_loaders(
         config=config,
         logger=logger,
-        ckpt_path=Path(config._args.resume),
+        model_path=Path(config._args.resume),
     )
     logger.info(model)
 
