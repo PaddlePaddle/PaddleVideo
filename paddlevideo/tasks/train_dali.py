@@ -40,12 +40,17 @@ def train_dali(cfg, weights=None, parallel=True):
 
     logger = get_logger("paddlevideo")
     batch_size = cfg.DALI_LOADER.get('batch_size', 8)
-    if cfg.use_gpu:
+    
+    if 'use_gpu' in cfg and cfg.use_gpu:
+        print('1111111111111111111111111111111111')
         places = paddle.set_device('gpu')
-    elif cfg.use_npu:
+    elif 'use_npu' in cfg and cfg.use_npu:
+        print('2222222222222222222222222222222222')
         places = paddle.set_device('npu')
     else:
+        print('3333333333333333333333333333333333')
         places = paddle.set_device('gpu')
+    
     model_name = cfg.model_name
     output_dir = cfg.get("output_dir", f"./output/{model_name}")
     mkdir(output_dir)

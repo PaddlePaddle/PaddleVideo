@@ -44,12 +44,17 @@ def test_model(cfg, weights, parallel=True):
     cfg.DATASET.test.test_mode = True
     dataset = build_dataset((cfg.DATASET.test, cfg.PIPELINE.test))
     batch_size = cfg.DATASET.get("test_batch_size", 8)
-    if cfg.use_gpu:
+    
+    if 'use_gpu' in cfg and cfg.use_gpu:
+        print('1111111111111111111111111111111111')
         places = paddle.set_device('gpu')
-    elif cfg.use_npu:
+    elif 'use_npu' in cfg and cfg.use_npu:
+        print('2222222222222222222222222222222222')
         places = paddle.set_device('npu')
     else:
+        print('3333333333333333333333333333333333')
         places = paddle.set_device('gpu')
+    
     # default num worker: 0, which means no subprocess will be created
     num_workers = cfg.DATASET.get('num_workers', 0)
     num_workers = cfg.DATASET.get('test_num_workers', num_workers)
