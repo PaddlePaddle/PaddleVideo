@@ -103,7 +103,7 @@ release/2.1 was released in 20/05/2021. Please refer to [release notes](https://
     - [ST-GCN](docs/en/model_zoo/recognition/stgcn.md)
     - [AGCN](docs/en/model_zoo/recognition/agcn.md)
   - Spatio temporal action detection
-    - Coming Soon!  
+    - [SlowFast_FasterRCNN](docs/en/model_zoo/detection/SlowFast_FasterRCNN_en.md)  
   - ActBERT: Learning Global-Local Video-Text Representations
     - Coming Soon!  
 - Tutorials and Slides

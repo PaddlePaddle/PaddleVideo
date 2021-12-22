@@ -165,16 +165,18 @@ class EntityBoxRescale:
 
     def __call__(self, results):
         scale_factor = np.concatenate([self.scale_factor, self.scale_factor])
-
-        proposals = results['proposals']
-        gt_bboxes = results['gt_bboxes']
-        results['gt_bboxes'] = gt_bboxes * scale_factor
-
-        if proposals is not None:
-            assert proposals.shape[1] == 4, (
-                'proposals shape should be in '
-                f'(n, 4), but got {proposals.shape}')
-            results['proposals'] = proposals * scale_factor
+        
+        if 'gt_bboxes' in results:
+            gt_bboxes = results['gt_bboxes']
+            results['gt_bboxes'] = gt_bboxes * scale_factor
+        
+        if 'proposals' in results:
+            proposals = results['proposals']
+            if proposals is not None:
+                assert proposals.shape[1] == 4, (
+                    'proposals shape should be in '
+                    f'(n, 4), but got {proposals.shape}')
+                results['proposals'] = proposals * scale_factor
 
         return results
 
@@ -352,10 +354,10 @@ class Resize:
                 raise NotImplementedError('Put Flip at last for now')
             lazyop['interpolation'] = self.interpolation
 
-        if 'gt_bboxes' in results:
-            assert not self.lazy
-            entity_box_rescale = EntityBoxRescale(self.scale_factor)
-            results = entity_box_rescale(results)
+        #if 'gt_bboxes' in results:
+        assert not self.lazy
+        entity_box_rescale = EntityBoxRescale(self.scale_factor)
+        results = entity_box_rescale(results)
 
         return results
 

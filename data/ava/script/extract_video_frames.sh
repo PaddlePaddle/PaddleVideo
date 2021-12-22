@@ -1,0 +1,6 @@
+o "帧保存路径$1"
+echo "视频路径$2"
+echo "帧率$3"
+out_name="$1/%05d.jpg"
+echo "${out_name}"
+ffmpeg -i $2 -r $3 -q:v 1 "${out_name}"
