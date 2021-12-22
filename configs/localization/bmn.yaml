@@ -95,6 +95,8 @@ INFERENCE:
 
 
 model_name: BMN
+use_gpu: True
+use_npu: False
 epochs: 9 #Mandatory, total epoch
 log_level: "INFO"
 resume_from: "" #checkpoint path.

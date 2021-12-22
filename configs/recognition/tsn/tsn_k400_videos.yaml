@@ -18,26 +18,21 @@ DATASET: #DATASET field
     test_batch_size: 1
     num_workers: 4 #Mandatory, XXX the number of subprocess on each GPU.
     train:
-        format: "FrameDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
-        data_prefix: "data/k400/rawframes" #Mandatory, train data root path
-        file_path: "data/k400/train_frames.list" #Mandatory, train data index file path
-        suffix: 'img_{:05}.jpg'
+        format: "VideoDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
+        file_path: "data/k400/train.list" #Mandatory, train data index file path
     valid:
-        format: "FrameDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
-        data_prefix: "data/k400/rawframes" #Mandatory, valid data root path
-        file_path: "data/k400/val_frames.list" #Mandatory, valid data index file path
-        suffix: 'img_{:05}.jpg'
+        format: "VideoDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
+        file_path: "data/k400/val.list" #Mandatory, valid data index file path
     test:
-        format: "FrameDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
-        data_prefix: "data/k400/rawframes" #Mandatory, valid data root path
-        file_path: "data/k400/val_frames.list" #Mandatory, valid data index file path
-        suffix: 'img_{:05}.jpg'
+        format: "VideoDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
+        file_path: "data/k400/val.list" #Mandatory, valid data index file path
 
 
 PIPELINE: #PIPELINE field
     train: #Mandotary, indicate the pipeline to deal with the training data, associate to the 'paddlevideo/loader/pipelines/'
         decode:
-            name: "FrameDecoder"
+            name: "VideoDecoder"
+            backend: "decord"
         sample:
             name: "Sampler"
             num_seg: 3
@@ -63,7 +58,8 @@ PIPELINE: #PIPELINE field
 
     valid: #Mandatory, indicate the pipeline to deal with the validing data. associate to the 'paddlevideo/loader/pipelines/'
         decode:
-            name: "FrameDecoder"
+            name: "VideoDecoder"
+            backend: "decord"
         sample:
             name: "Sampler"
             num_seg: 3
@@ -86,7 +82,8 @@ PIPELINE: #PIPELINE field
 
     test:
         decode:
-            name: "FrameDecoder"
+            name: "VideoDecoder"
+            backend: "decord"
         sample:
             name: "Sampler"
             num_seg: 25
