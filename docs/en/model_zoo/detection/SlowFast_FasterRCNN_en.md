@@ -12,7 +12,7 @@
 
 ## Introduction
 
-The [SlowFast](https://github.com/PaddlePaddle/PaddleVideo/blob/develop/docs/zh-CN/model_zoo/recognition/slowfast.md) model is one of the high-precision models in the video field. For action detection task, it is also neccessary to detect the person in current frame. Therefore, the SlowFast_FasterRCNN model takes human detection results and video frames as input, extracts spatiotemporal features through the SlowFast model, and then uses FasterRCNN's head gets the actions and positions of humans in the frame. 
+The [SlowFast](https://github.com/PaddlePaddle/PaddleVideo/blob/develop/docs/zh-CN/model_zoo/recognition/slowfast.md) model is one of the high-precision models in the video field. For action detection task, it is also neccessary to detect the person in current frame. Therefore, the SlowFast_FasterRCNN model takes human detection results and video frames as input, extracts spatiotemporal features through the SlowFast model, and then uses FasterRCNN's head gets the actions and positions of humans in the frame.
 
 The corresponding AI Studio Notebook Link：[基于SlowFast+FasterRCNN的动作识别](https://aistudio.baidu.com/aistudio/projectdetail/3267637?contributionType=1)
 
@@ -20,7 +20,7 @@ For details, please refer to the paper [SlowFast Networks for Video Recognition]
 
 ## Data
 
-We use [AVA dataset](https://research.google.com/ava/download.html) for action detection. The AVA v2.2 dataset contains 430 videos split into 235 for training, 64 for validation, and 131 for test. Each video has 15 minutes annotated in 1 second intervals. 
+We use [AVA dataset](https://research.google.com/ava/download.html) for action detection. The AVA v2.2 dataset contains 430 videos split into 235 for training, 64 for validation, and 131 for test. Each video has 15 minutes annotated in 1 second intervals.
 
 ### 1 Dowload Videos
 ```
@@ -77,7 +77,7 @@ import os
 import os.path as osp
 import cv2
 
-timeRate = 1  # 1 frame per second 
+timeRate = 1  # 1 frame per second
 
 def frame_extraction(video_path,target_dir):
     """Extract frames given video_path.
@@ -97,7 +97,7 @@ def frame_extraction(video_path,target_dir):
     print("FPS",FPS)
 
     frameRate = int(FPS) * timeRate #每隔多少帧保存一个，采样率
-    
+
     frames = []
     frame_paths = []
 
@@ -136,7 +136,7 @@ bash extract_video_frames.sh './data/frames_30fps/1j20qq1JyX4' \
 
 Action detection based on the result of FPS frame extraction and the detection result:
 - detection_result_dir: the dir of detection result;
-- frame_dir: the dir of extracted frames. 
+- frame_dir: the dir of extracted frames.
 
 ```
 python tools/infer.py \
@@ -145,4 +145,3 @@ python tools/infer.py \
   --detection_result_dir ./data/detection_result/1j20qq1JyX4 \
   --frame_dir ./data/frames_30fps/1j20qq1JyX4
 ```
-

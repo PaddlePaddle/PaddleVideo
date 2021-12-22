@@ -1,4 +1,4 @@
-简体中文 | [English](../../../en/model_zoo/detection/SlowFast_FastRCNN_en.md) 
+简体中文 | [English](../../../en/model_zoo/detection/SlowFast_FastRCNN_en.md)
 
 # SlowFast_FasterRCNN
 
@@ -98,7 +98,7 @@ def frame_extraction(video_path,target_dir):
     print("视频帧率：",FPS)
 
     frameRate = int(FPS) * timeRate #每隔多少帧保存一个，采样率
-    
+
     frames = []
     frame_paths = []
 
@@ -146,4 +146,3 @@ python tools/infer.py \
   --detection_result_dir ./data/detection_result/1j20qq1JyX4 \
   --frame_dir ./data/frames_30fps/1j20qq1JyX4
 ```
-
