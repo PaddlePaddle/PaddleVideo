@@ -46,13 +46,10 @@ def test_model(cfg, weights, parallel=True):
     batch_size = cfg.DATASET.get("test_batch_size", 8)
     
     if 'use_gpu' in cfg and cfg.use_gpu:
-        print('1111111111111111111111111111111111')
         places = paddle.set_device('gpu')
     elif 'use_npu' in cfg and cfg.use_npu:
-        print('2222222222222222222222222222222222')
         places = paddle.set_device('npu')
     else:
-        print('3333333333333333333333333333333333')
         places = paddle.set_device('gpu')
     
     # default num worker: 0, which means no subprocess will be created

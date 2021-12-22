@@ -153,13 +153,10 @@ def train_model_multigrid(cfg, world_size=1, validate=True):
     batch_size = cfg.DATASET.get('batch_size', 2)
 
     if 'use_gpu' in cfg and cfg.use_gpu:
-        print('1111111111111111111111111111111111')
         places = paddle.set_device('gpu')
     elif 'use_npu' in cfg and cfg.use_npu:
-        print('2222222222222222222222222222222222')
         places = paddle.set_device('npu')
     else:
-        print('3333333333333333333333333333333333')
         places = paddle.set_device('gpu')
     
     model_name = cfg.model_name
