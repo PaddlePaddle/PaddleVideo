@@ -84,7 +84,6 @@ class Mlp(nn.Layer):
 
 def window_partition(x, window_size):
     """window_partition
-
     Args:
         x (Tensor): x.shape = [B, D, H, W, C]
         window_size (tuple[int]): window_size
@@ -442,12 +441,8 @@ def compute_mask(D, H, W, window_size, shift_size):
                                     window_size)  # nW, ws[0]*ws[1]*ws[2], 1
     mask_windows = mask_windows.squeeze(-1)  # nW, ws[0]*ws[1]*ws[2]
     attn_mask = mask_windows.unsqueeze(1) - mask_windows.unsqueeze(2)
-    # attn_mask = attn_mask.masked_fill(attn_mask != 0, float(-100.0)).masked_fill(attn_mask == 0, float(0.0))
-    attn_mask = paddle.where(attn_mask != 0,
-                             paddle.full_like(attn_mask, float(-100.0)),
-                             attn_mask)
-    attn_mask = paddle.where(attn_mask == 0, paddle.zeros_like(attn_mask),
-                             attn_mask)
+    huns = -100.0 * paddle.ones_like(attn_mask)
+    attn_mask = huns * (attn_mask != 0).astype("float32")
     return attn_mask
 
 

@@ -17,6 +17,7 @@ import os
 import sys
 
 import cv2
+import imageio
 import numpy as np
 import paddle
 import paddle.nn.functional as F
@@ -25,18 +26,64 @@ from PIL import Image
 
 __dir__ = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.abspath(os.path.join(__dir__, '../')))
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 
-from paddlevideo.loader.pipelines import (AutoPadding, CenterCrop,
-                                          DecodeSampler, FeatureDecoder,
-                                          Image2Array, JitterScale, MultiCrop,
-                                          Normalization, PackOutput, Sampler,
-                                          Scale, SkeletonNorm, TenCrop,
-                                          UniformCrop, VideoDecoder)
+from paddlevideo.loader.pipelines import (
+    AutoPadding, CenterCrop, DecodeSampler, FeatureDecoder, FrameDecoder,
+    Image2Array, JitterScale, MultiCrop, Normalization, PackOutput, Sampler,
+    SamplerPkl, Scale, SkeletonNorm, TenCrop, UniformCrop, VideoDecoder)
 from paddlevideo.metrics.bmn_metric import boundary_choose, soft_nms
 from paddlevideo.utils import Registry, build
 
 INFERENCE = Registry('inference')
+
+
+def Add_text_to_video(video_path, output_dir="./data", text=None):
+    os.makedirs(output_dir, exist_ok=True)
+    if video_path.endswith('.pkl'):
+        try:
+            import cPickle as pickle
+            from cStringIO import StringIO
+        except ImportError:
+            import pickle
+            from io import BytesIO
+        from PIL import Image
+        data_loaded = pickle.load(open(video_path, 'rb'), encoding='bytes')
+        _, _, frames = data_loaded
+        frames_len = len(frames)
+
+    else:
+        videoCapture = cv2.VideoCapture()
+        videoCapture.open(video_path)
+
+        fps = videoCapture.get(cv2.CAP_PROP_FPS)
+        frame_width = int(videoCapture.get(cv2.CAP_PROP_FRAME_WIDTH))
+        frame_height = int(videoCapture.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
+        frames_len = videoCapture.get(cv2.CAP_PROP_FRAME_COUNT)
+        print("fps=", int(fps), "frames=", int(frames_len), "scale=",
+              f"{frame_height}x{frame_width}")
+
+    frames_rgb_list = []
+    for i in range(int(frames_len)):
+        if video_path.endswith('.pkl'):
+            frame = np.array(
+                Image.open(BytesIO(frames[i])).convert("RGB").resize(
+                    (384, 384)))[:, :, ::-1].astype('uint8')
+        else:
+            dummy_flag, frame = videoCapture.read()
+        frame = cv2.putText(frame, text, (20, 20), cv2.FONT_HERSHEY_COMPLEX,
+                            1.0, (0, 0, 255), 2)
+        frames_rgb_list.append(frame[:, :, ::-1])  # bgr to rgb
+    if not video_path.endswith('.pkl'):
+        videoCapture.release()
+    cv2.destroyAllWindows()
+    output_filename = os.path.basename(video_path)
+    output_filename = output_filename.split('.')[0] + '.gif'
+    imageio.mimsave(f'{output_dir}/{output_filename}',
+                    frames_rgb_list,
+                    'GIF',
+                    duration=0.00085)
 
 
 def decode(filepath, args):
@@ -371,7 +418,7 @@ class TimeSformer_Inference_helper(Base_Inference_helper):
 
 
 @INFERENCE.register()
-class VideoSwin_Inference_helper():
+class VideoSwin_Inference_helper(Base_Inference_helper):
     def __init__(self,
                  num_seg=32,
                  seg_len=4,
@@ -421,24 +468,84 @@ class VideoSwin_Inference_helper():
         res = np.expand_dims(results['imgs'], axis=0).copy()
         return [res]
 
-    def postprocess(self, output):
+
+@INFERENCE.register()
+class VideoSwin_TableTennis_Inference_helper(Base_Inference_helper):
+    def __init__(self,
+                 num_seg=32,
+                 seg_len=1,
+                 short_size=256,
+                 target_size=224,
+                 top_k=1):
+        self.num_seg = num_seg
+        self.seg_len = seg_len
+        self.short_size = short_size
+        self.target_size = target_size
+        self.top_k = top_k
+
+    def preprocess(self, input_file):
+        """
+        input_file: str, file path
+        return: list
+        """
+        self.input_file = input_file
+        assert os.path.isfile(input_file) is not None, "{0} not exists".format(
+            input_file)
+        results = {'filename': input_file}
+        img_mean = [123.675, 116.28, 103.53]
+        img_std = [58.395, 57.12, 57.375]
+        ops = [
+            FrameDecoder(),
+            SamplerPkl(num_seg=self.num_seg,
+                       seg_len=self.seg_len,
+                       backend='cv2',
+                       valid_mode=True),
+            Scale(short_size=self.short_size,
+                  fixed_ratio=False,
+                  keep_ratio=True,
+                  backend='cv2',
+                  do_round=True),
+            CenterCrop(target_size=224, backend='cv2'),
+            Normalization(mean=img_mean,
+                          std=img_std,
+                          tensor_shape=[3, 1, 1, 1],
+                          direct=True),
+            Image2Array(data_format='cthw')
+        ]
+        for op in ops:
+            results = op(results)
+
+        res = np.expand_dims(results['imgs'], axis=0).copy()
+        return [res]
+
+    def postprocess(self, output, print_output=True, save_gif=True):
         """
         output: list
         """
-        output = output[0]
-        if output.ndim == 1:
-            pass
-        elif output.ndim == 2:
-            output = output.mean(axis=0)
-        if output.ndim > 1:
-            output = output.flatten()
-        output = F.softmax(paddle.to_tensor(output)).numpy()
-        classes = np.argpartition(output, -self.top_k)[-self.top_k:]
-        classes = classes[np.argsort(-output[classes])]
-        scores = output[classes]
-        print("Current video file: {0}".format(self.input_file))
-        print("\ttop-1 class: {0}".format(classes[0]))
-        print("\ttop-1 score: {0}".format(scores[0]))
+        if not isinstance(self.input_file, list):
+            self.input_file = [
+                self.input_file,
+            ]
+        output = output[0]  # [B, num_cls]
+        N = len(self.input_file)
+        if output.shape[0] != N:
+            output = output.reshape([N] + [output.shape[0] // N] +
+                                    list(output.shape[1:]))  # [N, T, C]
+            output = output.mean(axis=1)  # [N, C]
+        output = F.softmax(paddle.to_tensor(output), axis=-1).numpy()
+        for i in range(N):
+            classes = np.argpartition(output[i], -self.top_k)[-self.top_k:]
+            classes = classes[np.argsort(-output[i, classes])]
+            scores = output[i, classes]
+            if print_output:
+                print("Current video file: {0}".format(self.input_file[i]))
+                for j in range(self.top_k):
+                    print("\ttop-{0} class: {1}".format(j + 1, classes[j]))
+                    print("\ttop-{0} score: {1}".format(j + 1, scores[j]))
+            if save_gif:
+                Add_text_to_video(
+                    "applications/TableTennis/results",
+                    text=f"{str(classes[0])} {float(scores[0]):.5f}")
 
 
 @INFERENCE.register()

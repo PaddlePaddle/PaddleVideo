@@ -22,15 +22,16 @@ from .decode import FeatureDecoder, FrameDecoder, VideoDecoder
 from .decode_sampler import DecodeSampler
 from .mix import Cutmix, Mixup, VideoMix
 from .multimodal import FeaturePadding, RandomCap, RandomMask, Tokenize
-from .sample import Sampler
+from .sample import Sampler, SamplerPkl
 from .sample_ava import *
 from .skeleton_pipeline import AutoPadding, Iden, SkeletonNorm
 
 __all__ = [
     'Scale', 'RandomCrop', 'CenterCrop', 'RandomFlip', 'Image2Array',
     'Normalization', 'Compose', 'VideoDecoder', 'FrameDecoder', 'Sampler',
-    'Mixup', 'Cutmix', 'JitterScale', 'MultiCrop', 'PackOutput', 'TenCrop',
-    'UniformCrop', 'DecodeSampler', 'LoadFeat', 'GetMatchMap', 'GetVideoLabel',
-    'AutoPadding', 'SkeletonNorm', 'Iden', 'VideoMix', 'FeatureDecoder',
-    'RandomResizedCrop', 'FeaturePadding', 'RandomCap', 'Tokenize', 'RandomMask'
+    'SamplerPkl', 'Mixup', 'Cutmix', 'JitterScale', 'MultiCrop', 'PackOutput',
+    'TenCrop', 'UniformCrop', 'DecodeSampler', 'LoadFeat', 'GetMatchMap',
+    'GetVideoLabel', 'AutoPadding', 'SkeletonNorm', 'Iden', 'VideoMix',
+    'FeatureDecoder', 'RandomResizedCrop', 'FeaturePadding', 'RandomCap',
+    'Tokenize', 'RandomMask'
 ]
