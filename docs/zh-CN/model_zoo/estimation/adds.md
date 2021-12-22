@@ -125,4 +125,4 @@ python3.7 tools/predict.py --input_file data/example.png \
 
 ## 参考论文
 
-- [Self-supervised Monocular Depth Estimation for All Day Images using Domain Separation](https://arxiv.org/abs/2108.07628), Lina Liu, Xibin Song, Mengmeng Wang
+- [Self-supervised Monocular Depth Estimation for All Day Images using Domain Separation](https://arxiv.org/abs/2108.07628), Liu, Lina and Song, Xibin and Wang, Mengmeng and Liu, Yong and Zhang, Liangjun

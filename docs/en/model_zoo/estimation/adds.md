@@ -125,4 +125,4 @@ The following is a sample picture and the corresponding predicted depth map：
 
 ## Reference
 
-- [Self-supervised Monocular Depth Estimation for All Day Images using Domain Separation](https://arxiv.org/abs/2108.07628), Lina Liu, Xibin Song, Mengmeng Wang
+- [Self-supervised Monocular Depth Estimation for All Day Images using Domain Separation](https://arxiv.org/abs/2108.07628), Liu, Lina and Song, Xibin and Wang, Mengmeng and Liu, Yong and Zhang, Liangjun
