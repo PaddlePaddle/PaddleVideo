@@ -157,7 +157,8 @@ MIX:
 
 INFERENCE:
     name: 'VideoSwin_TableTennis_Inference_helper'
-    num_seg: 32
+    num_seg: 1
+    seg_len: 32
     target_size: 224
 
 model_name: "VideoSwinTransformer_table"

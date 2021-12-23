@@ -302,40 +302,14 @@ class SamplerPkl(object):
         return:
             sampling id.
         """
-        ######根据文件名载入文件
-        old_new_f = open(
-            '/workspace/bianjiang03/DATA/FileList/8class/oldnew.map', 'r')
-        old_new_lines = old_new_f.readlines()
-        old_new_dict = {}
-        for item in old_new_lines:
-            old, new = item.strip().split(' ')
-            old_new_dict[new] = old
-        new_name = results['frame_dir']
-        filename = old_new_dict[new_name]
+        filename = results['frame_dir']
         data_loaded = pickle.load(open(filename, 'rb'), encoding='bytes')
-        ###
-        #        data_loaded = pickle.load(open(results['frame_dir'], 'rb'), encoding='bytes')
-        vid, _, frames = data_loaded
+        _, _, frames = data_loaded
         results['frames_len'] = len(frames)
-        ### 更换标签
-        label = int(new_name.split('.')[0][-1])
-        #        if label in [1, 7]:  #拉
-        #            label = 0
-        #        if label in [2,4,5,6]: #控制
-        #            label = 1
-        #        if label == 3: #摆短
-        #            label = 2
-        ###
+        label = int(filename.split('.')[0][-1])
         results['labels'] = label
-
-        # if len(label) == 1:
-        #     results['labels'] = int(label[0])
-        # else:
-        #     results['labels'] = int(label[0]) if random.random() < 0.5 else int(label[1])
-
         frames_len = results['frames_len']
         average_dur = int(int(frames_len) / self.num_seg)
-        frames_idx = []
         imgs = []
         for i in range(self.num_seg):
             idx = 0

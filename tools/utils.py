@@ -72,7 +72,7 @@ def Add_text_to_video(video_path, output_dir="./data", text=None):
                     (384, 384)))[:, :, ::-1].astype('uint8')
         else:
             dummy_flag, frame = videoCapture.read()
-        frame = cv2.putText(frame, text, (20, 20), cv2.FONT_HERSHEY_COMPLEX,
+        frame = cv2.putText(frame, text, (30, 30), cv2.FONT_HERSHEY_COMPLEX,
                             1.0, (0, 0, 255), 2)
         frames_rgb_list.append(frame[:, :, ::-1])  # bgr to rgb
     if not video_path.endswith('.pkl'):
@@ -472,8 +472,8 @@ class VideoSwin_Inference_helper(Base_Inference_helper):
 @INFERENCE.register()
 class VideoSwin_TableTennis_Inference_helper(Base_Inference_helper):
     def __init__(self,
-                 num_seg=32,
-                 seg_len=1,
+                 num_seg=1,
+                 seg_len=32,
                  short_size=256,
                  target_size=224,
                  top_k=1):
@@ -505,7 +505,7 @@ class VideoSwin_TableTennis_Inference_helper(Base_Inference_helper):
                   keep_ratio=True,
                   backend='cv2',
                   do_round=True),
-            CenterCrop(target_size=224, backend='cv2'),
+            UniformCrop(target_size=self.target_size, backend='cv2'),
             Normalization(mean=img_mean,
                           std=img_std,
                           tensor_shape=[3, 1, 1, 1],
