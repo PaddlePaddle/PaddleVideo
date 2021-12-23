@@ -29,9 +29,9 @@ TODO
 训练启动命令如下：
 ```bash
 # 单卡
-python3.7 -u main.py --amp --validate -c configs/recognition/videoswin/videoswin_tabletennis.yaml
+python3.7 -u main.py --amp --validate -c applications/TableTennis/conf/videoswin_tabletennis.yaml
 # 多卡
-python3.7 -u -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_videoswin_tabletennis main.py --amp --validate -c configs/recognition/videoswin/videoswin_tabletennis.yaml
+python3.7 -u -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_videoswin_tabletennis main.py --amp --validate -c applications/TableTennis/conf/videoswin_tabletennis.yaml
 ```
 
 ## 模型评估
