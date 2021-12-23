@@ -71,9 +71,9 @@ def Add_text_to_video(video_path,
         if video_path.endswith('.pkl'):
             frame = np.array(
                 Image.open(BytesIO(frames[i])).convert("RGB").resize(
-                    (384, 384)))[:, :, ::-1].astype('uint8')
+                    (240, 135)))[:, :, ::-1].astype('uint8')
         else:
-            dummy_flag, frame = videoCapture.read()
+            _, frame = videoCapture.read()
         frame = cv2.putText(frame, text, (30, 30), cv2.FONT_HERSHEY_COMPLEX,
                             1.0, (0, 0, 255), 2)
         frames_rgb_list.append(frame[:, :, ::-1])  # bgr to rgb
