@@ -3,7 +3,7 @@ MODEL: #MODEL field
     backbone: #Mandatory, indicate the type of backbone, associate to the 'paddlevideo/modeling/backbones/' .
         name: "SwinTransformer3D" #Mandatory, The name of backbone.
         pretrained: "data/swin_base_patch244_window877_kinetics400_22k.pdparams" #Optional, pretrained model path.
-        num_seg: 32 # tell test program model's num_seg
+        seg_num: 32 # tell test program model's seg_num
         patch_size: [2, 4, 4]
         embed_dim: 128
         depths: [2, 2, 18, 2]
@@ -160,7 +160,7 @@ INFERENCE:
     seg_len: 32
     target_size: 224
 
-model_name: "VideoSwin_table"
+model_name: "VideoSwin_TableTennis"
 log_interval: 20 #Optional, the interal of logger, default:10
 save_interval: 5
 epochs: 20 #Mandatory, total epoch

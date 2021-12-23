@@ -613,8 +613,7 @@ class SwinTransformer3D(nn.Layer):
     """
     def __init__(self,
                  pretrained=None,
-                 pretrained2d=True,
-                 num_seg=32,
+                 seg_num=32,
                  patch_size=(4, 4, 4),
                  in_chans=3,
                  embed_dim=96,
@@ -634,8 +633,7 @@ class SwinTransformer3D(nn.Layer):
         super().__init__()
 
         self.pretrained = pretrained
-        self.pretrained2d = pretrained2d
-        self.num_seg = num_seg
+        self.seg_num = seg_num
         self.num_layers = len(depths)
         self.embed_dim = embed_dim
         self.patch_norm = patch_norm

@@ -56,7 +56,7 @@ wget TODO
 ```
 运行预测代码
 ```bash
-python3.7 tools/predict.py --input_file applications/TableTennis/data/example.pkl \
+python3.7 tools/predict.py --input_file applications/TableTennis/data/example_tennis_7.pkl \
                            --config applications/TableTennis/conf/videoswin_tabletennis.yaml \
                            --model_file inference/VideoSwin_TableTennis/VideoSwin_TableTennis.pdmodel \
                            --params_file inference/VideoSwin_TableTennis/VideoSwin_TableTennis.pdiparams \

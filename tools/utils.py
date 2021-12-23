@@ -438,7 +438,6 @@ class VideoSwin_Inference_helper(Base_Inference_helper):
         input_file: str, file path
         return: list
         """
-        self.input_file = input_file
         assert os.path.isfile(input_file) is not None, "{0} not exists".format(
             input_file)
         results = {'filename': input_file}
@@ -488,10 +487,9 @@ class VideoSwin_TableTennis_Inference_helper(Base_Inference_helper):
         input_file: str, file path
         return: list
         """
-        self.input_file = input_file
         assert os.path.isfile(input_file) is not None, "{0} not exists".format(
             input_file)
-        results = {'filename': input_file}
+        results = {'frame_dir': input_file, 'suffix': 'img_{:05}.jpg'}
         img_mean = [123.675, 116.28, 103.53]
         img_std = [58.395, 57.12, 57.375]
         ops = [
@@ -509,7 +507,7 @@ class VideoSwin_TableTennis_Inference_helper(Base_Inference_helper):
             Normalization(mean=img_mean,
                           std=img_std,
                           tensor_shape=[3, 1, 1, 1],
-                          direct=True),
+                          inplace=True),
             Image2Array(data_format='cthw')
         ]
         for op in ops:

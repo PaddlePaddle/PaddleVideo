@@ -18,9 +18,9 @@ from os import path as osp
 
 from paddle import inference
 from paddle.inference import Config, create_predictor
-from paddlevideo.utils import get_config
 
 from utils import build_inference_helper
+from paddlevideo.utils import get_config
 
 
 def parse_args():

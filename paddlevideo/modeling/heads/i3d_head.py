@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import paddle
 import paddle.nn as nn
 from paddle import ParamAttr
 
@@ -86,7 +87,8 @@ class I3DHead(BaseHead):
         if self.dropout is not None:
             x = self.dropout(x)
         # [N, in_channels, 1, 1, 1]
-        x = x.reshape([x.shape[0], -1])
+        N = paddle.shape(x)[0]
+        x = x.reshape([N, -1])
         # [N, in_channels]
         cls_score = self.fc(x)
         # [N, num_classes]

@@ -89,7 +89,7 @@ def get_input_spec(cfg, model_name):
             ],
                       dtype='float32'),
         ]]
-    elif model_name in ['VideoSwin']:
+    elif model_name in ['VideoSwin', 'VideoSwin_TableTennis']:
         input_spec = [[
             InputSpec(shape=[
                 None, 3, cfg.num_seg * cfg.seg_len * 3, cfg.target_size,

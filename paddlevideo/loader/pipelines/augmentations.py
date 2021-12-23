@@ -793,7 +793,7 @@ class UniformCrop:
     Args:
         target_size(int | tuple[int]): (w, h) of target size for crop.
     """
-    def __init__(self, target_size):
+    def __init__(self, target_size, backend='cv2'):
         if isinstance(target_size, tuple):
             self.target_size = target_size
         elif isinstance(target_size, int):
@@ -802,21 +802,26 @@ class UniformCrop:
             raise TypeError(
                 f'target_size must be int or tuple[int], but got {type(target_size)}'
             )
+        self.backend = backend
 
     def __call__(self, results):
 
         imgs = results['imgs']
         if 'backend' in results and results['backend'] == 'pyav':  # [c,t,h,w]
             img_h, img_w = imgs.shape[2:]
-        else:
+        elif self.backend == 'pillow':
             img_w, img_h = imgs[0].size
-        crop_w, crop_h = self.target_size
-        if img_h > img_w:
-            offsets = [(0, 0), (0, int(math.ceil((img_h - crop_h) / 2))),
-                       (0, img_h - crop_h)]
         else:
-            offsets = [(0, 0), (int(math.ceil((img_w - crop_w) / 2)), 0),
-                       (img_w - crop_w, 0)]
+            img_h, img_w, _ = imgs[0].shape
+        crop_w, crop_h = self.target_size
+        if crop_h == img_h:
+            w_step = (img_w - crop_w) // 2
+            offsets = [(0, 0), (w_step, 0), (w_step * 2, 0)]
+        elif crop_w == img_w:
+            h_step = (img_h - crop_h) // 2
+            offsets = [(0, 0), (0, h_step), (0, h_step * 2)]
+        else:
+            raise ValueError
         img_crops = []
         if 'backend' in results and results['backend'] == 'pyav':  # [c,t,h,w]
             for x_offset, y_offset in offsets:
@@ -825,12 +830,20 @@ class UniformCrop:
                 img_crops.append(crop)
             img_crops = paddle.concat(img_crops, axis=1)
         else:
-            for x_offset, y_offset in offsets:
-                crop = [
-                    img.crop((x_offset, y_offset, x_offset + crop_w,
-                              y_offset + crop_h)) for img in imgs
-                ]
-                img_crops.extend(crop)
-                # [I1_left, ..., ITleft, ..., I1right, ..., ITright]
+            if self.backend == 'pillow':
+                for x_offset, y_offset in offsets:
+                    crop = [
+                        img.crop((x_offset, y_offset, x_offset + crop_w,
+                                  y_offset + crop_h)) for img in imgs
+                    ]
+                    img_crops.extend(crop)
+                    # [I1_left, ..., ITleft, ..., I1right, ..., ITright]
+            else:
+                for x_offset, y_offset in offsets:
+                    crop = [
+                        img[y_offset:y_offset + crop_h,
+                            x_offset:x_offset + crop_w] for img in imgs
+                    ]
+                    img_crops.extend(crop)
         results['imgs'] = img_crops
         return results
