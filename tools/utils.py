@@ -38,7 +38,9 @@ from paddlevideo.utils import Registry, build
 INFERENCE = Registry('inference')
 
 
-def Add_text_to_video(video_path, output_dir="./data", text=None):
+def Add_text_to_video(video_path,
+                      output_dir="applications/TableTennis/results",
+                      text=None):
     os.makedirs(output_dir, exist_ok=True)
     if video_path.endswith('.pkl'):
         try:
@@ -542,7 +544,7 @@ class VideoSwin_TableTennis_Inference_helper(Base_Inference_helper):
                     print("\ttop-{0} score: {1}".format(j + 1, scores[j]))
             if save_gif:
                 Add_text_to_video(
-                    "applications/TableTennis/results",
+                    self.input_file[0],
                     text=f"{str(classes[0])} {float(scores[0]):.5f}")
 
 
