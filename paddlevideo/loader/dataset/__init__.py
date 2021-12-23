@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from .video import VideoDataset
-from .frame import FrameDataset
+from .frame import FrameDataset, FrameDataset_Table
 from .slowfast_video import SFVideoDataset
 from .bmn_dataset import BMNDataset
 from .feature import FeatureDataset
@@ -25,5 +25,5 @@ from .actbert_dataset import ActBertDataset
 __all__ = [
     'VideoDataset', 'FrameDataset', 'SFVideoDataset', 'BMNDataset',
     'FeatureDataset', 'SkeletonDataset', 'AVADataset', 'MSRVTTDataset',
-    'ActBertDataset'
+    'ActBertDataset', 'FrameDataset_Table'
 ]

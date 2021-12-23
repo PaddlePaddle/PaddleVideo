@@ -31,15 +31,15 @@ DATASET: #DATASET field
     num_workers: 2 #Mandatory, XXX the number of subprocess on each GPU.
     test_batch_size: 1
     train:
-        format: "VideoDataset_Table" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
+        format: "FrameDataset_Table" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
         file_path: "train.list" #Mandatory, train data index file path
         suffix: 'img_{:05}.jpg'
     valid:
-        format: "VideoDataset_Table" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
+        format: "FrameDataset_Table" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
         file_path: "val.list" #Mandatory, valid data index file path
         suffix: 'img_{:05}.jpg'
     test:
-        format: "VideoDataset_Table" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
+        format: "FrameDataset_Table" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
         file_path: "val.list" #Mandatory, valid data index file path
         suffix: 'img_{:05}.jpg'
 
@@ -49,8 +49,8 @@ PIPELINE: #PIPELINE field TODO.....
             name: "FrameDecoder"
         sample:
             name: "SamplerPkl"
-            num_seg: 32
-            seg_len: 1
+            num_seg: 1
+            seg_len: 32
             valid_mode: False
             backend: 'cv2'
         transform: #Mandotary, image transform operator.
@@ -81,8 +81,8 @@ PIPELINE: #PIPELINE field TODO.....
             name: "FrameDecoder"
         sample:
             name: "SamplerPkl"
-            num_seg: 32
-            seg_len: 1
+            num_seg: 1
+            seg_len: 32
             valid_mode: True
             backend: 'cv2'
         transform: #Mandotary, image transform operator.
@@ -108,8 +108,8 @@ PIPELINE: #PIPELINE field TODO.....
             name: "FrameDecoder"
         sample:
             name: "SamplerPkl"
-            num_seg: 32
-            seg_len: 1
+            num_seg: 1
+            seg_len: 32
             valid_mode: True
             backend: 'cv2'
         transform: #Mandotary, image transform operator.
@@ -119,9 +119,8 @@ PIPELINE: #PIPELINE field TODO.....
                 keep_ratio: True
                 backend: 'cv2'
                 do_round: True
-            - CenterCrop:
+            - UniformCrop:
                 target_size: 224
-                do_round: False
                 backend: 'cv2'
             - Normalization:
                 mean: [123.675, 116.28, 103.53]
@@ -130,13 +129,13 @@ PIPELINE: #PIPELINE field TODO.....
                 direct: True
             - Image2Array:
                 data_format: 'cthw'
-OPTIMIZER: #OPTIMIZER field
-    name: 'AdamW' #Mandatory, the type of optimizer, associate to the 'paddlevideo/solver/'
+OPTIMIZER:
+    name: 'AdamW'
     beta1: 0.9
     beta2: 0.999
     no_weight_decay_name: 'norm relative_position_bias_table'
-    learning_rate: #Mandatory, the type of learning rate scheduler, associate to the 'paddlevideo/solver/'
-        name: 'CustomWarmupCosineDecay_align'
+    learning_rate:
+        name: 'CustomWarmupCosineStepDecay'
         iter_step: True
         warmup_iters: 2
         warmup_ratio: 0.1
@@ -149,7 +148,7 @@ METRIC:
     name: 'CenterCropMetric'
 
 GRADIENT_ACCUMULATION:
-    global_batch_size: 64 # Specify the sum of batches to be calculated by all GPUs
+    global_batch_size: 64
 
 MIX:
     name: "Mixup"
@@ -161,7 +160,7 @@ INFERENCE:
     seg_len: 32
     target_size: 224
 
-model_name: "VideoSwinTransformer_table"
+model_name: "VideoSwin_table"
 log_interval: 20 #Optional, the interal of logger, default:10
 save_interval: 5
 epochs: 20 #Mandatory, total epoch
