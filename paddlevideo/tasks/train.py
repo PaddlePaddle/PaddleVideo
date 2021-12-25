@@ -191,8 +191,6 @@ def train_model(cfg,
                     if i == 0:
                         optimizer.clear_grad()
                     avg_loss /= cfg.GRADIENT_ACCUMULATION.num_iters
-                    # bs=1的时候，一次累加梯度为g/8，累加8次，总共为g，更新N/1/64次，
-                    # bs=2的时候，一次累加的梯度为g/4，累加4次,总共为g，更新N/1/64次
                     scaled = scaler.scale(avg_loss)
                     scaled.backward()
                     if (i + 1) % cfg.GRADIENT_ACCUMULATION.num_iters == 0:
