@@ -24,9 +24,10 @@ from .agcn import AGCN
 from .transnetv2 import TransNetV2
 from .actbert import BertForMultiModalPreTraining
 from .vit_tweaks import VisionTransformer_tweaks
+from .cfbi import CFBI
 
 __all__ = [
     'ResNet', 'ResNetTSM', 'ResNetTweaksTSM', 'ResNetSlowFast', 'BMN',
     'ResNetTweaksTSN', 'VisionTransformer', 'STGCN', 'AGCN', 'TransNetV2',
-    'BertForMultiModalPreTraining', 'VisionTransformer_tweaks'
+    'BertForMultiModalPreTraining', 'VisionTransformer_tweaks', 'CFBI'
 ]

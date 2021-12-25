@@ -25,6 +25,7 @@ from .skeleton_pipeline import AutoPadding, Iden, SkeletonNorm
 from .augmentations_ava import *
 from .sample_ava import *
 from .multimodal import FeaturePadding, RandomCap, Tokenize, RandomMask
+from .segmentation import MultiRestrictSize, MultiNorm
 
 __all__ = [
     'Scale', 'RandomCrop', 'CenterCrop', 'RandomFlip', 'Image2Array',
@@ -32,5 +33,6 @@ __all__ = [
     'Mixup', 'Cutmix', 'JitterScale', 'MultiCrop', 'PackOutput', 'TenCrop',
     'UniformCrop', 'DecodeSampler', 'LoadFeat', 'GetMatchMap', 'GetVideoLabel',
     'AutoPadding', 'SkeletonNorm', 'Iden', 'VideoMix', 'FeatureDecoder',
-    'FeaturePadding', 'RandomCap', 'Tokenize', 'RandomMask'
+    'FeaturePadding', 'RandomCap', 'Tokenize', 'RandomMask',
+    'MultiRestrictSize', 'MultiNorm'
 ]

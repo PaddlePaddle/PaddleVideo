@@ -54,7 +54,9 @@ def test_model(cfg, weights, parallel=True):
                               drop_last=False,
                               shuffle=False)
 
-    data_loader = build_dataloader(dataset, **dataloader_setting)
+    data_loader = build_dataloader(
+        dataset, **dataloader_setting) if cfg.model_name not in ['CFBI'
+                                                                 ] else dataset
 
     model.eval()
 
@@ -67,6 +69,12 @@ def test_model(cfg, weights, parallel=True):
 
     Metric = build_metric(cfg.METRIC)
     for batch_id, data in enumerate(data_loader):
-        outputs = model(data, mode='test')
-        Metric.update(batch_id, data, outputs)
+        if cfg.model_name in [
+                'CFBI'
+        ]:  #for VOS task, dataset for video and dataloader for frames in each video
+            Metric.update(batch_id, data, model)
+        else:
+            outputs = model(data, mode='test')
+
+        Metric.update(batch_id, data, model)
     Metric.accumulate()

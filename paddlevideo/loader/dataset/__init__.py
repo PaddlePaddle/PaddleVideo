@@ -21,9 +21,10 @@ from .skeleton import SkeletonDataset
 from .ava_dataset import AVADataset
 from .msrvtt import MSRVTTDataset
 from .actbert_dataset import ActBertDataset
+from .davis_dataset import DavisDataset
 
 __all__ = [
     'VideoDataset', 'FrameDataset', 'SFVideoDataset', 'BMNDataset',
     'FeatureDataset', 'SkeletonDataset', 'AVADataset', 'MSRVTTDataset',
-    'ActBertDataset'
+    'ActBertDataset', 'DavisDataset'
 ]
