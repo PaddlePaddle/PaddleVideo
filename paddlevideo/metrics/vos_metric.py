@@ -11,18 +11,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 
 import os
-import numpy as np
 import paddle
-from paddle.hapi.model import _all_gather
-import paddle.fluid as fluid
 import zipfile
 import time
 from PIL import Image
 
+from paddle.io import DataLoader
+
 from .registry import METRIC
 from .base import BaseMetric
 from paddlevideo.utils import get_logger
-from paddle.io import DataLoader
 
 logger = get_logger("paddlevideo")
 
@@ -123,8 +121,8 @@ class VOSMetric(BaseMetric):
                         #  have to introduce new labels for new objects, if necessary.
                         if not sample['meta']['flip'] and not (
                                 current_label is None) and join_label is None:
-                            join_label = fluid.layers.cast(current_label,
-                                                           dtype='int64')
+                            join_label = paddle.cast(current_label,
+                                                     dtype='int64')
                         all_preds.append(all_pred)
                         if current_label is not None:
                             ref_embeddings[aug_idx].append(current_embedding)
@@ -139,8 +137,7 @@ class VOSMetric(BaseMetric):
                         join_label = paddle.squeeze(paddle.squeeze(join_label,
                                                                    axis=0),
                                                     axis=0)
-                        keep = fluid.layers.cast((join_label == 0),
-                                                 dtype="int64")
+                        keep = paddle.cast((join_label == 0), dtype="int64")
                         pred_label = pred_label * keep + join_label * (1 - keep)
                         pred_label = pred_label
                     current_label = paddle.reshape(
@@ -195,9 +192,8 @@ class VOSMetric(BaseMetric):
             1. / total_avg_time_per_frame, 1. / avg_sfps))
 
     def flip_tensor(self, tensor, dim=0):
-        inv_idx = fluid.layers.cast(paddle.arange(tensor.shape[dim] - 1, -1,
-                                                  -1),
-                                    dtype="int64")
+        inv_idx = paddle.cast(paddle.arange(tensor.shape[dim] - 1, -1, -1),
+                              dtype="int64")
         tensor = paddle.index_select(x=tensor, index=inv_idx, axis=dim)
         return tensor
 

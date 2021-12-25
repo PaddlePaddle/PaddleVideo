@@ -12,7 +12,6 @@
 
 import paddle
 import paddle.nn as nn
-import paddle.fluid as fluid
 import paddle.nn.functional as F
 import numpy as np
 

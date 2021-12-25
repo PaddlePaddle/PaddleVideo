@@ -12,12 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import random
 import numpy as np
 from PIL import Image
-import decord as de
 import copy
-import json
 import cv2
 from ..registry import PIPELINES
 

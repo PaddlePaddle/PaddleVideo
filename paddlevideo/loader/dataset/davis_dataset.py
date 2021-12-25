@@ -17,17 +17,14 @@ import os.path as osp
 import copy
 import random
 import numpy as np
-import lmdb
-import pickle
-import json
 import shutil
 from PIL import Image
 import cv2
+from paddle.io import Dataset
 
 from ..registry import DATASETS
 from .base import BaseDataset
 from ...utils import get_logger
-from paddle.io import Dataset
 
 logger = get_logger("paddlevideo")
 
