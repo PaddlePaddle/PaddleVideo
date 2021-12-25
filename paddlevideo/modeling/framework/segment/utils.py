@@ -1,8 +1,21 @@
+# copyright (c) 2021 PaddlePaddle Authors. All Rights Reserve.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import numpy as np
 import paddle
 import paddle.nn as nn
 import paddle.nn.functional as F
-import paddle.fluid as fluid
 
 
 def foreground2background(dis, obj_num):
@@ -25,7 +38,7 @@ def foreground2background(dis, obj_num):
 WRONG_LABEL_PADDING_DISTANCE = 5e4
 
 
-#############################################################GLOBAL_DIST_MAP
+#GLOBAL_DIST_MAP
 def _pairwise_distances(x, x2, y, y2):
     """
     Computes pairwise squared l2 distances between tensors x and y.
@@ -44,7 +57,6 @@ def _pairwise_distances(x, x2, y, y2):
     return d
 
 
-##################
 def _flattened_pairwise_distances(reference_embeddings, ref_square,
                                   query_embeddings, query_square):
     """
@@ -115,9 +127,7 @@ def _nearest_neighbor_features_per_object_in_chunks(reference_embeddings_flat,
     feature_dim, embedding_dim = query_embeddings_flat.shape
     chunk_size = int(np.ceil(float(feature_dim) / n_chunks))
     wrong_label_mask = reference_labels_flat < 0.1
-    #wrong_label_mask = wrong_label_mask.permute(1, 0)
-    #ref_square = reference_embeddings_flat.pow(2).sum(1)
-    #query_square = query_embeddings_flat.pow(2).sum(1)
+
     wrong_label_mask = paddle.transpose(x=wrong_label_mask, perm=[1, 0])
     ref_square = paddle.sum(paddle.pow(reference_embeddings_flat, 2), axis=1)
     query_square = paddle.sum(paddle.pow(query_embeddings_flat, 2), axis=1)
@@ -227,9 +237,9 @@ def global_matching(reference_embeddings,
         n_chunks)
 
     nn_features_reshape = paddle.reshape(nn_features, [1, h, w, obj_nums, 1])
-    nn_features_reshape = (fluid.layers.sigmoid(
-        nn_features_reshape + paddle.reshape(dis_bias, [1, 1, 1, -1, 1])) -
-                           0.5) * 2
+    nn_features_reshape = (
+        F.sigmoid(nn_features_reshape +
+                  paddle.reshape(dis_bias, [1, 1, 1, -1, 1])) - 0.5) * 2
 
     #TODO: ori_size is not None
 
@@ -420,7 +430,7 @@ def global_matching_for_eval(all_reference_embeddings,
     return nn_features_reshape
 
 
-########################################################################LOCAL_DIST_MAP
+#LOCAL_DIST_MAP
 def local_pairwise_distances(x,
                              y,
                              max_distance=9,
@@ -660,8 +670,8 @@ def local_matching(prev_frame_embedding,
         multi_dists.append(new_dists)
 
     multi_dists = paddle.concat(multi_dists, axis=1)
-    multi_dists = (fluid.layers.sigmoid(
-        multi_dists + paddle.reshape(dis_bias, [-1, 1, 1, 1])) - 0.5) * 2
+    multi_dists = (F.sigmoid(multi_dists +
+                             paddle.reshape(dis_bias, [-1, 1, 1, 1])) - 0.5) * 2
 
     if use_float16:
         multi_dists = paddle.cast(multi_dists, dtype="float32")
