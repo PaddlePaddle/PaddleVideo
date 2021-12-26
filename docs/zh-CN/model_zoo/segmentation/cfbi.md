@@ -16,7 +16,7 @@
 CFBI是百度在ECCV 2020提出的视频目标分割模型，该模型基于前背景整合的协作式方法，将前景目标对象与背景对象的嵌入特征进行对比，从而提升视频分割的效果。给定参考帧（第一帧）和前一帧的图像和目标分割，模型会预测出当前帧的分割。
 
 <div align="center">
-<img src="../../../images/cfbi.png" height=400 width=500 hspace='10'/> <br />
+<img src="../../../images/cfbi.png" height=400 width=540 hspace='10'/> <br />
 </div>
 
 
