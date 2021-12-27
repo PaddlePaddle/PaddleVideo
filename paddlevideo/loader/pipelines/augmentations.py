@@ -848,7 +848,7 @@ class GroupRandomFlip(object):
 
 
 @PIPELINES.register()
-class To_tensor(object):
+class ToArray(object):
     def __init__(self):
         pass
 

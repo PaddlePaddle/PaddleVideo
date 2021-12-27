@@ -284,20 +284,16 @@ def train_model(cfg,
                     best_flag = True
                 return best, best_flag
 
-            if cfg.MODEL.framework == "DepthEstimator" and (not parallel or
-                                                            (parallel
-                                                             and rank == 0)):
-                if best == 0.0 or record_list["rmse"].avg < best:
-                    best = record_list["rmse"].avg
-                    best_flag = True
-                return best, best_flag
-
             # forbest2, cfg.MODEL.framework != "FastRCNN":
-            for top_flag in ['hit_at_one', 'top1']:
-                if record_list.get(
-                        top_flag) and record_list[top_flag].avg > best:
-                    best = record_list[top_flag].avg
-                    best_flag = True
+            for top_flag in ['hit_at_one', 'top1', 'rmse']:
+                if record_list.get(top_flag):
+                    if top_flag != 'rmse' and record_list[top_flag].avg > best:
+                        best = record_list[top_flag].avg
+                        best_flag = True
+                    elif top_flag == 'rmse' and (
+                            best == 0.0 or record_list[top_flag].avg < best):
+                        best = record_list[top_flag].avg
+                        best_flag = True
 
             return best, best_flag
 

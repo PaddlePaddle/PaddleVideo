@@ -52,7 +52,7 @@ PaddleVideo is a toolset for video recognition, action localization, and spatio 
 | action recognition | [TSN](./docs/zh-CN/model_zoo/recognition/tsn.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | 69.81 |
 | action recognition | [AttentionLSTM](./docs/zh-CN/model_zoo/recognition/attention_lstm.md) | [Youtube-8M](./docs/zh-CN/dataset/youtube8m.md) | Hit@1 | 89.05 |
 | action detection| [BMN](./docs/zh-CN/model_zoo/localization/bmn.md) | [ActivityNet](./docs/zh-CN/dataset/ActivityNet.md) |  AUC | 67.23 |
-| depth estimation| [ADDS](./docs/en/model_zoo/estimation/adds.md)       | [Oxford_RobotCar](./docs/en/dataset/Oxford_RobotCar.md) |   Abs Rel    |   0.209   |
+| depth estimation| [ADDS](./docs/zh-CN/model_zoo/estimation/adds.md)       | [Oxford_RobotCar](./docs/zh-CN/dataset/Oxford_RobotCar.md) |   Abs Rel    |   0.209   |
 
 ### Changelog
 

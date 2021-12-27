@@ -69,7 +69,7 @@ PIPELINE: #PIPELINE field TODO.....
                 saturation: 0.2
                 hue: 0.1
                 mode: "train"
-            - To_tensor:
+            - ToArray:
     valid:
         decode:
             name: "ImageDecoder"
@@ -86,7 +86,7 @@ PIPELINE: #PIPELINE field TODO.....
                   width: 512
                   scale: 4
                   K: [ [ 0.768, 0, 0.5, 0 ],[ 0, 1.024, 0.5, 0 ],[ 0, 0, 1, 0 ],[ 0, 0, 0, 1 ] ]
-            - To_tensor:
+            - ToArray:
     test:
         decode:
             name: "ImageDecoder"
@@ -103,7 +103,7 @@ PIPELINE: #PIPELINE field TODO.....
                   width: 512
                   scale: 4
                   K: [ [ 0.768, 0, 0.5, 0 ],[ 0, 1.024, 0.5, 0 ],[ 0, 0, 1, 0 ],[ 0, 0, 0, 1 ] ]
-            - To_tensor:
+            - ToArray:
 
 OPTIMIZER: #OPTIMIZER field
     name: 'Adam' #Mandatory, the type of optimizer, associate to the 'paddlevideo/solver/'

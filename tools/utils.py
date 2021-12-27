@@ -32,7 +32,7 @@ from abc import abstractmethod
 from paddlevideo.loader.pipelines import (
     AutoPadding, CenterCrop, DecodeSampler, FeatureDecoder, GroupResize,
     Image2Array, ImageDecoder, JitterScale, MultiCrop, Normalization,
-    PackOutput, Sampler, Scale, SkeletonNorm, TenCrop, To_tensor, UniformCrop,
+    PackOutput, Sampler, Scale, SkeletonNorm, TenCrop, ToArray, UniformCrop,
     VideoDecoder)
 from paddlevideo.metrics.bmn_metric import boundary_choose, soft_nms
 from paddlevideo.utils import Registry, build
@@ -743,7 +743,7 @@ class ADDS_Inference_helper(Base_Inference_helper):
                 scale=1,
                 mode='infer',
             ),
-            To_tensor(),
+            ToArray(),
         ]
         for op in ops:
             results = op(results)

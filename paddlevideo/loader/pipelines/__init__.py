@@ -16,7 +16,7 @@ from .anet_pipeline import GetMatchMap, GetVideoLabel, LoadFeat
 from .augmentations import (CenterCrop, ColorJitter, GroupRandomFlip,
                             GroupResize, Image2Array, JitterScale, MultiCrop,
                             Normalization, PackOutput, RandomCrop, RandomFlip,
-                            Scale, TenCrop, To_tensor, UniformCrop)
+                            Scale, TenCrop, ToArray, UniformCrop)
 from .augmentations_ava import *
 from .compose import Compose
 from .decode import FeatureDecoder, FrameDecoder, VideoDecoder
@@ -35,5 +35,5 @@ __all__ = [
     'GroupResize', 'VideoDecoder', 'FrameDecoder', 'PackOutput',
     'GetVideoLabel', 'Cutmix', 'CenterCrop', 'RandomCrop', 'LoadFeat',
     'RandomCap', 'JitterScale', 'Iden', 'VideoMix', 'ColorJitter', 'RandomFlip',
-    'To_tensor', 'FeaturePadding', 'GetMatchMap', 'GroupRandomFlip', 'MultiCrop'
+    'ToArray', 'FeaturePadding', 'GetMatchMap', 'GroupRandomFlip', 'MultiCrop'
 ]
