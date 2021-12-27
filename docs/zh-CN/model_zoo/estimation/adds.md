@@ -99,7 +99,7 @@ Oxford RobotCar dataset数据下载及准备请参考[Oxford RobotCar dataset数
 python3.7 tools/export_model.py -c configs/estimation/adds/adds.yaml -p data/ADDS_car.pdparams -o inference/ADDS
 ```
 
-上述命令将生成预测所需的模型结构文件`ADDS.pdmodel`和模型权重文件`ADDS.pdiparams`以及`ADDS.pdiparams.info`文件，均存放在`inference/ppTSN/`目录下
+上述命令将生成预测所需的模型结构文件`ADDS.pdmodel`和模型权重文件`ADDS.pdiparams`以及`ADDS.pdiparams.info`文件，均存放在`inference/ADDS/`目录下
 
 上述bash命令中各个参数含义可参考[模型推理方法](https://github.com/PaddlePaddle/PaddleVideo/blob/release/2.0/docs/zh-CN/start.md#2-%E6%A8%A1%E5%9E%8B%E6%8E%A8%E7%90%86)
 

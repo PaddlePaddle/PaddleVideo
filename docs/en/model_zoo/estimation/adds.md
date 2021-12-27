@@ -99,7 +99,7 @@ For data download and preparation of Oxford RobotCar dataset, please refer to [O
 python3.7 tools/export_model.py -c configs/estimation/adds/adds.yaml -p data/ADDS_car.pdparams -o inference/ADDS
 ```
 
-The above command will generate the model structure file `ADDS.pdmodel` and model weight files `ADDS.pdiparams` and `ADDS.pdiparams.info` files needed for prediction, all of which are stored in the `inference/ppTSN/` directory
+The above command will generate the model structure file `ADDS.pdmodel` and model weight files `ADDS.pdiparams` and `ADDS.pdiparams.info` files needed for prediction, all of which are stored in the `inference/ADDS/` directory
 
 For the meaning of each parameter in the above bash command, please refer to [Model Inference Method](https://github.com/PaddlePaddle/PaddleVideo/blob/release/2.0/docs/en/start.md#2-%E6%A8%A1%E5%9E%8B%E6%8E%A8%E7%90%86)
 
