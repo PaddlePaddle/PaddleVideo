@@ -8,5 +8,4 @@ av==8.0.3
 scipy==1.6.3
 ffmpeg-python==0.2.0
 paddlenlp
-shutil
 lmdb
