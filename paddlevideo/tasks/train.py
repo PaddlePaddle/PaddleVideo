@@ -181,12 +181,21 @@ def train_model(cfg,
                     outputs = model(data, mode='train')
 
                 avg_loss = outputs['loss']
-                scaled = scaler.scale(avg_loss)
-                scaled.backward()
-                # keep prior to 2.0 design
-                scaler.minimize(optimizer, scaled)
-                optimizer.clear_grad()
-
+                if use_gradient_accumulation:
+                    if i == 0:
+                        optimizer.clear_grad()
+                    avg_loss /= cfg.GRADIENT_ACCUMULATION.num_iters
+                    scaled = scaler.scale(avg_loss)
+                    scaled.backward()
+                    if (i + 1) % cfg.GRADIENT_ACCUMULATION.num_iters == 0:
+                        scaler.minimize(optimizer, scaled)
+                        optimizer.clear_grad()
+                else:
+                    scaled = scaler.scale(avg_loss)
+                    scaled.backward()
+                    # keep prior to 2.0 design
+                    scaler.minimize(optimizer, scaled)
+                    optimizer.clear_grad()
             else:
                 outputs = model(data, mode='train')
 
