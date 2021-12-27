@@ -152,9 +152,7 @@ def train_model_multigrid(cfg, world_size=1, validate=True):
     logger = get_logger("paddlevideo")
     batch_size = cfg.DATASET.get('batch_size', 2)
 
-    if 'use_gpu' in cfg and cfg.use_gpu:
-        places = paddle.set_device('gpu')
-    elif 'use_npu' in cfg and cfg.use_npu:
+    if cfg.get('use_npu'):
         places = paddle.set_device('npu')
     else:
         places = paddle.set_device('gpu')

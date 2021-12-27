@@ -132,8 +132,6 @@ INFERENCE:
 
 
 model_name: "TSN"
-use_gpu: True
-use_npu: False
 log_interval: 20 #Optional, the interal of logger, default:10
 save_interval: 10
 epochs: 100 #Mandatory, total epoch
