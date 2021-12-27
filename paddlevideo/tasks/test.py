@@ -75,6 +75,5 @@ def test_model(cfg, weights, parallel=True):
             Metric.update(batch_id, data, model)
         else:
             outputs = model(data, mode='test')
-
-        Metric.update(batch_id, data, model)
+            Metric.update(batch_id, data, outputs)
     Metric.accumulate()
