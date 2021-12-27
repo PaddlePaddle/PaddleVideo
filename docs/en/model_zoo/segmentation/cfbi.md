@@ -15,7 +15,7 @@
 CFBI is a Video Object Segmentation model proposed by Baidu in ECCV 2020. This method consider background should be equally treated and thus propose Collaborative video object segmentation by Foreground-Background Integration (CFBI) approach. Our CFBI implicitly imposes the feature embedding from the target foreground object and its corresponding background to be contrastive, promoting the segmentation results accordingly.  Given the image and target segmentation of the reference frame (the first frame) and the previous frame, the model will predict the segmentation of the current frame.
 
 <div align="center">
-<img src="../../../images/cfbi.png" height=400 width=500 hspace='10'/> <br />
+<img src="../../../images/cfbi.png" height=400 width=600 hspace='10'/> <br />
 </div>
 
 
