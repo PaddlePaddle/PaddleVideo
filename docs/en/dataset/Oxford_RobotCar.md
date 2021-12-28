@@ -61,7 +61,7 @@ Since we use the self-supervised method, we need to filter out dynamic frames fo
 
 ### 3-Image-Rename
 
-Rename the original image timestamp to a continuous number sequence. For daytime scene correspondence, see *1209_all_files.txt*, for night scene correspondence, see *1216_all_files.txt*. The renamed data format is as follows:
+Rename the original image timestamp to a continuous number sequence. For daytime scene correspondence, see [1209_all_files.txt](https://videotag.bj.bcebos.com/Data/ADDS/1209_all_files.txt), for night scene correspondence, see [1216_all_files.txt](https://videotag.bj.bcebos.com/Data/ADDS/1216_all_files.txt). The renamed data format is as follows:
 ```
 ├── oxford_processing
     ├── day_train_all #Day training image folder (day_train_all.7z.001 ~ day_train_all.7z.012)
