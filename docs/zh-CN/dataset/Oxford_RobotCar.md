@@ -61,7 +61,7 @@
 
 #### 3. 图像重命名
 
-将原始图像时间戳重命名为连续数字序列. 白天场景对应关系见*1209_all_files.txt*, 夜晚场景对应关系见*1216_all_files.txt*. 重命名后的数据格式如下:
+将原始图像时间戳重命名为连续数字序列. 白天场景对应关系见[1209_all_files.txt](https://videotag.bj.bcebos.com/Data/ADDS/1209_all_files.txt), 夜晚场景对应关系见[1216_all_files.txt](https://videotag.bj.bcebos.com/Data/ADDS/1216_all_files.txt). 重命名后的数据格式如下:
 ```
 ├── oxford_processing
     ├── day_train_all      #白天训练图像文件夹 (day_train_all.7z.001 ~ day_train_all.7z.012)
