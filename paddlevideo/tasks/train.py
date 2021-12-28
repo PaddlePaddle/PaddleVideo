@@ -83,8 +83,11 @@ def train_model(cfg,
             f"num_gpus={num_gpus}, "
             f"num_accumulative_iters={cfg.GRADIENT_ACCUMULATION.num_iters}")
 
-    places = paddle.set_device('gpu')
-
+    if cfg.get('use_npu'):
+        places = paddle.set_device('npu')
+    else:
+        places = paddle.set_device('gpu')
+    
     # default num worker: 0, which means no subprocess will be created
     num_workers = cfg.DATASET.get('num_workers', 0)
     valid_num_workers = cfg.DATASET.get('valid_num_workers', num_workers)
