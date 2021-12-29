@@ -32,6 +32,10 @@ def evaluate_model(cfg, weights, parallel=True):
     model = build_model(cfg.MODEL)
     if parallel:
         model = paddle.DataParallel(model)
+        
+    # load trained weights 
+    state_dicts = load(weights)
+    model.set_state_dict(state_dicts)
 
     # 2. Construct dataset and dataloader.
     batch_size = cfg.DATASET.get("valid_batch_size", 8)
