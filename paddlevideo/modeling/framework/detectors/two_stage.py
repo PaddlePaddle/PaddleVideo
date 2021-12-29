@@ -101,21 +101,21 @@ class TwoStageDetector(BaseDetector):
 
         return self.roi_head.simple_test(x, proposals[0], img_metas[0], img_shape, rescale=rescale)
     
-    # 模型推理
     def infer_step(self,data, rescale=False):
+        ''' model inference'''
+        
         img_slow = data[0]
         img_fast = data[1]
         proposals = data[2]
         scores = data[3]
         img_shape = data[4]
 
-        # slowfast模型提取时空特征
+        # using slowfast model to extract spatio-temporal features
         x = self.extract_feat(img=[img_slow,img_fast])
 
         ret = self.roi_head.simple_test(x, proposals[0], scores, img_shape, rescale=rescale)
         return ret
-
-
+    
     def get_unpad_datas(self, data):
         ''' get original datas padded in dataset '''
         pad_proposals=data[2]
