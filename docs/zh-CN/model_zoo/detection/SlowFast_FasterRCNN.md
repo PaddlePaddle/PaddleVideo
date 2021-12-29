@@ -15,7 +15,7 @@
 
 [SlowFast](https://github.com/PaddlePaddle/PaddleVideo/blob/develop/docs/zh-CN/model_zoo/recognition/slowfast.md)模型是视频领域的高精度模型之一，对于动作识别任务，还需要检测出当前画面人物，因此SlowFast_FasterRCNN模型以人的检测结果和视频数据为输入，通过SlowFast模型提取时空特征，然后利用FasterRCNN的head得到画面中每个人的动作和位置。
 
-我们提供了详尽理论及代码讲解，并可使用免费在线GPU算力资源，一键运行的AI Studio Notebook项目，使用链接：[基于SlowFast+FasterRCNN的动作识别](./)
+我们提供了详尽理论及代码讲解，并可使用免费在线GPU算力资源，一键运行的AI Studio Notebook项目，使用链接：[基于SlowFast+FasterRCNN的动作识别](https://aistudio.baidu.com/aistudio/projectdetail/3267637?contributionType=1)
 
 详细内容请参考论文[SlowFast Networks for Video Recognition](https://arxiv.org/pdf/1812.03982.pdf)中AVA Action Detection相关内容。
 
