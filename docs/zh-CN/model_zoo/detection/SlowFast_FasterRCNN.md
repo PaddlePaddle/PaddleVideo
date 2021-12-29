@@ -7,8 +7,8 @@
 - [模型简介](#模型简介)
 - [数据准备](#数据准备)
 - [模型训练](#模型训练)
-- [模型评估](#模型评估)
-- [模型测试](#模型测试)
+- [模型评估](#模型测试)
+- [模型测试](#模型推理)
 
 
 ## 模型简介
@@ -56,16 +56,16 @@ export CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7
 python -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=logdir.ava main.py --validate -w paddle.init_param.pdparams -c configs/detection/ava/ava.yaml
 ```
 
-## 模型评估
+## 模型测试
 
-基于训练好的模型进行评估：
+基于训练好的模型进行测试：
 ```
 python main.py --valid \
    -w output/AVA_SlowFast_FastRcnn/AVA_SlowFast_FastRcnn_best.pdparams \
    -c configs/detection/ava/ava.yaml
 ```
 
-## 模型测试
+## 模型推理
 
 本项目动作识别分成两个阶段，第一个阶段得到人的proposals，然后再输入到SlowFast+FasterRCNN模型中进行动作识别。
 
