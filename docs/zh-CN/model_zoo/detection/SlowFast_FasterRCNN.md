@@ -7,8 +7,8 @@
 - [模型简介](#模型简介)
 - [数据准备](#数据准备)
 - [模型训练](#模型训练)
-- [模型评估](#模型测试)
-- [模型测试](#模型推理)
+- [模型测试](#模型测试)
+- [模型推理](#模型推理)
 
 
 ## 模型简介
@@ -60,7 +60,7 @@ python -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=logdir
 
 基于训练好的模型进行测试：
 ```
-python main.py --valid \
+python main.py --test \
    -w output/AVA_SlowFast_FastRcnn/AVA_SlowFast_FastRcnn_best.pdparams \
    -c configs/detection/ava/ava.yaml
 ```
