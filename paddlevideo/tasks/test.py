@@ -13,11 +13,12 @@
 # limitations under the License.
 
 import paddle
-from paddlevideo.utils import get_logger, load
+from paddlevideo.utils import get_logger, load, build_record,log_batch
 
 from ..loader.builder import build_dataloader, build_dataset
 from ..metrics import build_metric
 from ..modeling.builder import build_model
+import time
 
 logger = get_logger("paddlevideo")
 
@@ -61,12 +62,40 @@ def test_model(cfg, weights, parallel=True):
     state_dicts = load(weights)
     model.set_state_dict(state_dicts)
 
-    # add params to metrics
-    cfg.METRIC.data_size = len(dataset)
-    cfg.METRIC.batch_size = batch_size
+    if cfg.MODEL.framework != "FastRCNN":
+        # add params to metrics
+        cfg.METRIC.data_size = len(dataset)
+        cfg.METRIC.batch_size = batch_size
+        Metric = build_metric(cfg.METRIC)
+    else:
+        Metric = None
+        
+    results = []
+    record_list = build_record(cfg.MODEL)
+    record_list.pop('lr')
+    tic = time.time()
 
-    Metric = build_metric(cfg.METRIC)
     for batch_id, data in enumerate(data_loader):
         outputs = model(data, mode='test')
-        Metric.update(batch_id, data, outputs)
-    Metric.accumulate()
+        if cfg.MODEL.framework == "FastRCNN":
+            results.extend(outputs)
+            record_list['batch_time'].update(time.time() - tic)
+            tic = time.time()
+            ips = "ips: {:.5f} instance/sec.".format(
+                        batch_size / record_list["batch_time"].val)
+            log_batch(record_list, batch_id,0, 0, "test", ips)
+        else:
+            Metric.update(batch_id, data, outputs)
+    
+    if cfg.MODEL.framework == "FastRCNN":
+        if parallel:
+            results = collect_results_cpu(results, len(dataset))
+        if not parallel or (parallel and rank==0):
+            test_res = dataset.evaluate( results) 
+            for name, value in test_res.items():
+                record_list[name].update(value, batch_size)
+        
+        best = record_list["mAP@0.5IOU"].val
+        print(best)
+    else:
+        Metric.accumulate()
