@@ -20,10 +20,6 @@ from .base import BaseMetric
 import time
 
 logger = get_logger("paddlevideo")
-""" An example for metrics class.
-    MultiCropMetric for slowfast.
-"""
-
 
 @METRIC.register
 class AVAMetric(BaseMetric):
