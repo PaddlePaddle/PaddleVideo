@@ -101,6 +101,9 @@ class TwoStageDetector(BaseDetector):
 
         return self.roi_head.simple_test(x, proposals[0], img_metas[0], img_shape, rescale=rescale)
     
+    def test_step(self, data, rescale=False):
+        return self.val_step(data,rescale)
+    
     def infer_step(self,data, rescale=False):
         ''' model inference'''
         
