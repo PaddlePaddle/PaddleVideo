@@ -12,42 +12,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .backbones import ResNet
-from .builder import (build_backbone, build_head, build_recognizer,
-                      build_localizer, build_loss)
-from .heads import BaseHead, TSNHead
-from .losses import CrossEntropyLoss
-from .framework.recognizers import BaseRecognizer, recognizer2d
-from .framework.detectors import BaseDetector, TwoStageDetector, FastRCNN
-from .heads import SingleRoIExtractor3D, AVARoIHead, BBoxHeadAVA
 from .assigners import MaxIoUAssignerAVA
+from .backbones import ResNet
+from .builder import (build_backbone, build_head, build_localizer, build_loss,
+                      build_recognizer)
+from .framework.detectors import BaseDetector, FastRCNN, TwoStageDetector
+from .framework.recognizers import BaseRecognizer, Recognizer2D
+from .heads import (AVARoIHead, BaseHead, BBoxHeadAVA, SingleRoIExtractor3D,
+                    TSNHead)
+from .losses import CrossEntropyLoss
+from .registry import (BACKBONES, DETECTORS, HEADS, LOCALIZERS, LOSSES,
+                       PARTITIONERS, RECOGNIZERS, ROI_EXTRACTORS)
 from .samplers import RandomSampler
-from .registry import BACKBONES, HEADS, LOSSES, RECOGNIZERS, LOCALIZERS, ROI_EXTRACTORS, DETECTORS, PARTITIONERS
-from .weight_init import weight_init_
+from .weight_init import kaiming_normal_, trunc_normal_, weight_init_
 
 __all__ = [
-    'BACKBONES',
-    'HEADS',
-    'RECOGNIZERS',
-    'LOCALIZERS',
-    'PARTITIONERS',
-    'LOSSES',
-    'build_recognizer',
-    'build_localizer',
-    'build_head',
-    'build_backbone',
-    'build_loss',
-    'ResNet',
-    'TSNHead',
-    'BaseHead',
-    'BaseRecognizer',
-    'Recognizer2d',
-    'CrossEntropyLoss',
-    'ROI_EXTRACTORS',
-    'SingleRoIExtractor3D',
-    'AVARoIHead',
-    'BBoxHeadAVA',
-    'MaxIoUAssignerAVA',
-    'RandomSampler',
-    'DETECTORS',
+    'BACKBONES', 'HEADS', 'RECOGNIZERS', 'LOCALIZERS', 'PARTITIONERS', 'LOSSES',
+    'build_recognizer', 'build_localizer', 'build_head', 'build_backbone',
+    'build_loss', 'ResNet', 'TSNHead', 'BaseHead', 'BaseRecognizer',
+    'Recognizer2d', 'CrossEntropyLoss', 'ROI_EXTRACTORS',
+    'SingleRoIExtractor3D', 'AVARoIHead', 'BBoxHeadAVA', 'MaxIoUAssignerAVA',
+    'RandomSampler', 'DETECTORS', 'kaiming_normal_', 'trunc_normal_',
+    'weight_init_'
 ]
