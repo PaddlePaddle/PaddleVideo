@@ -40,6 +40,7 @@ MODEL: #MODEL field
 DATASET: #DATASET field
   batch_size: 10  #single card bacth size
   valid_batch_size: 1
+  test_batch_size: 1 #Optional, test batch size per gpu.
   num_workers: 1 
   train:
     format: "AVADataset" #the Class name of the dataset used by youerself
