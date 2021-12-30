@@ -12,24 +12,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from .adds_head import AddsHead
+from .attention_lstm_head import AttentionLstmHead
 from .base import BaseHead
-from .tsn_head import TSNHead
-from .tsm_head import TSMHead
+from .bbox_head import BBoxHeadAVA
 from .pptsm_head import ppTSMHead
 from .pptsn_head import ppTSNHead
-from .slowfast_head import SlowFastHead
-from .attention_lstm_head import AttentionLstmHead
-from .timesformer_head import TimeSformerHead
-from .stgcn_head import STGCNHead
-from .transnetv2_head import TransNetV2Head
-from .single_straight3d import SingleRoIExtractor3D
 from .roi_head import AVARoIHead
-from .bbox_head import BBoxHeadAVA
+from .single_straight3d import SingleRoIExtractor3D
+from .slowfast_head import SlowFastHead
+from .stgcn_head import STGCNHead
+from .timesformer_head import TimeSformerHead
+from .transnetv2_head import TransNetV2Head
 from .cfbi_head import CollaborativeEnsemblerMS
+from .tsm_head import TSMHead
+from .tsn_head import TSNHead
 
 __all__ = [
     'BaseHead', 'TSNHead', 'TSMHead', 'ppTSMHead', 'ppTSNHead', 'SlowFastHead',
     'AttentionLstmHead', 'TimeSformerHead', 'STGCNHead', 'TransNetV2Head',
-    'SingleRoIExtractor3D', 'AVARoIHead', 'BBoxHeadAVA',
+    'SingleRoIExtractor3D', 'AVARoIHead', 'BBoxHeadAVA', 'AddsHead',
     'CollaborativeEnsemblerMS'
 ]
