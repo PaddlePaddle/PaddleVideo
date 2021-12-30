@@ -13,12 +13,11 @@
 # limitations under the License.
 
 import paddle
-from paddlevideo.utils import get_logger, load, build_record,log_batch
+from paddlevideo.utils import get_logger, load
 
 from ..loader.builder import build_dataloader, build_dataset
 from ..metrics import build_metric
 from ..modeling.builder import build_model
-import time
 
 logger = get_logger("paddlevideo")
 
@@ -45,12 +44,12 @@ def test_model(cfg, weights, parallel=True):
     cfg.DATASET.test.test_mode = True
     dataset = build_dataset((cfg.DATASET.test, cfg.PIPELINE.test))
     batch_size = cfg.DATASET.get("test_batch_size", 8)
-    
+
     if cfg.get('use_npu'):
         places = paddle.set_device('npu')
     else:
         places = paddle.set_device('gpu')
-    
+
     # default num worker: 0, which means no subprocess will be created
     num_workers = cfg.DATASET.get('num_workers', 0)
     num_workers = cfg.DATASET.get('test_num_workers', num_workers)
@@ -67,40 +66,15 @@ def test_model(cfg, weights, parallel=True):
     state_dicts = load(weights)
     model.set_state_dict(state_dicts)
 
-    if cfg.MODEL.framework != "FastRCNN":
-        # add params to metrics
-        cfg.METRIC.data_size = len(dataset)
-        cfg.METRIC.batch_size = batch_size
-        Metric = build_metric(cfg.METRIC)
-    else:
-        Metric = None
-        
-    results = []
-    record_list = build_record(cfg.MODEL)
-    record_list.pop('lr')
-    tic = time.time()
+    # add params to metrics
+    cfg.METRIC.data_size = len(dataset)
+    cfg.METRIC.batch_size = batch_size
+    Metric = build_metric(cfg.METRIC)
+
+    if cfg.MODEL.framework == "FastRCNN":
+        Metric.set_dataset(dataset)
 
     for batch_id, data in enumerate(data_loader):
         outputs = model(data, mode='test')
-        if cfg.MODEL.framework == "FastRCNN":
-            results.extend(outputs)
-            record_list['batch_time'].update(time.time() - tic)
-            tic = time.time()
-            ips = "ips: {:.5f} instance/sec.".format(
-                        batch_size / record_list["batch_time"].val)
-            log_batch(record_list, batch_id,0, 0, "test", ips)
-        else:
-            Metric.update(batch_id, data, outputs)
-    
-    if cfg.MODEL.framework == "FastRCNN":
-        if parallel:
-            results = collect_results_cpu(results, len(dataset))
-        if not parallel or (parallel and rank==0):
-            test_res = dataset.evaluate( results) 
-            for name, value in test_res.items():
-                record_list[name].update(value, batch_size)
-        
-        best = record_list["mAP@0.5IOU"].val
-        print(best)
-    else:
-        Metric.accumulate()
+        Metric.update(batch_id, data, outputs)
+    Metric.accumulate()
