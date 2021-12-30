@@ -278,9 +278,9 @@ class BMNMetric(BaseMetric):
                           "segment":[max(0,df.xmin.values[idx])*video_duration, \
                                      min(1,df.xmax.values[idx])*video_duration]}
                 proposal_list.append(tmp_prop)
+
+            video_name = video_name[2:] if video_name[:2] == 'v_' else video_name
             result_dict[video_name] = proposal_list
-            # name system v_abc
-            #result_dict[video_name[2:]] = proposal_list
 
     def cal_metrics(self,
                     ground_truth_filename,

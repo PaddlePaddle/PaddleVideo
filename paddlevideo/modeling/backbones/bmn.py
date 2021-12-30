@@ -97,12 +97,12 @@ class BMN(paddle.nn.Layer):
 
     def __init__(
         self,
-        feat_dim,
         tscale,
         dscale,
         prop_boundary_ratio,
         num_sample,
         num_sample_perbin,
+        feat_dim=400,
     ):
         super(BMN, self).__init__()
 
