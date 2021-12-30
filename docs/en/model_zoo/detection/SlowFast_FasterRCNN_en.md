@@ -8,6 +8,7 @@
 - [Data](#Data)
 - [Train](#Train)
 - [Test](#Test)
+- [Inference](#Inference)
 
 
 ## Introduction
@@ -55,16 +56,16 @@ export CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7
 python -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=logdir.ava main.py --validate -w paddle.init_param.pdparams -c configs/detection/ava/ava.yaml
 ```
 
-## Evaluate
+## Test
 
-Evaluate model based on the best model:
+Test model based on the best model:
 ```
-python main.py --valid \
+python main.py --test \
    -w output/AVA_SlowFast_FastRcnn/AVA_SlowFast_FastRcnn_best.pdparams \
    -c configs/detection/ava/ava.yaml
 ```
 
-## Test
+## Inference
 
 The action detection of this project is divided into two stages. In the first stage, humans' proposals are obtained, and then input into the SlowFast+FasterRCNN model for action recognition.
 
