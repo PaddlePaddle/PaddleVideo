@@ -106,7 +106,7 @@ PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_githu
     - [基于骨骼的行为识别](docs/zh-CN/model_zoo/README.md)
        - [ST-GCN](docs/zh-CN/model_zoo/recognition/stgcn.md)
        - [AGCN](docs/zh-CN/model_zoo/recognition/agcn.md)
-    - 时空动作检测 <sup>[SlowFast_FasterRCNN](docs/zh_CN/model_zoo/detection/SLowFast_FasterRCNN.md)</sup>
+    - 时空动作检测 <sup>coming soon</sup>
     - ActBERT: 自监督多模态视频文字学习<sup>coming soon</sup>
 - 项目实战
     - [PP-TSM实践](docs/zh-CN/tutorials/pp-tsm.md)
