@@ -99,6 +99,7 @@ class BMNMetric(BaseMetric):
     (1) Get test results using trained model, results will be saved in BMNMetric.result_path;
     (2) Calculate metrics using results file from stage (1).
     """
+
     def __init__(self,
                  data_size,
                  batch_size,
@@ -250,7 +251,9 @@ class BMNMetric(BaseMetric):
         outfile = open(
             os.path.join(result_path, "bmn_results_%s.json" % subset), "w")
 
-        json.dump(output_dict, outfile)
+        # json.dump(output_dict, outfile)
+        # in case of file name in chinese
+        json.dump(output_dict, outfile, ensure_ascii=False)
         outfile.close()
 
     def video_process(self,
@@ -275,7 +278,9 @@ class BMNMetric(BaseMetric):
                           "segment":[max(0,df.xmin.values[idx])*video_duration, \
                                      min(1,df.xmax.values[idx])*video_duration]}
                 proposal_list.append(tmp_prop)
-            result_dict[video_name[2:]] = proposal_list
+
+            video_name = video_name[2:] if video_name[:2] == 'v_' else video_name
+            result_dict[video_name] = proposal_list
 
     def cal_metrics(self,
                     ground_truth_filename,
