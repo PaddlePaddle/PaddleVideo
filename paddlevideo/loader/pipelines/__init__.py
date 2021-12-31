@@ -27,6 +27,7 @@ from .multimodal import FeaturePadding, RandomCap, RandomMask, Tokenize
 from .sample import Sampler
 from .sample_ava import *
 from .skeleton_pipeline import AutoPadding, Iden, SkeletonNorm
+from .decode_sampler_MRI import SFMRI_DecodeSampler
 
 __all__ = [
     'ImageDecoder', 'RandomMask', 'UniformCrop', 'SkeletonNorm', 'Tokenize',
@@ -35,5 +36,6 @@ __all__ = [
     'GroupResize', 'VideoDecoder', 'FrameDecoder', 'PackOutput',
     'GetVideoLabel', 'Cutmix', 'CenterCrop', 'RandomCrop', 'LoadFeat',
     'RandomCap', 'JitterScale', 'Iden', 'VideoMix', 'ColorJitter', 'RandomFlip',
-    'ToArray', 'FeaturePadding', 'GetMatchMap', 'GroupRandomFlip', 'MultiCrop'
+    'ToArray', 'FeaturePadding', 'GetMatchMap', 'GroupRandomFlip', 'MultiCrop',
+    'SFMRI_DecodeSampler'
 ]

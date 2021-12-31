@@ -1,0 +1,102 @@
+
+MODEL: #MODEL field
+    framework: "Recognizer3DMRI"
+    backbone:
+        name: "ResNetSlowFast_MRI"
+        depth: 50 # Not Optional, only 50 now.
+        alpha: 8
+        beta: 8
+        width_per_group: 64
+        fusion_kernel_sz: 5
+    head:
+        name: "SlowFastHead"
+        width_per_group: 64
+        alpha: 8
+        beta: 8
+        num_classes: 2
+        num_frames: 32
+        crop_size: 224  #independent to test or train mode
+        dropout_rate: 0.5
+
+
+DATASET: #DATASET field
+    batch_size: 16 #Mandatory, bacth size
+    test_batch_size: 1
+    num_workers: 0 #Mandatory, XXX the number of subprocess on each GPU.
+    train:
+        format: "SFMRIDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
+        data_prefix: "" #Mandatory, train data root path
+        file_path: "/home/aistudio/train.txt" #Mandatory, train data index file path
+
+    valid:
+        format: "SFMRIDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
+        data_prefix: "" #Mandatory, valid data root path
+        file_path: "/home/aistudio/test.txt" #Mandatory, valid data index file path
+
+    test:
+        format: "SFMRIDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
+        data_prefix: "" #Mandatory, valid data root path
+        file_path: "/home/aistudio/test.txt" #Mandatory, valid data index file path
+
+
+PIPELINE: #PIPELINE field
+    train: #Mandotary, indicate the pipeline to deal with the training data, associate to the 'paddlevideo/loader/pipelines/'
+        decode_sampler_MRI:
+            name: "SFMRI_DecodeSampler"
+            num_seg: [4,32]
+            seg_len: 1
+            valid_mode: False
+            select_left: True
+
+    valid: #Mandatory, indicate the pipeline to deal with the validing data. associate to the 'paddlevideo/loader/pipelines/'
+        decode_sampler_MRI:
+            name: "SFMRI_DecodeSampler"
+            num_seg: [4,32]
+            seg_len: 1
+            valid_mode: True
+            select_left: True
+    test:
+        decode_sampler_MRI:
+            name: "SFMRI_DecodeSampler"
+            num_seg: [4,32]
+            seg_len: 1
+            valid_mode: True
+            select_left: True
+
+OPTIMIZER: #OPTIMIZER field
+    name: 'Momentum'
+    momentum: 0.9
+    learning_rate:
+        iter_step: True
+        name: 'CustomWarmupCosineDecay'
+        max_epoch: 196
+        warmup_epochs: 34
+        warmup_start_lr: 0.01
+        cosine_base_lr: 0.1
+    weight_decay:
+        name: 'L2'
+        value: 1e-4
+    use_nesterov: True
+
+METRIC:
+    name: 'MultiCropMetric'
+    num_ensemble_views: 10
+    num_spatial_crops: 3
+    num_classes: 2
+
+PRECISEBN:
+    preciseBN_interval: 10
+    num_iters_preciseBN: 200  #default
+
+
+INFERENCE:
+    name: 'SlowFast_Inference_helper'
+    num_frames: 32
+    alpha: 8
+    target_size: 224
+
+model_name: SlowFast_MRI
+save_interval: 10
+val_interval: 10
+epochs: 50 #Mandatory, total epoch
+log_level: "INFO"

@@ -17,6 +17,8 @@ import random
 
 import numpy as np
 from PIL import Image
+import SimpleITK as sitk
+import cv2
 
 from ..registry import PIPELINES
 
@@ -59,6 +61,16 @@ class Sampler(object):
                     os.path.join(frame_dir,
                                  results['suffix'].format(idx))).convert('RGB')
                 imgs.append(img)
+
+        elif data_format == "MRI":
+            frame_dir = results['frame_dir']
+            imgs = []
+            MRI = sitk.GetArrayFromImage(sitk.ReadImage(frame_dir))
+            for idx in frames_idx:
+                item = MRI[idx]
+                item = cv2.resize(item, (224, 224))
+                imgs.append(item)
+
         elif data_format == "video":
             if results['backend'] == 'cv2':
                 frames = np.array(results['frames'])
@@ -112,6 +124,10 @@ class Sampler(object):
                 frames_idx = [x % frames_len for x in frames_idx]
             elif results['format'] == 'frame':
                 frames_idx = list(offsets + 1)
+
+            elif results['format'] == 'MRI':
+                frames_idx = list(offsets)
+
             else:
                 raise NotImplementedError
             return self._get(frames_idx, results)
@@ -164,6 +180,9 @@ class Sampler(object):
                             frames_idx.append(int(jj % frames_len))
                         elif results['format'] == 'frame':
                             frames_idx.append(jj + 1)
+
+                        elif results['format'] == 'MRI':
+                            frames_idx.append(jj)
                         else:
                             raise NotImplementedError
 
@@ -195,6 +214,10 @@ class Sampler(object):
                 frames_idx = [x % frames_len for x in frames_idx]
             elif results['format'] == 'frame':
                 frames_idx = list(offsets + 1)
+
+            elif results['format'] == 'MRI':
+                frames_idx = list(offsets)
+
             else:
                 raise NotImplementedError
 

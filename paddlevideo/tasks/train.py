@@ -87,7 +87,7 @@ def train_model(cfg,
         places = paddle.set_device('npu')
     else:
         places = paddle.set_device('gpu')
-    
+
     # default num worker: 0, which means no subprocess will be created
     num_workers = cfg.DATASET.get('num_workers', 0)
     valid_num_workers = cfg.DATASET.get('valid_num_workers', num_workers)
@@ -111,6 +111,7 @@ def train_model(cfg,
                                     places=places)
 
     train_loader = build_dataloader(train_dataset, **train_dataloader_setting)
+
     if validate:
         valid_dataset = build_dataset((cfg.DATASET.valid, cfg.PIPELINE.valid))
         validate_dataloader_setting = dict(
