@@ -15,6 +15,7 @@
 from .actbert_dataset import ActBertDataset
 from .ava_dataset import AVADataset
 from .bmn_dataset import BMNDataset
+from .davis_dataset import DavisDataset
 from .feature import FeatureDataset
 from .frame import FrameDataset
 from .msrvtt import MSRVTTDataset
@@ -26,5 +27,5 @@ from .video import VideoDataset
 __all__ = [
     'VideoDataset', 'FrameDataset', 'SFVideoDataset', 'BMNDataset',
     'FeatureDataset', 'SkeletonDataset', 'AVADataset', 'MonoDataset',
-    'MSRVTTDataset', 'ActBertDataset'
+    'MSRVTTDataset', 'ActBertDataset', 'DavisDataset'
 ]

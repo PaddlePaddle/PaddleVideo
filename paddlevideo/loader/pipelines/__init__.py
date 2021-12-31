@@ -26,6 +26,7 @@ from .mix import Cutmix, Mixup, VideoMix
 from .multimodal import FeaturePadding, RandomCap, RandomMask, Tokenize
 from .sample import Sampler
 from .sample_ava import *
+from .segmentation import MultiRestrictSize, MultiNorm
 from .skeleton_pipeline import AutoPadding, Iden, SkeletonNorm
 
 __all__ = [
@@ -35,5 +36,6 @@ __all__ = [
     'GroupResize', 'VideoDecoder', 'FrameDecoder', 'PackOutput',
     'GetVideoLabel', 'Cutmix', 'CenterCrop', 'RandomCrop', 'LoadFeat',
     'RandomCap', 'JitterScale', 'Iden', 'VideoMix', 'ColorJitter', 'RandomFlip',
-    'ToArray', 'FeaturePadding', 'GetMatchMap', 'GroupRandomFlip', 'MultiCrop'
+    'ToArray', 'FeaturePadding', 'GetMatchMap', 'GroupRandomFlip', 'MultiCrop',
+    'MultiRestrictSize', 'MultiNorm'
 ]
