@@ -24,9 +24,10 @@ from .agcn import AGCN
 from .transnetv2 import TransNetV2
 from .actbert import BertForMultiModalPreTraining
 from .vit_tweaks import VisionTransformer_tweaks
+from .ms_tcn import MSTCN
 
 __all__ = [
     'ResNet', 'ResNetTSM', 'ResNetTweaksTSM', 'ResNetSlowFast', 'BMN',
     'ResNetTweaksTSN', 'VisionTransformer', 'STGCN', 'AGCN', 'TransNetV2',
-    'BertForMultiModalPreTraining', 'VisionTransformer_tweaks'
+    'BertForMultiModalPreTraining', 'VisionTransformer_tweaks', 'MSTCN'
 ]

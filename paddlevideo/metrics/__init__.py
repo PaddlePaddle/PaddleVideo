@@ -21,9 +21,10 @@ from .skeleton_metric import SkeletonMetric
 from .youtube8m.eval_util import HitOneMetric
 from .transnetv2_metric import TransNetV2Metric
 from .msrvtt_metric import MSRVTTMetric
+from .segmentation_metric import SegmentationMetric
 
 __all__ = [
     'METRIC', 'build_metric', 'MultiCropMetric', 'BMNMetric',
     'CenterCropMetric', 'SkeletonMetric', 'HitOneMetric', 'TransNetV2Metric',
-    'MSRVTTMetric'
+    'MSRVTTMetric', 'SegmentationMetric'
 ]

@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .registry import BACKBONES, HEADS, LOSSES, RECOGNIZERS, LOCALIZERS, ROI_EXTRACTORS, DETECTORS, BBOX_ASSIGNERS, BBOX_SAMPLERS, BBOX_CODERS, PARTITIONERS, MULTIMODAL
+from .registry import BACKBONES, HEADS, LOSSES, RECOGNIZERS, LOCALIZERS, ROI_EXTRACTORS, DETECTORS, BBOX_ASSIGNERS, BBOX_SAMPLERS, BBOX_CODERS, PARTITIONERS, MULTIMODAL, SEGMENTERS
 from ..utils import build
 
 
@@ -66,6 +66,11 @@ def build_recognizer(cfg):
     return build(cfg, RECOGNIZERS, key='framework')
 
 
+def build_segmenter(cfg):
+    """Build segmenter."""
+    return build(cfg, SEGMENTERS, key='framework')
+
+
 def build_localizer(cfg):
     """Build localizer."""
     return build(cfg, LOCALIZERS, key='framework')
@@ -99,5 +104,7 @@ def build_model(cfg):
         return build_detector(cfg)
     elif framework_type in MULTIMODAL:
         return build_multimodal(cfg)
+    elif framework_type in SEGMENTERS:
+        return build_segmenter(cfg)
     else:
         raise NotImplementedError

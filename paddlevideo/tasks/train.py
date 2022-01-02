@@ -28,6 +28,7 @@ from paddlevideo.utils import (add_profiler_step, build_record, get_logger,
 
 from ..loader.builder import build_dataloader, build_dataset
 from ..modeling.builder import build_model
+from ..metrics import build_metric
 from ..solver import build_lr, build_optimizer
 from ..utils import do_preciseBN
 from paddlevideo.utils import get_logger
@@ -36,8 +37,11 @@ from paddlevideo.utils import (build_record, log_batch, log_epoch, save, load,
 import sys
 import numpy as np
 from pathlib import Path
-paddle.framework.seed(1234)
-np.random.seed(1234)
+
+paddle.framework.seed(1538574472)
+paddle.seed(1538574472)
+np.random.seed(1538574472)
+
 
 def train_model(cfg,
                 weights=None,
@@ -128,6 +132,12 @@ def train_model(cfg,
         )
         valid_loader = build_dataloader(valid_dataset,
                                         **validate_dataloader_setting)
+        cfg.METRIC.data_size = len(valid_dataset)
+        cfg.METRIC.batch_size = batch_size
+        cfg.METRIC.log_interval = cfg.log_interval
+        # build metric
+        if cfg.METRIC.name == "SegmentationMetric":
+            Metric = build_metric(cfg.METRIC)
 
     # 3. Construct solver.
     lr = build_lr(cfg.OPTIMIZER.learning_rate, len(train_loader))
@@ -252,14 +262,17 @@ def train_model(cfg,
             #single_gpu_test and multi_gpu_test
             for i, data in enumerate(valid_loader):
                 outputs = model(data, mode='valid')
+
+                if cfg.METRIC.name == "SegmentationMetric":
+                    Metric.update(i, data, outputs)
+
                 if cfg.MODEL.framework == "FastRCNN":
                     results.extend(outputs)
 
                 #log_record
-                if cfg.MODEL.framework != "FastRCNN":
+                if cfg.MODEL.framework != "FastRCNN" and cfg.METRIC.name != "SegmentationMetric":
                     for name, value in outputs.items():
                         record_list[name].update(value, batch_size)
- 
 
                 record_list['batch_time'].update(time.time() - tic)
                 tic = time.time()
@@ -271,11 +284,10 @@ def train_model(cfg,
             if cfg.MODEL.framework == "FastRCNN":
                 if parallel:
                     results = collect_results_cpu(results, len(valid_dataset))
-                if not parallel or (parallel and rank==0):
-                    eval_res = valid_dataset.evaluate( results) 
+                if not parallel or (parallel and rank == 0):
+                    eval_res = valid_dataset.evaluate(results)
                     for name, value in eval_res.items():
                         record_list[name].update(value, valid_batch_size)
-
 
             ips = "avg_ips: {:.5f} instance/sec.".format(
                 valid_batch_size * record_list["batch_time"].count /
@@ -283,9 +295,10 @@ def train_model(cfg,
             log_epoch(record_list, epoch + 1, "val", ips)
 
             best_flag = False
-            if cfg.MODEL.framework == "FastRCNN" and (not parallel or (parallel and rank==0)):
+            if cfg.MODEL.framework == "FastRCNN" and (not parallel or
+                                                      (parallel and rank == 0)):
                 if record_list["mAP@0.5IOU"].val > best:
-                    best = record_list["mAP@0.5IOU"].val 
+                    best = record_list["mAP@0.5IOU"].val
                     best_flag = True
                 return best, best_flag
             #best2, cfg.MODEL.framework != "FastRCNN":
@@ -294,7 +307,8 @@ def train_model(cfg,
                         top_flag) and record_list[top_flag].avg > best:
                     best = record_list[top_flag].avg
                     best_flag = True
-
+            if cfg.METRIC.name == "SegmentationMetric":
+                Metric.accumulate()
             return best, best_flag
 
         # use precise bn to improve acc

@@ -22,6 +22,7 @@ from .decode_sampler import DecodeSampler
 from .mix import Cutmix, Mixup, VideoMix
 from .sample import Sampler
 from .skeleton_pipeline import AutoPadding, Iden, SkeletonNorm
+from .segmentation_pipline import SegmentationSampler
 from .augmentations_ava import *
 from .sample_ava import *
 from .multimodal import FeaturePadding, RandomCap, Tokenize, RandomMask
@@ -32,5 +33,6 @@ __all__ = [
     'Mixup', 'Cutmix', 'JitterScale', 'MultiCrop', 'PackOutput', 'TenCrop',
     'UniformCrop', 'DecodeSampler', 'LoadFeat', 'GetMatchMap', 'GetVideoLabel',
     'AutoPadding', 'SkeletonNorm', 'Iden', 'VideoMix', 'FeatureDecoder',
-    'FeaturePadding', 'RandomCap', 'Tokenize', 'RandomMask'
+    'FeaturePadding', 'RandomCap', 'Tokenize', 'RandomMask',
+    'SegmentationSampler'
 ]

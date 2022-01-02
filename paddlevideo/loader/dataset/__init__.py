@@ -21,9 +21,12 @@ from .skeleton import SkeletonDataset
 from .ava_dataset import AVADataset
 from .msrvtt import MSRVTTDataset
 from .actbert_dataset import ActBertDataset
+from .fiftysalads import FiftySaladsDataset
+from .breakfast import BreakfastDataset
+from .gtea import GteaDataset
 
 __all__ = [
     'VideoDataset', 'FrameDataset', 'SFVideoDataset', 'BMNDataset',
     'FeatureDataset', 'SkeletonDataset', 'AVADataset', 'MSRVTTDataset',
-    'ActBertDataset'
+    'ActBertDataset', 'FiftySaladsDataset', 'BreakfastDataset', 'GteaDataset'
 ]

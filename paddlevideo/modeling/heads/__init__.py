@@ -25,9 +25,10 @@ from .transnetv2_head import TransNetV2Head
 from .single_straight3d import SingleRoIExtractor3D
 from .roi_head import AVARoIHead
 from .bbox_head import BBoxHeadAVA
+from .ms_tcn_head import MSTCNHead
 
 __all__ = [
     'BaseHead', 'TSNHead', 'TSMHead', 'ppTSMHead', 'ppTSNHead', 'SlowFastHead',
     'AttentionLstmHead', 'TimeSformerHead', 'STGCNHead', 'TransNetV2Head',
-    'SingleRoIExtractor3D', 'AVARoIHead', 'BBoxHeadAVA'
+    'SingleRoIExtractor3D', 'AVARoIHead', 'BBoxHeadAVA', 'MSTCNHead'
 ]

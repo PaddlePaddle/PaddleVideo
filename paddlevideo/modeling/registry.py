@@ -17,6 +17,7 @@ from ..utils import Registry
 BACKBONES = Registry('backbone')
 HEADS = Registry('head')
 RECOGNIZERS = Registry('recognizer')
+SEGMENTERS = Registry('Segmenters')
 LOCALIZERS = Registry('localizer')
 PARTITIONERS = Registry('partitioner')
 LOSSES = Registry('loss')
