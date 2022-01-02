@@ -20,6 +20,7 @@ from ..registry import HEADS
 from ..weight_init import weight_init_
 import paddle.nn.functional as F
 
+
 @HEADS.register()
 class TSNHead(BaseHead):
     """TSN Head.
@@ -66,7 +67,7 @@ class TSNHead(BaseHead):
                      mean=0.,
                      std=self.std)
 
-    def forward(self, x, seg_num):
+    def forward(self, x, num_seg):
         """Define how the head is going to run.
 
         Args:
@@ -83,9 +84,9 @@ class TSNHead(BaseHead):
         # [N * num_segs, in_channels, 1, 1]
         if self.dropout is not None:
             x = self.dropout(x)
-        # [N * seg_num, in_channels, 1, 1]
-        x = paddle.reshape(x, [-1, seg_num, x.shape[1]])
-        # [N, seg_num, in_channels]
+        # [N * num_seg, in_channels, 1, 1]
+        x = paddle.reshape(x, [-1, num_seg, x.shape[1]])
+        # [N, num_seg, in_channels]
         x = paddle.mean(x, axis=1)
         # [N, 1, in_channels]
         x = paddle.reshape(x, shape=[-1, self.in_channels])

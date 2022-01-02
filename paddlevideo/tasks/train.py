@@ -127,9 +127,7 @@ def train_model(cfg,
 
     # 3. Construct solver.
     lr = build_lr(cfg.OPTIMIZER.learning_rate, len(train_loader))
-    optimizer = build_optimizer(cfg.OPTIMIZER,
-                                lr,
-                                parameter_list=model.parameters())
+    optimizer = build_optimizer(cfg.OPTIMIZER, lr, model=model)
     if use_fleet:
         optimizer = fleet.distributed_optimizer(optimizer)
     # Resume

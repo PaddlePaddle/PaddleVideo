@@ -13,7 +13,7 @@
 - 数据：视频解码耗时。mp4/mkv等视频文件都是经过encode后的压缩文件，通过需要经过解码和抽帧步骤才能得到原始的图像数据流，之后经过图像变换/增强操作才能将其喂入网络进行训练。如果视频帧数多，解码过程极其耗时。
 - 模型：视频任务使用的模型通常有更大的参数量与计算量。为学习时序特征，视频模型一般会使用3D卷积核/(2+1)D/双流网络，这都会使得模型的参数量与计算量大大增加。
 
-本教程介绍如下视频模型训练加速方法: 
+本教程介绍如下视频模型训练加速方法:
 
 - 模型上，通过op融合或混合精度训练的方式提升op运算效率
 - 数据上，通过多进程或者并行计算的方式加速数据读取速度
@@ -59,7 +59,7 @@ otl = []
 input = paddle.randn(SHAPE)
 for i in range(10000):
     t1 = time.time()
-    out1 = F.temporal_shift(x=input, seg_num=2, shift_ratio=0.2)
+    out1 = F.temporal_shift(x=input, num_seg=2, shift_ratio=0.2)
     t2 = time.time()
     ot = t2 - t1
     if i > 1000:
@@ -77,15 +77,15 @@ import paddle.nn.functional as F
 SHAPE = [32, 16, 32, 32]
 #SHAPE = [128, 64, 128, 128]
 
-def temporal_shift(x, seg_num, shift_ratio):
+def temporal_shift(x, num_seg, shift_ratio):
     shape = x.shape #[N*T, C, H, W]
-    reshape_x = x.reshape((-1, seg_num, shape[1], shape[2], shape[3])) #[N, T, C, H, W]
+    reshape_x = x.reshape((-1, num_seg, shape[1], shape[2], shape[3])) #[N, T, C, H, W]
     pad_x = paddle.fluid.layers.pad(reshape_x, [0,0,1,1,0,0,0,0,0,0,]) #[N, T+2, C, H, W]
     c1 = int(shape[1] * shift_ratio)
     c2 = int(shape[1] * 2 * shift_ratio)
-    slice1 = pad_x[:, :seg_num, :c1, :, :]
-    slice2 = pad_x[:, 2:seg_num+2, c1:c2, :, :]
-    slice3 = pad_x[:, 1:seg_num+1, c2:, :, :]
+    slice1 = pad_x[:, :num_seg, :c1, :, :]
+    slice2 = pad_x[:, 2:num_seg+2, c1:c2, :, :]
+    slice3 = pad_x[:, 1:num_seg+1, c2:, :, :]
     concat_x = paddle.concat([slice1, slice2, slice3], axis=2) #[N, T, C, H, W]
     return concat_x.reshape(shape)
 
@@ -93,7 +93,7 @@ ctl = []
 input = paddle.randn(SHAPE)
 for i in range(10000):
     t2 = time.time()
-    out2 = temporal_shift(x=input, seg_num=2, shift_ratio=0.2)
+    out2 = temporal_shift(x=input, num_seg=2, shift_ratio=0.2)
     t3 = time.time()
     ct = t3 - t2
     if i > 1000:
@@ -104,7 +104,7 @@ print("combine time: ", sum(ctl)/len(ctl))
 性能数据如下:
 
 | 输入tensor形状 | 实现方式 | 显存占用/M| 计算时间/s | 加速比 |
-| :------ | :-----: | :------: | :------: | :------: | 
+| :------ | :-----: | :------: | :------: | :------: |
 | 32\*16\*32\*32 |op组合方式 | 1074 | 0.00029325 |  baseline |
 | 32\*16\*32\*32 | temporal shift op | 1058 | 0.000045770 | **6.4x** |
 | 128\*64\*128\*128 |op组合方式 | 5160 | 0.0099088 |  baseline |
@@ -140,7 +140,7 @@ Comming soon~
 性能测试数据如下:
 
 | 解码库 | 版本 | pipeline处理每条视频的平均时间/s | 加速比 |
-| :------ | :-----: | :------: | :------: | 
+| :------ | :-----: | :------: | :------: |
 | opencv | 4.2.0 | 0.20965035 | baseline |
 | decord | 0.4.2 | 0.13788146 |  **1.52x** |
 
@@ -158,7 +158,7 @@ Comming soon~
 | 单卡 | 0 | 1.763 | 4.53887 | 单卡baseline |
 | 单卡 | 4 | 0.578 | 13.83729 | **3.04x** |
 | 4卡 | 0 | 1.866 | 4.28733 | 多卡baseline |
-| 4卡 | 4 | 0.615 | 13.00625 | **3.03x** | 
+| 4卡 | 4 | 0.615 | 13.00625 | **3.03x** |
 
 其中ips = batch_size/batch_cost，即为训练一个instance(一个video)的平均耗时。
 
@@ -168,7 +168,7 @@ Comming soon~
 
 既然GPU等待CPU进行数据处理耗时，能否把数据处理放到GPU上呢？[NVIDIA DALI](https://docs.nvidia.com/deeplearning/dali/user-guide/docs/)将数据预处理pipeline转移到GPU上执行，可以显著提升训练速度。针对视频文件，DALI提供`VideoReader`op进行解码抽帧操作，但目前其仅支持连续采样的方式进行抽帧。而视频领域常用的2D模型TSN或TSM，它们均采用分段采样方式，即把视频均匀分成N段segument，然后在每个segument内随机选取一帧，最后把选取的帧组合作为输入张量。为此，我们基于DALI进行了二次开发，实现了支持分段采样方式的`VideoReader`op。为方便用户使用，我们提供了配置好的docker运行环境，具体使用方法参考[TSN-DALI使用教程](https://github.com/PaddlePaddle/PaddleVideo/blob/main/docs/zh-CN/model_zoo/recognition/tsn_dali.md)。
 
-测试环境: 
+测试环境:
 ```
 机器: Tesla v100
 显存: 4卡16G
@@ -200,7 +200,7 @@ Cuda: 9.0
 
 # 训练策略加速
 
-前述方法大多从工程的角度思考训练速度的提升，在算法策略上，FAIR在CVPR 2020中提出了[Multigrid加速策略算法](https://arxiv.org/abs/1912.00998)，它的基本思想如下: 
+前述方法大多从工程的角度思考训练速度的提升，在算法策略上，FAIR在CVPR 2020中提出了[Multigrid加速策略算法](https://arxiv.org/abs/1912.00998)，它的基本思想如下:
 
 在图像分类任务中，若经过预处理后图像的高度和宽度分别为H和W，batch_size为N，则网络输入batch的Tensor形状为`[N, C, H, W]`，其中C等于3，指RGB三个通道。
 对应到视频任务，由于增加了时序通道，输入batch的Tensor形状为`[N, C, T, H, W]`。
@@ -220,7 +220,7 @@ Cuda: 9.0
 
 我们基于飞桨实现了Multigrid训练加速策略，对SlowFast模型训练进行加速，使用方法请参考文档[SlowFast训练加速](https://github.com/PaddlePaddle/PaddleVideo/blob/develop/docs/zh-CN/model_zoo/recognition/slowfast.md#%E8%AE%AD%E7%BB%83%E5%8A%A0%E9%80%9F)。
 
-测试环境: 
+测试环境:
 ```
 机器: Tesla v100
 显存: 8卡32G
@@ -237,6 +237,6 @@ Paddle版本: 2.0-rc0
 | Multigrid | 27.25 |  9758(6.7天) | 2.89x |
 | Normal | 78.76 | 15438(10.7天) | base |
 
-# 分布式训练 
+# 分布式训练
 
 Comming soon~

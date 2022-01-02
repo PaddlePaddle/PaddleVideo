@@ -70,9 +70,9 @@ class Sampler(object):
                     img = Image.fromarray(imgbuf, mode='RGB')
                     imgs.append(img)
             elif results['backend'] == 'decord':
-                vr = results['frames']
+                container = results['frames']
                 if self.use_pil:
-                    frames_select = vr.get_batch(frames_idx)
+                    frames_select = container.get_batch(frames_idx)
                     # dearray_to_img
                     np_frames = frames_select.asnumpy()
                     imgs = []
@@ -80,8 +80,10 @@ class Sampler(object):
                         imgbuf = np_frames[i]
                         imgs.append(Image.fromarray(imgbuf, mode='RGB'))
                 else:
+                    if frames_idx.ndim != 1:
+                        frames_idx = np.squeeze(frames_idx)
                     frame_dict = {
-                        idx: vr[idx].asnumpy()
+                        idx: container[idx].asnumpy()
                         for idx in np.unique(frames_idx)
                     }
                     imgs = [frame_dict[idx] for idx in frames_idx]
@@ -100,32 +102,32 @@ class Sampler(object):
         return results
 
     def _get_train_clips(self, num_frames):
-        ori_num_seg = self.num_seg * self.frame_interval
-        avg_interval = (num_frames - ori_num_seg + 1) // self.seg_len
+        ori_seg_len = self.seg_len * self.frame_interval
+        avg_interval = (num_frames - ori_seg_len + 1) // self.num_seg
 
         if avg_interval > 0:
-            base_offsets = np.arange(self.seg_len) * avg_interval
+            base_offsets = np.arange(self.num_seg) * avg_interval
             clip_offsets = base_offsets + np.random.randint(avg_interval,
-                                                            size=self.seg_len)
-        elif num_frames > max(self.seg_len, ori_num_seg):
+                                                            size=self.num_seg)
+        elif num_frames > max(self.num_seg, ori_seg_len):
             clip_offsets = np.sort(
-                np.random.randint(num_frames - ori_num_seg + 1,
-                                  size=self.seg_len))
+                np.random.randint(num_frames - ori_seg_len + 1,
+                                  size=self.num_seg))
         elif avg_interval == 0:
-            ratio = (num_frames - ori_num_seg + 1.0) / self.seg_len
-            clip_offsets = np.around(np.arange(self.seg_len) * ratio)
+            ratio = (num_frames - ori_seg_len + 1.0) / self.num_seg
+            clip_offsets = np.around(np.arange(self.num_seg) * ratio)
         else:
-            clip_offsets = np.zeros((self.seg_len, ), dtype=np.int)
+            clip_offsets = np.zeros((self.num_seg, ), dtype=np.int)
         return clip_offsets
 
     def _get_test_clips(self, num_frames):
-        ori_num_seg = self.num_seg * self.frame_interval
-        avg_interval = (num_frames - ori_num_seg + 1) / float(self.seg_len)
-        if num_frames > ori_num_seg - 1:
-            base_offsets = np.arange(self.seg_len) * avg_interval
+        ori_seg_len = self.seg_len * self.frame_interval
+        avg_interval = (num_frames - ori_seg_len + 1) / float(self.num_seg)
+        if num_frames > ori_seg_len - 1:
+            base_offsets = np.arange(self.num_seg) * avg_interval
             clip_offsets = (base_offsets + avg_interval / 2.0).astype(np.int)
         else:
-            clip_offsets = np.zeros((self.seg_len, ), dtype=np.int)
+            clip_offsets = np.zeros((self.num_seg, ), dtype=np.int)
         return clip_offsets
 
     def __call__(self, results):
@@ -145,12 +147,15 @@ class Sampler(object):
                 offsets = self._get_test_clips(frames_len)
 
             offsets = offsets[:, None] + np.arange(
-                self.num_seg)[None, :] * self.frame_interval
+                self.seg_len)[None, :] * self.frame_interval
+            offsets = np.concatenate(offsets)
+
+            offsets = offsets.reshape((-1, self.seg_len))
+            offsets = np.mod(offsets, frames_len)
             offsets = np.concatenate(offsets)
 
             if results['format'] == 'video':
-                frames_idx = list(offsets)
-                frames_idx = [x % frames_len for x in frames_idx]
+                frames_idx = offsets
             elif results['format'] == 'frame':
                 frames_idx = list(offsets + 1)
             else:
@@ -200,7 +205,6 @@ class Sampler(object):
                         ]
                     frames_idx = offsets
             else:
-                average_dur = int(frames_len / self.num_seg)
                 for i in range(self.num_seg):
                     idx = 0
                     if not self.valid_mode:
@@ -226,7 +230,6 @@ class Sampler(object):
                             frames_idx.append(jj + 1)
                         else:
                             raise NotImplementedError
-
             return self._get(frames_idx, results)
 
         else:  # for TSM

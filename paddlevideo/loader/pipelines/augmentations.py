@@ -21,6 +21,7 @@ import numpy as np
 import paddle
 import paddle.nn.functional as F
 from PIL import Image
+from sympy import Not
 
 from ..registry import PIPELINES
 
@@ -234,9 +235,10 @@ class CenterCrop(object):
         target_size(int): Center crop a square with the target_size from an image.
         do_round(bool): Whether to round up the coordinates of the upper left corner of the cropping area. default: True
     """
-    def __init__(self, target_size, do_round=True):
+    def __init__(self, target_size, do_round=True, backend='pillow'):
         self.target_size = target_size
         self.do_round = do_round
+        self.backend = backend
 
     def __call__(self, results):
         """
@@ -249,15 +251,31 @@ class CenterCrop(object):
         """
         imgs = results['imgs']
         ccrop_imgs = []
-        for img in imgs:
-            w, h = img.size
-            th, tw = self.target_size, self.target_size
-            assert (w >= self.target_size) and (h >= self.target_size), \
-                "image width({}) and height({}) should be larger than crop size".format(
-                    w, h, self.target_size)
+        th, tw = self.target_size, self.target_size
+        if isinstance(imgs, paddle.Tensor):
+            h, w = imgs.shape[-2:]
             x1 = int(round((w - tw) / 2.0)) if self.do_round else (w - tw) // 2
             y1 = int(round((h - th) / 2.0)) if self.do_round else (h - th) // 2
-            ccrop_imgs.append(img.crop((x1, y1, x1 + tw, y1 + th)))
+            ccrop_imgs = imgs[:, :, y1:y1 + th, x1:x1 + tw]
+        else:
+            for img in imgs:
+                if self.backend == 'pillow':
+                    w, h = img.size
+                elif self.backend == 'cv2':
+                    h, w, _ = img.shape
+                else:
+                    raise NotImplementedError
+                assert (w >= self.target_size) and (h >= self.target_size), \
+                    "image width({}) and height({}) should be larger than crop size".format(
+                        w, h, self.target_size)
+                x1 = int(round(
+                    (w - tw) / 2.0)) if self.do_round else (w - tw) // 2
+                y1 = int(round(
+                    (h - th) / 2.0)) if self.do_round else (h - th) // 2
+                if self.backend == 'cv2':
+                    ccrop_imgs.append(img[y1:y1 + th, x1:x1 + tw])
+                elif self.backend == 'pillow':
+                    ccrop_imgs.append(img.crop((x1, y1, x1 + tw, y1 + th)))
         results['imgs'] = ccrop_imgs
         return results
 
@@ -458,7 +476,7 @@ class Image2Array(object):
                     t_imgs = imgs.transpose((3, 0, 1, 2))  # cthw
             results['imgs'] = t_imgs
         else:
-            np_imgs = (np.stack(imgs)).astype('float32')
+            np_imgs = np.stack(imgs).astype('float32')
             if self.transpose:
                 if self.data_format == 'tchw':
                     np_imgs = np_imgs.transpose(0, 3, 1, 2)  # tchw
@@ -795,7 +813,7 @@ class UniformCrop:
     Args:
         target_size(int | tuple[int]): (w, h) of target size for crop.
     """
-    def __init__(self, target_size):
+    def __init__(self, target_size, backend='cv2'):
         if isinstance(target_size, tuple):
             self.target_size = target_size
         elif isinstance(target_size, int):
@@ -804,21 +822,33 @@ class UniformCrop:
             raise TypeError(
                 f'target_size must be int or tuple[int], but got {type(target_size)}'
             )
+        self.backend = backend
 
     def __call__(self, results):
 
         imgs = results['imgs']
         if 'backend' in results and results['backend'] == 'pyav':  # [c,t,h,w]
             img_h, img_w = imgs.shape[2:]
-        else:
+        elif self.backend == 'pillow':
             img_w, img_h = imgs[0].size
+        else:
+            img_h, img_w = imgs[0].shape[:2]
+
         crop_w, crop_h = self.target_size
         if img_h > img_w:
-            offsets = [(0, 0), (0, int(math.ceil((img_h - crop_h) / 2))),
-                       (0, img_h - crop_h)]
+            w_step = (img_w - crop_w) // 2
+            offsets = [
+                (0, 0),
+                (w_step * 2, 0),
+                (w_step, 0),
+            ]
         else:
-            offsets = [(0, 0), (int(math.ceil((img_w - crop_w) / 2)), 0),
-                       (img_w - crop_w, 0)]
+            h_step = (img_h - crop_h) // 2
+            offsets = [
+                (0, 0),
+                (0, h_step * 2),
+                (0, h_step),
+            ]
         img_crops = []
         if 'backend' in results and results['backend'] == 'pyav':  # [c,t,h,w]
             for x_offset, y_offset in offsets:
@@ -827,13 +857,20 @@ class UniformCrop:
                 img_crops.append(crop)
             img_crops = paddle.concat(img_crops, axis=1)
         else:
-            for x_offset, y_offset in offsets:
-                crop = [
-                    img.crop((x_offset, y_offset, x_offset + crop_w,
-                              y_offset + crop_h)) for img in imgs
-                ]
-                img_crops.extend(crop)
-                # [I1_left, ..., ITleft, ..., I1right, ..., ITright]
+            if self.backend == 'pillow':
+                for x_offset, y_offset in offsets:
+                    crop = [
+                        img.crop((x_offset, y_offset, x_offset + crop_w,
+                                  y_offset + crop_h)) for img in imgs
+                    ]
+                    img_crops.extend(crop)
+            else:
+                for x_offset, y_offset in offsets:
+                    crop = [
+                        img[y_offset:y_offset + crop_h,
+                            x_offset:x_offset + crop_w] for img in imgs
+                    ]
+                    img_crops.extend(crop)
         results['imgs'] = img_crops
         return results
 

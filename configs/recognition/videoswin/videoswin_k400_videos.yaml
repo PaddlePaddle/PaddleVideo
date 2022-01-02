@@ -23,7 +23,10 @@ MODEL: #MODEL field
         spatial_type: 'avg'
         drop_ratio: 0.5 #the ratio of dropout
         std: 0.01 #std value in params initialization
-
+    runtime_cfg: # configuration used when the model is train or test.
+        test: # test config
+            num_seg: 32
+            avg_type: 'prob' # 'score' or prob
 
 DATASET: #DATASET field
     batch_size: 1 #Mandatory, bacth size
@@ -50,9 +53,9 @@ PIPELINE: #PIPELINE field TODO.....
             mode: 'train'
         sample:
             name: "Sampler"
-            num_seg: 32
+            num_seg: 1
             frame_interval: 2
-            seg_len: 1
+            seg_len: 32
             valid_mode: False
         transform: #Mandotary, image transform operator.
             - Scale:
@@ -84,9 +87,9 @@ PIPELINE: #PIPELINE field TODO.....
             mode: 'valid'
         sample:
             name: "Sampler"
-            num_seg: 32
+            num_seg: 1
             frame_interval: 2
-            seg_len: 1
+            seg_len: 32
             valid_mode: True
         transform: #Mandotary, image transform operator.
             - Scale:
@@ -113,9 +116,9 @@ PIPELINE: #PIPELINE field TODO.....
             mode: 'valid'
         sample:
             name: "Sampler"
-            num_seg: 32
+            num_seg: 4
             frame_interval: 2
-            seg_len: 4
+            seg_len: 32
             valid_mode: True
         transform: #Mandotary, image transform operator.
             - Scale:
@@ -134,6 +137,7 @@ PIPELINE: #PIPELINE field TODO.....
                 inplace: True
             - Image2Array:
                 data_format: 'cthw'
+
 OPTIMIZER: #OPTIMIZER field
     name: 'AdamW' #Mandatory, the type of optimizer, associate to the 'paddlevideo/solver/'
     beta1: 0.9

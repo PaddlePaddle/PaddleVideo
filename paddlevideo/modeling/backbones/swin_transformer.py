@@ -189,10 +189,8 @@ class WindowAttention3D(nn.Layer):
                                               coords_w))  # 3, Wd, Wh, Ww
         coords_flatten = paddle.flatten(coords, 1)  # 3, Wd*Wh*Ww
 
-        # TODO: use None instead of unsqueeze when paddle.version >= 2.2
-        relative_coords = coords_flatten[:, :,
-                                         None] - coords_flatten[:,
-                                                                None, :]  # 3, Wd*Wh*Ww, Wd*Wh*Ww
+        relative_coords = coords_flatten.unsqueeze(
+            axis=2) - coords_flatten.unsqueeze(axis=1)  # 3, Wd*Wh*Ww, Wd*Wh*Ww
 
         # relative_coords = coords_flatten.unsqueeze(2) - coords_flatten.unsqueeze(1)  # 3, Wd*Wh*Ww, Wd*Wh*Ww
         relative_coords = relative_coords.transpose([1, 2, 0
@@ -205,7 +203,8 @@ class WindowAttention3D(nn.Layer):
         relative_coords[:, :, 0] *= (2 * self.window_size[1] -
                                      1) * (2 * self.window_size[2] - 1)
         relative_coords[:, :, 1] *= (2 * self.window_size[2] - 1)
-        relative_position_index = relative_coords.sum(-1)  # Wd*Wh*Ww, Wd*Wh*Ww
+        relative_position_index = relative_coords.sum(
+            axis=-1)  # Wd*Wh*Ww, Wd*Wh*Ww
         self.register_buffer("relative_position_index", relative_position_index)
 
         self.qkv = nn.Linear(dim, dim * 3, bias_attr=qkv_bias)
@@ -301,7 +300,7 @@ class SwinTransformerBlock3D(nn.Layer):
         assert 0 <= self.shift_size[2] < self.window_size[
             2], "shift_size must in 0-window_size"
 
-        self.norm1 = norm_layer(dim, )
+        self.norm1 = norm_layer(dim)
         self.attn = WindowAttention3D(dim,
                                       window_size=self.window_size,
                                       num_heads=num_heads,
@@ -443,11 +442,8 @@ def compute_mask(D, H, W, window_size, shift_size):
     mask_windows = mask_windows.squeeze(-1)  # nW, ws[0]*ws[1]*ws[2]
     attn_mask = mask_windows.unsqueeze(1) - mask_windows.unsqueeze(2)
     # attn_mask = attn_mask.masked_fill(attn_mask != 0, float(-100.0)).masked_fill(attn_mask == 0, float(0.0))
-    attn_mask = paddle.where(attn_mask != 0,
-                             paddle.full_like(attn_mask, float(-100.0)),
-                             attn_mask)
-    attn_mask = paddle.where(attn_mask == 0, paddle.zeros_like(attn_mask),
-                             attn_mask)
+    huns = -100.0 * paddle.ones_like(attn_mask)
+    attn_mask = huns * (attn_mask != 0).astype("float32")
     return attn_mask
 
 
@@ -705,8 +701,8 @@ class SwinTransformer3D(nn.Layer):
 
     def _init_fn(self, m):
         if isinstance(m, nn.Linear):
-            trunc_normal_(m.weight, std=.02)
-            if isinstance(m, nn.Linear) and m.bias is not None:
+            trunc_normal_(m.weight, std=0.02)
+            if m.bias is not None:
                 zeros_(m.bias)
         elif isinstance(m, nn.LayerNorm):
             zeros_(m.bias)
