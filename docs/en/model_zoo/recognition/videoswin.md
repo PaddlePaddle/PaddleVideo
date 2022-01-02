@@ -1,4 +1,4 @@
-[简体中文](../../../zh-CN/model_zoo/recognition/video-swin.md) | English
+[简体中文](../../../zh-CN/model_zoo/recognition/videoswin.md) | English
 
 # Video-Swin-Transformer Video Classification Model
 
@@ -36,7 +36,7 @@ K400 data download and preparation please refer to [Kinetics-400 data preparatio
    wget TODO
    ```
 
-2. Open `configs/recognition/video_swin_transformer/videoswin_k400_videos.yaml`, and fill in the downloaded weight storage path below `pretrained:`
+2. Open `configs/recognition/videoswin/videoswin_k400_videos.yaml`, and fill in the downloaded weight storage path below `pretrained:`
 
     ```yaml
     MODEL:
@@ -62,7 +62,7 @@ K400 data download and preparation please refer to [Kinetics-400 data preparatio
     export FLAGS_cudnn_exhaustive_search=1
     export FLAGS_cudnn_batchnorm_spatial_persistent=1
     # videos data format
-    python3.7 -u -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_videoswin main.py --amp --validate- c configs/recognition/video_swin_transformer/videoswin_k400_videos.yaml
+    python3.7 -u -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_videoswin main.py --amp --validate- c configs/recognition/videoswin/videoswin_k400_videos.yaml
     ```
 
 - In addition, you can customize and modify the parameter configuration to achieve the purpose of training/testing on different data sets. It is recommended that the naming method of the configuration file is `model_dataset name_file format_data format_sampling method.yaml` , Please refer to [config](../../tutorials/config.md) for parameter usage.
@@ -95,7 +95,7 @@ K400 data download and preparation please refer to [Kinetics-400 data preparatio
 ### Export inference model
 
 ```bash
-python3.7 tools/export_model.py -c configs/recognition/video_swin_transformer/videoswin_k400_videos.yaml \
+python3.7 tools/export_model.py -c configs/recognition/videoswin/videoswin_k400_videos.yaml \
                                 -p data/VideoSwin_k400.pdparams \
                                 -o inference/VideoSwin
 ```
@@ -108,7 +108,7 @@ The above command will generate the model structure file `VideoSwin.pdmodel` and
 
 ```bash
 python3.7 tools/predict.py --input_file data/example.avi \
-                           --config configs/recognition/video_swin_transformer/videoswin_k400_videos.yaml \
+                           --config configs/recognition/videoswin/videoswin_k400_videos.yaml \
                            --model_file inference/VideoSwin/VideoSwin.pdmodel \
                            --params_file inference/VideoSwin/VideoSwin.pdiparams \
                            --use_gpu=True \

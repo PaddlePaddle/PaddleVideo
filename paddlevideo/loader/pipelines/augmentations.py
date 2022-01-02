@@ -21,7 +21,6 @@ import numpy as np
 import paddle
 import paddle.nn.functional as F
 from PIL import Image
-from sympy import Not
 
 from ..registry import PIPELINES
 

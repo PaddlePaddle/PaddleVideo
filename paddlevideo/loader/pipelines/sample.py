@@ -37,6 +37,7 @@ class Sampler(object):
     def __init__(self,
                  num_seg,
                  seg_len,
+                 frame_interval=None,
                  valid_mode=False,
                  select_left=False,
                  dense_sample=False,
@@ -44,6 +45,7 @@ class Sampler(object):
                  use_pil=True):
         self.num_seg = num_seg
         self.seg_len = seg_len
+        self.frame_interval = frame_interval
         self.valid_mode = valid_mode
         self.select_left = select_left
         self.dense_sample = dense_sample

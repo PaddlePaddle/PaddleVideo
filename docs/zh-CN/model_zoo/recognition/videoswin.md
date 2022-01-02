@@ -1,4 +1,4 @@
-[English](../../../en/model_zoo/recognition/video-swin.md) | 简体中文
+[English](../../../en/model_zoo/recognition/videoswin.md) | 简体中文
 
 # Video-Swin-Transformer视频分类模型
 
@@ -36,7 +36,7 @@ K400数据下载及准备请参考[Kinetics-400数据准备](../../dataset/k400.
    wget TODO
    ```
 
-2. 打开`configs/recognition/video_swin_transformer/videoswin_k400_videos.yaml`，将下载好的权重存放路径填写到下方`pretrained:`之后
+2. 打开`configs/recognition/videoswin/videoswin_k400_videos.yaml`，将下载好的权重存放路径填写到下方`pretrained:`之后
 
     ```yaml
     MODEL:
@@ -52,7 +52,7 @@ K400数据下载及准备请参考[Kinetics-400数据准备](../../dataset/k400.
 
     ```bash
     # videos数据格式
-    python3.7 -u -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=log_videoswin main.py --validate -c configs/recognition/video_swin_transformer/videoswin_k400_videos.yaml
+    python3.7 -u -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=log_videoswin main.py --validate -c configs/recognition/videoswin/videoswin_k400_videos.yaml
     ```
 
 - 开启amp混合精度训练，可加速训练过程，其训练启动命令如下：
@@ -62,7 +62,7 @@ K400数据下载及准备请参考[Kinetics-400数据准备](../../dataset/k400.
     export FLAGS_cudnn_exhaustive_search=1
     export FLAGS_cudnn_batchnorm_spatial_persistent=1
     # videos数据格式
-    python3.7 -u -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=log_videoswin main.py --amp --validate -c configs/recognition/video_swin_transformer/videoswin_k400_videos.yaml
+    python3.7 -u -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=log_videoswin main.py --amp --validate -c configs/recognition/videoswin/videoswin_k400_videos.yaml
     ```
 
 - 另外您可以自定义修改参数配置，以达到在不同的数据集上进行训练/测试的目的，建议配置文件的命名方式为`模型_数据集名称_文件格式_数据格式_采样方式.yaml`，参数用法请参考[config](../../tutorials/config.md)。
@@ -79,7 +79,7 @@ K400数据下载及准备请参考[Kinetics-400数据准备](../../dataset/k400.
 - 由于Video-Swin-Transformer模型测试模式的采样方式是速度稍慢但精度高一些的**UniformCrop**，与训练过程中验证模式采用的**CenterCrop**不同，所以训练日志中记录的验证指标`topk Acc`不代表最终的测试分数，因此在训练完成之后可以用测试模式对最好的模型进行测试获取最终的指标，命令如下：
 
   ```bash
-  python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=log_videoswin  main.py  --test -c configs/recognition/video_swin_transformer/videoswin_k400_videos.yaml -w "output/VideoSwin/VideoSwin_best.pdparams"
+  python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=log_videoswin  main.py  --test -c configs/recognition/videoswin/videoswin_k400_videos.yaml -w "output/VideoSwin/VideoSwin_best.pdparams"
   ```
 
 
@@ -95,7 +95,7 @@ K400数据下载及准备请参考[Kinetics-400数据准备](../../dataset/k400.
 ### 导出inference模型
 
 ```bash
-python3.7 tools/export_model.py -c configs/recognition/video_swin_transformer/videoswin_k400_videos.yaml \
+python3.7 tools/export_model.py -c configs/recognition/videoswin/videoswin_k400_videos.yaml \
                                 -p data/VideoSwin_k400.pdparams \
                                 -o inference/VideoSwin
 ```
@@ -108,7 +108,7 @@ python3.7 tools/export_model.py -c configs/recognition/video_swin_transformer/vi
 
 ```bash
 python3.7 tools/predict.py --input_file data/example.avi \
-                           --config configs/recognition/video_swin_transformer/videoswin_k400_videos.yaml \
+                           --config configs/recognition/videoswin/videoswin_k400_videos.yaml \
                            --model_file inference/VideoSwin/VideoSwin.pdmodel \
                            --params_file inference/VideoSwin/VideoSwin.pdiparams \
                            --use_gpu=True \
