@@ -94,6 +94,7 @@ class BMN(paddle.nn.Layer):
         num_sample (int): number of samples betweent starting boundary and ending boundary of each propoasl, default 32.
         num_sample_perbin (int):  number of selected points in each sample, default 3.
     """
+
     def __init__(
         self,
         tscale,
@@ -101,10 +102,12 @@ class BMN(paddle.nn.Layer):
         prop_boundary_ratio,
         num_sample,
         num_sample_perbin,
+        feat_dim=400,
     ):
         super(BMN, self).__init__()
 
         #init config
+        self.feat_dim = feat_dim
         self.tscale = tscale
         self.dscale = dscale
         self.prop_boundary_ratio = prop_boundary_ratio
@@ -117,13 +120,13 @@ class BMN(paddle.nn.Layer):
 
         # Base Module
         self.b_conv1 = paddle.nn.Conv1D(
-            in_channels=400,
+            in_channels=self.feat_dim,
             out_channels=self.hidden_dim_1d,
             kernel_size=3,
             padding=1,
             groups=4,
-            weight_attr=init_params('Base_1_w', 400, 3),
-            bias_attr=init_params('Base_1_b', 400, 3))
+            weight_attr=init_params('Base_1_w', self.feat_dim, 3),
+            bias_attr=init_params('Base_1_b', self.feat_dim, 3))
         self.b_conv1_act = paddle.nn.ReLU()
 
         self.b_conv2 = paddle.nn.Conv1D(

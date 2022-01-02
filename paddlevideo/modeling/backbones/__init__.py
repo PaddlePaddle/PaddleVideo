@@ -13,8 +13,10 @@
 # limitations under the License.
 
 from .actbert import BertForMultiModalPreTraining
+from .adds import ADDS_DepthNet
 from .agcn import AGCN
 from .bmn import BMN
+from .cfbi import CFBI
 from .resnet import ResNet
 from .resnet_slowfast import ResNetSlowFast
 from .resnet_tsm import ResNetTSM
@@ -29,6 +31,6 @@ from .vit_tweaks import VisionTransformer_tweaks
 __all__ = [
     'ResNet', 'ResNetTSM', 'ResNetTweaksTSM', 'ResNetSlowFast', 'BMN',
     'ResNetTweaksTSN', 'VisionTransformer', 'STGCN', 'AGCN', 'TransNetV2',
-    'VisionTransformer_tweaks', 'SwinTransformer3D',
-    'BertForMultiModalPreTraining', 'VisionTransformer_tweaks'
+    'SwinTransformer3D', 'BertForMultiModalPreTraining', 'ADDS_DepthNet',
+    'VisionTransformer_tweaks', 'CFBI'
 ]

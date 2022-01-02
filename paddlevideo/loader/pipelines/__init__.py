@@ -13,24 +13,30 @@
 # limitations under the License.
 
 from .anet_pipeline import GetMatchMap, GetVideoLabel, LoadFeat
-from .augmentations import (CenterCrop, Image2Array, JitterScale, MultiCrop,
+from .augmentations import (CenterCrop, ColorJitter, GroupRandomFlip,
+                            GroupResize, Image2Array, JitterScale, MultiCrop,
                             Normalization, PackOutput, RandomCrop, RandomFlip,
-                            RandomResizedCrop, Scale, TenCrop, UniformCrop)
+                            RandomResizedCrop, Scale, TenCrop, ToArray,
+                            UniformCrop)
 from .augmentations_ava import *
 from .compose import Compose
 from .decode import FeatureDecoder, FrameDecoder, VideoDecoder
+from .decode_image import ImageDecoder
 from .decode_sampler import DecodeSampler
 from .mix import Cutmix, Mixup, VideoMix
 from .multimodal import FeaturePadding, RandomCap, RandomMask, Tokenize
 from .sample import Sampler
 from .sample_ava import *
+from .segmentation import MultiNorm, MultiRestrictSize
 from .skeleton_pipeline import AutoPadding, Iden, SkeletonNorm
 
 __all__ = [
-    'Scale', 'RandomCrop', 'CenterCrop', 'RandomFlip', 'Image2Array',
-    'Normalization', 'Compose', 'VideoDecoder', 'FrameDecoder', 'Sampler',
-    'Mixup', 'Cutmix', 'JitterScale', 'MultiCrop', 'PackOutput', 'TenCrop',
-    'UniformCrop', 'DecodeSampler', 'LoadFeat', 'GetMatchMap', 'GetVideoLabel',
-    'AutoPadding', 'SkeletonNorm', 'Iden', 'VideoMix', 'FeatureDecoder',
-    'RandomResizedCrop', 'FeaturePadding', 'RandomCap', 'Tokenize', 'RandomMask'
+    'ToArray', 'Normalization', 'LoadFeat', 'UniformCrop', 'MultiCrop',
+    'FeaturePadding', 'Compose', 'RandomCap', 'GetMatchMap', 'GetVideoLabel',
+    'RandomCrop', 'Image2Array', 'CenterCrop', 'VideoDecoder', 'VideoMix',
+    'AutoPadding', 'RandomResizedCrop', 'FeatureDecoder', 'Scale',
+    'SkeletonNorm', 'Iden', 'Mixup', 'TenCrop', 'Tokenize', 'DecodeSampler',
+    'FrameDecoder', 'Sampler', 'RandomFlip', 'ImageDecoder', 'ColorJitter',
+    'GroupRandomFlip', 'MultiNorm', 'RandomMask', 'PackOutput', 'JitterScale',
+    'GroupResize', 'MultiRestrictSize', 'Cutmix'
 ]

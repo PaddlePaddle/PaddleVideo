@@ -55,6 +55,7 @@ PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_githu
 | 行为识别 |       [TSN](./docs/zh-CN/model_zoo/recognition/tsn.md)       |    [Kinetics-400](./docs/zh-CN/dataset/k400.md)    |  Top-1   |   69.81   |
 | 行为识别 | [AttentionLSTM](./docs/zh-CN/model_zoo/recognition/attention_lstm.md) |  [Youtube-8M](./docs/zh-CN/dataset/youtube8m.md)   |  Hit@1   |   89.05    |
 | 视频动作定位   |      [BMN](./docs/zh-CN/model_zoo/localization/bmn.md)       | [ActivityNet](./docs/zh-CN/dataset/ActivityNet.md) |   AUC    |   67.23   |
+| 单目深度估计   |      [ADDS](./docs/zh-CN/model_zoo/estimation/adds.md)       | [Oxford_RobotCar](./docs/zh-CN/dataset/Oxford_RobotCar.md) |   Abs Rel    |   0.209   |
 
 <a name="欢迎加入PaddleVideo技术交流群"></a>
 ## 欢迎加入PaddleVideo技术交流群
@@ -108,6 +109,8 @@ PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_githu
     - [基于骨骼的行为识别](docs/zh-CN/model_zoo/README.md)
        - [ST-GCN](docs/zh-CN/model_zoo/recognition/stgcn.md)
        - [AGCN](docs/zh-CN/model_zoo/recognition/agcn.md)
+    - [基于自监督的单目深度估计](docs/zh-CN/model_zoo/README.md)
+       - [ADDS](./docs/zh-CN/model_zoo/estimation/adds.md)
     - 时空动作检测 <sup>coming soon</sup>
     - ActBERT: 自监督多模态视频文字学习<sup>coming soon</sup>
 - 项目实战

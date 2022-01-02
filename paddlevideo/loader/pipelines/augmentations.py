@@ -12,15 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import math
+import random
+from collections.abc import Sequence
+
+import cv2
+import numpy as np
 import paddle
 import paddle.nn.functional as F
-import random
-import numpy as np
-import math
 from PIL import Image
+
 from ..registry import PIPELINES
-from collections.abc import Sequence
-import cv2
 
 
 @PIPELINES.register()
@@ -833,4 +835,143 @@ class UniformCrop:
                 img_crops.extend(crop)
                 # [I1_left, ..., ITleft, ..., I1right, ..., ITright]
         results['imgs'] = img_crops
+        return results
+
+
+@PIPELINES.register()
+class GroupResize(object):
+    def __init__(self, height, width, scale, K, mode='train'):
+        self.height = height
+        self.width = width
+        self.scale = scale
+        self.resize = {}
+        self.K = np.array(K, dtype=np.float32)
+        self.mode = mode
+        for i in range(self.scale):
+            s = 2**i
+            self.resize[i] = paddle.vision.transforms.Resize(
+                (self.height // s, self.width // s), interpolation='lanczos')
+
+    def __call__(self, results):
+        if self.mode == 'infer':
+            imgs = results['imgs']
+            for k in list(imgs):  # ("color", 0, -1)
+                if "color" in k or "color_n" in k:
+                    n, im, _ = k
+                    for i in range(self.scale):
+                        imgs[(n, im, i)] = self.resize[i](imgs[(n, im, i - 1)])
+        else:
+            imgs = results['imgs']
+            for scale in range(self.scale):
+                K = self.K.copy()
+
+                K[0, :] *= self.width // (2**scale)
+                K[1, :] *= self.height // (2**scale)
+
+                inv_K = np.linalg.pinv(K)
+                imgs[("K", scale)] = K
+                imgs[("inv_K", scale)] = inv_K
+
+            for k in list(imgs):
+                if "color" in k or "color_n" in k:
+                    n, im, i = k
+                    for i in range(self.scale):
+                        imgs[(n, im, i)] = self.resize[i](imgs[(n, im, i - 1)])
+
+            results['imgs'] = imgs
+        return results
+
+
+@PIPELINES.register()
+class ColorJitter(object):
+    """Randomly change the brightness, contrast, saturation and hue of an image.
+    """
+    def __init__(self,
+                 brightness=0,
+                 contrast=0,
+                 saturation=0,
+                 hue=0,
+                 mode='train',
+                 p=0.5,
+                 keys=None):
+        self.mode = mode
+        self.colorjitter = paddle.vision.transforms.ColorJitter(
+            brightness, contrast, saturation, hue)
+        self.p = p
+
+    def __call__(self, results):
+        """
+        Args:
+            results (PIL Image): Input image.
+
+        Returns:
+            PIL Image: Color jittered image.
+        """
+
+        do_color_aug = random.random() > self.p
+        imgs = results['imgs']
+        for k in list(imgs):
+            f = imgs[k]
+            if "color" in k or "color_n" in k:
+                n, im, i = k
+                imgs[(n, im, i)] = f
+                if do_color_aug:
+                    imgs[(n + "_aug", im, i)] = self.colorjitter(f)
+                else:
+                    imgs[(n + "_aug", im, i)] = f
+        if self.mode == "train":
+            for i in results['frame_idxs']:
+                del imgs[("color", i, -1)]
+                del imgs[("color_aug", i, -1)]
+                del imgs[("color_n", i, -1)]
+                del imgs[("color_n_aug", i, -1)]
+        else:
+            for i in results['frame_idxs']:
+                del imgs[("color", i, -1)]
+                del imgs[("color_aug", i, -1)]
+
+        results['img'] = imgs
+        return results
+
+
+@PIPELINES.register()
+class GroupRandomFlip(object):
+    def __init__(self, p=0.5):
+        self.p = p
+
+    def __call__(self, results):
+
+        imgs = results['imgs']
+        do_flip = random.random() > self.p
+        if do_flip:
+            for k in list(imgs):
+                if "color" in k or "color_n" in k:
+                    n, im, i = k
+                    imgs[(n, im,
+                          i)] = imgs[(n, im,
+                                      i)].transpose(Image.FLIP_LEFT_RIGHT)
+            if "depth_gt" in imgs:
+                imgs['depth_gt'] = np.array(np.fliplr(imgs['depth_gt']))
+
+        results['imgs'] = imgs
+        return results
+
+
+@PIPELINES.register()
+class ToArray(object):
+    def __init__(self):
+        pass
+
+    def __call__(self, results):
+        imgs = results['imgs']
+        for k in list(imgs):
+            if "color" in k or "color_n" in k or "color_aug" in k or "color_n_aug" in k:
+                n, im, i = k
+                imgs[(n, im,
+                      i)] = np.array(imgs[(n, im, i)]).astype('float32') / 255.0
+                imgs[(n, im, i)] = imgs[(n, im, i)].transpose((2, 0, 1))
+        if "depth_gt" in imgs:
+            imgs['depth_gt'] = np.array(imgs['depth_gt']).astype('float32')
+
+        results['imgs'] = imgs
         return results

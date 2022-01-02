@@ -174,6 +174,7 @@ class Sampler(object):
                 raise NotImplementedError
             return self._get(frames_idx, results)
 
+        average_dur = int(frames_len / self.num_seg)
         if not self.select_left:
             if self.dense_sample:  # For ppTSM
                 if not self.valid_mode:  # train
