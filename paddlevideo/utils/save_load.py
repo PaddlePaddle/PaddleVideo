@@ -22,7 +22,9 @@ import paddle.nn.functional as F
 from paddlevideo.utils import get_logger
 from paddlevideo.utils import main_only
 
-def pretrain_vit_param_trans(model, state_dicts, num_patches, seg_num, attention_type):
+
+def pretrain_vit_param_trans(model, state_dicts, num_patches, seg_num,
+                             attention_type):
     """
     Convert ViT's pre-trained model parameters to a parameter dictionary that matches the existing model
     """
@@ -35,27 +37,31 @@ def pretrain_vit_param_trans(model, state_dicts, num_patches, seg_num, attention
     if num_patches + 1 != state_dicts['pos_embed'].shape[1]:
         pos_embed = state_dicts['pos_embed']
         cls_pos_embed = pos_embed[0, 0, :].unsqueeze(0).unsqueeze(1)
-        other_pos_embed = pos_embed[0, 1:, :].unsqueeze(0).unsqueeze(1).transpose((0, 1, 3, 2))
-        new_pos_embed = F.interpolate(
-            other_pos_embed,
-            size=(other_pos_embed.shape[-2], num_patches),
-            mode='nearest'
-        )
+        other_pos_embed = pos_embed[0,
+                                    1:, :].unsqueeze(0).unsqueeze(1).transpose(
+                                        (0, 1, 3, 2))
+        new_pos_embed = F.interpolate(other_pos_embed,
+                                      size=(other_pos_embed.shape[-2],
+                                            num_patches),
+                                      mode='nearest')
         new_pos_embed = new_pos_embed.squeeze(0).transpose((0, 2, 1))
         new_pos_embed = paddle.concat((cls_pos_embed, new_pos_embed), axis=1)
         state_dicts['pos_embed'] = new_pos_embed
         time.sleep(0.01)
 
-    if 'time_embed' in state_dicts and seg_num != state_dicts['time_embed'].shape[1]:
+    if 'time_embed' in state_dicts and seg_num != state_dicts[
+            'time_embed'].shape[1]:
         time_embed = state_dicts['time_embed'].transpose((0, 2, 1)).unsqueeze(0)
-        new_time_embed = F.interpolate(
-            time_embed,
-            size=(time_embed.shape[-2], seg_num),
-            mode='nearest'
-        )
-        state_dicts['time_embed'] = new_time_embed.squeeze(0).transpose((0, 2, 1))
+        new_time_embed = F.interpolate(time_embed,
+                                       size=(time_embed.shape[-2], seg_num),
+                                       mode='nearest')
+        state_dicts['time_embed'] = new_time_embed.squeeze(0).transpose(
+            (0, 2, 1))
         time.sleep(0.01)
-    with tqdm(total=total_len, position=1, bar_format='{desc}', desc="Loading weights") as desc:
+    with tqdm(total=total_len,
+              position=1,
+              bar_format='{desc}',
+              desc="Loading weights") as desc:
         if attention_type == 'divided_space_time':
             new_state_dicts = state_dicts.copy()
             for key in tqdm(state_dicts):
@@ -74,18 +80,41 @@ def pretrain_vit_param_trans(model, state_dicts, num_patches, seg_num, attention
                     else:
                         new_state_dicts[new_key] = state_dicts[new_key]
                 time.sleep(0.01)
-    ret_str = "loading {:<20d} weights completed.".format(len(model.state_dict()))
+    ret_str = "loading {:<20d} weights completed.".format(
+        len(model.state_dict()))
     desc.set_description(ret_str)
     return new_state_dicts
 
+
+def pretrain_resnet18_param_trans(model, loaded_dict):
+    encoder_dict = model.encoder.state_dict()
+    pose_encoder_dict = model.pose_encoder.state_dict()
+
+    names = ['encoder.', 'encoder_day.', 'encoder_night.']
+    for name in names:
+        for key, value in loaded_dict.items():
+            key = str(name + key)
+            if key in encoder_dict:
+                encoder_dict[key] = value
+
+    num_input_images = 2
+    loaded_dict['conv1.weight'] = paddle.concat(
+        [loaded_dict['conv1.weight']] * num_input_images, 1) / num_input_images
+
+    for name, value in loaded_dict.items():
+        name = str('encoder.' + name)
+        if name in pose_encoder_dict:
+            pose_encoder_dict[name] = value
+
+    return encoder_dict, pose_encoder_dict
+
+
 #XXX(shipping): maybe need load N times because of different cards have different params.
 @main_only
-def load_ckpt(model,
-              weight_path,
-              **kargs):
+def load_ckpt(model, weight_path, **kargs):
     """
     1. Load pre-trained model parameters
-    2. Extract and convert from the pre-trained model to the parameters 
+    2. Extract and convert from the pre-trained model to the parameters
     required by the existing model
     3. Load the converted parameters of the existing model
     """
@@ -97,24 +126,42 @@ def load_ckpt(model,
 
     logger = get_logger("paddlevideo")
     state_dicts = paddle.load(weight_path)
-    if "VisionTransformer" in str(model):  # For TimeSformer case
-        tmp = pretrain_vit_param_trans(model, state_dicts, kargs['num_patches'], kargs['seg_num'], kargs['attention_type'])
+    if 'ResnetEncoder' in str(model):
+        encoder_dict, pose_encoder_dict = pretrain_resnet18_param_trans(
+            model, state_dicts)
+        tmp = model.state_dict()
+        tmp.update(
+            {'backbone.encoder.' + k: v
+             for (k, v) in encoder_dict.items()})
+        tmp.update({
+            'backbone.pose_encoder.' + k: v
+            for (k, v) in pose_encoder_dict.items()
+        })
+    elif "VisionTransformer" in str(model):  # For TimeSformer case
+        tmp = pretrain_vit_param_trans(model, state_dicts, kargs['num_patches'],
+                                       kargs['seg_num'],
+                                       kargs['attention_type'])
     else:
         tmp = {}
         total_len = len(model.state_dict())
-        with tqdm(total=total_len, position=1, bar_format='{desc}', desc="Loading weights") as desc:
+        with tqdm(total=total_len,
+                  position=1,
+                  bar_format='{desc}',
+                  desc="Loading weights") as desc:
             for item in tqdm(model.state_dict(), total=total_len, position=0):
                 name = item
                 desc.set_description('Loading %s' % name)
-                if name not in state_dicts: # Convert from non-parallel model
+                if name not in state_dicts:  # Convert from non-parallel model
                     if str('backbone.' + name) in state_dicts:
                         tmp[name] = state_dicts['backbone.' + name]
                 else:  # Convert from parallel model
                     tmp[name] = state_dicts[name]
                 time.sleep(0.01)
-        ret_str = "loading {:<20d} weights completed.".format(len(model.state_dict()))
+        ret_str = "loading {:<20d} weights completed.".format(
+            len(model.state_dict()))
         desc.set_description(ret_str)
     model.set_state_dict(tmp)
+
 
 def mkdir(dir):
     if not os.path.exists(dir):

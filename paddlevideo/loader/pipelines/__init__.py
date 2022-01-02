@@ -13,26 +13,32 @@
 # limitations under the License.
 
 from .anet_pipeline import GetMatchMap, GetVideoLabel, LoadFeat
-from .augmentations import (CenterCrop, Image2Array, JitterScale, MultiCrop,
+from .augmentations import (CenterCrop, ColorJitter, GroupRandomFlip,
+                            GroupResize, Image2Array, JitterScale, MultiCrop,
                             Normalization, PackOutput, RandomCrop, RandomFlip,
-                            Scale, TenCrop, UniformCrop)
+                            Scale, TenCrop, ToArray, UniformCrop)
+from .augmentations_ava import *
 from .compose import Compose
 from .decode import FeatureDecoder, FrameDecoder, VideoDecoder
+from .decode_image import ImageDecoder
 from .decode_sampler import DecodeSampler
 from .mix import Cutmix, Mixup, VideoMix
+from .multimodal import FeaturePadding, RandomCap, RandomMask, Tokenize
 from .sample import Sampler
 from .skeleton_pipeline import AutoPadding, Iden, SkeletonNorm
 from .segmentation_pipline import SegmentationSampler
 from .augmentations_ava import *
 from .sample_ava import *
-from .multimodal import FeaturePadding, RandomCap, Tokenize, RandomMask
+from .segmentation import MultiRestrictSize, MultiNorm
+from .skeleton_pipeline import AutoPadding, Iden, SkeletonNorm
 
 __all__ = [
-    'Scale', 'RandomCrop', 'CenterCrop', 'RandomFlip', 'Image2Array',
-    'Normalization', 'Compose', 'VideoDecoder', 'FrameDecoder', 'Sampler',
-    'Mixup', 'Cutmix', 'JitterScale', 'MultiCrop', 'PackOutput', 'TenCrop',
-    'UniformCrop', 'DecodeSampler', 'LoadFeat', 'GetMatchMap', 'GetVideoLabel',
-    'AutoPadding', 'SkeletonNorm', 'Iden', 'VideoMix', 'FeatureDecoder',
-    'FeaturePadding', 'RandomCap', 'Tokenize', 'RandomMask',
-    'SegmentationSampler'
+    'ImageDecoder', 'RandomMask', 'UniformCrop', 'SkeletonNorm', 'Tokenize',
+    'Sampler', 'FeatureDecoder', 'DecodeSampler', 'TenCrop', 'Compose',
+    'AutoPadding', 'Normalization', 'Mixup', 'Image2Array', 'Scale',
+    'GroupResize', 'VideoDecoder', 'FrameDecoder', 'PackOutput',
+    'GetVideoLabel', 'Cutmix', 'CenterCrop', 'RandomCrop', 'LoadFeat',
+    'RandomCap', 'JitterScale', 'Iden', 'VideoMix', 'ColorJitter', 'RandomFlip',
+    'ToArray', 'FeaturePadding', 'GetMatchMap', 'GroupRandomFlip', 'MultiCrop',
+    'MultiRestrictSize', 'MultiNorm', 'SegmentationSampler'
 ]

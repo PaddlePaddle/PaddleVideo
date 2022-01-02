@@ -20,6 +20,7 @@ PaddleVideo包含视频分类和动作定位方向的多个主流领先模型，
 | 行为识别 | [AttentionLSTM](./recognition/attention_lstm.md) | [attention_lstm.yaml](../../../configs/recognition/attention_lstm/attention_lstm.yaml) | [Youtube-8M](../dataset/youtube8m.md) | Hit@1 | 89.0 | [AttentionLstm.pdparams](https://videotag.bj.bcebos.com/PaddleVideo/AttentionLstm/AttentionLstm.pdparams) |
 | 视频动作定位| [BMN](./localization/bmn.md) | [bmn.yaml](../../../configs/localization/bmn.yaml) | [ActivityNet](../dataset/ActivityNet.md) |  AUC | 67.23 | [BMN.pdparams](https://videotag.bj.bcebos.com/PaddleVideo/BMN/BMN.pdparams) |
 | 视频切分 | [TransNetV2](./partition/transnetv2.md) | [transnetv2.yaml](../../../configs/partitioners/transnetv2/transnetv2.yaml) | ClipShots | F1 scores | 76.1 |  |
+| 深度估计 | [ADDS](./estimation/adds.md) | [adds.yaml](../../../configs/estimation/adds/adds.yaml) | Oxford_RobotCar | Abs Rel | 0.209 |  |
 
 
 # 参考文献
@@ -34,3 +35,4 @@ PaddleVideo包含视频分类和动作定位方向的多个主流领先模型，
 - [Two-Stream Adaptive Graph Convolutional Networks for Skeleton-Based Action Recognition](https://arxiv.org/abs/1805.07694), Lei Shi, Yifan Zhang, Jian Cheng, Hanqing Lu
 - [Skeleton-Based Action Recognition with Multi-Stream Adaptive Graph Convolutional Networks](https://arxiv.org/abs/1912.06971), Lei Shi, Yifan Zhang, Jian Cheng, Hanqing Lu
 - [TransNet V2: An effective deep network architecture for fast shot transition detection](https://arxiv.org/abs/2008.04838), Tomáš Souček, Jakub Lokoč
+- [Self-supervised Monocular Depth Estimation for All Day Images using Domain Separation](https://arxiv.org/abs/2108.07628), Lina Liu, Xibin Song, Mengmeng Wang

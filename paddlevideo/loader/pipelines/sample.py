@@ -12,12 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import random
-from PIL import Image
-from ..registry import PIPELINES
 import os
+import random
+
 import numpy as np
-import paddle
+from PIL import Image
+
+from ..registry import PIPELINES
 
 
 @PIPELINES.register()

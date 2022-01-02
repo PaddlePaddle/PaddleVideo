@@ -70,6 +70,10 @@ def parse_args():
                         default=None,
                         help='The option of profiler, which should be in format '
                         '\"key1=value1;key2=value2;key3=value3\".')
+    parser.add_argument('--use_npu',
+                        type=bool,
+                        default=False,
+                        help='whether use npu.')
 
     args = parser.parse_args()
     return args

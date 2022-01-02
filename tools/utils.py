@@ -17,6 +17,8 @@ import os
 import sys
 
 import cv2
+import matplotlib as mpl
+import matplotlib.cm as cm
 import numpy as np
 import paddle
 import paddle.nn.functional as F
@@ -25,12 +27,13 @@ from PIL import Image
 
 __dir__ = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.abspath(os.path.join(__dir__, '../')))
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 
 from paddlevideo.loader.pipelines import (
-    AutoPadding, CenterCrop, DecodeSampler, FeatureDecoder, Image2Array,
-    JitterScale, MultiCrop, Normalization, PackOutput, Sampler, Scale,
-    SkeletonNorm, TenCrop, UniformCrop, VideoDecoder, SegmentationSampler)
+    AutoPadding, CenterCrop, DecodeSampler, FeatureDecoder, GroupResize,
+    Image2Array, ImageDecoder, JitterScale, MultiCrop, Normalization,
+    PackOutput, Sampler, Scale, SkeletonNorm, TenCrop, ToArray, UniformCrop,
+    VideoDecoder, SegmentationSampler)
 from paddlevideo.metrics.bmn_metric import boundary_choose, soft_nms
 from paddlevideo.utils import Registry, build
 
@@ -740,3 +743,101 @@ class TransNetV2_Inference_helper():
                 image_file = os.path.join(self.output_path,
                                           self.filename + "_vis.png")
                 pil_image.save(image_file)
+
+
+@INFERENCE.register()
+class ADDS_Inference_helper(Base_Inference_helper):
+
+    def __init__(self,
+                 frame_idxs=[0],
+                 num_scales=4,
+                 side_map={
+                     "2": 2,
+                     "3": 3,
+                     "l": 2,
+                     "r": 3
+                 },
+                 height=256,
+                 width=512,
+                 full_res_shape=None,
+                 num_channels=None,
+                 img_ext=".png",
+                 K=None):
+
+        self.frame_idxs = frame_idxs
+        self.num_scales = num_scales
+        self.side_map = side_map
+        self.full_res_shape = full_res_shape
+        self.img_ext = img_ext
+        self.height = height
+        self.width = width
+        self.K = K
+
+    def preprocess(self, input_file):
+        """
+        input_file: str, file path
+        return: list
+        """
+        assert os.path.isfile(input_file) is not None, "{0} not exists".format(
+            input_file)
+        results = {
+            'filename': input_file,
+            'mode': 'infer',
+            'day_or_night': 'day',
+        }
+        ops = [
+            ImageDecoder(
+                backend='pil',
+                dataset='kitti',
+                frame_idxs=self.frame_idxs,
+                num_scales=self.num_scales,
+                side_map=self.side_map,
+                full_res_shape=self.full_res_shape,
+                img_ext=self.img_ext,
+            ),
+            GroupResize(
+                height=self.height,
+                width=self.width,
+                K=self.K,
+                scale=1,
+                mode='infer',
+            ),
+            ToArray(),
+        ]
+        for op in ops:
+            results = op(results)
+        res = results['imgs'][('color', 0, 0)]
+        res = np.expand_dims(res, axis=0).copy()
+        return [res]
+
+    def postprocess(self, output, print_output, save_dir='data/'):
+        """
+        output: list
+        """
+        if not isinstance(self.input_file, list):
+            self.input_file = [
+                self.input_file,
+            ]
+        print(len(output))
+        N = len(self.input_file)
+        for i in range(N):
+            pred_depth = output[i]  # [H, W]
+            if print_output:
+                print("Current input image: {0}".format(self.input_file[i]))
+                file_name = os.path.basename(self.input_file[i]).split('.')[0]
+                save_path = os.path.join(save_dir,
+                                         file_name + "_depth" + ".png")
+                pred_depth_color = self._convertPNG(pred_depth)
+                pred_depth_color.save(save_path)
+                print(f"pred depth image saved to: {save_path}")
+
+    def _convertPNG(self, image_numpy):
+        disp_resized = cv2.resize(image_numpy, (1280, 640))
+        disp_resized_np = disp_resized
+        vmax = np.percentile(disp_resized_np, 95)
+        normalizer = mpl.colors.Normalize(vmin=disp_resized_np.min(), vmax=vmax)
+        mapper = cm.ScalarMappable(norm=normalizer, cmap='magma')
+        colormapped_im = (mapper.to_rgba(disp_resized_np)[:, :, :3] *
+                          255).astype(np.uint8)
+        im = Image.fromarray(colormapped_im)
+        return im

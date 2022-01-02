@@ -44,7 +44,12 @@ def test_model(cfg, weights, parallel=True):
     cfg.DATASET.test.test_mode = True
     dataset = build_dataset((cfg.DATASET.test, cfg.PIPELINE.test))
     batch_size = cfg.DATASET.get("test_batch_size", 8)
-    places = paddle.set_device('gpu')
+
+    if cfg.get('use_npu'):
+        places = paddle.set_device('npu')
+    else:
+        places = paddle.set_device('gpu')
+
     # default num worker: 0, which means no subprocess will be created
     num_workers = cfg.DATASET.get('num_workers', 0)
     num_workers = cfg.DATASET.get('test_num_workers', num_workers)
@@ -54,7 +59,9 @@ def test_model(cfg, weights, parallel=True):
                               drop_last=False,
                               shuffle=False)
 
-    data_loader = build_dataloader(dataset, **dataloader_setting)
+    data_loader = build_dataloader(
+        dataset, **dataloader_setting) if cfg.model_name not in ['CFBI'
+                                                                 ] else dataset
 
     model.eval()
 
@@ -67,6 +74,11 @@ def test_model(cfg, weights, parallel=True):
 
     Metric = build_metric(cfg.METRIC)
     for batch_id, data in enumerate(data_loader):
-        outputs = model(data, mode='test')
-        Metric.update(batch_id, data, outputs)
+        if cfg.model_name in [
+                'CFBI'
+        ]:  #for VOS task, dataset for video and dataloader for frames in each video
+            Metric.update(batch_id, data, model)
+        else:
+            outputs = model(data, mode='test')
+            Metric.update(batch_id, data, outputs)
     Metric.accumulate()

@@ -12,14 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from ..metrics.ava_utils import collect_results_cpu
-import shutil
-import pickle
-import time
-import os
 import os.path as osp
 import time
 
+import numpy as np
 import paddle
 import paddle.distributed as dist
 import paddle.distributed.fleet as fleet
@@ -27,20 +23,14 @@ from paddlevideo.utils import (add_profiler_step, build_record, get_logger,
                                load, log_batch, log_epoch, mkdir, save)
 
 from ..loader.builder import build_dataloader, build_dataset
+from ..metrics.ava_utils import collect_results_cpu
 from ..modeling.builder import build_model
 from ..metrics import build_metric
 from ..solver import build_lr, build_optimizer
 from ..utils import do_preciseBN
-from paddlevideo.utils import get_logger
-from paddlevideo.utils import (build_record, log_batch, log_epoch, save, load,
-                               mkdir)
-import sys
-import numpy as np
-from pathlib import Path
 
-paddle.framework.seed(1538574472)
-paddle.seed(1538574472)
-np.random.seed(1538574472)
+paddle.framework.seed(1234)
+np.random.seed(1234)
 
 
 def train_model(cfg,
@@ -94,7 +84,10 @@ def train_model(cfg,
             f"num_gpus={num_gpus}, "
             f"num_accumulative_iters={cfg.GRADIENT_ACCUMULATION.num_iters}")
 
-    places = paddle.set_device('gpu')
+    if cfg.get('use_npu'):
+        places = paddle.set_device('npu')
+    else:
+        places = paddle.set_device('gpu')
 
     # default num worker: 0, which means no subprocess will be created
     num_workers = cfg.DATASET.get('num_workers', 0)
@@ -169,7 +162,7 @@ def train_model(cfg,
                                        incr_every_n_steps=2000,
                                        decr_every_n_nan_or_inf=1)
 
-    best = 0.
+    best = 0.0
     for epoch in range(0, cfg.epochs):
         if epoch < resume_epoch:
             logger.info(
@@ -198,12 +191,21 @@ def train_model(cfg,
                     outputs = model(data, mode='train')
 
                 avg_loss = outputs['loss']
-                scaled = scaler.scale(avg_loss)
-                scaled.backward()
-                # keep prior to 2.0 design
-                scaler.minimize(optimizer, scaled)
-                optimizer.clear_grad()
-
+                if use_gradient_accumulation:
+                    if i == 0:
+                        optimizer.clear_grad()
+                    avg_loss /= cfg.GRADIENT_ACCUMULATION.num_iters
+                    scaled = scaler.scale(avg_loss)
+                    scaled.backward()
+                    if (i + 1) % cfg.GRADIENT_ACCUMULATION.num_iters == 0:
+                        scaler.minimize(optimizer, scaled)
+                        optimizer.clear_grad()
+                else:
+                    scaled = scaler.scale(avg_loss)
+                    scaled.backward()
+                    # keep prior to 2.0 design
+                    scaler.minimize(optimizer, scaled)
+                    optimizer.clear_grad()
             else:
                 outputs = model(data, mode='train')
 
@@ -228,7 +230,8 @@ def train_model(cfg,
             # log record
             record_list['lr'].update(optimizer.get_lr(), batch_size)
             for name, value in outputs.items():
-                record_list[name].update(value, batch_size)
+                if name in record_list:
+                    record_list[name].update(value, batch_size)
 
             record_list['batch_time'].update(time.time() - tic)
             tic = time.time()
@@ -272,7 +275,8 @@ def train_model(cfg,
                 #log_record
                 if cfg.MODEL.framework != "FastRCNN" and cfg.METRIC.name != "SegmentationMetric":
                     for name, value in outputs.items():
-                        record_list[name].update(value, batch_size)
+                        if name in record_list:
+                            record_list[name].update(value, batch_size)
 
                 record_list['batch_time'].update(time.time() - tic)
                 tic = time.time()
@@ -281,6 +285,7 @@ def train_model(cfg,
                     ips = "ips: {:.5f} instance/sec.".format(
                         valid_batch_size / record_list["batch_time"].val)
                     log_batch(record_list, i, epoch + 1, cfg.epochs, "val", ips)
+
             if cfg.MODEL.framework == "FastRCNN":
                 if parallel:
                     results = collect_results_cpu(results, len(valid_dataset))
@@ -301,14 +306,18 @@ def train_model(cfg,
                     best = record_list["mAP@0.5IOU"].val
                     best_flag = True
                 return best, best_flag
-            #best2, cfg.MODEL.framework != "FastRCNN":
-            for top_flag in ['hit_at_one', 'top1']:
-                if record_list.get(
-                        top_flag) and record_list[top_flag].avg > best:
-                    best = record_list[top_flag].avg
-                    best_flag = True
-            if cfg.METRIC.name == "SegmentationMetric":
-                Metric.accumulate()
+
+            # forbest2, cfg.MODEL.framework != "FastRCNN":
+            for top_flag in ['hit_at_one', 'top1', 'rmse']:
+                if record_list.get(top_flag):
+                    if top_flag != 'rmse' and record_list[top_flag].avg > best:
+                        best = record_list[top_flag].avg
+                        best_flag = True
+                    elif top_flag == 'rmse' and (
+                            best == 0.0 or record_list[top_flag].avg < best):
+                        best = record_list[top_flag].avg
+                        best_flag = True
+
             return best, best_flag
 
         # use precise bn to improve acc
@@ -334,7 +343,11 @@ def train_model(cfg,
                         f"Already save the best model (hit_at_one){best}")
                 elif cfg.MODEL.framework == "FastRCNN":
                     logger.info(
-                        f"Already save the best model (mAP@0.5IOU){int(best *10000)/10000}"
+                        f"Already save the best model (mAP@0.5IOU){int(best * 10000) / 10000}"
+                    )
+                elif cfg.MODEL.framework == "DepthEstimator":
+                    logger.info(
+                        f"Already save the best model (rmse){int(best * 10000) / 10000}"
                     )
                 else:
                     logger.info(
