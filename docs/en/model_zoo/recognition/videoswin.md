@@ -87,7 +87,7 @@ K400 data download and preparation please refer to [Kinetics-400 data preparatio
 
    | backbone | Sampling method | num_seg | target_size | Top-1 | checkpoints |
    | :----------------: | :-------------: | :-----: | :---------: | :---- | :----------------------------------------------------------: |
-   | Swin Transformer | UniformCrop | 32 | 224 | 82.22 | [VideoSwin_k400.pdparams](TODO) |
+   | Swin Transformer | UniformCrop | 32 | 224 | 82.23 | [VideoSwin_k400.pdparams](TODO) |
 
 
 ## Inference

@@ -442,15 +442,13 @@ class RandomFlip(object):
             if 'backend' in results and results[
                     'backend'] == 'pyav':  # [c,t,h,w]
                 results['imgs'] = paddle.flip(imgs, axis=[3])
-            elif results['backend'] == 'pillow':
-                results['imgs'] = [
-                    img.transpose(Image.FLIP_LEFT_RIGHT) for img in imgs
-                ]
             elif results['backend'] == 'cv2' or results['backend'] == 'decord':
                 results['imgs'] = [cv2.flip(img, 1, img) for img in imgs
                                    ]  # [[h,w,c], [h,w,c], ..., [h,w,c]]
             else:
-                raise NotImplementedError
+                results['imgs'] = [
+                    img.transpose(Image.FLIP_LEFT_RIGHT) for img in imgs
+                ]
         else:
             results['imgs'] = imgs
         return results
