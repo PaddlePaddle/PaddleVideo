@@ -35,7 +35,8 @@ class BaseRecognizer(nn.Layer):
         else:
             self.head = None
 
-        # Settings when running model, such as 'aver
+        # Settings when the model is running,
+        # such as 'avg_type'
         self.runtime_cfg = runtime_cfg
 
     def forward(self, data_batch, mode='infer'):
