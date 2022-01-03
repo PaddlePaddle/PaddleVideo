@@ -120,7 +120,7 @@ The output example is as follows:
 ```
 Current video file: data/example.avi
         top-1 class: 5
-        top-1 score: TODO
+        top-1 score: 0.9999829530715942
 ```
 
 It can be seen that using the Video-Swin-Transformer model trained on Kinetics-400 to predict `data/example.avi`, the output top1 category id is `5`, and the confidence is 0.99. By referring to the category id and name correspondence table `data/k400/Kinetics-400_label_list.txt`, it can be known that the predicted category name is `archery`.

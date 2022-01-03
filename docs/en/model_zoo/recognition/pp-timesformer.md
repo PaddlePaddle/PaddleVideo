@@ -107,7 +107,7 @@ UCF101 data download and preparation please refer to [UCF-101 data preparation](
 
 ```bash
 python3.7 tools/export_model.py -c configs/recognition/pptimesformer/pptimesformer_k400_videos.yaml \
-                                -p data/ppTimeSformer_k400.pdparams \
+                                -p data/ppTimeSformer_k400_8f.pdparams \
                                 -o inference/ppTimeSformer
 ```
 
