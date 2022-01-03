@@ -80,7 +80,6 @@ class I3DHead(BaseHead):
         Returns:
             torch.Tensor: The classification scores for input samples.
         """
-        N = paddle.shape(x)[0]
         # [N, in_channels, 4, 7, 7]
         if self.avg_pool is not None:
             x = self.avg_pool(x)
@@ -88,6 +87,7 @@ class I3DHead(BaseHead):
         if self.dropout is not None:
             x = self.dropout(x)
         # [N, in_channels, 1, 1, 1]
+        N = paddle.shape(x)[0]
         x = x.reshape([N, -1])
         # [N, in_channels]
         cls_score = self.fc(x)

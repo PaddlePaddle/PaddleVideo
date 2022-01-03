@@ -20,6 +20,10 @@ MODEL: #MODEL field
         in_channels: 768 #input channel of the extracted feature.
         std: 0.02 #std value in params initialization
         ls_eps: 0.1
+    runtime_cfg: # configuration used when the model is train or test.
+        test: # test config
+            num_seg: 8
+            avg_type: 'prob' # 'score' or 'prob'
 
 DATASET: #DATASET field
     batch_size: 8 #Mandatory, bacth size

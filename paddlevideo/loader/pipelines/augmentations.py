@@ -42,9 +42,11 @@ class Scale(object):
                  do_round=False,
                  backend='pillow'):
         self.short_size = short_size
+        assert (fixed_ratio and not keep_ratio) or (not fixed_ratio), \
+            f"fixed_ratio and keep_ratio cannot be true at the same time"
         self.fixed_ratio = fixed_ratio
-        self.do_round = do_round
         self.keep_ratio = keep_ratio
+        self.do_round = do_round
 
         assert backend in [
             'pillow', 'cv2'
@@ -75,18 +77,30 @@ class Scale(object):
                 ow = self.short_size
                 if self.fixed_ratio:
                     oh = int(self.short_size * 4.0 / 3.0)
+                elif not self.keep_ratio:  # no
+                    oh = self.short_size
                 else:
-                    oh = int(round(h * self.short_size /
-                                   w)) if self.do_round else int(
-                                       h * self.short_size / w)
+                    scale_factor = self.short_size / w
+                    oh = int(h * float(scale_factor) +
+                             0.5) if self.do_round else int(h *
+                                                            self.short_size / w)
+                    ow = int(w * float(scale_factor) +
+                             0.5) if self.do_round else int(w *
+                                                            self.short_size / h)
             else:
                 oh = self.short_size
                 if self.fixed_ratio:
                     ow = int(self.short_size * 4.0 / 3.0)
+                elif not self.keep_ratio:  # no
+                    ow = self.short_size
                 else:
-                    ow = int(round(w * self.short_size /
-                                   h)) if self.do_round else int(
-                                       w * self.short_size / h)
+                    scale_factor = self.short_size / h
+                    oh = int(h * float(scale_factor) +
+                             0.5) if self.do_round else int(h *
+                                                            self.short_size / w)
+                    ow = int(w * float(scale_factor) +
+                             0.5) if self.do_round else int(w *
+                                                            self.short_size / h)
             if self.backend == 'pillow':
                 resized_imgs.append(img.resize((ow, oh), Image.BILINEAR))
             elif self.backend == 'cv2' and (self.keep_ratio is not None):
@@ -433,7 +447,7 @@ class RandomFlip(object):
                     img.transpose(Image.FLIP_LEFT_RIGHT) for img in imgs
                 ]
             elif results['backend'] == 'cv2' or results['backend'] == 'decord':
-                results['imgs'] = [cv2.flip(img, 1) for img in imgs
+                results['imgs'] = [cv2.flip(img, 1, img) for img in imgs
                                    ]  # [[h,w,c], [h,w,c], ..., [h,w,c]]
             else:
                 raise NotImplementedError
@@ -475,13 +489,13 @@ class Image2Array(object):
                     t_imgs = imgs.transpose((3, 0, 1, 2))  # cthw
             results['imgs'] = t_imgs
         else:
-            np_imgs = np.stack(imgs).astype('float32')
+            t_imgs = np.stack(imgs).astype('float32')
             if self.transpose:
                 if self.data_format == 'tchw':
-                    np_imgs = np_imgs.transpose(0, 3, 1, 2)  # tchw
+                    t_imgs = t_imgs.transpose(0, 3, 1, 2)  # tchw
                 else:
-                    np_imgs = np_imgs.transpose(3, 0, 1, 2)  # cthw
-            results['imgs'] = np_imgs
+                    t_imgs = t_imgs.transpose(3, 0, 1, 2)  # cthw
+            results['imgs'] = t_imgs
         return results
 
 
@@ -834,20 +848,24 @@ class UniformCrop:
             img_h, img_w = imgs[0].shape[:2]
 
         crop_w, crop_h = self.target_size
-        if img_h > img_w:
+        if crop_h == img_h:
             w_step = (img_w - crop_w) // 2
             offsets = [
                 (0, 0),
                 (w_step * 2, 0),
                 (w_step, 0),
             ]
-        else:
+        elif crop_w == img_w:
             h_step = (img_h - crop_h) // 2
             offsets = [
                 (0, 0),
                 (0, h_step * 2),
                 (0, h_step),
             ]
+        else:
+            raise ValueError(
+                f"img_w({img_w}) == crop_w({crop_w}) or img_h({img_h}) == crop_h({crop_h})"
+            )
         img_crops = []
         if 'backend' in results and results['backend'] == 'pyav':  # [c,t,h,w]
             for x_offset, y_offset in offsets:

@@ -81,10 +81,10 @@ class RecognizerTransformer(BaseRecognizer):
         return cls_score
 
     def _average_view(self, cls_score, avg_type='score'):
-        """Combine the scores of different views
+        """Combine the predicted results of different views
 
         Args:
-            cls_score (list): Scores of multiple views
+            cls_score (list): results of multiple views
             avg_type (str, optional): Average calculation method. Defaults to 'score'.
         """
         assert avg_type in ['score', 'prob'], \
