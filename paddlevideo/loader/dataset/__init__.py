@@ -28,6 +28,6 @@ from .MRI_SlowFast import SFMRIDataset
 __all__ = [
     'VideoDataset', 'FrameDataset', 'SFVideoDataset', 'BMNDataset',
     'FeatureDataset', 'SkeletonDataset', 'AVADataset', 'MonoDataset',
-    'MSRVTTDataset', 'ActBertDataset', 'MRIDataset', 'SFMRIDataset'，
-    'DavisDataset'
+    'MSRVTTDataset', 'ActBertDataset', 'DavisDataset', 'MRIDataset',
+    'SFMRIDataset'，
 ]
