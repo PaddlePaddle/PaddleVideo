@@ -16,6 +16,8 @@ from .adds_head import AddsHead
 from .attention_lstm_head import AttentionLstmHead
 from .base import BaseHead
 from .bbox_head import BBoxHeadAVA
+from .cfbi_head import CollaborativeEnsemblerMS
+from .pptimesformer_head import ppTimeSformerHead
 from .pptsm_head import ppTSMHead
 from .pptsn_head import ppTSNHead
 from .roi_head import AVARoIHead
@@ -24,13 +26,12 @@ from .slowfast_head import SlowFastHead
 from .stgcn_head import STGCNHead
 from .timesformer_head import TimeSformerHead
 from .transnetv2_head import TransNetV2Head
-from .cfbi_head import CollaborativeEnsemblerMS
 from .tsm_head import TSMHead
 from .tsn_head import TSNHead
 
 __all__ = [
     'BaseHead', 'TSNHead', 'TSMHead', 'ppTSMHead', 'ppTSNHead', 'SlowFastHead',
-    'AttentionLstmHead', 'TimeSformerHead', 'STGCNHead', 'TransNetV2Head',
-    'SingleRoIExtractor3D', 'AVARoIHead', 'BBoxHeadAVA', 'AddsHead',
-    'CollaborativeEnsemblerMS'
+    'AttentionLstmHead', 'TimeSformerHead', 'ppTimeSformerHead', 'STGCNHead',
+    'TransNetV2Head', 'SingleRoIExtractor3D', 'AVARoIHead', 'BBoxHeadAVA',
+    'AddsHead', 'CollaborativeEnsemblerMS'
 ]
