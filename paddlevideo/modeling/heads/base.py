@@ -126,9 +126,8 @@ class BaseHead(nn.Layer):
             main idea is to split smooth loss into uniform distribution loss
             and hard label calculation
             """
-            num_classes = scores.shape[-1]
             hard_loss = (1.0 - self.ls_eps) * F.cross_entropy(scores, labels)
-            uniform_loss = (self.ls_eps / num_classes) * (
+            uniform_loss = (self.ls_eps / self.num_classes) * (
                 -F.log_softmax(scores, -1).sum(-1).mean(0))
             loss = hard_loss + uniform_loss
         else:
