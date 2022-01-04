@@ -37,5 +37,5 @@ __all__ = [
     'GetVideoLabel', 'Cutmix', 'CenterCrop', 'RandomCrop', 'LoadFeat',
     'RandomCap', 'JitterScale', 'Iden', 'VideoMix', 'ColorJitter', 'RandomFlip',
     'ToArray', 'FeaturePadding', 'GetMatchMap', 'GroupRandomFlip', 'MultiCrop',
-    'SFMRI_DecodeSampler'
+    'SFMRI_DecodeSampler', 'MultiRestrictSize', 'MultiNorm'
 ]
