@@ -113,10 +113,29 @@ class BaseHead(nn.Layer):
             raise NotImplemented
 
     def label_smooth_loss(self, scores, labels, **kwargs):
-        labels = F.one_hot(labels, self.num_classes)
-        labels = F.label_smooth(labels, epsilon=self.ls_eps)
-        labels = paddle.squeeze(labels, axis=1)
-        loss = self.loss_func(scores, labels, soft_label=True, **kwargs)
+        """
+        Args:
+            scores (paddle.Tensor): [N, num_classes]
+            labels (paddle.Tensor): [N, ]
+        Returns:
+            paddle.Tensor: [1,]
+        """
+        if paddle.fluid.core.is_compiled_with_npu():
+            """
+            Designed for the lack of temporary operators of NPU,
+            main idea is to split smooth loss into uniform distribution loss
+            and hard label calculation
+            """
+            num_classes = scores.shape[-1]
+            hard_loss = (1.0 - self.ls_eps) * F.cross_entropy(scores, labels)
+            uniform_loss = (self.ls_eps / num_classes) * (
+                -F.log_softmax(scores, -1).sum(-1).mean(0))
+            loss = hard_loss + uniform_loss
+        else:
+            labels = F.one_hot(labels, self.num_classes)
+            labels = F.label_smooth(labels, epsilon=self.ls_eps)
+            labels = paddle.squeeze(labels, axis=1)
+            loss = self.loss_func(scores, labels, soft_label=True, **kwargs)
         return loss
 
     def get_acc(self, scores, labels, valid_mode):
