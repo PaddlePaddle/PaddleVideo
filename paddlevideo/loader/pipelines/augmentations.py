@@ -163,15 +163,25 @@ class CenterCrop(object):
         """
         imgs = results['imgs']
         ccrop_imgs = []
-        for img in imgs:
-            w, h = img.size
-            th, tw = self.target_size, self.target_size
-            assert (w >= self.target_size) and (h >= self.target_size), \
-                "image width({}) and height({}) should be larger than crop size".format(
-                    w, h, self.target_size)
+        th, tw = self.target_size, self.target_size
+
+        if 'backend' in results and results['backend'] == 'pyav':
+            h, w = imgs.shape[-2:]
             x1 = int(round((w - tw) / 2.0)) if self.do_round else (w - tw) // 2
             y1 = int(round((h - th) / 2.0)) if self.do_round else (h - th) // 2
-            ccrop_imgs.append(img.crop((x1, y1, x1 + tw, y1 + th)))
+            ccrop_imgs = imgs[:, :, y1:y1 + th, x1:x1 + tw]  # [C, T, th, tw]
+        else:
+            for img in imgs:
+                w, h = img.size
+                assert (w >= self.target_size) and (h >= self.target_size), \
+                    "image width({}) and height({}) should be larger than crop size".format(
+                        w, h, self.target_size)
+                x1 = int(round(
+                    (w - tw) / 2.0)) if self.do_round else (w - tw) // 2
+                y1 = int(round(
+                    (h - th) / 2.0)) if self.do_round else (h - th) // 2
+                ccrop_imgs.append(img.crop((x1, y1, x1 + tw, y1 + th)))
+
         results['imgs'] = ccrop_imgs
         return results
 
