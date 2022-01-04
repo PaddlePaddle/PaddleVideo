@@ -164,6 +164,12 @@ class ANETproposal(object):
 
         if self.verbose:
             print('[RESULTS] Performance on ActivityNet proposal task.')
+            with open("data/bmn/BMN_Test_results/auc_result.txt",
+                      "a") as text_file:
+                text_file.write(
+                    '\tArea Under the AR vs AN curve: {}% \n'.format(
+                        100. * float(area_under_curve) /
+                        proposals_per_video[-1]))
             print('\tArea Under the AR vs AN curve: {}%'.format(
                 100. * float(area_under_curve) / proposals_per_video[-1]))
 
@@ -282,7 +288,7 @@ class ANETproposal(object):
                 true_positives_tiou = score >= tiou
                 # Get number of proposals as a percentage of total retrieved.
                 pcn_proposals = np.minimum(
-                    (score.shape[1] * pcn_lst).astype(np.int), score.shape[1])
+                    (score.shape[1] * pcn_lst).astype(int), score.shape[1])
 
                 for j, nr_proposals in enumerate(pcn_proposals):
                     # Compute the number of matches for each percentage of the proposals

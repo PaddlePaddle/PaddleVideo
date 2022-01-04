@@ -79,7 +79,7 @@ python3.7 main.py --test -c configs/multimodal/actbert/actbert_msrvtt.yaml -w Ac
 ```
 
 
-Accuracy on MSR-VTT:
+Metrics on MSR-VTT:
 
 | R@1 | R@5 | R@10 | Median R | Mean R | checkpoints |
 | :------: | :----------: | :----: | :----: | :----: | :----: |

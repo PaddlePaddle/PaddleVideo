@@ -26,6 +26,7 @@ from .mix import Cutmix, Mixup, VideoMix
 from .multimodal import FeaturePadding, RandomCap, RandomMask, Tokenize
 from .sample import Sampler
 from .sample_ava import *
+from .segmentation import MultiRestrictSize, MultiNorm
 from .skeleton_pipeline import AutoPadding, Iden, SkeletonNorm
 from .decode_sampler_MRI import SFMRI_DecodeSampler
 
