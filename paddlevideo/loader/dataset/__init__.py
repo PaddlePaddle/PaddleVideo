@@ -23,9 +23,12 @@ from .oxford import MonoDataset
 from .skeleton import SkeletonDataset
 from .slowfast_video import SFVideoDataset
 from .video import VideoDataset
+from .MRI import MRIDataset
+from .MRI_SlowFast import SFMRIDataset
 
 __all__ = [
     'VideoDataset', 'FrameDataset', 'SFVideoDataset', 'BMNDataset',
     'FeatureDataset', 'SkeletonDataset', 'AVADataset', 'MonoDataset',
-    'MSRVTTDataset', 'ActBertDataset', 'DavisDataset'
+    'MSRVTTDataset', 'ActBertDataset', 'DavisDataset', 'MRIDataset',
+    'SFMRIDataset'
 ]
