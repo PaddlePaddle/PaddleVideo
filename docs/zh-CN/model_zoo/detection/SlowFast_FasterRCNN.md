@@ -71,78 +71,38 @@ python main.py --test \
 
 对于画面中人的检测，可利用[PaddleDetection](https://github.com/PaddlePaddle/PaddleDetection)中的模型。
 
-在进行目标检测前，先将视频抽帧，下面代码展示了每秒抽一帧实现：
-
+PaddleDetection安装：
 ```
-import os
-import os.path as osp
-import cv2
+# 安装其他依赖
+cd PaddleDetection/
+pip install -r requirements.txt
 
-timeRate = 1  # 截取视频帧的时间间隔（这里是每隔1秒截取一帧）
-
-def frame_extraction(video_path,target_dir):
-    """Extract frames given video_path.
-    Args:
-        video_path (str): The video_path.
-    """
-
-    # 保存帧的目录不存在，创建
-    if not os.path.exists(target_dir):
-        os.makedirs(target_dir, exist_ok=True)
-
-    # Should be able to handle videos up to several hours
-    frame_tmpl = osp.join(target_dir, '{:05d}.jpg')
-    vid = cv2.VideoCapture(video_path)
-
-    FPS = vid.get(5)
-    print("视频帧率：",FPS)
-
-    frameRate = int(FPS) * timeRate #每隔多少帧保存一个，采样率
-
-    frames = []
-    frame_paths = []
-
-    flag, frame = vid.read()
-    cnt = 0
-    index = 1
-    while flag:
-        if cnt%frameRate == 0: #间隔采样
-           frames.append(frame)
-           frame_path = frame_tmpl.format(index)
-           frame_paths.append(frame_path)
-           cv2.imwrite(frame_path, frame)
-           index+=1
-        cnt += 1
-        flag, frame = vid.read()
-    return frame_paths, frames
-
-video_path = './data/1j20qq1JyX4.mp4'
-target_dir = './data/tmp/1j20qq1JyX4'
-frame_paths, frames = frame_extraction(video_path,target_dir)
-print("抽帧总数：",len(frames))
+# 编译安装paddledet
+python setup.py install
 ```
 
-通过PaddleDetection提供的训练好的模型即可得到抽取的视频帧中的目标。
-
-SlowFast_FasterRCNN模型需要输入密集采样的视频帧数据，通过下面的命令提取视频密集帧：
-
-1. 第一个参数是抽帧结果存放路径；
-1. 第二个参数是视频路径；
-1. 第三个参数是FPS。
-
+下载训练好的检测模型参数：
 ```
-bash extract_video_frames.sh './data/frames_30fps/1j20qq1JyX4' \
- './data/1j20qq1JyX4.mp4' 30
+wget https://paddledet.bj.bcebos.com/models/faster_rcnn_r50_fpn_1x_coco.pdparams
 ```
 
-基于以FPS抽帧的结果和检测结果进行动作识别：
-- detection_result_dir 检测结果存放路径；
-- frame_dir 抽帧结果存放路径。
+导出模型：
 
 ```
-python tools/infer.py \
+!python tools/export_model.py \
   -c configs/detection/ava/ava.yaml \
-  -w ./output/AVA_SlowFast_FastRcnn/AVA_SlowFast_FastRcnn_best.pdparams \
-  --detection_result_dir ./data/detection_result/1j20qq1JyX4 \
-  --frame_dir ./data/frames_30fps/1j20qq1JyX4
+  -o inference_output \
+  -p output/AVA_SlowFast_FastRcnn/AVA_SlowFast_FastRcnn_best.pdparams
+```
+
+基于导出的模型做推理：
+
+```
+python tools/predict.py \
+    -c configs/detection/ava/ava.yaml \
+    --input_file "data/-IELREHXDEMO.mp4" \
+    --model_file "inference_output/AVA_SlowFast_FastRcnn.pdmodel" \
+    --params_file "inference_output/AVA_SlowFast_FastRcnn.pdiparams" \
+    --use_gpu=True \
+    --use_tensorrt=False
 ```

@@ -71,78 +71,34 @@ The action detection of this project is divided into two stages. In the first st
 
 For human detection，you can use the trained model in [PaddleDetection](https://github.com/PaddlePaddle/PaddleDetection).
 
-Before object detection, extract frames from video. The following code shows the realization of extracting one frame per secong:
-
+Install PaddleDetection:
 ```
-import os
-import os.path as osp
-import cv2
-
-timeRate = 1  # 1 frame per second
-
-def frame_extraction(video_path,target_dir):
-    """Extract frames given video_path.
-    Args:
-        video_path (str): The video_path.
-    """
-
-    # if dir not exists, create target dir
-    if not os.path.exists(target_dir):
-        os.makedirs(target_dir, exist_ok=True)
-
-    # Should be able to handle videos up to several hours
-    frame_tmpl = osp.join(target_dir, '{:05d}.jpg')
-    vid = cv2.VideoCapture(video_path)
-
-    FPS = vid.get(5)
-    print("FPS",FPS)
-
-    frameRate = int(FPS) * timeRate #每隔多少帧保存一个，采样率
-
-    frames = []
-    frame_paths = []
-
-    flag, frame = vid.read()
-    cnt = 0
-    index = 1
-    while flag:
-        if cnt%frameRate == 0: #sample
-           frames.append(frame)
-           frame_path = frame_tmpl.format(index)
-           frame_paths.append(frame_path)
-           cv2.imwrite(frame_path, frame)
-           index+=1
-        cnt += 1
-        flag, frame = vid.read()
-    return frame_paths, frames
-
-video_path = './data/1j20qq1JyX4.mp4'
-target_dir = './data/tmp/1j20qq1JyX4'
-frame_paths, frames = frame_extraction(video_path,target_dir)
-print("抽帧总数：",len(frames))
+cd PaddleDetection/
+pip install -r requirements.txt
+!python setup.py install
 ```
 
-The persons in the extracted video frame can be obtained through the trained model provided by PaddleDetection.
-
-The SlowFast_FasterRCNN model needs to input densely sampled video frame data, and extract the dense video frames through the following command:
-
-1. First params: the dir of extracted frames；
-1. Second params: the path of video;
-1. Third params: FPS.
-
+Download detection model:
 ```
-bash extract_video_frames.sh './data/frames_30fps/1j20qq1JyX4' \
- './data/1j20qq1JyX4.mp4' 30
+# faster_rcnn_r50_fpn_1x_coco as an example
+wget https://paddledet.bj.bcebos.com/models/faster_rcnn_r50_fpn_1x_coco.pdparams
 ```
 
-Action detection based on the result of FPS frame extraction and the detection result:
-- detection_result_dir: the dir of detection result;
-- frame_dir: the dir of extracted frames.
-
+export model:
 ```
-python tools/infer.py \
+python tools/export_model.py \
   -c configs/detection/ava/ava.yaml \
-  -w ./output/AVA_SlowFast_FastRcnn/AVA_SlowFast_FastRcnn_best.pdparams \
-  --detection_result_dir ./data/detection_result/1j20qq1JyX4 \
-  --frame_dir ./data/frames_30fps/1j20qq1JyX4
+  -o inference_output \
+  -p output/AVA_SlowFast_FastRcnn/AVA_SlowFast_FastRcnn_best.pdparams
+```
+
+inference based on the exported model:
+```
+python tools/predict.py \
+    -c configs/detection/ava/ava.yaml \
+    --input_file "data/-IELREHXDEMO.mp4" \
+    --model_file "inference_output/AVA_SlowFast_FastRcnn.pdmodel" \
+    --params_file "inference_output/AVA_SlowFast_FastRcnn.pdiparams" \
+    --use_gpu=True \
+    --use_tensorrt=False
 ```
