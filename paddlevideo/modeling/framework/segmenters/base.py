@@ -31,15 +31,17 @@ class BaseSegmenter(nn.Layer):
 
     """
 
-    def __init__(self, backbone=None, head=None):
+    def __init__(self, backbone=None, head=None, loss=None):
 
         super().__init__()
+        # build backbone
         if backbone is not None:
             self.backbone = builder.build_backbone(backbone)
             if hasattr(self.backbone, 'init_weights'):
                 self.backbone.init_weights()
         else:
             self.backbone = None
+        # build head
         if head is not None:
             self.head_name = head.name
             self.head = builder.build_head(head)
@@ -47,6 +49,14 @@ class BaseSegmenter(nn.Layer):
                 self.head.init_weights()
         else:
             self.head = None
+        # build loss
+        if loss is not None:
+            self.loss_name = loss.name
+            self.loss = builder.build_loss(loss)
+            if hasattr(self.loss, 'init_weights'):
+                self.loss.init_weights()
+        else:
+            self.loss = None
 
     def forward(self, data_batch, mode='infer'):
         """

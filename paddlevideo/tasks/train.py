@@ -267,13 +267,13 @@ def train_model(cfg,
                 outputs = model(data, mode='valid')
 
                 if cfg.METRIC.name == "SegmentationMetric":
-                    Metric.update(i, data, outputs)
+                    Metric.update(i, data, outputs['predict'])
 
                 if cfg.MODEL.framework == "FastRCNN":
                     results.extend(outputs)
 
                 #log_record
-                if cfg.MODEL.framework != "FastRCNN" and cfg.METRIC.name != "SegmentationMetric":
+                if cfg.MODEL.framework != "FastRCNN":
                     for name, value in outputs.items():
                         if name in record_list:
                             record_list[name].update(value, batch_size)
@@ -306,6 +306,13 @@ def train_model(cfg,
                     best = record_list["mAP@0.5IOU"].val
                     best_flag = True
                 return best, best_flag
+
+            if cfg.METRIC.name == "SegmentationMetric":
+                    record_list.update(Metric.accumulate())
+                    if record_list["F1@0.50"] > best:
+                        best = record_list["F1@0.50"]
+                        best_flag = True
+                    return best, best_flag
 
             # forbest2, cfg.MODEL.framework != "FastRCNN":
             for top_flag in ['hit_at_one', 'top1', 'rmse']:
@@ -348,6 +355,10 @@ def train_model(cfg,
                 elif cfg.MODEL.framework == "DepthEstimator":
                     logger.info(
                         f"Already save the best model (rmse){int(best * 10000) / 10000}"
+                    )
+                elif cfg.MODEL.framework in ['MSTCN','ASRF']:
+                    logger.info(
+                        f"Already save the best model (F1@0.50){int(best * 10000) / 10000}"
                     )
                 else:
                     logger.info(

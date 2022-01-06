@@ -24,7 +24,7 @@ logger = get_logger("paddlevideo")
 
 
 @DATASETS.register()
-class BreakfastDataset(BaseDataset):
+class ASRFDataset(BaseDataset):
     """Video dataset for action segmentation.
     """
 
@@ -33,24 +33,14 @@ class BreakfastDataset(BaseDataset):
         file_path,
         pipeline,
         feature_path,
-        gt_path,
-        actions_map_file_path,
+        label_path,
+        boundary_path,
         **kwargs,
     ):
         super().__init__(file_path, pipeline, **kwargs)
-        self.gt_path = gt_path
-        self.actions_map_file_path = actions_map_file_path
+        self.label_path = label_path
+        self.boundary_path = boundary_path
         self.feature_path = feature_path
-
-        # actions dict generate
-        file_ptr = open(self.actions_map_file_path, 'r')
-        actions = file_ptr.read().split('\n')[:-1]
-        file_ptr.close()
-        self.actions_dict = dict()
-        for a in actions:
-            self.actions_dict[a.split()[1]] = int(a.split()[0])
-
-        self.num_classes = len(self.actions_dict.keys())
 
     def load_file(self):
         """Load index file to get video information."""
@@ -70,19 +60,21 @@ class BreakfastDataset(BaseDataset):
         video_feat = np.load(feat_file_path)
 
         # load label
-        target_file_path = os.path.join(self.gt_path, video_name)
-        file_ptr = open(target_file_path, 'r')
-        content = file_ptr.read().split('\n')[:-1]
-        classes = np.zeros(min(np.shape(video_feat)[1], len(content)))
-        for i in range(len(classes)):
-            classes[i] = self.actions_dict[content[i]]
-        # classes = classes * (-100)
+        file_name = video_name.split('.')[0] + ".npy"
+        label_file_path = os.path.join(self.label_path, file_name)
+        label = np.load(label_file_path).astype(np.int64)
+
+        # load boundary
+        file_name = video_name.split('.')[0] + ".npy"
+        boundary_file_path = os.path.join(self.boundary_path, file_name)
+        boundary = np.expand_dims(np.load(boundary_file_path),axis=0).astype(np.float32)
 
         results['video_feat'] = copy.deepcopy(video_feat)
-        results['video_gt'] = copy.deepcopy(classes)
+        results['video_label'] = copy.deepcopy(label)
+        results['video_boundary'] = copy.deepcopy(boundary)
 
         results = self.pipeline(results)
-        return results['video_feat'], results['video_gt']
+        return results['video_feat'], results['video_label'], results['video_boundary']
 
     def prepare_test(self, idx):
         """TEST: Prepare the data for test given the index."""
@@ -95,16 +87,18 @@ class BreakfastDataset(BaseDataset):
         video_feat = np.load(feat_file_path)
 
         # load label
-        target_file_path = os.path.join(self.gt_path, video_name)
-        file_ptr = open(target_file_path, 'r')
-        content = file_ptr.read().split('\n')[:-1]
-        classes = np.zeros(min(np.shape(video_feat)[1], len(content)))
-        for i in range(len(classes)):
-            classes[i] = self.actions_dict[content[i]]
-        # classes = classes * (-100)
+        file_name = video_name.split('.')[0] + ".npy"
+        label_file_path = os.path.join(self.label_path, file_name)
+        label = np.load(label_file_path).astype(np.int64)
+
+        # load boundary
+        file_name = video_name.split('.')[0] + ".npy"
+        boundary_file_path = os.path.join(self.boundary_path, file_name)
+        boundary = np.expand_dims(np.load(boundary_file_path),axis=0).astype(np.float32)
 
         results['video_feat'] = copy.deepcopy(video_feat)
-        results['video_gt'] = copy.deepcopy(classes)
+        results['video_label'] = copy.deepcopy(label)
+        results['video_boundary'] = copy.deepcopy(boundary)
 
         results = self.pipeline(results)
-        return results['video_feat'], results['video_gt']
+        return results['video_feat'], results['video_label'], results['video_boundary']

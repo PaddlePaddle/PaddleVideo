@@ -53,13 +53,21 @@ class MSTCN(BaseSegmenter):
     def val_step(self, data_batch):
         """Validating setp.
         """
-        video_feat, _ = data_batch
+        video_feat, video_gt = data_batch
 
         # call forward
         output = self.forward_net(video_feat)
+        loss = 0.
+        for i in range(len(output)):
+            loss += self.head.loss(output[i], video_gt)
+        
         predicted = paddle.argmax(output[-1], axis=1)
         predicted = paddle.squeeze(predicted)
-        return predicted
+
+        outputs_dict = dict()
+        outputs_dict['loss'] = loss
+        outputs_dict['predict'] = predicted
+        return outputs_dict
 
     def test_step(self, data_batch):
         """Testing setp.

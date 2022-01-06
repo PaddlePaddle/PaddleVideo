@@ -30,14 +30,11 @@ class SegmentationSampler(object):
         self.sample_rate = sample_rate
 
     def __call__(self, results):
-        video_feat = results['video_feat']
-        target = results['video_gt']
-
-        video_feat = video_feat[:, ::self.sample_rate]
-        if target is not None:
-            target = target[::self.sample_rate]
-
-        results['video_feat'] = copy.deepcopy(video_feat)
-        results['video_gt'] = paddle.to_tensor(copy.deepcopy(target),
-                                               dtype='int64')
+        for key, data in results.items():
+            if len(data.shape) == 1:
+                data = data[::self.sample_rate]
+                results[key] = copy.deepcopy(data)
+            else:
+                data = data[:, ::self.sample_rate]
+                results[key] = copy.deepcopy(data)
         return results

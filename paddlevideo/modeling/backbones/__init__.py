@@ -26,11 +26,12 @@ from .transnetv2 import TransNetV2
 from .vit import VisionTransformer
 from .vit_tweaks import VisionTransformer_tweaks
 from .ms_tcn import MSTCN
+from .asrf import ASRF
 from .cfbi import CFBI
 
 __all__ = [
     'ResNet', 'ResNetTSM', 'ResNetTweaksTSM', 'ResNetSlowFast', 'BMN',
     'ResNetTweaksTSN', 'VisionTransformer', 'STGCN', 'AGCN', 'TransNetV2',
     'ADDS_DepthNet', 'VisionTransformer_tweaks', 'BertForMultiModalPreTraining',
-    'CFBI', 'MSTCN'
+    'CFBI', 'MSTCN', 'ASRF'
 ]

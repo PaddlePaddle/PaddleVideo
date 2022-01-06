@@ -19,6 +19,33 @@ from paddlevideo.utils import get_logger
 
 logger = get_logger("paddlevideo")
 
+def argrelmax(prob, threshold=0.7):
+    """
+    Calculate arguments of relative maxima.
+    prob: np.array. boundary probability maps distributerd in [0, 1]
+    prob shape is (T)
+    ignore the peak whose value is under threshold
+
+    Return:
+        Index of peaks for each batch
+    """
+    # ignore the values under threshold
+    prob[prob < threshold] = 0.0
+
+    # calculate the relative maxima of boundary maps
+    # treat the first frame as boundary
+    peak = np.concatenate(
+        [
+            np.ones((1), dtype=np.bool),
+            (prob[:-2] < prob[1:-1]) & (prob[2:] < prob[1:-1]),
+            np.zeros((1), dtype=np.bool),
+        ],
+        axis=0,
+    )
+
+    peak_idx = np.where(peak)[0].tolist()
+
+    return peak_idx
 
 def get_labels_start_end_time(frame_wise_labels, bg_class=["background"]):
     labels = []
@@ -110,7 +137,9 @@ class SegmentationMetric(BaseMetric):
                  batch_size,
                  overlap,
                  actions_map_file_path,
-                 log_interval=1):
+                 log_interval=1,
+                 tolerance=5,
+                 boundary_threshold=0.7):
         """prepare for metrics
         """
         super().__init__(data_size, batch_size, log_interval)
@@ -122,6 +151,7 @@ class SegmentationMetric(BaseMetric):
         for a in actions:
             self.actions_dict[a.split()[1]] = int(a.split()[0])
 
+        # cls score
         self.overlap = overlap
         self.overlap_len = len(overlap)
 
@@ -132,6 +162,17 @@ class SegmentationMetric(BaseMetric):
         self.total_edit = 0
         self.total_frame = 0
         self.total_video = 0
+
+        # boundary score
+        # max distance of the frame which can be regarded as correct
+        self.tolerance = tolerance
+        # threshold of the boundary value which can be regarded as action boundary
+        self.boundary_threshold = boundary_threshold
+        self.tp = 0.0  # true positive
+        self.fp = 0.0  # false positive
+        self.fn = 0.0  # false negative
+        self.n_correct = 0.0
+        self.n_frames = 0.0
 
     def update(self, batch_id, data, outputs):
         """update metrics during each iter
@@ -157,6 +198,7 @@ class SegmentationMetric(BaseMetric):
             ]))
         gt_content = list(gt_content)
 
+        # cls metric
         tp, fp, fn = np.zeros(self.overlap_len), np.zeros(
             self.overlap_len), np.zeros(self.overlap_len)
 
@@ -192,30 +234,44 @@ class SegmentationMetric(BaseMetric):
         # accumulate
         self.total_video += 1
 
-        Acc = 100 * float(correct) / total
-        Edit = (1.0 * edit) / 1.0
-        Fscore = dict()
-        for s in range(self.overlap_len):
-            precision = tp[s] / float(tp[s] + fp[s])
-            recall = tp[s] / float(tp[s] + fn[s])
+        # boundary metric
+        # ignore invalid frames
 
-            f1 = 2.0 * (precision * recall) / (precision + recall)
+        pred_idx = argrelmax(outputs_np, threshold=self.boundary_threshold)
+        gt_idx = argrelmax(gt_np, threshold=self.boundary_threshold)
 
-            f1 = np.nan_to_num(f1) * 100
-            Fscore[self.overlap[s]] = f1
+        n_frames = outputs_np.shape[0]
+        tp = 0.0
+        fp = 0.0
+        fn = 0.0
 
-        # preds ensemble
-        # if batch_id % self.log_interval == 0:
-        #     logger.info("batch_id:[{:d}] model performence".format(batch_id))
-        #     logger.info("Acc: {:.4f}".format(Acc))
-        #     logger.info('Edit: {:.4f}'.format(Edit))
-        #     for s in range(len(self.overlap)):
-        #         logger.info('F1@{:0.2f}: {:.4f}'.format(
-        #             self.overlap[s], Fscore[self.overlap[s]]))
+        hits = np.zeros(len(gt_idx))
+
+        # calculate true positive, false negative, false postive, true negative
+        for i in range(len(pred_idx)):
+            dist = np.abs(np.array(gt_idx) - pred_idx[i])
+            min_dist = np.min(dist)
+            idx = np.argmin(dist)
+
+            if min_dist <= self.tolerance and hits[idx] == 0:
+                tp += 1
+                hits[idx] = 1
+            else:
+                fp += 1
+
+        fn = len(gt_idx) - sum(hits)
+        tn = n_frames - tp - fp - fn
+
+        self.tp += tp
+        self.fp += fp
+        self.fn += fn
+        self.n_frames += n_frames
+        self.n_correct += tp + tn
 
     def accumulate(self):
         """accumulate metrics when finished all iters.
         """
+        # cls metric
         Acc = 100 * float(self.total_correct) / self.total_frame
         Edit = (1.0 * self.total_edit) / self.total_video
         Fscore = dict()
@@ -230,15 +286,44 @@ class SegmentationMetric(BaseMetric):
             f1 = np.nan_to_num(f1) * 100
             Fscore[self.overlap[s]] = f1
 
+        # boundary meric
+        # accuracy
+        boundary_Acc = 100 * self.n_correct / self.n_frames
+
+        # Boudnary F1 Score
+        b_precision = self.tp / float(self.tp + self.fp)
+        b_recall = self.tp / float(self.tp + self.fn)
+
+        f1s = 2.0 * (b_precision * b_recall) / (b_precision + b_recall + 1e-7)
+        f1s = np.nan_to_num(f1s) * 100
+
+        # log metric
+        log_mertic_info = "dataset model performence: "
         # preds ensemble
-        logger.info("dataset model performence:")
-        logger.info("Acc: {:.4f}".format(Acc))
-        logger.info('Edit: {:.4f}'.format(Edit))
+        log_mertic_info += "Cls_Acc: {:.4f}, ".format(Acc)
+        log_mertic_info += 'Edit: {:.4f}, '.format(Edit)
         for s in range(len(self.overlap)):
-            logger.info('F1@{:0.2f}: {:.4f}'.format(self.overlap[s],
-                                                    Fscore[self.overlap[s]]))
+            log_mertic_info += 'F1@{:0.2f}: {:.4f}, '.format(self.overlap[s],
+                                                    Fscore[self.overlap[s]])
+        log_mertic_info += "Boundary_Acc: {:.4f}, ".format(boundary_Acc)
+        log_mertic_info += "Boundary_precision: {:.4f}, ".format(b_precision * 100)
+        log_mertic_info += "Boundary_recall: {:.4f}, ".format(b_recall * 100)
+        log_mertic_info += "Boundary_F1score: {:.4f}.".format(f1s)
+        logger.info(log_mertic_info)
+
+        # log metric
+        metric_dict = dict()
+        metric_dict['Cls_Acc'] = Acc
+        metric_dict['Edit'] = Edit
+        for s in range(len(self.overlap)):
+            metric_dict['F1@{:0.2f}'.format(self.overlap[s])] = Fscore[self.overlap[s]]
+        metric_dict['Boundary_Acc'] = boundary_Acc
+        metric_dict['Boundary_precision'] = b_precision * 100
+        metric_dict['Boundary_recall'] = b_recall * 100
+        metric_dict['Boundary_F1score'] = f1s
 
         # clear for next epoch
+        # cls
         self.total_tp = np.zeros(self.overlap_len)
         self.total_fp = np.zeros(self.overlap_len)
         self.total_fn = np.zeros(self.overlap_len)
@@ -246,3 +331,11 @@ class SegmentationMetric(BaseMetric):
         self.total_edit = 0
         self.total_frame = 0
         self.total_video = 0
+        # boundary
+        self.tp = 0.0  # true positive
+        self.fp = 0.0  # false positive
+        self.fn = 0.0  # false negative
+        self.n_correct = 0.0
+        self.n_frames = 0.0
+        
+        return metric_dict

@@ -28,10 +28,11 @@ from .cfbi_head import CollaborativeEnsemblerMS
 from .tsm_head import TSMHead
 from .tsn_head import TSNHead
 from .ms_tcn_head import MSTCNHead
+from .asrf_head import ASRFHead
 
 __all__ = [
     'BaseHead', 'TSNHead', 'TSMHead', 'ppTSMHead', 'ppTSNHead', 'SlowFastHead',
     'AttentionLstmHead', 'TimeSformerHead', 'STGCNHead', 'TransNetV2Head',
     'SingleRoIExtractor3D', 'AVARoIHead', 'BBoxHeadAVA', 'AddsHead',
-    'CollaborativeEnsemblerMS', 'MSTCNHead'
+    'CollaborativeEnsemblerMS', 'MSTCNHead', 'ASRFHead'
 ]

@@ -1,41 +1,59 @@
 MODEL: #MODEL field
-    framework: "MSTCN" #Mandatory, indicate the type of network, associate to the 'paddlevideo/modeling/framework/' .
+    framework: "ASRF" #Mandatory, indicate the type of network, associate to the 'paddlevideo/modeling/framework/' .
     backbone: #Mandatory, indicate the type of backbone, associate to the 'paddlevideo/modeling/backbones/' .
-        name: "MSTCN" #Mandatory, The name of backbone.
-        num_stages: 4 #Optional, the number of stages.
-        num_layers: 10 # Optional, the number of layers in each stage.
-        num_f_maps: 64 #Optional, the number of channels in each layers.
-        dim: 2048 #Optional, the number of channels in input feature.
-        num_classes: 48 #Optional, the number of classes to be classified.
+        name: "ASRF" #Mandatory, The name of backbone.
+        in_channel: 2048
+        num_features: 64
+        num_classes: 48
+        num_stages: 4
+        num_layers: 10
     head:
-        name: "MSTCNHead" #Mandatory, indicate the type of head, associate to the 'paddlevideo/modeling/heads'
-        num_classes: 48 #Optional, the number of classes to be classified.
-        in_channels: 64 #Optional, the number of channels in input feature.
+        name: "ASRFHead" #Mandatory, indicate the type of head, associate to the 'paddlevideo/modeling/heads'
+        num_classes: 48
+        num_features: 64
+        num_stages: 4
+        num_layers: 10
+        num_stages_asb: 4
+        num_stages_brb: 4
+    loss:
+        name: "ASRFLoss"
+        lambda_bound_loss: 0.1
+        ce: True
+        asl_focal: False
+        tmse: false
+        gstmse: True
+        asl_weight: True
+        ce_weight: 1.0
+        focal_weight: 1.0
+        tmse_weight: 0.15
+        gstmse_weight: 1.0
+    postprocessing_method: "refinement_with_boundary"
+    boundary_threshold: 0.5
 
 
 DATASET: #DATASET field
     batch_size: 1 #! Mandatory, bacth size， segmentation only support batch_size 1
-    num_workers: 1 #Mandatory, the number of subprocess on each GPU.
+    num_workers: 4 #Mandatory, the number of subprocess on each GPU.
     test_batch_size: 1
     test_num_workers: 0
     train:
-        format: "MSTCNDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
+        format: "ASRFDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
         file_path: "./data/breakfast/splits/train.split1.bundle" #Mandatory, train data index file path
         feature_path: "./data/breakfast/features"
-        gt_path: "./data/breakfast/groundTruth"
-        actions_map_file_path: "./data/breakfast/mapping.txt"
+        label_path: "./data/breakfast/gt_arr"
+        boundary_path: "./data/breakfast/gt_boundary_arr"
     valid:
-        format: "MSTCNDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
+        format: "ASRFDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
         file_path: "./data/breakfast/splits/test.split1.bundle" #Mandatory, valid data index file path
         feature_path: "./data/breakfast/features"
-        gt_path: "./data/breakfast/groundTruth"
-        actions_map_file_path: "./data/breakfast/mapping.txt"
+        label_path: "./data/breakfast/gt_arr"
+        boundary_path: "./data/breakfast/gt_boundary_arr"
     test:
-        format: "MSTCNDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
+        format: "ASRFDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
         file_path: "./data/breakfast/splits/test.split1.bundle" #Mandatory, test data index file path
         feature_path: "./data/breakfast/features"
-        gt_path: "./data/breakfast/groundTruth"
-        actions_map_file_path: "./data/breakfast/mapping.txt"
+        label_path: "./data/breakfast/gt_arr"
+        boundary_path: "./data/breakfast/gt_boundary_arr"
 
 PIPELINE: #PIPELINE field
     train: #Mandotary, indicate the pipeline to deal with the training data, associate to the 'paddlevideo/loader/pipelines/'

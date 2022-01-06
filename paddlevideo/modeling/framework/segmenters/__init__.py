@@ -12,5 +12,6 @@
 
 from .base import BaseSegmenter
 from .ms_tcn import MSTCN
+from .asrf import ASRF
 
-__all__ = ['BaseSegmenter', 'MSTCN']
+__all__ = ['BaseSegmenter', 'MSTCN', 'ASRF']

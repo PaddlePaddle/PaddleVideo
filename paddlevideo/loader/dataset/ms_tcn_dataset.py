@@ -24,7 +24,7 @@ logger = get_logger("paddlevideo")
 
 
 @DATASETS.register()
-class FiftySaladsDataset(BaseDataset):
+class MSTCNDataset(BaseDataset):
     """Video dataset for action segmentation.
     """
 
@@ -73,7 +73,7 @@ class FiftySaladsDataset(BaseDataset):
         target_file_path = os.path.join(self.gt_path, video_name)
         file_ptr = open(target_file_path, 'r')
         content = file_ptr.read().split('\n')[:-1]
-        classes = np.zeros(min(np.shape(video_feat)[1], len(content)))
+        classes = np.zeros(min(np.shape(video_feat)[1], len(content)), dtype='int64')
         for i in range(len(classes)):
             classes[i] = self.actions_dict[content[i]]
         # classes = classes * (-100)
