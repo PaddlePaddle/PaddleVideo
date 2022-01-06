@@ -26,6 +26,7 @@ from paddlevideo.utils import get_config
 
 
 def parse_args():
+
     def str2bool(v):
         return v.lower() in ("true", "t", "1")
 
@@ -147,6 +148,22 @@ def main():
     files = parse_file_paths(args.input_file)
 
     if model_name == 'TransNetV2':
+        for file in files:
+            inputs = InferenceHelper.preprocess(file)
+            outputs = []
+            for input in inputs:
+                # Run inference
+                for i in range(len(input_tensor_list)):
+                    input_tensor_list[i].copy_from_cpu(input)
+                predictor.run()
+                output = []
+                for j in range(len(output_tensor_list)):
+                    output.append(output_tensor_list[j].copy_to_cpu())
+                outputs.append(output)
+
+            # Post process output
+            InferenceHelper.postprocess(outputs)
+    elif model_name in ['MSTCN']:
         for file in files:
             inputs = InferenceHelper.preprocess(file)
             outputs = []

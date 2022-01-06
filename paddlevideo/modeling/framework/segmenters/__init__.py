@@ -9,18 +9,9 @@
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 
-from .base import BaseWeightedLoss
-from .bmn_loss import BMNLoss
-from .cross_entropy_loss import CrossEntropyLoss
-from .depth_loss import ADDSLoss
-from .transnetv2_loss import TransNetV2Loss
-from .actbert_loss import ActBertLoss
-from .asrf_loss import ASRFLoss
+from .base import BaseSegmenter
+from .ms_tcn import MSTCN
+from .asrf import ASRF
 
-__all__ = [
-    'CrossEntropyLoss', 'BMNLoss', 'TransNetV2Loss', 'ActBertLoss', 'ADDSLoss',
-    'BaseWeightedLoss', 'ASRFLoss'
-]
+__all__ = ['BaseSegmenter', 'MSTCN', 'ASRF']

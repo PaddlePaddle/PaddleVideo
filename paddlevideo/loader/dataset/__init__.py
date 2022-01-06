@@ -19,6 +19,9 @@ from .davis_dataset import DavisDataset
 from .feature import FeatureDataset
 from .frame import FrameDataset
 from .msrvtt import MSRVTTDataset
+from .actbert_dataset import ActBertDataset
+from .asrf_dataset import ASRFDataset
+from .ms_tcn_dataset import MSTCNDataset
 from .oxford import MonoDataset
 from .skeleton import SkeletonDataset
 from .slowfast_video import SFVideoDataset
@@ -30,5 +33,5 @@ __all__ = [
     'VideoDataset', 'FrameDataset', 'SFVideoDataset', 'BMNDataset',
     'FeatureDataset', 'SkeletonDataset', 'AVADataset', 'MonoDataset',
     'MSRVTTDataset', 'ActBertDataset', 'DavisDataset', 'MRIDataset',
-    'SFMRIDataset'
+    'SFMRIDataset', 'MSTCNDataset', 'ASRFDataset'
 ]

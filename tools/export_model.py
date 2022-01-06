@@ -139,6 +139,10 @@ def get_input_spec(cfg, model_name):
             ],
                       dtype='float32'),
         ]]
+    elif model_name in ['MSTCN']:
+        input_spec = [[
+            InputSpec(shape=[None, cfg.num_channels, None], dtype='float32'),
+        ]]
     elif model_name in ['ADDS']:
         input_spec = [[
             InputSpec(shape=[None, cfg.num_channels, cfg.height, cfg.width],

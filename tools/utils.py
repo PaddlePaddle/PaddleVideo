@@ -33,7 +33,7 @@ from paddlevideo.loader.pipelines import (
     AutoPadding, CenterCrop, DecodeSampler, FeatureDecoder, GroupResize,
     Image2Array, ImageDecoder, JitterScale, MultiCrop, Normalization,
     PackOutput, Sampler, Scale, SkeletonNorm, TenCrop, ToArray, UniformCrop,
-    VideoDecoder)
+    VideoDecoder, SegmentationSampler)
 from paddlevideo.metrics.bmn_metric import boundary_choose, soft_nms
 from paddlevideo.utils import Registry, build
 
@@ -104,6 +104,7 @@ def build_inference_helper(cfg):
 
 
 class Base_Inference_helper():
+
     def __init__(self,
                  num_seg=8,
                  seg_len=1,
@@ -160,6 +161,7 @@ class Base_Inference_helper():
 
 @INFERENCE.register()
 class ppTSM_Inference_helper(Base_Inference_helper):
+
     def __init__(self,
                  num_seg=8,
                  seg_len=1,
@@ -199,6 +201,7 @@ class ppTSM_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class ppTSN_Inference_helper(Base_Inference_helper):
+
     def __init__(self,
                  num_seg=25,
                  seg_len=1,
@@ -244,6 +247,7 @@ class ppTSN_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class BMN_Inference_helper(Base_Inference_helper):
+
     def __init__(self, feat_dim, dscale, tscale, result_path):
         self.feat_dim = feat_dim
         self.dscale = dscale
@@ -330,6 +334,7 @@ class BMN_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class TimeSformer_Inference_helper(Base_Inference_helper):
+
     def __init__(self,
                  num_seg=8,
                  seg_len=1,
@@ -373,6 +378,7 @@ class TimeSformer_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class SlowFast_Inference_helper(Base_Inference_helper):
+
     def __init__(self,
                  num_frames=32,
                  sampling_rate=2,
@@ -446,6 +452,7 @@ class SlowFast_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class STGCN_Inference_helper(Base_Inference_helper):
+
     def __init__(self,
                  num_channels,
                  window_size,
@@ -476,7 +483,57 @@ class STGCN_Inference_helper(Base_Inference_helper):
 
 
 @INFERENCE.register()
+class MSTCN_Inference_helper(Base_Inference_helper):
+
+    def __init__(self, num_channels, actions_map_file_path):
+        self.num_channels = num_channels
+        file_ptr = open(actions_map_file_path, 'r')
+        actions = file_ptr.read().split('\n')[:-1]
+        file_ptr.close()
+        self.actions_dict = dict()
+        for a in actions:
+            self.actions_dict[a.split()[1]] = int(a.split()[0])
+
+    def preprocess(self, input_file):
+        """
+        input_file: str, file path
+        return: list
+        """
+        assert os.path.isfile(input_file) is not None, "{0} not exists".format(
+            input_file)
+        self.filename = input_file.split('/')[-1].split('.')[0]
+        data = np.load(input_file)
+        results = {'video_feat': data, 'video_gt': None}
+        ops = []
+        for op in ops:
+            results = op(results)
+
+        res = np.expand_dims(results['video_feat'], axis=0).copy()
+        return [res]
+
+    def postprocess(self, output, print_output=True):
+        for outputs in output:
+            output_np = outputs[0]
+            recognition = []
+            for i in range(output_np.shape[0]):
+                recognition = np.concatenate((recognition, [
+                    list(self.actions_dict.keys())[list(
+                        self.actions_dict.values()).index(output_np[i])]
+                ]))
+            recog_content = list(recognition)
+            recog_content = [line + "\n" for line in recog_content]
+            f = open("./inference/" + self.filename + "_inference_result.txt",
+                     "w")
+            f.writelines(recog_content)
+            f.close
+            print("file write in : ./inference/" + self.filename +
+                  "_inference_result.txt")
+            print("Write result success!")
+
+
+@INFERENCE.register()
 class AttentionLSTM_Inference_helper(Base_Inference_helper):
+
     def __init__(
             self,
             num_classes,  #Optional, the number of classes to be classified.
@@ -517,6 +574,7 @@ class AttentionLSTM_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class TransNetV2_Inference_helper():
+
     def __init__(self,
                  num_frames,
                  height,
@@ -689,6 +747,7 @@ class TransNetV2_Inference_helper():
 
 @INFERENCE.register()
 class ADDS_Inference_helper(Base_Inference_helper):
+
     def __init__(self,
                  frame_idxs=[0],
                  num_scales=4,
