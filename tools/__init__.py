@@ -14,3 +14,4 @@
 
 from . import utils
 from .paddlevideo_clas import PaddleVideo
+from . import ava_predict

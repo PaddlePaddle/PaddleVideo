@@ -24,6 +24,7 @@ import paddle
 import paddle.nn.functional as F
 import pandas
 from PIL import Image
+import shutil
 
 __dir__ = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.abspath(os.path.join(__dir__, '../')))
@@ -36,6 +37,11 @@ from paddlevideo.loader.pipelines import (
     VideoDecoder)
 from paddlevideo.metrics.bmn_metric import boundary_choose, soft_nms
 from paddlevideo.utils import Registry, build
+from paddlevideo.loader.builder import build_pipeline
+from paddlevideo.utils import get_config
+from paddlevideo.metrics.ava_utils import read_labelmap
+
+from ava_predict import frame_extraction, detection_inference, get_detection_result, get_timestep_result, pack_result, visualize
 
 INFERENCE = Registry('inference')
 
@@ -104,6 +110,7 @@ def build_inference_helper(cfg):
 
 
 class Base_Inference_helper():
+
     def __init__(self,
                  num_seg=8,
                  seg_len=1,
@@ -160,6 +167,7 @@ class Base_Inference_helper():
 
 @INFERENCE.register()
 class ppTSM_Inference_helper(Base_Inference_helper):
+
     def __init__(self,
                  num_seg=8,
                  seg_len=1,
@@ -199,6 +207,7 @@ class ppTSM_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class ppTSN_Inference_helper(Base_Inference_helper):
+
     def __init__(self,
                  num_seg=25,
                  seg_len=1,
@@ -244,6 +253,7 @@ class ppTSN_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class BMN_Inference_helper(Base_Inference_helper):
+
     def __init__(self, feat_dim, dscale, tscale, result_path):
         self.feat_dim = feat_dim
         self.dscale = dscale
@@ -330,6 +340,7 @@ class BMN_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class TimeSformer_Inference_helper(Base_Inference_helper):
+
     def __init__(self,
                  num_seg=8,
                  seg_len=1,
@@ -373,6 +384,7 @@ class TimeSformer_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class SlowFast_Inference_helper(Base_Inference_helper):
+
     def __init__(self,
                  num_frames=32,
                  sampling_rate=2,
@@ -446,6 +458,7 @@ class SlowFast_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class STGCN_Inference_helper(Base_Inference_helper):
+
     def __init__(self,
                  num_channels,
                  window_size,
@@ -477,6 +490,7 @@ class STGCN_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class AttentionLSTM_Inference_helper(Base_Inference_helper):
+
     def __init__(
             self,
             num_classes,  #Optional, the number of classes to be classified.
@@ -517,6 +531,7 @@ class AttentionLSTM_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class TransNetV2_Inference_helper():
+
     def __init__(self,
                  num_frames,
                  height,
@@ -689,6 +704,7 @@ class TransNetV2_Inference_helper():
 
 @INFERENCE.register()
 class ADDS_Inference_helper(Base_Inference_helper):
+
     def __init__(self,
                  frame_idxs=[0],
                  num_scales=4,
@@ -782,3 +798,227 @@ class ADDS_Inference_helper(Base_Inference_helper):
                           255).astype(np.uint8)
         im = Image.fromarray(colormapped_im)
         return im
+
+
+@INFERENCE.register()
+class AVA_SlowFast_FastRCNN_Inference_helper(Base_Inference_helper):
+
+    def __init__(self,
+                 detection_model_name,
+                 detection_model_weights,
+                 config_file_path,
+                 predict_stepsize=8,
+                 output_stepsize=4,
+                 output_fps=6,
+                 out_filename='ava_det_demo.mp4',
+                 num_frames=32,
+                 alpha=4,
+                 target_size=256):
+        self.detection_model_name = detection_model_name
+        self.detection_model_weights = detection_model_weights
+
+        self.config = get_config(config_file_path,
+                                 show=False)  #parse config file
+        self.predict_stepsize = predict_stepsize
+        self.output_stepsize = output_stepsize
+        self.output_fps = output_fps
+        self.out_filename = out_filename
+        self.num_frames = num_frames
+        self.alpha = alpha
+        self.target_size = target_size
+
+    def preprocess(self, input_file):
+        """
+        input_file: str, file path
+        """
+
+        frame_dir = 'tmp_frames'
+        self.frame_paths, frames, FPS = frame_extraction(input_file, frame_dir)
+        num_frame = len(self.frame_paths)  #视频秒数*FPS
+        assert num_frame != 0
+
+        # 帧图像高度和宽度
+        h, w, _ = frames[0].shape
+
+        # Get clip_len, frame_interval and calculate center index of each clip
+        data_process_pipeline = build_pipeline(
+            self.config.PIPELINE.test)  #测试时输出处理流水配置
+
+        clip_len = self.config.PIPELINE.test.sample['clip_len']
+        assert clip_len % 2 == 0, 'We would like to have an even clip_len'
+        frame_interval = self.config.PIPELINE.test.sample['frame_interval']
+
+        # 此处关键帧每秒取一个
+        clip_len = self.config.PIPELINE.test.sample['clip_len']
+        assert clip_len % 2 == 0, 'We would like to have an even clip_len'
+        frame_interval = self.config.PIPELINE.test.sample['frame_interval']
+        window_size = clip_len * frame_interval
+        timestamps = np.arange(window_size // 2,
+                               (num_frame + 1 - window_size // 2),
+                               self.predict_stepsize)
+
+        selected_frame_list = []
+        for timestamp in timestamps:
+            selected_frame_list.append(self.frame_paths[timestamp - 1])
+
+        # Load label_map
+        label_map_path = self.config.DATASET.test['label_file']
+        self.categories, self.class_whitelist = read_labelmap(
+            open(label_map_path))
+        label_map = {}
+        for item in self.categories:
+            id = item['id']
+            name = item['name']
+            label_map[id] = name
+
+        self.label_map = label_map
+
+        detection_result_dir = 'tmp_detection'
+        detection_model_name = self.detection_model_name
+        detection_model_weights = self.detection_model_weights
+        detection_txt_list = detection_inference(selected_frame_list,
+                                                 detection_result_dir,
+                                                 detection_model_name,
+                                                 detection_model_weights)
+        assert len(detection_txt_list) == len(timestamps)
+
+        human_detections = []
+        data_list = []
+        person_num_list = []
+
+        for timestamp, detection_txt_path in zip(timestamps,
+                                                 detection_txt_list):
+            proposals, scores = get_detection_result(
+                detection_txt_path, h, w,
+                (float)(self.config.DATASET.test['person_det_score_thr']))
+
+            if proposals.shape[0] == 0:
+                #person_num_list.append(0)
+                human_detections.append(None)
+                continue
+
+            human_detections.append(proposals)
+
+            result = get_timestep_result(frame_dir,
+                                         timestamp,
+                                         clip_len,
+                                         frame_interval,
+                                         FPS=FPS)
+            result["proposals"] = proposals
+            result["scores"] = scores
+
+            new_result = data_process_pipeline(result)
+            proposals = new_result['proposals']
+
+            img_slow = new_result['imgs'][0]
+            img_slow = img_slow[np.newaxis, :]
+            img_fast = new_result['imgs'][1]
+            img_fast = img_fast[np.newaxis, :]
+
+            proposals = proposals[np.newaxis, :]
+
+            scores = scores[np.newaxis, :]
+
+            img_shape = np.asarray(new_result['img_shape'])
+            img_shape = img_shape[np.newaxis, :]
+
+            data = [
+                paddle.to_tensor(img_slow, dtype='float32'),
+                paddle.to_tensor(img_fast, dtype='float32'),
+                paddle.to_tensor(proposals, dtype='float32'),
+                paddle.to_tensor(img_shape, dtype='int32')
+            ]
+
+            person_num = proposals.shape[1]
+            person_num_list.append(person_num)
+
+            data_list.append(data)
+
+        self.human_detections = human_detections
+        self.person_num_list = person_num_list
+        self.timestamps = timestamps
+        self.frame_dir = frame_dir
+        self.detection_result_dir = detection_result_dir
+
+        return data_list
+
+    def postprocess(self, outputs, print_output=True):
+        """
+        output: list
+        """
+        predictions = []
+
+        assert len(self.person_num_list) == len(outputs)
+
+        #print("***  self.human_detections",len( self.human_detections))
+        #print("***  outputs",len( outputs))
+
+        index = 0
+        for t_index in range(len(self.timestamps)):
+            if self.human_detections[t_index] is None:
+                predictions.append(None)
+                continue
+
+            human_detection = self.human_detections[t_index]
+
+            output = outputs[index]
+            person_num = self.person_num_list[index]
+
+            index = index + 1
+
+            result = output
+
+            prediction = []
+
+            if human_detection is None:
+                predictions.append(None)
+                continue
+
+            # N proposals
+            for i in range(person_num):
+                prediction.append([])
+
+            # Perform action score thr
+            for i in range(len(result)):  # for class
+                if i + 1 not in self.class_whitelist:
+                    continue
+                for j in range(person_num):
+                    if result[i][j, 4] > self.config.MODEL.head['action_thr']:
+                        prediction[j].append(
+                            (self.label_map[i + 1], result[i][j, 4]))
+            predictions.append(prediction)
+
+        results = []
+        for human_detection, prediction in zip(self.human_detections,
+                                               predictions):
+            results.append(pack_result(human_detection, prediction))
+
+        def dense_timestamps(timestamps, n):
+            """Make it nx frames."""
+            old_frame_interval = (timestamps[1] - timestamps[0])
+            start = timestamps[0] - old_frame_interval / n * (n - 1) / 2
+            new_frame_inds = np.arange(
+                len(timestamps) * n) * old_frame_interval / n + start
+            return new_frame_inds.astype(np.int)
+
+        dense_n = int(self.predict_stepsize / self.output_stepsize)  #30
+        frames = [
+            cv2.imread(self.frame_paths[i - 1])
+            for i in dense_timestamps(self.timestamps, dense_n)
+        ]
+
+        vis_frames = visualize(frames, results)
+
+        try:
+            import moviepy.editor as mpy
+        except ImportError:
+            raise ImportError('Please install moviepy to enable output file')
+
+        vid = mpy.ImageSequenceClip([x[:, :, ::-1] for x in vis_frames],
+                                    fps=self.output_fps)
+        vid.write_videofile(self.out_filename)
+        print("finish write !")
+
+        # delete tmp files and dirs
+        shutil.rmtree(self.frame_dir)
+        shutil.rmtree(self.detection_result_dir)

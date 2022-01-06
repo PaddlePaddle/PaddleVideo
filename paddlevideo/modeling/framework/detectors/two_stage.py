@@ -12,13 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-import paddle 
+import paddle
 import paddle.nn as nn
 from ... import builder
 import paddle.distributed as dist
 from ...registry import DETECTORS
 from .base import BaseDetector
+
 
 @DETECTORS.register()
 class TwoStageDetector(BaseDetector):
@@ -36,13 +36,13 @@ class TwoStageDetector(BaseDetector):
         self.backbone = builder.build_backbone(backbone)
 
         if neck is not None:
-            self.neck = build_neck(neck)
+            self.neck = neck  # useless
 
         if rpn_head is not None:
             rpn_train_cfg = train_cfg.rpn if train_cfg is not None else None
             rpn_head_ = rpn_head.copy()
             rpn_head_.update(train_cfg=rpn_train_cfg, test_cfg=test_cfg.rpn)
-            self.rpn_head = build_head(rpn_head_)
+            self.rpn_head = builder.build_head(rpn_head_)
 
         if roi_head is not None:
             self.roi_head = builder.build_head(roi_head)
@@ -80,12 +80,14 @@ class TwoStageDetector(BaseDetector):
     def train_step(self, data, **kwargs):
         img_slow = data[0]
         img_fast = data[1]
-        proposals, gt_bboxes, gt_labels, scores, entity_ids = self.get_unpad_datas(data)
+        proposals, gt_bboxes, gt_labels, scores, entity_ids = self.get_unpad_datas(
+            data)
         img_shape = data[7]
-        img_idx=data[8]
-        img_metas=scores,entity_ids
-        x = self.extract_feat(img=[img_slow,img_fast])
-        roi_losses = self.roi_head.train_step(x, img_metas, proposals, gt_bboxes, gt_labels, **kwargs)
+        img_idx = data[8]
+        img_metas = scores, entity_ids
+        x = self.extract_feat(img=[img_slow, img_fast])
+        roi_losses = self.roi_head.train_step(x, img_metas, proposals,
+                                              gt_bboxes, gt_labels, **kwargs)
         losses = dict()
         losses.update(roi_losses)
 
@@ -94,37 +96,43 @@ class TwoStageDetector(BaseDetector):
     def val_step(self, data, rescale=False):
         img_slow = data[0]
         img_fast = data[1]
-        proposals, gt_bboxes, gt_labels, scores, entity_ids = self.get_unpad_datas(data)
+        proposals, gt_bboxes, gt_labels, scores, entity_ids = self.get_unpad_datas(
+            data)
         img_shape = data[7]
-        img_metas=scores,entity_ids
-        x = self.extract_feat(img=[img_slow,img_fast])
+        img_metas = scores, entity_ids
+        x = self.extract_feat(img=[img_slow, img_fast])
 
-        return self.roi_head.simple_test(x, proposals[0], img_metas[0], img_shape, rescale=rescale)
-    
+        return self.roi_head.simple_test(x,
+                                         proposals[0],
+                                         img_shape,
+                                         rescale=rescale)
+
     def test_step(self, data, rescale=False):
-        return self.val_step(data,rescale)
-    
-    def infer_step(self,data, rescale=False):
+        return self.val_step(data, rescale)
+
+    def infer_step(self, data, rescale=False):
         ''' model inference'''
-        
+
         img_slow = data[0]
         img_fast = data[1]
         proposals = data[2]
-        scores = data[3]
-        img_shape = data[4]
+        img_shape = data[3]
 
         # using slowfast model to extract spatio-temporal features
-        x = self.extract_feat(img=[img_slow,img_fast])
+        x = self.extract_feat(img=[img_slow, img_fast])
 
-        ret = self.roi_head.simple_test(x, proposals[0], scores, img_shape, rescale=rescale)
+        ret = self.roi_head.simple_test(x,
+                                        proposals[0],
+                                        img_shape,
+                                        rescale=rescale)
         return ret
-    
+
     def get_unpad_datas(self, data):
         ''' get original datas padded in dataset '''
-        pad_proposals=data[2]
-        pad_gt_bboxes=data[3]
-        pad_gt_labels=data[4]
-        pad_scores,pad_entity_ids=data[5],data[6]
+        pad_proposals = data[2]
+        pad_gt_bboxes = data[3]
+        pad_gt_labels = data[4]
+        pad_scores, pad_entity_ids = data[5], data[6]
         len_proposals = data[9]
         len_gt_bboxes = data[10]
         len_gt_labels = data[11]
@@ -140,19 +148,25 @@ class TwoStageDetector(BaseDetector):
             pad_proposal = pad_proposals[bi]
             len_proposal = len_proposals[bi]
             index_proposal = paddle.arange(len_proposal)
-            proposal = paddle.index_select(x=pad_proposal, index=index_proposal, axis=0)
+            proposal = paddle.index_select(x=pad_proposal,
+                                           index=index_proposal,
+                                           axis=0)
             proposals.append(proposal)
 
             pad_gt_bbox = pad_gt_bboxes[bi]
             len_gt_bbox = len_gt_bboxes[bi]
             index_gt_bbox = paddle.arange(len_gt_bbox)
-            gt_bbox = paddle.index_select(x=pad_gt_bbox, index=index_gt_bbox, axis=0)
+            gt_bbox = paddle.index_select(x=pad_gt_bbox,
+                                          index=index_gt_bbox,
+                                          axis=0)
             gt_bboxes.append(gt_bbox)
 
             pad_gt_label = pad_gt_labels[bi]
             len_gt_label = len_gt_labels[bi]
             index_gt_label = paddle.arange(len_gt_label)
-            gt_label = paddle.index_select(x=pad_gt_label, index=index_gt_label, axis=0)
+            gt_label = paddle.index_select(x=pad_gt_label,
+                                           index=index_gt_label,
+                                           axis=0)
             gt_labels.append(gt_label)
 
             pad_score = pad_scores[bi]
@@ -164,8 +178,9 @@ class TwoStageDetector(BaseDetector):
             pad_entity_id = pad_entity_ids[bi]
             len_entity_id = len_entity_ids[bi]
             index_entity_id = paddle.arange(len_entity_id)
-            entity_id = paddle.index_select(x=pad_entity_id, index=index_entity_id, axis=0)
+            entity_id = paddle.index_select(x=pad_entity_id,
+                                            index=index_entity_id,
+                                            axis=0)
             entity_ids.append(entity_id)
 
         return proposals, gt_bboxes, gt_labels, scores, entity_ids
- 

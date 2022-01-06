@@ -152,6 +152,20 @@ OPTIMIZER: #OPTIMIZER field
 
 METRIC:
     name: 'AVAMetric'
+    file_path: "data/ava_train.csv" #Mandotary, test data index file path.
+    exclude_file: "data/ava_val_excluded_timestamps_v2.1.csv"
+    label_file: "data/ava_action_list_v2.1_for_activitynet_2018.pbtxt"
+    custom_classes: 81
+
+INFERENCE:
+    name: 'AVA_SlowFast_FastRCNN_Inference_helper'
+    config_file_path: 'configs/detection/ava/ava.yaml'
+    detection_model_name: 'faster_rcnn/faster_rcnn_r50_fpn_1x_coco'
+    detection_model_weights: 'faster_rcnn_r50_fpn_1x_coco.pdparams'
+    predict_stepsize: 4
+    num_frames: 32
+    alpha: 4
+    target_size: 256
 
 model_name: AVA_SlowFast_FastRcnn
 save_interval: 10

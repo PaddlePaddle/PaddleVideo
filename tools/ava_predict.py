@@ -14,7 +14,7 @@
 
 import argparse
 import paddle
-import os,sys
+import os, sys
 import copy as cp
 import cv2
 import math
@@ -33,7 +33,7 @@ import numpy as np
 from paddlevideo.utils import get_config
 import pickle
 
-from paddlevideo.utils import (get_logger,load, mkdir, save)
+from paddlevideo.utils import (get_logger, load, mkdir, save)
 
 FONTFACE = cv2.FONT_HERSHEY_DUPLEX
 FONTSCALE = 0.5
@@ -42,11 +42,13 @@ MSGCOLOR = (128, 128, 128)  # BGR, gray
 THICKNESS = 1
 LINETYPE = 1
 
-FPS = 30 
+FPS = 30
+
 
 def hex2color(h):
     """Convert the 6-digit hex string to tuple of 3 int value (RGB)"""
     return (int(h[:2], 16), int(h[2:4], 16), int(h[4:], 16))
+
 
 plate_blue = '03045e-023e8a-0077b6-0096c7-00b4d8-48cae4'
 plate_blue = plate_blue.split('-')
@@ -54,6 +56,7 @@ plate_blue = [hex2color(h) for h in plate_blue]
 plate_green = '004b23-006400-007200-008000-38b000-70e000'
 plate_green = plate_green.split('-')
 plate_green = [hex2color(h) for h in plate_green]
+
 
 def abbrev(name):
     """Get the abbreviation of label name:
@@ -63,6 +66,7 @@ def abbrev(name):
         st, ed = name.find('('), name.find(')')
         name = name[:st] + '...' + name[ed + 1:]
     return name
+
 
 # annotations is pred results
 def visualize(frames, annotations, plate=plate_blue, max_num=5):
@@ -88,7 +92,7 @@ def visualize(frames, annotations, plate=plate_blue, max_num=5):
     h, w, _ = frames[0].shape
     # proposals被归一化需要还原真实坐标值
     scale_ratio = np.array([w, h, w, h])
-   
+
     for i in range(na):
         anno = annotations[i]
         if anno is None:
@@ -124,6 +128,7 @@ def visualize(frames, annotations, plate=plate_blue, max_num=5):
 
 
 def parse_args():
+
     def str2bool(v):
         return v.lower() in ("true", "t", "1")
 
@@ -152,8 +157,11 @@ def parse_args():
     parser.add_argument("--params_file", type=str)
 
     # detection_result_dir,frame_dir
-    parser.add_argument('--detection_result_dir', help='the object detection result dir of extracted frames')
-    parser.add_argument('--frame_dir', help='the dir of frames extracted with FPS frame rate ')
+    parser.add_argument(
+        '--detection_result_dir',
+        help='the object detection result dir of extracted frames')
+    parser.add_argument('--frame_dir',
+                        help='the dir of frames extracted with FPS frame rate ')
 
     # params for predict
     parser.add_argument("-b", "--batch_size", type=int, default=1)
@@ -165,28 +173,26 @@ def parse_args():
     parser.add_argument("--enable_benchmark", type=str2bool, default=False)
     parser.add_argument("--enable_mkldnn", type=str2bool, default=False)
     parser.add_argument("--cpu_threads", type=int, default=None)
-    parser.add_argument(
-        '--out-filename',
-        default='ava_det_demo.mp4',
-        help='output filename')
-    parser.add_argument(
-        '--predict-stepsize',
-        default=8,
-        type=int,
-        help='give out a prediction per n frames')
+    parser.add_argument('--out-filename',
+                        default='ava_det_demo.mp4',
+                        help='output filename')
+    parser.add_argument('--predict-stepsize',
+                        default=8,
+                        type=int,
+                        help='give out a prediction per n frames')
     parser.add_argument(
         '--output-stepsize',
         default=4,
         type=int,
         help=('show one frame per n frames in the demo, we should have: '
               'predict_stepsize % output_stepsize == 0'))
-    parser.add_argument(
-        '--output-fps',
-        default=6,
-        type=int,
-        help='the fps of demo video output')
+    parser.add_argument('--output-fps',
+                        default=6,
+                        type=int,
+                        help='the fps of demo video output')
 
     return parser.parse_args()
+
 
 # sort by confidence
 def pack_result(human_detection, result):
@@ -203,13 +209,13 @@ def pack_result(human_detection, result):
 
     for prop, res in zip(human_detection, result):
         res.sort(key=lambda x: -x[1])
-        
-        results.append(
-            (prop, [x[0] for x in res], [x[1] for x in res]))
-    
+
+        results.append((prop, [x[0] for x in res], [x[1] for x in res]))
+
     return results
 
-def get_timestep_result(frame_dir,timestamp,clip_len,frame_interval):
+
+def get_timestep_result(frame_dir, timestamp, clip_len, frame_interval):
     """
     construct the input of model
     """
@@ -222,26 +228,27 @@ def get_timestep_result(frame_dir,timestamp,clip_len,frame_interval):
     dir_name = frame_dir.split("/")[-1]
     result["video_id"] = dir_name
 
-    result['timestamp']=timestamp
+    result['timestamp'] = timestamp
 
     timestamp_str = '{:04d}'.format(timestamp)
-    img_key=dir_name+","+timestamp_str
+    img_key = dir_name + "," + timestamp_str
     result['img_key'] = img_key
 
-    result['shot_info']= (1, frame_num)
-    result['fps']= FPS
+    result['shot_info'] = (1, frame_num)
+    result['fps'] = FPS
 
     result['suffix'] = '{:05}.jpg'
 
-    result['timestamp_start'] =1
-    result['timestamp_end'] =int(frame_num/result['fps'])
+    result['timestamp_start'] = 1
+    result['timestamp_end'] = int(frame_num / result['fps'])
 
     return result
 
-def get_detection_result(txt_file_path,img_h,img_w,person_det_score_thr):
+
+def get_detection_result(txt_file_path, img_h, img_w, person_det_score_thr):
     """
     get proposals and scores according to detection result txt file
-    txt_file_path: detection txt file path 
+    txt_file_path: detection txt file path
     img_h: image height
     img_w: image width
     """
@@ -249,34 +256,35 @@ def get_detection_result(txt_file_path,img_h,img_w,person_det_score_thr):
     proposals = []
     scores = []
 
-    with open(txt_file_path,'r') as detection_file:
+    with open(txt_file_path, 'r') as detection_file:
         lines = detection_file.readlines()
-        for line in lines: # person 0.9842637181282043 0.0 469.1407470703125 944.7770385742188 831.806396484375
+        for line in lines:  # person 0.9842637181282043 0.0 469.1407470703125 944.7770385742188 831.806396484375
             items = line.split(" ")
-            if items[0]!='person': #person only
+            if items[0] != 'person':  #person only
                 continue
-            
+
             score = items[1]
 
-            if (float)(score)<person_det_score_thr:
+            if (float)(score) < person_det_score_thr:
                 continue
 
-            x1 = (float(items[2]))/img_w
-            y1 = ((float)(items[3]))/img_h
+            x1 = (float(items[2])) / img_w
+            y1 = ((float)(items[3])) / img_h
             box_w = ((float)(items[4]))
             box_h = ((float)(items[5]))
 
-            x2 = (float(items[2])+box_w)/img_w
-            y2 = (float(items[3])+box_h)/img_h
+            x2 = (float(items[2]) + box_w) / img_w
+            y2 = (float(items[3]) + box_h) / img_h
 
             scores.append(score)
 
-            proposals.append([x1,y1,x2,y2])
+            proposals.append([x1, y1, x2, y2])
 
-    return np.array(proposals),np.array(scores)
-    
+    return np.array(proposals), np.array(scores)
+
+
 @paddle.no_grad()
-def main(args): #detection_result_dir,frame_dir
+def main(args):  #detection_result_dir,frame_dir
     """
     detection_result_dir:detection result dir
     frame_dir: high fps dir
@@ -285,31 +293,31 @@ def main(args): #detection_result_dir,frame_dir
     detection_result_dir = args.detection_result_dir
     frame_dir = args.frame_dir
 
-    config = get_config(args.config, show=False)#parse config
+    config = get_config(args.config, show=False)  #parse config
 
     # high FPS frame list
     frame_name_list = os.listdir(frame_dir)
     original_frames = []
-    frame_paths = [] # full path
+    frame_paths = []  # full path
     for frame_name in frame_name_list:
-        full_path = os.path.join(frame_dir,frame_name)
+        full_path = os.path.join(frame_dir, frame_name)
         frame_paths.append(full_path)
 
         frame = cv2.imread(full_path)
         original_frames.append(frame)
-    #sort by name 
-    frame_paths.sort() 
-    num_frame = len(frame_paths) 
+    #sort by name
+    frame_paths.sort()
+    num_frame = len(frame_paths)
     # height and width
     h, w, _ = original_frames[0].shape
 
     # Get clip_len, frame_interval and calculate center index of each clip
-    data_process_pipeline = build_pipeline(config.PIPELINE.test) #pipelines
-    
+    data_process_pipeline = build_pipeline(config.PIPELINE.test)  #pipelines
+
     clip_len = config.PIPELINE.test.sample['clip_len']
     assert clip_len % 2 == 0, 'We would like to have an even clip_len'
     frame_interval = config.PIPELINE.test.sample['frame_interval']
-    
+
     clip_len = config.PIPELINE.test.sample['clip_len']
     assert clip_len % 2 == 0, 'We would like to have an even clip_len'
     frame_interval = config.PIPELINE.test.sample['frame_interval']
@@ -317,7 +325,7 @@ def main(args): #detection_result_dir,frame_dir
     #timestamps = np.arange(1,math.ceil(num_frame/FPS)+1)
     timestamps = np.arange(window_size // 2, (num_frame + 1 - window_size // 2),
                            args.predict_stepsize)
-    
+
     # Load label_map
     label_map_path = config.DATASET.test['label_file']
     categories, class_whitelist = read_labelmap(open(label_map_path))
@@ -345,15 +353,18 @@ def main(args): #detection_result_dir,frame_dir
 
     for timestamp in timestamps:
         frame_name = "{:05}.jpg".format(timestamp)
-        frame_path = os.path.join(detection_result_dir,frame_name)
+        frame_path = os.path.join(detection_result_dir, frame_name)
 
-        detection_txt_path = frame_path.replace("jpg","txt")
-        detection_txt_path = os.path.join(detection_result_dir,detection_txt_path.split("/")[-1])
+        detection_txt_path = frame_path.replace("jpg", "txt")
+        detection_txt_path = os.path.join(detection_result_dir,
+                                          detection_txt_path.split("/")[-1])
         if not os.path.exists(detection_txt_path):
-            print(detection_txt_path,"not exists!")
+            print(detection_txt_path, "not exists!")
             continue
 
-        proposals,scores = get_detection_result(detection_txt_path,h,w,(float)(config.DATASET.test['person_det_score_thr']))
+        proposals, scores = get_detection_result(
+            detection_txt_path, h, w,
+            (float)(config.DATASET.test['person_det_score_thr']))
 
         human_detections.append(proposals)
 
@@ -361,45 +372,53 @@ def main(args): #detection_result_dir,frame_dir
             predictions.append(None)
             continue
 
-        result = get_timestep_result(frame_dir,timestamp,clip_len,frame_interval)
+        result = get_timestep_result(frame_dir, timestamp, clip_len,
+                                     frame_interval)
         result["proposals"] = proposals
         result["scores"] = scores
-        
+
         new_result = data_process_pipeline(result)
-        proposals = new_result['proposals']# 此过程中，proposals经过reshape
+        proposals = new_result['proposals']  # 此过程中，proposals经过reshape
 
         img_slow = new_result['imgs'][0]
         img_slow = img_slow[np.newaxis, :]
         img_fast = new_result['imgs'][1]
         img_fast = img_fast[np.newaxis, :]
 
-        proposals=proposals[np.newaxis, :]
-        
+        proposals = proposals[np.newaxis, :]
+
         scores = scores[np.newaxis, :]
 
         img_shape = np.asarray(new_result['img_shape'])
         img_shape = img_shape[np.newaxis, :]
 
-        data = [paddle.to_tensor(img_slow,dtype='float32'),paddle.to_tensor(img_fast,dtype='float32'),paddle.to_tensor(proposals,dtype='float32'),scores,paddle.to_tensor(img_shape,dtype='int32')]
+        data = [
+            paddle.to_tensor(img_slow, dtype='float32'),
+            paddle.to_tensor(img_fast, dtype='float32'),
+            paddle.to_tensor(proposals, dtype='float32'), scores,
+            paddle.to_tensor(img_shape, dtype='int32')
+        ]
 
         with paddle.no_grad():
-            result = model(data,mode='infer') 
+            result = model(data, mode='infer')
 
-            result = result[0] 
+            result = result[0]
             prediction = []
 
             person_num = proposals.shape[1]
             # N proposals
-            for i in range(person_num): 
+            for i in range(person_num):
                 prediction.append([])
-            
+
             # Perform action score thr
-            for i in range(len(result)): 
+            for i in range(len(result)):
                 if i + 1 not in class_whitelist:
                     continue
                 for j in range(person_num):
                     if result[i][j, 4] > config.MODEL.head['action_thr']:
-                        prediction[j].append((label_map[i + 1], result[i][j,4])) #label_map[i + 1]，+1是因为label_map中index从1开始
+                        prediction[j].append(
+                            (label_map[i + 1], result[i][j, 4]
+                             ))  #label_map[i + 1]，+1是因为label_map中index从1开始
             predictions.append(prediction)
 
     results = []
@@ -414,12 +433,12 @@ def main(args): #detection_result_dir,frame_dir
             len(timestamps) * n) * old_frame_interval / n + start
         return new_frame_inds.astype(np.int)
 
-    dense_n = int(args.predict_stepsize / args.output_stepsize) #30 
+    dense_n = int(args.predict_stepsize / args.output_stepsize)  #30
     frames = [
         cv2.imread(frame_paths[i - 1])
         for i in dense_timestamps(timestamps, dense_n)
     ]
-    
+
     vis_frames = visualize(frames, results)
 
     try:
@@ -431,7 +450,7 @@ def main(args): #detection_result_dir,frame_dir
                                 fps=args.output_fps)
     vid.write_videofile(args.out_filename)
 
+
 if __name__ == '__main__':
     args = parse_args()
     main(args)
-
