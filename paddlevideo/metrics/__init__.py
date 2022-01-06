@@ -21,11 +21,11 @@ from .multi_crop_metric import MultiCropMetric
 from .registry import METRIC
 from .skeleton_metric import SkeletonMetric
 from .transnetv2_metric import TransNetV2Metric
-from .vos_metric import VOSMetric
 from .youtube8m.eval_util import HitOneMetric
+from .center_crop_metric_MRI import CenterCropMetric_MRI
 
 __all__ = [
     'METRIC', 'build_metric', 'MultiCropMetric', 'BMNMetric',
     'CenterCropMetric', 'SkeletonMetric', 'HitOneMetric', 'TransNetV2Metric',
-    'DepthMetric', 'MSRVTTMetric', 'VOSMetric'
+    'DepthMetric', 'MSRVTTMetric', 'CenterCropMetric_MRI'
 ]

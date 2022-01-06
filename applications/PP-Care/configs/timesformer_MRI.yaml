@@ -1,8 +1,8 @@
-MODEL: #MODEL field
-    framework: "RecognizerTransformer_MRI" #Mandatory, indicate the type of network, associate to the 'paddlevideo/modeling/framework/' .
-    backbone: #Mandatory, indicate the type of backbone, associate to the 'paddlevideo/modeling/backbones/' .
-        name: "VisionTransformer" #Mandatory, The name of backbone.
-        pretrained: "" #Optional, pretrained model path.
+MODEL:
+    framework: "RecognizerTransformer_MRI"
+    backbone:
+        name: "VisionTransformer"
+        pretrained: ""
         img_size: 224
         patch_size: 16
         in_channels: 1
@@ -15,30 +15,30 @@ MODEL: #MODEL field
         seg_num: 8
         attention_type: 'divided_space_time'
     head:
-        name: "TimeSformerHead" #Mandatory, indicate the type of head, associate to the 'paddlevideo/modeling/heads'
-        num_classes: 2 #Optional, the number of classes to be classified.
-        in_channels: 768 #input channel of the extracted feature.
-        std: 0.02 #std value in params initialization
+        name: "TimeSformerHead"
+        num_classes: 2
+        in_channels: 768
+        std: 0.02
 
-DATASET: #DATASET field
-    batch_size: 1 #Mandatory, bacth size
-    num_workers: 0 #Mandatory, XXX the number of subprocess on each GPU.
+DATASET:
+    batch_size: 8
+    num_workers: 4
     test_batch_size: 8
     train:
-        format: "MRIDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
-        data_prefix: "" #Mandatory, train data root path
-        file_path: "/home/aistudio/train.txt" #Mandatory, train data index file path
+        format: "MRIDataset"
+        data_prefix: ""
+        file_path: "/home/aistudio/train.txt"
     valid:
-        format: "MRIDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
-        data_prefix: "" #Mandatory, train data root path
-        file_path: "/home/aistudio/test.txt" #Mandatory, valid data index file path
+        format: "MRIDataset"
+        data_prefix: ""
+        file_path: "/home/aistudio/test.txt"
     test:
-        format: "MRIDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
-        data_prefix: "" #Mandatory, train data root path
-        file_path: "/home/aistudio/test.txt" #Mandatory, valid data index file path
+        format: "MRIDataset"
+        data_prefix: ""
+        file_path: "/home/aistudio/test.txt"
 
-PIPELINE: #PIPELINE field TODO.....
-    train: #Mandotary, indicate the pipeline to deal with the training data, associate to the 'paddlevideo/loader/pipelines/'
+PIPELINE:
+    train:
         decode:
             name: "MRIDecoder"
         sample:
@@ -48,14 +48,14 @@ PIPELINE: #PIPELINE field TODO.....
             valid_mode: False
             linspace_sample: True
 
-    valid: #Mandatory, indicate the pipeline to deal with the validing data. associate to the 'paddlevideo/loader/pipelines/'
+    valid:
         decode:
             name: "MRIDecoder"
         sample:
             name: "Sampler"
             num_seg: 8
             seg_len: 1
-            valid_mode: False # It is indeed False when verifying
+            valid_mode: False
             linspace_sample: True
 
     test:
@@ -68,32 +68,26 @@ PIPELINE: #PIPELINE field TODO.....
             valid_mode: True
             linspace_sample: True
 
-OPTIMIZER: #OPTIMIZER field
-    name: 'Momentum' #Mandatory, the type of optimizer, associate to the 'paddlevideo/solver/'
-    momentum: 0.9
-    learning_rate: #Mandatory, the type of learning rate scheduler, associate to the 'paddlevideo/solver/'
-        learning_rate: 0.005 # Applicable when global batch size=64
+OPTIMIZER:
+    name: 'Adam'
+    learning_rate:
+        learning_rate: 0.005
         name: 'MultiStepDecay'
-        milestones: [11, 14]
-        gamma: 0.1
+        milestones: [20, 29]
+        gamma: 0.9
     weight_decay:
         name: 'L2'
-        value: 0.0001
-    use_nesterov: True
+        value: 0.00005
+
 
 GRADIENT_ACCUMULATION:
-    global_batch_size: 64 # Specify the sum of batches to be calculated by all GPUs
+    global_batch_size: 64
 
 METRIC:
-    name: 'CenterCropMetric'
+    name: 'CenterCropMetric_MRI'
 
-INFERENCE:
-    name: 'TimeSformer_Inference_helper'
-    num_seg: 8
-    target_size: 224
-
-model_name: "TimeSformer"
-log_interval: 20 #Optional, the interal of logger, default:10
-save_interval: 3
-epochs: 15 #Mandatory, total epoch
-log_level: "INFO" #Optional, the logger level. default: "INFO"
+model_name: "TimeSformer_MRI"
+log_interval: 20
+save_interval: 5
+epochs: 30
+log_level: "INFO"
