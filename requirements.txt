@@ -12,3 +12,4 @@ matplotlib
 paddlenlp
 lmdb
 moviepy
+SimpleITK
