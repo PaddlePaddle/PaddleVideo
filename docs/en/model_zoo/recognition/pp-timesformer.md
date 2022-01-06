@@ -96,7 +96,7 @@ UCF101 data download and preparation please refer to [UCF-101 data preparation](
    | :----------------: | :-------------: | :-----: | :---------: | :---- | :----------------------------------------------------------: |
    | Vision Transformer |   UniformCrop   |   8    |     224     | 78.54 | [ppTimeSformer_k400_8f.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ppTimeSformer_k400_8f.pdparams) |
    | Vision Transformer | UniformCrop | 8 | 224 | 78.82 | [ppTimeSformer_k400_8f_distill.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ppTimeSformer_k400_8f_distill.pdparams) |
-   | Vision Transformer | UniformCrop | 16 | 224 | 79.49 | [ppTimeSformer_k400_16f_distill_16f.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ppTimeSformer_k400_16f_distill_16f.pdparams) |
+   | Vision Transformer | UniformCrop | 16 | 224 | 79.49 | [ppTimeSformer_k400_16f_distill.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ppTimeSformer_k400_16f_distill.pdparams) |
 
 
 - During the test, the PP-TimeSformer video sampling strategy is to use linspace sampling: in time sequence, from the first frame to the last frame of the video sequence to be sampled, `num_seg` sparse sampling points (including endpoints) are uniformly generated; spatially , Select 3 areas to sample at both ends of the long side and the middle position (left, middle, right or top, middle, and bottom). A total of 1 clip is sampled for 1 video.
