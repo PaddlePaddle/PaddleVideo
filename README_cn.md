@@ -48,7 +48,7 @@ PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_githu
 | 行为识别 | [**PP-TimeSformer**](./docs/zh-CN/model_zoo/recognition/pp-timesformer.md) |    [Kinetics-400](./docs/zh-CN/dataset/k400.md)    |  Top-1   |   79.49   |
 | 行为识别 | [AGCN](./docs/zh-CN/model_zoo/recognition/agcn.md) | [FSD](./docs/zh-CN/dataset/fsd.md) | Top-1 | 62.29 |
 | 行为识别 | [ST-GCN](./docs/zh-CN/model_zoo/recognition/stgcn.md) | [FSD](./docs/zh-CN/dataset/fsd.md) | Top-1 | 59.07 |
-| 行为识别 | [VideoSwin](./docs/zh-CN/model_zoo/recognition/videoswin.md) |    [Kinetics-400](./docs/zh-CN/dataset/k400.md)    |  Top-1   |   82.23   |
+| 行为识别 | [VideoSwin](./docs/zh-CN/model_zoo/recognition/videoswin.md) |    [Kinetics-400](./docs/zh-CN/dataset/k400.md)    |  Top-1   |   82.40   |
 | 行为识别 | [TimeSformer](./docs/zh-CN/model_zoo/recognition/timesformer.md) |    [Kinetics-400](./docs/zh-CN/dataset/k400.md)    |  Top-1   |   77.29   |
 | 行为识别 |  [SlowFast](./docs/zh-CN/model_zoo/recognition/slowfast.md)  |    [Kinetics-400](./docs/zh-CN/dataset/k400.md)    |  Top-1   |   75.84   |
 | 行为识别 |       [TSM](./docs/zh-CN/model_zoo/recognition/tsm.md)       |    [Kinetics-400](./docs/zh-CN/dataset/k400.md)    |  Top-1   |   71.06   |

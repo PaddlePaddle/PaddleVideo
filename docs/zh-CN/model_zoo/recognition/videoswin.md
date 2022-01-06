@@ -30,10 +30,10 @@ K400数据下载及准备请参考[Kinetics-400数据准备](../../dataset/k400.
 
 #### 下载并添加预训练模型
 
-1. 下载图像预训练模型[swin_base_patch4_window7_224_22k](TODO)作为Backbone初始化参数，或通过wget命令下载
+1. 下载图像预训练模型[SwinTransformer_imagenet.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/SwinTransformer_imagenet.pdparams)作为Backbone初始化参数，或通过wget命令下载
 
    ```bash
-   wget TODO
+   wget https://videotag.bj.bcebos.com/PaddleVideo-release2.2/SwinTransformer_imagenet.pdparams
    ```
 
 2. 打开`configs/recognition/videoswin/videoswin_k400_videos.yaml`，将下载好的权重存放路径填写到下方`pretrained:`之后
@@ -87,7 +87,7 @@ K400数据下载及准备请参考[Kinetics-400数据准备](../../dataset/k400.
 
    |      backbone      | Sampling method | num_seg | target_size | Top-1 |                         checkpoints                          |
    | :----------------: | :-------------: | :-----: | :---------: | :---- | :----------------------------------------------------------: |
-   | Swin Transformer |   UniformCrop   |   32    |     224     | 82.23 | [VideoSwin_k400.pdparams](TODO) |
+   | Swin Transformer |   UniformCrop   |   32    |     224     | 82.40 | [SwinTransformer_k400.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/SwinTransformer_k400.pdparams) |
 
 
 ## 模型推理

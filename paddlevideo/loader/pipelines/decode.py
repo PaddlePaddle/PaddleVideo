@@ -179,6 +179,18 @@ class FrameDecoder(object):
 
 
 @PIPELINES.register()
+class MRIDecoder(object):
+    """just parse results
+    """
+    def __init__(self):
+        pass
+
+    def __call__(self, results):
+        results['format'] = 'MRI'
+        return results
+
+
+@PIPELINES.register()
 class FeatureDecoder(object):
     """
         Perform feature decode operations.e.g.youtube8m

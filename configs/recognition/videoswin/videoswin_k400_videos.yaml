@@ -2,7 +2,7 @@ MODEL: #MODEL field
     framework: "RecognizerTransformer" #Mandatory, indicate the type of network, associate to the 'paddlevideo/modeling/framework/' .
     backbone: #Mandatory, indicate the type of backbone, associate to the 'paddlevideo/modeling/backbones/' .
         name: "SwinTransformer3D" #Mandatory, The name of backbone.
-        pretrained: "data/swin_base_patch4_window7_224_22k.pdparams" #Optional, pretrained model path.
+        pretrained: "data/SwinTransformer_imagenet.pdparams" #Optional, pretrained model path.
         num_seg: 32 # tell test program model's num_seg
         patch_size: [2, 4, 4]
         embed_dim: 128

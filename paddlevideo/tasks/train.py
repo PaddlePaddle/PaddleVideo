@@ -111,6 +111,7 @@ def train_model(cfg,
                                     places=places)
 
     train_loader = build_dataloader(train_dataset, **train_dataloader_setting)
+
     if validate:
         valid_dataset = build_dataset((cfg.DATASET.valid, cfg.PIPELINE.valid))
         validate_dataloader_setting = dict(

@@ -30,10 +30,10 @@ K400 data download and preparation please refer to [Kinetics-400 data preparatio
 
 #### Download and add pre-trained models
 
-1. Download the image pre-training model [swin_base_patch4_window7_224_22k] (TODO) as the Backbone initialization parameter, or download it through the wget command
+1. Download the image pre-training model [SwinTransformer_imagenet.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/SwinTransformer_imagenet.pdparams) as the Backbone initialization parameter, or download it through the wget command
 
    ```bash
-   wget TODO
+   wget https://videotag.bj.bcebos.com/PaddleVideo-release2.2/SwinTransformer_imagenet.pdparams
    ```
 
 2. Open `configs/recognition/videoswin/videoswin_k400_videos.yaml`, and fill in the downloaded weight storage path below `pretrained:`
@@ -87,7 +87,7 @@ K400 data download and preparation please refer to [Kinetics-400 data preparatio
 
    | backbone | Sampling method | num_seg | target_size | Top-1 | checkpoints |
    | :----------------: | :-------------: | :-----: | :---------: | :---- | :----------------------------------------------------------: |
-   | Swin Transformer | UniformCrop | 32 | 224 | 82.23 | [VideoSwin_k400.pdparams](TODO) |
+   | Swin Transformer | UniformCrop | 32 | 224 | 82.40 | [SwinTransformer_k400.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/SwinTransformer_k400.pdparams) |
 
 
 ## Inference

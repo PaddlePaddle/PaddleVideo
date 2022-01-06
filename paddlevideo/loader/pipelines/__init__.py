@@ -29,14 +29,15 @@ from .sample import Sampler
 from .sample_ava import *
 from .segmentation import MultiNorm, MultiRestrictSize
 from .skeleton_pipeline import AutoPadding, Iden, SkeletonNorm
+from .decode_sampler_MRI import SFMRI_DecodeSampler
 
 __all__ = [
-    'ToArray', 'Normalization', 'LoadFeat', 'UniformCrop', 'MultiCrop',
-    'FeaturePadding', 'Compose', 'RandomCap', 'GetMatchMap', 'GetVideoLabel',
-    'RandomCrop', 'Image2Array', 'CenterCrop', 'VideoDecoder', 'VideoMix',
-    'AutoPadding', 'RandomResizedCrop', 'FeatureDecoder', 'Scale',
-    'SkeletonNorm', 'Iden', 'Mixup', 'TenCrop', 'Tokenize', 'DecodeSampler',
-    'FrameDecoder', 'Sampler', 'RandomFlip', 'ImageDecoder', 'ColorJitter',
-    'GroupRandomFlip', 'MultiNorm', 'RandomMask', 'PackOutput', 'JitterScale',
-    'GroupResize', 'MultiRestrictSize', 'Cutmix'
+    'ImageDecoder', 'RandomMask', 'UniformCrop', 'SkeletonNorm', 'Tokenize',
+    'Sampler', 'FeatureDecoder', 'DecodeSampler', 'TenCrop', 'Compose',
+    'AutoPadding', 'Normalization', 'Mixup', 'Image2Array', 'Scale',
+    'GroupResize', 'VideoDecoder', 'FrameDecoder', 'PackOutput',
+    'GetVideoLabel', 'Cutmix', 'CenterCrop', 'RandomCrop', 'LoadFeat',
+    'RandomCap', 'JitterScale', 'Iden', 'VideoMix', 'ColorJitter', 'RandomFlip',
+    'ToArray', 'FeaturePadding', 'GetMatchMap', 'GroupRandomFlip', 'MultiCrop',
+    'SFMRI_DecodeSampler', 'MultiRestrictSize', 'MultiNorm', 'RandomResizedCrop'
 ]
