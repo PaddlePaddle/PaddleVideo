@@ -1,0 +1,8 @@
+# audio
+https://videotag.bj.bcebos.com/PaddleVideo-release2.1/FootballAction/audio.tar
+# pptsm
+https://videotag.bj.bcebos.com/PaddleVideo-release2.1/FootballAction/pptsm.tar
+# bmn
+https://videotag.bj.bcebos.com/PaddleVideo-release2.1/FootballAction/bmn.tar
+# lstm
+https://videotag.bj.bcebos.com/PaddleVideo-release2.1/FootballAction/lstm.tar
