@@ -24,9 +24,9 @@ def bbox2result(bboxes, labels, num_classes, img_shape, thr=0.01):
     if len(bboxes) == 0:
         return list(np.zeros((num_classes - 1, 0, 5), dtype=np.float32))
     else:
-        bboxes = bboxes[0].numpy()
-        labels = labels.numpy()
-        img_shape_np = img_shape.numpy()
+        bboxes = bboxes[0]
+        labels = labels
+        img_shape_np = img_shape
         img_h, img_w = img_shape_np[0][0], img_shape_np[0][1]
 
         img_w = paddle.cast(img_w, dtype='int32')

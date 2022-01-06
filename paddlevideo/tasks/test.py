@@ -74,7 +74,7 @@ def test_model(cfg, weights, parallel=True):
     Metric = build_metric(cfg.METRIC)
 
     if cfg.MODEL.framework == "FastRCNN":
-        Metric.set_dataset(dataset)
+        Metric.set_dataset_info(dataset.info, len(dataset))
 
     for batch_id, data in enumerate(data_loader):
         if cfg.model_name in [
