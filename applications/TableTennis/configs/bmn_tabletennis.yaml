@@ -94,6 +94,6 @@ INFERENCE:
     result_path: "data/bmn/BMN_INFERENCE_results"
 
 model_name: BMN
-epochs: 5                                          # Mandatory, total epoch
+epochs: 20                                          # Mandatory, total epoch
 log_level: "INFO"
 resume_from: ""                                     #checkpoint path.
