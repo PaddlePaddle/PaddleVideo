@@ -439,11 +439,9 @@ class RandomFlip(object):
         imgs = results['imgs']
         v = random.random()
         if v < self.p:
-            if 'backend' in results and results[
-                    'backend'] == 'pyav':  # [c,t,h,w]
+            if isinstance(imgs, paddle.Tensor):
                 results['imgs'] = paddle.flip(imgs, axis=[3])
-            elif 'backend' in results and (results['backend'] == 'cv2'
-                                           or results['backend'] == 'decord'):
+            elif isinstance(imgs[0], np.ndarray):
                 results['imgs'] = [cv2.flip(img, 1, img) for img in imgs
                                    ]  # [[h,w,c], [h,w,c], ..., [h,w,c]]
             else:
