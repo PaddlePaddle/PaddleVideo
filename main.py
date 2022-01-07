@@ -17,7 +17,7 @@ import random
 import numpy as np
 import paddle
 
-from paddlevideo.tasks import (test_model, evaluate_model, train_dali, train_model,
+from paddlevideo.tasks import (test_model, train_dali, train_model,
                                train_model_multigrid)
 from paddlevideo.utils import get_config, get_dist_info
 
@@ -56,23 +56,27 @@ def parse_args():
     parser.add_argument('--amp',
                         action='store_true',
                         help='whether to open amp training.')
-    parser.add_argument('--validate',
-                        action='store_true',
-                        help='whether to evaluate the checkpoint during training')
-    parser.add_argument('--seed',
-                        type=int,
-                        default=None,
-                        help='fixed all random seeds when the program is running')
-    parser.add_argument('--max_iters',
-                        type=int,
-                        default=None,
-                        help='max iterations when training(this argonly used in test_tipc)')
-    parser.add_argument('-p',
-                        '--profiler_options',
-                        type=str,
-                        default=None,
-                        help='The option of profiler, which should be in format '
-                        '\"key1=value1;key2=value2;key3=value3\".')
+    parser.add_argument(
+        '--validate',
+        action='store_true',
+        help='whether to evaluate the checkpoint during training')
+    parser.add_argument(
+        '--seed',
+        type=int,
+        default=None,
+        help='fixed all random seeds when the program is running')
+    parser.add_argument(
+        '--max_iters',
+        type=int,
+        default=None,
+        help='max iterations when training(this argonly used in test_tipc)')
+    parser.add_argument(
+        '-p',
+        '--profiler_options',
+        type=str,
+        default=None,
+        help='The option of profiler, which should be in format '
+        '\"key1=value1;key2=value2;key3=value3\".')
     parser.add_argument('--use_npu',
                         type=bool,
                         default=False,
@@ -102,8 +106,6 @@ def main():
 
     if args.test:
         test_model(cfg, weights=args.weights, parallel=parallel)
-    elif args.valid:
-        evaluate_model(cfg, weights=args.weights, parallel=parallel)
     elif args.train_dali:
         train_dali(cfg, weights=args.weights, parallel=parallel)
     elif args.multigrid:

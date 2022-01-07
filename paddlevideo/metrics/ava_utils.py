@@ -33,11 +33,11 @@ from pathlib import Path
 from datetime import datetime
 
 
-def det2csv(dataset, results, custom_classes):
+def det2csv(info, dataset_len, results, custom_classes):
     csv_results = []
-    for idx in range(len(dataset)):
-        video_id = dataset.info[idx]['video_id']
-        timestamp = dataset.info[idx]['timestamp']
+    for idx in range(dataset_len):
+        video_id = info[idx]['video_id']
+        timestamp = info[idx]['timestamp']
 
         result = results[idx]
         for label, _ in enumerate(result):
@@ -55,9 +55,9 @@ def det2csv(dataset, results, custom_classes):
 
 
 # results is organized by class
-def results2csv(dataset, results, out_file, custom_classes=None):
+def results2csv(info, dataset_len, results, out_file, custom_classes=None):
     if isinstance(results[0], list):
-        csv_results = det2csv(dataset, results, custom_classes)
+        csv_results = det2csv(info, dataset_len, results, custom_classes)
 
     # save space for float
     def tostr(item):
