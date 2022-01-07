@@ -442,7 +442,8 @@ class RandomFlip(object):
             if 'backend' in results and results[
                     'backend'] == 'pyav':  # [c,t,h,w]
                 results['imgs'] = paddle.flip(imgs, axis=[3])
-            elif results['backend'] == 'cv2' or results['backend'] == 'decord':
+            elif 'backend' in results and (results['backend'] == 'cv2'
+                                           or results['backend'] == 'decord'):
                 results['imgs'] = [cv2.flip(img, 1, img) for img in imgs
                                    ]  # [[h,w,c], [h,w,c], ..., [h,w,c]]
             else:
