@@ -66,10 +66,10 @@ class Scale(object):
         resized_imgs = []
         for i in range(len(imgs)):
             img = imgs[i]
-            if self.backend == 'pillow':
-                w, h = img.size
-            elif self.backend == 'cv2':
+            if isinstance(img, np.ndarray):
                 h, w, _ = img.shape
+            elif isinstance(img, Image.Image):
+                w, h = img.size
             else:
                 raise NotImplementedError
 
