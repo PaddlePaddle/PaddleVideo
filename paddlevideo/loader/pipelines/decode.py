@@ -153,10 +153,10 @@ class VideoDecoder(object):
                 start_idx, end_idx = get_start_end_idx(
                     len(frames),  # frame_len
                     clip_sz,
-                    clip_idx if decode_all_video else 0,  # If decode all video, -1 in train and valid, 0 in test; 
+                    clip_idx if decode_all_video else
+                    0,  # If decode all video, -1 in train and valid, 0 in test;
                     # else, always 0 in train, valid and test, as we has selected clip size frames when decode.
-                    1
-                )
+                    1)
                 results['frames'] = frames
                 results['frames_len'] = len(frames)
                 results['start_idx'] = start_idx
@@ -175,6 +175,18 @@ class FrameDecoder(object):
 
     def __call__(self, results):
         results['format'] = 'frame'
+        return results
+
+
+@PIPELINES.register()
+class MRIDecoder(object):
+    """just parse results
+    """
+    def __init__(self):
+        pass
+
+    def __call__(self, results):
+        results['format'] = 'MRI'
         return results
 
 
@@ -202,9 +214,12 @@ class FeatureDecoder(object):
         data = pickle.load(open(filepath, 'rb'), encoding='bytes')
 
         record = data
-        nframes = record['nframes'] if 'nframes' in record else record[b'nframes']
-        rgb = record['feature'].astype(float) if 'feature' in record else record[b'feature'].astype(float)
-        audio = record['audio'].astype(float) if 'audio' in record else record[b'audio'].astype(float)
+        nframes = record['nframes'] if 'nframes' in record else record[
+            b'nframes']
+        rgb = record['feature'].astype(
+            float) if 'feature' in record else record[b'feature'].astype(float)
+        audio = record['audio'].astype(
+            float) if 'audio' in record else record[b'audio'].astype(float)
         if self.has_label:
             label = record['label'] if 'label' in record else record[b'label']
             one_hot_label = self.make_one_hot(label, self.num_classes)
