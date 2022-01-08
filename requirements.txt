@@ -11,3 +11,4 @@ scikit-image
 matplotlib
 paddlenlp
 lmdb
+SimpleITK

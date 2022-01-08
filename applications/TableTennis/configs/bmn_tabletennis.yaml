@@ -86,6 +86,13 @@ METRIC:
   output_path: "data/bmn/BMN_Test_output"
   result_path: "data/bmn/BMN_Test_results"
 
+INFERENCE:
+    name: 'BMN_Inference_helper'
+    feat_dim: 2048
+    dscale: 200
+    tscale: 200
+    result_path: "data/bmn/BMN_INFERENCE_results"
+
 model_name: BMN
 epochs: 20                                          # Mandatory, total epoch
 log_level: "INFO"
