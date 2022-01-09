@@ -41,7 +41,7 @@ PaddleVideo is a toolset for video recognition, action localization, and spatio 
 
 | Field | Model | Dataset | Metrics | ACC% |
 | :--------------- | :--------: | :------------: | :------------: | :------------: |
-| action recognition | [**PP-TSM**](./docs/zh-CN/model_zoo/recognition/pp-tsm.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | **76.16** |
+| action recognition | [**PP-TSM**](./docs/zh-CN/model_zoo/recognition/pp-tsm.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | **77.15** |
 | action recognition | [**PP-TSN**](./docs/zh-CN/model_zoo/recognition/pp-tsn.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | **75.06** |
 | action recognition | [**PP-TimeSformer**](./docs/zh-CN/model_zoo/recognition/pp-timesformer.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | 79.49 |
 | action recognition | [AGCN](./docs/zh-CN/model_zoo/recognition/agcn.md) | [FSD](./docs/zh-CN/dataset/fsd.md) | Top-1 | 62.29 |
