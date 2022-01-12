@@ -12,13 +12,17 @@ MODEL: #MODEL field
         mlp_ratio: 4
         qkv_bias: True
         epsilon: 1e-6
-        seg_num: 8
+        num_seg: 8
         attention_type: 'divided_space_time'
     head:
         name: "TimeSformerHead" #Mandatory, indicate the type of head, associate to the 'paddlevideo/modeling/heads'
         num_classes: 400 #Optional, the number of classes to be classified.
         in_channels: 768 #input channel of the extracted feature.
         std: 0.02 #std value in params initialization
+    runtime_cfg: # configuration used when the model is train or test.
+        test: # test config
+            num_seg: 8
+            avg_type: 'prob' # 'score' or 'prob'
 
 DATASET: #DATASET field
     batch_size: 1 #Mandatory, bacth size

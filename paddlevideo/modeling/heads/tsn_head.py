@@ -66,7 +66,7 @@ class TSNHead(BaseHead):
                      mean=0.,
                      std=self.std)
 
-    def forward(self, x, seg_num):
+    def forward(self, x, num_seg):
         """Define how the head is going to run.
         Args:
             x (paddle.Tensor): The input data.
@@ -77,11 +77,11 @@ class TSNHead(BaseHead):
 
         #XXX: check dropout location!
         # [N * num_segs, in_channels, 7, 7]
-        
+
         x = self.avgpool2d(x)
         # [N * num_segs, in_channels, 1, 1]
-        x = paddle.reshape(x, [-1, seg_num, x.shape[1]])
-        # [N, seg_num, in_channels]
+        x = paddle.reshape(x, [-1, num_seg, x.shape[1]])
+        # [N, num_seg, in_channels]
         x = paddle.mean(x, axis=1)
         # [N, in_channels]
         if self.dropout is not None:
@@ -91,4 +91,3 @@ class TSNHead(BaseHead):
         # [N, num_class]
         #x = F.softmax(x)  #NOTE remove
         return score
-    

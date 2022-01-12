@@ -33,21 +33,22 @@ class TSMINFReader(DataReader):
     """
     Data reader for video dataset of jpg folder.
     """
-
     def __init__(self, name, mode, cfg, material=None):
         super(TSMINFReader, self).__init__(name, mode, cfg)
         name = name.upper()
-        self.seg_num        = cfg[name]['seg_num']
-        self.seglen         = cfg[name]['seglen']
-        self.short_size     = cfg[name]['short_size']
-        self.target_size    = cfg[name]['target_size']
-        self.batch_size     = cfg[name]['batch_size']
+        self.num_seg = cfg[name]['num_seg']
+        self.seglen = cfg[name]['seglen']
+        self.short_size = cfg[name]['short_size']
+        self.target_size = cfg[name]['target_size']
+        self.batch_size = cfg[name]['batch_size']
         self.reader_threads = cfg[name]['reader_threads']
-        self.buf_size       = cfg[name]['buf_size']
-        self.video_path     = cfg[name]['frame_list']
+        self.buf_size = cfg[name]['buf_size']
+        self.video_path = cfg[name]['frame_list']
 
-        self.img_mean       = np.array(cfg[name]['image_mean']).reshape([3, 1, 1]).astype(np.float32)
-        self.img_std        = np.array(cfg[name]['image_std']).reshape([3, 1, 1]).astype(np.float32)
+        self.img_mean = np.array(cfg[name]['image_mean']).reshape(
+            [3, 1, 1]).astype(np.float32)
+        self.img_std = np.array(cfg[name]['image_std']).reshape(
+            [3, 1, 1]).astype(np.float32)
 
         self.material = material
 
@@ -56,16 +57,16 @@ class TSMINFReader(DataReader):
         batch loader for TSN
         """
         _reader = self._inference_reader_creator_longvideo(
-                self.video_path,
-                self.mode,
-                seg_num=self.seg_num,
-                seglen=self.seglen,
-                short_size=self.short_size,
-                target_size=self.target_size,
-                img_mean=self.img_mean,
-                img_std=self.img_std,
-                num_threads = self.reader_threads,
-                buf_size = self.buf_size)
+            self.video_path,
+            self.mode,
+            num_seg=self.num_seg,
+            seglen=self.seglen,
+            short_size=self.short_size,
+            target_size=self.target_size,
+            img_mean=self.img_mean,
+            img_std=self.img_std,
+            num_threads=self.reader_threads,
+            buf_size=self.buf_size)
 
         def _batch_reader():
             batch_out = []
@@ -81,9 +82,10 @@ class TSMINFReader(DataReader):
 
         return _batch_reader
 
-
-    def _inference_reader_creator_longvideo(self, video_path, mode, seg_num, seglen,
-                                  short_size, target_size, img_mean, img_std, num_threads, buf_size):
+    def _inference_reader_creator_longvideo(self, video_path, mode, num_seg,
+                                            seglen, short_size, target_size,
+                                            img_mean, img_std, num_threads,
+                                            buf_size):
         """
         inference reader for video
         """
@@ -94,7 +96,7 @@ class TSMINFReader(DataReader):
             def image_buf(image_id_path_buf):
                 """
                 image_buf reader
-                """  
+                """
                 try:
                     img_path = image_id_path_buf[1]
                     img = Image.open(img_path).convert("RGB")
@@ -103,61 +105,68 @@ class TSMINFReader(DataReader):
                     image_id_path_buf[2] = None
 
             frame_len = len(video_path)
-            read_thread_num = seg_num
+            read_thread_num = num_seg
             for i in range(0, frame_len, read_thread_num):
-                image_list_part = video_path[i: i + read_thread_num]
+                image_list_part = video_path[i:i + read_thread_num]
                 image_id_path_buf_list = []
                 for k in range(len(image_list_part)):
                     image_id_path_buf_list.append([k, image_list_part[k], None])
 
-                
-                with concurrent.futures.ThreadPoolExecutor(max_workers=read_thread_num) as executor:
-                    executor.map(lambda image_id_path_buf: image_buf(image_id_path_buf), image_id_path_buf_list)
+                with concurrent.futures.ThreadPoolExecutor(
+                        max_workers=read_thread_num) as executor:
+                    executor.map(
+                        lambda image_id_path_buf: image_buf(image_id_path_buf),
+                        image_id_path_buf_list)
                 imgs_seg_list = [x[2] for x in image_id_path_buf_list]
-                    
+
                 # add the fault-tolerant for bad image
                 for k in range(len(image_id_path_buf_list)):
                     img_buf = image_id_path_buf_list[k][2]
                     pad_id = 1
-                    while pad_id < seg_num and img_buf is None:
-                        img_buf = imgs_seg_list[(k + pad_id)%seg_num][2]
+                    while pad_id < num_seg and img_buf is None:
+                        img_buf = imgs_seg_list[(k + pad_id) % num_seg][2]
                     if img_buf is None:
-                        logger.info("read img erro from {} to {}".format(i, i + read_thread_num))
+                        print("read img erro from {} to {}".format(
+                            i, i + read_thread_num))
                         exit(0)
                     else:
                         imgs_seg_list[k] = img_buf
-                for pad_id in range(len(imgs_seg_list), seg_num):
+                for pad_id in range(len(imgs_seg_list), num_seg):
                     imgs_seg_list.append(imgs_seg_list[-1])
-                yield imgs_seg_list      
+                yield imgs_seg_list
 
 
-        def inference_imgs_transform(imgs_list, mode, seg_num, seglen, short_size,\
+        def inference_imgs_transform(imgs_list, mode, num_seg, seglen, short_size,\
                                     target_size, img_mean, img_std):
             """
             inference_imgs_transform
-            """ 
-            imgs_ret = imgs_transform(imgs_list, mode, seg_num, seglen, short_size,
-                        target_size, img_mean, img_std)
+            """
+            imgs_ret = imgs_transform(imgs_list, mode, num_seg, seglen,
+                                      short_size, target_size, img_mean,
+                                      img_std)
             label_ret = 0
 
             return imgs_ret, label_ret
 
-        mapper = functools.partial(
-            inference_imgs_transform,
-            mode=mode,
-            seg_num=seg_num,
-            seglen=seglen,
-            short_size=short_size,
-            target_size=target_size,
-            img_mean=img_mean,
-            img_std=img_std)
+        mapper = functools.partial(inference_imgs_transform,
+                                   mode=mode,
+                                   num_seg=num_seg,
+                                   seglen=seglen,
+                                   short_size=short_size,
+                                   target_size=target_size,
+                                   img_mean=img_mean,
+                                   img_std=img_std)
 
-        return paddle.reader.xmap_readers(mapper, reader, num_threads, buf_size, order=True)
+        return paddle.reader.xmap_readers(mapper,
+                                          reader,
+                                          num_threads,
+                                          buf_size,
+                                          order=True)
 
 
 def imgs_transform(imgs,
                    mode,
-                   seg_num,
+                   num_seg,
                    seglen,
                    short_size,
                    target_size,
@@ -186,7 +195,7 @@ def imgs_transform(imgs,
     imgs = np_imgs
     imgs -= img_mean
     imgs /= img_std
-    imgs = np.reshape(imgs, (seg_num, seglen * 3, target_size, target_size))
+    imgs = np.reshape(imgs, (num_seg, seglen * 3, target_size, target_size))
 
     return imgs
 
@@ -260,10 +269,10 @@ def group_multi_scale_crop(img_group, target_size, scales=None, \
                 'crop_h': crop_pair[1],
                 'offset_w': w_offset,
                 'offset_h': h_offset
-                }
-             
+            }
+
         return crop_info
-    
+
     crop_info = _sample_crop_size(im_size)
     crop_w = crop_info['crop_w']
     crop_h = crop_info['crop_h']
@@ -355,4 +364,3 @@ def group_scale(imgs, target_size):
             resized_imgs.append(img.resize((ow, oh), Image.BILINEAR))
 
     return resized_imgs
-

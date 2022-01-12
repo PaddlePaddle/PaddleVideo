@@ -82,9 +82,9 @@ class VideoDecoder(object):
             results['frames_len'] = len(sampledFrames)
 
         elif self.backend == 'decord':
-            vr = de.VideoReader(file_path)
-            frames_len = len(vr)
-            results['frames'] = vr
+            container = de.VideoReader(file_path)
+            frames_len = len(container)
+            results['frames'] = container
             results['frames_len'] = frames_len
 
         elif self.backend == 'pyav':  # for TimeSformer

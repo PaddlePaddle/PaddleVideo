@@ -123,9 +123,9 @@ x = self.avgpool2d(x)
 # [N * num_segs, in_channels, 1, 1]
 if self.dropout is not None:
     x = self.dropout(x)
-# [N * seg_num, in_channels, 1, 1]
-x = paddle.reshape(x, [-1, seg_num, x.shape[1]])
-# [N, seg_num, in_channels]
+# [N * num_seg, in_channels, 1, 1]
+x = paddle.reshape(x, [-1, num_seg, x.shape[1]])
+# [N, num_seg, in_channels]
 x = paddle.mean(x, axis=1)
 # [N, 1, in_channels]
 x = paddle.reshape(x, shape=[-1, self.in_channels])

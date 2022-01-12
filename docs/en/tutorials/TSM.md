@@ -62,7 +62,7 @@ Let's have a look at how TSM is implemented using **paddlepaddle**:
 `import paddle.nn.functional as F`
 
 
-`shifts = F.temporal_shift(inputs, self.num_seg,1.0 / self.num_seg)`
+`shifts = F.temporal_shift(inputs, self.num_seg, 1.0 / self.num_seg)`
 
 **Only two lines codes !!!**, isn't it easy ?
 

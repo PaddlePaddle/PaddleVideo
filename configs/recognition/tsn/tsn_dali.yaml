@@ -16,7 +16,7 @@ MODEL: #MODEL field
 DALI_LOADER:
     batch_size: 32
     file_path: 'data/k400/train.csv'
-    seg_num: 3
+    num_seg: 3
     seglen: 1
     short_size: 256
     target_size: 224
