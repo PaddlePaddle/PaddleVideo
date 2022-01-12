@@ -62,44 +62,32 @@ class BaseDataset(paddle.io.Dataset):
     def __init__(
             self,
             data_dir: Path,
-            fuse_captions: bool,
-            spatial_feats: bool,
-            challenge_mode: bool,
             eval_only: bool,
             use_zeros_for_missing: bool,
-            task: str,
             text_agg: str,
             text_feat: str,
             split_name: str,
             cls_partition: str,
             root_feat_folder: str,
-            challenge_test_root_feat_folder: str,
             text_dim: int,
             num_test_captions: int,
             restrict_train_captions: int,
             max_tokens: Dict[str, int],
-            text_dropout: float,
             logger: logging.Logger,
             raw_input_dims: Dict[str, int],
             feat_aggregation: Dict[str, Dict],
     ):
-        self.task = task
         self.eval_only = eval_only
         self.logger = logger
-        self.challenge_mode = challenge_mode
         self.text_feat = text_feat
         self.data_dir = data_dir
         self.text_dim = text_dim
-        self.spatial_feats = spatial_feats
-        self.text_dropout = text_dropout
         self.restrict_train_captions = restrict_train_captions
         self.max_tokens = max_tokens
         self.cls_partition = cls_partition
-        self.fuse_captions = fuse_captions
         self.num_test_captions = num_test_captions
         self.feat_aggregation = feat_aggregation
         self.root_feat = data_dir / root_feat_folder
-        self.challenge_test_root_feat_folder = data_dir / challenge_test_root_feat_folder
         self.experts = set(raw_input_dims.keys())
         self.tokenizer = BertTokenizer.from_pretrained('bert-base-uncased') 
         # This attributes can be overloaded by different datasets, so it must be set
@@ -126,7 +114,7 @@ class BaseDataset(paddle.io.Dataset):
         # All retrieval-based tasks use a single dataloader (and handle the retrieval
         # data separately), whereas for classification we use one dataloader for
         # training and one for validation.
-        self.logger.info("The current task is {}".format(self.task))
+        self.logger.info("The current task is retrieval")
         self.sample_list = self.partition_lists["train"]
         self.num_samples = len(self.sample_list)
         num_val = len(self.partition_lists["val"])
@@ -176,16 +164,15 @@ class BaseDataset(paddle.io.Dataset):
         self.test_ind = {expert: paddle.ones([num_val]) for expert in self.experts} 
         self.raw_captions_retrieval = [None] * num_val
 
-        if self.task == "retrieval":
-            # avoid evaluation on missing queries
-            self.query_masks = np.zeros((num_val, num_test_captions))
-            self.text_token_mask = np.zeros((num_val, num_test_captions))
-            self.text_retrieval = np.zeros((num_val, self.num_test_captions,
-                                            self.max_tokens["text"], self.text_dim))
-            self.cap_retrieval = paddle.zeros([num_val, self.num_test_captions, self.max_tokens["text"]], dtype='int64') #self.cap_retrieval = th.zeros((num_val, self.num_test_captions, self.max_tokens["text"]))
-            self.att_retrieval = paddle.zeros([num_val, self.num_test_captions, self.max_tokens["text"]], dtype='int64') #self.att_retrieval = th.zeros((num_val, self.num_test_captions, self.max_tokens["text"]))
-        else:
-            raise ValueError(f"Unrecognised task: {self.task}")
+
+        # avoid evaluation on missing queries
+        self.query_masks = np.zeros((num_val, num_test_captions))
+        self.text_token_mask = np.zeros((num_val, num_test_captions))
+        self.text_retrieval = np.zeros((num_val, self.num_test_captions,
+                                        self.max_tokens["text"], self.text_dim))
+        self.cap_retrieval = paddle.zeros([num_val, self.num_test_captions, self.max_tokens["text"]], dtype='int64') #self.cap_retrieval = th.zeros((num_val, self.num_test_captions, self.max_tokens["text"]))
+        self.att_retrieval = paddle.zeros([num_val, self.num_test_captions, self.max_tokens["text"]], dtype='int64') #self.att_retrieval = th.zeros((num_val, self.num_test_captions, self.max_tokens["text"]))
+
         save_cap = []
         for ii, video_name in enumerate(self.partition_lists["val"]):
 
@@ -216,67 +203,41 @@ class BaseDataset(paddle.io.Dataset):
                     keep = min(self.max_tokens[expert], len(feats))
                     self.retrieval[expert][ii, :keep, :] = feats[:keep]
 
-            if self.task == "retrieval":
-                candidates_sentences = self.text_features[video_name]
-                if self.restrict_test_captions is not None:
-                    keep_sent_idx = self.restrict_test_captions[video_name]
-                    candidates_sentences = [candidates_sentences[keep_sent_idx]]
+            candidates_sentences = self.text_features[video_name]
+            if self.restrict_test_captions is not None:
+                keep_sent_idx = self.restrict_test_captions[video_name]
+                candidates_sentences = [candidates_sentences[keep_sent_idx]]
 
-                self.query_masks[ii, :len(candidates_sentences)] = 1
+            self.query_masks[ii, :len(candidates_sentences)] = 1
 
-                if self.fuse_captions:
-                    # fuse into a single caption
-                    text_feats = np.vstack(candidates_sentences)
-                    keep = min(len(text_feats), self.max_tokens["text"])
-                    sent = self.raw_captions_retrieval[ii]
-                    cap_ids = [paddle.to_tensor([[self.tokenizer.sep_token_id]], dtype='int64')]
-                    for s in sent:
-                        txt_caption = " ".join(s)
-                        txt_caption = txt_caption.strip()
-                        encoded_dict = self.tokenizer.__call__(txt_caption, max_seq_len=self.max_tokens["text"], pad_to_max_seq_len=False, return_attention_mask=False, truncation_strategy='longest_first')
-                        cap_ids.append(encoded_dict['input_ids'])
-                        cap_ids.append(paddle.to_tensor([[self.tokenizer.sep_token_id]], dtype='int64')) 
-                    cap_ids = paddle.concat(cap_ids, axis=1) 
-                    attention_mask = paddle.zeros([1, self.max_tokens["text"]], dtype='int64') 
-                    attention_mask[:,:cap_ids.shape[1]] = 1 
-                    new_cap = paddle.zeros([1,self.max_tokens["text"]], dtype='int64') 
-                    new_cap[:,:cap_ids.shape[1]] = cap_ids[:,:self.max_tokens["text"]] 
-                    new_cap[:,-1] = self.tokenizer.sep_token_id
-                    cap_ids = new_cap
-                    self.cap_retrieval[ii, 0, :] = cap_ids
-                    self.att_retrieval[ii, 0, :] = attention_mask
-                    self.text_retrieval[ii, 0, :keep, :] = text_feats[:keep, :]
-                    self.text_token_mask[ii, 0] = keep
-                    self.query_masks[ii, :] = 1
-                else:
-                    for test_caption_idx in range(self.num_test_captions):
-                        if len(candidates_sentences) <= test_caption_idx:
-                            break
-                        keep = min(len(candidates_sentences[test_caption_idx]),
-                                   self.max_tokens["text"])
-                        self.text_token_mask[ii, test_caption_idx] = keep
-                        sent = self.raw_captions_retrieval[ii][test_caption_idx]
-                        sent = " ".join(sent) 
-                        sent = sent.strip()
-                        encoded_dict = self.tokenizer.__call__(sent, max_seq_len=self.max_tokens["text"], pad_to_max_seq_len=True, return_attention_mask=True, truncation_strategy='longest_first')
-                        cap_ids = paddle.to_tensor(encoded_dict['input_ids'])
-                        attention_mask = paddle.to_tensor(encoded_dict['attention_mask'])
-                        save_cap.append(sent)
-                        self.cap_retrieval[ii, test_caption_idx, :] = cap_ids
-                        self.att_retrieval[ii, test_caption_idx, :] = attention_mask
-                        if ii % 500 == 0 and test_caption_idx == 0:
-                            msg = (
-                                f"{ii}/{len(self.partition_lists['val'])} will evaluate "
-                                f"sentence {test_caption_idx} out of "
-                                f"{len(candidates_sentences)} (has {keep} words) "
-                                f"{video_name}"
-                            )
-                            self.logger.info(msg)
-                        text_feats = candidates_sentences[test_caption_idx][: keep]
-                        if text_feats.shape[0] == 0:
-                            text_feats = 0
-                            raise ValueError("empty text features!")
-                        self.text_retrieval[ii, test_caption_idx, :keep, :] = text_feats
+            for test_caption_idx in range(self.num_test_captions):
+                if len(candidates_sentences) <= test_caption_idx:
+                    break
+                keep = min(len(candidates_sentences[test_caption_idx]),
+                            self.max_tokens["text"])
+                self.text_token_mask[ii, test_caption_idx] = keep
+                sent = self.raw_captions_retrieval[ii][test_caption_idx]
+                sent = " ".join(sent) 
+                sent = sent.strip()
+                encoded_dict = self.tokenizer.__call__(sent, max_seq_len=self.max_tokens["text"], pad_to_max_seq_len=True, return_attention_mask=True, truncation_strategy='longest_first')
+                cap_ids = paddle.to_tensor(encoded_dict['input_ids'])
+                attention_mask = paddle.to_tensor(encoded_dict['attention_mask'])
+                save_cap.append(sent)
+                self.cap_retrieval[ii, test_caption_idx, :] = cap_ids
+                self.att_retrieval[ii, test_caption_idx, :] = attention_mask
+                if ii % 500 == 0 and test_caption_idx == 0:
+                    msg = (
+                        f"{ii}/{len(self.partition_lists['val'])} will evaluate "
+                        f"sentence {test_caption_idx} out of "
+                        f"{len(candidates_sentences)} (has {keep} words) "
+                        f"{video_name}"
+                    )
+                    self.logger.info(msg)
+                text_feats = candidates_sentences[test_caption_idx][: keep]
+                if text_feats.shape[0] == 0:
+                    text_feats = 0
+                    raise ValueError("empty text features!")
+                self.text_retrieval[ii, test_caption_idx, :keep, :] = text_feats
         with open('run_cap.pkl','wb') as f:
             pkl.dump(save_cap, f)
         self.sanity_checks()
@@ -291,11 +252,7 @@ class BaseDataset(paddle.io.Dataset):
         print("loading training/val splits....")
         tic = time.time()
         for subset, path in self.paths["subset_list_paths"][split_name].items():
-            if self.challenge_mode and split_name == "public_server_test" \
-                    and subset == "val":
-                root_feat = Path(self.challenge_test_root_feat_folder)
-            else:
-                root_feat = Path(self.root_feat)
+            root_feat = Path(self.root_feat)
             subset_list_path = root_feat / path
             if subset == "train" and self.eval_only:
                 rows = []
@@ -322,12 +279,11 @@ class BaseDataset(paddle.io.Dataset):
             (batch_size, self.max_tokens[expert], self.raw_input_dims[expert]))
         ) for expert in self.tensor_storage["variable"]})
 
-        if "retrieval" in self.task:
-            text_tensor = paddle.to_tensor(np.zeros((batch_size, self.captions_per_video,
-                                    self.max_tokens["text"], self.text_dim)))
-            text_token_mask = paddle.to_tensor(np.zeros((batch_size, self.captions_per_video)))
-            text_cap_id = paddle.zeros([batch_size, self.max_tokens["text"]], dtype='int64') 
-            text_att_mask = paddle.zeros([batch_size, self.max_tokens["text"]], dtype='int64') 
+        text_tensor = paddle.to_tensor(np.zeros((batch_size, self.captions_per_video,
+                                self.max_tokens["text"], self.text_dim)))
+        text_token_mask = paddle.to_tensor(np.zeros((batch_size, self.captions_per_video)))
+        text_cap_id = paddle.zeros([batch_size, self.max_tokens["text"]], dtype='int64') 
+        text_att_mask = paddle.zeros([batch_size, self.max_tokens["text"]], dtype='int64') 
 
         for ii, _ in enumerate(data):
             datum = data[ii]
@@ -343,16 +299,15 @@ class BaseDataset(paddle.io.Dataset):
                 else:
                     tensors[expert][ii, :, :] = self.MISSING_VAL
 
-            if "retrieval" in self.task:
-                text = datum["text"]
-                cap_id = datum["cap_id"]
-                att_mask = datum["att_mask"]
-                text_cap_id[ii,:] = paddle.to_tensor(cap_id)
-                text_att_mask[ii, :] = paddle.to_tensor(att_mask)
-                for jj in range(self.captions_per_video):
-                    keep = min(len(text[jj]), self.max_tokens["text"])
-                    text_tensor[ii, jj, :keep, :] = text[jj][:keep]
-                    text_token_mask[ii, jj] = keep
+            text = datum["text"]
+            cap_id = datum["cap_id"]
+            att_mask = datum["att_mask"]
+            text_cap_id[ii,:] = paddle.to_tensor(cap_id)
+            text_att_mask[ii, :] = paddle.to_tensor(att_mask)
+            for jj in range(self.captions_per_video):
+                keep = min(len(text[jj]), self.max_tokens["text"])
+                text_tensor[ii, jj, :keep, :] = text[jj][:keep]
+                text_token_mask[ii, jj] = keep
 
         ind = {key: ensure_tensor(val) for key, val in ind.items()}
         experts = OrderedDict(
@@ -364,11 +319,10 @@ class BaseDataset(paddle.io.Dataset):
                 experts[expert][replace] = paddle.ones_like(experts[expert][replace])
 
         minibatch = {"experts": experts, "ind": ind}
-        if "retrieval" in self.task:
-            minibatch["text"] = paddle.to_tensor(text_tensor, dtype='float32') 
-            minibatch["cap_id"] = paddle.to_tensor(text_cap_id, dtype='int64') 
-            minibatch["att_mask"] = paddle.to_tensor(text_att_mask, dtype='int64')
-            minibatch["text_token_mask"] = paddle.to_tensor(text_token_mask)
+        minibatch["text"] = paddle.to_tensor(text_tensor, dtype='float32') 
+        minibatch["cap_id"] = paddle.to_tensor(text_cap_id, dtype='int64') 
+        minibatch["att_mask"] = paddle.to_tensor(text_att_mask, dtype='int64')
+        minibatch["text_token_mask"] = paddle.to_tensor(text_token_mask)
         return minibatch
 
 
@@ -422,57 +376,27 @@ class BaseDataset(paddle.io.Dataset):
                 else:
                     ind[expert] = 1
 
-            if self.task == "retrieval":
-                # Handle some inconsistencies between how the text features are stored
-                text = self.text_features[vid]
-                if self.fuse_captions:
-                    text = [np.vstack(text)]
-                    pick = None
-                    sent = self.raw_captions[vid]
-                    random.shuffle(sent)
-                    cap_ids = paddle.to_tensor([[self.tokenizer.sep_token_id]], dtype='int64')
-                    for s in sent:
-                        txt_caption = " ".join(s)
-                        txt_caption = txt_caption.strip()
-                        encoded_dict = self.tokenizer.__call__(txt_caption, max_seq_len=self.max_tokens["text"], pad_to_max_seq_len=False, return_attention_mask=False, truncation_strategy='longest_first')
-                        cap_ids.append(encoded_dict['input_ids'])
-                        cap_ids.append(paddle.to_tensor([[self.tokenizer.sep_token_id]], dtype='int64'))
-                    cap_ids = paddle.concat(cap_ids, axis=1)
-                    attention_mask = paddle.zeros([1,self.max_tokens["text"]], dtype='int64')
-                    attention_mask[:,:cap_ids.size(1)] = 1
-                    new_cap = paddle.zeros([1,self.max_tokens["text"]], dtype='int64')
-                    new_cap[:,:cap_ids.size(1)] = cap_ids[:,:self.max_tokens["text"]]
-                    new_cap[:,-1] = self.tokenizer.sep_token_id
-                    cap_id = new_cap
-                elif isinstance(text, list):
-                    pick = np.random.choice(len(text), size=self.captions_per_video) 
-                    sent = self.raw_captions[vid][pick[0]]
-                    sent = " ".join(sent) 
-                    sent = sent.strip()
+            # Handle some inconsistencies between how the text features are stored
+            text = self.text_features[vid]
+            if isinstance(text, list):
+                pick = np.random.choice(len(text), size=self.captions_per_video) 
+                sent = self.raw_captions[vid][pick[0]]
+                sent = " ".join(sent) 
+                sent = sent.strip()
 
-                    text = np.array(text)[pick]
-                    encoded_dict = self.tokenizer.__call__(sent, max_seq_len=self.max_tokens["text"], pad_to_max_seq_len=True, return_attention_mask=True, truncation_strategy='longest_first')
-                    cap_id = encoded_dict['input_ids']
-                    token_type_ids = encoded_dict['token_type_ids']                   
-                    attention_mask = encoded_dict['attention_mask']
-                else:
-                    pick = None
-                    text = np.random.choice(text, size=self.captions_per_video)
-
-                if np.random.random() < self.text_dropout:
-                    if pick is not None:
-                        mask = np.random.random(len(text[0]))
-                        text = [text[0][mask > 0.5]]
-                    else:
-                        raise NotImplementedError("TODO: Add dropouot for picked text")
+                text = np.array(text)[pick]
+                encoded_dict = self.tokenizer.__call__(sent, max_seq_len=self.max_tokens["text"], pad_to_max_seq_len=True, return_attention_mask=True, truncation_strategy='longest_first')
+                cap_id = encoded_dict['input_ids']
+                token_type_ids = encoded_dict['token_type_ids']                   
+                attention_mask = encoded_dict['attention_mask']
+            else:
+                pick = None
+                text = np.random.choice(text, size=self.captions_per_video)
 
         # Return both the missing indices as well as the tensors
-        if self.task == "retrieval":
-            sample = {"text": text}
-            sample.update({"cap_id": cap_id})
-            sample.update({"att_mask": attention_mask})
-        else:
-            raise ValueError(f"unknown task: {self.task}")
+        sample = {"text": text}
+        sample.update({"cap_id": cap_id})
+        sample.update({"att_mask": attention_mask})
         sample.update({f"{key}_ind": val for key, val in ind.items()})
         sample.update(features)
         return sample

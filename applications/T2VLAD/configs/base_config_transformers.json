@@ -14,15 +14,7 @@
     "arch": {
         "type": "CENet",
         "args": {
-            "keep_missing_modalities": false,
-            "use_ce": "pairwise",
             "use_mish": 1,
-            "use_bn_reason": 1,
-            "num_g_layers": 3,
-            "num_h_layers": 0,
-            "include_self": 1,
-            "l2renorm": false,
-            "randomise_feats": "",
             "vlad_clusters": {
                 "features_audio": 16,
                 "features_speech": 16,
@@ -32,12 +24,7 @@
                 "features_rgb": 16,
                 "features_ocr": 16,
                 "features_flow": 16,
-                "ocr": 32,
-                "text": 16,
-                "audio": 16,
-                "chen_resnet": 16,
-                "speech": 32,
-                "detection-sem": 32
+                "text": 16
             },
             "ghost_clusters": {
                 "text": 0
@@ -48,224 +35,11 @@
 
     "data_loader": {
         "type": "ExpertDataLoader",
-        "args":{
-            "trn_cat": false,
+        "args": {
             "batch_size": 32,
             "num_workers": 8,
-            "root_feat_folder": "structured-symlinks",
-            "text_dropout": 0.0,
+            "root_feat_folder": "",
             "feat_aggregation": {
-                "imagenet.senet154.0": {
-                    "fps": 25,
-                    "stride": 1,
-                    "pixel_dim": 256,
-                    "aggregate-axis": 1,
-                    "offset": 0,
-                    "temporal": "avg",
-                    "aggregate": "concat",
-                    "type": "embed",
-                    "feat_dims": {
-                        "embed": 2048,
-                        "logits": 1000
-                    }
-                },
-                "trn.moments-trn.0": {
-                    "fps": 25,
-                    "offset": 0,
-                    "stride": 8,
-                    "pixel_dim": 256,
-                    "inner_stride": 5,
-                    "temporal": "avg",
-                    "aggregate": "concat",
-                    "aggregate-axis": 1,
-                    "type": "embed",
-                    "feat_dims": {
-                        "embed": 1792,
-                        "logits": 339
-                    }
-                },
-                "scene.densenet161.0": {
-                    "stride": 1,
-                    "fps": 25,
-                    "offset": 0,
-                    "temporal": "avg",
-                    "pixel_dim": 256,
-                    "aggregate": "concat",
-                    "aggregate-axis": 1,
-                    "type": "embed",
-                    "feat_dims": {
-                        "embed": 2208,
-                        "logits": 1000
-                    }
-                },
-                "i3d.i3d.0": {
-                    "fps": 25,
-                    "offset": 0,
-                    "stride": 25,
-                    "inner_stride": 1,
-                    "pixel_dim": 256,
-                    "temporal": "avg",
-                    "aggregate": "concat",
-                    "aggregate-axis": 1,
-                    "type": "embed",
-                    "feat_dims": {
-                        "embed": 1024,
-                        "logits": 400
-                    }
-                },
-                "moments_3d.moments-resnet3d50.0": {
-                    "fps": 25,
-                    "offset": 1,
-                    "stride": 8,
-                    "pixel_dim": 256,
-                    "inner_stride": 5,
-                    "temporal": "avg",
-                    "aggregate": "concat",
-                    "aggregate-axis": 1,
-                    "type": "embed",
-                    "feat_dims": {
-                        "embed": 2048,
-                        "logits": 3339
-                    }
-                },
-                "s3dg.s3dg.0": {
-                    "fps": 10,
-                    "offset": 0,
-                    "stride": 16,
-                    "pixel_dim": 256,
-                    "inner_stride": 1,
-                    "temporal": "avg",
-                    "aggregate": "concat",
-                    "aggregate-axis": 1,
-                    "type": "embed",
-                    "feat_dims": {
-                        "embed": 1024,
-                        "logits": 512
-                    }
-                },
-                "r2p1d.r2p1d-ig65m.0": {
-                    "fps": 30,
-                    "offset": 0,
-                    "stride": 32,
-                    "inner_stride": 1,
-                    "pixel_dim": 256,
-                    "temporal": "avg",
-                    "aggregate": "concat",
-                    "aggregate-axis": 1,
-                    "type": "embed",
-                    "feat_dims": {
-                        "embed": 512,
-                        "logits": 359
-                    }
-                },
-                "r2p1d.r2p1d-ig65m-kinetics.0": {
-                    "fps": 30,
-                    "offset": 0,
-                    "stride": 32,
-                    "inner_stride": 1,
-                    "pixel_dim": 256,
-                    "temporal": "avg",
-                    "aggregate": "concat",
-                    "aggregate-axis": 1,
-                    "type": "embed",
-                    "feat_dims": {
-                        "embed": 512,
-                        "logits": 400
-                    }
-                },
-                "moments-static.moments-resnet50.0": {
-                    "fps": 25,
-                    "stride": 1,
-                    "offset": 3,
-                    "pixel_dim": 256,
-                    "temporal": "avg",
-                    "aggregate": "concat",
-                    "aggregate-axis": 1,
-                    "type": "embed",
-                    "feat_dims": {
-                        "embed": 2048,
-                        "logits": 1000
-                    }
-                },
-                "imagenet.resnext101_32x48d.0": {
-                    "fps": 25,
-                    "stride": 1,
-                    "offset": 0,
-                    "pixel_dim": 256,
-                    "temporal": "avg",
-                    "aggregate": "concat",
-                    "aggregate-axis": 1,
-                    "type": "embed",
-                    "feat_dims": {
-                        "embed": 2048,
-                        "logits": 1000
-                    }
-                },
-                "ocr": {
-                    "model": "yang",
-                    "temporal": "vlad",
-                    "type": "embed",
-                    "flaky": true,
-                    "binarise": false,
-                    "feat_dims": {
-                        "embed": 300
-                    }
-                },
-                "chen_resnet": {
-                    "model": "resnet",
-                    "temporal": "vlad",
-                    "type": "embed",
-                    "binarise": false,
-                    "feat_dims": {
-                        "embed": 2048
-                    }
-                },
-                "audio": {
-                    "model": "vggish",
-                    "temporal": "vlad",
-                    "type": "embed",
-                    "binarise": false
-                },
-                "antoine-rgb": {
-                    "model": "antoine",
-                    "temporal": "avg",
-                    "type": "embed",
-                    "feat_dims": {
-                        "embed": 2048
-                    }
-                },
-                "flow": {
-                    "model": "antoine",
-                    "temporal": "avg",
-                    "type": "embed",
-                    "feat_dims": {
-                        "embed": 1024
-                    }
-                },
-                "speech": {
-                    "model": "w2v",
-                    "flaky": true,
-                    "temporal": "vlad",
-                    "type": "embed",
-                    "binarise": false,
-                    "feat_dims": {
-                        "embed": 300
-                    }
-                },
-                "face": {
-                    "model": "antoine",
-                    "temporal": "avg",
-                    "flaky": true,
-                    "binarise": false
-                },
-                "detection-sem": {
-                    "fps": 1,
-                    "stride": 3,
-                    "temporal": "vlad",
-                    "feat_type": "sem",
-                    "model": "detection",
-                    "type": "embed"
-                },
                 "features_audio": {
                     "model": "mmt",
                     "flaky": true,
@@ -362,14 +136,6 @@
         "t2v_metrics",
         "v2t_metrics"
     ],
-    "visualizer": {
-        "type": "Visualizer",
-        "args":{
-            "src_video_dir": "MSRVTT/challenge-release-1/videos/all",
-            "vis_vid_freq": 1000,
-            "num_samples": 100
-        }
-    },
     "lr_scheduler": {
         "type": "StepLR",
         "args": {
@@ -381,7 +147,7 @@
         "save_only_best": true,
         "save_dir": "data/saved/",
         "save_period": 5,
-        "val_freq": 5,
+        "val_freq": 1,
         "verbosity": 2,
         "monitor": "max val_t2v_metrics_geometric_mean_R1-R5-R10"
     }

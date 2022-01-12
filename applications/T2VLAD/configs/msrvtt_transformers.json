@@ -17,23 +17,12 @@
     "arch": {
         "type": "CENet",
         "args": {
-            "keep_missing_modalities": false,
-            "use_ce": false,
             "use_mish": 1,
-            "use_bn_reason": 1,
-            "num_g_layers": 3,
-            "num_h_layers": 0,
-            "include_self": 1,
-            "l2renorm": false,
-            "randomise_feats": "",
             "vlad_clusters": {
-                "text": 9,
-                "chen_resnet": 9,
-                "detection-sem": 50
+                "text": 9
             },
             "ghost_clusters": {
                 "text": 1,
-                "ocr": 1,
                 "features_ocr": 1,
                 "features_rgb": 1,
                 "features_flow": 1,
@@ -41,13 +30,9 @@
                 "features_s3d": 1,
                 "features_audio": 1,
                 "features_speech": 1,
-                "features_face": 1,
-                "audio": 1,
-                "chen_resnet": 1,
-                "speech": 1
+                "features_face": 1
             },
-            "mimic_ce_dims": 1,
-            "test_caption_mode": "indep"
+            "mimic_ce_dims": 1
         }
     },
     "data_loader": {
@@ -57,25 +42,17 @@
             "data_dir": "data/MSRVTT",
             "split_name": "jsfusion",
             "batch_size": 64,
-            "fuse_captions": false,
             "num_test_captions": 1,
             "max_tokens": {
-		"features_ocr": 30,
-		"features_face": 30,
-		"features_rgb": 51,
-		"features_flow": 49,
-		"features_s3d": 30,
-		"features_scene": 31,
-		"features_speech": 112,
-		"features_audio": 31,
-                "ocr": 49,
-                "text": 37,
-                "audio": 29,
-                "speech": 32,
-                "openpose": 50,
-                "chen_resnet": 57,
-                "detection": 12,
-                "detection-sem": 100
+                "features_ocr": 30,
+                "features_face": 30,
+                "features_rgb": 51,
+                "features_flow": 49,
+                "features_s3d": 30,
+                "features_scene": 31,
+                "features_speech": 112,
+                "features_audio": 31,
+                "text": 37
             }
         }
     },
@@ -102,11 +79,6 @@
 		     "step_size": 5,
 		      "gamma": 0.9
 	    }
-    },
-    "visualizer": {
-        "args":{
-            "src_video_dir": "data/MSRVTT/videos/all"
-        }
     },
     "eval_settings": {
         "data_loader": {

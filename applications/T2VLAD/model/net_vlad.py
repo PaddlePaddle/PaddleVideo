@@ -42,7 +42,14 @@ class NetVLAD(nn.Layer):
         self.clusters1 = paddle.create_parameter([1, feature_size, cluster_size], dtype='float32', default_initializer=nn.initializer.Assign(paddle.randn([1, feature_size, cluster_size]) * init_sc))
         self.clusters2 = paddle.create_parameter([1, feature_size, cluster_size], dtype='float32', default_initializer=nn.initializer.Assign(paddle.randn([1, feature_size, cluster_size]) * init_sc)) 
         self.out_dim = self.cluster_size * feature_size
-
+    
+    def sanity_checks(self, x):
+        """Catch any nans in the inputs/clusters"""
+        if paddle.isnan(paddle.sum(x)):
+            raise ValueError("nan inputs")
+        if paddle.isnan(self.clusters[0][0]): 
+            raise ValueError("nan clusters")
+        
     def forward(self, x, freeze=False, mask=None):
         """Aggregates feature maps into a fixed size representation.  In the following
         notation, B = batch_size, N = num_features, K = num_clusters, D = feature_size.
@@ -71,14 +78,13 @@ class NetVLAD(nn.Layer):
             assignment = batch_norm(assignment)
 
         assignment = F.softmax(assignment, axis=1) # BN x (K+G) -> BN x (K+G)
-        # remove ghost assigments
-        save_ass = assignment.reshape([-1, max_sample, self.cluster_size+1]) 
+        save_ass = assignment.reshape([-1, max_sample, self.cluster_size+1])
 
         assignment = assignment[:, :self.cluster_size]
         assignment = assignment.reshape([-1, max_sample, self.cluster_size]) # -> B x N x K
         a_sum = paddle.sum(assignment, axis=1, keepdim=True) # B x N x K -> B x 1 x K
         a = a_sum * self.clusters2
-        assignment = assignment.transpose([0, 2, 1]) # B x N x K -> B x K x N
+        assignment = assignment.transpose([0, 2, 1])  # B x N x K -> B x K x N
 
         x = x.reshape([-1, max_sample, self.feature_size]) # BN x D -> B x N x D
         vlad = paddle.matmul(assignment, x) # (B x K x N) x (B x N x D) -> B x K x D
@@ -92,10 +98,3 @@ class NetVLAD(nn.Layer):
         vlad = vlad_.reshape([-1, self.cluster_size * self.feature_size])  # -> B x DK
         vlad = F.normalize(vlad)
         return vlad, vlad_, save_ass  # B x DK
-
-    def sanity_checks(self, x):
-        """Catch any nans in the inputs/clusters"""
-        if paddle.isnan(paddle.sum(x)):
-            raise ValueError("nan inputs")
-        if paddle.isnan(self.clusters[0][0]): 
-            raise ValueError("nan clusters")

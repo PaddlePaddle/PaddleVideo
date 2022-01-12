@@ -175,8 +175,6 @@ def compute_dims(config, logger=None):
     dims = []
     arch_args = config["arch"]["args"]
     vlad_clusters = arch_args["vlad_clusters"]
-    msg = f"It is not valid to use both the `use_ce` and `mimic_ce_dims` options"
-    assert not (arch_args["use_ce"] and arch_args.get("mimic_ce_dims", False)), msg
     for expert in ordered:
         temporal = feat_agg[expert]["temporal"]
         if expert == "face":
@@ -228,7 +226,7 @@ def compute_dims(config, logger=None):
 
         # For the CE architecture, we need to project all features to a common
         # dimensionality
-        if arch_args["use_ce"] or arch_args.get("mimic_ce_dims", False):
+        if arch_args.get("mimic_ce_dims", False):
             out_dim = experts["ce_shared_dim"]
 
         dims.append((expert, (in_dim, out_dim)))

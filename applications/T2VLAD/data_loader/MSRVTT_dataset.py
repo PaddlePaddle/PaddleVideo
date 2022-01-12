@@ -24,52 +24,15 @@ class MSRVTT(BaseDataset):
     @typechecked
     def dataset_paths() -> Dict[str, Union[str, List[str], Path, Dict]]:
         subset_paths = {}
-        js_test_cap_idx_path = None
-        challenge_splits = {"val", "public_server_val", "public_server_test"}
-        splits = {"full-val", "full-test", "miech", "jsfusion"}
-        splits.update(challenge_splits)
-        for split_name in splits:
-            if split_name == "miech":
-                # For now, we follow Antoine's approach of using the first text caption
-                # for the retreival task when evaluating on his custom split.
-                train_list_path = "train_list_miech.txt"
-                test_list_path = "test_list_miech.txt"
-            elif split_name in "jsfusion":
-                train_list_path = "train_list_jsfusion.txt"
-                test_list_path = "val_list_jsfusion.txt"
-                # NOTE: The JSFusion split (referred to as 1k-A in the paper) uses all
-                # videos, but randomly samples a single caption per video from the test
-                # set for evaluation. To reproduce this evaluation, we use the indices
-                # of the test captions, and restrict to this subset during eval.
-                js_test_cap_idx_path = "jsfusion_val_caption_idx.pkl"
-            elif split_name in {"full-val", "full-test"}:
-                train_list_path = "train_list_full.txt"
-                if split_name == "full-val":
-                    test_list_path = "val_list_full.txt"
-                else:
-                    test_list_path = "test_list_full.txt"
-            elif split_name in challenge_splits:
-                train_list_path = "train_list.txt"
-                if split_name == "val":
-                    test_list_path = f"{split_name}_list.txt"
-                else:
-                    test_list_path = f"{split_name}.txt"
-            else:
-                msg = "unrecognised MSRVTT split: {}"
-                raise ValueError(msg.format(split_name))
-            subset_paths[split_name] = {"train": train_list_path, "val": test_list_path}
-        feature_names = [
-            "imagenet.senet154.0",
-            "scene.densenet161.0",
-            "i3d.i3d.0",
-            "s3dg.s3dg.0",
-            "imagenet.resnext101_32x48d.0",
-            "trn.moments-trn.0",
-            "r2p1d.r2p1d-ig65m.0",
-            "r2p1d.r2p1d-ig65m-kinetics.0",
-            "moments_3d.moments-resnet3d50.0",
-            "moments-static.moments-resnet50.0",
-        ]
+        split_name = "jsfusion"
+        train_list_path = "train_list_jsfusion.txt"
+        test_list_path = "val_list_jsfusion.txt"
+        # NOTE: The JSFusion split (referred to as 1k-A in the paper) uses all
+        # videos, but randomly samples a single caption per video from the test
+        # set for evaluation. To reproduce this evaluation, we use the indices
+        # of the test captions, and restrict to this subset during eval.
+        js_test_cap_idx_path = "jsfusion_val_caption_idx.pkl"
+        subset_paths[split_name] = {"train": train_list_path, "val": test_list_path}
         custom_paths = {
             "features_audio": ["mmt_feats/features.audio.pkl"],
             "features_flow": ["mmt_feats/features.flow_agg.pkl"],
@@ -79,35 +42,16 @@ class MSRVTT(BaseDataset):
             "features_ocr": ["mmt_feats/features.ocr.pkl"],
             "features_s3d": ["mmt_feats/features.s3d.pkl"],
             "features_speech": ["mmt_feats/features.speech.pkl"],
-            "audio": ["aggregated_audio_feats/Audio_MSRVTT_new.pickle"],
-            "chen_resnet": ["aggregated_chen_resnet_feats/chen_resnet_feats.pkl"],
-            "face": ["aggregated_face_feats/facefeats-avg.pickle"],
-            "ocr": ["aggregated_ocr_feats/ocr-raw.pickle"],
-            "speech": ["aggregated_speech/speech-w2v.pickle"]
         }
-        custom_miech_paths = custom_paths.copy()
-        custom_miech_paths.update({
-            "antoine-rgb": ["antoine/resnet_features.pickle"],
-            "audio": ["antoine/audio_features.pickle"],
-            "flow": ["antoine/flow_features.pickle"],
-            "face": ["antoine/facefeats-clone.pickle"],
-        })
         text_feat_paths = {
-            "w2v": "w2v_MSRVTT.pickle",
             "openai": "w2v_MSRVTT_openAIGPT.pickle",
-            "bertxl": "w2v_MSRVTT_transformer.pickle",
         }
         text_feat_paths = {key: Path("aggregated_text_feats") / fname
                            for key, fname in text_feat_paths.items()}
-        challenge_text_feat_paths = {key: f"aggregated_text_feats/{key}.pickle"
-                                     for key in text_feat_paths}
         feature_info = {
             "custom_paths": custom_paths,
-            "custom_miech_paths": custom_miech_paths,
-            "feature_names": feature_names,
             "subset_list_paths": subset_paths,
             "text_feat_paths": text_feat_paths,
-            "challenge_text_feat_paths": challenge_text_feat_paths,
             "raw_captions_path": "raw-captions.pkl",
             "js_test_cap_idx_path": js_test_cap_idx_path,
         }
@@ -115,12 +59,8 @@ class MSRVTT(BaseDataset):
 
     def load_features(self):
         root_feat = Path(self.root_feat)
-        feat_names = {key: self.visual_feat_paths(key) for key in
-                      self.paths["feature_names"]}
-        if self.split_name == "miech":
-            custom_path_key = "custom_miech_paths"
-        else:
-            custom_path_key = "custom_paths"
+        feat_names = {}
+        custom_path_key = "custom_paths"
         feat_names.update(self.paths[custom_path_key])
         features = {}
         for expert, rel_names in feat_names.items():
@@ -146,32 +86,29 @@ class MSRVTT(BaseDataset):
                 features[expert] = copy.deepcopy(features_)
 
         self.features = features
-        if self.challenge_mode:
-            self.load_challenge_text_features()
-        else:
-            self.raw_captions = memcache(root_feat / self.paths["raw_captions_path"])
-            text_feat_path = root_feat / self.paths["text_feat_paths"][self.text_feat]
-            self.text_features = memcache(text_feat_path)
+        self.raw_captions = memcache(root_feat / self.paths["raw_captions_path"])
+        text_feat_path = root_feat / self.paths["text_feat_paths"][self.text_feat]
+        self.text_features = memcache(text_feat_path)
 
-            if self.restrict_train_captions:
-                # hash the video names to avoid O(n) lookups in long lists
-                train_list = set(self.partition_lists["train"])
-                for key, val in self.text_features.items():
-                    if key not in train_list:
-                        continue
+        if self.restrict_train_captions:
+            # hash the video names to avoid O(n) lookups in long lists
+            train_list = set(self.partition_lists["train"])
+            for key, val in self.text_features.items():
+                if key not in train_list:
+                    continue
 
-                    if not self.split_name == "full-test":
-                        # Note that we do not perform this sanity check for the full-test
-                        # split, because the text features in the cached dataset will
-                        # already have been cropped to the specified
-                        # `resstrict_train_captions`
-                        expect = {19, 20}
-                        msg = f"expected train text feats as lists with length {expect}"
-                        has_expected_feats = isinstance(val, list) and len(val) in expect
-                        self.log_assert(has_expected_feats, msg=msg)
+                if not self.split_name == "full-test":
+                    # Note that we do not perform this sanity check for the full-test
+                    # split, because the text features in the cached dataset will
+                    # already have been cropped to the specified
+                    # `resstrict_train_captions`
+                    expect = {19, 20}
+                    msg = f"expected train text feats as lists with length {expect}"
+                    has_expected_feats = isinstance(val, list) and len(val) in expect
+                    self.log_assert(has_expected_feats, msg=msg)
 
-                    # restrict to the first N captions (deterministic)
-                    self.text_features[key] = val[:self.restrict_train_captions]
+                # restrict to the first N captions (deterministic)
+                self.text_features[key] = val[:self.restrict_train_captions]
         self.summary_stats()
 
     def sanity_checks(self):

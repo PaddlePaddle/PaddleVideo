@@ -15,7 +15,7 @@
 T2VLAD is proposed by Baidu in CVPR2021 for text-video retrieval. Text-video retrieval is a challenging task that aims to search relevant video contents based on natural language descriptions. The key to this problem is to measure text- video similarities in a joint embedding space. T2VLAD designs an efficient global-local alignment method. This model achieves consistent improvements on three standard text-video retrieval benchmarks and outperform the state- of-the-art by a clear margin.
 
 <div align="center">
-<img src="./imgs/t2vlad.png" height=400 width=500 hspace='10'/> <br />
+<img src="./imgs/t2vlad.png" height=400 width=700 hspace='10'/> <br />
 </div>
 
 

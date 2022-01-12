@@ -16,13 +16,13 @@
 T2VLAD是百度在CVPR2021提出的文本视频检索模型。文本视频检索是一项具有挑战的任务，旨在基于自然语言处理描述搜索相关视频内容。这个问题的关键是在联合嵌入空间中测量文本-视频的相似性。T2VLAD设计了一种有效的全局-局部对齐方法，在三个标准的文本视频检索基准上取得了一致的改进，并以明显的优势超越了最先进的技术。
 
 <div align="center">
-<img src="./imgs/t2vlad.png" height=400 width=500 hspace='10'/> <br />
+<img src="./imgs/t2vlad.png" height=400 width=700 hspace='10'/> <br />
 </div>
 
 
 ## 数据准备
 
-MSR-VTT数据下载及准备请参考[MSR-VTT数据准备]()
+MSR-VTT数据下载链接：
 
 
 ## 模型训练

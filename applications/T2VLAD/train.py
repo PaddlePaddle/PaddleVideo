@@ -61,13 +61,8 @@ def run_exp(config):
             module=module_arch,
             expert_dims=expert_dims,
             text_dim=config["experts"]["text_dim"],
-            disable_nan_checks=config["disable_nan_checks"],
-            spatial_feats=config["data_loader"]["args"].get("spatial_feats", False),
-            task=config.get("task", "retrieval"),
             ce_shared_dim=config["experts"].get("ce_shared_dim", None),
             feat_aggregation=config["data_loader"]["args"]["feat_aggregation"],
-            trn_config=trn_config,
-            trn_cat=config["data_loader"]["args"].get("trn_cat", 0),
         )
         logger.info(model)
 
@@ -76,12 +71,10 @@ def run_exp(config):
             module=module_data,
             logger=logger,
             raw_input_dims=raw_input_dims,
-            challenge_mode=config.get("challenge_mode", False),
             text_feat=config["experts"]["text_feat"],
             text_dim=config["experts"]["text_dim"],
             text_agg=config["experts"]["text_agg"],
             use_zeros_for_missing=config["experts"].get("use_zeros_for_missing", False),
-            task=config.get("task", "retrieval"),
             eval_only=False,
         )
 
