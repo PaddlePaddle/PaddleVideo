@@ -95,7 +95,6 @@ def main():
         random.seed(seed)
         np.random.seed(seed)
         paddle.seed(seed)
-        paddle.framework.seed(seed)
 
     _, world_size = get_dist_info()
     parallel = world_size != 1

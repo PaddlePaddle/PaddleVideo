@@ -59,7 +59,7 @@ otl = []
 input = paddle.randn(SHAPE)
 for i in range(10000):
     t1 = time.time()
-    out1 = F.temporal_shift(x=input, num_seg=2, shift_ratio=0.2)
+    out1 = F.temporal_shift(x=input, seg_num=2, shift_ratio=0.2)
     t2 = time.time()
     ot = t2 - t1
     if i > 1000:
@@ -77,15 +77,15 @@ import paddle.nn.functional as F
 SHAPE = [32, 16, 32, 32]
 #SHAPE = [128, 64, 128, 128]
 
-def temporal_shift(x, num_seg, shift_ratio):
+def temporal_shift(x, seg_num, shift_ratio):
     shape = x.shape #[N*T, C, H, W]
-    reshape_x = x.reshape((-1, num_seg, shape[1], shape[2], shape[3])) #[N, T, C, H, W]
+    reshape_x = x.reshape((-1, seg_num, shape[1], shape[2], shape[3])) #[N, T, C, H, W]
     pad_x = paddle.fluid.layers.pad(reshape_x, [0,0,1,1,0,0,0,0,0,0,]) #[N, T+2, C, H, W]
     c1 = int(shape[1] * shift_ratio)
     c2 = int(shape[1] * 2 * shift_ratio)
-    slice1 = pad_x[:, :num_seg, :c1, :, :]
-    slice2 = pad_x[:, 2:num_seg+2, c1:c2, :, :]
-    slice3 = pad_x[:, 1:num_seg+1, c2:, :, :]
+    slice1 = pad_x[:, :seg_num, :c1, :, :]
+    slice2 = pad_x[:, 2:seg_num+2, c1:c2, :, :]
+    slice3 = pad_x[:, 1:seg_num+1, c2:, :, :]
     concat_x = paddle.concat([slice1, slice2, slice3], axis=2) #[N, T, C, H, W]
     return concat_x.reshape(shape)
 
@@ -93,7 +93,7 @@ ctl = []
 input = paddle.randn(SHAPE)
 for i in range(10000):
     t2 = time.time()
-    out2 = temporal_shift(x=input, num_seg=2, shift_ratio=0.2)
+    out2 = temporal_shift(x=input, seg_num=2, shift_ratio=0.2)
     t3 = time.time()
     ct = t3 - t2
     if i > 1000:
