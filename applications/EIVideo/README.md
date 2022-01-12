@@ -9,7 +9,12 @@
 ![](https://img.shields.io/badge/%E6%B7%B1%E5%BA%A6%E9%80%82%E9%85%8D->Win7-9cf)
 [![QQGroup](https://img.shields.io/badge/QQ群-441226485-9cf?logo=tencent-qq&logoColor=000&logoWidth=15)](https://jq.qq.com/?_wv=1027&k=Z6G9YmzQ)
 
-[EIVideo官方主页](https://github.com/QPT-Family/EIVideo) 欢迎前来Star!
+---
+
+> [EIVideo官方主页](https://github.com/QPT-Family/EIVideo) 欢迎前来Star!
+
+---
+
 
 <div align="center">
 <img width="600" alt="图片" src="https://user-images.githubusercontent.com/46156734/148925774-a04b641c-6a71-43ed-a7c0-d4b66e8d6e8a.png">
@@ -25,6 +30,8 @@ EIVideo，基于百度飞桨MA-Net交互式视频分割模型打造的交互式*
 
 > 为了更好的解放双手，我们还提供了图形化界面工具QEIVideo，通过它我们可以不使用繁杂的命令方式来完成视频的智能标注工作。
 
+---
+
 ### README目录
 
 - [EAP - The Early Access Program 早期访问计划](#eap---the-early-access-program-早期访问计划)
@@ -35,6 +42,8 @@ EIVideo，基于百度飞桨MA-Net交互式视频分割模型打造的交互式*
     - [开发版本 - 适合高阶开发者进行开发/社区贡献](#开发版本---适合高阶开发者进行开发社区贡献)
 - [(Q)EIVideo产品规划安排](#qeivideo产品规划安排)
 - [开源协议](#开源协议)
+
+---
 
 ### EAP - The Early Access Program 早期访问计划
 
