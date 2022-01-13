@@ -6,6 +6,17 @@
 赛题baseline由PaddleVideo提供[ST-GCN](https://github.com/PaddlePaddle/PaddleVideo/blob/develop/docs/zh-CN/model_zoo/recognition/stgcn.md)，
 [教程链接](https://aistudio.baidu.com/aistudio/projectdetail/2417717)，[视频链接](https://www.bilibili.com/video/BV1w3411172G)
 
+## 近期活动
+
+🔥**1月17号-21号《产业级视频技术与应用案例》**🔥 
+- 【1月17号20:15-21:30】视频技术导论及医疗行业典型案例
+- 【1月18号20:15-21:30】视频内容智能分析和生产解决方案
+- 【1月19号20:15-21:30】体育+安防行业中的行为识别
+- 【1月20号20:15-21:30】顶会冠军视频分割算法深度解密
+- 【1月21号20:15-21:30】多模态学习和检索方法
+
+- 报名链接: https://paddleqiyeban.wjx.cn/vj/QIValIZ.aspx?udsid=419689
+
 ## 简介
 
 ![python version](https://img.shields.io/badge/python-3.7+-orange.svg) ![paddle version](https://img.shields.io/badge/PaddlePaddle-2.0-blue)
