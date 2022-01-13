@@ -2,17 +2,6 @@
 
 # PaddleVideo
 
-## 近期活动
-
-🌟  **1月17号-21号《产业级视频技术与应用案例》** 🌟
-- 【1月17号20:15-21:30】视频技术导论及医疗行业典型案例
-- 【1月18号20:15-21:30】视频内容智能分析和生产解决方案
-- 【1月19号20:15-21:30】体育+安全防范行业中的行为识别
-- 【1月20号20:15-21:30】顶会冠军视频分割算法深度解密
-- 【1月21号20:15-21:30】多模态学习和检索方法
-
-👀 **报名链接**: https://paddleqiyeban.wjx.cn/vj/QIValIZ.aspx?udsid=419689
-
 ​ 💖 **Welcome everyone to scan the code and join the group discussion** 💖
 <div align="center">
   <img src="docs/images/user_group.png" width=250/></div>
