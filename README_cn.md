@@ -31,86 +31,21 @@ PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_githu
 ### **⭐如果本项目对您有帮助，欢迎点击页面右上方star~ ⭐**
 
 
-### 模型
+### 方案
 
-<table style="margin-left:auto;margin-right:auto;font-size:1.3vw;padding:3px 5px;text-align:center;vertical-align:center;">
-  <tr>
-    <td colspan="5" style="font-weight:bold;">行为识别方法</td>
-  </tr>
-  <tr>
-    <td><a href="./docs/zh-CN/model_zoo/recognition/pp-tsm.md">PP-TSM</a> (PP series)</td>
-    <td><a href="./docs/zh-CN/model_zoo/recognition/pp-tsn.md">PP-TSN</a> (PP series)</td>
-    <td><a href="./docs/zh-CN/model_zoo/recognition/pp-timesformer.md">PP-TimeSformer</a> (PP series)</td>
-    <td><a href="./docs/zh-CN/model_zoo/recognition/tsn.md">TSN</a> (2D’)</td>
-    <td><a href="./docs/zh-CN/model_zoo/recognition/tsm.md">TSM</a> (2D‘)</td>
-  <tr>
-    <td><a href="./docs/zh-CN/model_zoo/recognition/slowfast.md">SlowFast</a> (3D’)</td>
-    <td><a href="./docs/zh-CN/model_zoo/recognition/timesformer.md">TimeSformer</a> (Transformer‘)</td>
-    <td><a href="./docs/zh-CN/model_zoo/recognition/videoswin.md">VideoSwin</a> (Transformer’)</td>
-    <td><a href="./docs/zh-CN/model_zoo/recognition/attention_lstm.md">AttentionLSTM</a> (RNN‘)</td>
-    <td></td>
-  </tr>
-  <tr>
-    <td colspan="5" style="font-weight:bold;">基于骨骼点的动作识别方法</td>
-  </tr>
-  <tr>
-    <td><a href="./docs/zh-CN/model_zoo/recognition/stgcn.md">ST-GCN</a> (Custom’)</td>
-    <td><a href="./docs/zh-CN/model_zoo/recognition/agcn.md">AGCN</a> (Adaptive‘)</td>
-    <td></td>
-    <td></td>
-    <td></td>
-  </tr>
-  <tr>
-    <td colspan="5" style="font-weight:bold;">时序动作检测方法</td>
-  </tr>
-  <tr>
-    <td><a href="./docs/zh-CN/model_zoo/localization/bmn.md">BMN</a> (One-stage‘)</td>
-    <td></td>
-    <td></td>
-    <td></td>
-    <td></td>
-  </tr>
-  <tr>
-    <td colspan="5" style="font-weight:bold;">时空动作检测方法</td>
-  </tr>
-  <tr>
-    <td><a href="slowfast.md">SlowFast+Fast R-CNN</a>
-    <td></td>
-    <td></td>
-    <td></td>
-    <td></td>
-  </tr>
-  <tr>
-    <td colspan="5" style="font-weight:bold;">多模态</td>
-  </tr>
-  <tr>
-    <td><a href="./docs/zh-CN/model_zoo/multimodal/actbert.md">ActBERT</a> (Learning‘)</td>
-    <td><a href="">T2VLAD</a> (Retrieval‘)</td>
-    <td></td>
-    <td></td>
-    <td></td>
-  </tr>
-  <tr>
-    <td colspan="5" style="font-weight:bold;">视频目标分割</td>
-  </tr>
-  <tr>
-    <td><a href="./docs/zh-CN/model_zoo/segmentation/cfbi.md">CFBI</a> (Semi‘)</td>
-    <td><a href="./applications/EIVideo/EIVideo/docs/zh-CN/manet.md">MA-Net</a> (Supervised‘)</td>
-    <td></td>
-    <td></td>
-    <td></td>
-  </tr>
-  <tr>
-    <td colspan="5" style="font-weight:bold;">单目深度估计</td>
-  </tr>
-  <tr>
-    <td><a href="./docs/zh-CN/model_zoo/estimation/adds.md">ADDS</a> (Unsupervised‘)</td>
-    <td></td>
-    <td></td>
-    <td></td>
-    <td></td>
-  </tr>
-</table>
+| Applications | Descriptions |
+| :--------------- | :-------- |
+| [FootballAction]() | 足球动作检测方案 |
+| [BasketballAction](applications/BasketballAction) | 篮球动作检测方案 |
+| [TableTennis](applications/TableTennis) | 乒乓球动作识别方案|
+| [FigureSkating](applications/FigureSkating) | 花样滑冰动作识别方案|
+| [VideoTag](applications/VideoTag) | 3000类大规模视频分类方案 |
+| [MultimodalVideoTag](applications/MultimodalVideoTag) | 多模态视频分类方案|
+| [VideoQualityAssessment](applications/VideoQualityAssessment) | 视频质量评估方案|
+| [PP-Care](applications/PP-Care) | 3DMRI医疗图像识别方案 |
+| [EIVideo](applications/EIVideo) | 视频交互式分割工具|
+| [Anti-UAV](applications/Anti-UAV) |无人机检测方案 |
+
 
 ## 特色应用方案效果
 - [特色应用01: 大规模视频3k类标签方案VideoTag](https://github.com/PaddlePaddle/PaddleVideo/tree/application/VideoTag)

@@ -1,146 +1,121 @@
-[简体中文](README_cn.md) | English
+[English](README.md) | Chinese
 
 # PaddleVideo
 
-## News
+## recent activities
 
-- 🔥🔥🔥 [2021 CCF BDCI Figure Skating Action Recognition Competition](https://www.datafountain.cn/competitions/519) with 100 thousand bonus is in progress ! :tada: PaddleVideo provides baseline model [ST-GCN](https://github.com/PaddlePaddle/PaddleVideo/blob/develop/docs/zh-CN/model_zoo/recognition/stgcn.md), and related tutorials [AI Studio projects](https://aistudio.baidu.com/aistudio/projectdetail/2417717), [video course](https://www.bilibili.com/video/BV1w3411172G).
+🌟 **January 17-21 "Industrial Video Technology and Application Cases"** 🌟
+- [January 17, 20:15-21:30] Introduction to Video Technology and Typical Cases in the Medical Industry
+- [20:15-21:30 on January 18] Video content intelligent analysis and production solutions
+- [January 19, 20:15-21:30] Behavior recognition in the sports + security industry
+- [20:15-21:30 on January 20] Depth decryption of the video segmentation algorithm of the champion of the top meeting
+- [January 21st 20:15-21:30] Multimodal Learning and Retrieval Methods
+
+👀 **Registration link**: https://paddleqiyeban.wjx.cn/vj/QIValIZ.aspx?udsid=419689
+
+​ 💖 **Welcome everyone to scan the code and join the group discussion** 💖
+<div align="center">
+  <img src="docs/images/user_group.png" width=250/></div>
 
 ## Introduction
 
-![python version](https://img.shields.io/badge/python-3.7+-orange.svg) ![paddle version](https://img.shields.io/badge/PaddlePaddle-2.0-blue)
+![python version](https://img.shields.io/badge/python-3.7+-orange.svg) ![paddle version](https://img.shields.io/badge/PaddlePaddle-2.0-blue )
 
 
-PaddleVideo is a toolset for video recognition, action localization, and spatio temporal action detection tasks prepared for the industry and academia. This repository provides examples and best practice guildelines for exploring deep learning algorithm in the scene of video area. We devote to support experiments and utilities which can significantly reduce the "time to deploy". By the way, this is also a proficiency verification and implementation of the newest PaddlePaddle 2.0 in the video field.
+PaddleVideo is a video model development kit produced by [PaddlePaddle Official](https://www.paddlepaddle.org.cn/?fr=paddleEdu_github), which aims to help developers better conduct academic research and industrial practice in the video field.
 
 <div align="center">
   <img src="docs/images/home.gif" width="450px"/><br>
 </div>
 
-### ⭐ **If you think this repo is helpful to you, welcome to star us~ ⭐**
+### **⭐If this project is helpful to you, please click star at the top right of the page~ ⭐**
 
 
-## Features
+### Project
 
-- **Various dataset and models**
-    PaddleVideo supports more datasets and models, including [Kinetics400](docs/zh-CN/dataset/k400.md), UCF101, YoutTube8M, NTU-RGB+D datasets, and video recognition models, such as TSN, TSM, SlowFast, TimeSformer, AttentionLSTM, ST-GCN and action localization model, like BMN.
+| Applications | Descriptions |
+| :--------------- | :-------- |
+| [FootballAction]() | Football action detection model|
+| [BasketballAction](applications/BasketballAction) | Basketball action detection model|
+| [TableTennis](applications/TableTennis) | TableTennis action recognition model|
+| [FigureSkating](applications/FigureSkating) | FigureSkating action recognition model|
+| [VideoTag](applications/VideoTag) | 3k Large-Scale video classification model |
+| [MultimodalVideoTag](applications/MultimodalVideoTag) | Multimodal video classification model|
+| [VideoQualityAssessment](applications/VideoQualityAssessment) | Video Quality Assessment model|
+| [PP-Care](applications/PP-Care) | Video models for 3DMRI |
+| [EIVideo](applications/EIVideo) | Efficient interactive video object segmentation tools|
+| [Anti-UAV](applications/Anti-UAV) |UAV detection model |
 
-- **Higher performance**
-    PaddleVideo has built-in solutions to improve accuracy on recognition models. [PP-TSM](docs/zh-CN/model_zoo/recognition/pp-tsm.md), which is based on the standard TSM, already archive the best performance in the 2D recognition network, has the same size of parameters but improve the Top1 Acc to 76.16%.
-
-- **Faster training strategy**
-    PaddleVideo suppors faster training strategy, such as AMP training, Distributed training, Multigrid method for Slowfast, OP fusion method, Faster reader and so on.
-
-- **Deployable**
-    PaddleVideo is powered by the Paddle Inference. There is no need to convert the model to ONNX format when deploying it, all you want can be found in this repository.
-
-- **Applications**
-    PaddleVideo provides some interesting and practical projects that are implemented using video recognition and detection techniques, such as FootballAction and VideoTag.
-
-### Overview of the performance
-
-| Field | Model | Dataset | Metrics | ACC% |
-| :--------------- | :--------: | :------------: | :------------: | :------------: |
-| action recognition | [**PP-TSM**](./docs/zh-CN/model_zoo/recognition/pp-tsm.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | **77.15** |
-| action recognition | [**PP-TSN**](./docs/zh-CN/model_zoo/recognition/pp-tsn.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | **75.06** |
-| action recognition | [**PP-TimeSformer**](./docs/zh-CN/model_zoo/recognition/pp-timesformer.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | 79.49 |
-| action recognition | [AGCN](./docs/zh-CN/model_zoo/recognition/agcn.md) | [FSD](./docs/zh-CN/dataset/fsd.md) | Top-1 | 62.29 |
-| action recognition | [ST-GCN](./docs/zh-CN/model_zoo/recognition/stgcn.md) | [FSD](./docs/zh-CN/dataset/fsd.md) | Top-1 | 59.07 |
-| action recognition | [VideoSwin](./docs/zh-CN/model_zoo/recognition/videoswin.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | 82.40 |
-| action recognition | [TimeSformer](./docs/zh-CN/model_zoo/recognition/timesformer.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | 77.29 |
-| action recognition | [SlowFast](./docs/zh-CN/model_zoo/recognition/slowfast.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | 75.84 |
-| action recognition | [TSM](./docs/zh-CN/model_zoo/recognition/tsm.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | 71.06 |
-| action recognition | [TSN](./docs/zh-CN/model_zoo/recognition/tsn.md) | [Kinetics-400](./docs/zh-CN/dataset/k400.md) | Top-1 | 69.81 |
-| action recognition | [AttentionLSTM](./docs/zh-CN/model_zoo/recognition/attention_lstm.md) | [Youtube-8M](./docs/zh-CN/dataset/youtube8m.md) | Hit@1 | 89.05 |
-| action detection| [BMN](./docs/zh-CN/model_zoo/localization/bmn.md) | [ActivityNet](./docs/zh-CN/dataset/ActivityNet.md) |  AUC | 67.23 |
-| depth estimation| [ADDS](./docs/zh-CN/model_zoo/estimation/adds.md)       | [Oxford_RobotCar](./docs/zh-CN/dataset/Oxford_RobotCar.md) |   Abs Rel    |   0.209   |
-
-### Changelog
-
-release/2.1 was released in 20/05/2021. Please refer to [release notes](https://github.com/PaddlePaddle/PaddleVideo/releases) for details.
-
-
-<a name="Community"></a>
-## Community
-- Scan the QR code below with your Wechat and reply "video", you can access to official technical exchange group. Look forward to your participation.
-
-<div align="center">
-<img src="./docs/images/joinus.PNG"  width = "200" height = "200" />
-</div>
-
-## Applications
-
-- [VideoTag](https://github.com/PaddlePaddle/PaddleVideo/tree/application/VideoTag): 3k Large-Scale video classification model
+## Featured application effect
+- [Featured Application 01: Large-scale Video 3k Class Tag Scheme VideoTag](https://github.com/PaddlePaddle/PaddleVideo/tree/application/VideoTag)
 
 <div align="center">
   <img src="docs/images/VideoTag.gif" width="450px"/><br>
 </div>
 
-
-- [FootballAction](https://github.com/PaddlePaddle/PaddleVideo/tree/application/FootballAction): Football action detection model
+- [Featured Application 02: Football Action Positioning Solution FootballAction](https://github.com/PaddlePaddle/PaddleVideo/tree/application/FootballAction)
 
 <div align="center">
   <img src="docs/images/FootballAction.gif" width="450px"/><br>
 </div>
 
 
-## Tutorials and Docs
+## Documentation tutorial
+- Free video courses, PPT, AIStudio tutorials (free online GPU computing power)
+    - [Comprehensive Analysis of Flying Paddle Video Library](https://aistudio.baidu.com/aistudio/course/introduce/6742)
+    - [Introduction to Video Classification and Action Recognition](https://github.com/PaddlePaddle/PaddleVideo/blob/main/docs/zh-CN/tutorials/summarize.md)
+    - [[Official] Paddle 2.1 realizes the classic model of video understanding - TSN](https://aistudio.baidu.com/aistudio/projectdetail/2250682)
+    - [[Official] Paddle 2.1 realizes the classic model of video understanding - TSM](https://aistudio.baidu.com/aistudio/projectdetail/2310889)
+    - [BMN video action positioning](https://aistudio.baidu.com/aistudio/projectdetail/2250674)
+    - [ST-GCN Tutorial for Figure Skate Skeleton Point Action Recognition](https://aistudio.baidu.com/aistudio/projectdetail/2417717)
+- Quick start
+    - [Installation Instructions](docs/zh-CN/install.md)
+    - [Usage Guide](docs/zh-CN/usage.md)
+- Code organization
+    - [Detailed explanation of model library design ideas](docs/zh-CN/tutorials/modular_design.md)
+    - [Detailed explanation of configuration module parameters](docs/zh-CN/tutorials/config.md)
+- Rich model library
+    - [Video classification](docs/zh-CN/model_zoo/README.md)
+       - [TSN](docs/en-US/model_zoo/recognition/tsn.md)
+       - [TSM](docs/en-US/model_zoo/recognition/tsm.md)
+       - [PP-TSM](docs/zh-CN/model_zoo/recognition/pp-tsm.md)
+       - [PP-TSN](docs/zh-CN/model_zoo/recognition/pp-tsn.md)
+       - [PP-TimeSformer](docs/en-US/model_zoo/recognition/pp-timesformer.md)
+       - [VideoSwin](docs/en-US/model_zoo/recognition/videoswin.md)
+       - [SlowFast](docs/zh-CN/model_zoo/recognition/slowfast.md)
+       - [TimeSformer](docs/en-US/model_zoo/recognition/timesformer.md)
+       - [Attention-LSTM](docs/zh-CN/model_zoo/recognition/attention_lstm.md)
+    - [Action Positioning](docs/zh-CN/model_zoo/README.md)
+       - [BMN](docs/zh-CN/model_zoo/localization/bmn.md)
+    - [Bone-Based Behavior Recognition](docs/zh-CN/model_zoo/README.md)
+       - [ST-GCN](docs/zh-CN/model_zoo/recognition/stgcn.md)
+       - [AGCN](docs/zh-CN/model_zoo/recognition/agcn.md)
+    - [Self-supervised Monocular Depth Estimation](docs/zh-CN/model_zoo/README.md)
+       - [ADDS](./docs/en-US/model_zoo/estimation/adds.md)
+    - Time and space motion detection <sup>coming soon</sup>
+    - ActBERT: Self-Supervised Multimodal Video Text Learning <sup>coming soon</sup>
+- Project combat
+    - [PP-TSM Practice](docs/zh-CN/tutorials/pp-tsm.md)
+    - [Training Accelerate](docs/zh-CN/tutorials/accelerate.md)
+    - [Predicted Deployment](docs/en-US/tutorials/deployment.md)
+- Auxiliary tools
+    - [benchmark](docs/zh-CN/benchmark.md)
+    - [Tools](docs/zh-CN/tools.md)
+- [Technical Exchange Group] (#Welcome to the PaddleVideoTechnical Exchange Group)
+- [Event Support](#Event Support)
+- [license] (#license)
+- [Contributed code](#Contributed code)
 
-- Quick Start
-  - [Install](docs/en/install.md)
-  - [Usage](docs/en/usage.md)
-- Model zoo
-  - [recognition](docs/en/model_zoo/README.md)
-    - [TimeSformer](docs/en/model_zoo/recognition/timesformer.md)
-    - [Attention-LSTM](docs/en/model_zoo/recognition/attention_lstm.md)
-    - [TSN](docs/en/model_zoo/recognition/tsn.md)
-    - [TSM](docs/en/model_zoo/recognition/tsm.md)
-    - [PP-TSM](docs/en/model_zoo/recognition/pp-tsm.md)
-    - [PP-TSN](docs/en/model_zoo/recognition/pp-tsn.md)
-    - [PP-TimeSformer](docs/en/model_zoo/recognition/pp-timesformer.md)
-    - [VideoSwin](docs/en/model_zoo/recognition/videoswin.md)
-    - [SlowFast](docs/en/model_zoo/recognition/slowfast.md)
-  - [Localization](docs/en/model_zoo/README.md)
-    - [BMN](docs/en/model_zoo/localization/bmn.md)
-  - [Skeleton-based action recognition](docs/en/model_zoo/README.md)
-    - [ST-GCN](docs/en/model_zoo/recognition/stgcn.md)
-    - [AGCN](docs/en/model_zoo/recognition/agcn.md)
-  - [Self-supervised Monocular Depth Estimation](docs/en/model_zoo/README.md)
-    - [ADDS](./docs/en/model_zoo/estimation/adds.md)
-  - Spatio temporal action detection
-    - Coming Soon!  
-  - ActBERT: Learning Global-Local Video-Text Representations
-    - Coming Soon!  
-- Tutorials and Slides
-  - [2021.01](https://aistudio.baidu.com/aistudio/course/introduce/6742)
-  - [Summarize of video understanding](docs/en/tutorials/summarize.md)
-- Practice
-  - [Higher performance PP-TSM](docs/en/tutorials/pp-tsm.md)
-  - [Accelerate training](docs/en/tutorials/accelerate.md)
-  - [Deployment](docs/en/tutorials/deployment.md)
-- Others
-  - [Benchmark](docs/en/benchmark.md)
-  - [Tools](docs/en/tools.md)
-- Contribute
-  - [Configuration design](docs/zh-CN/contribute/config.md)
-  - [Add new algorithm](docs/zh-CN/contribute/add_new_algorithm.md)
-  - [pr](docs/zh-CN/contribute/how_to_contribute.md)
 
-## Competition
-
-- [CCKS 2021：Knowledge Enhanced Video Understanding](https://www.biendata.xyz/competition/ccks_2021_videounderstanding/)
-- [Figure Skating Action Recognition Competition](https://aistudio.baidu.com/aistudio/competition/detail/115/0/introduction)
-
+## Tournament Support
+- [CCKS 2021: Knowledge-Enhanced Video Semantic Understanding](https://www.biendata.xyz/competition/ccks_2021_videounderstanding/)
+- [Recognition of skeletal points of figure skaters based on flying paddles](https://aistudio.baidu.com/aistudio/competition/detail/115/0/introduction)
 
 ## License
+This project is released under the [Apache 2.0 license](LICENSE) license.
 
-PaddleVideo is released under the [Apache 2.0 license](LICENSE).
 
+## Contributions welcome
+We welcome any contributions and appreciate your support, see the [contribution guidelines](docs/CONTRIBUTING.md) for more information.
 
-## Contributing
-This poject welcomes contributions and suggestions. Please see our [contribution guidelines](docs/CONTRIBUTING.md).
-
-- Many thanks to [mohui37](https://github.com/mohui37), [zephyr-fun](https://github.com/zephyr-fun), [voipchina](https://github.com/voipchina) for contributing the code.
-
-## Thanks
-- Many thanks to the following repo: [SlowFast](https://github.com/facebookresearch/SlowFast), [Mmaction2](https://github.com/open-mmlab/mmaction2), the implementation of some models refer to them.
+- Many thanks to [mohui37](https://github.com/mohui37), [zephyr-fun](https://github.com/zephyr-fun), [voipchina](https://github.com/voipchina ) contribute relevant code
