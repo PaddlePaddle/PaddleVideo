@@ -108,7 +108,7 @@ release/2.1 was released in 20/05/2021. Please refer to [release notes](https://
   - [Self-supervised Monocular Depth Estimation](docs/en/model_zoo/README.md)
     - [ADDS](./docs/en/model_zoo/estimation/adds.md)
   - Spatio temporal action detection
-     - Coming Soon!  
+    - Coming Soon!  
   - ActBERT: Learning Global-Local Video-Text Representations
     - Coming Soon!  
 - Tutorials and Slides
