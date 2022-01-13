@@ -29,7 +29,7 @@ PIPELINE: #PIPELINE field
         transform:
         - FeaturePadding:
         - RandomCap:
-            caption_path: "./dataset/ caption_val.json"
+            caption_path: "./dataset/caption_val.json"
         - Tokenize:
         - RandomMask:
 

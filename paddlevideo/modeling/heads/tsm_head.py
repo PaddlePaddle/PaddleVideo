@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 import math
 import paddle
 from paddle import ParamAttr
@@ -53,11 +52,15 @@ class TSMHead(TSNHead):
 
         self.fc = Linear(self.in_channels,
                          self.num_classes,
-                         weight_attr=ParamAttr(learning_rate=5.0, regularizer=L2Decay(1e-4)),
-                         bias_attr=ParamAttr(learning_rate=10.0, regularizer=L2Decay(0.0)))
+                         weight_attr=ParamAttr(learning_rate=5.0,
+                                               regularizer=L2Decay(1e-4)),
+                         bias_attr=ParamAttr(learning_rate=10.0,
+                                             regularizer=L2Decay(0.0)))
 
-        assert (data_format in ['NCHW', 'NHWC']), f"data_format must be 'NCHW' or 'NHWC', but got {data_format}"
-        
+        assert (data_format in [
+            'NCHW', 'NHWC'
+        ]), f"data_format must be 'NCHW' or 'NHWC', but got {data_format}"
+
         self.data_format = data_format
 
         self.stdv = std
@@ -66,7 +69,7 @@ class TSMHead(TSNHead):
         """Initiate the FC layer parameters"""
         weight_init_(self.fc, 'Normal', 'fc_0.w_0', 'fc_0.b_0', std=self.stdv)
 
-    def forward(self, x, seg_num):
+    def forward(self, x, num_seg):
         """Define how the tsm-head is going to run.
 
         Args:
@@ -80,15 +83,17 @@ class TSMHead(TSNHead):
         x = self.avgpool2d(x)  # [N * num_segs, in_channels, 1, 1]
 
         if self.dropout is not None:
-            x = self.dropout(x)  # [N * seg_num, in_channels, 1, 1]
+            x = self.dropout(x)  # [N * num_seg, in_channels, 1, 1]
 
         if self.data_format == 'NCHW':
             x = paddle.reshape(x, x.shape[:2])
         else:
             x = paddle.reshape(x, x.shape[::3])
-        score = self.fc(x)  # [N * seg_num, num_class]
-        score = paddle.reshape(score, [-1, seg_num, score.shape[1]])  # [N, seg_num, num_class]
+        score = self.fc(x)  # [N * num_seg, num_class]
+        score = paddle.reshape(
+            score, [-1, num_seg, score.shape[1]])  # [N, num_seg, num_class]
         score = paddle.mean(score, axis=1)  # [N, num_class]
-        score = paddle.reshape(score, shape=[-1, self.num_classes])  # [N, num_class]
+        score = paddle.reshape(score,
+                               shape=[-1, self.num_classes])  # [N, num_class]
         # score = F.softmax(score)  #NOTE remove
         return score

@@ -346,12 +346,16 @@ class TimeSformer_Inference_helper(Base_Inference_helper):
                  seg_len=1,
                  short_size=224,
                  target_size=224,
-                 top_k=1):
+                 top_k=1,
+                 mean=[0.45, 0.45, 0.45],
+                 std=[0.225, 0.225, 0.225]):
         self.num_seg = num_seg
         self.seg_len = seg_len
         self.short_size = short_size
         self.target_size = target_size
         self.top_k = top_k
+        self.mean = mean
+        self.std = std
 
     def preprocess(self, input_file):
         """
@@ -361,15 +365,13 @@ class TimeSformer_Inference_helper(Base_Inference_helper):
         assert os.path.isfile(input_file) is not None, "{0} not exists".format(
             input_file)
         results = {'filename': input_file}
-        img_mean = [0.45, 0.45, 0.45]
-        img_std = [0.225, 0.225, 0.225]
         ops = [
             VideoDecoder(backend='pyav', mode='test', num_seg=self.num_seg),
             Sampler(self.num_seg,
                     self.seg_len,
                     valid_mode=True,
                     linspace_sample=True),
-            Normalization(img_mean, img_std, tensor_shape=[1, 1, 1, 3]),
+            Normalization(self.mean, self.std, tensor_shape=[1, 1, 1, 3]),
             Image2Array(data_format='cthw'),
             JitterScale(self.short_size, self.short_size),
             UniformCrop(self.target_size)
@@ -380,6 +382,30 @@ class TimeSformer_Inference_helper(Base_Inference_helper):
         # [N,C,Tx3,H,W]
         res = np.expand_dims(results['imgs'], axis=0).copy()
         return [res]
+
+    def postprocess(self, output, print_output=True):
+        """
+        output: list
+        """
+        if not isinstance(self.input_file, list):
+            self.input_file = [
+                self.input_file,
+            ]
+        output = output[0]  # [B, num_cls]
+        N = len(self.input_file)
+        if output.shape[0] != N:
+            output = output.reshape([N] + [output.shape[0] // N] +
+                                    list(output.shape[1:]))  # [N, T, C]
+            output = output.mean(axis=1)  # [N, C]
+        for i in range(N):
+            classes = np.argpartition(output[i], -self.top_k)[-self.top_k:]
+            classes = classes[np.argsort(-output[i, classes])]
+            scores = output[i, classes]
+            if print_output:
+                print("Current video file: {0}".format(self.input_file[i]))
+                for j in range(self.top_k):
+                    print("\ttop-{0} class: {1}".format(j + 1, classes[j]))
+                    print("\ttop-{0} score: {1}".format(j + 1, scores[j]))
 
 
 @INFERENCE.register()
@@ -799,6 +825,84 @@ class ADDS_Inference_helper(Base_Inference_helper):
         im = Image.fromarray(colormapped_im)
         return im
 
+@INFERENCE.register()
+class VideoSwin_Inference_helper(Base_Inference_helper):
+    def __init__(self,
+                 num_seg=4,
+                 seg_len=32,
+                 frame_interval=2,
+                 short_size=224,
+                 target_size=224,
+                 top_k=1,
+                 mean=[123.675, 116.28, 103.53],
+                 std=[58.395, 57.12, 57.375]):
+
+        self.num_seg = num_seg
+        self.seg_len = seg_len
+        self.frame_interval = frame_interval
+        self.short_size = short_size
+        self.target_size = target_size
+        self.top_k = top_k
+        self.mean = mean
+        self.std = std
+
+    def preprocess(self, input_file):
+        """
+        input_file: str, file path
+        return: list
+        """
+        self.input_file = input_file
+        assert os.path.isfile(input_file) is not None, "{0} not exists".format(
+            input_file)
+        results = {'filename': input_file}
+        ops = [
+            VideoDecoder(backend='decord', mode='valid'),
+            Sampler(num_seg=self.num_seg,
+                    frame_interval=self.frame_interval,
+                    seg_len=self.seg_len,
+                    valid_mode=True,
+                    use_pil=False),
+            Scale(short_size=self.short_size,
+                  fixed_ratio=False,
+                  keep_ratio=True,
+                  backend='cv2',
+                  do_round=True),
+            CenterCrop(target_size=224, backend='cv2'),
+            Normalization(mean=self.mean,
+                          std=self.std,
+                          tensor_shape=[3, 1, 1, 1],
+                          inplace=True),
+            Image2Array(data_format='cthw')
+        ]
+        for op in ops:
+            results = op(results)
+
+        res = np.expand_dims(results['imgs'], axis=0).copy()
+        return [res]
+
+    def postprocess(self, output, print_output=True):
+        """
+        output: list
+        """
+        if not isinstance(self.input_file, list):
+            self.input_file = [
+                self.input_file,
+            ]
+        output = output[0]  # [B, num_cls]
+        N = len(self.input_file)
+        if output.shape[0] != N:
+            output = output.reshape([N] + [output.shape[0] // N] +
+                                    list(output.shape[1:]))  # [N, T, C]
+            output = output.mean(axis=1)  # [N, C]
+        for i in range(N):
+            classes = np.argpartition(output[i], -self.top_k)[-self.top_k:]
+            classes = classes[np.argsort(-output[i, classes])]
+            scores = output[i, classes]
+            if print_output:
+                print("Current video file: {0}".format(self.input_file[i]))
+                for j in range(self.top_k):
+                    print("\ttop-{0} class: {1}".format(j + 1, classes[j]))
+                    print("\ttop-{0} score: {1}".format(j + 1, scores[j]))
 
 @INFERENCE.register()
 class AVA_SlowFast_FastRCNN_Inference_helper(Base_Inference_helper):
@@ -962,11 +1066,11 @@ class AVA_SlowFast_FastRCNN_Inference_helper(Base_Inference_helper):
             human_detection = self.human_detections[t_index]
 
             output = outputs[index]
+            result = output #长度为类别个数，不包含背景
+
             person_num = self.person_num_list[index]
 
             index = index + 1
-
-            result = output
 
             prediction = []
 
@@ -977,7 +1081,7 @@ class AVA_SlowFast_FastRCNN_Inference_helper(Base_Inference_helper):
             # N proposals
             for i in range(person_num):
                 prediction.append([])
-
+            
             # Perform action score thr
             for i in range(len(result)):  # for class
                 if i + 1 not in self.class_whitelist:
@@ -985,7 +1089,7 @@ class AVA_SlowFast_FastRCNN_Inference_helper(Base_Inference_helper):
                 for j in range(person_num):
                     if result[i][j, 4] > self.config.MODEL.head['action_thr']:
                         prediction[j].append(
-                            (self.label_map[i + 1], result[i][j, 4]))
+                            (self.label_map[i + 1], result[i][j, 4])) # label_map is a dict, label index start from 1
             predictions.append(prediction)
 
         results = []
