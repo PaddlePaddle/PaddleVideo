@@ -101,13 +101,13 @@ PaddleVideo is a video model development kit produced by [PaddlePaddle Official]
 - Auxiliary tools
     - [benchmark](docs/zh-CN/benchmark.md)
     - [Tools](docs/zh-CN/tools.md)
-- [Technical Exchange Group] (#Welcome to the PaddleVideoTechnical Exchange Group)
-- [Event Support](#Event Support)
-- [license] (#license)
-- [Contributed code](#Contributed code)
+- [Technical Exchange Group](docs/images/user_group.png)
+- [Event Support](#Tournament_Support)
+- [license](#License)
+- [pr](docs/zh-CN/contribute/how_to_contribute.md)
 
 
-## Tournament Support
+## Tournament_Support
 - [CCKS 2021: Knowledge-Enhanced Video Semantic Understanding](https://www.biendata.xyz/competition/ccks_2021_videounderstanding/)
 - [Recognition of skeletal points of figure skaters based on flying paddles](https://aistudio.baidu.com/aistudio/competition/detail/115/0/introduction)
 
