@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from genericpath import isdir
 import math
 from collections import OrderedDict
 
@@ -196,9 +195,9 @@ def rot_from_axisangle(vec):
         [1],
         [2],
         [10],
+        [3],
         [4],
         [5],
-        [3],
         [10],
         [6],
         [7],
@@ -277,6 +276,7 @@ def resnet_multiimage_input(num_layers, num_input_images=1):
                                   num_layers,
                                   blocks,
                                   num_input_images=num_input_images)
+    model.init_weights()
     return model
 
 
@@ -442,6 +442,16 @@ class ResNetMultiImageInput(ResNet):
         self.layer2 = self._make_layer(block, 128, layers[1], stride=2)
         self.layer3 = self._make_layer(block, 256, layers[2], stride=2)
         self.layer4 = self._make_layer(block, 512, layers[3], stride=2)
+
+    def init_weights(self):
+        for layer in self.sublayers(include_self=True):
+            if isinstance(layer, nn.Conv2D):
+                kaiming_normal_(layer.weight,
+                                mode='fan_out',
+                                nonlinearity='relu')
+            elif isinstance(layer, nn.BatchNorm2D):
+                ones_(layer.weight)
+                zeros_(layer.bias)
 
 
 class ConvBNLayer(nn.Layer):
