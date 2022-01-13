@@ -1,0 +1,4 @@
+# 更新PaddleVideo上的EIVideo
+git subtree push --prefix=applications/EIVideo/ https://github.com/QPT-Family/EIVideo 开发分支
+git subtree pull --prefix=applications/EIVideo/ https://github.com/QPT-Family/EIVideo 开发分支 --squash
+git subtree split --rejoin --prefix=applications/EIVideo/  --branch 开发分支

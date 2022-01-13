@@ -128,9 +128,7 @@ def train_model(cfg,
 
     # 3. Construct solver.
     lr = build_lr(cfg.OPTIMIZER.learning_rate, len(train_loader))
-    optimizer = build_optimizer(cfg.OPTIMIZER,
-                                lr,
-                                parameter_list=model.parameters())
+    optimizer = build_optimizer(cfg.OPTIMIZER, lr, model=model)
     if use_fleet:
         optimizer = fleet.distributed_optimizer(optimizer)
     # Resume
@@ -183,41 +181,47 @@ def train_model(cfg,
             if amp:
                 with paddle.amp.auto_cast(custom_black_list={"reduce_mean"}):
                     outputs = model(data, mode='train')
-
                 avg_loss = outputs['loss']
                 if use_gradient_accumulation:
+                    # clear grad at when epoch begins
                     if i == 0:
                         optimizer.clear_grad()
+                    # Loss normalization
                     avg_loss /= cfg.GRADIENT_ACCUMULATION.num_iters
+                    # Loss scaling
                     scaled = scaler.scale(avg_loss)
+                    # 4.2 backward
                     scaled.backward()
+                    # 4.3 minimize
                     if (i + 1) % cfg.GRADIENT_ACCUMULATION.num_iters == 0:
                         scaler.minimize(optimizer, scaled)
                         optimizer.clear_grad()
-                else:
+                else:  # general case
+                    # 4.2 backward
                     scaled = scaler.scale(avg_loss)
                     scaled.backward()
-                    # keep prior to 2.0 design
+                    # 4.3 minimize
                     scaler.minimize(optimizer, scaled)
                     optimizer.clear_grad()
             else:
                 outputs = model(data, mode='train')
-
-                # 4.2 backward
-                if use_gradient_accumulation and i == 0:  # Use gradient accumulation strategy
-                    optimizer.clear_grad()
                 avg_loss = outputs['loss']
-                avg_loss.backward()
-
-                # 4.3 minimize
-                if use_gradient_accumulation:  # Use gradient accumulation strategy
+                if use_gradient_accumulation:
+                    # clear grad at when epoch begins
+                    if i == 0:
+                        optimizer.clear_grad()
+                    # Loss normalization
+                    avg_loss /= cfg.GRADIENT_ACCUMULATION.num_iters
+                    # 4.2 backward
+                    avg_loss.backward()
+                    # 4.3 minimize
                     if (i + 1) % cfg.GRADIENT_ACCUMULATION.num_iters == 0:
-                        for p in model.parameters():
-                            p.grad.set_value(
-                                p.grad / cfg.GRADIENT_ACCUMULATION.num_iters)
                         optimizer.step()
                         optimizer.clear_grad()
-                else:  # Common case
+                else:  # general case
+                    # 4.2 backward
+                    avg_loss.backward()
+                    # 4.3 minimize
                     optimizer.step()
                     optimizer.clear_grad()
 

@@ -1,9 +1,9 @@
 
-MODEL: #MODEL field
+MODEL:
     framework: "Recognizer3DMRI"
     backbone:
         name: "ResNetSlowFast_MRI"
-        depth: 50 # Not Optional, only 50 now.
+        depth: 50
         alpha: 8
         beta: 8
         width_per_group: 64
@@ -15,32 +15,32 @@ MODEL: #MODEL field
         beta: 8
         num_classes: 2
         num_frames: 32
-        crop_size: 224  #independent to test or train mode
+        crop_size: 224
         dropout_rate: 0.5
 
 
-DATASET: #DATASET field
-    batch_size: 16 #Mandatory, bacth size
-    test_batch_size: 1
-    num_workers: 0 #Mandatory, XXX the number of subprocess on each GPU.
+DATASET:
+    batch_size: 16
+    test_batch_size: 16
+    num_workers: 0
     train:
-        format: "SFMRIDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
-        data_prefix: "" #Mandatory, train data root path
-        file_path: "/home/aistudio/train.txt" #Mandatory, train data index file path
+        format: "SFMRIDataset"
+        data_prefix: ""
+        file_path: "/home/aistudio/train.txt"
 
     valid:
-        format: "SFMRIDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
-        data_prefix: "" #Mandatory, valid data root path
-        file_path: "/home/aistudio/test.txt" #Mandatory, valid data index file path
+        format: "SFMRIDataset"
+        data_prefix: ""
+        file_path: "/home/aistudio/test.txt"
 
     test:
-        format: "SFMRIDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
-        data_prefix: "" #Mandatory, valid data root path
-        file_path: "/home/aistudio/test.txt" #Mandatory, valid data index file path
+        format: "SFMRIDataset"
+        data_prefix: ""
+        file_path: "/home/aistudio/test.txt"
 
 
-PIPELINE: #PIPELINE field
-    train: #Mandotary, indicate the pipeline to deal with the training data, associate to the 'paddlevideo/loader/pipelines/'
+PIPELINE:
+    train:
         decode_sampler_MRI:
             name: "SFMRI_DecodeSampler"
             num_seg: [4,32]
@@ -48,7 +48,7 @@ PIPELINE: #PIPELINE field
             valid_mode: False
             select_left: True
 
-    valid: #Mandatory, indicate the pipeline to deal with the validing data. associate to the 'paddlevideo/loader/pipelines/'
+    valid:
         decode_sampler_MRI:
             name: "SFMRI_DecodeSampler"
             num_seg: [4,32]
@@ -63,7 +63,7 @@ PIPELINE: #PIPELINE field
             valid_mode: True
             select_left: True
 
-OPTIMIZER: #OPTIMIZER field
+OPTIMIZER:
     name: 'Momentum'
     momentum: 0.9
     learning_rate:
@@ -79,21 +79,12 @@ OPTIMIZER: #OPTIMIZER field
     use_nesterov: True
 
 METRIC:
-    name: 'MultiCropMetric'
-    num_ensemble_views: 10
-    num_spatial_crops: 3
-    num_classes: 2
+    name: 'CenterCropMetric_MRI'
+    if_slowfast: 1
 
 PRECISEBN:
     preciseBN_interval: 10
-    num_iters_preciseBN: 200  #default
-
-
-INFERENCE:
-    name: 'SlowFast_Inference_helper'
-    num_frames: 32
-    alpha: 8
-    target_size: 224
+    num_iters_preciseBN: 200
 
 model_name: SlowFast_MRI
 save_interval: 10

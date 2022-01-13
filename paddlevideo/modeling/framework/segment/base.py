@@ -30,20 +30,20 @@ class BaseSegment(nn.Layer):
     """
     def __init__(self, backbone=None, head=None, loss=None):
         super().__init__()
-        if backbone != None:
+        if backbone is not None:
             self.backbone = builder.build_backbone(backbone)
             if hasattr(self.backbone, 'init_weights'):
                 self.backbone.init_weights()
         else:
             self.backbone = None
-        if head != None:
+        if head is not None:
             self.head_name = head.name
             self.head = builder.build_head(head)
             if hasattr(self.head, 'init_weights'):
                 self.head.init_weights()
         else:
             self.head = None
-        if loss != None:
+        if loss is not None:
             self.loss = builder.build_loss(loss)
         else:
             self.loss = None

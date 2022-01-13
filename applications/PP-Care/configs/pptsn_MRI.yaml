@@ -1,41 +1,41 @@
-MODEL: #MODEL field
-    framework: "RecognizerMRI" #Mandatory, indicate the type of network, associate to the 'paddlevideo/modeling/framework/' .
-    backbone: #Mandatory, indicate the type of backbone, associate to the 'paddlevideo/modeling/backbones/' .
-        name: "ResNetTSN_MRI" #Mandatory, The name of backbone.
-        pretrained: #"data/ResNet50_vd_ssld_v2_pretrained.pdparams" #Optional, pretrained model path.
-        layers: 50 #Optional, the depth of backbone architecture.
+MODEL:
+    framework: "RecognizerMRI"
+    backbone:
+        name: "ResNetTSN_MRI"
+        pretrained: ""
+        layers: 50
     head:
-        name: "ppTSNHead" #Mandatory, indicate the type of head, associate to the 'paddlevideo/modeling/heads'
-        num_classes: 2 #Optional, the number of classes to be classified.s
-        in_channels: 2048 #input channel of the extracted feature.
-        drop_ratio: 0.4 #the ratio of dropout
-        std: 0.01 #std value in params initialization
+        name: "ppTSNHead"
+        num_classes: 2
+        in_channels: 2048
+        drop_ratio: 0.4
+        std: 0.01
         ls_eps: 0.1
 
 
-DATASET: #DATASET field
-    batch_size: 16 #Mandatory, bacth size
+DATASET:
+    batch_size: 16
     valid_batch_size: 16
-    test_batch_size: 1
-    num_workers: 0 #Mandatory, XXX the number of subprocess on each GPU.
+    test_batch_size: 16
+    num_workers: 4
     train:
-        format: "MRIDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
-        data_prefix: "" #Mandatory, train data root path
-        file_path: "/home/aistudio/train.txt" #Mandatory, train data index file path
+        format: "MRIDataset"
+        data_prefix: ""
+        file_path: "/home/aistudio/train.txt"
 
     valid:
-        format: "MRIDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
-        data_prefix: "" #Mandatory, valid data root path
-        file_path: "/home/aistudio/test.txt" #Mandatory, valid data index file path
+        format: "MRIDataset"
+        data_prefix: ""
+        file_path: "/home/aistudio/test.txt"
 
     test:
-        format: "MRIDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
-        data_prefix: "" #Mandatory, valid data root path
-        file_path: "/home/aistudio/test.txt" #Mandatory, valid data index file path
+        format: "MRIDataset"
+        data_prefix: ""
+        file_path: "/home/aistudio/test.txt"
 
 
-PIPELINE: #PIPELINE field
-    train: #Mandotary, indicate the pipeline to deal with the training data, associate to the 'paddlevideo/loader/pipelines/'
+PIPELINE:
+    train:
         decode:
             name: "MRIDecoder"
         sample:
@@ -45,7 +45,7 @@ PIPELINE: #PIPELINE field
             valid_mode: False
             select_left: True
 
-    valid: #Mandatory, indicate the pipeline to deal with the validing data. associate to the 'paddlevideo/loader/pipelines/'
+    valid:
         decode:
             name: "MRIDecoder"
         sample:
@@ -65,10 +65,10 @@ PIPELINE: #PIPELINE field
             valid_mode: True
             select_left: True
 
-OPTIMIZER: #OPTIMIZER field
-    name: 'Momentum' #Mandatory, the type of optimizer, associate to the 'paddlevideo/solver/'
+OPTIMIZER:
+    name: 'Momentum'
     momentum: 0.9
-    learning_rate: #Mandatory, the type of learning rate scheduler, associate to the 'paddlevideo/solver/'
+    learning_rate:
         iter_step: True
         name: 'CustomWarmupCosineDecay'
         max_epoch: 50
@@ -77,7 +77,7 @@ OPTIMIZER: #OPTIMIZER field
         cosine_base_lr: 0.01
     weight_decay:
         name: 'L2'
-        value: 0.0001
+        value: 0.00005
     use_nesterov: True
 
 
@@ -87,17 +87,11 @@ MIX:
 
 
 METRIC:
-    name: 'CenterCropMetric'
-
-
-INFERENCE:
-    name: 'ppTSN_Inference_helper'
-    num_seg: 25
-    target_size: 224
+    name: 'CenterCropMetric_MRI'
 
 
 model_name: "ppTSN_MRI"
-log_interval: 20 #Optional, the interal of logger, default:10
+log_interval: 20
 save_interval: 20
-epochs: 50 #Mandatory, total epoch
-log_level: "INFO" #Optional, the logger level. default: "INFO"
+epochs: 50
+log_level: "INFO"

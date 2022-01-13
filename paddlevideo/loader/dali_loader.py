@@ -42,7 +42,7 @@ class TSN_Dali_loader(object):
         self.batch_size = cfg.batch_size
         self.file_path = cfg.file_path
 
-        self.seg_num = cfg.seg_num
+        self.num_seg = cfg.num_seg
         self.seglen = cfg.seglen
         self.short_size = cfg.short_size
         self.target_size = cfg.target_size
@@ -50,8 +50,8 @@ class TSN_Dali_loader(object):
         # set num_shards and shard_id when distributed training is implemented
         self.num_shards = dist.get_world_size()
         self.shard_id = ParallelEnv().local_rank
-        self.dali_mean = cfg.mean * (self.seg_num * self.seglen)
-        self.dali_std = cfg.std * (self.seg_num * self.seglen)
+        self.dali_mean = cfg.mean * (self.num_seg * self.seglen)
+        self.dali_std = cfg.std * (self.num_seg * self.seglen)
 
     def build_dali_reader(self):
         """
@@ -103,8 +103,8 @@ class TSN_Dali_loader(object):
                              num_threads=1,
                              device_id=device_id,
                              file_list=video_files,
-                             sequence_length=self.seg_num * self.seglen,
-                             seg_num=self.seg_num,
+                             sequence_length=self.num_seg * self.seglen,
+                             num_seg=self.num_seg,
                              seg_length=self.seglen,
                              resize_shorter_scale=self.short_size,
                              crop_target_size=self.target_size,
@@ -135,7 +135,7 @@ class VideoPipe(Pipeline):
                  device_id,
                  file_list,
                  sequence_length,
-                 seg_num,
+                 num_seg,
                  seg_length,
                  resize_shorter_scale,
                  crop_target_size,
@@ -149,7 +149,7 @@ class VideoPipe(Pipeline):
         self.input = ops.VideoReader(device="gpu",
                                      file_list=file_list,
                                      sequence_length=sequence_length,
-                                     seg_num=seg_num,
+                                     num_seg=num_seg,
                                      seg_length=seg_length,
                                      is_training=is_training,
                                      num_shards=num_shards,
@@ -180,7 +180,7 @@ class VideoPipe(Pipeline):
             std=dali_std)
         self.reshape_back = ops.Reshape(
             device="gpu",
-            shape=[seg_num, seg_length * 3, crop_target_size, crop_target_size],
+            shape=[num_seg, seg_length * 3, crop_target_size, crop_target_size],
             layout='FCHW')
         self.cast_label = ops.Cast(device="gpu", dtype=types.DALIDataType.INT64)
 

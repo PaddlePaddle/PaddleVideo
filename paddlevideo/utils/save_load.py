@@ -15,15 +15,86 @@ import os
 import os.path as osp
 import time
 
-import pickle
-from tqdm import tqdm
 import paddle
 import paddle.nn.functional as F
-from paddlevideo.utils import get_logger
-from paddlevideo.utils import main_only
+from paddlevideo.utils import get_logger, main_only
+from tqdm import tqdm
 
 
-def pretrain_vit_param_trans(model, state_dicts, num_patches, seg_num,
+def pretrain_swin_param_trans(model, state_dicts):
+    # delete classifier's params
+    if 'head.fc' + '.weight' in state_dicts:
+        del state_dicts['head.fc' + '.weight']
+    if 'head.fc' + '.bias' in state_dicts:
+        del state_dicts['head.fc' + '.bias']
+
+    state_dicts = {
+        k.replace('backbone.', ''): v
+        for k, v in state_dicts.items()
+    }
+
+    if len(state_dicts) == len(model.state_dict()):
+        print("Load 3D weights")
+        return state_dicts
+
+    print("Load 2D weights")
+    relative_position_index_keys = [
+        k for k in state_dicts.keys() if "relative_position_index" in k
+    ]
+    for k in relative_position_index_keys:
+        del state_dicts[k]
+
+    # delete attn_mask since we always re-init it
+    attn_mask_keys = [k for k in state_dicts.keys() if "attn_mask" in k]
+    for k in attn_mask_keys:
+        del state_dicts[k]
+
+    state_dicts['patch_embed.proj.weight'] = state_dicts[
+        'patch_embed.proj.weight'].unsqueeze(2).tile(
+            [1, 1, model.patch_size[0], 1, 1]) / model.patch_size[0]
+
+    # bicubic interpolate relative_position_bias_table if not match
+    relative_position_bias_table_keys = [
+        k for k in state_dicts.keys() if "relative_position_bias_table" in k
+    ]
+    total_len = len(relative_position_bias_table_keys)
+    with tqdm(total=total_len,
+              position=1,
+              bar_format='{desc}',
+              desc="Loading weights") as desc:
+        for key in tqdm(relative_position_bias_table_keys,
+                        total=total_len,
+                        position=0):
+            relative_position_bias_table_pretrained = state_dicts[key]
+            relative_position_bias_table_current = model.state_dict()[key]
+            L1, nH1 = relative_position_bias_table_pretrained.shape
+            L2, nH2 = relative_position_bias_table_current.shape
+            L2 = (2 * model.window_size[1] - 1) * (2 * model.window_size[2] - 1)
+            wd = model.window_size[0]
+            if nH1 != nH2:
+                desc.set_description(f"Error in loading {key}, skip")
+            else:
+                if L1 != L2:
+                    S1 = int(L1**0.5)
+                    relative_position_bias_table_pretrained_resized = paddle.nn.functional.interpolate(
+                        relative_position_bias_table_pretrained.transpose(
+                            [1, 0]).reshape([1, nH1, S1, S1]),
+                        size=(2 * model.window_size[1] - 1,
+                              2 * model.window_size[2] - 1),
+                        mode='bicubic')
+                    relative_position_bias_table_pretrained = relative_position_bias_table_pretrained_resized.reshape(
+                        [nH2, L2]).transpose([1, 0])
+                desc.set_description(f"Loading {key}")
+            state_dicts[key] = relative_position_bias_table_pretrained.tile(
+                [2 * wd - 1, 1])
+            time.sleep(0.01)
+    ret_str = "loading {:<20d} weights completed.".format(
+        len(model.state_dict()))
+    desc.set_description(ret_str)
+    return state_dicts
+
+
+def pretrain_vit_param_trans(model, state_dicts, num_patches, num_seg,
                              attention_type):
     """
     Convert ViT's pre-trained model parameters to a parameter dictionary that matches the existing model
@@ -49,11 +120,11 @@ def pretrain_vit_param_trans(model, state_dicts, num_patches, seg_num,
         state_dicts['pos_embed'] = new_pos_embed
         time.sleep(0.01)
 
-    if 'time_embed' in state_dicts and seg_num != state_dicts[
+    if 'time_embed' in state_dicts and num_seg != state_dicts[
             'time_embed'].shape[1]:
         time_embed = state_dicts['time_embed'].transpose((0, 2, 1)).unsqueeze(0)
         new_time_embed = F.interpolate(time_embed,
-                                       size=(time_embed.shape[-2], seg_num),
+                                       size=(time_embed.shape[-2], num_seg),
                                        mode='nearest')
         state_dicts['time_embed'] = new_time_embed.squeeze(0).transpose(
             (0, 2, 1))
@@ -139,8 +210,10 @@ def load_ckpt(model, weight_path, **kargs):
         })
     elif "VisionTransformer" in str(model):  # For TimeSformer case
         tmp = pretrain_vit_param_trans(model, state_dicts, kargs['num_patches'],
-                                       kargs['seg_num'],
+                                       kargs['num_seg'],
                                        kargs['attention_type'])
+    elif 'SwinTransformer3D' in str(model):
+        tmp = pretrain_swin_param_trans(model, state_dicts)
     else:
         tmp = {}
         total_len = len(model.state_dict())

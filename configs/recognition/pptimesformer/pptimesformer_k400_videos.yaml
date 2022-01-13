@@ -12,7 +12,7 @@ MODEL: #MODEL field
         mlp_ratio: 4
         qkv_bias: False
         epsilon: 1e-6
-        seg_num: 8
+        num_seg: 8
         attention_type: 'divided_space_time'
     head:
         name: "ppTimeSformerHead" #Mandatory, indicate the type of head, associate to the 'paddlevideo/modeling/heads'
@@ -20,6 +20,10 @@ MODEL: #MODEL field
         in_channels: 768 #input channel of the extracted feature.
         std: 0.02 #std value in params initialization
         ls_eps: 0.1
+    runtime_cfg: # configuration used when the model is train or test.
+        test: # test config
+            num_seg: 8
+            avg_type: 'prob' # 'score' or 'prob'
 
 DATASET: #DATASET field
     batch_size: 8 #Mandatory, bacth size
@@ -149,6 +153,8 @@ INFERENCE:
     name: 'TimeSformer_Inference_helper'
     num_seg: 8
     target_size: 224
+    mean: [0, 0, 0]
+    std: [1, 1, 1]
 
 model_name: "ppTimeSformer"
 log_interval: 20 #Optional, the interal of logger, default:10

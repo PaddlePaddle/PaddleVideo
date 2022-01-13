@@ -23,15 +23,16 @@ class Recognizer2D(BaseRecognizer):
     """2D recognizer model framework."""
     def forward_net(self, imgs):
         # NOTE: As the num_segs is an attribute of dataset phase, and didn't pass to build_head phase, should obtain it from imgs(paddle.Tensor) now, then call self.head method.
-        num_segs = imgs.shape[1]  # imgs.shape=[N,T,C,H,W], for most commonly case
+        num_segs = imgs.shape[
+            1]  # imgs.shape=[N,T,C,H,W], for most commonly case
         imgs = paddle.reshape_(imgs, [-1] + list(imgs.shape[2:]))
 
-        if self.backbone != None:
+        if self.backbone is not None:
             feature = self.backbone(imgs)
         else:
             feature = imgs
 
-        if self.head != None:
+        if self.head is not None:
             cls_score = self.head(feature, num_segs)
         else:
             cls_score = None
