@@ -14,7 +14,6 @@
 
 import argparse
 import os
-import time
 from os import path as osp
 import paddle
 import numpy as np

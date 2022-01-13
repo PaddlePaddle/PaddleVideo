@@ -92,9 +92,9 @@ def main():
     if seed is not None:
         assert isinstance(
             seed, int), f"seed must be a integer when specified, but got {seed}"
-        paddle.seed(seed)
-        np.random.seed(seed)
         random.seed(seed)
+        np.random.seed(seed)
+        paddle.seed(seed)
 
     _, world_size = get_dist_info()
     parallel = world_size != 1

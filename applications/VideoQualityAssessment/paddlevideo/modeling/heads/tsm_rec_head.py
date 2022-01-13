@@ -67,7 +67,7 @@ class TSMRecHead(TSNHead):
         self.fc.bias.learning_rate = 2.0
         self.fc.bias.regularizer = paddle.regularizer.L2Decay(0.)
 
-    def forward(self, x, seg_num):
+    def forward(self, x, num_seg):
         """Define how the head is going to run.
 
         Args:
@@ -81,9 +81,9 @@ class TSMRecHead(TSNHead):
         # [N * num_segs, in_channels, 1, 1]
         if self.dropout is not None:
             x = self.dropout(x)
-        # [N * seg_num, in_channels, 1, 1]
-        x = paddle.reshape(x, [-1, seg_num, x.shape[1]])
-        # [N, seg_num, in_channels]
+        # [N * num_seg, in_channels, 1, 1]
+        x = paddle.reshape(x, [-1, num_seg, x.shape[1]])
+        # [N, num_seg, in_channels]
         x = paddle.mean(x, axis=1)
         # [N, 1, in_channels]
         x = paddle.reshape(x, shape=[-1, self.in_channels])
@@ -112,7 +112,7 @@ class TSMRecHead(TSNHead):
             labels = labels[0]
             losses = dict()
             loss = self.loss_func(scores, labels, **kwargs)
-            
+
             score_list = paddle.tolist(scores)
             label_list = paddle.tolist(labels)
             score_list_len = len(score_list)
@@ -137,7 +137,7 @@ class TSMRecHead(TSNHead):
                 loss_a = self.loss_func(scores, labels_a, **kwargs)
                 loss_b = self.loss_func(scores, labels_a, **kwargs)
             loss = lam * loss_a + (1 - lam) * loss_b
-            
+
             losses['loss'] = loss
             losses['output'] = output
             losses['label'] = label
@@ -151,4 +151,3 @@ class TSMRecHead(TSNHead):
         labels = paddle.squeeze(labels, axis=1)
         loss = self.loss_func(scores, labels, **kwargs)
         return loss
-
