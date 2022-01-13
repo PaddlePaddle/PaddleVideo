@@ -88,7 +88,7 @@ python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log
 
 
   When the test configuration uses the following parameters, the test indicators on the validation data set of Kinetics-400 are as follows:
-  
+
 
   | backbone | Sampling method | num_seg | target_size | Top-1 | checkpoints |
   | :----------------: | :-----: | :-----: | :---------: | :----: | :----------------------------------------------------------: |

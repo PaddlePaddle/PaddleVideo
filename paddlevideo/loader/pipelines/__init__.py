@@ -16,7 +16,8 @@ from .anet_pipeline import GetMatchMap, GetVideoLabel, LoadFeat
 from .augmentations import (CenterCrop, ColorJitter, GroupRandomFlip,
                             GroupResize, Image2Array, JitterScale, MultiCrop,
                             Normalization, PackOutput, RandomCrop, RandomFlip,
-                            Scale, TenCrop, ToArray, UniformCrop)
+                            RandomResizedCrop, Scale, TenCrop, ToArray,
+                            UniformCrop)
 from .augmentations_ava import *
 from .compose import Compose
 from .decode import FeatureDecoder, FrameDecoder, VideoDecoder
@@ -29,8 +30,9 @@ from .skeleton_pipeline import AutoPadding, Iden, SkeletonNorm
 from .segmentation_pipline import SegmentationSampler
 from .augmentations_ava import *
 from .sample_ava import *
-from .segmentation import MultiRestrictSize, MultiNorm
+from .segmentation import MultiNorm, MultiRestrictSize
 from .skeleton_pipeline import AutoPadding, Iden, SkeletonNorm
+from .decode_sampler_MRI import SFMRI_DecodeSampler
 
 __all__ = [
     'ImageDecoder', 'RandomMask', 'UniformCrop', 'SkeletonNorm', 'Tokenize',
@@ -40,5 +42,6 @@ __all__ = [
     'GetVideoLabel', 'Cutmix', 'CenterCrop', 'RandomCrop', 'LoadFeat',
     'RandomCap', 'JitterScale', 'Iden', 'VideoMix', 'ColorJitter', 'RandomFlip',
     'ToArray', 'FeaturePadding', 'GetMatchMap', 'GroupRandomFlip', 'MultiCrop',
-    'MultiRestrictSize', 'MultiNorm', 'SegmentationSampler'
+    'SFMRI_DecodeSampler', 'MultiRestrictSize', 'MultiNorm',
+    'RandomResizedCrop', 'SegmentationSampler'
 ]

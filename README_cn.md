@@ -6,6 +6,21 @@
 赛题baseline由PaddleVideo提供[ST-GCN](https://github.com/PaddlePaddle/PaddleVideo/blob/develop/docs/zh-CN/model_zoo/recognition/stgcn.md)，
 [教程链接](https://aistudio.baidu.com/aistudio/projectdetail/2417717)，[视频链接](https://www.bilibili.com/video/BV1w3411172G)
 
+## 近期活动
+
+🌟  **1月17号-21号《产业级视频技术与应用案例》** 🌟
+- 【1月17号20:15-21:30】视频技术导论及医疗行业典型案例
+- 【1月18号20:15-21:30】视频内容智能分析和生产解决方案
+- 【1月19号20:15-21:30】体育+安防行业中的行为识别
+- 【1月20号20:15-21:30】顶会冠军视频分割算法深度解密
+- 【1月21号20:15-21:30】多模态学习和检索方法
+
+👀 **报名链接**: https://paddleqiyeban.wjx.cn/vj/QIValIZ.aspx?udsid=419689
+
+​																	  💖 **欢迎大家扫码入群讨论** 💖
+<div align="center">
+  <img src="docs/images/user_group.png" width=250/></div>
+
 ## 简介
 
 ![python version](https://img.shields.io/badge/python-3.7+-orange.svg) ![paddle version](https://img.shields.io/badge/PaddlePaddle-2.0-blue)
@@ -48,6 +63,7 @@ PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_githu
 | 行为识别 | [**PP-TimeSformer**](./docs/zh-CN/model_zoo/recognition/pp-timesformer.md) |    [Kinetics-400](./docs/zh-CN/dataset/k400.md)    |  Top-1   |   79.49   |
 | 行为识别 | [AGCN](./docs/zh-CN/model_zoo/recognition/agcn.md) | [FSD](./docs/zh-CN/dataset/fsd.md) | Top-1 | 62.29 |
 | 行为识别 | [ST-GCN](./docs/zh-CN/model_zoo/recognition/stgcn.md) | [FSD](./docs/zh-CN/dataset/fsd.md) | Top-1 | 59.07 |
+| 行为识别 | [VideoSwin](./docs/zh-CN/model_zoo/recognition/videoswin.md) |    [Kinetics-400](./docs/zh-CN/dataset/k400.md)    |  Top-1   |   82.40   |
 | 行为识别 | [TimeSformer](./docs/zh-CN/model_zoo/recognition/timesformer.md) |    [Kinetics-400](./docs/zh-CN/dataset/k400.md)    |  Top-1   |   77.29   |
 | 行为识别 |  [SlowFast](./docs/zh-CN/model_zoo/recognition/slowfast.md)  |    [Kinetics-400](./docs/zh-CN/dataset/k400.md)    |  Top-1   |   75.84   |
 | 行为识别 |       [TSM](./docs/zh-CN/model_zoo/recognition/tsm.md)       |    [Kinetics-400](./docs/zh-CN/dataset/k400.md)    |  Top-1   |   71.06   |
@@ -99,6 +115,7 @@ PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_githu
        - [PP-TSM](docs/zh-CN/model_zoo/recognition/pp-tsm.md)
        - [PP-TSN](docs/zh-CN/model_zoo/recognition/pp-tsn.md)
        - [PP-TimeSformer](docs/zh-CN/model_zoo/recognition/pp-timesformer.md)
+       - [VideoSwin](docs/zh-CN/model_zoo/recognition/videoswin.md)
        - [SlowFast](docs/zh-CN/model_zoo/recognition/slowfast.md)
        - [TimeSformer](docs/zh-CN/model_zoo/recognition/timesformer.md)
        - [Attention-LSTM](docs/zh-CN/model_zoo/recognition/attention_lstm.md)

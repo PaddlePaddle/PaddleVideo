@@ -89,6 +89,13 @@ def get_input_spec(cfg, model_name):
             ],
                       dtype='float32'),
         ]]
+    elif model_name in ['VideoSwin']:
+        input_spec = [[
+            InputSpec(shape=[
+                None, 3, cfg.num_seg * 4, cfg.target_size, cfg.target_size
+            ],
+                      dtype='float32'),
+        ]]
     elif model_name in ['AttentionLSTM']:
         input_spec = [[
             InputSpec(shape=[None, cfg.embedding_size, cfg.feature_dims[0]],

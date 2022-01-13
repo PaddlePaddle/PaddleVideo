@@ -16,8 +16,12 @@ from .recognizer2d import Recognizer2D
 from .recognizer3d import Recognizer3D
 from .recognizer_transformer import RecognizerTransformer
 from .recognizer_gcn import RecognizerGCN
+from .recognizerMRI import RecognizerMRI
+from .recognizer3dMRI import Recognizer3DMRI
+from .recognizer_transformer_MRI import RecognizerTransformer_MRI
 
 __all__ = [
     'BaseRecognizer', 'Recognizer1D', 'Recognizer2D', 'Recognizer3D',
-    'RecognizerTransformer', 'RecognizerGCN'
+    'RecognizerTransformer', 'RecognizerGCN', 'RecognizerMRI',
+    'Recognizer3DMRI', 'RecognizerTransformer_MRI'
 ]

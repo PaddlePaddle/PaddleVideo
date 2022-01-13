@@ -17,6 +17,8 @@ import random
 
 import numpy as np
 from PIL import Image
+import SimpleITK as sitk
+import cv2
 
 from ..registry import PIPELINES
 
@@ -37,16 +39,20 @@ class Sampler(object):
     def __init__(self,
                  num_seg,
                  seg_len,
+                 frame_interval=None,
                  valid_mode=False,
                  select_left=False,
                  dense_sample=False,
-                 linspace_sample=False):
+                 linspace_sample=False,
+                 use_pil=True):
         self.num_seg = num_seg
         self.seg_len = seg_len
+        self.frame_interval = frame_interval
         self.valid_mode = valid_mode
         self.select_left = select_left
         self.dense_sample = dense_sample
         self.linspace_sample = linspace_sample
+        self.use_pil = use_pil
 
     def _get(self, frames_idx, results):
         data_format = results['format']
@@ -59,6 +65,16 @@ class Sampler(object):
                     os.path.join(frame_dir,
                                  results['suffix'].format(idx))).convert('RGB')
                 imgs.append(img)
+
+        elif data_format == "MRI":
+            frame_dir = results['frame_dir']
+            imgs = []
+            MRI = sitk.GetArrayFromImage(sitk.ReadImage(frame_dir))
+            for idx in frames_idx:
+                item = MRI[idx]
+                item = cv2.resize(item, (224, 224))
+                imgs.append(item)
+
         elif data_format == "video":
             if results['backend'] == 'cv2':
                 frames = np.array(results['frames'])
@@ -68,14 +84,23 @@ class Sampler(object):
                     img = Image.fromarray(imgbuf, mode='RGB')
                     imgs.append(img)
             elif results['backend'] == 'decord':
-                vr = results['frames']
-                frames_select = vr.get_batch(frames_idx)
-                # dearray_to_img
-                np_frames = frames_select.asnumpy()
-                imgs = []
-                for i in range(np_frames.shape[0]):
-                    imgbuf = np_frames[i]
-                    imgs.append(Image.fromarray(imgbuf, mode='RGB'))
+                container = results['frames']
+                if self.use_pil:
+                    frames_select = container.get_batch(frames_idx)
+                    # dearray_to_img
+                    np_frames = frames_select.asnumpy()
+                    imgs = []
+                    for i in range(np_frames.shape[0]):
+                        imgbuf = np_frames[i]
+                        imgs.append(Image.fromarray(imgbuf, mode='RGB'))
+                else:
+                    if frames_idx.ndim != 1:
+                        frames_idx = np.squeeze(frames_idx)
+                    frame_dict = {
+                        idx: container[idx].asnumpy()
+                        for idx in np.unique(frames_idx)
+                    }
+                    imgs = [frame_dict[idx] for idx in frames_idx]
             elif results['backend'] == 'pyav':
                 imgs = []
                 frames = np.array(results['frames'])
@@ -90,6 +115,35 @@ class Sampler(object):
         results['imgs'] = imgs
         return results
 
+    def _get_train_clips(self, num_frames):
+        ori_seg_len = self.seg_len * self.frame_interval
+        avg_interval = (num_frames - ori_seg_len + 1) // self.num_seg
+
+        if avg_interval > 0:
+            base_offsets = np.arange(self.num_seg) * avg_interval
+            clip_offsets = base_offsets + np.random.randint(avg_interval,
+                                                            size=self.num_seg)
+        elif num_frames > max(self.num_seg, ori_seg_len):
+            clip_offsets = np.sort(
+                np.random.randint(num_frames - ori_seg_len + 1,
+                                  size=self.num_seg))
+        elif avg_interval == 0:
+            ratio = (num_frames - ori_seg_len + 1.0) / self.num_seg
+            clip_offsets = np.around(np.arange(self.num_seg) * ratio)
+        else:
+            clip_offsets = np.zeros((self.num_seg, ), dtype=np.int)
+        return clip_offsets
+
+    def _get_test_clips(self, num_frames):
+        ori_seg_len = self.seg_len * self.frame_interval
+        avg_interval = (num_frames - ori_seg_len + 1) / float(self.num_seg)
+        if num_frames > ori_seg_len - 1:
+            base_offsets = np.arange(self.num_seg) * avg_interval
+            clip_offsets = (base_offsets + avg_interval / 2.0).astype(np.int)
+        else:
+            clip_offsets = np.zeros((self.num_seg, ), dtype=np.int)
+        return clip_offsets
+
     def __call__(self, results):
         """
         Args:
@@ -98,8 +152,31 @@ class Sampler(object):
             sampling id.
         """
         frames_len = int(results['frames_len'])
-        average_dur = int(frames_len / self.num_seg)
         frames_idx = []
+        if self.frame_interval is not None:
+            assert isinstance(self.frame_interval, int)
+            if not self.valid_mode:
+                offsets = self._get_train_clips(frames_len)
+            else:
+                offsets = self._get_test_clips(frames_len)
+
+            offsets = offsets[:, None] + np.arange(
+                self.seg_len)[None, :] * self.frame_interval
+            offsets = np.concatenate(offsets)
+
+            offsets = offsets.reshape((-1, self.seg_len))
+            offsets = np.mod(offsets, frames_len)
+            offsets = np.concatenate(offsets)
+
+            if results['format'] == 'video':
+                frames_idx = offsets
+            elif results['format'] == 'frame':
+                frames_idx = list(offsets + 1)
+            else:
+                raise NotImplementedError
+
+            return self._get(frames_idx, results)
+
         if self.linspace_sample:
             if 'start_idx' in results and 'end_idx' in results:
                 offsets = np.linspace(results['start_idx'], results['end_idx'],
@@ -112,10 +189,15 @@ class Sampler(object):
                 frames_idx = [x % frames_len for x in frames_idx]
             elif results['format'] == 'frame':
                 frames_idx = list(offsets + 1)
+
+            elif results['format'] == 'MRI':
+                frames_idx = list(offsets)
+
             else:
                 raise NotImplementedError
             return self._get(frames_idx, results)
 
+        average_dur = int(frames_len / self.num_seg)
         if not self.select_left:
             if self.dense_sample:  # For ppTSM
                 if not self.valid_mode:  # train
@@ -164,9 +246,11 @@ class Sampler(object):
                             frames_idx.append(int(jj % frames_len))
                         elif results['format'] == 'frame':
                             frames_idx.append(jj + 1)
+
+                        elif results['format'] == 'MRI':
+                            frames_idx.append(jj)
                         else:
                             raise NotImplementedError
-
             return self._get(frames_idx, results)
 
         else:  # for TSM
@@ -195,6 +279,10 @@ class Sampler(object):
                 frames_idx = [x % frames_len for x in frames_idx]
             elif results['format'] == 'frame':
                 frames_idx = list(offsets + 1)
+
+            elif results['format'] == 'MRI':
+                frames_idx = list(offsets)
+
             else:
                 raise NotImplementedError
 

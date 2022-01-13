@@ -1,0 +1,93 @@
+MODEL:
+    framework: "RecognizerTransformer_MRI"
+    backbone:
+        name: "VisionTransformer"
+        pretrained: ""
+        img_size: 224
+        patch_size: 16
+        in_channels: 1
+        embed_dim: 768
+        depth: 12
+        num_heads: 12
+        mlp_ratio: 4
+        qkv_bias: True
+        epsilon: 1e-6
+        seg_num: 8
+        attention_type: 'divided_space_time'
+    head:
+        name: "TimeSformerHead"
+        num_classes: 2
+        in_channels: 768
+        std: 0.02
+
+DATASET:
+    batch_size: 8
+    num_workers: 4
+    test_batch_size: 8
+    train:
+        format: "MRIDataset"
+        data_prefix: ""
+        file_path: "/home/aistudio/train.txt"
+    valid:
+        format: "MRIDataset"
+        data_prefix: ""
+        file_path: "/home/aistudio/test.txt"
+    test:
+        format: "MRIDataset"
+        data_prefix: ""
+        file_path: "/home/aistudio/test.txt"
+
+PIPELINE:
+    train:
+        decode:
+            name: "MRIDecoder"
+        sample:
+            name: "Sampler"
+            num_seg: 8
+            seg_len: 1
+            valid_mode: False
+            linspace_sample: True
+
+    valid:
+        decode:
+            name: "MRIDecoder"
+        sample:
+            name: "Sampler"
+            num_seg: 8
+            seg_len: 1
+            valid_mode: False
+            linspace_sample: True
+
+    test:
+        decode:
+            name: "MRIDecoder"
+        sample:
+            name: "Sampler"
+            num_seg: 8
+            seg_len: 1
+            valid_mode: True
+            linspace_sample: True
+
+OPTIMIZER:
+    name: 'Adam'
+    learning_rate:
+        learning_rate: 0.005
+        name: 'MultiStepDecay'
+        milestones: [20, 29]
+        gamma: 0.9
+    weight_decay:
+        name: 'L2'
+        value: 0.00005
+
+
+GRADIENT_ACCUMULATION:
+    global_batch_size: 64
+
+METRIC:
+    name: 'CenterCropMetric_MRI'
+
+model_name: "TimeSformer_MRI"
+log_interval: 20
+save_interval: 5
+epochs: 30
+log_level: "INFO"
