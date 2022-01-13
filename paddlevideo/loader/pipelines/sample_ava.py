@@ -308,16 +308,16 @@ class RawFrameDecode:
         results['img_shape'] = imgs[0].shape[:2]
 
         # we resize the gt_bboxes and proposals to their real scale
+        h, w = results['img_shape']
+        scale_factor = np.array([w, h, w, h])
         if 'gt_bboxes' in results:
-            h, w = results['img_shape']
-            scale_factor = np.array([w, h, w, h])
             gt_bboxes = results['gt_bboxes']
             gt_bboxes_new = (gt_bboxes * scale_factor).astype(np.float32)
             results['gt_bboxes'] = gt_bboxes_new
-            if 'proposals' in results and results['proposals'] is not None:
-                proposals = results['proposals']
-                proposals = (proposals * scale_factor).astype(np.float32)
-                results['proposals'] = proposals
+        if 'proposals' in results and results['proposals'] is not None:
+            proposals = results['proposals']
+            proposals = (proposals * scale_factor).astype(np.float32)
+            results['proposals'] = proposals
         return results
 
     def __repr__(self):
