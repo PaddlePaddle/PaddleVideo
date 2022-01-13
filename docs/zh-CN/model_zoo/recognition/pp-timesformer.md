@@ -1,6 +1,6 @@
 [English](../../../en/model_zoo/recognition/pp-timesformer.md) | 简体中文
 
-# TimeSformer视频分类模型
+# PP-TimeSformer视频分类模型
 
 ## 内容
 
