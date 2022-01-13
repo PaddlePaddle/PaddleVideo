@@ -28,8 +28,8 @@ PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_githu
   <img src="docs/images/home.gif" width="450px"/><br>
 </div>
 
-### **⭐如果本项目对您有帮助，欢迎点击页面右上方star~ ⭐**
 
+## 模型案例库
 
 ### 模型
 
@@ -142,27 +142,7 @@ PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_githu
 - 代码组织
     - [模型库设计思路详解](docs/zh-CN/tutorials/modular_design.md)
     - [配置模块参数详解](docs/zh-CN/tutorials/config.md)
-- 丰富的模型库
-    - [视频分类](docs/zh-CN/model_zoo/README.md)
-       - [TSN](docs/zh-CN/model_zoo/recognition/tsn.md)
-       - [TSM](docs/zh-CN/model_zoo/recognition/tsm.md)
-       - [PP-TSM](docs/zh-CN/model_zoo/recognition/pp-tsm.md)
-       - [PP-TSN](docs/zh-CN/model_zoo/recognition/pp-tsn.md)
-       - [PP-TimeSformer](docs/zh-CN/model_zoo/recognition/pp-timesformer.md)
-       - [VideoSwin](docs/zh-CN/model_zoo/recognition/videoswin.md)
-       - [SlowFast](docs/zh-CN/model_zoo/recognition/slowfast.md)
-       - [TimeSformer](docs/zh-CN/model_zoo/recognition/timesformer.md)
-       - [Attention-LSTM](docs/zh-CN/model_zoo/recognition/attention_lstm.md)
-    - [动作定位](docs/zh-CN/model_zoo/README.md)
-       - [BMN](docs/zh-CN/model_zoo/localization/bmn.md)
-    - [基于骨骼的行为识别](docs/zh-CN/model_zoo/README.md)
-       - [ST-GCN](docs/zh-CN/model_zoo/recognition/stgcn.md)
-       - [AGCN](docs/zh-CN/model_zoo/recognition/agcn.md)
-    - [基于自监督的单目深度估计](docs/zh-CN/model_zoo/README.md)
-       - [ADDS](./docs/zh-CN/model_zoo/estimation/adds.md)
-    - 时空动作检测 <sup>coming soon</sup>
-    - ActBERT: 自监督多模态视频文字学习<sup>coming soon</sup>
-- 项目实战
+- 进阶指南
     - [PP-TSM实践](docs/zh-CN/tutorials/pp-tsm.md)
     - [训练加速](docs/zh-CN/tutorials/accelerate.md)
     - [预测部署](docs/zh-CN/tutorials/deployment.md)
