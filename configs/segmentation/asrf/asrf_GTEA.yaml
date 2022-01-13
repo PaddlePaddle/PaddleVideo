@@ -21,14 +21,14 @@ MODEL: #MODEL field
         num_classes: 11
         ce: True
         asl_focal: False
-        tmse: false
+        tmse: False
         gstmse: True
         asl_weight: True
         ce_weight: 1.0
         focal_weight: 1.0
         tmse_weight: 0.15
         gstmse_weight: 1.0
-        file_path: "./data/gtea/splits/train.split1.bundle" #Mandatory, train data index file path
+        file_path: "./data/gtea/splits/train.split4.bundle" #Mandatory, train data index file path
         label_path: "./data/gtea/gt_arr"
         boundary_path: "./data/gtea/gt_boundary_arr"
     postprocessing_method: "refinement_with_boundary"
@@ -42,19 +42,19 @@ DATASET: #DATASET field
     test_num_workers: 0
     train:
         format: "ASRFDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
-        file_path: "./data/gtea/splits/train.split1.bundle" #Mandatory, train data index file path
+        file_path: "./data/gtea/splits/train.split4.bundle" #Mandatory, train data index file path
         feature_path: "./data/gtea/features"
         label_path: "./data/gtea/gt_arr"
         boundary_path: "./data/gtea/gt_boundary_arr"
     valid:
         format: "ASRFDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
-        file_path: "./data/gtea/splits/test.split1.bundle" #Mandatory, valid data index file path
+        file_path: "./data/gtea/splits/test.split4.bundle" #Mandatory, valid data index file path
         feature_path: "./data/gtea/features"
         label_path: "./data/gtea/gt_arr"
         boundary_path: "./data/gtea/gt_boundary_arr"
     test:
         format: "ASRFDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
-        file_path: "./data/gtea/splits/test.split1.bundle" #Mandatory, test data index file path
+        file_path: "./data/gtea/splits/test.split4.bundle" #Mandatory, test data index file path
         feature_path: "./data/gtea/features"
         label_path: "./data/gtea/gt_arr"
         boundary_path: "./data/gtea/gt_boundary_arr"
@@ -91,17 +91,17 @@ METRIC:
     name: 'SegmentationMetric'
     overlap: [.1, .25, .5]
     actions_map_file_path: "./data/gtea/mapping.txt"
-    tolerance: 5
-    boundary_threshold: 0.7
 
 
 INFERENCE:
-    name: 'MSTCN_Inference_helper'
+    name: 'ASRF_Inference_helper'
     num_channels: 2048
-    actions_map_file_path: "./data/breakfast/mapping.txt"
+    actions_map_file_path: "./data/gtea/mapping.txt"
+    postprocessing_method: "refinement_with_boundary"
+    boundary_threshold: 0.5
 
 
 model_name: "ASRF"
 log_interval: 10 #Optional, the interal of logger, default:10
 epochs: 50 #Mandatory, total epoch
-save_interval: 10
+save_interval: 40

@@ -139,7 +139,7 @@ def get_input_spec(cfg, model_name):
             ],
                       dtype='float32'),
         ]]
-    elif model_name in ['MSTCN']:
+    elif model_name in ['MSTCN', 'ASRF']:
         input_spec = [[
             InputSpec(shape=[None, cfg.num_channels, None], dtype='float32'),
         ]]

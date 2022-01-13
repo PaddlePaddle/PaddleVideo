@@ -24,6 +24,7 @@ from ..backbones.ms_tcn import SingleStageModel
 from .base import BaseHead
 from ..registry import HEADS
 from ..weight_init import weight_init_
+from ..framework.segmenters.utils import init_bias, KaimingUniform_like_torch
 
 
 @HEADS.register()
@@ -39,7 +40,7 @@ class ASRFHead(BaseHead):
         super().__init__(num_classes=num_classes, in_channels=num_features)
         if not isinstance(num_stages_asb, int):
             num_stages_asb = num_stages
-        
+
         if not isinstance(num_stages_brb, int):
             num_stages_brb = num_stages
 
@@ -49,7 +50,7 @@ class ASRFHead(BaseHead):
         self.num_features = num_features
 
         self.init_weights()
-    
+
     def init_weights(self):
         """
         initialize model layers' weight
@@ -59,12 +60,13 @@ class ASRFHead(BaseHead):
 
         # action segmentation branch
         asb = [
-            SingleStageModel(self.num_layers, self.num_features, self.num_classes, self.num_classes)
+            SingleStageModel(self.num_layers, self.num_features,
+                             self.num_classes, self.num_classes)
             for _ in range(self.num_stages_asb - 1)
         ]
 
         # boundary regression branch
-        brb=[
+        brb = [
             SingleStageModel(self.num_layers, self.num_features, 1, 1)
             for _ in range(self.num_stages_brb - 1)
         ]
@@ -77,8 +79,11 @@ class ASRFHead(BaseHead):
         # init weight
         for layer in self.sublayers():
             if isinstance(layer, nn.Conv1D):
-                weight_init_(layer, 'XavierNormal')
-                # weight_init_(layer, 'Normal', mean=0.0, std=0.02)
+                layer.weight.set_value(
+                    KaimingUniform_like_torch(layer.weight).astype('float32'))
+                if layer.bias is not None:
+                    layer.bias.set_value(
+                        init_bias(layer.weight, layer.bias).astype('float32'))
 
     def forward(self, x):
         """

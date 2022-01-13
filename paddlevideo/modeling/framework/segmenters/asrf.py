@@ -20,6 +20,7 @@ from .utils import ASRFPostProcessing
 @SEGMENTERS.register()
 class ASRF(BaseSegmenter):
     """ASRF model framework."""
+
     def __init__(self,
                  postprocessing_method,
                  boundary_threshold,
@@ -50,14 +51,12 @@ class ASRF(BaseSegmenter):
         """Training step.
         """
         feature, label, boundary = data_batch
-
         # call forward
         outputs_cls, outputs_boundary = self.forward_net(feature)
         # caculate loss
         if self.loss is not None:
-            output_loss = self.loss(
-                feature, outputs_cls, label, outputs_boundary, boundary
-                )
+            output_loss = self.loss(feature, outputs_cls, label,
+                                    outputs_boundary, boundary)
         else:
             output_loss = None
         loss_metrics = dict()
@@ -74,19 +73,19 @@ class ASRF(BaseSegmenter):
         outputs_cls, outputs_boundary = self.forward_net(feature)
 
         # transfer data
-        outputs_cls_np = outputs_cls[-1].cpu().detach().numpy()
-        outputs_boundary_np = outputs_boundary[-1].cpu().detach().numpy()
+        outputs_cls_np = outputs_cls[-1].numpy()
+        outputs_boundary_np = outputs_boundary[-1].numpy()
 
         ## caculate loss
         if self.loss is not None:
-            output_loss = self.loss(
-                feature, outputs_cls, label, outputs_boundary, boundary
-                )
+            output_loss = self.loss(feature, outputs_cls, label,
+                                    outputs_boundary, boundary)
         else:
             output_loss = None
 
         # predict post process
-        predicted = ASRFPostProcessing(outputs_cls_np, outputs_boundary_np, self.postprocessing_method)
+        predicted = ASRFPostProcessing(outputs_cls_np, outputs_boundary_np,
+                                       self.postprocessing_method)
 
         outputs_dict = dict()
         outputs_dict['loss'] = output_loss
@@ -101,11 +100,12 @@ class ASRF(BaseSegmenter):
         # call forward
         outputs_cls, outputs_boundary = self.forward_net(feature)
         # transfer data
-        outputs_cls_np = outputs_cls[-1].cpu().detach().numpy()
-        outputs_boundary_np = outputs_boundary[-1].cpu().detach().numpy()
+        outputs_cls_np = outputs_cls[-1].numpy()
+        outputs_boundary_np = outputs_boundary[-1].numpy()
 
         # predict post process
-        predicted = ASRFPostProcessing(outputs_cls_np, outputs_boundary_np, self.postprocessing_method)
+        predicted = ASRFPostProcessing(outputs_cls_np, outputs_boundary_np,
+                                       self.postprocessing_method)
         return predicted[0, :]
 
     def infer_step(self, data_batch):
@@ -116,11 +116,8 @@ class ASRF(BaseSegmenter):
         # call forward
         outputs_cls, outputs_boundary = self.forward_net(feature)
         # transfer data
-        outputs_cls_np = outputs_cls.cpu().detach().numpy()
-        outputs_boundary_np = outputs_boundary.cpu().detach().numpy()
+        outputs_cls_np = outputs_cls[-1].numpy()
+        outputs_boundary_np = outputs_boundary[-1].numpy()
 
-        # predict post process
-        predicted = ASRFPostProcessing(
-            outputs_cls_np, outputs_boundary_np, self.postprocessing_method, boundary_threshold=self.boundary_threshold
-            )
-        return predicted[0, :]
+        outputs = [outputs_cls_np, outputs_boundary_np]
+        return outputs

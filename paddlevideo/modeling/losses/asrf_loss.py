@@ -24,6 +24,7 @@ import os
 
 from ..registry import LOSSES
 
+
 class TMSE(nn.Layer):
     """
     Temporal MSE Loss Function
@@ -31,9 +32,7 @@ class TMSE(nn.Layer):
     arXiv: https://arxiv.org/pdf/1903.01945.pdf
     """
 
-    def __init__(self,
-                 threshold=4,
-                 ignore_index=255):
+    def __init__(self, threshold=4, ignore_index=255):
         super().__init__()
         self.threshold = threshold
         self.ignore_index = ignore_index
@@ -44,13 +43,13 @@ class TMSE(nn.Layer):
         total_loss = 0.0
         batch_size = preds.shape[0]
         for pred, gt in zip(preds, gts):
-            pred = paddle.gather(pred, paddle.nonzero(gt != self.ignore_index)[:, 0])
+            pred = paddle.gather(pred,
+                                 paddle.nonzero(gt != self.ignore_index)[:, 0])
 
-            loss = self.mse(
-                F.log_softmax(pred[:, 1:], axis=1), F.log_softmax(pred[:, :-1], axis=1)
-            )
+            loss = self.mse(F.log_softmax(pred[:, 1:], axis=1),
+                            F.log_softmax(pred[:, :-1], axis=1))
 
-            loss = paddle.clip(loss, min=0, max=self.threshold ** 2)
+            loss = paddle.clip(loss, min=0, max=self.threshold**2)
             total_loss += paddle.mean(loss)
 
         return total_loss / batch_size
@@ -61,20 +60,14 @@ class GaussianSimilarityTMSE(nn.Layer):
     Temporal MSE Loss Function with Gaussian Similarity Weighting
     """
 
-    def __init__(self,
-                 threshold=4,
-                 sigma=1.0,
-                 ignore_index=255):
+    def __init__(self, threshold=4, sigma=1.0, ignore_index=255):
         super().__init__()
         self.threshold = threshold
         self.ignore_index = ignore_index
         self.mse = nn.MSELoss(reduction="none")
         self.sigma = sigma
 
-    def forward(self, 
-                preds,
-                gts,
-                sim_index):
+    def forward(self, preds, gts, sim_index):
         """
         Args:
             preds: the output of model before softmax. (N, C, T)
@@ -86,18 +79,22 @@ class GaussianSimilarityTMSE(nn.Layer):
         total_loss = 0.0
         batch_size = preds.shape[0]
         for pred, gt, sim in zip(preds, gts, sim_index):
-            pred = paddle.gather(pred, paddle.nonzero(gt != self.ignore_index)[:, 0], axis=1)
-            sim = paddle.gather(sim, paddle.nonzero(gt != self.ignore_index)[:, 0], axis=1)
+            pred = paddle.gather(pred,
+                                 paddle.nonzero(gt != self.ignore_index)[:, 0],
+                                 axis=1)
+            sim = paddle.gather(sim,
+                                paddle.nonzero(gt != self.ignore_index)[:, 0],
+                                axis=1)
 
             # calculate gaussian similarity
             diff = sim[:, 1:] - sim[:, :-1]
-            similarity = paddle.exp((-1 * paddle.norm(diff, axis=0)) / (2 * self.sigma ** 2))
+            similarity = paddle.exp(
+                (-1 * paddle.norm(diff, axis=0)) / (2 * self.sigma**2))
 
             # calculate temporal mse
-            loss = self.mse(
-                F.log_softmax(pred[:, 1:], axis=1), F.log_softmax(pred[:, :-1], axis=1)
-            )
-            loss = paddle.clip(loss, min=0, max=self.threshold ** 2)
+            loss = self.mse(F.log_softmax(pred[:, 1:], axis=1),
+                            F.log_softmax(pred[:, :-1], axis=1))
+            loss = paddle.clip(loss, min=0, max=self.threshold**2)
 
             # gaussian similarity weighting
             loss = similarity * loss
@@ -106,7 +103,9 @@ class GaussianSimilarityTMSE(nn.Layer):
 
         return total_loss / batch_size
 
+
 class FocalLoss(nn.Layer):
+
     def __init__(self,
                  weight=None,
                  size_average=True,
@@ -119,13 +118,11 @@ class FocalLoss(nn.Layer):
         self.gamma = gamma
         self.alpha = alpha
         self.batch_average = batch_average
-        self.criterion = nn.CrossEntropyLoss(
-            weight=weight, ignore_index=ignore_index, size_average=size_average
-        )
+        self.criterion = nn.CrossEntropyLoss(weight=weight,
+                                             ignore_index=ignore_index,
+                                             size_average=size_average)
 
-    def forward(self,
-                logit,
-                target):
+    def forward(self, logit, target):
         n, _, _ = logit.size()
 
         logpt = -self.criterion(logit, target.long())
@@ -134,12 +131,13 @@ class FocalLoss(nn.Layer):
         if self.alpha is not None:
             logpt *= self.alpha
 
-        loss = -((1 - pt) ** self.gamma) * logpt
+        loss = -((1 - pt)**self.gamma) * logpt
 
         if self.batch_average:
             loss /= n
 
         return loss
+
 
 class ActionSegmentationLoss(nn.Layer):
     """
@@ -180,8 +178,8 @@ class ActionSegmentationLoss(nn.Layer):
 
         if ce:
             self.criterions.append(
-                nn.CrossEntropyLoss(weight=class_weight, ignore_index=ignore_index)
-            )
+                nn.CrossEntropyLoss(weight=class_weight,
+                                    ignore_index=ignore_index))
             self.weights.append(ce_weight)
 
         if focal:
@@ -189,13 +187,14 @@ class ActionSegmentationLoss(nn.Layer):
             self.weights.append(focal_weight)
 
         if tmse:
-            self.criterions.append(TMSE(threshold=threshold, ignore_index=ignore_index))
+            self.criterions.append(
+                TMSE(threshold=threshold, ignore_index=ignore_index))
             self.weights.append(tmse_weight)
 
         if gstmse:
             self.criterions.append(
-                GaussianSimilarityTMSE(threshold=threshold, ignore_index=ignore_index)
-            )
+                GaussianSimilarityTMSE(threshold=threshold,
+                                       ignore_index=ignore_index))
             self.weights.append(gstmse_weight)
 
         if len(self.criterions) == 0:
@@ -231,10 +230,7 @@ class ActionSegmentationLoss(nn.Layer):
         class_weight = median / frequency
         return class_weight
 
-    def forward(self,
-                preds,
-                gts,
-                sim_index):
+    def forward(self, preds, gts, sim_index):
         """
         Args:
             preds: paddle.float (N, C, T).
@@ -253,6 +249,7 @@ class ActionSegmentationLoss(nn.Layer):
 
         return loss
 
+
 class BoundaryRegressionLoss(nn.Layer):
     """
     Boundary Regression Loss
@@ -262,7 +259,7 @@ class BoundaryRegressionLoss(nn.Layer):
 
     def __init__(self,
                  file_path,
-                 label_path,  
+                 label_path,
                  bce=True,
                  focal=False,
                  mse=False,
@@ -273,16 +270,12 @@ class BoundaryRegressionLoss(nn.Layer):
         self.criterions = []
         self.file_path = file_path
         self.label_path = label_path
-        
-        if weight:
-            pos_weight = self.get_pos_weight()
-        else:
-            pos_weight = None
+
+        pos_weight = self.get_pos_weight()
 
         if bce:
             self.criterions.append(
-                nn.BCEWithLogitsLoss(weight=pos_weight, pos_weight=pos_weight)
-            )
+                nn.BCEWithLogitsLoss(weight=weight, pos_weight=pos_weight))
 
         if focal:
             self.criterions.append(FocalLoss())
@@ -293,7 +286,7 @@ class BoundaryRegressionLoss(nn.Layer):
         if len(self.criterions) == 0:
             print("You have to choose at least one loss function.")
             sys.exit(1)
-        
+
     def get_pos_weight(self, norm=None):
         """
         pos_weight for binary cross entropy with logits loss
@@ -338,8 +331,10 @@ class BoundaryRegressionLoss(nn.Layer):
 
         return loss / batch_size
 
+
 @LOSSES.register()
 class ASRFLoss(nn.Layer):
+
     def __init__(self,
                  lambda_bound_loss,
                  num_classes,
@@ -360,54 +355,64 @@ class ASRFLoss(nn.Layer):
                  bce=True,
                  brl_focal=False,
                  mse=False,
-                 brl_weight=None,
-                 pos_weight=None):
+                 brl_weight=None):
         super().__init__()
-        self.criterion_cls = ActionSegmentationLoss(
-            ce=ce,
-            focal=asl_focal,
-            tmse=tmse,
-            gstmse=gstmse,
-            weight=asl_weight,
-            threshold=threshold,
-            ignore_index=ignore_index,
-            ce_weight=ce_weight,
-            focal_weight=focal_weight,
-            tmse_weight=tmse_weight,
-            gstmse_weight=gstmse_weight,
-            file_path=file_path,
-            label_path=label_path,
-            num_classes=num_classes
-        )
+        self.criterion_cls = ActionSegmentationLoss(ce=ce,
+                                                    focal=asl_focal,
+                                                    tmse=tmse,
+                                                    gstmse=gstmse,
+                                                    weight=asl_weight,
+                                                    threshold=threshold,
+                                                    ignore_index=ignore_index,
+                                                    ce_weight=ce_weight,
+                                                    focal_weight=focal_weight,
+                                                    tmse_weight=tmse_weight,
+                                                    gstmse_weight=gstmse_weight,
+                                                    file_path=file_path,
+                                                    label_path=label_path,
+                                                    num_classes=num_classes)
         self.criterion_boundary = BoundaryRegressionLoss(
             bce=bce,
             focal=brl_focal,
             mse=mse,
             weight=brl_weight,
-            pos_weight=pos_weight,
             file_path=file_path,
-            label_path=boundary_path
-        )
+            label_path=boundary_path)
         self.lambda_bound_loss = lambda_bound_loss
-    
-    def forward(self,
-                x,
-                output_cls,
-                label,
-                outputs_boundary,
-                boundary):
+
+        # self.cnt = 1
+
+    def forward(self, x, output_cls, label, outputs_boundary, boundary):
         loss = 0.0
+        # if self.cnt == 1:
+        #     output_dict = {}
+        #     # index = 1
+        #     output_dict["x"] = x
+        #     output_dict["output_cls"] = output_cls
+        #     output_dict["label"] = label
+        #     output_dict["outputs_boundary"] = outputs_boundary
+        #     output_dict["boundary"] = boundary
         if isinstance(output_cls, list):
             n = len(output_cls)
             for out in output_cls:
                 loss += self.criterion_cls(out, label, x) / n
+                # if self.cnt == 1:
+                # output_dict['cls_out' + str(index)] = out
+                # output_dict['cls_label' + str(index)] = label
+                # index += 1
         else:
             loss += self.criterion_cls(output_cls, label, x)
 
         if isinstance(outputs_boundary, list):
             n = len(outputs_boundary)
             for out in outputs_boundary:
-                loss += self.lambda_bound_loss * self.criterion_boundary(out, boundary) / n
+                loss += self.lambda_bound_loss * self.criterion_boundary(
+                    out, boundary) / n
         else:
-            loss += self.lambda_bound_loss * self.criterion_boundary(outputs_boundary, boundary)
+            loss += self.lambda_bound_loss * self.criterion_boundary(
+                outputs_boundary, boundary)
+
+        # if self.cnt == 1:
+        #     paddle.save(output_dict, "/workspace/wenwujun/compare/paddle_modle_output.pdparams")
+        #     self.cnt += 1
         return loss
