@@ -17,6 +17,10 @@
 
 👀 **报名链接**: https://paddleqiyeban.wjx.cn/vj/QIValIZ.aspx?udsid=419689
 
+​																	  💖 **欢迎大家扫码入群讨论** 💖
+<div align="center">
+  <img src="https://user-images.githubusercontent.com/80816848/146363329-a5fb4cee-b540-4b82-9a63-f99ab0b99ed7.jpg" width=250/></div>
+
 ## 简介
 
 ![python version](https://img.shields.io/badge/python-3.7+-orange.svg) ![paddle version](https://img.shields.io/badge/PaddlePaddle-2.0-blue)
