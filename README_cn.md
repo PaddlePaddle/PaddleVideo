@@ -38,24 +38,24 @@ PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_githu
     <td colspan="5" style="font-weight:bold;">行为识别方法</td>
   </tr>
   <tr>
-    <td><a href="https://github.com/open-mmlab/mmaction2/blob/master/configs/recognition/c3d/README_zh-CN.md">PP-TSM</a> (PP series)</td>
-    <td><a href="https://github.com/open-mmlab/mmaction2/blob/master/configs/recognition/c3d/README_zh-CN.md">PP-TSN</a> (PP series)</td>
-    <td><a href="https://github.com/open-mmlab/mmaction2/blob/master/configs/recognition/c3d/README_zh-CN.md">PP-TimeSformer</a> (PP series)</td>
-    <td><a href="https://github.com/open-mmlab/mmaction2/blob/master/configs/recognition/c3d/README_zh-CN.md">TSN</a> (2D’)</td>
-    <td><a href="https://github.com/open-mmlab/mmaction2/blob/master/configs/recognition/c3d/README_zh-CN.md">TSM</a> (2D‘)</td>
+    <td><a href="./docs/zh-CN/model_zoo/recognition/pp-tsm.md">PP-TSM</a> (PP series)</td>
+    <td><a href="./docs/zh-CN/model_zoo/recognition/pp-tsn.md">PP-TSN</a> (PP series)</td>
+    <td><a href="./docs/zh-CN/model_zoo/recognition/pp-timesformer.md">PP-TimeSformer</a> (PP series)</td>
+    <td><a href="./docs/zh-CN/model_zoo/recognition/tsn.md">TSN</a> (2D’)</td>
+    <td><a href="./docs/zh-CN/model_zoo/recognition/tsm.md">TSM</a> (2D‘)</td>
   <tr>
-    <td><a href="https://github.com/open-mmlab/mmaction2/blob/master/configs/recognition/c3d/README_zh-CN.md">SlowFast</a> (3D’)</td>
-    <td><a href="https://github.com/open-mmlab/mmaction2/blob/master/configs/recognition/c3d/README_zh-CN.md">TimeSformer</a> (Transformer‘)</td>
-    <td><a href="https://github.com/open-mmlab/mmaction2/blob/master/configs/recognition/c3d/README_zh-CN.md">VideoSwin</a> (Transformer’)</td>
-    <td><a href="https://github.com/open-mmlab/mmaction2/blob/master/configs/recognition/c3d/README_zh-CN.md">AttentionLSTM</a> (RNN‘)</td>
+    <td><a href="./docs/zh-CN/model_zoo/recognition/slowfast.md">SlowFast</a> (3D’)</td>
+    <td><a href="./docs/zh-CN/model_zoo/recognition/timesformer.md">TimeSformer</a> (Transformer‘)</td>
+    <td><a href="./docs/zh-CN/model_zoo/recognition/videoswin.md">VideoSwin</a> (Transformer’)</td>
+    <td><a href="./docs/zh-CN/model_zoo/recognition/attention_lstm.md">AttentionLSTM</a> (RNN‘)</td>
     <td></td>
   </tr>
   <tr>
     <td colspan="5" style="font-weight:bold;">基于骨骼点的动作识别方法</td>
   </tr>
   <tr>
-    <td><a href="https://github.com/open-mmlab/mmaction2/blob/master/configs/recognition/c3d/README_zh-CN.md">ST-GCN</a> (Custom’)</td>
-    <td><a href="https://github.com/open-mmlab/mmaction2/blob/master/configs/recognition/c3d/README_zh-CN.md">AGCN</a> (Adaptive‘)</td>
+    <td><a href="./docs/zh-CN/model_zoo/recognition/stgcn.md">ST-GCN</a> (Custom’)</td>
+    <td><a href="./docs/zh-CN/model_zoo/recognition/agcn.md">AGCN</a> (Adaptive‘)</td>
     <td></td>
     <td></td>
     <td></td>
@@ -64,7 +64,7 @@ PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_githu
     <td colspan="5" style="font-weight:bold;">时序动作检测方法</td>
   </tr>
   <tr>
-    <td><a href="https://github.com/open-mmlab/mmaction2/blob/master/configs/recognition/c3d/README_zh-CN.md">BMN</a> (One-stage‘)</td>
+    <td><a href="./docs/zh-CN/model_zoo/localization/bmn.md">BMN</a> (One-stage‘)</td>
     <td></td>
     <td></td>
     <td></td>
@@ -74,7 +74,7 @@ PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_githu
     <td colspan="5" style="font-weight:bold;">时空动作检测方法</td>
   </tr>
   <tr>
-    <td><a href="https://github.com/open-mmlab/mmaction2/blob/master/configs/recognition/c3d/README_zh-CN.md">SlowFast+Fast R-CNN</a>
+    <td><a href="slowfast.md">SlowFast+Fast R-CNN</a>
     <td></td>
     <td></td>
     <td></td>
@@ -84,8 +84,8 @@ PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_githu
     <td colspan="5" style="font-weight:bold;">多模态</td>
   </tr>
   <tr>
-    <td><a href="https://github.com/open-mmlab/mmaction2/blob/master/configs/recognition/c3d/README_zh-CN.md">ActBERT</a> (Learning‘)</td>
-    <td><a href="https://github.com/open-mmlab/mmaction2/blob/master/configs/recognition/c3d/README_zh-CN.md">T2VLAD</a> (Retrieval‘)</td>
+    <td><a href="./docs/zh-CN/model_zoo/multimodal/actbert.md">ActBERT</a> (Learning‘)</td>
+    <td><a href="">T2VLAD</a> (Retrieval‘)</td>
     <td></td>
     <td></td>
     <td></td>
@@ -94,8 +94,8 @@ PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_githu
     <td colspan="5" style="font-weight:bold;">视频目标分割</td>
   </tr>
   <tr>
-    <td><a href="https://github.com/open-mmlab/mmaction2/blob/master/configs/recognition/c3d/README_zh-CN.md">CFBI</a> (Semi‘)</td>
-    <td><a href="https://github.com/open-mmlab/mmaction2/blob/master/configs/recognition/c3d/README_zh-CN.md">MA-Net</a> (Supervised‘)</td>
+    <td><a href="./docs/zh-CN/model_zoo/segmentation/cfbi.md">CFBI</a> (Semi‘)</td>
+    <td><a href="./applications/EIVideo/EIVideo/docs/zh-CN/manet.md">MA-Net</a> (Supervised‘)</td>
     <td></td>
     <td></td>
     <td></td>
@@ -104,7 +104,7 @@ PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_githu
     <td colspan="5" style="font-weight:bold;">单目深度估计</td>
   </tr>
   <tr>
-    <td><a href="https://github.com/open-mmlab/mmaction2/blob/master/configs/recognition/c3d/README_zh-CN.md">ADDS</a> (Unsupervised‘)</td>
+    <td><a href="./docs/zh-CN/model_zoo/estimation/adds.md">ADDS</a> (Unsupervised‘)</td>
     <td></td>
     <td></td>
     <td></td>
