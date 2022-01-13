@@ -37,9 +37,6 @@ def parse_args():
     parser.add_argument('--test',
                         action='store_true',
                         help='whether to test a model')
-    parser.add_argument('--valid',
-                        action='store_true',
-                        help='whether to evaluate a model')
     parser.add_argument('--train_dali',
                         action='store_true',
                         help='whether to use dali to speed up training')
