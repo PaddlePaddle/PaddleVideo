@@ -31,26 +31,93 @@ PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_githu
 
 ## 模型案例库
 
-### 方案
+### 模型
 
-| Applications | Descriptions |
-| :--------------- | :-------- |
-| [FootballAction]() | 足球动作检测方案 |
-| [BasketballAction](applications/BasketballAction) | 篮球动作检测方案 |
-| [TableTennis](applications/TableTennis) | 乒乓球动作识别方案|
-| [FigureSkating](applications/FigureSkating) | 花样滑冰动作识别方案|
-| [VideoTag](applications/VideoTag) | 3000类大规模视频分类方案 |
-| [MultimodalVideoTag](applications/MultimodalVideoTag) | 多模态视频分类方案|
-| [VideoQualityAssessment](applications/VideoQualityAssessment) | 视频质量评估方案|
-| [PP-Care](applications/PP-Care) | 3DMRI医疗图像识别方案 |
-| [EIVideo](applications/EIVideo) | 视频交互式分割工具|
-| [Anti-UAV](applications/Anti-UAV) |无人机检测方案 |
+<table style="margin-left:auto;margin-right:auto;font-size:1.3vw;padding:3px 5px;text-align:center;vertical-align:center;">
+  <tr>
+    <td colspan="5" style="font-weight:bold;">行为识别方法</td>
+  </tr>
+  <tr>
+    <td><a href="./docs/zh-CN/model_zoo/recognition/pp-tsm.md">PP-TSM</a> (PP series)</td>
+    <td><a href="./docs/zh-CN/model_zoo/recognition/pp-tsn.md">PP-TSN</a> (PP series)</td>
+    <td><a href="./docs/zh-CN/model_zoo/recognition/pp-timesformer.md">PP-TimeSformer</a> (PP series)</td>
+    <td><a href="./docs/zh-CN/model_zoo/recognition/tsn.md">TSN</a> (2D’)</td>
+    <td><a href="./docs/zh-CN/model_zoo/recognition/tsm.md">TSM</a> (2D‘)</td>
+  <tr>
+    <td><a href="./docs/zh-CN/model_zoo/recognition/slowfast.md">SlowFast</a> (3D’)</td>
+    <td><a href="./docs/zh-CN/model_zoo/recognition/timesformer.md">TimeSformer</a> (Transformer‘)</td>
+    <td><a href="./docs/zh-CN/model_zoo/recognition/videoswin.md">VideoSwin</a> (Transformer’)</td>
+    <td><a href="./docs/zh-CN/model_zoo/recognition/attention_lstm.md">AttentionLSTM</a> (RNN‘)</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td colspan="5" style="font-weight:bold;">基于骨骼点的动作识别方法</td>
+  </tr>
+  <tr>
+    <td><a href="./docs/zh-CN/model_zoo/recognition/stgcn.md">ST-GCN</a> (Custom’)</td>
+    <td><a href="./docs/zh-CN/model_zoo/recognition/agcn.md">AGCN</a> (Adaptive‘)</td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td colspan="5" style="font-weight:bold;">时序动作检测方法</td>
+  </tr>
+  <tr>
+    <td><a href="./docs/zh-CN/model_zoo/localization/bmn.md">BMN</a> (One-stage‘)</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td colspan="5" style="font-weight:bold;">时空动作检测方法</td>
+  </tr>
+  <tr>
+    <td><a href="slowfast.md">SlowFast+Fast R-CNN</a>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td colspan="5" style="font-weight:bold;">多模态</td>
+  </tr>
+  <tr>
+    <td><a href="./docs/zh-CN/model_zoo/multimodal/actbert.md">ActBERT</a> (Learning‘)</td>
+    <td><a href="">T2VLAD</a> (Retrieval‘)</td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td colspan="5" style="font-weight:bold;">视频目标分割</td>
+  </tr>
+  <tr>
+    <td><a href="./docs/zh-CN/model_zoo/segmentation/cfbi.md">CFBI</a> (Semi‘)</td>
+    <td><a href="./applications/EIVideo/EIVideo/docs/zh-CN/manet.md">MA-Net</a> (Supervised‘)</td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td colspan="5" style="font-weight:bold;">单目深度估计</td>
+  </tr>
+  <tr>
+    <td><a href="./docs/zh-CN/model_zoo/estimation/adds.md">ADDS</a> (Unsupervised‘)</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+</table>
 
+- 模型库使用前请参考[安装说明](docs/zh-CN/install.md)、[使用指南](docs/zh-CN/usage.md)。
 
 ### 应用案例
 
 | Applications | Descriptions |
-| :--------------- | :--------: | 
+| :--------------- | :-------- |
 | [FootballAction]() | 足球动作检测方案|
 | [BasketballAction](applications/BasketballAction) | 篮球动作检测方案 |
 | [TableTennis](applications/ableTennis) | 乒乓球动作识别方案|
@@ -62,32 +129,18 @@ PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_githu
 | [EIVideo](applications/EIVideo) | 视频交互式分割工具|
 | [Anti-UAV](applications/Anti-UAV) |无人机检测方案|
 
-
 ## 文档教程
-- 免费视频课程、PPT、AIStudio教程（提供免费在线GPU算力）
-    - [飞桨视频库全面解析](https://aistudio.baidu.com/aistudio/course/introduce/6742)
-    - [视频分类及动作识别介绍](https://github.com/PaddlePaddle/PaddleVideo/blob/main/docs/zh-CN/tutorials/summarize.md)
+- AI-Studio教程
+    - [【官方】Paddle2.1实现视频理解优化模型 -- PP-TSM](https://aistudio.baidu.com/aistudio/projectdetail/3399656?contributionType=1)
+    - [【官方】Paddle2.1实现视频理解优化模型 -- PP-TSN](https://aistudio.baidu.com/aistudio/projectdetail/2879980?contributionType=1)
     - [【官方】Paddle 2.1实现视频理解经典模型 - TSN](https://aistudio.baidu.com/aistudio/projectdetail/2250682)
     - [【官方】Paddle 2.1实现视频理解经典模型 - TSM](https://aistudio.baidu.com/aistudio/projectdetail/2310889)
     - [BMN视频动作定位](https://aistudio.baidu.com/aistudio/projectdetail/2250674)
     - [花样滑冰选手骨骼点动作识别ST-GCN教程](https://aistudio.baidu.com/aistudio/projectdetail/2417717)
-- 快速入门
-    - [安装说明](docs/zh-CN/install.md)
-    - [使用指南](docs/zh-CN/usage.md)
-- 代码组织
-    - [模型库设计思路详解](docs/zh-CN/tutorials/modular_design.md)
-    - [配置模块参数详解](docs/zh-CN/tutorials/config.md)
-- 进阶指南
-    - [PP-TSM实践](docs/zh-CN/tutorials/pp-tsm.md)
-    - [训练加速](docs/zh-CN/tutorials/accelerate.md)
-    - [预测部署](docs/zh-CN/tutorials/deployment.md)
-- 辅助工具
-    - [benchmark](docs/zh-CN/benchmark.md)
-    - [工具](docs/zh-CN/tools.md)
-- [技术交流群](#欢迎加入PaddleVideo技术交流群)
-- [赛事支持](#赛事支持)
-- [许可证书](#许可证书)
-- [贡献代码](#贡献代码)
+- 贡献代码
+    - [如何添加新算法](./docs/zh-CN/contribute/add_new_algorithm.md)
+    - [配置系统设计解析](./docs/en/tutorials/config.md)
+    - [如何提pr](./docs/zh-CN/contribute/how_to_contribute.md)
 
 
 ## 赛事支持
