@@ -1,4 +1,4 @@
-[English](README.md) | Chinese
+[简体中文](README_cn.md) | English
 
 # PaddleVideo
 
