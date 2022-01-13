@@ -1,10 +1,6 @@
 [English](README.md) | 中文
 
 # PaddleVideo
-## 最新动态
-- 🔥🔥🔥 2021年CCF大数据与计算智能大赛火热进行中，欢迎参加CCF和百度飞桨联合推出奖金10万元的赛题[基于飞桨实现花样滑冰选手骨骼点动作识别](https://www.datafountain.cn/competitions/519)！:tada:
-赛题baseline由PaddleVideo提供[ST-GCN](https://github.com/PaddlePaddle/PaddleVideo/blob/develop/docs/zh-CN/model_zoo/recognition/stgcn.md)，
-[教程链接](https://aistudio.baidu.com/aistudio/projectdetail/2417717)，[视频链接](https://www.bilibili.com/video/BV1w3411172G)
 
 ## 近期活动
 
@@ -35,50 +31,86 @@ PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_githu
 ### **⭐如果本项目对您有帮助，欢迎点击页面右上方star~ ⭐**
 
 
-## 特性
+### 模型
 
-- **更多的数据集和模型结构**
-    PaddleVideo 支持更多的数据集和模型结构，包括[Kinetics400](docs/zh-CN/dataset/k400.md)，UCF101，YoutTube8M，NTU-RGB+D等数据集，模型结构涵盖了视频分类模型TSN，TSM，SlowFast，TimeSformer，AttentionLSTM，ST-GCN和视频定位模型BMN等。
-
-- **更高指标的模型算法**
-    PaddleVideo 提供更高精度的模型结构解决方案，在基于TSM标准版改进的[PP-TSM](docs/zh-CN/model_zoo/recognition/pp-tsm.md)上，在Kinectics400数据集上达到2D网络SOTA效果，Top1 Acc 76.16% 相较标准版TSM模型精度提升5%以上，参数量持平，且取得更快的模型速度。
-
-- **更快的训练速度**
-    PaddleVideo 提供更快速度的训练阶段解决方案，包括混合精度训练，分布式训练，针对Slowfast模型的Multigrid训练策略，OP融合策略以及更快的数据预处理模块等。
-
-- **全流程可部署**
-    PaddleVideo 提供全流程的预测部署方案，支持PaddlePaddle2.0动转静功能，方便产出可快速部署的模型，完成部署阶段最后一公里。
-
-- **丰富的应用案例**
-    PaddleVideo 提供了基于行为识别和动作检测技术的多个实用案例，包括FootballAction和VideoTag。
-
-
-### 模型性能概览
-
-
-| 领域               |                             模型                             |                       数据集                       | 精度指标 |   精度%   |
-| :----------------- | :----------------------------------------------------------: | :------------------------------------------------: | :------: | :-------: |
-| 行为识别|   [**PP-TSM**](./docs/zh-CN/model_zoo/recognition/pp-tsm.md)  |    [Kinetics-400](./docs/zh-CN/dataset/k400.md)    |  Top-1   | **76.16** |
-| 行为识别 |  [**PP-TSN**](./docs/zh-CN/model_zoo/recognition/pp-tsn.md)  |    [Kinetics-400](./docs/zh-CN/dataset/k400.md)    |  Top-1   | **75.06** |
-| 行为识别 | [**PP-TimeSformer**](./docs/zh-CN/model_zoo/recognition/pp-timesformer.md) |    [Kinetics-400](./docs/zh-CN/dataset/k400.md)    |  Top-1   |   79.49   |
-| 行为识别 | [AGCN](./docs/zh-CN/model_zoo/recognition/agcn.md) | [FSD](./docs/zh-CN/dataset/fsd.md) | Top-1 | 62.29 |
-| 行为识别 | [ST-GCN](./docs/zh-CN/model_zoo/recognition/stgcn.md) | [FSD](./docs/zh-CN/dataset/fsd.md) | Top-1 | 59.07 |
-| 行为识别 | [VideoSwin](./docs/zh-CN/model_zoo/recognition/videoswin.md) |    [Kinetics-400](./docs/zh-CN/dataset/k400.md)    |  Top-1   |   82.40   |
-| 行为识别 | [TimeSformer](./docs/zh-CN/model_zoo/recognition/timesformer.md) |    [Kinetics-400](./docs/zh-CN/dataset/k400.md)    |  Top-1   |   77.29   |
-| 行为识别 |  [SlowFast](./docs/zh-CN/model_zoo/recognition/slowfast.md)  |    [Kinetics-400](./docs/zh-CN/dataset/k400.md)    |  Top-1   |   75.84   |
-| 行为识别 |       [TSM](./docs/zh-CN/model_zoo/recognition/tsm.md)       |    [Kinetics-400](./docs/zh-CN/dataset/k400.md)    |  Top-1   |   71.06   |
-| 行为识别 |       [TSN](./docs/zh-CN/model_zoo/recognition/tsn.md)       |    [Kinetics-400](./docs/zh-CN/dataset/k400.md)    |  Top-1   |   69.81   |
-| 行为识别 | [AttentionLSTM](./docs/zh-CN/model_zoo/recognition/attention_lstm.md) |  [Youtube-8M](./docs/zh-CN/dataset/youtube8m.md)   |  Hit@1   |   89.05    |
-| 视频动作定位   |      [BMN](./docs/zh-CN/model_zoo/localization/bmn.md)       | [ActivityNet](./docs/zh-CN/dataset/ActivityNet.md) |   AUC    |   67.23   |
-| 单目深度估计   |      [ADDS](./docs/zh-CN/model_zoo/estimation/adds.md)       | [Oxford_RobotCar](./docs/zh-CN/dataset/Oxford_RobotCar.md) |   Abs Rel    |   0.209   |
-
-<a name="欢迎加入PaddleVideo技术交流群"></a>
-## 欢迎加入PaddleVideo技术交流群
-- 微信扫描二维码添加运营同学，回复 **“视频”**，即可邀请您加入官方交流群，获得更高效的问题答疑，与各行各业开发者充分交流，期待您的加入。
-
-<div align="center">
-<img src="./docs/images/joinus.PNG"  width = "200" height = "200" />
-</div>
+<table style="margin-left:auto;margin-right:auto;font-size:1.3vw;padding:3px 5px;text-align:center;vertical-align:center;">
+  <tr>
+    <td colspan="5" style="font-weight:bold;">行为识别方法</td>
+  </tr>
+  <tr>
+    <td><a href="https://github.com/open-mmlab/mmaction2/blob/master/configs/recognition/c3d/README_zh-CN.md">PP-TSM</a> (PP series)</td>
+    <td><a href="https://github.com/open-mmlab/mmaction2/blob/master/configs/recognition/c3d/README_zh-CN.md">PP-TSN</a> (PP series)</td>
+    <td><a href="https://github.com/open-mmlab/mmaction2/blob/master/configs/recognition/c3d/README_zh-CN.md">PP-TimeSformer</a> (PP series)</td>
+    <td><a href="https://github.com/open-mmlab/mmaction2/blob/master/configs/recognition/c3d/README_zh-CN.md">TSN</a> (2D’)</td>
+    <td><a href="https://github.com/open-mmlab/mmaction2/blob/master/configs/recognition/c3d/README_zh-CN.md">TSM</a> (2D‘)</td>
+  <tr>
+    <td><a href="https://github.com/open-mmlab/mmaction2/blob/master/configs/recognition/c3d/README_zh-CN.md">SlowFast</a> (3D’)</td>
+    <td><a href="https://github.com/open-mmlab/mmaction2/blob/master/configs/recognition/c3d/README_zh-CN.md">TimeSformer</a> (Transformer‘)</td>
+    <td><a href="https://github.com/open-mmlab/mmaction2/blob/master/configs/recognition/c3d/README_zh-CN.md">VideoSwin</a> (Transformer’)</td>
+    <td><a href="https://github.com/open-mmlab/mmaction2/blob/master/configs/recognition/c3d/README_zh-CN.md">AttentionLSTM</a> (RNN‘)</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td colspan="5" style="font-weight:bold;">基于骨骼点的动作识别方法</td>
+  </tr>
+  <tr>
+    <td><a href="https://github.com/open-mmlab/mmaction2/blob/master/configs/recognition/c3d/README_zh-CN.md">ST-GCN</a> (Custom’)</td>
+    <td><a href="https://github.com/open-mmlab/mmaction2/blob/master/configs/recognition/c3d/README_zh-CN.md">AGCN</a> (Adaptive‘)</td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td colspan="5" style="font-weight:bold;">时序动作检测方法</td>
+  </tr>
+  <tr>
+    <td><a href="https://github.com/open-mmlab/mmaction2/blob/master/configs/recognition/c3d/README_zh-CN.md">BMN</a> (One-stage‘)</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td colspan="5" style="font-weight:bold;">时空动作检测方法</td>
+  </tr>
+  <tr>
+    <td><a href="https://github.com/open-mmlab/mmaction2/blob/master/configs/recognition/c3d/README_zh-CN.md">SlowFast+Fast R-CNN</a>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td colspan="5" style="font-weight:bold;">多模态</td>
+  </tr>
+  <tr>
+    <td><a href="https://github.com/open-mmlab/mmaction2/blob/master/configs/recognition/c3d/README_zh-CN.md">ActBERT</a> (Learning‘)</td>
+    <td><a href="https://github.com/open-mmlab/mmaction2/blob/master/configs/recognition/c3d/README_zh-CN.md">T2VLAD</a> (Retrieval‘)</td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td colspan="5" style="font-weight:bold;">视频目标分割</td>
+  </tr>
+  <tr>
+    <td><a href="https://github.com/open-mmlab/mmaction2/blob/master/configs/recognition/c3d/README_zh-CN.md">CFBI</a> (Semi‘)</td>
+    <td><a href="https://github.com/open-mmlab/mmaction2/blob/master/configs/recognition/c3d/README_zh-CN.md">MA-Net</a> (Supervised‘)</td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td colspan="5" style="font-weight:bold;">单目深度估计</td>
+  </tr>
+  <tr>
+    <td><a href="https://github.com/open-mmlab/mmaction2/blob/master/configs/recognition/c3d/README_zh-CN.md">ADDS</a> (Unsupervised‘)</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+</table>
 
 ## 特色应用方案效果
 - [特色应用01: 大规模视频3k类标签方案VideoTag](https://github.com/PaddlePaddle/PaddleVideo/tree/application/VideoTag)
