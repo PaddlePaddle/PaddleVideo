@@ -112,7 +112,7 @@ PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_githu
   </tr>
 </table>
 
-- 模型库使用前请参考安装说明](docs/zh-CN/install.md)、[使用指南](docs/zh-CN/usage.md)。
+- 模型库使用前请参考[安装说明](docs/zh-CN/install.md)、[使用指南](docs/zh-CN/usage.md)。
 
 ### 应用案例
 
