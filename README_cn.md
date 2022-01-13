@@ -19,7 +19,7 @@
 
 ​																	  💖 **欢迎大家扫码入群讨论** 💖
 <div align="center">
-  <img src="https://user-images.githubusercontent.com/80816848/146363329-a5fb4cee-b540-4b82-9a63-f99ab0b99ed7.jpg" width=250/></div>
+  <img src="docs/images/user_group.png" width=250/></div>
 
 ## 简介
 
