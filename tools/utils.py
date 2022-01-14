@@ -35,6 +35,7 @@ from paddlevideo.loader.pipelines import (
     PackOutput, Sampler, Scale, SkeletonNorm, TenCrop, ToArray, UniformCrop,
     VideoDecoder, SegmentationSampler)
 from paddlevideo.metrics.bmn_metric import boundary_choose, soft_nms
+from paddlevideo.modeling.framework.segmenters.utils import ASRFPostProcessing
 from paddlevideo.utils import Registry, build
 
 INFERENCE = Registry('inference')
@@ -555,6 +556,65 @@ class MSTCN_Inference_helper(Base_Inference_helper):
             print("file write in : ./inference/" + self.filename +
                   "_inference_result.txt")
             print("Write result success!")
+
+
+@INFERENCE.register()
+class ASRF_Inference_helper(Base_Inference_helper):
+
+    def __init__(self, num_channels, actions_map_file_path,
+                 postprocessing_method, boundary_threshold):
+        self.num_channels = num_channels
+        file_ptr = open(actions_map_file_path, 'r')
+        actions = file_ptr.read().split('\n')[:-1]
+        file_ptr.close()
+        self.actions_dict = dict()
+        for a in actions:
+            self.actions_dict[a.split()[1]] = int(a.split()[0])
+
+        self.postprocessing_method = postprocessing_method
+        self.boundary_threshold = boundary_threshold
+
+    def preprocess(self, input_file):
+        """
+        input_file: str, file path
+        return: list
+        """
+        assert os.path.isfile(input_file) is not None, "{0} not exists".format(
+            input_file)
+        self.filename = input_file.split('/')[-1].split('.')[0]
+        data = np.load(input_file)
+        results = {'video_feat': data, 'video_gt': None}
+        ops = []
+        for op in ops:
+            results = op(results)
+
+        res = np.expand_dims(results['video_feat'], axis=0).copy()
+        return [res]
+
+    def postprocess(self, output, print_output=True):
+        outputs_cls_np = output[0]
+        outputs_boundary_np = output[1]
+
+        output_np = ASRFPostProcessing(
+            outputs_cls_np,
+            outputs_boundary_np,
+            self.postprocessing_method,
+            boundary_threshold=self.boundary_threshold).numpy()[0, :]
+
+        recognition = []
+        for i in range(output_np.shape[0]):
+            recognition = np.concatenate((recognition, [
+                list(self.actions_dict.keys())[list(
+                    self.actions_dict.values()).index(output_np[i])]
+            ]))
+        recog_content = list(recognition)
+        recog_content = [line + "\n" for line in recog_content]
+        f = open("./inference/" + self.filename + "_inference_result.txt", "w")
+        f.writelines(recog_content)
+        f.close
+        print("file write in : ./inference/" + self.filename +
+              "_inference_result.txt")
+        print("Write result success!")
 
 
 @INFERENCE.register()

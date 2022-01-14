@@ -27,15 +27,13 @@ from paddle import ParamAttr
 from ..registry import BACKBONES
 from ..weight_init import weight_init_
 from .ms_tcn import DilatedResidualLayer
+from ..framework.segmenters.utils import init_bias, KaimingUniform_like_torch
+
 
 @BACKBONES.register()
 class ASRF(nn.Layer):
 
-    def __init__(self,
-                 in_channel,
-                 num_features,
-                 num_classes,
-                 num_stages,
+    def __init__(self, in_channel, num_features, num_classes, num_stages,
                  num_layers):
         super().__init__()
         self.in_channel = in_channel
@@ -45,7 +43,7 @@ class ASRF(nn.Layer):
         self.num_layers = num_layers
 
         self.init_weights()
-    
+
     def init_weights(self):
         """
         initialize model layers' weight
@@ -54,7 +52,7 @@ class ASRF(nn.Layer):
         self.conv_in = nn.Conv1D(self.in_channel, self.num_features, 1)
 
         shared_layers = [
-            DilatedResidualLayer(2 ** i, self.num_features, self.num_features)
+            DilatedResidualLayer(2**i, self.num_features, self.num_features)
             for i in range(self.num_layers)
         ]
         self.shared_layers = nn.LayerList(shared_layers)
@@ -62,8 +60,11 @@ class ASRF(nn.Layer):
         # init weight
         for layer in self.sublayers():
             if isinstance(layer, nn.Conv1D):
-                weight_init_(layer, 'XavierNormal')
-                # weight_init_(layer, 'Normal', mean=0.0, std=0.02)
+                layer.weight.set_value(
+                    KaimingUniform_like_torch(layer.weight).astype('float32'))
+                if layer.bias is not None:
+                    layer.bias.set_value(
+                        init_bias(layer.weight, layer.bias).astype('float32'))
 
     def forward(self, x):
         """ ASRF forward

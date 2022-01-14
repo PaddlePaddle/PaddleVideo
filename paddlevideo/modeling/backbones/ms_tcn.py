@@ -88,7 +88,7 @@ class SingleStageModel(nn.Layer):
 
     def __init__(self, num_layers, num_f_maps, dim, num_classes):
         super(SingleStageModel, self).__init__()
-        self.conv_1x1 = nn.Conv1D(dim, num_f_maps, 1)
+        self.conv_in = nn.Conv1D(dim, num_f_maps, 1)
         self.layers = nn.LayerList([
             copy.deepcopy(DilatedResidualLayer(2**i, num_f_maps, num_f_maps))
             for i in range(num_layers)
@@ -96,7 +96,7 @@ class SingleStageModel(nn.Layer):
         self.conv_out = nn.Conv1D(num_f_maps, num_classes, 1)
 
     def forward(self, x):
-        out = self.conv_1x1(x)
+        out = self.conv_in(x)
         for layer in self.layers:
             out = layer(out)
         out = self.conv_out(out)
@@ -112,12 +112,12 @@ class DilatedResidualLayer(nn.Layer):
                                       3,
                                       padding=dilation,
                                       dilation=dilation)
-        self.conv_1x1 = nn.Conv1D(out_channels, out_channels, 1)
+        self.conv_in = nn.Conv1D(out_channels, out_channels, 1)
         self.dropout = nn.Dropout()
 
     def forward(self, x):
         out = F.relu(self.conv_dilated(x))
-        out = self.conv_1x1(out)
+        out = self.conv_in(out)
         out = self.dropout(out)
         return (x + out)
 

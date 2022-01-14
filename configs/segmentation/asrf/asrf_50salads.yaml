@@ -18,15 +18,19 @@ MODEL: #MODEL field
     loss:
         name: "ASRFLoss"
         lambda_bound_loss: 0.1
+        num_classes: 19
         ce: True
         asl_focal: False
-        tmse: false
+        tmse: False
         gstmse: True
         asl_weight: True
         ce_weight: 1.0
         focal_weight: 1.0
         tmse_weight: 0.15
         gstmse_weight: 1.0
+        file_path: "./data/50salads/splits/train.split5.bundle" #Mandatory, train data index file path
+        label_path: "./data/50salads/gt_arr"
+        boundary_path: "./data/50salads/gt_boundary_arr"
     postprocessing_method: "refinement_with_boundary"
     boundary_threshold: 0.5
 
@@ -86,17 +90,17 @@ METRIC:
     name: 'SegmentationMetric'
     overlap: [.1, .25, .5]
     actions_map_file_path: "./data/50salads/mapping.txt"
-    tolerance: 5
-    boundary_threshold: 0.7
 
 
 INFERENCE:
-    name: 'MSTCN_Inference_helper'
+    name: 'ASRF_Inference_helper'
     num_channels: 2048
     actions_map_file_path: "./data/50salads/mapping.txt"
+    postprocessing_method: "refinement_with_boundary"
+    boundary_threshold: 0.5
 
 
-model_name: "MSTCN"
-log_interval: 40 #Optional, the interal of logger, default:10
+model_name: "ASRF"
+log_interval: 10 #Optional, the interal of logger, default:10
 epochs: 50 #Mandatory, total epoch
 save_interval: 40

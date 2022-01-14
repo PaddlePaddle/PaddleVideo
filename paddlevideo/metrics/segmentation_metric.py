@@ -19,6 +19,7 @@ from paddlevideo.utils import get_logger
 
 logger = get_logger("paddlevideo")
 
+
 def argrelmax(prob, threshold=0.7):
     """
     Calculate arguments of relative maxima.
@@ -46,6 +47,7 @@ def argrelmax(prob, threshold=0.7):
     peak_idx = np.where(peak)[0].tolist()
 
     return peak_idx
+
 
 def get_labels_start_end_time(frame_wise_labels, bg_class=["background"]):
     labels = []
@@ -155,24 +157,13 @@ class SegmentationMetric(BaseMetric):
         self.overlap = overlap
         self.overlap_len = len(overlap)
 
-        self.total_tp = np.zeros(self.overlap_len)
-        self.total_fp = np.zeros(self.overlap_len)
-        self.total_fn = np.zeros(self.overlap_len)
+        self.cls_tp = np.zeros(self.overlap_len)
+        self.cls_fp = np.zeros(self.overlap_len)
+        self.cls_fn = np.zeros(self.overlap_len)
         self.total_correct = 0
         self.total_edit = 0
         self.total_frame = 0
         self.total_video = 0
-
-        # boundary score
-        # max distance of the frame which can be regarded as correct
-        self.tolerance = tolerance
-        # threshold of the boundary value which can be regarded as action boundary
-        self.boundary_threshold = boundary_threshold
-        self.tp = 0.0  # true positive
-        self.fp = 0.0  # false positive
-        self.fn = 0.0  # false negative
-        self.n_correct = 0.0
-        self.n_frames = 0.0
 
     def update(self, batch_id, data, outputs):
         """update metrics during each iter
@@ -198,10 +189,6 @@ class SegmentationMetric(BaseMetric):
             ]))
         gt_content = list(gt_content)
 
-        # cls metric
-        tp, fp, fn = np.zeros(self.overlap_len), np.zeros(
-            self.overlap_len), np.zeros(self.overlap_len)
-
         correct = 0
         total = 0
         edit = 0
@@ -222,51 +209,14 @@ class SegmentationMetric(BaseMetric):
 
         for s in range(self.overlap_len):
             tp1, fp1, fn1 = f_score(recog_content, gt_content, self.overlap[s])
-            tp[s] += tp1
-            fp[s] += fp1
-            fn[s] += fn1
 
             # accumulate
-            self.total_tp[s] += tp1
-            self.total_fp[s] += fp1
-            self.total_fn[s] += fn1
+            self.cls_tp[s] += tp1
+            self.cls_fp[s] += fp1
+            self.cls_fn[s] += fn1
 
         # accumulate
         self.total_video += 1
-
-        # boundary metric
-        # ignore invalid frames
-
-        pred_idx = argrelmax(outputs_np, threshold=self.boundary_threshold)
-        gt_idx = argrelmax(gt_np, threshold=self.boundary_threshold)
-
-        n_frames = outputs_np.shape[0]
-        tp = 0.0
-        fp = 0.0
-        fn = 0.0
-
-        hits = np.zeros(len(gt_idx))
-
-        # calculate true positive, false negative, false postive, true negative
-        for i in range(len(pred_idx)):
-            dist = np.abs(np.array(gt_idx) - pred_idx[i])
-            min_dist = np.min(dist)
-            idx = np.argmin(dist)
-
-            if min_dist <= self.tolerance and hits[idx] == 0:
-                tp += 1
-                hits[idx] = 1
-            else:
-                fp += 1
-
-        fn = len(gt_idx) - sum(hits)
-        tn = n_frames - tp - fp - fn
-
-        self.tp += tp
-        self.fp += fp
-        self.fn += fn
-        self.n_frames += n_frames
-        self.n_correct += tp + tn
 
     def accumulate(self):
         """accumulate metrics when finished all iters.
@@ -276,66 +226,40 @@ class SegmentationMetric(BaseMetric):
         Edit = (1.0 * self.total_edit) / self.total_video
         Fscore = dict()
         for s in range(self.overlap_len):
-            precision = self.total_tp[s] / float(self.total_tp[s] +
-                                                 self.total_fp[s])
-            recall = self.total_tp[s] / float(self.total_tp[s] +
-                                              self.total_fn[s])
+            precision = self.cls_tp[s] / float(self.cls_tp[s] + self.cls_fp[s])
+            recall = self.cls_tp[s] / float(self.cls_tp[s] + self.cls_fn[s])
 
             f1 = 2.0 * (precision * recall) / (precision + recall)
 
             f1 = np.nan_to_num(f1) * 100
             Fscore[self.overlap[s]] = f1
 
-        # boundary meric
-        # accuracy
-        boundary_Acc = 100 * self.n_correct / self.n_frames
-
-        # Boudnary F1 Score
-        b_precision = self.tp / float(self.tp + self.fp)
-        b_recall = self.tp / float(self.tp + self.fn)
-
-        f1s = 2.0 * (b_precision * b_recall) / (b_precision + b_recall + 1e-7)
-        f1s = np.nan_to_num(f1s) * 100
-
         # log metric
         log_mertic_info = "dataset model performence: "
         # preds ensemble
-        log_mertic_info += "Cls_Acc: {:.4f}, ".format(Acc)
+        log_mertic_info += "Acc: {:.4f}, ".format(Acc)
         log_mertic_info += 'Edit: {:.4f}, '.format(Edit)
         for s in range(len(self.overlap)):
-            log_mertic_info += 'F1@{:0.2f}: {:.4f}, '.format(self.overlap[s],
-                                                    Fscore[self.overlap[s]])
-        log_mertic_info += "Boundary_Acc: {:.4f}, ".format(boundary_Acc)
-        log_mertic_info += "Boundary_precision: {:.4f}, ".format(b_precision * 100)
-        log_mertic_info += "Boundary_recall: {:.4f}, ".format(b_recall * 100)
-        log_mertic_info += "Boundary_F1score: {:.4f}.".format(f1s)
+            log_mertic_info += 'F1@{:0.2f}: {:.4f}, '.format(
+                self.overlap[s], Fscore[self.overlap[s]])
         logger.info(log_mertic_info)
 
         # log metric
         metric_dict = dict()
-        metric_dict['Cls_Acc'] = Acc
+        metric_dict['Acc'] = Acc
         metric_dict['Edit'] = Edit
         for s in range(len(self.overlap)):
-            metric_dict['F1@{:0.2f}'.format(self.overlap[s])] = Fscore[self.overlap[s]]
-        metric_dict['Boundary_Acc'] = boundary_Acc
-        metric_dict['Boundary_precision'] = b_precision * 100
-        metric_dict['Boundary_recall'] = b_recall * 100
-        metric_dict['Boundary_F1score'] = f1s
+            metric_dict['F1@{:0.2f}'.format(
+                self.overlap[s])] = Fscore[self.overlap[s]]
 
         # clear for next epoch
         # cls
-        self.total_tp = np.zeros(self.overlap_len)
-        self.total_fp = np.zeros(self.overlap_len)
-        self.total_fn = np.zeros(self.overlap_len)
+        self.cls_tp = np.zeros(self.overlap_len)
+        self.cls_fp = np.zeros(self.overlap_len)
+        self.cls_fn = np.zeros(self.overlap_len)
         self.total_correct = 0
         self.total_edit = 0
         self.total_frame = 0
         self.total_video = 0
-        # boundary
-        self.tp = 0.0  # true positive
-        self.fp = 0.0  # false positive
-        self.fn = 0.0  # false negative
-        self.n_correct = 0.0
-        self.n_frames = 0.0
-        
+
         return metric_dict
