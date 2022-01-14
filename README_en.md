@@ -63,7 +63,7 @@ PaddleVideo is a video model development kit produced by [PaddlePaddle Official]
     <td colspan="5" style="font-weight:bold;">Spatio-temporal motion detection method</td>
   </tr>
   <tr>
-    <td><a href="slowfast.md">SlowFast+Fast R-CNN</a>
+    <td><a href="docs/en/model_zoo/detection/SlowFast_FasterRCNN_en.md">SlowFast+Fast R-CNN</a>
     <td></td>
     <td></td>
     <td></td>
