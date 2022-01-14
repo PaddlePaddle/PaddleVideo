@@ -161,7 +161,7 @@ PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_githu
   </tr>
   <tr>
     <td><a href="docs/zh-CN/dataset/ntu-rgbd.md">PoseC3D-NTURGB+D</a> (<a href="https://kennymckormick.github.io/posec3d/" rel="nofollow">Homepage</a>) (ArXiv'2021)</td>
-    <td><a href="docs/zh-CN/dataset/fsd.md">FSD</a> (<a href="https://aistudio.baidu.com/aistudio/competition/detail/115/0/introduction" rel="nofollow">Homepage</a>) (ArXiv'2021)</td>
+    <td><a href="docs/zh-CN/dataset/fsd.md">FSD</a> (<a href="https://aistudio.baidu.com/aistudio/competition/detail/115/0/introduction" rel="nofollow">Homepage</a>)</td>
   </tr>
   <tr>
     <td colspan="4">单目深度估计</td>

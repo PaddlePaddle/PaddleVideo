@@ -151,7 +151,7 @@ PaddleVideo is a video model development kit produced by [PaddlePaddle Official]
   </tr>
   <tr>
     <td><a href="docs/en/dataset/ntu-rgbd.md">PoseC3D-NTURGB+D</a> (<a href="https://kennymckormick.github.io/posec3d/" rel="nofollow">Homepage</a>) (ArXiv'2021)</td>
-    <td><a href="docs/en/dataset/fsd.md">FSD</a> (<a href="https://aistudio.baidu.com/aistudio/competition/detail/115/0/introduction" rel="nofollow">Homepage</a>) (ArXiv'2021)</td>
+    <td><a href="docs/en/dataset/fsd.md">FSD</a> (<a href="https://aistudio.baidu.com/aistudio/competition/detail/115/0/introduction" rel="nofollow">Homepage</a>)</td>
   </tr>
   <tr>
     <td colspan="4">Depth Estimation</td>
