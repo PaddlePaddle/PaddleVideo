@@ -53,7 +53,7 @@ def _trim(cfg, args):
     """
     model_name = cfg.model_name
     cfg = cfg.MODEL
-    cfg.backbone.pretrained = ""
+    # cfg.backbone.pretrained = ""
 
     if 'num_seg' in cfg.backbone:
         cfg.backbone.num_seg = args.num_seg
@@ -69,11 +69,13 @@ def main():
     img_size = args.img_size
     num_seg = args.num_seg
     #NOTE: only support tsm now, will refine soon
-    params_info = paddle.summary(model, (1, 1, num_seg, 3, img_size, img_size))
+    # params_info = paddle.summary(model, (1, 1, num_seg, 3, img_size, img_size))
+    params_info = paddle.summary(model, (1, 1, 2048, 1000))
     print(params_info)
 
     if args.FLOPs:
-        flops_info = paddleslim.analysis.flops(model, [1, 1, num_seg, 3, img_size, img_size])
+        # flops_info = paddleslim.analysis.flops(model, [1, 1, num_seg, 3, img_size, img_size])
+        flops_info = paddleslim.analysis.flops(model, [1, 1, 2048, 1000])
         print(flops_info)
 
 

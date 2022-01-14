@@ -518,7 +518,7 @@ class STGCN_Inference_helper(Base_Inference_helper):
 @INFERENCE.register()
 class MSTCN_Inference_helper(Base_Inference_helper):
 
-    def __init__(self, num_channels, actions_map_file_path):
+    def __init__(self, num_channels, actions_map_file_path, feature_path=None):
         self.num_channels = num_channels
         file_ptr = open(actions_map_file_path, 'r')
         actions = file_ptr.read().split('\n')[:-1]
@@ -527,25 +527,45 @@ class MSTCN_Inference_helper(Base_Inference_helper):
         for a in actions:
             self.actions_dict[a.split()[1]] = int(a.split()[0])
 
-    def preprocess(self, input_file):
+        self.feature_path = feature_path
+        self.file_name_list = []
+
+    def preprocess(self, input_file_txt):
         """
-        input_file: str, file path
+        input_file: str, feature file list txt path
         return: list
         """
-        assert os.path.isfile(input_file) is not None, "{0} not exists".format(
-            input_file)
-        self.filename = input_file.split('/')[-1].split('.')[0]
-        data = np.load(input_file)
-        results = {'video_feat': data, 'video_gt': None}
-        ops = []
-        for op in ops:
-            results = op(results)
+        with open(input_file_txt, 'r') as file_ptr:
+            info = file_ptr.read().split('\n')[:-1]
 
-        res = np.expand_dims(results['video_feat'], axis=0).copy()
-        return [res]
+        output_list = []
+        for video_name in info:
+            if self.feature_path is not None:
+                file_name = video_name.split('.')[0] + ".npy"
+                input_file = os.path.join(self.feature_path, file_name)
+            else:
+                input_file = video_name
+
+            assert os.path.isfile(
+                input_file) is not None, "{0} not exists".format(input_file)
+
+            self.file_name_list.append(input_file.split('/')[-1].split('.')[0])
+
+            data = np.load(input_file)
+            results = {'video_feat': data, 'video_gt': None}
+            ops = []
+            for op in ops:
+                results = op(results)
+
+            res = np.expand_dims(results['video_feat'], axis=0).copy()
+            output_list.append(res)
+        return output_list
 
     def postprocess(self, output, print_output=True):
-        for outputs in output:
+        reslut_path = os.path.join("./inference/infer_results/")
+        if not os.path.isdir(reslut_path):
+            os.makedirs(reslut_path)
+        for outputs, filename in zip(output, self.file_name_list):
             output_np = outputs[0]
             recognition = []
             for i in range(output_np.shape[0]):
@@ -555,20 +575,24 @@ class MSTCN_Inference_helper(Base_Inference_helper):
                 ]))
             recog_content = list(recognition)
             recog_content = [line + "\n" for line in recog_content]
-            f = open("./inference/" + self.filename + "_inference_result.txt",
-                     "w")
+
+            write_path = os.path.join(reslut_path,
+                                      filename + "_inference_result.txt")
+            f = open(write_path, "w")
             f.writelines(recog_content)
-            f.close
-            print("file write in : ./inference/" + self.filename +
-                  "_inference_result.txt")
-            print("Write result success!")
+            f.close()
+        print("file write in : " + reslut_path + " Write result success!")
 
 
 @INFERENCE.register()
 class ASRF_Inference_helper(Base_Inference_helper):
 
-    def __init__(self, num_channels, actions_map_file_path,
-                 postprocessing_method, boundary_threshold):
+    def __init__(self,
+                 num_channels,
+                 actions_map_file_path,
+                 postprocessing_method,
+                 boundary_threshold,
+                 feature_path=None):
         self.num_channels = num_channels
         file_ptr = open(actions_map_file_path, 'r')
         actions = file_ptr.read().split('\n')[:-1]
@@ -579,48 +603,69 @@ class ASRF_Inference_helper(Base_Inference_helper):
 
         self.postprocessing_method = postprocessing_method
         self.boundary_threshold = boundary_threshold
+        self.feature_path = feature_path
+        self.file_name_list = []
 
-    def preprocess(self, input_file):
+    def preprocess(self, input_file_txt):
         """
-        input_file: str, file path
+        input_file: str, feature file list txt path
         return: list
         """
-        assert os.path.isfile(input_file) is not None, "{0} not exists".format(
-            input_file)
-        self.filename = input_file.split('/')[-1].split('.')[0]
-        data = np.load(input_file)
-        results = {'video_feat': data, 'video_gt': None}
-        ops = []
-        for op in ops:
-            results = op(results)
+        with open(input_file_txt, 'r') as file_ptr:
+            info = file_ptr.read().split('\n')[:-1]
 
-        res = np.expand_dims(results['video_feat'], axis=0).copy()
-        return [res]
+        output_list = []
+        for video_name in info:
+            if self.feature_path is not None:
+                file_name = video_name.split('.')[0] + ".npy"
+                input_file = os.path.join(self.feature_path, file_name)
+            else:
+                input_file = video_name
+
+            assert os.path.isfile(
+                input_file) is not None, "{0} not exists".format(input_file)
+
+            self.file_name_list.append(input_file.split('/')[-1].split('.')[0])
+
+            data = np.load(input_file)
+            results = {'video_feat': data, 'video_gt': None}
+            ops = []
+            for op in ops:
+                results = op(results)
+
+            res = np.expand_dims(results['video_feat'], axis=0).copy()
+            output_list.append(res)
+        return output_list
 
     def postprocess(self, output, print_output=True):
-        outputs_cls_np = output[0]
-        outputs_boundary_np = output[1]
+        reslut_path = os.path.join("./inference/infer_results/")
+        if not os.path.isdir(reslut_path):
+            os.makedirs(reslut_path)
+        for outputs, filename in zip(output, self.file_name_list):
+            outputs_cls_np = outputs[0]
+            outputs_boundary_np = outputs[1]
 
-        output_np = ASRFPostProcessing(
-            outputs_cls_np,
-            outputs_boundary_np,
-            self.postprocessing_method,
-            boundary_threshold=self.boundary_threshold).numpy()[0, :]
+            output_np = ASRFPostProcessing(
+                outputs_cls_np,
+                outputs_boundary_np,
+                self.postprocessing_method,
+                boundary_threshold=self.boundary_threshold).numpy()[0, :]
 
-        recognition = []
-        for i in range(output_np.shape[0]):
-            recognition = np.concatenate((recognition, [
-                list(self.actions_dict.keys())[list(
-                    self.actions_dict.values()).index(output_np[i])]
-            ]))
-        recog_content = list(recognition)
-        recog_content = [line + "\n" for line in recog_content]
-        f = open("./inference/" + self.filename + "_inference_result.txt", "w")
-        f.writelines(recog_content)
-        f.close
-        print("file write in : ./inference/" + self.filename +
-              "_inference_result.txt")
-        print("Write result success!")
+            recognition = []
+            for i in range(output_np.shape[0]):
+                recognition = np.concatenate((recognition, [
+                    list(self.actions_dict.keys())[list(
+                        self.actions_dict.values()).index(output_np[i])]
+                ]))
+            recog_content = list(recognition)
+            recog_content = [line + "\n" for line in recog_content]
+
+            write_path = os.path.join(reslut_path,
+                                      filename + "_inference_result.txt")
+            f = open(write_path, "w")
+            f.writelines(recog_content)
+            f.close()
+        print("file write in : " + reslut_path + " Write result success!")
 
 
 @INFERENCE.register()
@@ -934,6 +979,7 @@ class ADDS_Inference_helper(Base_Inference_helper):
         im = Image.fromarray(colormapped_im)
         return im
 
+
 @INFERENCE.register()
 class VideoSwin_Inference_helper(Base_Inference_helper):
 
@@ -1013,6 +1059,7 @@ class VideoSwin_Inference_helper(Base_Inference_helper):
                 for j in range(self.top_k):
                     print("\ttop-{0} class: {1}".format(j + 1, classes[j]))
                     print("\ttop-{0} score: {1}".format(j + 1, scores[j]))
+
 
 @INFERENCE.register()
 class AVA_SlowFast_FastRCNN_Inference_helper(Base_Inference_helper):
@@ -1176,7 +1223,7 @@ class AVA_SlowFast_FastRCNN_Inference_helper(Base_Inference_helper):
             human_detection = self.human_detections[t_index]
 
             output = outputs[index]
-            result = output #长度为类别个数，不包含背景
+            result = output  #长度为类别个数，不包含背景
 
             person_num = self.person_num_list[index]
 
@@ -1191,7 +1238,7 @@ class AVA_SlowFast_FastRCNN_Inference_helper(Base_Inference_helper):
             # N proposals
             for i in range(person_num):
                 prediction.append([])
-            
+
             # Perform action score thr
             for i in range(len(result)):  # for class
                 if i + 1 not in self.class_whitelist:
@@ -1199,7 +1246,8 @@ class AVA_SlowFast_FastRCNN_Inference_helper(Base_Inference_helper):
                 for j in range(person_num):
                     if result[i][j, 4] > self.config.MODEL.head['action_thr']:
                         prediction[j].append(
-                            (self.label_map[i + 1], result[i][j, 4])) # label_map is a dict, label index start from 1
+                            (self.label_map[i + 1], result[i][j, 4]
+                             ))  # label_map is a dict, label index start from 1
             predictions.append(prediction)
 
         results = []

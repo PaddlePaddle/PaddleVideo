@@ -98,6 +98,7 @@ INFERENCE:
     actions_map_file_path: "./data/50salads/mapping.txt"
     postprocessing_method: "refinement_with_boundary"
     boundary_threshold: 0.5
+    feature_path: "./data/50salads/features"
 
 
 model_name: "ASRF"

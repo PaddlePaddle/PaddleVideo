@@ -76,6 +76,7 @@ INFERENCE:
     name: 'MSTCN_Inference_helper'
     num_channels: 2048
     actions_map_file_path: "./data/50salads/mapping.txt"
+    feature_path: "./data/50salads/features"
 
 
 model_name: "MSTCN"
