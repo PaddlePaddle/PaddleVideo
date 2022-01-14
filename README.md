@@ -118,9 +118,9 @@ PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_githu
 
 | Applications | Descriptions |
 | :--------------- | :-------- |
-| [FootballAction]() | 足球动作检测方案|
+| [FootballAction](https://github.com/PaddlePaddle/PaddleVideo/tree/application/FootballAction) | 足球动作检测方案|
 | [BasketballAction](applications/BasketballAction) | 篮球动作检测方案 |
-| [TableTennis](applications/ableTennis) | 乒乓球动作识别方案|
+| [TableTennis](applications/TableTennis) | 乒乓球动作识别方案|
 | [FigureSkating](applications/FigureSkating) | 花样滑冰动作识别方案|
 | [VideoTag](applications/VideoTag) | 3000类大规模视频分类方案 |
 | [MultimodalVideoTag](applications/MultimodalVideoTag) | 多模态视频分类方案|
