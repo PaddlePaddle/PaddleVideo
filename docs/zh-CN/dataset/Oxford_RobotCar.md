@@ -91,6 +91,10 @@ splits/oxford_night/train_files.txt     # 夜晚训练序列
 splits/oxford_day_451/val_files.txt     # 白天验证序列
 splits/oxford_night_411/val_files.txt   # 夜晚验证序列
 ```
+下载地址：
+```shell
+
+```
 
 #### 4. 白天-伪夜晚图像对准备
 
