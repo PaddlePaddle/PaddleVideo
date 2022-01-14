@@ -43,5 +43,5 @@ __all__ = [
     'RandomCap', 'JitterScale', 'Iden', 'VideoMix', 'ColorJitter', 'RandomFlip',
     'ToArray', 'FeaturePadding', 'GetMatchMap', 'GroupRandomFlip', 'MultiCrop',
     'SFMRI_DecodeSampler', 'MultiRestrictSize', 'MultiNorm',
-    'RandomResizedCrop', 'SegmentationSampler'
+    'SegmentationSampler'
 ]
