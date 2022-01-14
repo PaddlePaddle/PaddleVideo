@@ -1,4 +1,4 @@
-[简体中文](README_cn.md) | English
+[简体中文](README.md) | English
 
 # PaddleVideo
 
@@ -18,9 +18,9 @@ PaddleVideo is a video model development kit produced by [PaddlePaddle Official]
 </div>
 
 
-## Model and Applications library
+## Model and Applications
 
-### Model
+### Model zoo
 
 <table style="margin-left:auto;margin-right:auto;font-size:1.3vw;padding:3px 5px;text-align:center;vertical-align:center;">
   <tr>

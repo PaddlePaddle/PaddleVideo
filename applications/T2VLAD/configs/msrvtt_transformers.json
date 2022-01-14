@@ -1,0 +1,96 @@
+{
+    "inherit_from": "configs/base_config_transformers.json",
+    "eval_mode": "test_run",
+    "experts": {
+        "modalities": [
+	    "features_audio",
+	    "features_rgb",
+	    "features_ocr",
+	    "features_speech",
+	    "features_scene",
+	    "features_flow",
+	    "features_s3d",
+	    "features_face"
+        ],
+        "face_dim": 512
+    },
+    "arch": {
+        "type": "CENet",
+        "args": {
+            "use_mish": 1,
+            "vlad_clusters": {
+                "text": 9
+            },
+            "ghost_clusters": {
+                "text": 1,
+                "features_ocr": 1,
+                "features_rgb": 1,
+                "features_flow": 1,
+                "features_scene": 1,
+                "features_s3d": 1,
+                "features_audio": 1,
+                "features_speech": 1,
+                "features_face": 1
+            },
+            "mimic_ce_dims": 1
+        }
+    },
+    "data_loader": {
+        "type": "ExpertDataLoader",
+        "args": {
+            "dataset_name": "MSRVTT",
+            "data_dir": "data/MSRVTT",
+            "split_name": "jsfusion",
+            "batch_size": 64,
+            "num_test_captions": 1,
+            "max_tokens": {
+                "features_ocr": 30,
+                "features_face": 30,
+                "features_rgb": 51,
+                "features_flow": 49,
+                "features_s3d": 30,
+                "features_scene": 31,
+                "features_speech": 112,
+                "features_audio": 31,
+                "text": 37
+            }
+        }
+    },
+    "loss": {
+        "type": "ContrastiveLoss",
+        "args": {
+            "margin": 0.2,
+	    "topk": 1
+        }
+    },
+    "trainer": {
+        "epochs": 150
+    },
+    "optimizer": {
+        "type": "AdamW",
+        "args":{
+		"weight_decay": 1e-4
+	}
+    },
+    "lr_scheduler": {
+	    "type": "StepDecay",
+	    "args": {
+             "learning_rate": 0.0001,
+		     "step_size": 5,
+		      "gamma": 0.9
+	    }
+    },
+    "eval_settings": {
+        "data_loader": {
+            "args":{
+                "split_name": "jsfusion",
+                "num_test_captions": 1
+            }
+        },
+        "tester": {
+            "save_dir": "data/saved/",
+            "verbosity": 2
+        },
+        "disable_gpu": false
+    }
+}

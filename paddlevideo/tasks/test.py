@@ -71,8 +71,11 @@ def test_model(cfg, weights, parallel=True):
     # add params to metrics
     cfg.METRIC.data_size = len(dataset)
     cfg.METRIC.batch_size = batch_size
-
     Metric = build_metric(cfg.METRIC)
+
+    if cfg.MODEL.framework == "FastRCNN":
+        Metric.set_dataset_info(dataset.info, len(dataset))
+
     for batch_id, data in enumerate(data_loader):
         if cfg.model_name in [
                 'CFBI'

@@ -1,0 +1,6 @@
+o "Frame path: $1"
+echo "Video path: $2"
+echo "FPS: $3"
+out_name="$1/%05d.jpg"
+echo "${out_name}"
+ffmpeg -i $2 -r $3 -q:v 1 "${out_name}"
