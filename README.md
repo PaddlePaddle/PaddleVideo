@@ -160,7 +160,7 @@ PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_githu
     <td colspan="4">基于骨架的动作识别</td>
   </tr>
   <tr>
-    <td><a href="docs/zh-CN/dataset/ntu-rgbd.md">PoseC3D-NTURGB+D</a> (<a href="https://kennymckormick.github.io/posec3d/" rel="nofollow">Homepage</a>) (ArXiv'2021)</td>
+    <td><a href="docs/zh-CN/dataset/ntu-rgbd.md">NTURGB+D</a> (<a href="https://rose1.ntu.edu.sg/dataset/actionRecognition/" rel="nofollow">Homepage</a>) (IEEE CS'2016)</td>
     <td><a href="docs/zh-CN/dataset/fsd.md">FSD</a> (<a href="https://aistudio.baidu.com/aistudio/competition/detail/115/0/introduction" rel="nofollow">Homepage</a>)</td>
   </tr>
   <tr>
