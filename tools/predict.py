@@ -15,7 +15,8 @@
 import argparse
 import os
 from os import path as osp
-
+import paddle
+import numpy as np
 from paddle import inference
 from paddle.inference import Config, create_predictor
 
@@ -161,14 +162,36 @@ def main():
 
             # Post process output
             InferenceHelper.postprocess(outputs)
-    elif model_name in ['MSTCN']:
+    elif model_name in ['MSTCN', 'ASRF']:
         for file in files:
+            inputs = InferenceHelper.preprocess(file)
+                outputs = []
+                for input in inputs:
+                    # Run inference
+                    for i in range(len(input_tensor_list)):
+                        input_tensor_list[i].copy_from_cpu(input)
+                        predictor.run()
+                        output = []
+                        for j in range(len(output_tensor_list)):
+                            output.append(output_tensor_list[j].copy_to_cpu())
+                        outputs.append(output)
+
+                    # Post process output
+                    InferenceHelper.postprocess(outputs)
+    elif model_name == 'AVA_SlowFast_FastRcnn':
+        for file in files:  # for videos
             inputs = InferenceHelper.preprocess(file)
             outputs = []
             for input in inputs:
                 # Run inference
-                for i in range(len(input_tensor_list)):
-                    input_tensor_list[i].copy_from_cpu(input)
+                input_len = len(input_tensor_list)
+
+                for i in range(input_len):
+                    if type(input[i]) == paddle.Tensor:
+                        input_tmp = input[i].numpy()
+                    else:
+                        input_tmp = input[i]
+                    input_tensor_list[i].copy_from_cpu(input_tmp)
                 predictor.run()
                 output = []
                 for j in range(len(output_tensor_list)):
