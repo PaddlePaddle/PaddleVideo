@@ -44,7 +44,7 @@
 
 1. 下载序列[2014-12-09](https://robotcar-dataset.robots.ox.ac.uk/datasets/2014-12-09-13-21-02/) 中Bumblebee XB3的左目图像作为白天场景的训练集, 下载好的图像解压在同一文件夹下.
 2. 下载序列[2014-12-16](https://robotcar-dataset.robots.ox.ac.uk/datasets/2014-12-16-18-44-24/) 中Bumblebee XB3的左目图像作为夜晚场景的训练集, 下载好的图像解压在同一文件夹下.
-3. 验证集的图像和深度真值从原始数据集中筛选, 在我们给出的链接中下载. (需要给定下载链接)
+3. 验证集的图像和深度真值从原始数据集中筛选, 下载地址如下：
     ```shell
     https://videotag.bj.bcebos.com/Data/ADDS/1209_all_files.txt
     https://videotag.bj.bcebos.com/Data/ADDS/1216_all_files.txt
@@ -91,7 +91,7 @@ splits/oxford_night/train_files.txt     # 夜晚训练序列
 splits/oxford_day_451/val_files.txt     # 白天验证序列
 splits/oxford_night_411/val_files.txt   # 夜晚验证序列
 ```
-下载地址：
+训练所用路径文本的下载地址：
 ```shell
 
 ```

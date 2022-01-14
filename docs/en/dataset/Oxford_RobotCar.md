@@ -44,7 +44,7 @@ If you want to use Oxford-RobotCar-for-ADDS, please cite the following papers:
 
 1. Download the left eye image of Bumblebee XB3 in the sequence [2014-12-09](https://robotcar-dataset.robots.ox.ac.uk/datasets/2014-12-09-13-21-02/) as For the training set of the daytime scene, the downloaded images are decompressed in the same folder.
 2. Download the left eye image of Bumblebee XB3 in the sequence [2014-12-16](https://robotcar-dataset.robots.ox.ac.uk/datasets/2014-12-16-18-44-24/) as The training set of the night scene, the downloaded images are unzipped in the same folder.
-3. The images and depth truth values ​​of the validation set are filtered from the original data set and downloaded from the link we gave. (The download link is required)
+3. The images and depth truth values ​​of the validation set are filtered from the original data set and downloaded from the link we gave. (The data download links are below)
     ```shell
     https://videotag.bj.bcebos.com/Data/ADDS/1209_all_files.txt
     https://videotag.bj.bcebos.com/Data/ADDS/1216_all_files.txt
@@ -83,7 +83,7 @@ Rename the original image timestamp to a continuous number sequence. For daytime
     └── night_val_411_gt #Night verification depth truth value folder (night_val_411_gt.7z)
 ```
 
-download links:
+annotation files download links are below:
 ```shell
 
 ```
