@@ -20,7 +20,7 @@ T2VLAD is proposed by Baidu in CVPR2021 for text-video retrieval. Text-video ret
 
 
 ## Data
-Please refer to MSR-VTT data download and preparation doc [MSR-VTT-data]()
+Please refer to MSR-VTT data download and preparation doc [MSR-VTT-data](./dataset.md)
 
 ## Train
 ### Train on MSR-VTT
@@ -31,7 +31,8 @@ Download data then move to `data/MSRVTT` folder.
 - Train T2VLAD on MSRVTT scripts:
 
 ```bash
-python3.7 train.py --config ./configs/msrvtt_transformers.json --device 0
+export CUDA_VISIBLE_DEVICES=0
+python3.7 train.py --config ./configs/msrvtt_transformers.json
 ```
 
 T2VLAD uses the Ranger optimizer during training. We haven't supported the implementation of Ranger optimizer, for now, the AdamW optimizer can be used to complete the training.
@@ -42,7 +43,8 @@ T2VLAD uses the Ranger optimizer during training. We haven't supported the imple
 - Evaluation performs on downstream task, i.e. text-video clip retrieval on MSR-VTT dataset, test accuracy can be obtained using scripts:
 
 ```bash
-python3.7 test.py --config ./configs/msrvtt_transformers.json --device 0 --resume ./T2VLAD_msrvtt.pdparams
+export CUDA_VISIBLE_DEVICES=0
+python3.7 test.py --config ./configs/msrvtt_transformers.json --resume ./T2VLAD_msrvtt.pdparams
 ```
 
 Accuracy on MSR-VTT:

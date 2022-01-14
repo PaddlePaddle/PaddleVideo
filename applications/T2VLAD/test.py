@@ -27,7 +27,7 @@ from typeguard import typechecked
 from mergedeep import Strategy, merge
 from parse_config import ConfigParser
 from trainer.trainer import verbose, ctxt_mgr
-from utils.util import update_src_web_video_dir, compute_dims, compute_trn_config
+from utils.util import compute_dims, compute_trn_config
 
 @typechecked
 def compress_predictions(query_masks: np.ndarray, sims: np.ndarray, topk: int = 10):
@@ -70,32 +70,25 @@ def get_model_and_data_loaders(
         module=module_data,
         logger=logger,
         raw_input_dims=raw_input_dims,
-        challenge_mode=config.get("challenge_mode", False),
         text_feat=config["experts"]["text_feat"],
         text_dim=config["experts"]["text_dim"],
         text_agg=config["experts"]["text_agg"],
         use_zeros_for_missing=config["experts"].get("use_zeros_for_missing", False),
-        task=config.get("task", "retrieval"),
         eval_only=True,
     )
 
     model = config.init(
         name='arch',
         module=module_arch,
-        trn_config=trn_config,
         expert_dims=expert_dims,
         text_dim=config["experts"]["text_dim"],
-        disable_nan_checks=config["disable_nan_checks"],
-        task=config.get("task", "retrieval"),
         ce_shared_dim=config["experts"].get("ce_shared_dim", None),
         feat_aggregation=config["data_loader"]["args"]["feat_aggregation"],
-        trn_cat=config["data_loader"]["args"].get("trn_cat", 0),
     )
     model_path = config._args.resume
     logger.info(f"Loading checkpoint: {model_path} ...")
     checkpoint = paddle.load(model_path)
     state_dict = checkpoint
-    #state_dict = checkpoint['state_dict']
     if config['n_gpu'] > 1:
         model = paddle.DataParallel(model)
     model.load_dict(state_dict)
@@ -130,24 +123,10 @@ def evaluation(config, logger=None, trainer=None):
     )
     logger.info(model)
 
-    update_src_web_video_dir(config)
-
     metrics = [getattr(module_metric, met) for met in config['metrics']]
-    challenge_mode = config.get("challenge_mode", False)
-    challenge_msg = (
-        "\n"
-        "Evaluation ran on challenge features. To obtain a score, upload the similarity"
-        "matrix for each dataset to the test server after running the "
-        "`misc/cvpr2020-challenge/prepare_submission.py` script and following the "
-        "instructions at: "
-        "https://www.robots.ox.ac.uk/~vgg/challenges/video-pentathlon/"
-        "\n"
-    )
 
     # prepare model for testing.  Note that some datasets fail to fit the retrieval
     # set on the GPU, so we run them on the CPU
-    device = paddle.device.get_device()
-    logger.info(f"Running evaluation on {device}")
     model.eval()
 
     with paddle.no_grad():
@@ -181,8 +160,7 @@ def evaluation(config, logger=None, trainer=None):
                 for expert in samples['experts'].keys():
                     sub_samples['experts'][expert] = samples['experts'][expert][vid*chk:vid*chk+chk]
                     sub_samples['ind'][expert] = samples['ind'][expert][vid*chk:vid*chk+chk]
-                disable_nan_checks = config._config["disable_nan_checks"]
-                with ctxt_mgr(sub_samples, disable_nan_checks) as valid:
+                with ctxt_mgr(sub_samples) as valid:
                     output = model(**valid)
                 subsub_sims.append(output["cross_view_conf_matrix"].cpu())
             subsub_sims = paddle.concat(subsub_sims, axis=1)
@@ -216,7 +194,6 @@ if __name__ == '__main__':
     args = argparse.ArgumentParser(description='PyTorch Template')
     args.add_argument('--config', default=None, type=str, help="config file path")
     args.add_argument('--resume', default=None, help='path to checkpoint for evaluation')
-    args.add_argument('--device', help='indices of GPUs to enable')
     args.add_argument('--eval_from_training_config', action="store_true",
                       help="if true, evaluate directly from a training config file.")
     args.add_argument("--custom_args", help="qualified key,val pairs")
