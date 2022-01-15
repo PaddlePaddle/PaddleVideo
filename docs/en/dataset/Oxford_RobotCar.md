@@ -85,7 +85,9 @@ Rename the original image timestamp to a continuous number sequence. For daytime
 
 annotation files download links are below:
 ```shell
-
+https://videotag.bj.bcebos.com/Data/ADDS/train_files.txt
+https://videotag.bj.bcebos.com/Data/ADDS/val_day_files.txt
+https://videotag.bj.bcebos.com/Data/ADDS/val_night_files.txt
 ```
 
 The sequence used for training and verification is as follows:
@@ -108,6 +110,20 @@ In order to use our framework to extract the common information of day and night
     ├── day_val_451_gt #Daytime verification depth truth value folder (day_val_451_gt.7z)
     ├── night_val_411 #night verification image folder (night_val_411.7z)
     └── night_val_411_gt #Night verification depth truth value folder (night_val_411_gt.7z)
+data
+└── oxford
+    ├── splits
+        ├── train_files.txt
+        ├── val_day_files.txt
+        └── val_night_files.txt
+    └── oxford_processing_forADDS
+        ├── day_train_all/      #Day training image folder (from day_train_all.7z.001 ~ day_train_all.7z.002)
+        ├── night_train_all/    #Night training image folder (from night_train_all.7z.001 ~ day_train_all.7z.002)
+        ├── day_val_451/        #Daytime verification image folder (from day_val_451.7z)
+        ├── day_val_451_gt/     #Daytime verification depth truth value folder (from day_val_451_gt.7z)
+        ├── night_val_411/      #night verification image folder (from night_val_411.7z)
+        └── night_val_411_gt/   #Night verification depth truth value folder (from night_val_411_gt.7z)
+
 ```
 
 The sequences used for training and verification are consistent with the foregoing.

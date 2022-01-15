@@ -93,20 +93,28 @@ splits/oxford_night_411/val_files.txt   # 夜晚验证序列
 ```
 训练所用路径文本的下载地址：
 ```shell
-
+https://videotag.bj.bcebos.com/Data/ADDS/train_files.txt
+https://videotag.bj.bcebos.com/Data/ADDS/val_day_files.txt
+https://videotag.bj.bcebos.com/Data/ADDS/val_night_files.txt
 ```
 
 #### 4. 白天-伪夜晚图像对准备
 
 为了用我们的框架提取出白天和夜晚图像的共有信息,我们用[CycleGAN](https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix)生成白天-伪夜晚图像对,其中伪夜晚为CycleGAN生成的与白天对应的夜晚图像, 所有图像都缩放为192x640, 夜晚图像用直方图均衡化增强, 训练75个epoch, 最终得到Oxford-RobotCar-for-ADDS. 生成的白天-伪夜晚图像对数据格式如下,可直接用于ADDS-DepthNet的训练和验证:
 ```
-├── oxford_processing_forADDS
-    ├── day_train_all      #白天训练图像文件夹 (day_train_all.7z.001 ~ day_train_all.7z.002)
-    ├── night_train_all    #夜晚训练图像文件夹 (night_train_all.7z.001 ~ day_train_all.7z.002)
-    ├── day_val_451        #白天验证图像文件夹 (day_val_451.7z)
-    ├── day_val_451_gt     #白天验证深度真值文件夹 (day_val_451_gt.7z)
-    ├── night_val_411      #夜晚验证图像文件夹 (night_val_411.7z)
-    └── night_val_411_gt   #夜晚验证深度真值文件夹 (night_val_411_gt.7z)
+data
+└── oxford
+    ├── splits
+        ├── train_files.txt
+        ├── val_day_files.txt
+        └── val_night_files.txt
+    └── oxford_processing_forADDS
+        ├── day_train_all/      #白天训练图像文件夹 (解压自day_train_all.7z.001 ~ day_train_all.7z.002)
+        ├── night_train_all/    #夜晚训练图像文件夹 (解压自night_train_all.7z.001 ~ day_train_all.7z.002)
+        ├── day_val_451/        #白天验证图像文件夹 (解压自day_val_451.7z)
+        ├── day_val_451_gt/     #白天验证深度真值文件夹 (解压自day_val_451_gt.7z)
+        ├── night_val_411/      #夜晚验证图像文件夹 (解压自night_val_411.7z)
+        └── night_val_411_gt/   #夜晚验证深度真值文件夹 (解压自night_val_411_gt.7z)
 ```
 
 其中用于训练和验证的序列与前述保持一致.
