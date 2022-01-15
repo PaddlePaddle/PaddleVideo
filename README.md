@@ -74,7 +74,7 @@ PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_githu
     <td colspan="5" style="font-weight:bold;">时空动作检测方法</td>
   </tr>
   <tr>
-    <td><a href="slowfast.md">SlowFast+Fast R-CNN</a>
+    <td><a href="docs/zh-CN/model_zoo/detection/SlowFast_FasterRCNN.md">SlowFast+Fast R-CNN</a>
     <td></td>
     <td></td>
     <td></td>
