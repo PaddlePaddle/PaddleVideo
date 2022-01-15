@@ -200,6 +200,7 @@ def load_ckpt(model, weight_path, **kargs):
     if 'ResnetEncoder' in str(model):
         encoder_dict, pose_encoder_dict = pretrain_resnet18_param_trans(
             model, state_dicts)
+        model.encoder.load_dict(encoder_dict)
         tmp = model.state_dict()
         tmp.update(
             {'backbone.encoder.' + k: v
