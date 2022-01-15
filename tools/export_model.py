@@ -151,6 +151,22 @@ def get_input_spec(cfg, model_name):
             InputSpec(shape=[None, cfg.num_channels, cfg.height, cfg.width],
                       dtype='float32'),
         ]]
+    elif model_name in ['AVA_SlowFast_FastRcnn']:
+        input_spec = [[
+            InputSpec(shape=[
+                None, 3, cfg.num_frames // cfg.alpha, cfg.target_size,
+                cfg.target_size
+            ],
+                      dtype='float32',
+                      name='slow_input'),
+            InputSpec(shape=[
+                None, 3, cfg.num_frames, cfg.target_size, cfg.target_size
+            ],
+                      dtype='float32',
+                      name='fast_input'),
+            InputSpec(shape=[None, None, 4], dtype='float32', name='proposals'),
+            InputSpec(shape=[None, 2], dtype='float32', name='img_shape')
+        ]]
     return input_spec
 
 

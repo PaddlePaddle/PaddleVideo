@@ -133,7 +133,10 @@ class BBoxHeadAVA(nn.Layer):
             neg_bboxes = neg_bboxes_list[i]
             gt_label = gt_labels[i]
             num_pos = pos_bboxes.shape[0]
-            num_neg = neg_bboxes.shape[0]
+            if neg_bboxes is not None:
+                num_neg = neg_bboxes.shape[0]
+            else:
+                num_neg = 0
             num_samples = num_pos + num_neg
             neg_label = paddle.zeros([num_neg, gt_label.shape[1]])
             label = paddle.concat([gt_label,neg_label])

@@ -20,7 +20,7 @@ import sys
 import os
 import pickle
 from datetime import datetime
-from ...metrics.ava_utils import ava_eval, read_labelmap, results2csv
+from ...metrics.ava_utils import ava_evaluate_results
 from ..registry import DATASETS
 from .base import BaseDataset
 from collections import defaultdict
@@ -29,7 +29,7 @@ from collections import defaultdict
 @DATASETS.register()
 class AVADataset(BaseDataset):
     """AVA dataset for spatial temporal detection.
-    the dataset loads raw frames, bounding boxes, proposals and applies 
+    the dataset loads raw frames, bounding boxes, proposals and applies
     transformations to return the frame tensors and other information.
     """
 
@@ -66,19 +66,18 @@ class AVADataset(BaseDataset):
             file_path,
             pipeline,
             data_prefix,
-            test_mode,)
+            test_mode,
+        )
         if self.proposal_file is not None:
             self.proposals = self._load(self.proposal_file)
         else:
             self.proposals = None
         if not test_mode:
             valid_indexes = self.filter_exclude_file()
-            self.info = self.info = [
-                self.info[i] for i in valid_indexes
-            ]
+            self.info = self.info = [self.info[i] for i in valid_indexes]
 
-    def _load(self,path):
-        f = open(path,'rb')
+    def _load(self, path):
+        f = open(path, 'rb')
         res = pickle.load(f)
         f.close()
         return res
@@ -101,8 +100,7 @@ class AVADataset(BaseDataset):
 
             bboxes.append(img_record['entity_box'])
             valid_labels = np.array([
-                selected_record['label']
-                for selected_record in selected_records
+                selected_record['label'] for selected_record in selected_records
             ])
 
             label = np.zeros(self.num_classes, dtype=np.float32)
@@ -151,33 +149,31 @@ class AVADataset(BaseDataset):
                 shot_info = (0, (self.timestamp_end - self.timestamp_start) *
                              self._FPS)
 
-                video_info = dict(
-                    video_id=video_id,
-                    timestamp=timestamp,
-                    entity_box=entity_box,
-                    label=label,
-                    entity_id=entity_id,
-                    shot_info=shot_info)
+                video_info = dict(video_id=video_id,
+                                  timestamp=timestamp,
+                                  entity_box=entity_box,
+                                  label=label,
+                                  entity_id=entity_id,
+                                  shot_info=shot_info)
                 records_dict_by_img[img_key].append(video_info)
 
-        
         for img_key in records_dict_by_img:
             video_id, timestamp = img_key.split(',')
             bboxes, labels, entity_ids = self.parse_img_record(
                 records_dict_by_img[img_key])
-            ann = dict(
-                gt_bboxes=bboxes, gt_labels=labels, entity_ids=entity_ids)
+            ann = dict(gt_bboxes=bboxes,
+                       gt_labels=labels,
+                       entity_ids=entity_ids)
             frame_dir = video_id
             if self.data_prefix is not None:
                 frame_dir = osp.join(self.data_prefix, frame_dir)
-            video_info = dict(
-                frame_dir=frame_dir,
-                video_id=video_id,
-                timestamp=int(timestamp),
-                img_key=img_key,
-                shot_info=shot_info,
-                fps=self._FPS,
-                ann=ann)
+            video_info = dict(frame_dir=frame_dir,
+                              video_id=video_id,
+                              timestamp=int(timestamp),
+                              img_key=img_key,
+                              shot_info=shot_info,
+                              fps=self._FPS,
+                              ann=ann)
             info.append(video_info)
 
         return info
@@ -212,7 +208,7 @@ class AVADataset(BaseDataset):
         results['gt_bboxes'] = ann['gt_bboxes']
         results['gt_labels'] = ann['gt_labels']
         results['entity_ids'] = ann['entity_ids']
-       
+
         #ret = self.pipeline(results, "")
         ret = self.pipeline(results)
         #padding for dataloader
@@ -227,10 +223,15 @@ class AVADataset(BaseDataset):
         ret['gt_labels'] = self.my_padding_2d(ret['gt_labels'], padding_len)
         ret['scores'] = self.my_padding_1d(ret['scores'], padding_len)
         ret['entity_ids'] = self.my_padding_1d(ret['entity_ids'], padding_len)
-        return ret['imgs'][0], ret['imgs'][1], ret['proposals'], ret['gt_bboxes'], ret['gt_labels'], ret['scores'], ret['entity_ids'], np.array(ret['img_shape'],dtype=int), idx, len_proposals, len_gt_bboxes, len_gt_labels, len_scores, len_entity_ids 
+        return ret['imgs'][0], ret['imgs'][1], ret['proposals'], ret[
+            'gt_bboxes'], ret['gt_labels'], ret['scores'], ret[
+                'entity_ids'], np.array(
+                    ret['img_shape'], dtype=int
+                ), idx, len_proposals, len_gt_bboxes, len_gt_labels, len_scores, len_entity_ids
 
     def my_padding_2d(self, feat, max_len):
-        feat_add = np.zeros((max_len - feat.shape[0], feat.shape[1]), dtype=np.float32)
+        feat_add = np.zeros((max_len - feat.shape[0], feat.shape[1]),
+                            dtype=np.float32)
         feat_pad = np.concatenate((feat, feat_add), axis=0)
         return feat_pad
 
@@ -238,25 +239,11 @@ class AVADataset(BaseDataset):
         feat_add = np.zeros((max_len - feat.shape[0]), dtype=np.float32)
         feat_pad = np.concatenate((feat, feat_add), axis=0)
         return feat_pad
- 
+
     def prepare_test(self, idx):
         return self.prepare_train(idx)
 
     def evaluate(self, results):
-        # need to create a temp result file
-        time_now = datetime.now().strftime('%Y%m%d_%H%M%S')
-        temp_file = f'AVA_{time_now}_result.csv'
-        results2csv(self, results, temp_file, self.custom_classes)
-        ret = {}
-        eval_result = ava_eval(
-            temp_file,
-            'mAP',
-            self.label_file,
-            self.file_path, #ann_file,
-            self.exclude_file,
-            custom_classes=self.custom_classes)
-        ret.update(eval_result)
-
-        os.remove(temp_file)
-
-        return ret
+        return ava_evaluate_results(self.info, len(self), results,
+                                    self.custom_classes, self.label_file,
+                                    self.file_path, self.exclude_file)
