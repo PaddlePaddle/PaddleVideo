@@ -17,9 +17,11 @@ import numpy as np
 from ..registry import ROI_EXTRACTORS
 from .roi_extractor import RoIAlign
 
+
 @ROI_EXTRACTORS.register()
 class SingleRoIExtractor3D(nn.Layer):
     """Extract RoI features from a single level feature map.  """
+
     def __init__(self,
                  roi_layer_type='RoIAlign',
                  featmap_stride=16,
@@ -41,11 +43,10 @@ class SingleRoIExtractor3D(nn.Layer):
         self.with_temporal_pool = with_temporal_pool
         self.with_global = with_global
 
-        self.roi_layer = RoIAlign(
-            resolution = self.output_size,
-            spatial_scale = self.spatial_scale,
-            sampling_ratio=self.sampling_ratio,
-            aligned=self.aligned)
+        self.roi_layer = RoIAlign(resolution=self.output_size,
+                                  spatial_scale=self.spatial_scale,
+                                  sampling_ratio=self.sampling_ratio,
+                                  aligned=self.aligned)
 
     def init_weights(self):
         pass
@@ -60,13 +61,18 @@ class SingleRoIExtractor3D(nn.Layer):
                 xi = xi + 1
                 y = paddle.mean(x, 2, keepdim=True)
             feat = [paddle.mean(x, 2, keepdim=True) for x in feat]
-        feat = paddle.concat(feat, axis=1) # merge slow and fast
+        feat = paddle.concat(feat, axis=1)  # merge slow and fast
         roi_feats = []
         for t in range(feat.shape[2]):
-            data_index = np.array([t]).astype('int32')
-            index = paddle.to_tensor(data_index)
+            if type(t) == paddle.fluid.framework.Variable:
+                index = paddle.to_tensor(t)
+            else:
+                data_index = np.array([t]).astype('int32')
+                index = paddle.to_tensor(data_index)
+
             frame_feat = paddle.index_select(feat, index, axis=2)
-            frame_feat = paddle.squeeze(frame_feat, axis=2) #axis=2,避免N=1时, 第一维度被删除.
+            frame_feat = paddle.squeeze(frame_feat,
+                                        axis=2)  #axis=2,避免N=1时, 第一维度被删除.
             roi_feat = self.roi_layer(frame_feat, rois, rois_num)
             roi_feats.append(roi_feat)
 

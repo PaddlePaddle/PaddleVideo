@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import copy
 import paddle
 from paddle.regularizer import L1Decay, L2Decay
 
@@ -92,16 +91,15 @@ def build_optimizer(cfg, lr_scheduler, model=None):
         no_weight_decay_name_list = no_weight_decay_name.split(' ')
 
         # NOTE: use param.name not name
-        weight_decay_param_white_list = [
+        no_weight_decay_param_list = [
             param.name for name, param in model.named_parameters()
             if any(key_word in name for key_word in no_weight_decay_name_list)
-        ]
+        ]  # get the full param name of no weight decay
 
-        _apply_decay_param_fun = lambda name: name not in weight_decay_param_white_list
+        _apply_decay_param_fun = lambda name: name not in no_weight_decay_param_list
         cfg_copy['apply_decay_param_fun'] = _apply_decay_param_fun
-        white_list_num = len(weight_decay_param_white_list)
-        print(f"Weight Decay white list :({white_list_num})",
-              weight_decay_param_white_list)
+        print(f"No weight Decay list :({len(no_weight_decay_param_list)})",
+              no_weight_decay_param_list)
 
     cfg_copy.pop('learning_rate')
     return getattr(paddle.optimizer, opt_name)(lr_scheduler,

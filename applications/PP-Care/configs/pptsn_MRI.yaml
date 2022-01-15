@@ -1,0 +1,97 @@
+MODEL:
+    framework: "RecognizerMRI"
+    backbone:
+        name: "ResNetTSN_MRI"
+        pretrained: ""
+        layers: 50
+    head:
+        name: "ppTSNHead"
+        num_classes: 2
+        in_channels: 2048
+        drop_ratio: 0.4
+        std: 0.01
+        ls_eps: 0.1
+
+
+DATASET:
+    batch_size: 16
+    valid_batch_size: 16
+    test_batch_size: 16
+    num_workers: 4
+    train:
+        format: "MRIDataset"
+        data_prefix: ""
+        file_path: "/home/aistudio/train.txt"
+
+    valid:
+        format: "MRIDataset"
+        data_prefix: ""
+        file_path: "/home/aistudio/test.txt"
+
+    test:
+        format: "MRIDataset"
+        data_prefix: ""
+        file_path: "/home/aistudio/test.txt"
+
+
+PIPELINE:
+    train:
+        decode:
+            name: "MRIDecoder"
+        sample:
+            name: "Sampler"
+            num_seg: 8
+            seg_len: 1
+            valid_mode: False
+            select_left: True
+
+    valid:
+        decode:
+            name: "MRIDecoder"
+        sample:
+            name: "Sampler"
+            num_seg: 8
+            seg_len: 1
+            valid_mode: True
+            select_left: True
+
+    test:
+        decode:
+            name: "MRIDecoder"
+        sample:
+            name: "Sampler"
+            num_seg: 16
+            seg_len: 1
+            valid_mode: True
+            select_left: True
+
+OPTIMIZER:
+    name: 'Momentum'
+    momentum: 0.9
+    learning_rate:
+        iter_step: True
+        name: 'CustomWarmupCosineDecay'
+        max_epoch: 50
+        warmup_epochs: 5
+        warmup_start_lr: 0.005
+        cosine_base_lr: 0.01
+    weight_decay:
+        name: 'L2'
+        value: 0.00005
+    use_nesterov: True
+
+
+MIX:
+    name: "Mixup"
+    alpha: 0.2
+
+
+METRIC:
+    name: 'CenterCropMetric_MRI'
+
+
+model_name: "ppTSN_MRI"
+log_interval: 20
+save_interval: 20
+epochs: 50
+log_level: "INFO"

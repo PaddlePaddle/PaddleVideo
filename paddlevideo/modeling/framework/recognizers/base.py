@@ -18,22 +18,26 @@ class BaseRecognizer(nn.Layer):
         head (dict): Classification head to process feature.
 
     """
-    def __init__(self, backbone=None, head=None):
+    def __init__(self, backbone=None, head=None, runtime_cfg=None):
 
         super().__init__()
-        if backbone != None:
+        if backbone is not None:
             self.backbone = builder.build_backbone(backbone)
             if hasattr(self.backbone, 'init_weights'):
                 self.backbone.init_weights()
         else:
             self.backbone = None
-        if head != None:
+        if head is not None:
             self.head_name = head.name
             self.head = builder.build_head(head)
             if hasattr(self.head, 'init_weights'):
                 self.head.init_weights()
         else:
             self.head = None
+
+        # Settings when the model is running,
+        # such as 'avg_type'
+        self.runtime_cfg = runtime_cfg
 
     def forward(self, data_batch, mode='infer'):
         """

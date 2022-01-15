@@ -233,7 +233,7 @@ class CustomWarmupCosineStepDecay(LRScheduler):
         super().__init__(last_epoch=last_epoch, verbose=verbose)
 
     def annealing_cos(self, start, end, factor, weight=1):
-        cos_out = math.cos(pi * factor) + 1
+        cos_out = math.cos(math.pi * factor) + 1
         return end + 0.5 * weight * (start - end) * cos_out
 
     def get_regular_lr(self):

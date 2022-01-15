@@ -1,7 +1,7 @@
 COMMON:
     fps: 5
     use_gpu: True
-    label_dic: 'configs_basketball/index_label_basketball_6.json' 
+    label_dic: 'configs_basketball/index_label_basketball_6.json'
     # debug
     PCM_ONLY: False
     DEBUG: False
@@ -14,7 +14,7 @@ PPTSM:
     params_file: "checkpoints_basketball/ppTSM/ppTSM.pdiparams"
     gpu_mem: 8000
     device_id: 0
-    seg_num: 8
+    num_seg: 8
     seglen: 1
     short_size: 256
     target_size: 224
@@ -57,6 +57,6 @@ ACTION:
     nms_thread: 0.01
     nms_offset: 10
 
-    classify_score_thread: 0.1    
-    iou_score_thread: 0.3      
+    classify_score_thread: 0.1
+    iou_score_thread: 0.3
 

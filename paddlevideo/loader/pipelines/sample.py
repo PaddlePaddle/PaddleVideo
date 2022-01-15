@@ -17,6 +17,8 @@ import random
 
 import numpy as np
 from PIL import Image
+import SimpleITK as sitk
+import cv2
 
 from ..registry import PIPELINES
 
@@ -44,6 +46,7 @@ class Sampler(object):
     def __init__(self,
                  num_seg,
                  seg_len,
+                 frame_interval=None,
                  valid_mode=False,
                  select_left=False,
                  dense_sample=False,
@@ -51,6 +54,7 @@ class Sampler(object):
                  use_pil=True):
         self.num_seg = num_seg
         self.seg_len = seg_len
+        self.frame_interval = frame_interval
         self.valid_mode = valid_mode
         self.select_left = select_left
         self.dense_sample = dense_sample
@@ -68,6 +72,16 @@ class Sampler(object):
                     os.path.join(frame_dir,
                                  results['suffix'].format(idx))).convert('RGB')
                 imgs.append(img)
+
+        elif data_format == "MRI":
+            frame_dir = results['frame_dir']
+            imgs = []
+            MRI = sitk.GetArrayFromImage(sitk.ReadImage(frame_dir))
+            for idx in frames_idx:
+                item = MRI[idx]
+                item = cv2.resize(item, (224, 224))
+                imgs.append(item)
+
         elif data_format == "video":
             if results['backend'] == 'cv2':
                 frames = np.array(results['frames'])
@@ -77,9 +91,9 @@ class Sampler(object):
                     img = Image.fromarray(imgbuf, mode='RGB')
                     imgs.append(img)
             elif results['backend'] == 'decord':
-                vr = results['frames']
+                container = results['frames']
                 if self.use_pil:
-                    frames_select = vr.get_batch(frames_idx)
+                    frames_select = container.get_batch(frames_idx)
                     # dearray_to_img
                     np_frames = frames_select.asnumpy()
                     imgs = []
@@ -90,7 +104,7 @@ class Sampler(object):
                     if frames_idx.ndim != 1:
                         frames_idx = np.squeeze(frames_idx)
                     frame_dict = {
-                        idx: vr[idx].asnumpy()
+                        idx: container[idx].asnumpy()
                         for idx in np.unique(frames_idx)
                     }
                     imgs = [frame_dict[idx] for idx in frames_idx]
@@ -182,10 +196,15 @@ class Sampler(object):
                 frames_idx = [x % frames_len for x in frames_idx]
             elif results['format'] == 'frame':
                 frames_idx = list(offsets + 1)
+
+            elif results['format'] == 'MRI':
+                frames_idx = list(offsets)
+
             else:
                 raise NotImplementedError
             return self._get(frames_idx, results)
 
+        average_dur = int(frames_len / self.num_seg)
         if not self.select_left:
             if self.dense_sample:  # For ppTSM
                 if not self.valid_mode:  # train
@@ -211,7 +230,6 @@ class Sampler(object):
                         ]
                     frames_idx = offsets
             else:
-                average_dur = int(frames_len / self.num_seg)
                 for i in range(self.num_seg):
                     idx = 0
                     if not self.valid_mode:
@@ -235,9 +253,11 @@ class Sampler(object):
                             frames_idx.append(int(jj % frames_len))
                         elif results['format'] == 'frame':
                             frames_idx.append(jj + 1)
+
+                        elif results['format'] == 'MRI':
+                            frames_idx.append(jj)
                         else:
                             raise NotImplementedError
-
             return self._get(frames_idx, results)
 
         else:  # for TSM
@@ -266,6 +286,10 @@ class Sampler(object):
                 frames_idx = [x % frames_len for x in frames_idx]
             elif results['format'] == 'frame':
                 frames_idx = list(offsets + 1)
+
+            elif results['format'] == 'MRI':
+                frames_idx = list(offsets)
+
             else:
                 raise NotImplementedError
 
