@@ -25,7 +25,6 @@ from paddlevideo.utils import get_config
 
 
 def parse_args():
-
     def str2bool(v):
         return v.lower() in ("true", "t", "1")
 
@@ -85,6 +84,7 @@ def create_paddle_predictor(args, cfg):
         max_batch_size = args.batch_size
         if 'num_seg' in cfg.INFERENCE:
             num_seg = cfg.INFERENCE.num_seg
+            seg_len = cfg.INFERENCE.get('seg_len', 1)
             num_views = 1
             if 'tsm' in cfg.model_name.lower():
                 num_views = 1  # CenterCrop
@@ -92,7 +92,9 @@ def create_paddle_predictor(args, cfg):
                 num_views = 10  # TenCrop
             elif 'timesformer' in cfg.model_name.lower():
                 num_views = 3  # UniformCrop
-            max_batch_size = args.batch_size * num_views * num_seg
+            elif 'videoswin' in cfg.model_name.lower():
+                num_views = 3  # UniformCrop
+            max_batch_size = args.batch_size * num_views * num_seg * seg_len
         config.enable_tensorrt_engine(precision_mode=precision,
                                       max_batch_size=max_batch_size)
 
