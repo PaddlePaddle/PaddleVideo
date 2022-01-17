@@ -1,4 +1,4 @@
-[简体中文](./readme.md) | English
+[简体中文](./README.md) | English
 
 # T2VLAD
 
@@ -20,7 +20,7 @@ T2VLAD is proposed by Baidu in CVPR2021 for text-video retrieval. Text-video ret
 
 
 ## Data
-Please refer to MSR-VTT data download and preparation doc [MSR-VTT-data](./dataset.md)
+Please refer to MSR-VTT data download and preparation doc [MSR-VTT data](./docs/dataset.md)
 
 ## Train
 ### Train on MSR-VTT

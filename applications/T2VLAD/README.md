@@ -1,4 +1,4 @@
-[English](./readme_en.md) | 简体中文
+[English](./README_en.md) | 简体中文
 
 # T2VLAD: 基于局部全局对齐的文本视频检索
 

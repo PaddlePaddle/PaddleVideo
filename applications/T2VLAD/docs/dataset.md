@@ -11,7 +11,7 @@ MSR-VTT(Microsoft Research Video to Text) 是一个包含视频及字幕的大�
 首先，请确保在 `data` 目录下，输入如下命令，下载数据集。
 
 ```bash
-wget 
+bash download_features.sh
 ```
 
 下载完成后，data目录下文件组织形式如下：
