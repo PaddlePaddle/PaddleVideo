@@ -74,7 +74,7 @@ PaddleVideo is a video model development kit produced by [PaddlePaddle Official]
   </tr>
   <tr>
     <td><a href="./docs/en/model_zoo/multimodal/actbert.md">ActBERT</a> (Learning')</td>
-    <td><a href="">T2VLAD</a> (Retrieval')</td>
+    <td><a href="./applications/T2VLAD/README.md">T2VLAD</a> (Retrieval')</td>
     <td></td>
     <td></td>
     <td></td>
