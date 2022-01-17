@@ -85,7 +85,7 @@ PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_githu
   </tr>
   <tr>
     <td><a href="./docs/zh-CN/model_zoo/multimodal/actbert.md">ActBERT</a> (Learning‘)</td>
-    <td><a href="">T2VLAD</a> (Retrieval‘)</td>
+    <td><a href="./applications/T2VLAD/README.md">T2VLAD</a> (Retrieval‘)</td>
     <td></td>
     <td></td>
     <td></td>
@@ -163,6 +163,25 @@ PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_githu
     <td></td>
     <td></td>
   </tr>
+  <tr>
+    <td colspan="4">文本视频检索</td>
+  </tr>
+  <tr>
+    <td><a href="applications/T2VLAD/docs/dataset.md">MSR-VTT</a> (<a href="https://www.microsoft.com/en-us/research/publication/msr-vtt-a-large-video-description-dataset-for-bridging-video-and-language/" rel="nofollow">Homepage</a>) (CVPR'2016)</td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td colspan="4">文本视频预训练</td>
+  </tr>
+  <tr>
+    <td><a href="docs/zh-CN/dataset/howto100m.md">HowTo100M</a> (<a href="https://www.di.ens.fr/willow/research/howto100m/" rel="nofollow">Homepage</a>) (ICCV'2019)</td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+
 </tbody>
 </table>
 
