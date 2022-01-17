@@ -19,4 +19,5 @@ lap
 motmetrics
 xmltodict
 openpyxl
-cython
+Cython
+cython_bbox
