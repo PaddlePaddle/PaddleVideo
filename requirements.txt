@@ -13,4 +13,4 @@ paddlenlp
 lmdb
 moviepy
 SimpleITK
-ppdet
+paddledet
