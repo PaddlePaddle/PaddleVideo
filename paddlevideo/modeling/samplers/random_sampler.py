@@ -23,7 +23,13 @@ class SamplingResult():
         self.pos_inds = pos_inds
         self.neg_inds = neg_inds
         self.pos_bboxes = paddle.index_select(bboxes,pos_inds)
-        self.neg_bboxes = paddle.index_select(bboxes,neg_inds)
+        
+        # neg_inds may be empty
+        if neg_inds.shape[0]!=0:
+            self.neg_bboxes = paddle.index_select(bboxes,neg_inds)
+        else:
+            self.neg_bboxes=None
+        
         self.pos_is_gt  = paddle.index_select(gt_flags,pos_inds)
         self.num_gts = gt_bboxes.shape[0]
         self.pos_assigned_gt_inds = paddle.index_select(assign_result.gt_inds,pos_inds) - 1
@@ -44,7 +50,11 @@ class SamplingResult():
 
     @property
     def bboxes(self):
-        ret = paddle.concat([self.pos_bboxes, self.neg_bboxes])
+        if self.neg_bboxes is not None:
+            ret = paddle.concat([self.pos_bboxes, self.neg_bboxes])
+        else:
+            # neg bbox may be empty
+            ret = self.pos_bboxes
         return ret
 
 

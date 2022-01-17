@@ -1,0 +1,27 @@
+MODEL: #MODEL field
+  framework: "Manet"
+  backbone:
+    name: "DeepLab"
+    backbone: 'resnet'
+    output_stride: 16
+    num_classes: 21
+    freeze_bn: False
+  head:
+    name: "IntVOS"
+    train_bn_mom: 0.9997
+    model_aspp_outdim: 256
+    model_semantic_embedding_dim: 100
+    model_head_embedding_dim: 256
+    model_useintseg: False
+    test_mode: False
+    model_max_local_distance: 12
+
+PIPELINE: #PIPELINE field
+  test: #Mandatory, indicate the pipeline to deal with the validing data. please refer to the 'paddlevideo/loader/pipelines/'
+    transform: #Mandatory, image transform operator.
+      - Resize_manet:
+          output_size: [ 480, 854 ]
+      - ToTensor_manet:
+
+
+model_name: "Manet" #Mandatory, model name.

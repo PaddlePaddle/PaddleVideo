@@ -16,6 +16,9 @@ from .adds_head import AddsHead
 from .attention_lstm_head import AttentionLstmHead
 from .base import BaseHead
 from .bbox_head import BBoxHeadAVA
+from .cfbi_head import CollaborativeEnsemblerMS
+from .i3d_head import I3DHead
+from .pptimesformer_head import ppTimeSformerHead
 from .pptsm_head import ppTSMHead
 from .pptsn_head import ppTSNHead
 from .roi_head import AVARoIHead
@@ -31,6 +34,6 @@ from .bcn_head import BcnBgmHead
 __all__ = [
     'BaseHead', 'TSNHead', 'TSMHead', 'ppTSMHead', 'ppTSNHead', 'SlowFastHead',
     'AttentionLstmHead', 'TimeSformerHead', 'STGCNHead', 'TransNetV2Head',
-    'SingleRoIExtractor3D', 'AVARoIHead', 'BBoxHeadAVA', 'AddsHead',
-    'BcnBgmHead'
+    'I3DHead', 'SingleRoIExtractor3D', 'AVARoIHead', 'BBoxHeadAVA', 'AddsHead',
+    'ppTimeSformerHead', 'CollaborativeEnsemblerMS', 'BcnBgmHead'
 ]

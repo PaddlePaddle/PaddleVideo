@@ -2,7 +2,7 @@ MODEL:
     framework: "ActBert"
     backbone:
         name: "BertForMultiModalPreTraining"
-        pretrained: "/workspace/huangjun12/PaddleProject/ActBert/paddlevideo-actbert/bert_for_actbert.pdparams"
+        pretrained: "./bert_for_actbert.pdparams"
     loss:
         name: "ActBertLoss"
 
@@ -12,24 +12,24 @@ DATASET: #DATASET field
     batch_size: 8
     train:
         format: "ActBertDataset"
-        file_path: "/workspace/huangjun12/PaddleProject/ActBert/main.debug/dataset/my_data.npy"
+        file_path: "./dataset/my_data.npy"
     valid:
         format: "ActBertDataset"
-        file_path: "/workspace/huangjun12/PaddleProject/ActBert/main.debug/dataset/my_data.npy"
+        file_path: "./dataset/my_data.npy"
 
 PIPELINE: #PIPELINE field
     train:
         transform:
         - FeaturePadding:
         - RandomCap:
-            caption_path: "/workspace/huangjun12/PaddleProject/ActBert/main.debug/dataset/caption_train.json"
+            caption_path: "./dataset/caption_train.json"
         - Tokenize:
         - RandomMask:
     valid:
         transform:
         - FeaturePadding:
         - RandomCap:
-            caption_path: "/workspace/huangjun12/PaddleProject/ActBert/main.debug/dataset/ caption_val.json"
+            caption_path: "./dataset/caption_val.json"
         - Tokenize:
         - RandomMask:
 

@@ -16,7 +16,8 @@ from .anet_pipeline import GetMatchMap, GetVideoLabel, LoadFeat
 from .augmentations import (CenterCrop, ColorJitter, GroupRandomFlip,
                             GroupResize, Image2Array, JitterScale, MultiCrop,
                             Normalization, PackOutput, RandomCrop, RandomFlip,
-                            Scale, TenCrop, ToArray, UniformCrop)
+                            RandomResizedCrop, Scale, TenCrop, ToArray,
+                            UniformCrop)
 from .augmentations_ava import *
 from .compose import Compose
 from .decode import FeatureDecoder, FrameDecoder, VideoDecoder
@@ -26,8 +27,10 @@ from .mix import Cutmix, Mixup, VideoMix
 from .multimodal import FeaturePadding, RandomCap, RandomMask, Tokenize
 from .sample import Sampler
 from .sample_ava import *
+from .segmentation import MultiNorm, MultiRestrictSize
 from .skeleton_pipeline import AutoPadding, Iden, SkeletonNorm
 from .bcn_pipeline import GetBcnBgmTrainLabel
+from .decode_sampler_MRI import SFMRI_DecodeSampler
 
 __all__ = [
     'ImageDecoder', 'RandomMask', 'UniformCrop', 'SkeletonNorm', 'Tokenize',
@@ -37,5 +40,6 @@ __all__ = [
     'GetVideoLabel', 'Cutmix', 'CenterCrop', 'RandomCrop', 'LoadFeat',
     'RandomCap', 'JitterScale', 'Iden', 'VideoMix', 'ColorJitter', 'RandomFlip',
     'ToArray', 'FeaturePadding', 'GetMatchMap', 'GroupRandomFlip', 'MultiCrop',
-    'GetBcnBgmTrainLabel'
+    'SFMRI_DecodeSampler', 'MultiRestrictSize', 'MultiNorm',
+    'RandomResizedCrop', 'GetBcnBgmTrainLabel'
 ]

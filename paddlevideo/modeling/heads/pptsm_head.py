@@ -59,9 +59,8 @@ class ppTSMHead(TSNHead):
     def init_weights(self):
         """Initiate the FC layer parameters"""
         weight_init_(self.fc, 'Normal', 'fc_0.w_0', 'fc_0.b_0', std=self.stdv)
-    
-    
-    def forward(self, x, seg_num):
+
+    def forward(self, x, num_seg):
         """Define how the head is going to run.
         Args:
             x (paddle.Tensor): The input data.
@@ -76,9 +75,9 @@ class ppTSMHead(TSNHead):
         # [N * num_segs, in_channels, 1, 1]
         if self.dropout is not None:
             x = self.dropout(x)
-            # [N * seg_num, in_channels, 1, 1]
-        x = paddle.reshape(x, [-1, seg_num, x.shape[1]])
-        # [N, seg_num, in_channels]
+            # [N * num_seg, in_channels, 1, 1]
+        x = paddle.reshape(x, [-1, num_seg, x.shape[1]])
+        # [N, num_seg, in_channels]
         x = paddle.mean(x, axis=1)
         # [N, in_channels]
         x = paddle.reshape(x, shape=[-1, self.in_channels])

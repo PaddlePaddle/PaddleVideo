@@ -215,3 +215,65 @@ class CustomMultiStepDecay(MultiStepDecay):
 
     def __init__(self, **kargs):
         super().__init__(**kargs)
+
+
+class CustomWarmupCosineStepDecay(LRScheduler):
+
+    def __init__(self,
+                 warmup_iters,
+                 warmup_ratio=0.1,
+                 min_lr=0,
+                 base_lr=3e-5,
+                 max_epoch=30,
+                 last_epoch=-1,
+                 num_iters=None,
+                 verbose=False):
+
+        self.warmup_ratio = warmup_ratio
+        self.min_lr = min_lr
+        self.warmup_epochs = warmup_iters
+        self.warmup_iters = warmup_iters * num_iters
+        self.cnt_iters = 0
+        self.cnt_epoch = 0
+        self.num_iters = num_iters
+        self.tot_iters = max_epoch * num_iters
+        self.max_epoch = max_epoch
+        self.cosine_base_lr = base_lr  # initial lr for all param groups
+        self.regular_lr = self.get_regular_lr()
+        super().__init__(last_epoch=last_epoch, verbose=verbose)
+
+    def annealing_cos(self, start, end, factor, weight=1):
+        cos_out = math.cos(math.pi * factor) + 1
+        return end + 0.5 * weight * (start - end) * cos_out
+
+    def get_regular_lr(self):
+        progress = self.cnt_epoch
+        max_progress = self.max_epoch
+        target_lr = self.min_lr
+        return self.annealing_cos(self.cosine_base_lr, target_lr, progress /
+                                  max_progress)  # self.cosine_base_lr
+
+    def get_warmup_lr(self, cur_iters):
+        k = (1 - cur_iters / self.warmup_iters) * (1 - self.warmup_ratio)
+        warmup_lr = self.regular_lr * (1 - k)  # 3e-5 * (1-k)
+        return warmup_lr
+
+    def step(self, epoch=None):
+        self.regular_lr = self.get_regular_lr()
+        self.last_lr = self.get_lr()
+        self.cnt_epoch = (self.cnt_iters +
+                          1) // self.num_iters  # update step with iters
+        self.cnt_iters += 1
+
+        if self.verbose:
+            print('Epoch {}: {} set learning rate to {}.'.format(
+                self.last_epoch, self.__class__.__name__, self.last_lr))
+
+    def get_lr(self):
+        """Define lr policy"""
+        cur_iter = self.cnt_iters
+        if cur_iter >= self.warmup_iters:
+            return self.regular_lr
+        else:
+            warmup_lr = self.get_warmup_lr(cur_iter)
+            return warmup_lr

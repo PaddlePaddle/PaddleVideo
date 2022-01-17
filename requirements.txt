@@ -11,3 +11,6 @@ scikit-image
 matplotlib
 paddlenlp
 lmdb
+moviepy
+SimpleITK
+ppdet
