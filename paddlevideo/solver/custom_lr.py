@@ -36,6 +36,7 @@ class CustomWarmupCosineDecay(LRScheduler):
     Returns:
         ``CosineAnnealingDecay`` instance to schedule learning rate.
     """
+
     def __init__(self,
                  warmup_start_lr,
                  warmup_epochs,
@@ -109,6 +110,7 @@ class CustomWarmupPiecewiseDecay(LRScheduler):
     Returns:
         ``CustomWarmupPiecewiseDecay`` instance to schedule learning rate.
     """
+
     def __init__(self,
                  warmup_start_lr,
                  warmup_epochs,
@@ -150,8 +152,10 @@ class CustomWarmupPiecewiseDecay(LRScheduler):
         self.last_lr = self.get_lr()
 
         if self.verbose:
-            print('step Epoch {}: {} set learning rate to {}.self.num_iters={}, 1/self.num_iters={}'.format(
-                self.last_epoch, self.__class__.__name__, self.last_lr, self.num_iters, 1/self.num_iters))
+            print(
+                'step Epoch {}: {} set learning rate to {}.self.num_iters={}, 1/self.num_iters={}'
+                .format(self.last_epoch, self.__class__.__name__, self.last_lr,
+                        self.num_iters, 1 / self.num_iters))
 
     def _lr_func_steps_with_relative_lrs(self, cur_epoch, lrs, base_lr, steps,
                                          max_epoch):
@@ -161,9 +165,10 @@ class CustomWarmupPiecewiseDecay(LRScheduler):
             if cur_epoch < step:
                 break
         if self.verbose:
-            print('_lr_func_steps_with_relative_lrs, cur_epoch {}: {}, steps {}, ind {}, step{}, max_epoch{}'.format(
-                cur_epoch, self.__class__.__name__, steps, ind, step, max_epoch ))
-
+            print(
+                '_lr_func_steps_with_relative_lrs, cur_epoch {}: {}, steps {}, ind {}, step{}, max_epoch{}'
+                .format(cur_epoch, self.__class__.__name__, steps, ind, step,
+                        max_epoch))
 
         return lrs[ind - 1] * base_lr
 
@@ -190,14 +195,23 @@ class CustomWarmupPiecewiseDecay(LRScheduler):
             alpha = (lr_end - lr_start) / self.warmup_epochs
             lr = self.last_epoch * alpha + lr_start
         if self.verbose:
-            print('get_lr, Epoch {}: {}, lr {}, lr_end {}, self.lrs{}, self.step_base_lr{}, self.steps{}, self.max_epoch{}'.format(
-                self.last_epoch, self.__class__.__name__, lr, lr_end, self.lrs, self.step_base_lr, self.steps, self.max_epoch ))
+            print(
+                'get_lr, Epoch {}: {}, lr {}, lr_end {}, self.lrs{}, self.step_base_lr{}, self.steps{}, self.max_epoch{}'
+                .format(self.last_epoch, self.__class__.__name__, lr, lr_end,
+                        self.lrs, self.step_base_lr, self.steps,
+                        self.max_epoch))
 
- 
         return lr
 
 
 class CustomPiecewiseDecay(PiecewiseDecay):
+
     def __init__(self, **kargs):
         kargs.pop('num_iters')
+        super().__init__(**kargs)
+
+
+class CustomMultiStepDecay(MultiStepDecay):
+
+    def __init__(self, **kargs):
         super().__init__(**kargs)

@@ -15,7 +15,8 @@
 from ..utils import build
 from .registry import (BACKBONES, BBOX_ASSIGNERS, BBOX_CODERS, BBOX_SAMPLERS,
                        DETECTORS, ESTIMATORS, HEADS, LOCALIZERS, LOSSES,
-                       MULTIMODAL, PARTITIONERS, RECOGNIZERS, ROI_EXTRACTORS)
+                       MULTIMODAL, PARTITIONERS, RECOGNIZERS, ROI_EXTRACTORS,
+                       SEGMENTERS)
 
 
 def build_backbone(cfg):
@@ -93,6 +94,11 @@ def build_multimodal(cfg):
     return build(cfg, MULTIMODAL, key='framework')
 
 
+def build_segmenter(cfg):
+    """Build segmenter."""
+    return build(cfg, SEGMENTERS, key='framework')
+
+
 def build_model(cfg):
     cfg_copy = cfg.copy()
     framework_type = cfg_copy.get('framework')
@@ -108,5 +114,7 @@ def build_model(cfg):
         return build_estimator(cfg)
     elif framework_type in MULTIMODAL:
         return build_multimodal(cfg)
+    elif framework_type in SEGMENTERS:
+        return build_segmenter(cfg)
     else:
         raise NotImplementedError

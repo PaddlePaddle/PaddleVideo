@@ -1,0 +1,75 @@
+MODEL: #MODEL field
+    framework: "BcnBgm"
+    backbone:
+        name: "BcnBgm"
+        dataset: "gtea"
+        use_full: True
+    loss:
+        name: "BcnBgmLoss"
+    head:
+        name: "BcnBgmHead"
+        dataset: "gtea"
+        use_full: True
+        test_mode: "more"
+        results_path: "./output/BCN/gtea/split4/BcnBgmFull/results"
+
+DATASET: #DATASET field
+    batch_size: 1
+    valid_batch_size: 1
+    test_batch_size: 1
+    num_workers: 4
+    train:
+        format: 'BcnBgmDataset'
+        file_path: "./data/gtea/splits/train.split4.bundle"
+        use_full: True
+        bd_ratio: 0.05
+    valid:
+        format: 'BcnBgmDataset'
+        file_path: "./data/gtea/splits/test.split4.bundle"
+        use_full: True
+        bd_ratio: 0.05
+    test:
+        format: 'BcnBgmDataset'
+        file_path: "./data/gtea/splits/test.split4.bundle"
+        use_full: True
+        bd_ratio: 0.05
+
+PIPELINE: #PIPELINE field
+    train:
+        decode:
+            name: "GetBcnBgmTrainLabel"
+
+    valid:
+        decode:
+            name: "GetBcnBgmTrainLabel"
+
+    test:
+        decode:
+            name: "GetBcnBgmTrainLabel"
+
+OPTIMIZER: #OPTIMIZER field
+    name: 'Adam'
+    learning_rate:
+        name: 'CustomMultiStepDecay'
+        learning_rate: 0.0002
+        milestones: [32, 65]
+        gamma: 0.3
+    weight_decay:
+        name: 'L2'
+        value: 0.0001
+
+METRIC: #METRIC field
+    name: 'BcnBgmMetric'
+
+INFERENCE:
+    name: 'BcnBgmFull_Inference_helper'
+    num_channels: 2048
+    sample_rate: 1
+    result_path: './inference/'
+
+output_dir: "./output/BCN/gtea/split4/BcnBgmFull/"
+log_interval: 2000
+epochs: 100
+log_level: "DEBUG"
+save_interval: 2000
+model_name: 'BcnBgmFull'

@@ -1,0 +1,79 @@
+MODEL: #MODEL field
+    framework: "BcnModel" #Mandatory, indicate the type of network, associate to the 'paddlevideo/modeling/framework/'.
+    data_path: "./data/50salads/splits/train.split1.bundle" #Mandatory, the path to [.bundle] file of train data
+    bgm_result_path: "./output/BCN/50salads/split1/BcnBgmResized/results" #Mandatory, the path to results of resized-resolution bgm
+    bgm_pdparams: "./output/BCN/50salads/split1/BcnBgmFull/BcnBgmFull_best.pdparams" #Mandatory, the path to full-resolution bgm weight
+    use_lbp: True #Optional [True, False], use the full model or resized model
+    num_post: 4 #Optional, the layer number of lbp
+    backbone:
+        name: "BcnModel" #Mandatory, indicate the type of backbone, associate to the 'paddlevideo/modeling/backbones/'.
+        num_stages: 4 #Optional, the stage number of model
+        num_layers: 12 #Optional, the layer number in each stage
+        num_f_maps: 256 #Optional, the number of hidden channels in each layer
+        dim: 2048 #Mandatory, the number of channels for input
+        num_classes: 19 #Optional, the number of categories
+        dataset: "50salads" #Optional, dataset
+        use_lbp: True #Optional [True, False], use the full model or resized model
+        num_soft_lbp: 1 #Optional, the layer number of soft_lbp
+    loss:
+        name: "BcnModelLoss"
+
+DATASET: #DATASET field
+    batch_size: 1 #Mandatory, batch size per gpu.
+    valid_batch_size: 1 #Mandatory, valid batch size per gpu.
+    test_batch_size: 1 #Mandatory, test batch size per gpu.
+    num_workers: 2 #Optional, the number of subprocess on each GPU.
+    train:
+        format: 'BcnModelDataset' #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'.
+        file_path: "./data/50salads/splits/train.split1.bundle" #Optional, choose split
+        bd_ratio: 0.05 # Mandatory
+    valid:
+        format: 'BcnModelDataset' #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'.
+        file_path: "./data/50salads/splits/test.split1.bundle" #Optional, choose split
+        bd_ratio: 0.05 #Mandatory
+    test:
+        format: 'BcnModelDataset' #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'.
+        file_path: "./data/50salads/splits/test.split1.bundle" #Optional, choose split
+        bd_ratio: 0.05 #Mandatory
+
+PIPELINE: #PIPELINE field
+    train: #Mandotary, indicate the pipeline to deal with the training data, please refer to the 'paddlevideo/loader/pipelines/'
+        decode:
+            name: "BcnModelPipeline" #Mandatory
+
+    valid: #Mandatory, indicate the pipeline to deal with the validing data. please refer to the 'paddlevideo/loader/pipelines/'
+        decode:
+            name: "BcnModelPipeline" #Mandatory
+
+    test: #Mandatory, indicate the pipeline to deal with the validing data. please refer to the 'paddlevideo/loader/pipelines/'
+        decode:
+            name: "BcnModelPipeline" #Mandatory
+
+OPTIMIZER: #OPTIMIZER field
+        name: 'Adam' #Mandatory, the type of optimizer, please to the 'paddlevideo/solver/'
+        learning_rate: #Mandatory, the type of optimizer, please to the 'paddlevideo/solver/'
+            -
+                name: 'CustomMultiStepDecay' #Mandatory, the learning rate scheduler for main model
+                learning_rate: 0.001
+                milestones: [30]
+                gamma: 0.3
+            -
+                name: 'CustomMultiStepDecay' #Mandatory, the learning rate scheduler for bgm model
+                learning_rate: 0.0001
+                milestones: [30]
+                gamma: 0.3
+
+METRIC:
+    name: 'BcnModelMetric' #Mandatory, the type of optimizer, please to the 'paddlevideo/metrics'
+    overlap: [.1, .25, .5] #Optional, the iou threshold value when calculating f-score
+    actions_map_file_path: "./data/50salads/mapping.txt" # Mandatory, the path to actions_map
+    log_path: "./output/BCN/50salads/split1/BcnModel/metric.csv" #Optional, the path to save metric results
+    dataset: "50salads" #Optional, choose dataset
+
+
+output_dir: "./output/BCN/50salads/split1/BcnModel/" #Optional, path to save output
+model_name: "BcnModel" #Mandatory, model name.
+log_interval: 20 #Optional, the interval of logger.
+epochs: 50 #Mandatory, total epoch
+log_level: "DEBUG" #Optional, the logger level.
+save_interval: 2000 #Optional, the interval of save.

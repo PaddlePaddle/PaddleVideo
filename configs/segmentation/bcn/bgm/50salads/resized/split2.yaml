@@ -1,0 +1,78 @@
+MODEL: #MODEL field
+    framework: "BcnBgm"
+    backbone:
+        name: "BcnBgm"
+        dataset: "50salads"
+        use_full: False
+    loss:
+        name: "BcnBgmLoss"
+    head:
+        name: "BcnBgmHead"
+        dataset: "50salads"
+        use_full: False
+        test_mode: "more"
+        results_path: "./output/BCN/50salads/split2/BcnBgmResized/results"
+
+DATASET: #DATASET field
+    batch_size: 1
+    valid_batch_size: 1
+    test_batch_size: 1
+    num_workers: 4
+    train:
+        format: 'BcnBgmDataset'
+        file_path: "./data/50salads/splits/train.split2.bundle"
+        use_full: False
+        bd_ratio: 0.05
+    valid:
+        format: 'BcnBgmDataset'
+        file_path: "./data/50salads/splits/test.split2.bundle"
+        use_full: False
+        bd_ratio: 0.05
+    test:
+        format: 'BcnBgmDataset'
+        file_path: "./data/50salads/splits/test.split2.bundle"
+        use_full: False
+        bd_ratio: 0.05
+
+PIPELINE: #PIPELINE field
+    train:
+        decode:
+            name: "GetBcnBgmTrainLabel"
+
+    valid:
+        decode:
+            name: "GetBcnBgmTrainLabel"
+
+    test:
+        decode:
+            name: "GetBcnBgmTrainLabel"
+
+OPTIMIZER: #OPTIMIZER field
+    name: 'Adam'
+    learning_rate:
+        name: 'CustomMultiStepDecay'
+        learning_rate: 0.001
+        milestones: [100, 200]
+        gamma: 0.3
+    weight_decay:
+        name: 'L2'
+        value: 0.0001
+
+METRIC:
+    name: 'BcnBgmMetric'
+
+INFERENCE:
+    name: 'BcnBgmResized_Inference_helper'
+    num_channels: 2048
+    sample_rate: 2
+    result_path: './inference/'
+    mode: 'more'
+    temporal_dim: 400
+    dataset: '50salads'
+
+output_dir: "./output/BCN/50salads/split2/BcnBgmResized/"
+model_name: "BcnBgmResized"
+log_interval: 2000
+epochs: 300
+log_level: "DEBUG"
+save_interval: 2000
