@@ -71,7 +71,7 @@ class SubBatchNorm3D(paddle.nn.Layer):
                 attr=self.weight_attr,
                 shape=[self.num_features],
                 default_initializer=paddle.nn.initializer.Constant(1.0))
-            self.weight.stop_gradient = self.weight_attr != None \
+            self.weight.stop_gradient = self.weight_attr is not None \
                                         and self.weight_attr.learning_rate == 0.
 
         if self.bias_attr == False:
@@ -83,7 +83,7 @@ class SubBatchNorm3D(paddle.nn.Layer):
             self.bias = self.create_parameter(attr=self.bias_attr,
                                               shape=[self.num_features],
                                               is_bias=True)
-            self.bias.stop_gradient = self.bias_attr != None \
+            self.bias.stop_gradient = self.bias_attr is not None \
                                       and self.bias_attr.learning_rate == 0.
 
         # set weights and bias fixed (inner).

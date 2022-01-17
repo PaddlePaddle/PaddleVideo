@@ -64,7 +64,7 @@ But...，
 `import paddle.nn.functional as F`
 
 
-`shifts = F.temporal_shift(inputs, self.num_seg,1.0 / self.num_seg)`
+`shifts = F.temporal_shift(inputs, self.num_seg, 1.0 / self.num_seg)`
 
 两行代码就可以实现TSM了，是不是很简单？
 

@@ -9,8 +9,8 @@ DATASET: #DATASET field
     test_batch_size: 1
     test:
         format: "MSRVTTDataset"
-        file_path: "/workspace/huangjun12/PaddleProject/ActBert/main/test_data/MSRVTT_JSFUSION_test.csv"
-        features_path: "/workspace/huangjun12/PaddleProject/ActBert/main/test_data/msrvtt_test.lmdb"
+        file_path: "./test_data/MSRVTT_JSFUSION_test.csv"
+        features_path: "./test_data/msrvtt_test.lmdb"
 
 PIPELINE: #PIPELINE field
     test:

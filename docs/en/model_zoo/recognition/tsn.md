@@ -100,7 +100,7 @@ python3.7 tools/predict.py --input_file data/example.avi \
 
 **data processing:**
 
-- The model reads the `mp4` data in the Kinetics-400 data set, first divides each piece of video data into `seg_num` segments, and then evenly extracts 1 frame of image from each segment to obtain sparsely sampled `seg_num` video frames , And then do the same random data enhancement to this `seg_num` frame image, including multi-scale random cropping, random left and right flips, data normalization, etc., and finally zoom to `target_size`
+- The model reads the `mp4` data in the Kinetics-400 data set, first divides each piece of video data into `num_seg` segments, and then evenly extracts 1 frame of image from each segment to obtain sparsely sampled `num_seg` video frames , And then do the same random data enhancement to this `num_seg` frame image, including multi-scale random cropping, random left and right flips, data normalization, etc., and finally zoom to `target_size`
 
 **training strategy:**
 

@@ -58,7 +58,7 @@ class FeatureReader(DataReader):
         self.batch_size = cfg[mode.upper()]['batch_size']
         self.filelist = cfg[mode.upper()]['filelist']
         self.eigen_file = cfg.MODEL.get('eigen_file', None)
-        self.seg_num = cfg.MODEL.get('seg_num', None)
+        self.num_seg = cfg.MODEL.get('num_seg', None)
         self.loss_type = cfg.TRAIN['loss_type']
         vocab_file = os.path.join(cfg.TRAIN.ernie_pretrain_dict_path,
                                   'vocab.txt')
@@ -120,10 +120,13 @@ class FeatureReader(DataReader):
                         yield batch_out
                         batch_out = []
                 except Exception as e:
-                    print("warning: load data {} failed, {}".format(filepath, str(e)))
+                    print("warning: load data {} failed, {}".format(
+                        filepath, str(e)))
                     traceback.print_exc()
                     continue
-	    # if self.mode == 'infer' and len(batch_out) > 0:
+
+
+# if self.mode == 'infer' and len(batch_out) > 0:
             if len(batch_out) > 0:
                 yield batch_out
 
@@ -224,13 +227,13 @@ def make_one_hot(label, dim=15):
     return one_hot_soft_label
 
 
-def generate_random_idx(feature_len, seg_num):
+def generate_random_idx(feature_len, num_seg):
     """
     generate_random_idx
     """
     idxs = []
-    stride = float(feature_len) / seg_num
-    for i in range(seg_num):
+    stride = float(feature_len) / num_seg
+    for i in range(num_seg):
         pos = (i + np.random.random()) * stride
         idxs.append(min(feature_len - 1, int(pos)))
     return idxs

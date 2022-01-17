@@ -27,20 +27,24 @@ import os
 import os.path as osp
 from paddlevideo.utils import get_logger, get_dist_info
 import paddle.distributed as dist
-import sys      
+import sys
 import numpy as np
 from pathlib import Path
+from datetime import datetime
 
 
-def det2csv(dataset, results, custom_classes):
+def det2csv(info, dataset_len, results, custom_classes):
     csv_results = []
-    for idx in range(len(dataset)):
-        video_id = dataset.info[idx]['video_id']
-        timestamp = dataset.info[idx]['timestamp']
- 
+    for idx in range(dataset_len):
+        video_id = info[idx]['video_id']
+        timestamp = info[idx]['timestamp']
+
         result = results[idx]
         for label, _ in enumerate(result):
             for bbox in result[label]:
+                if type(bbox) == paddle.Tensor:
+                    bbox = bbox.numpy()
+                
                 bbox_ = tuple(bbox.tolist())
                 if custom_classes is not None:
                     actual_label = custom_classes[label + 1]
@@ -54,9 +58,9 @@ def det2csv(dataset, results, custom_classes):
 
 
 # results is organized by class
-def results2csv(dataset, results, out_file, custom_classes=None):
+def results2csv(info, dataset_len, results, out_file, custom_classes=None):
     if isinstance(results[0], list):
-        csv_results = det2csv(dataset, results, custom_classes)
+        csv_results = det2csv(info, dataset_len, results, custom_classes)
 
     # save space for float
     def tostr(item):
@@ -218,8 +222,7 @@ def ava_eval(result_file,
 
     if result_type == 'proposal':
         gts = [
-            np.array(gt_boxes[image_key], dtype=float)
-            for image_key in gt_boxes
+            np.array(gt_boxes[image_key], dtype=float) for image_key in gt_boxes
         ]
         proposals = []
         for image_key in gt_boxes:
@@ -298,26 +301,32 @@ def ava_eval(result_file,
         }
         return ret
 
+
 def mkdir_or_exist(dir_name, mode=0o777):
     if dir_name == '':
         return
     dir_name = osp.expanduser(dir_name)
     os.makedirs(dir_name, mode=mode, exist_ok=True)
 
+
 def dump_to_fileobj(obj, file, **kwargs):
     kwargs.setdefault('protocol', 2)
     pickle.dump(obj, file, **kwargs)
+
 
 def dump_to_path(obj, filepath, mode='wb'):
     with open(filepath, mode) as f:
         dump_to_fileobj(obj, f)
 
+
 def load_from_fileobj(file, **kwargs):
     return pickle.load(file, **kwargs)
+
 
 def load_from_path(filepath, mode='rb'):
     with open(filepath, mode) as f:
         return load_from_fileobj(f)
+
 
 def collect_results_cpu(result_part, size):
     """Collect results in cpu mode.
@@ -353,12 +362,32 @@ def collect_results_cpu(result_part, size):
     ordered_results = []
     for res in zip(*part_list):
         ordered_results.extend(list(res))
-    ordered_results = ordered_results[:size]#the dataloader may pad some samples
+    ordered_results = ordered_results[:
+                                      size]  #the dataloader may pad some samples
     #5. remove results of all parts from tmp dir, avoid dump_file fail to tmp dir when dir not exists.
     for i in range(world_size):
         part_file = osp.join(tmpdir, f'part_{i}.pkl')
         os.remove(part_file)
- 
+
     return ordered_results
 
 
+def ava_evaluate_results(info, dataset_len, results, custom_classes, label_file,
+                         file_path, exclude_file):
+    # need to create a temp result file
+    time_now = datetime.now().strftime('%Y%m%d_%H%M%S')
+    temp_file = f'AVA_{time_now}_result.csv'
+    results2csv(info, dataset_len, results, temp_file)
+    ret = {}
+    eval_result = ava_eval(
+        temp_file,
+        'mAP',
+        label_file,
+        file_path,  #ann_file,
+        exclude_file,
+        custom_classes=custom_classes)
+    ret.update(eval_result)
+
+    os.remove(temp_file)
+
+    return ret
