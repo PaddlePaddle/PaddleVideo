@@ -19,3 +19,4 @@ lap
 motmetrics
 xmltodict
 openpyxl
+cython
