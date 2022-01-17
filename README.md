@@ -74,7 +74,7 @@ PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_githu
     <td colspan="5" style="font-weight:bold;">时空动作检测方法</td>
   </tr>
   <tr>
-    <td><a href="slowfast.md">SlowFast+Fast R-CNN</a>
+    <td><a href="docs/zh-CN/model_zoo/detection/SlowFast_FasterRCNN.md">SlowFast+Fast R-CNN</a>
     <td></td>
     <td></td>
     <td></td>
@@ -114,6 +114,59 @@ PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_githu
 
 - 模型库使用前请参考[安装说明](docs/zh-CN/install.md)、[使用指南](docs/zh-CN/usage.md)。
 
+
+### 数据集
+
+<table>
+  <tbody><tr>
+    <td colspan="4">动作识别</td>
+  </tr>
+  <tr>
+    <td><a href="docs/zh-CN/dataset/k400.md">Kinetics-400</a> (<a href="https://deepmind.com/research/open-source/kinetics/" rel="nofollow">Homepage</a>) (CVPR'2017)</td>
+    <td><a href="docs/zh-CN/dataset/ucf101.md">UCF101</a> (<a href="https://www.crcv.ucf.edu/research/data-sets/ucf101/" rel="nofollow">Homepage</a>) (CRCV-IR-12-01)</td>
+    <td><a href="docs/zh-CN/dataset/ActivityNet.md">ActivityNet</a> (<a href="http://activity-net.org/" rel="nofollow">Homepage</a>) (CVPR'2015)</td>
+    <td><a href="docs/zh-CN/dataset/youtube8m.md">YouTube-8M</a> (<a href="https://research.google.com/youtube8m/" rel="nofollow">Homepage</a>) (CVPR'2017)</td>
+  </tr>
+  <tr>
+    <td colspan="4">动作定位</td>
+  </tr>
+  <tr>
+    <td><a href="docs/zh-CN/dataset/ActivityNet.md">ActivityNet</a> (<a href="http://activity-net.org/" rel="nofollow">Homepage</a>) (CVPR'2015)</td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td colspan="4">时空动作检测</td>
+  </tr>
+  <tr>
+    <td><a href="docs/zh-CN/dataset/AVA.md">AVA</a> (<a href="https://research.google.com/ava/index.html" rel="nofollow">Homepage</a>) (CVPR'2018)</td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td colspan="4">基于骨架的动作识别</td>
+  </tr>
+  <tr>
+    <td><a href="docs/zh-CN/dataset/ntu-rgbd.md">NTURGB+D</a> (<a href="https://rose1.ntu.edu.sg/dataset/actionRecognition/" rel="nofollow">Homepage</a>) (IEEE CS'2016)</td>
+    <td><a href="docs/zh-CN/dataset/fsd.md">FSD</a> (<a href="https://aistudio.baidu.com/aistudio/competition/detail/115/0/introduction" rel="nofollow">Homepage</a>)</td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td colspan="4">单目深度估计</td>
+  </tr>
+  <tr>
+    <td><a href="docs/zh-CN/dataset/Oxford_RobotCar.md">Oxford-RobotCar</a> (<a href="https://robotcar-dataset.robots.ox.ac.uk/" rel="nofollow">Homepage</a>) (IJRR'2017)</td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+</tbody>
+</table>
+
+
 ### 应用案例
 
 | Applications | Descriptions |
@@ -129,6 +182,7 @@ PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_githu
 | [EIVideo](applications/EIVideo) | 视频交互式分割工具|
 | [Anti-UAV](applications/Anti-UAV) |无人机检测方案|
 
+
 ## 文档教程
 - AI-Studio教程
     - [【官方】Paddle2.1实现视频理解优化模型 -- PP-TSM](https://aistudio.baidu.com/aistudio/projectdetail/3399656?contributionType=1)
@@ -137,6 +191,7 @@ PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_githu
     - [【官方】Paddle 2.1实现视频理解经典模型 - TSM](https://aistudio.baidu.com/aistudio/projectdetail/2310889)
     - [BMN视频动作定位](https://aistudio.baidu.com/aistudio/projectdetail/2250674)
     - [花样滑冰选手骨骼点动作识别ST-GCN教程](https://aistudio.baidu.com/aistudio/projectdetail/2417717)
+    - [【实践】CV领域的Transformer模型TimeSformer实现视频理解](https://aistudio.baidu.com/aistudio/projectdetail/3413254?contributionType=1)
 - 贡献代码
     - [如何添加新算法](./docs/zh-CN/contribute/add_new_algorithm.md)
     - [配置系统设计解析](./docs/en/tutorials/config.md)
@@ -146,6 +201,7 @@ PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_githu
 ## 赛事支持
 - [CCKS 2021：知识增强的视频语义理解](https://www.biendata.xyz/competition/ccks_2021_videounderstanding/)
 - [基于飞桨实现花样滑冰选手骨骼点动作识别大赛](https://aistudio.baidu.com/aistudio/competition/detail/115/0/introduction)
+- [基于飞桨实现乒乓球时序动作定位大赛](https://aistudio.baidu.com/aistudio/competition/detail/127/0/introduction)
 
 ## 许可证书
 本项目的发布受[Apache 2.0 license](LICENSE)许可认证。
