@@ -144,7 +144,10 @@ def main():
         output_tensor_list.append(predictor.get_output_handle(item))
 
     # get the absolute file path(s) to be processed
-    files = parse_file_paths(args.input_file)
+    if model_name in ["MSTCN", "ASRF"]:
+        files = InferenceHelper.get_process_file(args.input_file)
+    else:
+        files = parse_file_paths(args.input_file)
 
     if model_name == 'TransNetV2':
         for file in files:

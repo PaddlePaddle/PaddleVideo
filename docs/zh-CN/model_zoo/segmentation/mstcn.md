@@ -85,7 +85,7 @@ python3.7 tools/export_model.py \
 ### 使用预测引擎推理
 
 ```bash
-python3.7 tools/predict.py --input_file data/example_feat.list \
+python3.7 tools/predict.py --input_file data/gtea/splits/test.split1.bundle \
                            --config configs/segmentation/ms_tcn/ms_tcn_GTEA.yaml \
                            --model_file inference/MSTCN.pdmodel \
                            --params_file inference/MSTCN.pdiparams \

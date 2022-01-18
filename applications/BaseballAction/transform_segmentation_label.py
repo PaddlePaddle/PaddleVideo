@@ -131,6 +131,9 @@ def localization_convert_segmentation_label(label, prefix_data_path, out_path):
             else:
                 pass
 
+        if len(seg_label) != num_feture:
+            seg_label = seg_label[:num_feture]
+
         out_txt_file_path = os.path.join(out_path, "groundTruth",
                                          video_name + ".txt")
         str = '\n'
