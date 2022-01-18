@@ -26,9 +26,8 @@ def generate_mapping_list_txt(action_dict, out_path):
     f.close()
 
 
-def segmentation_convert_localization_label(prefix_data_path, out_path,
-                                            action_dict, fps):
-    label_path = os.path.join(prefix_data_path, "train")
+def segmentation_convert_localization_label(prefix_data_path, out_path, action_dict, fps):
+    label_path = os.path.join(prefix_data_path, "groundTruth")
     label_txt_name_list = os.listdir(label_path)
 
     labels_dict = {}
@@ -37,38 +36,38 @@ def segmentation_convert_localization_label(prefix_data_path, out_path,
     for label_name in tqdm(label_txt_name_list, desc='label convert:'):
         label_dict = {}
         label_dict["url"] = label_name.split(".")[0] + ".mp4"
-        label_txt_path = os.path.join(prefix_data_path, "train", label_name)
-
+        label_txt_path = os.path.join(prefix_data_path, "groundTruth", label_name)
+        
         with open(label_txt_path, "r", encoding='utf-8') as f:
             gt = f.read().split("\n")[:-1]
         label_dict["total_frames"] = len(gt)
-
+        
         boundary_index_list = [0]
         before_action_name = gt[0]
         for index in range(1, len(gt)):
             if before_action_name != gt[index]:
                 boundary_index_list.append(index)
+                before_action_name = gt[index]
         actions_list = []
         for index in range(len(boundary_index_list) - 1):
-            if gt[index] != "None":
+            if gt[boundary_index_list[index]] != "None":
                 action_name = gt[boundary_index_list[index]]
                 start_sec = float(boundary_index_list[index]) / float(fps)
-                end_sec = float(boundary_index_list[index + 1]) / float(fps)
-                action_id = list(action_dict.keys())[list(
-                    action_dict.values()).index(action_name)]
+                end_sec = float(boundary_index_list[index + 1] - 1) / float(fps)
+                action_id = action_dict[action_name]
                 label_action_dict = {}
                 label_action_dict["label_names"] = action_name
                 label_action_dict["start_id"] = start_sec
                 label_action_dict["end_id"] = end_sec
                 label_action_dict["label_ids"] = action_id
                 actions_list.append(label_action_dict)
-
+        
         label_dict["actions"] = actions_list
         labels_list.append(label_dict)
     labels_dict["gts"] = labels_list
     output_path = os.path.join(out_path, "output.json")
-    f = open(output_path, "w", encoding='utf-8')
-    f.write(json.dumps(labels_dict, indent=4))
+    f=open(output_path,"w", encoding='utf-8')
+    f.write(json.dumps(labels_dict, indent = 4))
     f.close()
 
 
@@ -160,7 +159,7 @@ def main():
                                                     args.out_path)
 
         elif args.mode == "localization":
-            action_dict = load_action_dict(args.data_path)
+            action_dict = load_action_dict(args.label_path)
             segmentation_convert_localization_label(args.data_path,
                                                     args.out_path,
                                                     action_dict,
