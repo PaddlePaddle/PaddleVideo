@@ -12,10 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from ..metrics.ava_utils import collect_results_cpu
+import shutil
+import pickle
+import time
+import os
 import os.path as osp
 import time
-
 import numpy as np
+
 import paddle
 import paddle.distributed as dist
 import paddle.distributed.fleet as fleet
@@ -23,13 +28,20 @@ from paddlevideo.utils import (add_profiler_step, build_record, get_logger,
                                load, log_batch, log_epoch, mkdir, save)
 
 from ..loader.builder import build_dataloader, build_dataset
-from ..metrics.ava_utils import collect_results_cpu
 from ..modeling.builder import build_model
+from ..metrics import build_metric
 from ..solver import build_lr, build_optimizer
 from ..utils import do_preciseBN
+from paddlevideo.utils import get_logger
+from paddlevideo.utils import (build_record, log_batch, log_epoch, save, load,
+                               mkdir)
+import sys
+import numpy as np
+from pathlib import Path
 
-paddle.framework.seed(1234)
-np.random.seed(1234)
+paddle.framework.seed(1538574472)
+paddle.seed(1538574472)
+np.random.seed(1538574472)
 
 
 def train_model(cfg,
@@ -125,10 +137,44 @@ def train_model(cfg,
         )
         valid_loader = build_dataloader(valid_dataset,
                                         **validate_dataloader_setting)
+        cfg.METRIC.data_size = len(valid_dataset)
+        cfg.METRIC.batch_size = batch_size
+        cfg.METRIC.log_interval = cfg.log_interval
+        # build metric
+        if cfg.MODEL.framework in ["BcnBgm", "BcnModel"]:
+            Metric = build_metric(cfg.METRIC)
 
     # 3. Construct solver.
-    lr = build_lr(cfg.OPTIMIZER.learning_rate, len(train_loader))
-    optimizer = build_optimizer(cfg.OPTIMIZER, lr, model=model)
+    if cfg.MODEL.framework == "BcnModel":
+        lr_list = []
+        for sub_learning_rate in cfg.OPTIMIZER.get("learning_rate"):
+            lr = build_lr(sub_learning_rate, len(train_loader))
+            lr_list.append(lr)
+        model.backbone.bgm.weight_attr = paddle.ParamAttr(
+            learning_rate=lr_list[1])
+        model.backbone.bgm.bias_attr = paddle.ParamAttr(
+            learning_rate=lr_list[1])
+        optimizer = build_optimizer(cfg.OPTIMIZER,
+                                    lr_list[0],
+                                    parameter_list=[{
+                                        'params':
+                                        model.backbone.stage1.parameters()
+                                    }, {
+                                        'params':
+                                        model.backbone.stages.parameters()
+                                    }, {
+                                        'params':
+                                        model.backbone.stageF.parameters()
+                                    }, {
+                                        'params':
+                                        model.backbone.bgm.parameters(),
+                                        'learning_rate':
+                                        1
+                                    }])
+    else:
+        lr = build_lr(cfg.OPTIMIZER.learning_rate, len(train_loader))
+        optimizer = build_optimizer(cfg.OPTIMIZER, lr, model=model)
+
     if use_fleet:
         optimizer = fleet.distributed_optimizer(optimizer)
     # Resume
@@ -240,11 +286,15 @@ def train_model(cfg,
                 log_batch(record_list, i, epoch + 1, cfg.epochs, "train", ips)
 
             # learning rate iter step
-            if cfg.OPTIMIZER.learning_rate.get("iter_step"):
+            if (cfg.MODEL.framework != "BcnModel") and (
+                    cfg.OPTIMIZER.learning_rate.get("iter_step")):
                 lr.step()
 
         # learning rate epoch step
-        if not cfg.OPTIMIZER.learning_rate.get("iter_step"):
+        if cfg.MODEL.framework == "BcnModel":
+            for sub_lr in lr_list:
+                sub_lr.step()
+        elif not cfg.OPTIMIZER.learning_rate.get("iter_step"):
             lr.step()
 
         ips = "avg_ips: {:.5f} instance/sec.".format(
@@ -263,11 +313,17 @@ def train_model(cfg,
             #single_gpu_test and multi_gpu_test
             for i, data in enumerate(valid_loader):
                 outputs = model(data, mode='valid')
+
+                if cfg.MODEL.framework in ["BcnBgm", "BcnModel"]:
+                    Metric.update(i, data, outputs)
+
                 if cfg.MODEL.framework == "FastRCNN":
                     results.extend(outputs)
 
                 #log_record
-                if cfg.MODEL.framework != "FastRCNN":
+                if cfg.MODEL.framework not in [
+                        "FastRCNN", "BcnBgm", "BcnModel"
+                ]:
                     for name, value in outputs.items():
                         if name in record_list:
                             record_list[name].update(value, batch_size)
@@ -312,6 +368,11 @@ def train_model(cfg,
                         best = record_list[top_flag].avg
                         best_flag = True
 
+            if cfg.MODEL.framework in ["BcnBgm", "BcnModel"]:
+                new_best = Metric.accumulate()
+                if not isinstance(new_best, list) and new_best > best:
+                    best = new_best
+                    best_flag = True
             return best, best_flag
 
         # use precise bn to improve acc

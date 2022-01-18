@@ -1,0 +1,79 @@
+MODEL: #MODEL field
+    framework: "BcnModel"
+    data_path: "./data/breakfast/splits/train.split3.bundle"
+    bgm_result_path: "./output/BCN/breakfast/split3/BcnBgmResized/results"
+    bgm_pdparams: "./output/BCN/breakfast/split3/BcnBgmFull/BcnBgmFull_best.pdparams"
+    use_lbp: True
+    num_post: 4
+    backbone:
+        name: "BcnModel" #Optional, model'.
+        num_stages: 4
+        num_layers: 12
+        num_f_maps: 256
+        dim: 2048
+        num_classes: 48
+        dataset: "breakfast"
+        use_lbp: True
+        num_soft_lbp: 1
+    loss:
+        name: "BcnModelLoss"
+
+DATASET: #DATASET field
+    batch_size: 1 #Mandatory, batch size per gpu.
+    valid_batch_size: 1 #Optional, valid batch size per gpu.
+    test_batch_size: 1 #Optional, test batch size per gpu.
+    num_workers: 2 #Mandatory, the number of subprocess on each GPU.
+    train:
+        format: 'BcnModelDataset'
+        file_path: "./data/breakfast/splits/train.split3.bundle"
+        bd_ratio: 0.05
+    valid:
+        format: 'BcnModelDataset'
+        file_path: "./data/breakfast/splits/test.split3.bundle"
+        bd_ratio: 0.05
+    test:
+        format: 'BcnModelDataset'
+        file_path: "./data/breakfast/splits/test.split3.bundle"
+        bd_ratio: 0.05
+
+PIPELINE: #PIPELINE field
+    train: #Mandotary, indicate the pipeline to deal with the training data, please refer to the 'paddlevideo/loader/pipelines/'
+        decode:
+            name: "BcnModelPipeline" #Decoder type.
+
+    valid: #Mandatory, indicate the pipeline to deal with the validing data. please refer to the 'paddlevideo/loader/pipelines/'
+        decode:
+            name: "BcnModelPipeline" #Decoder type.
+
+    test: #Mandatory, indicate the pipeline to deal with the validing data. please refer to the 'paddlevideo/loader/pipelines/'
+        decode:
+            name: "BcnModelPipeline" #Decoder type.
+
+OPTIMIZER: #OPTIMIZER field
+        name: 'Adam'
+        learning_rate:
+            -
+                name: 'CustomMultiStepDecay'
+                learning_rate: 0.0005
+                milestones: [20]
+                gamma: 0.3
+            -
+                name: 'CustomMultiStepDecay'
+                learning_rate: 0.00005
+                milestones: [20]
+                gamma: 0.3
+
+METRIC:
+    name: 'BcnModelMetric'
+    overlap: [.1, .25, .5]
+    actions_map_file_path: "./data/breakfast/mapping.txt"
+    log_path: "./output/BCN/breakfast/split3/BcnModel/metric.csv"
+    dataset: "breakfast"
+
+
+output_dir: "./output/BCN/breakfast/split3/BcnModel/"
+model_name: "BcnModel" #Mandatory, model name.
+log_interval: 2000 #Optional, the interval of logger.
+epochs: 50 #Mandatory, total epoch
+log_level: "DEBUG" #Optional, the logger level.
+save_interval: 2000

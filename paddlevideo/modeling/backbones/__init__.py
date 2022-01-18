@@ -30,11 +30,12 @@ from .swin_transformer import SwinTransformer3D
 from .transnetv2 import TransNetV2
 from .vit import VisionTransformer
 from .vit_tweaks import VisionTransformer_tweaks
+from .bcn import BcnBgm, BcnModel
 
 __all__ = [
     'ResNet', 'ResNetTSM', 'ResNetTweaksTSM', 'ResNetSlowFast', 'BMN',
     'ResNetTweaksTSN', 'VisionTransformer', 'STGCN', 'AGCN', 'TransNetV2',
     'SwinTransformer3D', 'BertForMultiModalPreTraining', 'ADDS_DepthNet',
     'VisionTransformer_tweaks', 'ResNetTSN_MRI', 'ResNetTSM_MRI',
-    'ResNetSlowFast_MRI', 'CFBI'
+    'ResNetSlowFast_MRI', 'CFBI', 'BcnBgm', 'BcnModel'
 ]

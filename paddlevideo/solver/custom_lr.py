@@ -36,6 +36,7 @@ class CustomWarmupCosineDecay(LRScheduler):
     Returns:
         ``CosineAnnealingDecay`` instance to schedule learning rate.
     """
+
     def __init__(self,
                  warmup_start_lr,
                  warmup_epochs,
@@ -109,6 +110,7 @@ class CustomWarmupPiecewiseDecay(LRScheduler):
     Returns:
         ``CustomWarmupPiecewiseDecay`` instance to schedule learning rate.
     """
+
     def __init__(self,
                  warmup_start_lr,
                  warmup_epochs,
@@ -203,12 +205,20 @@ class CustomWarmupPiecewiseDecay(LRScheduler):
 
 
 class CustomPiecewiseDecay(PiecewiseDecay):
+
     def __init__(self, **kargs):
         kargs.pop('num_iters')
         super().__init__(**kargs)
 
 
+class CustomMultiStepDecay(MultiStepDecay):
+
+    def __init__(self, **kargs):
+        super().__init__(**kargs)
+
+
 class CustomWarmupCosineStepDecay(LRScheduler):
+
     def __init__(self,
                  warmup_iters,
                  warmup_ratio=0.1,

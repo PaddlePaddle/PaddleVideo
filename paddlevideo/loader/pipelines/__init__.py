@@ -29,6 +29,7 @@ from .sample import Sampler
 from .sample_ava import *
 from .segmentation import MultiNorm, MultiRestrictSize
 from .skeleton_pipeline import AutoPadding, Iden, SkeletonNorm
+from .bcn_pipeline import GetBcnBgmTrainLabel
 from .decode_sampler_MRI import SFMRI_DecodeSampler
 
 __all__ = [
@@ -39,5 +40,6 @@ __all__ = [
     'GetVideoLabel', 'Cutmix', 'CenterCrop', 'RandomCrop', 'LoadFeat',
     'RandomCap', 'JitterScale', 'Iden', 'VideoMix', 'ColorJitter', 'RandomFlip',
     'ToArray', 'FeaturePadding', 'GetMatchMap', 'GroupRandomFlip', 'MultiCrop',
-    'SFMRI_DecodeSampler', 'MultiRestrictSize', 'MultiNorm', 'RandomResizedCrop'
+    'SFMRI_DecodeSampler', 'MultiRestrictSize', 'MultiNorm',
+    'RandomResizedCrop', 'GetBcnBgmTrainLabel'
 ]

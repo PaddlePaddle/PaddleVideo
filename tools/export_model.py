@@ -135,6 +135,11 @@ def get_input_spec(cfg, model_name):
             ],
                       dtype='float32'),
         ]]
+    elif model_name in ['BcnModel', 'BcnBgmFull', 'BcnBgmResized']:
+        input_spec = [[
+            InputSpec(shape=[1, cfg.num_channels, None], dtype='float32'),
+            InputSpec(shape=[1, 1, None], dtype='float32', name='mask'),
+        ]]
     elif model_name in ['TransNetV2']:
         input_spec = [[
             InputSpec(shape=[
@@ -190,6 +195,7 @@ def main():
 
     input_spec = get_input_spec(cfg.INFERENCE, model_name)
     model = to_static(model, input_spec=input_spec)
+    print(model.parameters)
     paddle.jit.save(model, osp.join(args.output_path, model_name))
     print(
         f"model ({model_name}) has been already saved in ({args.output_path}).")

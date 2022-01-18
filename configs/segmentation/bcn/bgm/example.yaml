@@ -1,0 +1,79 @@
+# BCN-bgm parameter
+MODEL: #MODEL field
+    framework: "BcnBgm" #Mandatory, indicate the type of network, associate to the 'paddlevideo/modeling/framework/'.
+    backbone:
+        name: "BcnBgm" #Mandatory, indicate the type of backbone, associate to the 'paddlevideo/modeling/backbones/'.
+        dataset: "50salads" #Optional [50salads, gtea, breakfast], indicate the type of dataset, associate to the 'paddlevidel/data'.
+        use_full: True #Optional [True, False], use the full model or resized model.
+    loss:
+        name: "BcnBgmLoss" #Mandatory, indicate the type of loss, associate to the 'paddlevideo/modeling/losses/'.
+    head:
+        name: "BcnBgmHead" #Mandatory, indicate the type of loss, associate to the 'paddlevideo/modeling/heads/'.
+        dataset: "50salads" #Optional [50salads, gtea, breakfast], indicate the type of dataset, associate to the 'paddlevidel/data'.
+        use_full: True #Mandatory [True, False], use the full model or resized model.
+        test_mode: "more" #Optional [more, less], how to calculate the results of the test set.
+        results_path: "./output/BCN/50salads/split1/BcnBgmResized/results" #Optional, the path to save the segmentation result, like "./output/BCN/[gtea, 50salads, breakfast]/[split1, split2...]/[BcnBgmFull, BcnBgmResized]/results".
+
+DATASET: #DATASET field
+    batch_size: 1 #Mandatory, batch size per gpu.
+    valid_batch_size: 1 #Mandatory, valid batch size per gpu.
+    test_batch_size: 1 #Mandatory, test batch size per gpu.
+    num_workers: 4 #Optional, the number of subprocess on each GPU.
+    train:
+        format: 'BcnBgmDataset' #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'.
+        file_path: "./data/50salads/splits/train.split1.bundle" #Optional, choose split
+        use_full: True #Optional [True, False], use the full model or resized model.
+        bd_ratio: 0.05 #Mandatory
+    valid:
+        format: 'BcnBgmDataset' #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'.
+        file_path: "./data/50salads/splits/train.split1.bundle" #Optional, choose split
+        use_full: True #Optional [True, False], use the full model or resized model.
+        bd_ratio: 0.05 #Mandatory
+    test:
+        format: 'BcnBgmDataset' #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'.
+        file_path: "./data/50salads/splits/train.split1.bundle" #Optional, choose split
+        use_full: True #Optional [True, False], use the full model or resized model.
+        bd_ratio: 0.05 #Mandatory
+
+PIPELINE: #PIPELINE field
+    train: #Mandotary, indicate the pipeline to deal with the training data, please refer to the 'paddlevideo/loader/pipelines/'
+        decode:
+            name: "GetBcnBgmTrainLabel" #Mandatory, processing raw label.
+
+    valid: #Mandatory, indicate the pipeline to deal with the validing data. please refer to the 'paddlevideo/loader/pipelines/'
+        decode:
+            name: "GetBcnBgmTrainLabel" #Mandatory, processing raw label.
+
+    test: #Mandatory, indicate the pipeline to deal with the validing data. please refer to the 'paddlevideo/loader/pipelines/'
+        decode:
+            name: "GetBcnBgmTrainLabel" #Mandatory, processing raw label.
+
+OPTIMIZER: #OPTIMIZER field
+    name: 'Adam' #Mandatory, the type of optimizer, please to the 'paddlevideo/solver/'
+    learning_rate: #Optional, the type of learning rate scheduler, please refer to the 'paddlevideo/solver/'
+        name: 'CustomMultiStepDecay'
+        learning_rate: 0.001 #Optional, the initial learning rate.
+        milestones: [100, 200] #Optional, milestones=[int(epochs / 3), int(2 * epochs / 3)] in bcn-bgm model.
+        gamma: 0.3 #Optional, attenuation coefficient.
+    weight_decay: #Optional, regularization.
+        name: 'L2'
+        value: 0.0001
+
+METRIC:
+    name: 'BcnBgmMetric' #Mandatory, the type of optimizer, please to the 'paddlevideo/metrics'
+
+INFERENCE:
+    name: 'BcnBgmResized_Inference_helper' #Optional, the type of inference_helper, please to the 'tools/utils.py'
+    num_channels: 2048  #Mandatory, the number of in channel
+    sample_rate: 1 #Optional, sample_rate for feature
+    result_path: './inference/' #Optional, the path to save
+    mode: 'more' #Optional [more, less], how to calculate the results of the test set, only use in resized
+    temporal_dim: 300 #Optional, only use in resized
+    dataset: "50salads" #Optional [50salads, gtea, breakfast], indicate the type of dataset, associate to the 'paddlevidel/data', only use in resized
+
+output_dir: "./output/BCN/50salads/split1/BcnBgmResized/" #Optional, like "./output/BCN/[gtea, 50salads, breakfast]/[split1, split2...]/[BcnBgmFull, BcnBgmResized]/results".
+model_name: "BcnBgmFull" #Optional, model name like [BcnBgmFull, BcnBgmResized].
+log_interval: 2000 #Optional, the interval of logger.
+epochs: 300 #Optional, total epoch
+log_level: "DEBUG" #Optional, the logger level.
+save_interval: 2000 #Optional, the interval of save.

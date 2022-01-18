@@ -24,6 +24,8 @@ import paddle
 import paddle.nn.functional as F
 import pandas
 from PIL import Image
+from scipy import signal
+import pandas as pd
 import shutil
 
 __dir__ = os.path.dirname(os.path.abspath(__file__))
@@ -163,6 +165,218 @@ class Base_Inference_helper():
                 for j in range(self.top_k):
                     print("\ttop-{0} class: {1}".format(j + 1, classes[j]))
                     print("\ttop-{0} score: {1}".format(j + 1, scores[j]))
+
+
+@INFERENCE.register()
+class BcnBgmFull_Inference_helper(Base_Inference_helper):
+
+    def __init__(self,
+                 num_channels,
+                 sample_rate,
+                 result_path,
+                 mode=None,
+                 temporal_dim=None,
+                 dataset=None):
+        self.num_channels = num_channels
+        self.sample_rate = sample_rate
+        self.result_path = result_path
+
+    def preprocess(self, input_file_txt):
+        """
+        input_file: str, feature file list txt path
+        return: list
+        """
+        if not isinstance(input_file_txt, list):
+            self.input_file_txt = [input_file_txt]
+            features = np.load(input_file_txt)
+            features = features[:, ::self.sample_rate]
+            feature_tensor = paddle.to_tensor(features, dtype='float32')
+            return [feature_tensor.unsqueeze(0)]
+        else:
+            self.input_file_txt = input_file_txt
+            out_list = []
+            for input_file in input_file_txt:
+                features = np.load(input_file_txt)
+                features = features[:, ::self.sample_rate]
+                feature_tensor = paddle.to_tensor(features, dtype='float32')
+                out_list.append(feature_tensor.unsqueeze(0))
+        return out_list
+
+    def postprocess(self, outputs_list, print_output=True):
+        for outputs, input_file in zip(outputs_list, self.input_file_txt):
+            columns = ["barrier"]
+
+            barrier_threshold = 0.5
+            barrier = (outputs > barrier_threshold) * outputs
+            video_result = barrier[0]
+
+            video_result = video_result.transpose([1, 0])
+            video_df = pd.DataFrame(list(video_result), columns=columns)
+            video_df.to_csv(os.path.join(
+                self.result_path,
+                input_file.split('/')[-1].split('.')[0] + ".csv"),
+                            index=False)
+
+
+@INFERENCE.register()
+class BcnBgmResized_Inference_helper(Base_Inference_helper):
+
+    def __init__(self, num_channels, sample_rate, result_path, mode,
+                 temporal_dim, dataset):
+        self.num_channels = num_channels
+        self.sample_rate = sample_rate
+        self.result_path = result_path
+        self.test_mode = mode
+        self.temporal_dim = temporal_dim
+        self.dataset = dataset
+
+    def resized_feature(self, feature_tensor):
+        num_frames = feature_tensor.shape[1]
+        feature_tensor = feature_tensor.unsqueeze(0)
+        if self.dataset == 'breakfast':  # for breakfast dataset, there are extremely short videos
+            factor = 1
+            while factor * num_frames < self.temporal_dim:
+                factor = factor + 1
+            feature_tensor = F.interpolate(feature_tensor,
+                                           scale_factor=(factor),
+                                           mode='linear',
+                                           align_corners=False,
+                                           data_format='NCW')
+        feature_tensor = F.interpolate(feature_tensor.unsqueeze(3),
+                                       size=(self.temporal_dim, 1),
+                                       mode='nearest').squeeze(3)
+        return feature_tensor
+
+    def preprocess(self, input_file_txt):
+        """
+        input_file: str, feature file list txt path
+        return: list
+        """
+        if not isinstance(input_file_txt, list):
+            self.input_file_txt = [input_file_txt]
+            features = np.load(input_file_txt)
+            features = features[:, ::self.sample_rate]
+            feature_tensor = paddle.to_tensor(features, dtype='float32')
+            return [self.resized_feature(feature_tensor)]
+        else:
+            self.input_file_txt = input_file_txt
+            out_list = []
+            for input_file in input_file_txt:
+                features = np.load(input_file_txt)
+                features = features[:, ::self.sample_rate]
+                feature_tensor = paddle.to_tensor(features, dtype='float32')
+                out_list.append(self.resized_feature(feature_tensor))
+        return out_list
+
+    def postprocess(self, outputs_list, print_output=True):
+        for outputs, input_file in zip(outputs_list, self.input_file_txt):
+            columns = ["barrier"]
+            if self.test_mode == 'less':
+                barrier_threshold = 0.5
+                barrier = (outputs > barrier_threshold) * outputs
+                video_result = barrier[0]
+
+                maximum = signal.argrelmax(video_result[0])
+                flag = np.array([0] * self.temporal_dim)
+                flag[maximum] = 1
+
+                video_result = video_result * flag
+                video_df = pd.DataFrame(list(video_result.transpose([1, 0])),
+                                        columns=columns)
+                video_df.to_csv(os.path.join(
+                    self.result_path,
+                    input_file.split('/')[-1].split('.')[0] + ".csv"),
+                                index=False)
+            elif self.test_mode == 'more':
+                barrier = (outputs > 0.3) * outputs
+                high_barrier = (outputs > 0.8)
+                video_result = barrier[0]
+                maximum1 = signal.argrelmax(video_result[0])
+                maximum2 = high_barrier[0]
+
+                flag = np.array([0] * self.temporal_dim)
+                flag[maximum1] = 1
+                flag = np.clip((flag + maximum2), 0, 1)
+
+                video_result = video_result * flag
+                video_df = pd.DataFrame(list(video_result.transpose([1, 0])),
+                                        columns=columns)
+                video_df.to_csv(os.path.join(
+                    self.result_path,
+                    input_file.split('/')[-1].split('.')[0] + ".csv"),
+                                index=False)
+
+
+@INFERENCE.register()
+class BcnModel_Inference_helper(Base_Inference_helper):
+
+    def __init__(self, num_channels, sample_rate, result_path, mode,
+                 temporal_dim, dataset):
+        self.num_channels = num_channels
+        self.sample_rate = sample_rate
+        self.result_path = result_path
+        self.test_mode = mode
+        self.temporal_dim = temporal_dim
+        self.dataset = dataset
+
+    def preprocess(self, input_file_txt):
+        """
+        input_file: str, feature file list txt path
+        return: list
+        """
+        if not isinstance(input_file_txt, list):
+            self.input_file_txt = [input_file_txt]
+            features = np.load(input_file_txt)
+            features = features[:, ::self.sample_rate]
+            feature_tensor = paddle.to_tensor(features, dtype='float32')
+            return [self.resized_feature(feature_tensor)]
+        else:
+            self.input_file_txt = input_file_txt
+            out_list = []
+            for input_file in input_file_txt:
+                features = np.load(input_file_txt)
+                features = features[:, ::self.sample_rate]
+                feature_tensor = paddle.to_tensor(features, dtype='float32')
+                out_list.append(self.resized_feature(feature_tensor))
+        return out_list
+
+    def postprocess(self, outputs_list, print_output=True):
+        for outputs, input_file in zip(outputs_list, self.input_file_txt):
+            columns = ["barrier"]
+            if self.test_mode == 'less':
+                barrier_threshold = 0.5
+                barrier = (outputs > barrier_threshold) * outputs
+                video_result = barrier[0]
+
+                maximum = signal.argrelmax(video_result[0])
+                flag = np.array([0] * self.temporal_dim)
+                flag[maximum] = 1
+
+                video_result = video_result * flag
+                video_df = pd.DataFrame(list(video_result.transpose([1, 0])),
+                                        columns=columns)
+                video_df.to_csv(os.path.join(
+                    self.result_path,
+                    input_file.split('/')[-1].split('.')[0] + ".csv"),
+                                index=False)
+            elif self.test_mode == 'more':
+                barrier = (outputs > 0.3) * outputs
+                high_barrier = (outputs > 0.8)
+                video_result = barrier[0]
+                maximum1 = signal.argrelmax(video_result[0])
+                maximum2 = high_barrier[0]
+
+                flag = np.array([0] * self.temporal_dim)
+                flag[maximum1] = 1
+                flag = np.clip((flag + maximum2), 0, 1)
+
+                video_result = video_result * flag
+                video_df = pd.DataFrame(list(video_result.transpose([1, 0])),
+                                        columns=columns)
+                video_df.to_csv(os.path.join(
+                    self.result_path,
+                    input_file.split('/')[-1].split('.')[0] + ".csv"),
+                                index=False)
 
 
 @INFERENCE.register()
@@ -825,8 +1039,10 @@ class ADDS_Inference_helper(Base_Inference_helper):
         im = Image.fromarray(colormapped_im)
         return im
 
+
 @INFERENCE.register()
 class VideoSwin_Inference_helper(Base_Inference_helper):
+
     def __init__(self,
                  num_seg=4,
                  seg_len=32,
@@ -903,6 +1119,7 @@ class VideoSwin_Inference_helper(Base_Inference_helper):
                 for j in range(self.top_k):
                     print("\ttop-{0} class: {1}".format(j + 1, classes[j]))
                     print("\ttop-{0} score: {1}".format(j + 1, scores[j]))
+
 
 @INFERENCE.register()
 class AVA_SlowFast_FastRCNN_Inference_helper(Base_Inference_helper):
@@ -1066,7 +1283,7 @@ class AVA_SlowFast_FastRCNN_Inference_helper(Base_Inference_helper):
             human_detection = self.human_detections[t_index]
 
             output = outputs[index]
-            result = output #长度为类别个数，不包含背景
+            result = output  #长度为类别个数，不包含背景
 
             person_num = self.person_num_list[index]
 
@@ -1081,7 +1298,7 @@ class AVA_SlowFast_FastRCNN_Inference_helper(Base_Inference_helper):
             # N proposals
             for i in range(person_num):
                 prediction.append([])
-            
+
             # Perform action score thr
             for i in range(len(result)):  # for class
                 if i + 1 not in self.class_whitelist:
@@ -1089,7 +1306,8 @@ class AVA_SlowFast_FastRCNN_Inference_helper(Base_Inference_helper):
                 for j in range(person_num):
                     if result[i][j, 4] > self.config.MODEL.head['action_thr']:
                         prediction[j].append(
-                            (self.label_map[i + 1], result[i][j, 4])) # label_map is a dict, label index start from 1
+                            (self.label_map[i + 1], result[i][j, 4]
+                             ))  # label_map is a dict, label index start from 1
             predictions.append(prediction)
 
         results = []
