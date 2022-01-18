@@ -9,6 +9,8 @@ scipy==1.6.3
 ffmpeg-python==0.2.0
 scikit-image
 matplotlib
+Cython
+cython_bbox
 paddlenlp
 lmdb
 moviepy
@@ -19,5 +21,3 @@ lap
 motmetrics
 xmltodict
 openpyxl
-Cython
-cython_bbox
