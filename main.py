@@ -53,23 +53,27 @@ def parse_args():
     parser.add_argument('--amp',
                         action='store_true',
                         help='whether to open amp training.')
-    parser.add_argument('--validate',
-                        action='store_true',
-                        help='whether to evaluate the checkpoint during training')
-    parser.add_argument('--seed',
-                        type=int,
-                        default=None,
-                        help='fixed all random seeds when the program is running')
-    parser.add_argument('--max_iters',
-                        type=int,
-                        default=None,
-                        help='max iterations when training(this argonly used in test_tipc)')
-    parser.add_argument('-p',
-                        '--profiler_options',
-                        type=str,
-                        default=None,
-                        help='The option of profiler, which should be in format '
-                        '\"key1=value1;key2=value2;key3=value3\".')
+    parser.add_argument(
+        '--validate',
+        action='store_true',
+        help='whether to evaluate the checkpoint during training')
+    parser.add_argument(
+        '--seed',
+        type=int,
+        default=None,
+        help='fixed all random seeds when the program is running')
+    parser.add_argument(
+        '--max_iters',
+        type=int,
+        default=None,
+        help='max iterations when training(this argonly used in test_tipc)')
+    parser.add_argument(
+        '-p',
+        '--profiler_options',
+        type=str,
+        default=None,
+        help='The option of profiler, which should be in format '
+        '\"key1=value1;key2=value2;key3=value3\".')
     parser.add_argument('--use_npu',
                         type=bool,
                         default=False,
@@ -88,9 +92,9 @@ def main():
     if seed is not None:
         assert isinstance(
             seed, int), f"seed must be a integer when specified, but got {seed}"
-        paddle.seed(seed)
-        np.random.seed(seed)
         random.seed(seed)
+        np.random.seed(seed)
+        paddle.seed(seed)
 
     _, world_size = get_dist_info()
     parallel = world_size != 1

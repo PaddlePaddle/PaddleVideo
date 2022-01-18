@@ -39,15 +39,15 @@ function _train(){
             exit 1
         fi;;
     mp)
-        rm -rf ./mylog_${model_name}
+        rm -rf ./mylog
         if [ ${fp_item} == 'fp32' ]; then
-            train_cmd="python -u -B -m paddle.distributed.launch --gpus=$CUDA_VISIBLE_DEVICES --log_dir=./mylog_${model_name} main.py \
+            train_cmd="python -u -B -m paddle.distributed.launch --gpus=$CUDA_VISIBLE_DEVICES --log_dir=./mylog main.py \
             -c configs/recognition/timesformer/timesformer_ucf101_videos_benchmark_bs${batch_size}_mp.yaml"
-            log_parse_file="mylog_${model_name}/workerlog.0"
+            log_parse_file="mylog/workerlog.0"
         elif [ ${fp_item} == 'fp16' ]; then
-            train_cmd="python -u -B -m paddle.distributed.launch --gpus=$CUDA_VISIBLE_DEVICES --log_dir=./mylog_${model_name} main.py --amp \
+            train_cmd="python -u -B -m paddle.distributed.launch --gpus=$CUDA_VISIBLE_DEVICES --log_dir=./mylog main.py --amp \
             -c configs/recognition/timesformer/timesformer_ucf101_videos_benchmark_bs${batch_size}_mp.yaml"
-            log_parse_file="mylog_${model_name}/workerlog.0"
+            log_parse_file="mylog/workerlog.0"
         else
             echo "choose fp_item(fp32 or fp16)"
             exit 1

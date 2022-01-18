@@ -308,12 +308,12 @@ class VisionTransformer(nn.Layer):
                  drop_path_rate=0.1,
                  norm_layer='nn.LayerNorm',
                  epsilon=1e-5,
-                 seg_num=8,
+                 num_seg=8,
                  attention_type='divided_space_time',
                  **args):
         super().__init__()
         self.pretrained = pretrained
-        self.seg_num = seg_num
+        self.num_seg = num_seg
         self.attention_type = attention_type
         self.num_features = self.embed_dim = embed_dim
 
@@ -332,7 +332,7 @@ class VisionTransformer(nn.Layer):
         self.pos_drop = nn.Dropout(p=drop_rate)
 
         if self.attention_type != 'space_only':
-            self.time_embed = self.create_parameter(shape=(1, seg_num,
+            self.time_embed = self.create_parameter(shape=(1, num_seg,
                                                            embed_dim),
                                                     default_initializer=zeros_)
             self.time_drop = nn.Dropout(p=drop_rate)
@@ -380,7 +380,7 @@ class VisionTransformer(nn.Layer):
             load_ckpt(self,
                       self.pretrained,
                       num_patches=self.patch_embed.num_patches,
-                      seg_num=self.seg_num,
+                      num_seg=self.num_seg,
                       attention_type=self.attention_type)
 
     def _init_fn(self, m):
