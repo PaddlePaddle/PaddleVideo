@@ -28,9 +28,6 @@ from ..modeling.builder import build_model
 from ..solver import build_lr, build_optimizer
 from ..utils import do_preciseBN
 
-paddle.framework.seed(1234)
-np.random.seed(1234)
-
 
 def train_model(cfg,
                 weights=None,

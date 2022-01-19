@@ -59,7 +59,7 @@ For data download and preparation of Oxford RobotCar dataset, please refer to [O
 - The ADDS-DepthNet model is verified synchronously during training (only the day or night data is verified). You can find the keyword `best` in the training log to obtain the model test accuracy. The log example is as follows:
 
   ```bash
-  Already save the best model (top1 acc)0.7004
+  Already save the best model (rmse)8.5531
   ```
 
 - Because the model can only test one day or night data set at a given path in the yaml file at a time, to get the complete test score at the beginning of this document, you need to run 4 test commands and record their indicators ( 40m during the day, 60m during the day, 40m at night, 60m at night)
