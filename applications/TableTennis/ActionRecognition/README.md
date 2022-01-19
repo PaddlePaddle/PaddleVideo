@@ -47,10 +47,10 @@ python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=lo
 
 ## 模型推理
 
-我们提供了一个在乒乓球数据集上训练好的模型以及一个乒乓球样例的视频pkl文件
+我们提供了一个在乒乓球数据集上训练好的模型以及一个乒乓球样例的视频pkl文件，以供测试
 ```
-wget -P data/ TODO # 下载乒乓球数据集上训练好的模型
-wget -P data/ TODO # 下载乒乓球样例视频pkl文件
+wget -P data/ https://videotag.bj.bcebos.com/PaddleVideo-release2.2/VideoSwin_tennis.pdparams # 下载乒乓球数据集上训练好的模型
+wget -P data/ https://videotag.bj.bcebos.com/Data/example_tennis.pkl # 下载乒乓球样例输入视频pkl文件
 ```
 
 ### 导出推理模型
