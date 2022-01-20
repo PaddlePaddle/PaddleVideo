@@ -27,7 +27,7 @@ def verbose(epoch, metrics, mode, name="TEST"):
 
 
 @contextmanager
-def ctxt_mgr(samples, disable_nan_checks):
+def ctxt_mgr(samples):
     """Provide a context for managing temporary, cloned copies of retrieval
     sample tensors.
 
@@ -36,25 +36,22 @@ def ctxt_mgr(samples, disable_nan_checks):
     function lets the evaluation code run (and modify) temporary copies, without
     modifying the originals.
     """
-    if disable_nan_checks:
-        print("running without nan checks")
-        yield samples
-    else:
-        exp_dict = samples["experts"].items()
-        experts = {key: val.clone() for key, val in exp_dict}
-        samples_ = {
-            "experts": experts,
-            "ind": samples["ind"],
-            "text": samples["text"],
-            "cap_id": samples["cap_id"],
-            "att_mask": samples["att_mask"],
-        }
-        if "text_token_mask" in samples:
-            samples_["text_token_mask"] = samples["text_token_mask"]
-        try:
-            yield samples_
-        finally:
-            del samples_
+
+    exp_dict = samples["experts"].items()
+    experts = {key: val.clone() for key, val in exp_dict}
+    samples_ = {
+        "experts": experts,
+        "ind": samples["ind"],
+        "text": samples["text"],
+        "cap_id": samples["cap_id"],
+        "att_mask": samples["att_mask"],
+    }
+    if "text_token_mask" in samples:
+        samples_["text_token_mask"] = samples["text_token_mask"]
+    try:
+        yield samples_
+    finally:
+        del samples_
 
 
 class Trainer(BaseTrainer):
@@ -65,7 +62,7 @@ class Trainer(BaseTrainer):
         Inherited from BaseTrainer.
     """
     def __init__(self, model, loss, metrics, optimizer, config, data_loaders,
-                 lr_scheduler, visualizer, disable_nan_checks, skip_first_n_saves,
+                 lr_scheduler, visualizer, skip_first_n_saves,
                  include_optim_in_save_model, force_cpu_val, cache_targets=set(),
                  num_keep_ckpts=3, mini_train=False, val_freq=1, skip_tboard=False):
         super().__init__(model, loss, metrics, optimizer, config, mini_train=mini_train,
@@ -75,7 +72,6 @@ class Trainer(BaseTrainer):
         self.data_loaders = data_loaders
         self.lr_scheduler = lr_scheduler
         self.mini_train = mini_train
-        self.disable_nan_checks = disable_nan_checks
         self.len_epoch = len(self.data_loaders["train"])
         self.log_step = int(np.sqrt(data_loaders["train"].batch_size))
         self.visualizer = visualizer
@@ -192,7 +188,7 @@ class Trainer(BaseTrainer):
                             for expert in samples['experts'].keys():
                                 sub_samples['experts'][expert] = samples['experts'][expert][vid*chk:vid*chk+chk]
                                 sub_samples['ind'][expert] = samples['ind'][expert][vid*chk:vid*chk+chk]
-                            with ctxt_mgr(sub_samples, self.disable_nan_checks) as xx:
+                            with ctxt_mgr(sub_samples) as xx:
                                 output = self.model(**xx)
                             subsub_sims.append(output["cross_view_conf_matrix"].cpu())
                     
@@ -202,7 +198,7 @@ class Trainer(BaseTrainer):
                     sims = paddle.concat(sub_sims, axis=0)
                     sims = paddle.to_tensor(sims, dtype='float32').cpu().numpy()
                 else:
-                    with ctxt_mgr(samples, self.disable_nan_checks) as xx:
+                    with ctxt_mgr(samples) as xx:
                         output = self.model(**xx)
                     sims = paddle.to_tensor(output["cross_view_conf_matrix"], dtype='float32').cpu().numpy()
 
