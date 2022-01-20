@@ -33,15 +33,15 @@ DATASET: #DATASET field
     num_workers: 2 #Mandatory, XXX the number of subprocess on each GPU.
     test_batch_size: 1
     train:
-        format: "FrameDataset_Table" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
+        format: "FrameDataset_Sport" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
         file_path: "train.list" #Mandatory, train data index file path
         suffix: 'img_{:05}.jpg'
     valid:
-        format: "FrameDataset_Table" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
+        format: "FrameDataset_Sport" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
         file_path: "val.list" #Mandatory, valid data index file path
         suffix: 'img_{:05}.jpg'
     test:
-        format: "FrameDataset_Table" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
+        format: "FrameDataset_Sport" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
         file_path: "val.list" #Mandatory, valid data index file path
         suffix: 'img_{:05}.jpg'
 

@@ -333,18 +333,8 @@ class SamplerPkl(object):
         """
         filename = results['frame_dir']
         data_loaded = pickle.load(open(filename, 'rb'), encoding='bytes')
-        _, _, frames = data_loaded
+        video_name, label, frames = data_loaded
         results['frames_len'] = len(frames)
-        # NOTE: The following code will get the label
-        # from the path, can be modified to other rules
-        try:
-            label = int(filename.split('.')[0][-1])
-        except Exception as e:
-            print(
-                f"Can not get label from filename properly, set label to 0 by default"
-            )
-            label = 0
-
         results['labels'] = label
         frames_len = results['frames_len']
         average_dur = int(int(frames_len) / self.num_seg)

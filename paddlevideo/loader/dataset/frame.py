@@ -109,7 +109,7 @@ class FrameDataset(BaseDataset):
 
 
 @DATASETS.register()
-class FrameDataset_Table(BaseDataset):
+class FrameDataset_Sport(BaseDataset):
     """Video dataset for action recognition
        The dataset loads raw videos and apply specified transforms on them.
        The index file is a file with multiple lines, and each line indicates
