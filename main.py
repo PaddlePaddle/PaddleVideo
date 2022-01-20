@@ -60,7 +60,7 @@ def parse_args():
     parser.add_argument(
         '--seed',
         type=int,
-        default=None,
+        default=1234,
         help='fixed all random seeds when the program is running')
     parser.add_argument(
         '--max_iters',
