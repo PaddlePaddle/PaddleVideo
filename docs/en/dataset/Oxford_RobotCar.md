@@ -57,6 +57,30 @@ If you want to use Oxford-RobotCar-for-ADDS, please cite the following papers:
     https://videotag.bj.bcebos.com/Data/ADDS/night_val_411.7z
     https://videotag.bj.bcebos.com/Data/ADDS/night_val_411_gt.7z
     ```
+    the original raw data download links:
+    ```shell
+    https://videotag.bj.bcebos.com/Data/original-ADDS/day_train_all.7z.001
+    https://videotag.bj.bcebos.com/Data/original-ADDS/day_train_all.7z.002
+    https://videotag.bj.bcebos.com/Data/original-ADDS/day_train_all.7z.003
+    https://videotag.bj.bcebos.com/Data/original-ADDS/day_train_all.7z.004
+    https://videotag.bj.bcebos.com/Data/original-ADDS/day_train_all.7z.005
+    https://videotag.bj.bcebos.com/Data/original-ADDS/day_train_all.7z.006
+    https://videotag.bj.bcebos.com/Data/original-ADDS/day_train_all.7z.007
+    https://videotag.bj.bcebos.com/Data/original-ADDS/day_train_all.7z.008
+    https://videotag.bj.bcebos.com/Data/original-ADDS/day_train_all.7z.009
+    https://videotag.bj.bcebos.com/Data/original-ADDS/day_train_all.7z.010
+    https://videotag.bj.bcebos.com/Data/original-ADDS/day_train_all.7z.011
+    https://videotag.bj.bcebos.com/Data/original-ADDS/night_train_all.7z.001
+    https://videotag.bj.bcebos.com/Data/original-ADDS/night_train_all.7z.002
+    https://videotag.bj.bcebos.com/Data/original-ADDS/night_train_all.7z.003
+    https://videotag.bj.bcebos.com/Data/original-ADDS/night_train_all.7z.004
+    https://videotag.bj.bcebos.com/Data/original-ADDS/night_train_all.7z.005
+    https://videotag.bj.bcebos.com/Data/original-ADDS/night_train_all.7z.006
+    https://videotag.bj.bcebos.com/Data/original-ADDS/night_train_all.7z.007
+    https://videotag.bj.bcebos.com/Data/original-ADDS/night_train_all.7z.008
+    https://videotag.bj.bcebos.com/Data/original-ADDS/night_train_all.7z.009
+    https://videotag.bj.bcebos.com/Data/original-ADDS/night_train_all.7z.010
+    ```
 
 ## Preprocessing
 
