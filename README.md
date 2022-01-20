@@ -17,7 +17,7 @@
 <div align="center">
   <img src="docs/images/user_group.png" width=250/></div>
   
-添加成功后回复【视频】加入交流群
+- 添加成功后回复【视频】加入交流群
 
 ## 简介
 
