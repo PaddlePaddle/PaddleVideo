@@ -16,6 +16,9 @@ import os
 import paddle
 from paddle.io import DataLoader, DistributedBatchSampler
 from .registry import DATASETS, PIPELINES
+from paddle.fluid.dataloader import BatchSampler
+from paddle.io import DataLoader, DistributedBatchSampler
+from .registry import DATASETS, PIPELINES, DATALOADERS, BATCH_SAMPLERS, SAMPLERS
 from ..utils.build_utils import build
 from .pipelines.compose import Compose
 from paddlevideo.utils import get_logger
@@ -50,16 +53,32 @@ def build_dataset(cfg):
     return dataset
 
 
-def build_batch_pipeline(cfg):
+def build_sampler(cfg):
+    """Build batch_sampler.
+    Args:
+        cfg (dict): root config dict.
 
+    Returns:
+        batch_sampler: batch_sampler.
+    """
+    sampler = build(cfg, SAMPLERS)
+    return sampler
+
+
+def build_batch_pipeline(cfg):
     batch_pipeline = build(cfg, PIPELINES)
     return batch_pipeline
+
+
+def build_custom_dataloader(cfg):
+    custom_dataloader = build(cfg, DATALOADERS, key='dataloader')
+    return custom_dataloader
 
 
 def build_dataloader(dataset,
                      batch_size,
                      num_workers,
-                     places,
+                     places=None,
                      shuffle=True,
                      drop_last=True,
                      multigrid=False,
@@ -75,18 +94,27 @@ def build_dataloader(dataset,
         num_worker (int): num_worker
         shuffle(bool): whether to shuffle the data at every epoch.
     """
-    if multigrid:
-        sampler = DistributedShortSampler(dataset,
-                                          batch_sizes=batch_size,
-                                          shuffle=True,
-                                          drop_last=True)
+    if not kwargs.get('sampler'):
+        if multigrid:
+            batch_sampler = DistributedShortSampler(dataset,
+                                                    batch_sizes=batch_size,
+                                                    shuffle=True,
+                                                    drop_last=True)
+        else:
+            batch_sampler = DistributedBatchSampler(dataset,
+                                                    batch_size=batch_size,
+                                                    shuffle=shuffle,
+                                                    drop_last=drop_last)
     else:
-        sampler = DistributedBatchSampler(dataset,
-                                          batch_size=batch_size,
-                                          shuffle=shuffle,
-                                          drop_last=drop_last)
+        sampler = build_sampler(kwargs['sampler'])
+        batch_sampler = BatchSampler(dataset,
+                                     sampler=sampler,
+                                     batch_size=batch_size,
+                                     shuffle=shuffle,
+                                     drop_last=drop_last)
 
-    #NOTE(shipping): when switch the mix operator on, such as: mixup, cutmix.
+    # NOTE(shipping): when switch the mix operator on, such as: mixup, cutmix.
+
     # batch like: [[img, label, attibute, ...], [imgs, label, attribute, ...], ...] will recollate to:
     # [[img, img, ...], [label, label, ...], [attribute, attribute, ...], ...] as using numpy.transpose.
 
@@ -108,7 +136,7 @@ def build_dataloader(dataset,
 
     data_loader = DataLoader(
         dataset,
-        batch_sampler=sampler,
+        batch_sampler=batch_sampler,
         places=places,
         num_workers=num_workers,
         collate_fn=mix_collate_fn if collate_fn_cfg is not None else None,

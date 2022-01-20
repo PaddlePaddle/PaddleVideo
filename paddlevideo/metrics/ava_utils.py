@@ -42,9 +42,6 @@ def det2csv(info, dataset_len, results, custom_classes):
         result = results[idx]
         for label, _ in enumerate(result):
             for bbox in result[label]:
-                if type(bbox) == paddle.Tensor:
-                    bbox = bbox.numpy()
-                
                 bbox_ = tuple(bbox.tolist())
                 if custom_classes is not None:
                     actual_label = custom_classes[label + 1]

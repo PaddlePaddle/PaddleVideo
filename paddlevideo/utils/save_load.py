@@ -163,39 +163,20 @@ def pretrain_resnet18_param_trans(model, loaded_dict):
 
     names = ['encoder.', 'encoder_day.', 'encoder_night.']
     for name in names:
-        total_len = len(loaded_dict.items())
-        with tqdm(total=total_len,
-                  position=1,
-                  bar_format='{desc}',
-                  desc="Loading weights") as desc:
-            for key, value in tqdm(loaded_dict.items(),
-                                   total=total_len,
-                                   position=0):
-                key = str(name + key)
-                if key in encoder_dict:
-                    encoder_dict[key] = value
-                    desc.set_description('Loading %s' % key)
-                time.sleep(0.01)
+        for key, value in loaded_dict.items():
+            key = str(name + key)
+            if key in encoder_dict:
+                encoder_dict[key] = value
 
     num_input_images = 2
     loaded_dict['conv1.weight'] = paddle.concat(
         [loaded_dict['conv1.weight']] * num_input_images, 1) / num_input_images
-    total_len = len(loaded_dict.items())
-    with tqdm(total=total_len,
-              position=1,
-              bar_format='{desc}',
-              desc="Loading weights") as desc:
-        for name, value in tqdm(loaded_dict.items(),
-                                total=total_len,
-                                position=0):
-            name = str('encoder.' + name)
-            if name in pose_encoder_dict:
-                pose_encoder_dict[name] = value
-                desc.set_description('Loading %s' % key)
-            time.sleep(0.01)
-        ret_str = "loading {:<20d} weights completed.".format(
-            len(model.state_dict()))
-        desc.set_description(ret_str)
+
+    for name, value in loaded_dict.items():
+        name = str('encoder.' + name)
+        if name in pose_encoder_dict:
+            pose_encoder_dict[name] = value
+
     return encoder_dict, pose_encoder_dict
 
 
@@ -220,8 +201,14 @@ def load_ckpt(model, weight_path, **kargs):
         encoder_dict, pose_encoder_dict = pretrain_resnet18_param_trans(
             model, state_dicts)
         model.encoder.load_dict(encoder_dict)
-        model.pose_encoder.load_dict(pose_encoder_dict)
         tmp = model.state_dict()
+        tmp.update(
+            {'backbone.encoder.' + k: v
+             for (k, v) in encoder_dict.items()})
+        tmp.update({
+            'backbone.pose_encoder.' + k: v
+            for (k, v) in pose_encoder_dict.items()
+        })
     elif "VisionTransformer" in str(model):  # For TimeSformer case
         tmp = pretrain_vit_param_trans(model, state_dicts, kargs['num_patches'],
                                        kargs['num_seg'],

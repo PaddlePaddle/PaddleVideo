@@ -16,7 +16,7 @@ import paddle
 from paddle.regularizer import L1Decay, L2Decay
 
 
-def build_optimizer(cfg, lr_scheduler, model=None):
+def build_optimizer(cfg, lr_scheduler, model=None, parallel=False):
     """
     Build an optimizer and learning rate scheduler to optimize parameters accroding to ```OPTIMIZER``` field in configuration .
 
@@ -102,6 +102,21 @@ def build_optimizer(cfg, lr_scheduler, model=None):
               no_weight_decay_param_list)
 
     cfg_copy.pop('learning_rate')
+    if cfg_copy.get('parameter_list'):
+        parameter_list = []
+        for unit_dict in cfg_copy['parameter_list']:
+            for unit_name, params in unit_dict.items():
+                for param in params:
+                    if parallel:
+                        for child in model.children():
+                            parameter_list.extend(
+                                getattr(getattr(child, unit_name), param).parameters())
+                    else:
+                        parameter_list.extend(
+                            getattr(getattr(model, unit_name), param).parameters())
+        cfg_copy.pop('parameter_list')
+    else:
+        parameter_list = model.parameters()
     return getattr(paddle.optimizer, opt_name)(lr_scheduler,
-                                               parameters=model.parameters(),
+                                               parameters=parameter_list,
                                                **cfg_copy)

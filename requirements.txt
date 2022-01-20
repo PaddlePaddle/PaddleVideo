@@ -13,9 +13,3 @@ paddlenlp
 lmdb
 moviepy
 SimpleITK
-paddledet
-et_xmlfile
-lap
-motmetrics
-xmltodict
-openpyxl

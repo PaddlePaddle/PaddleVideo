@@ -18,6 +18,7 @@ from paddlevideo.utils import get_logger, load
 from ..loader.builder import build_dataloader, build_dataset
 from ..metrics import build_metric
 from ..modeling.builder import build_model
+from ..modeling.framework.segment import ManetSegment_Stage2
 
 logger = get_logger("paddlevideo")
 
@@ -32,6 +33,10 @@ def test_model(cfg, weights, parallel=True):
         parallel (bool): Whether to do multi-cards testing. Default: True.
 
     """
+    if cfg.MODEL.framework == "ManetSegment_Stage2":
+        ManetSegment_Stage2().test_step(**cfg, weights=weights, parallel=False, test_cfg=cfg.MODEL.test_cfg)
+        return
+
     # 1. Construct model.
     if cfg.MODEL.get('backbone') and cfg.MODEL.backbone.get('pretrained'):
         cfg.MODEL.backbone.pretrained = ''  # disable pretrain model init
@@ -44,7 +49,7 @@ def test_model(cfg, weights, parallel=True):
     cfg.DATASET.test.test_mode = True
     dataset = build_dataset((cfg.DATASET.test, cfg.PIPELINE.test))
     batch_size = cfg.DATASET.get("test_batch_size", 8)
-
+    cfg.dataset = dataset
     if cfg.get('use_npu'):
         places = paddle.set_device('npu')
     else:

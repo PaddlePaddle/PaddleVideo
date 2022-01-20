@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from .manet_dataset import DAVIS2017_TrainDataset, DAVIS2017_VOS_TrainDataset, DAVIS2017_Feature_ExtractDataset
 from .actbert_dataset import ActBertDataset
 from .ava_dataset import AVADataset
 from .bmn_dataset import BMNDataset
@@ -30,5 +31,7 @@ __all__ = [
     'VideoDataset', 'FrameDataset', 'SFVideoDataset', 'BMNDataset',
     'FeatureDataset', 'SkeletonDataset', 'AVADataset', 'MonoDataset',
     'MSRVTTDataset', 'ActBertDataset', 'DavisDataset', 'MRIDataset',
-    'SFMRIDataset'
+    'SFMRIDataset',
+    'DAVIS2017_VOS_TrainDataset', 'DAVIS2017_Feature_ExtractDataset',
+    'DAVIS2017_TrainDataset'
 ]

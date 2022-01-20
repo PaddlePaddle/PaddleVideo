@@ -20,6 +20,8 @@ from .augmentations import (CenterCrop, ColorJitter, GroupRandomFlip,
                             UniformCrop)
 from .augmentations_ava import *
 from .compose import Compose
+from .manet_pipeline import Resize_manet, RandomCrop_manet, RandomHorizontalFlip_manet, ToTensor_manet, \
+    RandomScale_manet
 from .decode import FeatureDecoder, FrameDecoder, VideoDecoder
 from .decode_image import ImageDecoder
 from .decode_sampler import DecodeSampler
@@ -39,5 +41,7 @@ __all__ = [
     'GetVideoLabel', 'Cutmix', 'CenterCrop', 'RandomCrop', 'LoadFeat',
     'RandomCap', 'JitterScale', 'Iden', 'VideoMix', 'ColorJitter', 'RandomFlip',
     'ToArray', 'FeaturePadding', 'GetMatchMap', 'GroupRandomFlip', 'MultiCrop',
-    'SFMRI_DecodeSampler', 'MultiRestrictSize', 'MultiNorm', 'RandomResizedCrop'
+    'SFMRI_DecodeSampler', 'MultiRestrictSize', 'MultiNorm', 'RandomResizedCrop',
+    'Resize_manet', 'RandomCrop_manet',
+    'RandomHorizontalFlip_manet', 'ToTensor_manet', 'RandomScale_manet',
 ]

@@ -14,6 +14,7 @@
 
 from .base import BaseWeightedLoss
 from .bmn_loss import BMNLoss
+from .manet_loss import Topk_CrossEntropyLoss
 from .cross_entropy_loss import CrossEntropyLoss
 from .depth_loss import ADDSLoss
 from .transnetv2_loss import TransNetV2Loss
@@ -21,5 +22,5 @@ from .actbert_loss import ActBertLoss
 
 __all__ = [
     'CrossEntropyLoss', 'BMNLoss', 'TransNetV2Loss', 'ActBertLoss', 'ADDSLoss',
-    'BaseWeightedLoss'
+    'BaseWeightedLoss', 'Topk_CrossEntropyLoss'
 ]

@@ -1,0 +1,98 @@
+MODEL: #MODEL field
+  framework: "ManetSegment_Stage2"
+  backbone:
+    name: "DeepLab" #Optional, indicate the type of backbone, please refer to the 'paddlevideo/modeling/backbones/'.
+    backbone: 'resnet'
+    output_stride: 16
+    num_classes: 21
+    freeze_bn: False
+  head:
+    name: "IntVOS"
+    pretrained: "/home/lc/paddlevideo/output/Manet_stage1/Manet_stage1_epoch_100001.pdparams"
+    loss_cfg:
+      name: "Topk_CrossEntropyLoss"
+      top_k_percent_pixels: 0.15
+      hard_example_mining_step: 50000
+    train_bn_mom: 0.9997
+    model_aspp_outdim: 256
+    model_semantic_embedding_dim: 100
+    model_head_embedding_dim: 256
+    model_useintseg: False
+    test_mode: False
+    model_max_local_distance: 12
+  train_cfg:
+    knns: 1
+    train_inter_use_true_result: True
+  test_cfg:
+    knns: 1
+    is_save_image: False
+DATASET: #DATASET field
+  batch_size: 2 #Mandatory, batch size per gpu.
+  test_batch_size: 2 #Optional, test batch size per gpu.
+  valid_batch_size: 1
+  num_workers: 0 #Mandatory, the number of subprocess on each GPU.
+  train:
+    format: "DAVIS2017_TrainDataset" #Mandatory, indicate the type of train dataset, please refer to the 'paddlevidel/loader/dateset'.
+    file_path: "/home/lc/manet/data/DAVIS" #Mandatory, train data index file path
+  valid:
+    format: "DAVIS2017_TrainDataset" #Mandatory, indicate the type of train dataset, please refer to the 'paddlevidel/loader/dateset'.
+    file_path: "/home/lc/manet/data/DAVIS" #Mandatory, train data index file path
+  test:
+    format: "DAVIS2017_Feature_ExtractDataset" #Mandotary, indicate the type of test dataset, please refer to the 'paddlevideo/loader/dataset'.
+    file_path: "/home/lc/manet/data/DAVIS" #Mandotary, test data index file path.
+
+
+PIPELINE: #PIPELINE field
+  train: #Mandotary, indicate the pipeline to deal with the training data, please refer to the 'paddlevideo/loader/pipelines/'
+    transform: #Mandotary, image transform operator
+      - RandomHorizontalFlip_manet:
+          prob: 0.5
+      - RandomScale_manet:
+          scales: [ 0.75, 1, 1.25 ]
+      - RandomCrop_manet:
+          output_size: [ 416, 416 ]
+          step: 10
+      - Resize_manet:
+          output_size: [ 416, 416 ]
+      - ToTensor_manet:
+  test: #Mandatory, indicate the pipeline to deal with the validing data. please refer to the 'paddlevideo/loader/pipelines/'
+    transform: #Mandatory, image transform operator.
+      - Resize_manet:
+          output_size: [ 480, 854 ]
+      - ToTensor_manet:
+  valid:
+    train_inter_use_true_result:
+      transform: #Mandotary, image transfrom operator
+        - Resize_manet:
+            output_size: 416
+        - ToTensor_manet:
+    transform:
+      - ToTensor_manet:
+
+OPTIMIZER: #OPTIMIZER field
+  name: 'Momentum' #Mandatory, the type of optimizer, associate to the 'paddlevideo/solver/'
+  momentum: 0.9
+  parameter_list:
+    - head: [ inter_seghead ]
+  learning_rate: #Mandatory, the type of learning rate scheduler, associate to the 'paddlevideo/solver/'
+    name: 'LambdaDecay'
+    learning_rate: 0.0007
+    lr_lambda: "lambda last_step: (1 - last_step / (101000 + 1)) ** 0.9"
+  weight_decay:
+    name: 'L2'
+    value: 0.00004
+  grad_clip:
+    name: 'ClipGradByGlobalNorm'
+    value: 5
+
+METRIC:
+  name: 'CenterCropMetric'
+INFERENCE:
+  name: 'Manet_Inference_helper'
+  output_path: inference_results
+
+model_name: "Manet_stage2" #Mandatory, model name.
+log_level: "INFO" #Optional, the logger level.
+max_iters: 101000
+log_interval: 50
+save_step: 20000

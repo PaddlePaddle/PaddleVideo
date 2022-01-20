@@ -262,8 +262,6 @@ def write_dict(state_dict, file_name, **cfg):
     lines = []
     tot = 0
     for k, v in state_dict.items():
-        # 目前只发现了torch和paddle模型参数命名的这三种不一致
-        # 不一致1
         if 'num_batches_tracked' in k:
             tot += 1
             continue
@@ -272,9 +270,6 @@ def write_dict(state_dict, file_name, **cfg):
         except:
             line = str(k) + '\t' + str(v.shape) + '\n'
         lines.append(line)
-    # with open(cfg.get("output_dir", f"./output/{file_name}"), 'w') as f:
-    #     f.writelines(lines)
-    # print('%d num_batches_tracked skipped' % tot)
 
 
 def damage_masks(labels, shift=True, scale=True, rotate=True):
