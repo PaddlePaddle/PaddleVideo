@@ -21,7 +21,6 @@ PaddleVideo包含视频分类和动作定位方向的多个主流领先模型，
 | 视频动作定位| [BMN](./localization/bmn.md) | [bmn.yaml](../../../configs/localization/bmn.yaml) | [ActivityNet](../dataset/ActivityNet.md) |  AUC | 67.23 | [BMN.pdparams](https://videotag.bj.bcebos.com/PaddleVideo/BMN/BMN.pdparams) |
 | 视频切分 | [TransNetV2](./partition/transnetv2.md) | [transnetv2.yaml](../../../configs/partitioners/transnetv2/transnetv2.yaml) | ClipShots | F1 scores | 76.1 |  |
 | 深度估计 | [ADDS](./estimation/adds.md) | [adds.yaml](../../../configs/estimation/adds/adds.yaml) | Oxford_RobotCar | Abs Rel | 0.209 |  |
-| 视频分割 | [Manet](./segmentation/manet.md) | [manet_stage1.yaml](../../../configs/segmentation/manet_stage1.yaml)<br />[manet_stage2.yaml](../../../configs/segmentation/manet_stage2.yaml) | DAVIS2017 | AUC | 0.749 | |
 
 
 # 参考文献
