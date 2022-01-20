@@ -334,6 +334,8 @@ class SamplerPkl(object):
         filename = results['frame_dir']
         data_loaded = pickle.load(open(filename, 'rb'), encoding='bytes')
         video_name, label, frames = data_loaded
+        if isinstance(label, dict):
+            label = label['动作类型']
         results['frames_len'] = len(frames)
         results['labels'] = label
         frames_len = results['frames_len']
