@@ -43,29 +43,7 @@ def set_seeds(seed: int):
     """
     random.seed(seed)
     np.random.seed(seed)
-    paddle.seed(seed) #torch.manual_seed(seed)
-
-
-def update_src_web_video_dir(config):
-    """Provide backwards compatible support for web directories
-
-    Args:
-        config: a configuration object containing experiment paths
-    """
-    src_video_dir = Path(config["visualizer"]["args"]["src_video_dir"])
-    dataset = config["data_loader"]["args"]["dataset_name"]
-    if dataset not in str(src_video_dir):
-        lookup = {
-            "ActivityNet": "activity-net/videos",
-            "MSRVTT": "MSRVTT/videos/all",
-            "MSVD": "MSVD/videos",
-            "DiDeMo": "DiDeMo/videos",
-            "LSMDC": "LSMDC/videos",
-            "YouCook2": "YouCook2/videos",
-        }
-        src_video_dir = Path(src_video_dir.parts[0]) / lookup[dataset]
-    config["visualizer"]["args"]["src_video_dir"] = Path(src_video_dir)
-
+    paddle.seed(seed)
 
 def memory_summary():
     vmem = psutil.virtual_memory()

@@ -38,7 +38,7 @@ coming soon
 
 ## 模型推理
 
-下载在ClipShots和TRECVID IACC.3上训练好的TransNetV2模型参数 [TransNetV2_shots.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/TransNetV2_shots.pdparams )，也可以通过命令行下载
+下载在ClipShots和TRECVID IACC.3上训练好的TransNetV2模型参数 [TransNetV2_shots.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/TransNetV2_shots.pdparams)，也可以通过命令行下载
 
 ```bash
 wget https://videotag.bj.bcebos.com/PaddleVideo-release2.2/TransNetV2_shots.pdparams
