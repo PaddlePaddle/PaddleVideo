@@ -8,7 +8,7 @@ from ..registry import HEADS
 import time
 import paddle.nn.functional as F
 from paddlevideo.utils.manet_utils import int_, float_, long_, write_dict, load
-from paddlevideo.utils.manet_utils import kaiming_normal_
+from paddlevideo.modeling import kaiming_normal_
 
 #############################################################GLOBAL_DIST_MAP
 from .base import BaseHead

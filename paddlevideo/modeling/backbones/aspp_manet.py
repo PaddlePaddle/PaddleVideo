@@ -2,7 +2,8 @@ import math
 import paddle
 import paddle.nn as nn
 import paddle.nn.functional as F
-from paddlevideo.utils.manet_utils import kaiming_normal_
+
+from paddlevideo.modeling import kaiming_normal_
 
 
 class _ASPPModule(nn.Layer):
