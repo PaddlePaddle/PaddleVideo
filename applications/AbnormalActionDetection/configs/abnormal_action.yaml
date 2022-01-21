@@ -83,6 +83,7 @@ DATASET: #DATASET field
       timestamp_end: 1800
       test_mode: True
       FPS: 15
+      
 PIPELINE:
   train:
     sampler:
@@ -138,6 +139,7 @@ PIPELINE:
           to_bgr: False
       - PackOutput:
           alpha: 4
+          
 OPTIMIZER: #OPTIMIZER field
     name: 'Momentum' #Mandatory, the type of optimizer, associate to the 'paddlevideo/solver/'
     momentum: 0.9
