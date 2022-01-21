@@ -12,24 +12,24 @@ DATASET: #DATASET field
     batch_size: 8
     train:
         format: "ActBertDataset"
-        file_path: "./dataset/my_data.npy"
+        file_path: "data/howto100m/my_data.npy"
     valid:
         format: "ActBertDataset"
-        file_path: "./dataset/my_data.npy"
+        file_path: "data/howto100m/my_data.npy"
 
 PIPELINE: #PIPELINE field
     train:
         transform:
         - FeaturePadding:
         - RandomCap:
-            caption_path: "./dataset/caption_train.json"
+            caption_path: "data/howto100m/caption_train.json"
         - Tokenize:
         - RandomMask:
     valid:
         transform:
         - FeaturePadding:
         - RandomCap:
-            caption_path: "./dataset/caption_val.json"
+            caption_path: "data/howto100m/caption_val.json"
         - Tokenize:
         - RandomMask:
 

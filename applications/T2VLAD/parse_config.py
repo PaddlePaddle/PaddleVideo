@@ -14,6 +14,7 @@
 
 import os
 import time
+import paddle
 import pprint
 import logging
 from typing import Dict
@@ -43,9 +44,6 @@ class ConfigParser:
             args = args.parse_args(args=[])
         else:
             args = args.parse_args()
-
-        if args.device:
-            os.environ["CUDA_VISIBLE_DEVICES"] = args.device
 
         if args.resume and not slave_mode:
             self.resume = Path(args.resume)
@@ -81,20 +79,14 @@ class ConfigParser:
         else:
             subdir = timestamp
 
-        # store challenge experiments in a further subdirectory
-        if self._config.get("challenge_mode", False):
-            challenge_tag = "cvpr2020-challenge"
-            exper_name = f"{challenge_tag}/{exper_name}"
-
         self._save_dir = save_dir / 'models' / exper_name / subdir
-        self._web_log_dir = save_dir / 'web' / exper_name / subdir
         self._log_dir = save_dir / 'log' / exper_name / subdir
         self._exper_name = exper_name
         self._args = args
 
         # if set, remove all previous experiments with the current config
         if vars(args).get("purge_exp_dir", False):
-            for dirpath in (self._save_dir, self._log_dir, self._web_log_dir):
+            for dirpath in (self._save_dir, self._log_dir):
                 config_dir = dirpath.parent
                 existing = list(config_dir.glob("*"))
                 print(f"purging {len(existing)} directories from config_dir...")

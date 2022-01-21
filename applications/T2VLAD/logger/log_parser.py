@@ -102,15 +102,3 @@ def log_summary(logger, log_path, eval_mode="test_run", fixed_num_epochs=None):
             logger.info(f"Reporting stats with fixed training length: {fixed_num_epochs}")
         for metric, values in agg_scores.items():
             logger.info(f"{metric}: {np.mean(values):.1f}, {np.std(values, ddof=1):.1f}")
-
-
-if __name__ == "__main__":
-    sample_path = "data/saved/log/lsmdc-train-full-ce/07-25_15-15-18/info.log"
-    logger_ = logging.getLogger("parser")
-    logging.basicConfig(level=logging.INFO)
-    log_summary(
-        logger=logger_,
-        log_path=sample_path,
-        eval_mode="fixed_num_epochs",
-        fixed_num_epochs=9,
-    )

@@ -59,7 +59,7 @@ Oxford RobotCar dataset数据下载及准备请参考[Oxford RobotCar dataset数
 - ADDS-DepthNet模型在训练时同步进行验证（只对白天或者夜晚的数据进行验证），您可以通过在训练日志中查找关键字`best`获取模型测试精度，日志示例如下:
 
   ```bash
-  Already save the best model (top1 acc)0.7004
+  Already save the best model (rmse)8.5531
   ```
 
 - 由于模型暂时一次只能测试yaml文件中给定路径的一个白天或者夜晚的数据集，因此若要得到本文档开头处的完整测试分数，需要运行4次测试命令并分别记录下它们的指标（白天40m、白天60m、夜晚40m、夜晚60m）
