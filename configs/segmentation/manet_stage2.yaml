@@ -26,6 +26,7 @@ MODEL: #MODEL field
   test_cfg:
     knns: 1
     is_save_image: False
+
 DATASET: #DATASET field
   batch_size: 2 #Mandatory, batch size per gpu.
   test_batch_size: 2 #Optional, test batch size per gpu.
@@ -40,7 +41,6 @@ DATASET: #DATASET field
   test:
     format: "DAVIS2017_Feature_ExtractDataset" #Mandotary, indicate the type of test dataset, please refer to the 'paddlevideo/loader/dataset'.
     file_path: "/home/lc/manet/data/DAVIS" #Mandotary, test data index file path.
-
 
 PIPELINE: #PIPELINE field
   train: #Mandotary, indicate the pipeline to deal with the training data, please refer to the 'paddlevideo/loader/pipelines/'
@@ -87,6 +87,7 @@ OPTIMIZER: #OPTIMIZER field
 
 METRIC:
   name: 'CenterCropMetric'
+
 INFERENCE:
   name: 'Manet_Inference_helper'
   output_path: inference_results

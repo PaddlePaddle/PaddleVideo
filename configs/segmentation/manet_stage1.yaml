@@ -45,11 +45,7 @@ PIPELINE: #PIPELINE field
       - Resize_manet:
           output_size: [ 416, 416 ]
       - ToTensor_manet:
-  test: #Mandatory, indicate the pipeline to deal with the validing data. please refer to the 'paddlevideo/loader/pipelines/'
-    transform: #Mandatory, image transform operator.
-      - Resize_manet:
-          output_size: [ 480, 854 ]
-      - ToTensor_manet:
+
 OPTIMIZER: #OPTIMIZER field
   name: 'Momentum' #Mandatory, the type of optimizer, associate to the 'paddlevideo/solver/'
   momentum: 0.9
@@ -68,7 +64,6 @@ OPTIMIZER: #OPTIMIZER field
 
 METRIC:
   name: 'CenterCropMetric'
-
 
 model_name: "Manet_stage1" #Mandatory, model name.
 log_interval: 50 #Optional, the interval of logger.

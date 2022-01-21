@@ -63,31 +63,10 @@
     python main.py -c configs/segmentation/manet_stage1.yaml
     ```
 
-  - 使用多张卡进行训练，以加快训练过程。训练开始命令如下：
-
-    ```bash
-    export CUDA_VISIBLE_DEVICES=0,1,2,3
-
-    python -B -m paddle.distributed.launch --gpus="0,1,2,3"  --log_dir=log_manet_stage1 main.py -c configs/segmentation/manet_stage1.yaml
-    ```
-
-  - 使用混合精度训练以加快训练过程。训练开始命令如下：
-
-    ```bash
-    export FLAGS_conv_workspace_size_limit=800 # MB
-    export FLAGS_cudnn_exhaustive_search=1
-    export FLAGS_cudnn_batchnorm_spatial_persistent=1
-
-    # frames data format
-    python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4" --log_dir=log_manet_stage1 main.py --amp -c configs/segmentation/manet_stage1.yaml
-    ```
-
 - 使用第一阶段的模型训练结果，您可以使用一张卡开始训练第二阶段（其他训练方法，如多张卡或混合精度类似于上述），命令如下：
 
   ```bash
-  export CUDA_VISIBLE_DEVICES=0,1,2,3
-
-  python -B -m paddle.distributed.launch --gpus="0,1,2,3"  --log_dir=log_manet_stage1 main.py  --validate -c configs/segmentation/manet_stage2.yaml
+  python main.py -c configs/segmentation/manet_stage2.yaml
   ```
 
 - 此外，您可以自定义和修改参数配置，以达到在不同数据集上训练/测试的目的。建议配置文件的命名方法是 `model_dataset name_file format_data format_sampling method.yaml` ，请参考 [config](../../tutorials/config.md) 配置参数的方法。
@@ -100,7 +79,7 @@
 您可以通过以下命令开始测试：
 
 ```bash
-python main.py --test -c configs/localization/bmn.yaml -w output/BMN/BMN_epoch_00009.pdparams -o DATASET.test_batch_size=1
+python main.py --test -c configs/segmentation/manet_stage2.yaml -w output/ManetSegment_Stage2/ManetSegment_Stage2_step_100001.pdparams  
 ```
 
 - 您可以下载[我们的模型](https://drive.google.com/file/d/1JjYNha40rtEYKKKFtDv06myvpxagl5dW/view?usp=sharing) 解压缩它，并在配置文件中指定`METRIC.ground_truth_filename` 的路径。
@@ -113,7 +92,3 @@ python main.py --test -c configs/localization/bmn.yaml -w output/BMN/BMN_epoch_0
 | J@60  |  AUC  |
 | :---: | :---: |
 | 0.761 | 0.749 |
-
-
-
-## 模型推理

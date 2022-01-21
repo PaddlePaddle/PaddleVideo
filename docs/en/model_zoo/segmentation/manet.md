@@ -63,32 +63,10 @@ If you need the file "DAVIS2017/ImageSets/2017/v_a_l_instances.txt", please refe
     ```bash
     python main.py -c configs/segmentation/manet_stage1.yaml
     ```
-
-  - Turn on multiple cards for training to speed up the training process. The training start command is as follows:
-
-    ```bash
-    export CUDA_VISIBLE_DEVICES=0,1,2,3
-
-    python -B -m paddle.distributed.launch --gpus="0,1,2,3"  --log_dir=log_manet_stage1 main.py -c configs/segmentation/manet_stage1.yaml
-    ```
-
-  - Turn on amp mixed-precision training to speed up the training process. The training start command is as follows:
-
-    ```bash
-    export FLAGS_conv_workspace_size_limit=800 # MB
-    export FLAGS_cudnn_exhaustive_search=1
-    export FLAGS_cudnn_batchnorm_spatial_persistent=1
-
-    # frames data format
-    python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4" --log_dir=log_manet_stage1 main.py --amp -c configs/segmentation/manet_stage1.yaml
-    ```
-
 - Then you can start training of stage two  using one card (other training method such as multiple cards or amp mixed-precision is similar to the above) by such command which depends on the model training result of stage one：
 
   ```bash
-  export CUDA_VISIBLE_DEVICES=0,1,2,3
-
-  python -B -m paddle.distributed.launch --gpus="0,1,2,3"  --log_dir=log_manet_stage1 main.py  --validate -c configs/segmentation/manet_stage2.yaml
+    python main.py -c configs/segmentation/manet_stage2.yaml
   ```
 
 - In addition, you can customize and modify the parameter configuration to achieve the purpose of training/testing on different data sets. It is recommended that the naming method of the configuration file is `model_dataset name_file format_data format_sampling method.yaml` , Please refer to [config](../../tutorials/config.md) for parameter usage.
@@ -100,7 +78,7 @@ If you need the file "DAVIS2017/ImageSets/2017/v_a_l_instances.txt", please refe
 You can start testing by such command：
 
 ```bash
-python main.py --test -c configs/localization/bmn.yaml -w output/BMN/BMN_epoch_00009.pdparams -o DATASET.test_batch_size=1
+python main.py --test -c configs/segmentation/manet_stage2.yaml -w output/ManetSegment_Stage2/ManetSegment_Stage2_step_100001.pdparams  
 ```
 
 - You can download [our model](https://drive.google.com/file/d/1JjYNha40rtEYKKKFtDv06myvpxagl5dW/view?usp=sharing) decompress it and specify the path to `METRIC.ground_truth_filename` in config file.
@@ -113,8 +91,3 @@ Test accuracy in DAVIS2017:
 | J@60  |  AUC  |
 | :---: | :---: |
 | 0.761 | 0.749 |
-
-
-## Inference
-
-**Ongoing**
