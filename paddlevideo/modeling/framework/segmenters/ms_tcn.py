@@ -60,13 +60,14 @@ class MSTCN(BaseSegmenter):
         loss = 0.
         for i in range(len(output)):
             loss += self.head.loss(output[i], video_gt)
-        
+
         predicted = paddle.argmax(output[-1], axis=1)
         predicted = paddle.squeeze(predicted)
 
         outputs_dict = dict()
         outputs_dict['loss'] = loss
         outputs_dict['predict'] = predicted
+        outputs_dict['output_np'] = output[-1]
         return outputs_dict
 
     def test_step(self, data_batch):
@@ -74,11 +75,14 @@ class MSTCN(BaseSegmenter):
         """
         video_feat, _ = data_batch
 
+        outputs_dict = dict()
         # call forward
         output = self.forward_net(video_feat)
         predicted = paddle.argmax(output[-1], axis=1)
         predicted = paddle.squeeze(predicted)
-        return predicted
+        outputs_dict['predict'] = predicted
+        outputs_dict['output_np'] = output[-1]
+        return outputs_dict
 
     def infer_step(self, data_batch):
         """Infering setp.
@@ -89,4 +93,4 @@ class MSTCN(BaseSegmenter):
         output = self.forward_net(video_feat)
         predicted = paddle.argmax(output[-1], axis=1)
         predicted = paddle.squeeze(predicted)
-        return predicted
+        return predicted, output[-1]

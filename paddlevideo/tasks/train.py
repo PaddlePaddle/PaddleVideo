@@ -272,7 +272,7 @@ def train_model(cfg,
                 outputs = model(data, mode='valid')
 
                 if cfg.METRIC.name == "SegmentationMetric":
-                    Metric.update(i, data, outputs['predict'])
+                    Metric.update(i, data, outputs)
 
                 if cfg.MODEL.framework == "FastRCNN":
                     results.extend(outputs)
@@ -314,8 +314,8 @@ def train_model(cfg,
 
             if cfg.METRIC.name == "SegmentationMetric":
                 record_list.update(Metric.accumulate())
-                if record_list["F1@0.50"] > best:
-                    best = record_list["F1@0.50"]
+                if record_list["Auc"] > best:
+                    best = record_list["Auc"]
                     best_flag = True
                 return best, best_flag
 
