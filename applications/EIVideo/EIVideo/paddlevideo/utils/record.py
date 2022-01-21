@@ -115,8 +115,8 @@ def log_batch(metric_list,
               total_epoch,
               mode,
               ips,
-              step_id=None,
-              total_step=None):
+              tot_step=None,
+              max_iters=None):
     batch_cost = str(metric_list['batch_time'].value) + ' sec,'
     reader_cost = str(metric_list['reader_time'].value) + ' sec,'
 
@@ -126,7 +126,7 @@ def log_batch(metric_list,
             metric_values.append(metric_list[m].value)
     metric_str = ' '.join([str(v) for v in metric_values])
     if max_iters:
-        epoch_str = "iter:[{:>3d}/{:<3d}]".format(step_id, total_step)
+        epoch_str = "iter:[{:>3d}/{:<3d}]".format(tot_step, max_iters)
     else:
         epoch_str = "epoch:[{:>3d}/{:<3d}]".format(epoch_id, total_epoch)
     step_str = "{:s} step:{:<4d}".format(mode, batch_id)

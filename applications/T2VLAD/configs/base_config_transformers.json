@@ -1,7 +1,6 @@
 {
     "n_gpu": 1,
     "seed": 0,
-    "disable_nan_checks": false,
     "log_name": "info.json",
     "experts": {
         "drop_feats": "",
@@ -147,7 +146,7 @@
         "save_only_best": true,
         "save_dir": "data/saved/",
         "save_period": 5,
-        "val_freq": 1,
+        "val_freq": 5,
         "verbosity": 2,
         "monitor": "max val_t2v_metrics_geometric_mean_R1-R5-R10"
     }

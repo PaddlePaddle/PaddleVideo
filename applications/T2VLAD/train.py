@@ -46,10 +46,6 @@ def run_exp(config):
     else:
         seeds = [int(x) for x in config._args.seeds.split(",")]
 
-    # set up local filesystem on the cluster
-    if socket.gethostname().endswith("cluster"):
-        os.system(str(Path.home() / "configure_tmp_data.sh"))
-
     for ii, seed in enumerate(seeds):
         tic = time.time()
         logger.info(f"{ii + 1}/{len(seeds)} Setting experiment random seed to {seed}")
@@ -93,7 +89,6 @@ def run_exp(config):
             data_loaders=data_loaders,
             lr_scheduler=lr_scheduler,
             mini_train=config._args.mini_train,
-            disable_nan_checks=config["disable_nan_checks"],
             visualizer=None,
             val_freq=config["trainer"].get("val_freq", 1),
             force_cpu_val=config.get("force_cpu_val", False),
@@ -127,7 +122,6 @@ def main():
     args = argparse.ArgumentParser(description='Main entry point for training')
     args.add_argument('--config', help='config file path')
     args.add_argument('--resume', help='path to latest model (default: None)')
-    args.add_argument('--device', help="indices of GPUs to enable")
     args.add_argument('--mini_train', action="store_true")
     args.add_argument('--group_id', help="if supplied, group these experiments")
     args.add_argument('--disable_workers', action="store_true")
