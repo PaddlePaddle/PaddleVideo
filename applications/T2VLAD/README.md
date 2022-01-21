@@ -1,4 +1,4 @@
-[English](./readme_en.md) | 简体中文
+[English](./README_en.md) | 简体中文
 
 # T2VLAD: 基于局部全局对齐的文本视频检索
 
@@ -22,8 +22,7 @@ T2VLAD是百度在CVPR2021提出的文本视频检索模型。文本视频检索
 
 ## 数据准备
 
-MSR-VTT数据下载链接：
-
+MSR-VTT数据下载及准备请参考 [MSR-VTT数据准备](./docs/dataset.md)
 
 ## 模型训练
 
@@ -36,7 +35,8 @@ MSR-VTT数据下载链接：
 - 训练启动命令如下:
 
 ```bash
-python3.7 train.py --config ./configs/msrvtt_transformers.json --device 0
+export CUDA_VISIBLE_DEVICES=0
+python3.7 train.py --config ./configs/msrvtt_transformers.json
 ```
 
 T2VLAD在训练时使用了Ranger优化器，这里我们暂时没有支持Ranger优化器到的实现，目前可以使用AdamW优化器来完成训练。
@@ -47,7 +47,8 @@ T2VLAD在训练时使用了Ranger优化器，这里我们暂时没有支持Range
 - 对下游任务：文本-视频检索，在MSR-VTT数据集上评估性能，评估脚本启动方式如下：
 
 ```bash
-python3.7 test.py --config ./configs/msrvtt_transformers.json --device 0 --resume ./T2VLAD_msrvtt.pdparams
+export CUDA_VISIBLE_DEVICES=0
+python3.7 test.py --config ./configs/msrvtt_transformers.json --resume ./T2VLAD_msrvtt.pdparams
 ```
 
 MSR-VTT数据集测试精度:

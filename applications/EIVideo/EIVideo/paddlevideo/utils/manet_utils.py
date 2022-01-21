@@ -262,6 +262,8 @@ def write_dict(state_dict, file_name, **cfg):
     lines = []
     tot = 0
     for k, v in state_dict.items():
+        # 目前只发现了torch和paddle模型参数命名的这三种不一致
+        # 不一致1
         if 'num_batches_tracked' in k:
             tot += 1
             continue
@@ -270,6 +272,9 @@ def write_dict(state_dict, file_name, **cfg):
         except:
             line = str(k) + '\t' + str(v.shape) + '\n'
         lines.append(line)
+    # with open(cfg.get("output_dir", f"./output/{file_name}"), 'w') as f:
+    #     f.writelines(lines)
+    # print('%d num_batches_tracked skipped' % tot)
 
 
 def damage_masks(labels, shift=True, scale=True, rotate=True):
@@ -396,7 +401,6 @@ def _rotate_mask(mask, max_rot_degrees=3.0):
 
 class AverageMeter(object):
     """Computes and stores the average and current value"""
-
     def __init__(self):
         self.val = 0
         self.avg = 0
@@ -468,7 +472,6 @@ def byte_(tensor: Tensor):
 
 
 class ToPILImage(BaseTransform):
-
     def __init__(self, mode=None, keys=None):
         super(ToPILImage, self).__init__(keys)
 
@@ -574,7 +577,6 @@ class Identity(nn.Layer):
         args: any argument (unused)
         kwargs: any keyword argument (unused)
     """
-
     def __init__(self, *args, **kwargs):
         super(Identity, self).__init__()
 
@@ -1274,3 +1276,16 @@ def _make_deprecate(meth):
         old_name=old_name, new_name=new_name)
     deprecated_init.__name__ = old_name
     return deprecated_init
+
+
+# uniform = _make_deprecate(uniform_)
+# normal = _make_deprecate(normal_)
+# constant = _make_deprecate(constant_)
+# eye = _make_deprecate(eye_)
+# dirac = _make_deprecate(dirac_)
+# xavier_uniform = _make_deprecate(xavier_uniform_)
+# xavier_normal = _make_deprecate(xavier_normal_)
+# kaiming_uniform = _make_deprecate(kaiming_uniform_)
+# kaiming_normal = _make_deprecate(kaiming_normal_)
+# orthogonal = _make_deprecate(orthogonal_)
+# sparse = _make_deprecate(sparse_)
