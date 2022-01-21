@@ -1,30 +1,113 @@
-<!DOCTYPE html><html lang=""><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,maximum-scale=1,user-scalable=0,initial-scale=1"><meta http-equiv="pragma" content="no-cache"><meta http-equiv="Cache-Control" content="no-cache, must-revalidate"><meta http-equiv="expires" content="0"><link rel="icon" href="/uuapstatic/img/ph-logo.5e92fca2.svg"><title>统一认证中心</title><script>function ieBrowser() {
-            var userAgent = navigator.userAgent; //取得浏览器的userAgent字符串
-            var isIE = userAgent.indexOf("compatible") > -1 && userAgent.indexOf("MSIE") > -1; //判断是否IE<11浏览器
-            var isIE11 = userAgent.indexOf('Trident') > -1 && userAgent.indexOf("rv:11.0") > -1;
-            return (isIE || isIE11) ? true : false;
-        }
-        window.onload = function() {
-            var isIE = ieBrowser();
-            if (isIE) {
-                var nav = window.navigator;
-                var isZh = nav.userLanguage.indexOf('zh') !== -1 && nav.systemLanguage.indexOf('zh') !== -1 && nav.browserLanguage.indexOf('zh') !== -1;
-                document.getElementById(isZh ? 'enLang' : 'chLang').style.display = 'none';
-                document.getElementById('too-low').style.display = 'block';
-            }
-        };</script><link href="/uuapstatic/css/app.890c08bc.css" rel="preload" as="style"><link href="/uuapstatic/css/chunk-vendors.ec2db238.css" rel="preload" as="style"><link href="/uuapstatic/js/app.2b07e65a.js" rel="preload" as="script"><link href="/uuapstatic/js/chunk-vendors.99baec38.js" rel="preload" as="script"><link href="/uuapstatic/css/chunk-vendors.ec2db238.css" rel="stylesheet"><link href="/uuapstatic/css/app.890c08bc.css" rel="stylesheet"></head><body><noscript>您的浏览器不支持或禁止了网页脚本(JavaScript)，请在浏览器设置中允许运行JavaScript，如有问题请联系如流群：1667521</noscript><div id="too-low" class="too-low" style="display: none;"><div class="header"><img class="cursor-pointer" src="/uuapstatic/logo.svg" alt="logo" height="38"></div><div class="too-low-con"><div><img src="/uuapstatic/error-auth.png" alt="error-auth.png"><br><br><div id="enLang">Your browser version is too old. In order to have a better access experience, please change your browser to firebox,<br>Safari, chrome (including chrome kernel browser) and edge. Chrome is recommended.<br><br>Browser compatible version:</div><div id="chLang">您的浏览器版本过旧，为了更好的访问体验，请更换浏览器为firefox，Safari，<br>Chrome（包含Chromium内核浏览器）及edge，推荐使用Chrome。<br><br>浏览器兼容版本：</div>firefox(58+), safari(10+), chrome(76+), edge(16+)</div></div></div><div id="uuap"></div><script src="/uuapstatic/js/chunk-vendors.99baec38.js"></script><script src="/uuapstatic/js/app.2b07e65a.js"></script></body><script src="https://wappass.baidu.com/static/machine/js/api/mkd.js"></script><script>function initQRCode({appToken, language}) {
-        return new Promise((resolve, reject) => {
-            new Beep_QRCode({
-                el: 'qrCode',
-                // appToken 请选择颁发的线上appToken
-                appToken,
-                language,
-                success: function (res) {
-                    resolve(res);
-                },
-                error: function (res) {
-                    reject(res);
-                }
-            });
-        });
-    }</script></html>
+import argparse
+import glob
+import os
+import sys
+from typing import Dict
+import numpy as np
+
+sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
+
+dataset_names = ["50salads", "breakfast", "gtea", "baseball"]
+
+
+def get_class2id_map(dataset: str,
+                     dataset_dir: str = "./dataset") -> Dict[str, int]:
+    """
+    Args:
+        dataset: 50salads, gtea, breakfast
+        dataset_dir: the path to the datset directory
+    """
+
+    assert (dataset in dataset_names
+            ), "You have to choose 50salads, gtea or breakfast as dataset."
+
+    with open(os.path.join(dataset_dir, "{}/mapping.txt".format(dataset)),
+              "r") as f:
+        actions = f.read().split("\n")[:-1]
+
+    class2id_map = dict()
+    for a in actions:
+        class2id_map[a.split()[1]] = int(a.split()[0])
+
+    return class2id_map
+
+
+def get_arguments() -> argparse.Namespace:
+    """
+    parse all the arguments from command line inteface
+    return a list of parsed arguments
+    """
+
+    parser = argparse.ArgumentParser(
+        description="convert ground truth txt files to numpy array")
+    parser.add_argument(
+        "--dataset_dir",
+        type=str,
+        default="./dataset",
+        help="path to a dataset directory (default: ./dataset)",
+    )
+
+    return parser.parse_args()
+
+
+def main() -> None:
+    args = get_arguments()
+
+    datasets = ["50salads", "gtea", "breakfast", "baseball"]
+
+    for dataset in datasets:
+        # make directory for saving ground truth numpy arrays
+        cls_save_dir = os.path.join(args.dataset_dir, dataset, "gt_arr")
+        if not os.path.exists(cls_save_dir):
+            os.mkdir(cls_save_dir)
+
+        # make directory for saving ground truth numpy arrays
+        boundary_save_dir = os.path.join(args.dataset_dir, dataset,
+                                         "gt_boundary_arr")
+        if not os.path.exists(boundary_save_dir):
+            os.mkdir(boundary_save_dir)
+
+        # class to index mapping
+        class2id_map = get_class2id_map(dataset, dataset_dir=args.dataset_dir)
+
+        gt_dir = os.path.join(args.dataset_dir, dataset, "groundTruth")
+        gt_paths = glob.glob(os.path.join(gt_dir, "*.txt"))
+
+        for gt_path in gt_paths:
+            # the name of ground truth text file
+            gt_name = os.path.relpath(gt_path, gt_dir)
+
+            with open(gt_path, "r") as f:
+                gt = f.read().split("\n")[:-1]
+
+            gt_array = np.zeros(len(gt))
+            for i in range(len(gt)):
+                gt_array[i] = class2id_map[gt[i]]
+
+            # save array
+            np.save(os.path.join(cls_save_dir, gt_name[:-4] + ".npy"), gt_array)
+
+            # the name of ground truth text file
+            gt_name = os.path.relpath(gt_path, gt_dir)
+
+            with open(gt_path, "r") as f:
+                gt = f.read().split("\n")[:-1]
+
+            # define the frame where new action starts as boundary frame
+            boundary = np.zeros(len(gt))
+            last = gt[0]
+            boundary[0] = 1
+            for i in range(1, len(gt)):
+                if last != gt[i]:
+                    boundary[i] = 1
+                    last = gt[i]
+
+            # save array
+            np.save(os.path.join(boundary_save_dir, gt_name[:-4] + ".npy"),
+                    boundary)
+
+    print("Done")
+
+
+if __name__ == "__main__":
+    main()

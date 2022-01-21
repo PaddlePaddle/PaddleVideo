@@ -41,7 +41,7 @@ coming soon
 ## Inference
 
 
-Load the TransNetV2 weights trained on ClipShots and TRECVID IACC.3 dataset [TransNetV2_shots.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/TransNetV2_shots.pdparams ), or download through the command line
+Load the TransNetV2 weights trained on ClipShots and TRECVID IACC.3 dataset [TransNetV2_shots.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/TransNetV2_shots.pdparams), or download through the command line
 
 ```bash
 wget https://videotag.bj.bcebos.com/PaddleVideo-release2.2/TransNetV2_shots.pdparams
