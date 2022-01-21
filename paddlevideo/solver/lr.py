@@ -44,5 +44,7 @@ def build_lr(cfg, num_iters):
     if cfg_copy.get('iter_step'):
         cfg_copy['num_iters'] = num_iters
         cfg_copy.pop('iter_step')
+    if cfg_copy.get('lr_lambda'):
+        cfg_copy['lr_lambda'] = eval(cfg_copy['lr_lambda'])
 
     return getattr(custom_lr, lr_name)(**cfg_copy)

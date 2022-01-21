@@ -28,7 +28,13 @@ class BaseSegment(nn.Layer):
         head (dict): Head to process feature.
         loss(dict): Loss function.
     """
-    def __init__(self, backbone=None, head=None, loss=None):
+
+    def __init__(self,
+                 backbone=None,
+                 head=None,
+                 loss=None,
+                 train_cfg=None,
+                 test_cfg=None):
         super().__init__()
         if backbone is not None:
             self.backbone = builder.build_backbone(backbone)
@@ -38,7 +44,11 @@ class BaseSegment(nn.Layer):
             self.backbone = None
         if head is not None:
             self.head_name = head.name
-            self.head = builder.build_head(head)
+            if head.name == 'IntVOS':
+                head.update({'feature_extracter': self.backbone})
+                self.head = builder.build_head(head)
+            else:
+                self.head = builder.build_head(head)
             if hasattr(self.head, 'init_weights'):
                 self.head.init_weights()
         else:
@@ -47,21 +57,23 @@ class BaseSegment(nn.Layer):
             self.loss = builder.build_loss(loss)
         else:
             self.loss = None
+        self.train_cfg = train_cfg
+        self.test_cfg = test_cfg
 
-    def forward(self, data_batch, mode='infer'):
+    def forward(self, data_batch, mode='infer', **kwargs):
         """
         1. Define how the model is going to run, from input to output.
         2. Console of train, valid, test or infer step
         3. Set mode='infer' is used for saving inference model, refer to tools/export_model.py
         """
         if mode == 'train':
-            return self.train_step(data_batch)
+            return self.train_step(data_batch, **kwargs)
         elif mode == 'valid':
-            return self.val_step(data_batch)
+            return self.val_step(data_batch, **kwargs)
         elif mode == 'test':
-            return self.test_step(data_batch)
+            return self.test_step(data_batch, **kwargs)
         elif mode == 'infer':
-            return self.infer_step(data_batch)
+            return self.infer_step(data_batch, **kwargs)
         else:
             raise NotImplementedError
 

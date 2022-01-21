@@ -25,8 +25,10 @@ from paddlevideo.utils import (add_profiler_step, build_record, get_logger,
 from ..loader.builder import build_dataloader, build_dataset
 from ..metrics.ava_utils import collect_results_cpu
 from ..modeling.builder import build_model
+from ..modeling.framework.segment import ManetSegment_Stage2
 from ..solver import build_lr, build_optimizer
 from ..utils import do_preciseBN
+import warnings
 
 
 def train_model(cfg,
@@ -37,6 +39,10 @@ def train_model(cfg,
                 max_iters=None,
                 use_fleet=False,
                 profiler_options=None):
+    if cfg.get('max_iters'):
+        warnings.warn(
+            'max_iters is set, iter nums will decided by max_iters, not epochs ',
+            Warning)
     """Train model entry
 
     Args:
@@ -48,6 +54,16 @@ def train_model(cfg,
         use_fleet (bool):
         profiler_options (str): Activate the profiler function Default: None.
     """
+    if cfg.MODEL.framework == "ManetSegment_Stage2":
+        ManetSegment_Stage2().train_step(**cfg,
+                                         weights=None,
+                                         parallel=True,
+                                         validate=True,
+                                         amp=False,
+                                         use_fleet=False,
+                                         profiler_options=None,
+                                         train_cfg=cfg.MODEL.train_cfg)
+        return
     if use_fleet:
         fleet.init(is_collective=True)
 
@@ -152,10 +168,13 @@ def train_model(cfg,
                                        decr_every_n_nan_or_inf=1)
 
     best = 0.0
-    for epoch in range(0, cfg.epochs):
+    tot_step = 0
+    epochs = cfg.get('epochs', 1000000)
+    max_iters = cfg.get('max_iters', None)
+    for epoch in range(0, epochs):
         if epoch < resume_epoch:
             logger.info(
-                f"| epoch: [{epoch+1}] <= resume_epoch: [{ resume_epoch}], continue... "
+                f"| epoch: [{epoch + 1}] <= resume_epoch: [{resume_epoch}], continue... "
             )
             continue
         model.train()
@@ -166,6 +185,8 @@ def train_model(cfg,
             """Next two line of code only used in test_tipc,
             ignore it most of the time"""
             if max_iters is not None and i >= max_iters:
+                tot_step += 1
+            if max_iters is not None and tot_step >= max_iters:
                 break
 
             record_list['reader_time'].update(time.time() - tic)
@@ -201,7 +222,10 @@ def train_model(cfg,
                     scaler.minimize(optimizer, scaled)
                     optimizer.clear_grad()
             else:
-                outputs = model(data, mode='train')
+                if cfg.MODEL.framework == "ManetSegment_Stage1":
+                    outputs = model(data, mode='train', step=tot_step, **cfg)
+                else:
+                    outputs = model(data, mode='train')
                 avg_loss = outputs['loss']
                 if use_gradient_accumulation:
                     # clear grad at when epoch begins
@@ -234,12 +258,25 @@ def train_model(cfg,
             if i % cfg.get("log_interval", 10) == 0:
                 ips = "ips: {:.5f} instance/sec.".format(
                     batch_size / record_list["batch_time"].val)
-                log_batch(record_list, i, epoch + 1, cfg.epochs, "train", ips)
+                log_batch(record_list, i, epoch + 1, epochs, "train", ips,
+                          tot_step, max_iters)
 
             # learning rate iter step
             if cfg.OPTIMIZER.learning_rate.get("iter_step"):
                 lr.step()
 
+            if cfg.get("save_step"):
+                if tot_step and (tot_step % cfg.save_step == 0 or
+                                 (max_iters and tot_step == max_iters - 1)):
+                    save(
+                        optimizer.state_dict(),
+                        osp.join(output_dir, model_name +
+                                 f"_step_{tot_step + 1:05d}.pdopt"))
+                    save(
+                        model.state_dict(),
+                        osp.join(
+                            output_dir,
+                            model_name + f"_step_{tot_step + 1:05d}.pdparams"))
         # learning rate epoch step
         if not cfg.OPTIMIZER.learning_rate.get("iter_step"):
             lr.step()
@@ -275,7 +312,8 @@ def train_model(cfg,
                 if i % cfg.get("log_interval", 10) == 0:
                     ips = "ips: {:.5f} instance/sec.".format(
                         valid_batch_size / record_list["batch_time"].val)
-                    log_batch(record_list, i, epoch + 1, cfg.epochs, "val", ips)
+                    log_batch(record_list, i, epoch + 1, epochs, "val", ips,
+                              tot_step, max_iters)
 
             if cfg.MODEL.framework == "FastRCNN":
                 if parallel:
@@ -346,7 +384,8 @@ def train_model(cfg,
                     )
 
         # 6. Save model and optimizer
-        if epoch % cfg.get("save_interval", 1) == 0 or epoch == cfg.epochs - 1:
+        if not cfg.get("save_step") and (epoch % cfg.get("save_interval", 1)
+                                         == 0 or epoch == cfg.epochs - 1):
             save(
                 optimizer.state_dict(),
                 osp.join(output_dir,

@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from .deeplab_manet import DeepLab
 from .actbert import BertForMultiModalPreTraining
 from .adds import ADDS_DepthNet
 from .agcn import AGCN
@@ -36,5 +37,5 @@ __all__ = [
     'ResNetTweaksTSN', 'VisionTransformer', 'STGCN', 'AGCN', 'TransNetV2',
     'SwinTransformer3D', 'BertForMultiModalPreTraining', 'ADDS_DepthNet',
     'VisionTransformer_tweaks', 'ResNetTSN_MRI', 'ResNetTSM_MRI',
-    'ResNetSlowFast_MRI', 'CFBI'
+    'ResNetSlowFast_MRI', 'CFBI', 'DeepLab'
 ]

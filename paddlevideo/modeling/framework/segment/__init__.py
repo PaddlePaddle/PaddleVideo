@@ -12,5 +12,12 @@
 
 from .base import BaseSegment
 from .cfbi import CFBI
+from .manet_stage1 import ManetSegment_Stage1
+from .manet_stage2 import ManetSegment_Stage2
 
-__all__ = ['BaseSegment', 'CFBI']
+__all__ = [
+    'BaseSegment',
+    'CFBI',
+    'ManetSegment_Stage1',
+    'ManetSegment_Stage2',
+]

@@ -59,6 +59,7 @@ class Bottleneck(nn.Layer):
 
 
 class ResNet(nn.Layer):
+
     def __init__(self,
                  block,
                  layers,
@@ -113,8 +114,6 @@ class ResNet(nn.Layer):
                                          dilation=dilations[3],
                                          BatchNorm=BatchNorm)
         self.init_weight()
-
-
 
     def _make_layer(self,
                     block,
@@ -209,8 +208,6 @@ class ResNet(nn.Layer):
         return self.sublayers()
 
 
-
-
 def ResNet101(output_stride, BatchNorm, pretrained=None):
     """Constructs a ResNet-101 model.
     Args:
@@ -225,21 +222,3 @@ def ResNet101(output_stride, BatchNorm, pretrained=None):
 
 def build_backbone(output_stride, BatchNorm, pretrained):
     return ResNet101(output_stride, BatchNorm, pretrained)
-
-
-if __name__ == "__main__":
-    import paddle
-
-    model = ResNet101(BatchNorm=nn.BatchNorm2D,
-                      pretrained=True,
-                      output_stride=8)
-    input = paddle.rand([1, 3, 512, 512])
-    output, low_level_feat = model(input)
-    print(output.shape)
-    print(low_level_feat.shape)
-    import json
-
-    with open('output.txt', 'w') as f:
-        json.dump(output.tolist(), f)
-    with open('low_level_feat.txt', 'w') as f:
-        json.dump(low_level_feat.tolist(), f)

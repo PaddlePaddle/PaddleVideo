@@ -24,18 +24,19 @@ __all__ = ['AverageMeter', 'build_record', 'log_batch', 'log_epoch']
 
 
 def build_record(cfg):
+    framework_type = cfg.get('framework', '')
     record_list = [
         ("loss", AverageMeter('loss', '7.5f')),
         ("lr", AverageMeter('lr', 'f', need_avg=False)),
     ]
-    if 'Recognizer1D' in cfg.framework:  #TODO: required specify str in framework
+    if 'Recognizer1D' in framework_type:  #TODO: required specify str in framework
         record_list.append(("hit_at_one", AverageMeter("hit_at_one", '.5f')))
         record_list.append(("perr", AverageMeter("perr", '.5f')))
         record_list.append(("gap", AverageMeter("gap", '.5f')))
-    elif 'Recognizer' in cfg.framework:
+    elif 'Recognizer' in framework_type:
         record_list.append(("top1", AverageMeter("top1", '.5f')))
         record_list.append(("top5", AverageMeter("top5", '.5f')))
-    elif 'FastRCNN' in cfg.framework:
+    elif 'FastRCNN' in framework_type:
         record_list.append(
             ("recall@thr=0.5", AverageMeter("recall@thr=0.5", '.5f')))
         record_list.append(("prec@thr=0.5", AverageMeter("prec@thr=0.5",
@@ -67,6 +68,7 @@ class AverageMeter(object):
     """
     Computes and stores the average and current value
     """
+
     def __init__(self, name='', fmt='f', need_avg=True):
         self.name = name
         self.fmt = fmt
@@ -108,7 +110,14 @@ class AverageMeter(object):
         return '{self.name}: {self.val:{self.fmt}}'.format(self=self)
 
 
-def log_batch(metric_list, batch_id, epoch_id, total_epoch, mode, ips):
+def log_batch(metric_list,
+              batch_id,
+              epoch_id,
+              total_epoch,
+              mode,
+              ips,
+              tot_step=None,
+              max_iters=None):
     batch_cost = str(metric_list['batch_time'].value) + ' sec,'
     reader_cost = str(metric_list['reader_time'].value) + ' sec,'
 
@@ -117,7 +126,10 @@ def log_batch(metric_list, batch_id, epoch_id, total_epoch, mode, ips):
         if not (m == 'batch_time' or m == 'reader_time'):
             metric_values.append(metric_list[m].value)
     metric_str = ' '.join([str(v) for v in metric_values])
-    epoch_str = "epoch:[{:>3d}/{:<3d}]".format(epoch_id, total_epoch)
+    if max_iters:
+        epoch_str = "iter:[{:>3d}/{:<3d}]".format(tot_step, max_iters)
+    else:
+        epoch_str = "epoch:[{:>3d}/{:<3d}]".format(epoch_id, total_epoch)
     step_str = "{:s} step:{:<4d}".format(mode, batch_id)
 
     logger.info("{:s} {:s} {:s} {:s} {:s} {}".format(

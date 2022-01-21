@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from .manet_head import IntVOS
 from .adds_head import AddsHead
 from .attention_lstm_head import AttentionLstmHead
 from .base import BaseHead
@@ -34,5 +35,5 @@ __all__ = [
     'BaseHead', 'TSNHead', 'TSMHead', 'ppTSMHead', 'ppTSNHead', 'SlowFastHead',
     'AttentionLstmHead', 'TimeSformerHead', 'STGCNHead', 'TransNetV2Head',
     'I3DHead', 'SingleRoIExtractor3D', 'AVARoIHead', 'BBoxHeadAVA', 'AddsHead',
-    'ppTimeSformerHead', 'CollaborativeEnsemblerMS'
+    'ppTimeSformerHead', 'CollaborativeEnsemblerMS', 'IntVOS'
 ]
