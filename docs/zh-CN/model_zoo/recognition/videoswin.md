@@ -87,7 +87,7 @@ K400数据下载及准备请参考[Kinetics-400数据准备](../../dataset/k400.
 
    |      backbone      | Sampling method | num_seg | target_size | Top-1 |                         checkpoints                          |
    | :----------------: | :-------------: | :-----: | :---------: | :---- | :----------------------------------------------------------: |
-   | Swin Transformer |   UniformCrop   |   32    |     224     | 82.40 | [SwinTransformer_k400.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/SwinTransformer_k400.pdparams) |
+   | Swin Transformer |   UniformCrop   |   32    |     224     | 82.40 | [SwinTransformer_k400.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/VideoSwin_k400.pdparams) |
 
 
 ## 模型推理

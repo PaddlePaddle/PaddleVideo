@@ -27,7 +27,7 @@ TODO
 
 1. 使用VideoSwin在K400上的预训练模型基础上进行finetune，因此首先下载K400的预训练模型并放置到`data`目录下
     ```bash
-    wget -P data/ https://videotag.bj.bcebos.com/PaddleVideo-release2.2/SwinTransformer_k400.pdparams
+    wget -P data/ https://videotag.bj.bcebos.com/PaddleVideo-release2.2/VideoSwin_k400.pdparams
     ```
 
 2. 使用`TableTennis/ActionRecognition/configs/videoswin_tabletennis.yaml`配置文件进行训练

@@ -188,6 +188,7 @@ PaddleVideo is a video model development kit produced by [PaddlePaddle Official]
 | [PP-Care](applications/PP-Care) | 3DMRI medical image recognition solution |
 | [EIVideo](applications/EIVideo) | Interactive video segmentation tool|
 | [Anti-UAV](applications/Anti-UAV) |UAV detection solution|
+| [AbnormalActionDetection](applications/AbnormalActionDetection) |Abnormal action detection solution|
 
 
 ## Documentation tutorial
