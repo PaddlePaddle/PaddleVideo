@@ -74,7 +74,7 @@ PaddleVideo is a video model development kit produced by [PaddlePaddle Official]
   </tr>
   <tr>
     <td><a href="./docs/en/model_zoo/multimodal/actbert.md">ActBERT</a> (Learning')</td>
-    <td><a href="">T2VLAD</a> (Retrieval')</td>
+    <td><a href="./applications/T2VLAD/README.md">T2VLAD</a> (Retrieval')</td>
     <td></td>
     <td></td>
     <td></td>
@@ -152,6 +152,24 @@ PaddleVideo is a video model development kit produced by [PaddlePaddle Official]
     <td></td>
     <td></td>
   </tr>
+  <tr>
+    <td colspan="4">Text-Video Retrieval</td>
+  </tr>
+  <tr>
+    <td><a href="applications/T2VLAD/docs/dataset.md">MSR-VTT</a> (<a href="https://www.microsoft.com/en-us/research/publication/msr-vtt-a-large-video-description-dataset-for-bridging-video-and-language/" rel="nofollow">Homepage</a>) (CVPR'2016)</td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td colspan="4">Text-Video Pretrained Model</td>
+  </tr>
+  <tr>
+    <td><a href="docs/zh-CN/dataset/howto100m.md">HowTo100M</a> (<a href="https://www.di.ens.fr/willow/research/howto100m/" rel="nofollow">Homepage</a>) (ICCV'2019)</td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
 </tbody>
 </table>
 
@@ -170,6 +188,7 @@ PaddleVideo is a video model development kit produced by [PaddlePaddle Official]
 | [PP-Care](applications/PP-Care) | 3DMRI medical image recognition solution |
 | [EIVideo](applications/EIVideo) | Interactive video segmentation tool|
 | [Anti-UAV](applications/Anti-UAV) |UAV detection solution|
+| [AbnormalActionDetection](applications/AbnormalActionDetection) |Abnormal action detection solution|
 
 
 ## Documentation tutorial

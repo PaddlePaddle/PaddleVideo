@@ -17,6 +17,8 @@
 <div align="center">
   <img src="docs/images/user_group.png" width=250/></div>
 
+- 添加成功后回复【视频】加入交流群
+
 ## 简介
 
 ![python version](https://img.shields.io/badge/python-3.7+-orange.svg) ![paddle version](https://img.shields.io/badge/PaddlePaddle-2.0-blue)
@@ -85,7 +87,7 @@ PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_githu
   </tr>
   <tr>
     <td><a href="./docs/zh-CN/model_zoo/multimodal/actbert.md">ActBERT</a> (Learning‘)</td>
-    <td><a href="">T2VLAD</a> (Retrieval‘)</td>
+    <td><a href="./applications/T2VLAD/README.md">T2VLAD</a> (Retrieval‘)</td>
     <td></td>
     <td></td>
     <td></td>
@@ -163,6 +165,25 @@ PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_githu
     <td></td>
     <td></td>
   </tr>
+  <tr>
+    <td colspan="4">文本视频检索</td>
+  </tr>
+  <tr>
+    <td><a href="applications/T2VLAD/docs/dataset.md">MSR-VTT</a> (<a href="https://www.microsoft.com/en-us/research/publication/msr-vtt-a-large-video-description-dataset-for-bridging-video-and-language/" rel="nofollow">Homepage</a>) (CVPR'2016)</td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td colspan="4">文本视频预训练</td>
+  </tr>
+  <tr>
+    <td><a href="docs/zh-CN/dataset/howto100m.md">HowTo100M</a> (<a href="https://www.di.ens.fr/willow/research/howto100m/" rel="nofollow">Homepage</a>) (ICCV'2019)</td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+
 </tbody>
 </table>
 
@@ -181,6 +202,7 @@ PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_githu
 | [PP-Care](applications/PP-Care) | 3DMRI医疗图像识别方案 |
 | [EIVideo](applications/EIVideo) | 视频交互式分割工具|
 | [Anti-UAV](applications/Anti-UAV) |无人机检测方案|
+| [AbnormalActionDetection](applications/AbnormalActionDetection) |异常行为检测方案|
 
 
 ## 文档教程

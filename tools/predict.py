@@ -16,7 +16,6 @@ import argparse
 import os
 from os import path as osp
 import paddle
-import numpy as np
 from paddle import inference
 from paddle.inference import Config, create_predictor
 
@@ -83,6 +82,10 @@ def create_paddle_predictor(args, cfg):
         # calculate real max batch size during inference when tenrotRT enabled
         max_batch_size = args.batch_size
         if 'num_seg' in cfg.INFERENCE:
+            # num_seg: number of segments when extracting frames.
+            # seg_len: number of frames extracted within a segment, default to 1.
+            # num_views: the number of video frame groups obtained by cropping and flipping,
+            # uniformcrop=3, tencrop=10, centercrop=1.
             num_seg = cfg.INFERENCE.num_seg
             seg_len = cfg.INFERENCE.get('seg_len', 1)
             num_views = 1

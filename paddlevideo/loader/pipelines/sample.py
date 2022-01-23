@@ -333,9 +333,10 @@ class SamplerPkl(object):
         """
         filename = results['frame_dir']
         data_loaded = pickle.load(open(filename, 'rb'), encoding='bytes')
-        _, _, frames = data_loaded
+        video_name, label, frames = data_loaded
+        if isinstance(label, dict):
+            label = label['动作类型']
         results['frames_len'] = len(frames)
-        label = int(filename.split('.')[0][-1])
         results['labels'] = label
         frames_len = results['frames_len']
         average_dur = int(int(frames_len) / self.num_seg)
