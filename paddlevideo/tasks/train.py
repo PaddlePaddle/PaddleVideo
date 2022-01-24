@@ -36,12 +36,12 @@ def train_model(cfg,
                 parallel=True,
                 validate=True,
                 amp=False,
-                max_iters=None,
+                tot_step=None,
                 use_fleet=False,
                 profiler_options=None):
-    if cfg.get('max_iters'):
+    if cfg.get('tot_step'):
         warnings.warn(
-            'max_iters is set, iter nums will decided by max_iters, not epochs ',
+            'tot_step is set, iter nums will decided by tot_step, not epochs ',
             Warning)
     """Train model entry
 
@@ -168,9 +168,9 @@ def train_model(cfg,
                                        decr_every_n_nan_or_inf=1)
 
     best = 0.0
-    tot_step = 0
+    cur_step = 0
     epochs = cfg.get('epochs', 1000000)
-    max_iters = cfg.get('max_iters', None)
+    tot_step = cfg.get('tot_step', None)
     for epoch in range(0, epochs):
         if epoch < resume_epoch:
             logger.info(
@@ -184,9 +184,9 @@ def train_model(cfg,
         for i, data in enumerate(train_loader):
             """Next two line of code only used in test_tipc,
             ignore it most of the time"""
-            if max_iters is not None and i >= max_iters:
-                tot_step += 1
-            if max_iters is not None and tot_step >= max_iters:
+            if tot_step is not None and i >= tot_step:
+                cur_step += 1
+            if tot_step is not None and cur_step >= tot_step:
                 break
 
             record_list['reader_time'].update(time.time() - tic)
@@ -223,7 +223,7 @@ def train_model(cfg,
                     optimizer.clear_grad()
             else:
                 if cfg.MODEL.framework == "ManetSegment_Stage1":
-                    outputs = model(data, mode='train', step=tot_step, **cfg)
+                    outputs = model(data, mode='train', step=cur_step, **cfg)
                 else:
                     outputs = model(data, mode='train')
                 avg_loss = outputs['loss']
@@ -259,24 +259,24 @@ def train_model(cfg,
                 ips = "ips: {:.5f} instance/sec.".format(
                     batch_size / record_list["batch_time"].val)
                 log_batch(record_list, i, epoch + 1, epochs, "train", ips,
-                          tot_step, max_iters)
+                          cur_step, tot_step)
 
             # learning rate iter step
             if cfg.OPTIMIZER.learning_rate.get("iter_step"):
                 lr.step()
 
             if cfg.get("save_step"):
-                if tot_step and (tot_step % cfg.save_step == 0 or
-                                 (max_iters and tot_step == max_iters - 1)):
+                if cur_step and (cur_step % cfg.save_step == 0 or
+                                 (tot_step and cur_step == tot_step - 1)):
                     save(
                         optimizer.state_dict(),
                         osp.join(output_dir, model_name +
-                                 f"_step_{tot_step + 1:05d}.pdopt"))
+                                 f"_step_{cur_step + 1:05d}.pdopt"))
                     save(
                         model.state_dict(),
                         osp.join(
                             output_dir,
-                            model_name + f"_step_{tot_step + 1:05d}.pdparams"))
+                            model_name + f"_step_{cur_step + 1:05d}.pdparams"))
         # learning rate epoch step
         if not cfg.OPTIMIZER.learning_rate.get("iter_step"):
             lr.step()
@@ -313,7 +313,7 @@ def train_model(cfg,
                     ips = "ips: {:.5f} instance/sec.".format(
                         valid_batch_size / record_list["batch_time"].val)
                     log_batch(record_list, i, epoch + 1, epochs, "val", ips,
-                              tot_step, max_iters)
+                              cur_step, tot_step)
 
             if cfg.MODEL.framework == "FastRCNN":
                 if parallel:

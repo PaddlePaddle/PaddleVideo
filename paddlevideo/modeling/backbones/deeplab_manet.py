@@ -24,8 +24,8 @@ class FrozenBatchNorm2d(nn.Layer):
             self.running_var = self.running_var.half()
         scale = self.weight * self.running_var.rsqrt()
         bias = self.bias - self.running_mean * scale
-        scale = scale.reshape(1, -1, 1, 1)
-        bias = bias.reshape(1, -1, 1, 1)
+        scale = scale.reshape([1, -1, 1, 1])
+        bias = bias.reshape([1, -1, 1, 1])
         return x * scale + bias
 
 
@@ -60,23 +60,3 @@ class DeepLab(nn.Layer):
         for m in self.sublayers():
             if isinstance(m, nn.BatchNorm2D):
                 m.eval()
-
-    def get_1x_lr_params(self):
-        modules = [self.backbone]
-        for i in range(len(modules)):
-            for m in modules[i].named_modules():
-                if isinstance(m[1], nn.Conv2D) or isinstance(
-                        m[1], nn.BatchNorm2D):
-                    for p in m[1].parameters():
-                        if p.requires_grad:
-                            yield p
-
-    def get_10x_lr_params(self):
-        modules = [self.aspp, self.decoder]
-        for i in range(len(modules)):
-            for m in modules[i].named_modules():
-                if isinstance(m[1], nn.Conv2D) or isinstance(
-                        m[1], nn.BatchNorm2D):
-                    for p in m[1].parameters():
-                        if p.requires_grad:
-                            yield p

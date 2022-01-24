@@ -8,7 +8,7 @@ MODEL: #MODEL field
     freeze_bn: False
   head:
     name: "IntVOS"
-    pretrained: "/home/lc/manet/init_for_align/init_for_align.pdparams"
+    pretrained: "data/pretrain/DeeplabV3_coco.pdparams"
     loss_cfg:
       name: "Topk_CrossEntropyLoss"
       top_k_percent_pixels: 0.15
@@ -27,10 +27,10 @@ MODEL: #MODEL field
 DATASET: #DATASET field
   batch_size: 2 #Mandatory, batch size per gpu.
   test_batch_size: 2 #Optional, test batch size per gpu.
-  num_workers: 0 #Mandatory, the number of subprocess on each GPU.
+  num_workers: 4 #Mandatory, the number of subprocess on each GPU.
   train:
     format: "DAVIS2017_VOS_TrainDataset" #Mandatory, indicate the type of train dataset, please refer to the 'paddlevidel/loader/dateset'.
-    file_path: "/home/lc/manet/data/DAVIS" #Mandatory, train data index file path
+    file_path: "data/DAVIS2017" #Mandatory, train data index file path
 
 PIPELINE: #PIPELINE field
   train: #Mandotary, indicate the pipeline to deal with the training data, please refer to the 'paddlevideo/loader/pipelines/'
@@ -70,4 +70,4 @@ log_interval: 50 #Optional, the interval of logger.
 log_level: "INFO" #Optional, the logger level.
 resume_epoch: 0
 save_step: 20000
-max_iters: 101000
+tot_step: 101000

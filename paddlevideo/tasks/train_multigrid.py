@@ -156,7 +156,7 @@ def train_model_multigrid(cfg, world_size=1, validate=True):
         places = paddle.set_device('npu')
     else:
         places = paddle.set_device('gpu')
-    
+
     model_name = cfg.model_name
     output_dir = cfg.get("output_dir", f"./output/{model_name}")
     mkdir(output_dir)

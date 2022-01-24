@@ -1,17 +1,13 @@
-[简体中文](../../../zh-CN/model_zoo/partition/manet.md) | English
+[简体中文](../../../zh-CN/model_zoo/segmentation/manet.md) | English
 
 # Ma-Net
 
 ## Contents
 
 - [Introduction](#Introduction)
-
 - [Data](#Data)
-
 - [Train](#Train)
-
 - [Test](#Test)
-
 - [Inference](#Inference)
 
 
@@ -29,19 +25,17 @@ This code currently supports model test and model training on DAVIS  dataset,  a
 
 ## Data
 
-Download [DAVIS2017](https://data.vision.ee.ethz.ch/csergi/share/davis/DAVIS-2017-trainval-480p.zip) and [scribbles](https://data.vision.ee.ethz.ch/csergi/share/DAVIS-Interactive/DAVIS-2017-scribbles-trainval.zip) into one folder. Please refer to [DAVIS](https://davischallenge.org/davis2017/code.html).
-
-If you need the file "DAVIS2017/ImageSets/2017/v_a_l_instances.txt", please refer to the link https://drive.google.com/file/d/1aLPaQ_5lyAi3Lk3d2fOc_xewSrfcrQlc/view?usp=sharing
+Please refer to DAVIS data download and preparation doc [DAVIS-data](../../dataset/DAVIS2017.md)
 
 
 ## Train
 
-#### Download and add pre-trained models
+### Download and add pre-trained models
 
-1. Download [deeplabV3+ model pretrained on COCO](https://drive.google.com/file/d/15temSaxnKmGPvNxrKPN6W2lSsyGfCtTB/view?usp=sharing) to this repo as the Backbone initialization parameter, or download it through wget
+1. Download [deeplabV3+ model pretrained on COCO](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/DeeplabV3_coco.pdparams) to this repo as the Backbone initialization parameter, or download it through wget
 
    ```bash
-   wget https://drive.google.com/file/d/15temSaxnKmGPvNxrKPN6W2lSsyGfCtTB/view?usp=sharing
+   wget https://videotag.bj.bcebos.com/PaddleVideo-release2.2/DeeplabV3_coco.pdparams
    ```
 
 2. Open `PaddleVideo/configs/segmentationer/manet_stage1.yaml`, and fill in the downloaded weight storage path below `pretrained:`
@@ -54,7 +48,7 @@ If you need the file "DAVIS2017/ImageSets/2017/v_a_l_instances.txt", please refe
            pretrained: fill in the path here
    ```
 
-#### Start training
+### Start training
 
 - Our training process contains two stage.
 
@@ -78,12 +72,12 @@ If you need the file "DAVIS2017/ImageSets/2017/v_a_l_instances.txt", please refe
 You can start testing by such command：
 
 ```bash
-python main.py --test -c configs/segmentation/manet_stage2.yaml -w output/ManetSegment_Stage2/ManetSegment_Stage2_step_100001.pdparams  
+    python main.py --test -c configs/segmentation/manet_stage2.yaml -w output/ManetSegment_Stage2/ManetSegment_Stage2_step_100001.pdparams  
 ```
 
-- You can download [our model](https://drive.google.com/file/d/1JjYNha40rtEYKKKFtDv06myvpxagl5dW/view?usp=sharing) decompress it and specify the path to `METRIC.ground_truth_filename` in config file.
+- You can download [our model](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/MANet_davis2017.pdparams) decompress it for testing,  args `-w` is used to specifiy the model path.
 
-- Args `-w` is used to specifiy the model path，you can download [our model](https://drive.google.com/file/d/1JjYNha40rtEYKKKFtDv06myvpxagl5dW/view?usp=sharing) and decompress it  for evaluation.
+- Please specify the path to `METRIC.ground_truth_filename` in config file.
 
 
 Test accuracy in DAVIS2017:

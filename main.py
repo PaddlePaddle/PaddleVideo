@@ -114,9 +114,9 @@ def main():
                     weights=args.weights,
                     parallel=parallel,
                     validate=args.validate,
-                    use_fleet=args.fleet,
                     amp=args.amp,
-                    max_iters=args.max_iters,
+                    tot_step=args.max_iters,
+                    use_fleet=args.fleet,
                     profiler_options=args.profiler_options)
 
 

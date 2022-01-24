@@ -15,10 +15,10 @@ class Bottleneck(nn.Layer):
                  stride=1,
                  dilation=1,
                  downsample=None,
-                 BatchNorm=None):
+                 norm_layer=None):
         super(Bottleneck, self).__init__()
         self.conv1 = nn.Conv2D(inplanes, planes, kernel_size=1, bias_attr=False)
-        self.bn1 = BatchNorm(planes)
+        self.bn1 = norm_layer(planes)
         self.conv2 = nn.Conv2D(planes,
                                planes,
                                kernel_size=3,
@@ -26,12 +26,12 @@ class Bottleneck(nn.Layer):
                                dilation=dilation,
                                padding=dilation,
                                bias_attr=False)
-        self.bn2 = BatchNorm(planes)
+        self.bn2 = norm_layer(planes)
         self.conv3 = nn.Conv2D(planes,
                                planes * 4,
                                kernel_size=1,
                                bias_attr=False)
-        self.bn3 = BatchNorm(planes * 4)
+        self.bn3 = norm_layer(planes * 4)
         self.relu = nn.ReLU()
         self.downsample = downsample
         self.stride = stride

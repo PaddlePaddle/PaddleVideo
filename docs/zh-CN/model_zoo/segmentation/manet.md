@@ -1,17 +1,13 @@
-[English](../../../en/model_zoo/partition/manet.md) | 简体中文
+[English](../../../en/model_zoo/segmentation/manet.md) | 简体中文
 
 # Ma-Net视频切分模型
 
 ## 内容
 
 - [模型简介](#模型简介)
-
 - [数据准备](#数据准备)
-
 - [模型训练](#模型训练)
-
 - [模型测试](#模型测试)
-
 - [模型推理](#模型推理)
 
 
@@ -28,19 +24,17 @@
 
 ## 数据准备
 
-下载 [DAVIS2017](https://data.vision.ee.ethz.ch/csergi/share/davis/DAVIS-2017-trainval-480p.zip) 和 [scribbles](https://data.vision.ee.ethz.ch/csergi/share/DAVIS-Interactive/DAVIS-2017-scribbles-trainval.zip) 到一个文件夹中。请参阅 [DAVIS](https://davischallenge.org/davis2017/code.html).
-
-如果您需要文件"DAVIS2017/ImageSets/2017/v_a_l_instances.txt"，请参阅链接 https://drive.google.com/file/d/1aLPaQ_5lyAi3Lk3d2fOc_xewSrfcrQlc/view?usp=sharing
+DAVIS数据下载及准备请参考[DAVIS2017数据准备](../../dataset/DAVIS2017.md)
 
 
 ## 模型训练
 
-#### 下载并添加预先训练的模型
+### 下载并添加预先训练的模型
 
-1. 下载  [deeplabV3+ model pretrained on COCO](https://drive.google.com/file/d/15temSaxnKmGPvNxrKPN6W2lSsyGfCtTB/view?usp=sharing) 作为主干初始化参数，或通过 wget 下载
+1. 下载  [deeplabV3+ model pretrained on COCO](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/DeeplabV3_coco.pdparams) 作为主干初始化参数，或通过 wget 下载
 
    ```bash
-   wget https://drive.google.com/file/d/15temSaxnKmGPvNxrKPN6W2lSsyGfCtTB/view?usp=sharing
+   wget https://videotag.bj.bcebos.com/PaddleVideo-release2.2/DeeplabV3_coco.pdparams
    ```
 
 2. 打开 `PaddleVideo/configs/segmentationer/manet_stage1.yaml，然后在`pretrained:`填写下载的模型权重存储路径
@@ -53,7 +47,7 @@
            pretrained: fill in the path here
    ```
 
-#### Start training
+### 开始训练
 
 - 我们的训练过程包括两个阶段。
 
@@ -66,7 +60,7 @@
 - 使用第一阶段的模型训练结果，您可以使用一张卡开始训练第二阶段（其他训练方法，如多张卡或混合精度类似于上述），命令如下：
 
   ```bash
-  python main.py -c configs/segmentation/manet_stage2.yaml
+    python main.py -c configs/segmentation/manet_stage2.yaml
   ```
 
 - 此外，您可以自定义和修改参数配置，以达到在不同数据集上训练/测试的目的。建议配置文件的命名方法是 `model_dataset name_file format_data format_sampling method.yaml` ，请参考 [config](../../tutorials/config.md) 配置参数的方法。
@@ -78,13 +72,13 @@
 
 您可以通过以下命令开始测试：
 
-```bash
-python main.py --test -c configs/segmentation/manet_stage2.yaml -w output/ManetSegment_Stage2/ManetSegment_Stage2_step_100001.pdparams  
-```
+  ```bash
+    python main.py --test -c configs/segmentation/manet_stage2.yaml -w output/ManetSegment_Stage2/ManetSegment_Stage2_step_100001.pdparams  
+  ```
 
-- 您可以下载[我们的模型](https://drive.google.com/file/d/1JjYNha40rtEYKKKFtDv06myvpxagl5dW/view?usp=sharing) 解压缩它，并在配置文件中指定`METRIC.ground_truth_filename` 的路径。
+- 您可以下载[我们的模型](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/MANet_davis2017.pdparams) 解压缩它以用于测试，使用参数 `-w` 用于指定模型路径。
 
-- 参数 `-w` 用于指定模型路径，您可以下载 [我们的模型](https://drive.google.com/file/d/1JjYNha40rtEYKKKFtDv06myvpxagl5dW/view?usp=sharing) 并解压缩以进行测试。
+- 同时在配置文件中指定`METRIC.ground_truth_filename` 的路径。
 
 
 测试精度在 DAVIS2017上:

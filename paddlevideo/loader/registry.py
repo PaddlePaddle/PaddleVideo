@@ -17,5 +17,3 @@ from ..utils import Registry
 PIPELINES = Registry("pipeline")
 DATASETS = Registry("datasets")
 SAMPLERS = Registry("sampler")
-BATCH_SAMPLERS = Registry("batch_sampler")
-DATALOADERS = Registry("dataloader")

@@ -384,12 +384,12 @@ class IntSegHead(nn.Layer):
                                stride=1,
                                padding=3)
         self.bn1 = paddle.nn.BatchNorm2D(emb_dim, momentum=cfg['train_bn_mom'])
-        self.relu1 = nn.ReLU(True)
+        self.relu1 = nn.ReLU()
         self.res1 = _res_block(emb_dim, emb_dim, **cfg)
         self.res2 = _res_block(emb_dim, emb_dim, **cfg)
         self.conv2 = nn.Conv2D(256, emb_dim, kernel_size=3, stride=1, padding=1)
         self.bn2 = paddle.nn.BatchNorm2D(emb_dim, momentum=cfg['train_bn_mom'])
-        self.relu2 = nn.ReLU(True)
+        self.relu2 = nn.ReLU()
         self.conv3 = nn.Conv2D(emb_dim, 1, 1, 1)
 
     def forward(self, x):
@@ -414,10 +414,10 @@ class _split_separable_conv2d(nn.Layer):
                                stride=1,
                                padding=int((kernel_size - 1) / 2),
                                groups=in_dim)
-        self.relu1 = nn.ReLU(True)
+        self.relu1 = nn.ReLU()
         self.bn1 = paddle.nn.BatchNorm2D(in_dim, momentum=cfg['train_bn_mom'])
         self.conv2 = nn.Conv2D(in_dim, out_dim, kernel_size=1, stride=1)
-        self.relu2 = nn.ReLU(True)
+        self.relu2 = nn.ReLU()
         self.bn2 = paddle.nn.BatchNorm2D(out_dim, momentum=cfg['train_bn_mom'])
         kaiming_normal_(self.conv1.weight, mode='fan_out', nonlinearity='relu')
         kaiming_normal_(self.conv2.weight, mode='fan_out', nonlinearity='relu')
@@ -467,11 +467,11 @@ class IntVOS(BaseHead):
                                        groups=cfg['model_aspp_outdim'])
         self.bn1 = paddle.nn.BatchNorm2D(cfg['model_aspp_outdim'],
                                          momentum=cfg['train_bn_mom'])
-        self.relu1 = nn.ReLU(True)
+        self.relu1 = nn.ReLU()
         self.embedding_conv = nn.Conv2D(cfg['model_aspp_outdim'],
                                         cfg['model_semantic_embedding_dim'], 1,
                                         1)
-        self.relu2 = nn.ReLU(True)
+        self.relu2 = nn.ReLU()
         self.bn2 = paddle.nn.BatchNorm2D(cfg['model_semantic_embedding_dim'],
                                          momentum=cfg['train_bn_mom'])
         self.semantic_embedding = nn.Sequential(*[

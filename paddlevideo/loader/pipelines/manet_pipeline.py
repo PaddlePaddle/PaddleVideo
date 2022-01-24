@@ -9,7 +9,6 @@ from davisinteractive.utils.operations import bresenham
 from ..registry import PIPELINES
 
 cv2.setNumThreads(0)
-NEW_BRANCH = True
 
 
 @PIPELINES.register()
@@ -23,7 +22,6 @@ class RandomScale_manet(object):
 
     def __call__(self, sample):
 
-        # Fixed range of scales
         sc = self.scales[random.randint(0, len(self.scales) - 1)]
 
         for elem in sample.keys():
@@ -58,9 +56,6 @@ class Resize_manet(object):
             self.output_size = (output_size, output_size)
         else:
             self.output_size = output_size
-
-    #        self.seg_interpolation = cv2.INTER_CUBIC if is_continuous else cv2.INTER_NEAREST
-    #        self.fix = fix
 
     def __call__(self, results):
         img1 = results['img1']
@@ -112,10 +107,8 @@ class RandomCrop_manet(object):
         new_w = w if new_w >= w else new_w
         is_contain_obj = False
 
-        #        while (not is_contain_obj) and (step < 5):
         if self.step is None:
             while not is_contain_obj:
-                #                step += 1
                 top = np.random.randint(0, h - new_h + 1)
                 left = np.random.randint(0, w - new_w + 1)
                 ref_scribble_label = results['ref_scribble_label']

@@ -1,4 +1,4 @@
-from paddle.fluid.dataloader import Sampler
+from paddle.io import Sampler
 
 
 class BaseSampler(Sampler):

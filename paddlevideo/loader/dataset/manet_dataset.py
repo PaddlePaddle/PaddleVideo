@@ -155,10 +155,6 @@ class DAVIS2017_VOS_TrainDataset(BaseDataset):
         # self.pipeline=None
         if self.pipeline is not None:
             sample = self.pipeline(sample)
-        sample['ref_scribble_label'] = paddle.to_tensor(
-            sample['ref_scribble_label'], dtype='int64')
-        sample['label1'] = paddle.to_tensor(sample['label1'], dtype='int64')
-        sample['label2'] = paddle.to_tensor(sample['label2'], dtype='int64')
         return sample
 
     def prepare_test(self, idx):

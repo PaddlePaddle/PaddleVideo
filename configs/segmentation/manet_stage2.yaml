@@ -8,7 +8,7 @@ MODEL: #MODEL field
     freeze_bn: False
   head:
     name: "IntVOS"
-    pretrained: "/home/lc/paddlevideo/output/Manet_stage1/Manet_stage1_epoch_100001.pdparams"
+    pretrained: "output/Manet_stage1/Manet_stage1_epoch_100001.pdparams"
     loss_cfg:
       name: "Topk_CrossEntropyLoss"
       top_k_percent_pixels: 0.15
@@ -31,16 +31,16 @@ DATASET: #DATASET field
   batch_size: 2 #Mandatory, batch size per gpu.
   test_batch_size: 2 #Optional, test batch size per gpu.
   valid_batch_size: 1
-  num_workers: 0 #Mandatory, the number of subprocess on each GPU.
+  num_workers: 4 #Mandatory, the number of subprocess on each GPU.
   train:
     format: "DAVIS2017_TrainDataset" #Mandatory, indicate the type of train dataset, please refer to the 'paddlevidel/loader/dateset'.
-    file_path: "/home/lc/manet/data/DAVIS" #Mandatory, train data index file path
+    file_path: "data/DAVIS2017" #Mandatory, train data index file path
   valid:
     format: "DAVIS2017_TrainDataset" #Mandatory, indicate the type of train dataset, please refer to the 'paddlevidel/loader/dateset'.
-    file_path: "/home/lc/manet/data/DAVIS" #Mandatory, train data index file path
+    file_path: "data/DAVIS2017" #Mandatory, train data index file path
   test:
     format: "DAVIS2017_Feature_ExtractDataset" #Mandotary, indicate the type of test dataset, please refer to the 'paddlevideo/loader/dataset'.
-    file_path: "/home/lc/manet/data/DAVIS" #Mandotary, test data index file path.
+    file_path: "data/DAVIS2017" #Mandotary, test data index file path.
 
 PIPELINE: #PIPELINE field
   train: #Mandotary, indicate the pipeline to deal with the training data, please refer to the 'paddlevideo/loader/pipelines/'
@@ -94,6 +94,6 @@ INFERENCE:
 
 model_name: "Manet_stage2" #Mandatory, model name.
 log_level: "INFO" #Optional, the logger level.
-max_iters: 101000
+tot_step: 101000
 log_interval: 50
 save_step: 20000

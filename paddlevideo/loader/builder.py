@@ -14,11 +14,9 @@
 import signal
 import os
 import paddle
+from paddle.io import BatchSampler
 from paddle.io import DataLoader, DistributedBatchSampler
-from .registry import DATASETS, PIPELINES
-from paddle.fluid.dataloader import BatchSampler
-from paddle.io import DataLoader, DistributedBatchSampler
-from .registry import DATASETS, PIPELINES, DATALOADERS, BATCH_SAMPLERS, SAMPLERS
+from .registry import DATASETS, PIPELINES, SAMPLERS
 from ..utils.build_utils import build
 from .pipelines.compose import Compose
 from paddlevideo.utils import get_logger
@@ -53,7 +51,7 @@ def build_dataset(cfg):
     return dataset
 
 
-def build_sampler(cfg):
+def build_batch_sampler(cfg):
     """Build batch_sampler.
     Args:
         cfg (dict): root config dict.
@@ -61,19 +59,14 @@ def build_sampler(cfg):
     Returns:
         batch_sampler: batch_sampler.
     """
-    sampler = build(cfg, SAMPLERS)
-    return sampler
+    batch_sampler = build(cfg, SAMPLERS)
+    return batch_sampler
 
 
 def build_batch_pipeline(cfg):
 
     batch_pipeline = build(cfg, PIPELINES)
     return batch_pipeline
-
-
-def build_custom_dataloader(cfg):
-    custom_dataloader = build(cfg, DATALOADERS, key='dataloader')
-    return custom_dataloader
 
 
 def build_dataloader(dataset,
@@ -95,7 +88,7 @@ def build_dataloader(dataset,
         num_worker (int): num_worker
         shuffle(bool): whether to shuffle the data at every epoch.
     """
-    if not kwargs.get('sampler'):
+    if kwargs.get('sampler', None) is not None:
         if multigrid:
             batch_sampler = DistributedShortSampler(dataset,
                                                     batch_sizes=batch_size,
@@ -107,7 +100,7 @@ def build_dataloader(dataset,
                                                     shuffle=shuffle,
                                                     drop_last=drop_last)
     else:
-        sampler = build_sampler(kwargs['sampler'])
+        sampler = build_batch_sampler(kwargs['sampler'])
         batch_sampler = BatchSampler(dataset,
                                      sampler=sampler,
                                      batch_size=batch_size,
@@ -151,8 +144,7 @@ def term_mp(sig_num, frame):
     """
     pid = os.getpid()
     pgid = os.getpgid(os.getpid())
-    logger.info("main proc {} exit, kill process group "
-                "{}".format(pid, pgid))
+    logger.info("main proc {} exit, kill process group " "{}".format(pid, pgid))
     os.killpg(pgid, signal.SIGKILL)
     return
 

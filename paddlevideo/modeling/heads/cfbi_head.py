@@ -382,7 +382,7 @@ class CollaborativeEnsemblerMS(nn.Layer):
         x = self.S3_IA3(x, IA_head)
         x = self.S3_layer3(x)
 
-        # ASPP + Decoder
+        # aspp + Decoder
         x = self.ASPP_IA(x, IA_head)
         x = self.ASPP(x)
 

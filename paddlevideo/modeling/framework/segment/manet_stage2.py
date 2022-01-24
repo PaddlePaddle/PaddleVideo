@@ -15,7 +15,7 @@ import json
 
 from paddlevideo.loader import build_dataloader, build_dataset
 from paddlevideo.loader.sampler import RandomIdentitySampler
-from paddlevideo.loader.builder import build_custom_dataloader, build_pipeline
+from paddlevideo.loader.builder import build_pipeline
 from paddlevideo.solver import build_lr, build_optimizer
 from paddlevideo.utils import get_logger, load
 import paddle.distributed as dist
@@ -144,14 +144,13 @@ class ManetSegment_Stage2(BaseSegment):
                     train_dataset.init_ref_frame_dic()
 
                 train_dataloader_setting = dict(
-                    dataloader='ManetDataLoaderStage2',
                     batch_size=batch_size,
                     num_workers=num_workers,
                     collate_fn_cfg=cfg.get('MIX', None),
                     places=places,
                     sampler=RandomIdentitySampler(train_dataset),
                     dataset=train_dataset)
-                train_loader = build_custom_dataloader(train_dataloader_setting)
+                train_loader = build_dataloader(train_dataloader_setting)
 
                 for epoch in range(epoch_per_round):
                     tic = time.time()
@@ -291,9 +290,11 @@ class ManetSegment_Stage2(BaseSegment):
                             if (i + 1
                                 ) % cfg['GRADIENT_ACCUMULATION'].num_iters == 0:
                                 for p in model.parameters():
-                                    p.grad.set_value(
-                                        p.grad /
-                                        cfg['GRADIENT_ACCUMULATION'].num_iters)
+                                    if p.grad is not None:
+                                        p.grad.set_value(
+                                            p.grad /
+                                            cfg['GRADIENT_ACCUMULATION'].
+                                            num_iters)
                                 optimizer.step()
                                 optimizer.clear_grad()
                         else:  # Common case
@@ -324,8 +325,8 @@ class ManetSegment_Stage2(BaseSegment):
                                       _,
                                       "train",
                                       ips,
-                                      tot_step=step,
-                                      max_iters=max_iters)
+                                      cur_step=step,
+                                      tot_step=max_iters)
                         if step % cfg['save_step'] == 0 and step != 0:
                             save(
                                 optimizer.state_dict(),
@@ -539,6 +540,7 @@ class ManetSegment_Stage2(BaseSegment):
                             cfg['PIPELINE']['train'])
                         print('updating ref frame and label finished!')
 
+    @paddle.no_grad()
     def test_step(self, weights, parallel=False, test_cfg={}, **cfg):
         # 1. Construct model.
         cfg['MODEL'].head.pretrained = ''
@@ -616,177 +618,156 @@ class ManetSegment_Stage2(BaseSegment):
             os.path.join(cfg.get("output_dir", f"./output/{cfg['model_name']}"),
                          'inter_file.txt'), 'w')
         seen_seq = []
-        with paddle.no_grad():
-            with DavisInteractiveSession(
-                    host=host,
-                    davis_root=cfg['DATASET'].test.file_path,
-                    subset=subset,
-                    report_save_dir=report_save_dir,
-                    max_nb_interactions=max_nb_interactions,
-                    max_time=max_time,
-                    metric_to_optimize='J') as sess:
-                while sess.next():
 
-                    t_total = timeit.default_timer()
-                    # Get the current iteration scribbles
+        with DavisInteractiveSession(host=host,
+                                     davis_root=cfg['DATASET'].test.file_path,
+                                     subset=subset,
+                                     report_save_dir=report_save_dir,
+                                     max_nb_interactions=max_nb_interactions,
+                                     max_time=max_time,
+                                     metric_to_optimize='J') as sess:
+            while sess.next():
 
-                    sequence, scribbles, first_scribble = sess.get_scribbles(
-                        only_last=True
-                    )  # return only one scribble (the last one)
-                    print(sequence)
-                    h, w = h_w_dic[sequence]
-                    if 'prev_label_storage' not in locals().keys():
-                        prev_label_storage = paddle.zeros(
-                            [104, h,
-                             w])  # because the maximum length of frames is 104.
-                    if len(annotated_frames(scribbles)) == 0:
-                        # if no scribbles return, keep masks in previous round
-                        final_masks = prev_label_storage[:seq_imgnum_dict_[
-                            sequence]]
-                        sess.submit_masks(final_masks.numpy())
-                        continue
+                t_total = timeit.default_timer()
+                # Get the current iteration scribbles
 
-                    start_annotated_frame = annotated_frames(scribbles)[0]
+                sequence, scribbles, first_scribble = sess.get_scribbles(
+                    only_last=True)  # return only one scribble (the last one)
+                print(sequence)
+                h, w = h_w_dic[sequence]
+                if 'prev_label_storage' not in locals().keys():
+                    prev_label_storage = paddle.zeros(
+                        [104, h,
+                         w])  # because the maximum length of frames is 104.
+                if len(annotated_frames(scribbles)) == 0:
+                    # if no scribbles return, keep masks in previous round
+                    final_masks = prev_label_storage[:
+                                                     seq_imgnum_dict_[sequence]]
+                    sess.submit_masks(final_masks.numpy())
+                    continue
 
-                    pred_masks = []
-                    pred_masks_reverse = []
+                start_annotated_frame = annotated_frames(scribbles)[0]
 
-                    if first_scribble:  # If in the first round, initialize memories
-                        n_interaction = 1
-                        eval_global_map_tmp_dic = {}
-                        local_map_dics = ({}, {})
-                        total_frame_num = total_frame_num_dic[sequence]
-                        obj_nums = seq_dict[sequence][-1]
+                pred_masks = []
+                pred_masks_reverse = []
 
-                    else:
-                        n_interaction += 1
-                        with open(f'{n_interaction}.json', 'w') as f:
-                            json.dump(scribbles, f)
-                    inter_file.write(sequence + ' ' + 'interaction' +
-                                     str(n_interaction) + ' ' + 'frame' +
-                                     str(start_annotated_frame) + '\n')
+                if first_scribble:  # If in the first round, initialize memories
+                    n_interaction = 1
+                    eval_global_map_tmp_dic = {}
+                    local_map_dics = ({}, {})
+                    total_frame_num = total_frame_num_dic[sequence]
+                    obj_nums = seq_dict[sequence][-1]
 
-                    if first_scribble:  # if in the first round, extract pixel embbedings.
-                        if sequence not in seen_seq:
-                            inter_turn = 1
+                else:
+                    n_interaction += 1
+                    with open(f'{n_interaction}.json', 'w') as f:
+                        json.dump(scribbles, f)
+                inter_file.write(sequence + ' ' + 'interaction' +
+                                 str(n_interaction) + ' ' + 'frame' +
+                                 str(start_annotated_frame) + '\n')
 
-                            seen_seq.append(sequence)
-                            embedding_memory = []
-                            cfg_dataset = cfg['DATASET'].test
-                            cfg_dataset.update({'seq_name': sequence})
-                            test_dataset = build_dataset(
-                                (cfg_dataset, cfg['PIPELINE'].test))
-                            batch_size = cfg['DATASET'].get(
-                                "test_batch_size", 14)
-                            places = paddle.set_device('gpu')
-                            # default num worker: 0, which means no subprocess will be created
-                            num_workers = cfg['DATASET'].get('num_workers', 0)
-                            num_workers = cfg['DATASET'].get(
-                                'test_num_workers', num_workers)
-                            test_dataloader_setting = dict(
-                                batch_size=batch_size,
-                                num_workers=num_workers,
-                                places=places,
-                                drop_last=False,
-                                shuffle=False,
-                                dataset=test_dataset)
-                            test_loader = build_dataloader(
-                                **test_dataloader_setting)
-                            for ii, sample in enumerate(test_loader):
-                                imgs = sample['img1']
-                                if parallel:
-                                    for c in model.children():
-                                        frame_embedding = c.head.extract_feature(
-                                            imgs)
-                                else:
-                                    frame_embedding = model.head.extract_feature(
+                if first_scribble:  # if in the first round, extract pixel embbedings.
+                    if sequence not in seen_seq:
+                        inter_turn = 1
+
+                        seen_seq.append(sequence)
+                        embedding_memory = []
+                        cfg_dataset = cfg['DATASET'].test
+                        cfg_dataset.update({'seq_name': sequence})
+                        test_dataset = build_dataset(
+                            (cfg_dataset, cfg['PIPELINE'].test))
+                        batch_size = cfg['DATASET'].get("test_batch_size", 14)
+                        places = paddle.set_device('gpu')
+                        # default num worker: 0, which means no subprocess will be created
+                        num_workers = cfg['DATASET'].get('num_workers', 0)
+                        num_workers = cfg['DATASET'].get(
+                            'test_num_workers', num_workers)
+                        test_dataloader_setting = dict(batch_size=batch_size,
+                                                       num_workers=num_workers,
+                                                       places=places,
+                                                       drop_last=False,
+                                                       shuffle=False,
+                                                       dataset=test_dataset)
+                        test_loader = build_dataloader(
+                            **test_dataloader_setting)
+                        for ii, sample in enumerate(test_loader):
+                            imgs = sample['img1']
+                            if parallel:
+                                for c in model.children():
+                                    frame_embedding = c.head.extract_feature(
                                         imgs)
-                                embedding_memory.append(frame_embedding)
-                            del frame_embedding
+                            else:
+                                frame_embedding = model.head.extract_feature(
+                                    imgs)
+                            embedding_memory.append(frame_embedding)
+                        del frame_embedding
 
-                            embedding_memory = paddle.concat(
-                                embedding_memory, 0)
-                            _, _, emb_h, emb_w = embedding_memory.shape
-                            ref_frame_embedding = embedding_memory[
-                                start_annotated_frame]
-                            ref_frame_embedding = ref_frame_embedding.unsqueeze(
-                                0)
-                        else:
-                            inter_turn += 1
-                            ref_frame_embedding = embedding_memory[
-                                start_annotated_frame]
-                            ref_frame_embedding = ref_frame_embedding.unsqueeze(
-                                0)
-
-                    else:
+                        embedding_memory = paddle.concat(embedding_memory, 0)
+                        _, _, emb_h, emb_w = embedding_memory.shape
                         ref_frame_embedding = embedding_memory[
                             start_annotated_frame]
                         ref_frame_embedding = ref_frame_embedding.unsqueeze(0)
-                    ########
-                    scribble_masks = scribbles2mask(scribbles, (emb_h, emb_w))
-                    scribble_label = scribble_masks[start_annotated_frame]
-                    scribble_sample = {'scribble_label': scribble_label}
-                    scribble_sample = ToTensor_manet()(scribble_sample)
-                    #                     print(ref_frame_embedding, ref_frame_embedding.shape)
-                    scribble_label = scribble_sample['scribble_label']
-
-                    scribble_label = scribble_label.unsqueeze(0)
-                    model_name = cfg['model_name']
-                    output_dir = cfg.get("output_dir", f"./output/{model_name}")
-                    inter_file_path = os.path.join(
-                        output_dir, sequence,
-                        'interactive' + str(n_interaction),
-                        'turn' + str(inter_turn))
-                    if is_save_image:
-                        ref_scribble_to_show = scribble_label.squeeze().numpy()
-                        im_ = Image.fromarray(
-                            ref_scribble_to_show.astype('uint8')).convert(
-                                'P', )
-                        im_.putpalette(_palette)
-                        ref_img_name = str(start_annotated_frame)
-
-                        if not os.path.exists(inter_file_path):
-                            os.makedirs(inter_file_path)
-                        im_.save(
-                            os.path.join(inter_file_path,
-                                         'inter_' + ref_img_name + '.png'))
-                    if first_scribble:
-                        prev_label = None
-                        prev_label_storage = paddle.zeros(
-                            [104, h,
-                             w])  # because the maximum length of frames is 104.
                     else:
-                        prev_label = prev_label_storage[start_annotated_frame]
-                        prev_label = prev_label.unsqueeze(0).unsqueeze(0)
+                        inter_turn += 1
+                        ref_frame_embedding = embedding_memory[
+                            start_annotated_frame]
+                        ref_frame_embedding = ref_frame_embedding.unsqueeze(0)
 
-                    # check if no scribbles.
-                    if not first_scribble and paddle.unique(
-                            scribble_label).shape[0] == 1:
-                        print(
-                            'not first_scribble and paddle.unique(scribble_label).shape[0] == 1'
-                        )
-                        print(paddle.unique(scribble_label))
-                        final_masks = prev_label_storage[:seq_imgnum_dict_[
-                            sequence]]
-                        sess.submit_masks(final_masks.numpy())
-                        continue
+                else:
+                    ref_frame_embedding = embedding_memory[
+                        start_annotated_frame]
+                    ref_frame_embedding = ref_frame_embedding.unsqueeze(0)
+                ########
+                scribble_masks = scribbles2mask(scribbles, (emb_h, emb_w))
+                scribble_label = scribble_masks[start_annotated_frame]
+                scribble_sample = {'scribble_label': scribble_label}
+                scribble_sample = ToTensor_manet()(scribble_sample)
+                #                     print(ref_frame_embedding, ref_frame_embedding.shape)
+                scribble_label = scribble_sample['scribble_label']
 
-                    ###inteaction segmentation head
-                    if parallel:
-                        for c in model.children():
-                            tmp_dic, local_map_dics = c.head.int_seghead(
-                                ref_frame_embedding=ref_frame_embedding,
-                                ref_scribble_label=scribble_label,
-                                prev_round_label=prev_label,
-                                global_map_tmp_dic=eval_global_map_tmp_dic,
-                                local_map_dics=local_map_dics,
-                                interaction_num=n_interaction,
-                                seq_names=[sequence],
-                                gt_ids=paddle.to_tensor([obj_nums]),
-                                frame_num=[start_annotated_frame],
-                                first_inter=first_scribble)
-                    else:
-                        tmp_dic, local_map_dics = model.head.int_seghead(
+                scribble_label = scribble_label.unsqueeze(0)
+                model_name = cfg['model_name']
+                output_dir = cfg.get("output_dir", f"./output/{model_name}")
+                inter_file_path = os.path.join(
+                    output_dir, sequence, 'interactive' + str(n_interaction),
+                    'turn' + str(inter_turn))
+                if is_save_image:
+                    ref_scribble_to_show = scribble_label.squeeze().numpy()
+                    im_ = Image.fromarray(
+                        ref_scribble_to_show.astype('uint8')).convert('P', )
+                    im_.putpalette(_palette)
+                    ref_img_name = str(start_annotated_frame)
+
+                    if not os.path.exists(inter_file_path):
+                        os.makedirs(inter_file_path)
+                    im_.save(
+                        os.path.join(inter_file_path,
+                                     'inter_' + ref_img_name + '.png'))
+                if first_scribble:
+                    prev_label = None
+                    prev_label_storage = paddle.zeros(
+                        [104, h,
+                         w])  # because the maximum length of frames is 104.
+                else:
+                    prev_label = prev_label_storage[start_annotated_frame]
+                    prev_label = prev_label.unsqueeze(0).unsqueeze(0)
+
+                # check if no scribbles.
+                if not first_scribble and paddle.unique(
+                        scribble_label).shape[0] == 1:
+                    print(
+                        'not first_scribble and paddle.unique(scribble_label).shape[0] == 1'
+                    )
+                    print(paddle.unique(scribble_label))
+                    final_masks = prev_label_storage[:
+                                                     seq_imgnum_dict_[sequence]]
+                    sess.submit_masks(final_masks.numpy())
+                    continue
+
+                ###inteaction segmentation head
+                if parallel:
+                    for c in model.children():
+                        tmp_dic, local_map_dics = c.head.int_seghead(
                             ref_frame_embedding=ref_frame_embedding,
                             ref_scribble_label=scribble_label,
                             prev_round_label=prev_label,
@@ -797,62 +778,56 @@ class ManetSegment_Stage2(BaseSegment):
                             gt_ids=paddle.to_tensor([obj_nums]),
                             frame_num=[start_annotated_frame],
                             first_inter=first_scribble)
-                    pred_label = tmp_dic[sequence]
-                    pred_label = nn.functional.interpolate(pred_label,
-                                                           size=(h, w),
-                                                           mode='bilinear',
-                                                           align_corners=True)
-                    pred_label = paddle.argmax(pred_label, axis=1)
-                    pred_masks.append(float_(pred_label))
-                    prev_label_storage[start_annotated_frame] = float_(
-                        pred_label[0])
+                else:
+                    tmp_dic, local_map_dics = model.head.int_seghead(
+                        ref_frame_embedding=ref_frame_embedding,
+                        ref_scribble_label=scribble_label,
+                        prev_round_label=prev_label,
+                        global_map_tmp_dic=eval_global_map_tmp_dic,
+                        local_map_dics=local_map_dics,
+                        interaction_num=n_interaction,
+                        seq_names=[sequence],
+                        gt_ids=paddle.to_tensor([obj_nums]),
+                        frame_num=[start_annotated_frame],
+                        first_inter=first_scribble)
+                pred_label = tmp_dic[sequence]
+                pred_label = nn.functional.interpolate(pred_label,
+                                                       size=(h, w),
+                                                       mode='bilinear',
+                                                       align_corners=True)
+                pred_label = paddle.argmax(pred_label, axis=1)
+                pred_masks.append(float_(pred_label))
+                prev_label_storage[start_annotated_frame] = float_(
+                    pred_label[0])
 
-                    if is_save_image:  # save image
-                        pred_label_to_save = pred_label.squeeze(0).numpy()
-                        im = Image.fromarray(
-                            pred_label_to_save.astype('uint8')).convert('P', )
-                        im.putpalette(_palette)
-                        imgname = str(start_annotated_frame)
-                        while len(imgname) < 5:
-                            imgname = '0' + imgname
-                        if not os.path.exists(inter_file_path):
-                            os.makedirs(inter_file_path)
-                        im.save(os.path.join(inter_file_path, imgname + '.png'))
-                    #######################################
-                    if first_scribble:
-                        scribble_label = rough_ROI(scribble_label)
+                if is_save_image:  # save image
+                    pred_label_to_save = pred_label.squeeze(0).numpy()
+                    im = Image.fromarray(
+                        pred_label_to_save.astype('uint8')).convert('P', )
+                    im.putpalette(_palette)
+                    imgname = str(start_annotated_frame)
+                    while len(imgname) < 5:
+                        imgname = '0' + imgname
+                    if not os.path.exists(inter_file_path):
+                        os.makedirs(inter_file_path)
+                    im.save(os.path.join(inter_file_path, imgname + '.png'))
+                #######################################
+                if first_scribble:
+                    scribble_label = rough_ROI(scribble_label)
 
-                    ##############################
-                    ref_prev_label = pred_label.unsqueeze(0)
-                    prev_label = pred_label.unsqueeze(0)
-                    prev_embedding = ref_frame_embedding
-                    # propagate from current_frame to the end.
-                    # Propagation ->
-                    for ii in range(start_annotated_frame + 1, total_frame_num):
-                        current_embedding = embedding_memory[ii]
-                        current_embedding = current_embedding.unsqueeze(0)
-                        prev_label = prev_label
-                        if parallel:
-                            for c in model.children():
-                                tmp_dic, eval_global_map_tmp_dic, local_map_dics = c.head.prop_seghead(
-                                    ref_frame_embedding,
-                                    prev_embedding,
-                                    current_embedding,
-                                    scribble_label,
-                                    prev_label,
-                                    normalize_nearest_neighbor_distances=True,
-                                    use_local_map=True,
-                                    seq_names=[sequence],
-                                    gt_ids=paddle.to_tensor([obj_nums]),
-                                    k_nearest_neighbors=test_cfg['knns'],
-                                    global_map_tmp_dic=eval_global_map_tmp_dic,
-                                    local_map_dics=local_map_dics,
-                                    interaction_num=n_interaction,
-                                    start_annotated_frame=start_annotated_frame,
-                                    frame_num=[ii],
-                                    dynamic_seghead=c.head.dynamic_seghead)
-                        else:
-                            tmp_dic, eval_global_map_tmp_dic, local_map_dics = model.head.prop_seghead(
+                ##############################
+                ref_prev_label = pred_label.unsqueeze(0)
+                prev_label = pred_label.unsqueeze(0)
+                prev_embedding = ref_frame_embedding
+                # propagate from current_frame to the end.
+                # Propagation ->
+                for ii in range(start_annotated_frame + 1, total_frame_num):
+                    current_embedding = embedding_memory[ii]
+                    current_embedding = current_embedding.unsqueeze(0)
+                    prev_label = prev_label
+                    if parallel:
+                        for c in model.children():
+                            tmp_dic, eval_global_map_tmp_dic, local_map_dics = c.head.prop_seghead(
                                 ref_frame_embedding,
                                 prev_embedding,
                                 current_embedding,
@@ -868,63 +843,60 @@ class ManetSegment_Stage2(BaseSegment):
                                 interaction_num=n_interaction,
                                 start_annotated_frame=start_annotated_frame,
                                 frame_num=[ii],
-                                dynamic_seghead=model.head.dynamic_seghead)
-                        pred_label = tmp_dic[sequence]
-                        pred_label = nn.functional.interpolate(
-                            pred_label,
-                            size=(h, w),
-                            mode='bilinear',
-                            align_corners=True)
-                        pred_label = paddle.argmax(pred_label, axis=1)
-                        pred_masks.append(float_(pred_label))
-                        prev_label = pred_label.unsqueeze(0)
-                        prev_embedding = current_embedding
-                        prev_label_storage[ii] = float_(pred_label[0])
-                        if is_save_image:
-                            pred_label_to_save = pred_label.squeeze(0).numpy()
-                            im = Image.fromarray(
-                                pred_label_to_save.astype('uint8')).convert(
-                                    'P', )
-                            im.putpalette(_palette)
-                            imgname = str(ii)
-                            while len(imgname) < 5:
-                                imgname = '0' + imgname
-                            if not os.path.exists(inter_file_path):
-                                os.makedirs(inter_file_path)
-                            im.save(
-                                os.path.join(inter_file_path, imgname + '.png'))
-                    #######################################
-                    prev_label = ref_prev_label
-                    prev_embedding = ref_frame_embedding
-                    #######
-                    # propagate from current_frame to the beginning.
-                    # Propagation <-
-                    for ii in range(start_annotated_frame):
-                        current_frame_num = start_annotated_frame - 1 - ii
-                        current_embedding = embedding_memory[current_frame_num]
-                        current_embedding = current_embedding.unsqueeze(0)
-                        prev_label = prev_label
-                        if parallel:
-                            for c in model.children():
-                                tmp_dic, eval_global_map_tmp_dic, local_map_dics = c.head.prop_seghead(
-                                    ref_frame_embedding,
-                                    prev_embedding,
-                                    current_embedding,
-                                    scribble_label,
-                                    prev_label,
-                                    normalize_nearest_neighbor_distances=True,
-                                    use_local_map=True,
-                                    seq_names=[sequence],
-                                    gt_ids=paddle.to_tensor([obj_nums]),
-                                    k_nearest_neighbors=test_cfg['knns'],
-                                    global_map_tmp_dic=eval_global_map_tmp_dic,
-                                    local_map_dics=local_map_dics,
-                                    interaction_num=n_interaction,
-                                    start_annotated_frame=start_annotated_frame,
-                                    frame_num=[current_frame_num],
-                                    dynamic_seghead=c.head.dynamic_seghead)
-                        else:
-                            tmp_dic, eval_global_map_tmp_dic, local_map_dics = model.head.prop_seghead(
+                                dynamic_seghead=c.head.dynamic_seghead)
+                    else:
+                        tmp_dic, eval_global_map_tmp_dic, local_map_dics = model.head.prop_seghead(
+                            ref_frame_embedding,
+                            prev_embedding,
+                            current_embedding,
+                            scribble_label,
+                            prev_label,
+                            normalize_nearest_neighbor_distances=True,
+                            use_local_map=True,
+                            seq_names=[sequence],
+                            gt_ids=paddle.to_tensor([obj_nums]),
+                            k_nearest_neighbors=test_cfg['knns'],
+                            global_map_tmp_dic=eval_global_map_tmp_dic,
+                            local_map_dics=local_map_dics,
+                            interaction_num=n_interaction,
+                            start_annotated_frame=start_annotated_frame,
+                            frame_num=[ii],
+                            dynamic_seghead=model.head.dynamic_seghead)
+                    pred_label = tmp_dic[sequence]
+                    pred_label = nn.functional.interpolate(pred_label,
+                                                           size=(h, w),
+                                                           mode='bilinear',
+                                                           align_corners=True)
+                    pred_label = paddle.argmax(pred_label, axis=1)
+                    pred_masks.append(float_(pred_label))
+                    prev_label = pred_label.unsqueeze(0)
+                    prev_embedding = current_embedding
+                    prev_label_storage[ii] = float_(pred_label[0])
+                    if is_save_image:
+                        pred_label_to_save = pred_label.squeeze(0).numpy()
+                        im = Image.fromarray(
+                            pred_label_to_save.astype('uint8')).convert('P', )
+                        im.putpalette(_palette)
+                        imgname = str(ii)
+                        while len(imgname) < 5:
+                            imgname = '0' + imgname
+                        if not os.path.exists(inter_file_path):
+                            os.makedirs(inter_file_path)
+                        im.save(os.path.join(inter_file_path, imgname + '.png'))
+                #######################################
+                prev_label = ref_prev_label
+                prev_embedding = ref_frame_embedding
+                #######
+                # propagate from current_frame to the beginning.
+                # Propagation <-
+                for ii in range(start_annotated_frame):
+                    current_frame_num = start_annotated_frame - 1 - ii
+                    current_embedding = embedding_memory[current_frame_num]
+                    current_embedding = current_embedding.unsqueeze(0)
+                    prev_label = prev_label
+                    if parallel:
+                        for c in model.children():
+                            tmp_dic, eval_global_map_tmp_dic, local_map_dics = c.head.prop_seghead(
                                 ref_frame_embedding,
                                 prev_embedding,
                                 current_embedding,
@@ -940,51 +912,65 @@ class ManetSegment_Stage2(BaseSegment):
                                 interaction_num=n_interaction,
                                 start_annotated_frame=start_annotated_frame,
                                 frame_num=[current_frame_num],
-                                dynamic_seghead=model.head.dynamic_seghead)
-                        pred_label = tmp_dic[sequence]
-                        pred_label = nn.functional.interpolate(
-                            pred_label,
-                            size=(h, w),
-                            mode='bilinear',
-                            align_corners=True)
+                                dynamic_seghead=c.head.dynamic_seghead)
+                    else:
+                        tmp_dic, eval_global_map_tmp_dic, local_map_dics = model.head.prop_seghead(
+                            ref_frame_embedding,
+                            prev_embedding,
+                            current_embedding,
+                            scribble_label,
+                            prev_label,
+                            normalize_nearest_neighbor_distances=True,
+                            use_local_map=True,
+                            seq_names=[sequence],
+                            gt_ids=paddle.to_tensor([obj_nums]),
+                            k_nearest_neighbors=test_cfg['knns'],
+                            global_map_tmp_dic=eval_global_map_tmp_dic,
+                            local_map_dics=local_map_dics,
+                            interaction_num=n_interaction,
+                            start_annotated_frame=start_annotated_frame,
+                            frame_num=[current_frame_num],
+                            dynamic_seghead=model.head.dynamic_seghead)
+                    pred_label = tmp_dic[sequence]
+                    pred_label = nn.functional.interpolate(pred_label,
+                                                           size=(h, w),
+                                                           mode='bilinear',
+                                                           align_corners=True)
 
-                        pred_label = paddle.argmax(pred_label, axis=1)
-                        pred_masks_reverse.append(float_(pred_label))
-                        prev_label = pred_label.unsqueeze(0)
-                        prev_embedding = current_embedding
-                        ####
-                        prev_label_storage[current_frame_num] = float_(
-                            pred_label[0])
-                        ###
-                        if is_save_image:
-                            pred_label_to_save = pred_label.squeeze(0).numpy()
-                            im = Image.fromarray(
-                                pred_label_to_save.astype('uint8')).convert(
-                                    'P', )
-                            im.putpalette(_palette)
-                            imgname = str(current_frame_num)
-                            while len(imgname) < 5:
-                                imgname = '0' + imgname
-                            if not os.path.exists(inter_file_path):
-                                os.makedirs(inter_file_path)
-                            im.save(
-                                os.path.join(inter_file_path, imgname + '.png'))
-                    pred_masks_reverse.reverse()
-                    pred_masks_reverse.extend(pred_masks)
-                    final_masks = paddle.concat(pred_masks_reverse, 0)
-                    sess.submit_masks(final_masks.numpy())
+                    pred_label = paddle.argmax(pred_label, axis=1)
+                    pred_masks_reverse.append(float_(pred_label))
+                    prev_label = pred_label.unsqueeze(0)
+                    prev_embedding = current_embedding
+                    ####
+                    prev_label_storage[current_frame_num] = float_(
+                        pred_label[0])
+                    ###
+                    if is_save_image:
+                        pred_label_to_save = pred_label.squeeze(0).numpy()
+                        im = Image.fromarray(
+                            pred_label_to_save.astype('uint8')).convert('P', )
+                        im.putpalette(_palette)
+                        imgname = str(current_frame_num)
+                        while len(imgname) < 5:
+                            imgname = '0' + imgname
+                        if not os.path.exists(inter_file_path):
+                            os.makedirs(inter_file_path)
+                        im.save(os.path.join(inter_file_path, imgname + '.png'))
+                pred_masks_reverse.reverse()
+                pred_masks_reverse.extend(pred_masks)
+                final_masks = paddle.concat(pred_masks_reverse, 0)
+                sess.submit_masks(final_masks.numpy())
 
-                    # if inter_turn == 3 and n_interaction == 8:
-                    #     del eval_global_map_tmp_dic
-                    #     del local_map_dics
-                    #     del embedding_memory
-                    #     del prev_label_storage
-                    t_end = timeit.default_timer()
-                    print('Total time for single interaction: ' +
-                          str(t_end - t_total))
+                if inter_turn == 3 and n_interaction == 8:
+                    del eval_global_map_tmp_dic
+                    del local_map_dics
+                    del embedding_memory
+                    del prev_label_storage
+                t_end = timeit.default_timer()
+                print('Total time for single interaction: ' +
+                      str(t_end - t_total))
 
-                report = sess.get_report()
-                summary = sess.get_global_summary(
-                    save_file=os.path.join(report_save_dir, 'summary.json'))
-
+            report = sess.get_report()
+            summary = sess.get_global_summary(
+                save_file=os.path.join(report_save_dir, 'summary.json'))
         inter_file.close()

@@ -6,10 +6,10 @@ import paddle.nn.functional as F
 from paddlevideo.modeling import kaiming_normal_
 
 
-class _ASPPModule(nn.Layer):
+class _asppmodule(nn.Layer):
     def __init__(self, inplanes, planes, kernel_size, padding, dilation,
-                 BatchNorm):
-        super(_ASPPModule, self).__init__()
+                 norm_layer):
+        super(_asppmodule, self).__init__()
         self.atrous_conv = nn.Conv2D(inplanes,
                                      planes,
                                      kernel_size=kernel_size,
@@ -17,8 +17,8 @@ class _ASPPModule(nn.Layer):
                                      padding=padding,
                                      dilation=dilation,
                                      bias_attr=False)
-        self.bn = BatchNorm(planes)
-        self.relu = nn.ReLU(True)
+        self.bn = norm_layer(planes)
+        self.relu = nn.ReLU()
 
         self._init_weight()
 
@@ -39,9 +39,9 @@ class _ASPPModule(nn.Layer):
                 zero_(m.bias)
 
 
-class ASPP(nn.Layer):
-    def __init__(self, backbone, output_stride, BatchNorm):
-        super(ASPP, self).__init__()
+class aspp(nn.Layer):
+    def __init__(self, backbone, output_stride, norm_layer):
+        super(aspp, self).__init__()
         if backbone == 'drn':
             inplanes = 512
         elif backbone == 'mobilenet':
@@ -55,38 +55,38 @@ class ASPP(nn.Layer):
         else:
             raise NotImplementedError
 
-        self.aspp1 = _ASPPModule(inplanes,
+        self.aspp1 = _asppmodule(inplanes,
                                  256,
                                  1,
                                  padding=0,
                                  dilation=dilations[0],
-                                 BatchNorm=BatchNorm)
-        self.aspp2 = _ASPPModule(inplanes,
+                                 norm_layer=norm_layer)
+        self.aspp2 = _asppmodule(inplanes,
                                  256,
                                  3,
                                  padding=dilations[1],
                                  dilation=dilations[1],
-                                 BatchNorm=BatchNorm)
-        self.aspp3 = _ASPPModule(inplanes,
+                                 norm_layer=norm_layer)
+        self.aspp3 = _asppmodule(inplanes,
                                  256,
                                  3,
                                  padding=dilations[2],
                                  dilation=dilations[2],
-                                 BatchNorm=BatchNorm)
-        self.aspp4 = _ASPPModule(inplanes,
+                                 norm_layer=norm_layer)
+        self.aspp4 = _asppmodule(inplanes,
                                  256,
                                  3,
                                  padding=dilations[3],
                                  dilation=dilations[3],
-                                 BatchNorm=BatchNorm)
+                                 norm_layer=norm_layer)
 
         self.global_avg_pool = nn.Sequential(
             nn.AdaptiveAvgPool2D((1, 1)),
             nn.Conv2D(inplanes, 256, 1, stride=1, bias_attr=False),
-            BatchNorm(256), nn.ReLU())
+            norm_layer(256), nn.ReLU())
         self.conv1 = nn.Conv2D(1280, 256, 1, bias_attr=False)
-        self.bn1 = BatchNorm(256)
-        self.relu = nn.ReLU(True)
+        self.bn1 = norm_layer(256)
+        self.relu = nn.ReLU()
         self.dropout = nn.Dropout(0.1)
         self._init_weight()
 
@@ -121,5 +121,5 @@ class ASPP(nn.Layer):
                 zero_(m.bias)
 
 
-def build_aspp(backbone, output_stride, BatchNorm):
-    return ASPP(backbone, output_stride, BatchNorm)
+def build_aspp(backbone, output_stride, norm_layer):
+    return aspp(backbone, output_stride, norm_layer)
