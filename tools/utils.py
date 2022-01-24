@@ -509,7 +509,7 @@ class VideoSwin_TableTennis_Inference_helper(Base_Inference_helper):
         res = np.expand_dims(results['imgs'], axis=0).copy()
         return [res]
 
-    def Add_text_to_video(
+    def add_text_to_video(
             self,
             video_path,
             output_dir="applications/TableTennis/ActionRecognition/results",
@@ -584,7 +584,7 @@ class VideoSwin_TableTennis_Inference_helper(Base_Inference_helper):
                     print("\ttop-{0} class: {1}".format(j + 1, classes[j]))
                     print("\ttop-{0} score: {1}".format(j + 1, scores[j]))
             if save_gif:
-                self.Add_text_to_video(
+                self.add_text_to_video(
                     self.input_file[0],
                     text=f"{str(classes[0])} {float(scores[0]):.5f}")
 
