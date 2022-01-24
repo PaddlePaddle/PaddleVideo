@@ -48,57 +48,6 @@ from ava_predict import (detection_inference, frame_extraction,
 INFERENCE = Registry('inference')
 
 
-def Add_text_to_video(
-        video_path,
-        output_dir="applications/TableTennis/ActionRecognition/results",
-        text=None):
-    os.makedirs(output_dir, exist_ok=True)
-    if video_path.endswith('.pkl'):
-        try:
-            import cPickle as pickle
-            from cStringIO import StringIO
-        except ImportError:
-            import pickle
-            from io import BytesIO
-        from PIL import Image
-        data_loaded = pickle.load(open(video_path, 'rb'), encoding='bytes')
-        _, _, frames = data_loaded
-        frames_len = len(frames)
-
-    else:
-        videoCapture = cv2.VideoCapture()
-        videoCapture.open(video_path)
-
-        fps = videoCapture.get(cv2.CAP_PROP_FPS)
-        frame_width = int(videoCapture.get(cv2.CAP_PROP_FRAME_WIDTH))
-        frame_height = int(videoCapture.get(cv2.CAP_PROP_FRAME_HEIGHT))
-
-        frames_len = videoCapture.get(cv2.CAP_PROP_FRAME_COUNT)
-        print("fps=", int(fps), "frames=", int(frames_len), "scale=",
-              f"{frame_height}x{frame_width}")
-
-    frames_rgb_list = []
-    for i in range(int(frames_len)):
-        if video_path.endswith('.pkl'):
-            frame = np.array(
-                Image.open(BytesIO(frames[i])).convert("RGB").resize(
-                    (240, 135)))[:, :, ::-1].astype('uint8')
-        else:
-            _, frame = videoCapture.read()
-        frame = cv2.putText(frame, text, (30, 30), cv2.FONT_HERSHEY_COMPLEX,
-                            1.0, (0, 0, 255), 2)
-        frames_rgb_list.append(frame[:, :, ::-1])  # bgr to rgb
-    if not video_path.endswith('.pkl'):
-        videoCapture.release()
-    cv2.destroyAllWindows()
-    output_filename = os.path.basename(video_path)
-    output_filename = output_filename.split('.')[0] + '.gif'
-    imageio.mimsave(f'{output_dir}/{output_filename}',
-                    frames_rgb_list,
-                    'GIF',
-                    duration=0.00085)
-
-
 def decode(filepath, args):
     num_seg = args.num_seg
     seg_len = args.seg_len
@@ -560,6 +509,57 @@ class VideoSwin_TableTennis_Inference_helper(Base_Inference_helper):
         res = np.expand_dims(results['imgs'], axis=0).copy()
         return [res]
 
+    def Add_text_to_video(
+            self,
+            video_path,
+            output_dir="applications/TableTennis/ActionRecognition/results",
+            text=None):
+        os.makedirs(output_dir, exist_ok=True)
+        if video_path.endswith('.pkl'):
+            try:
+                import cPickle as pickle
+                from cStringIO import StringIO
+            except ImportError:
+                import pickle
+                from io import BytesIO
+            from PIL import Image
+            data_loaded = pickle.load(open(video_path, 'rb'), encoding='bytes')
+            _, _, frames = data_loaded
+            frames_len = len(frames)
+
+        else:
+            videoCapture = cv2.VideoCapture()
+            videoCapture.open(video_path)
+
+            fps = videoCapture.get(cv2.CAP_PROP_FPS)
+            frame_width = int(videoCapture.get(cv2.CAP_PROP_FRAME_WIDTH))
+            frame_height = int(videoCapture.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
+            frames_len = videoCapture.get(cv2.CAP_PROP_FRAME_COUNT)
+            print("fps=", int(fps), "frames=", int(frames_len), "scale=",
+                  f"{frame_height}x{frame_width}")
+
+        frames_rgb_list = []
+        for i in range(int(frames_len)):
+            if video_path.endswith('.pkl'):
+                frame = np.array(
+                    Image.open(BytesIO(frames[i])).convert("RGB").resize(
+                        (240, 135)))[:, :, ::-1].astype('uint8')
+            else:
+                _, frame = videoCapture.read()
+            frame = cv2.putText(frame, text, (30, 30), cv2.FONT_HERSHEY_COMPLEX,
+                                1.0, (0, 0, 255), 2)
+            frames_rgb_list.append(frame[:, :, ::-1])  # bgr to rgb
+        if not video_path.endswith('.pkl'):
+            videoCapture.release()
+        cv2.destroyAllWindows()
+        output_filename = os.path.basename(video_path)
+        output_filename = output_filename.split('.')[0] + '.gif'
+        imageio.mimsave(f'{output_dir}/{output_filename}',
+                        frames_rgb_list,
+                        'GIF',
+                        duration=0.00085)
+
     def postprocess(self, output, print_output=True, save_gif=True):
         """
         output: list
@@ -584,7 +584,7 @@ class VideoSwin_TableTennis_Inference_helper(Base_Inference_helper):
                     print("\ttop-{0} class: {1}".format(j + 1, classes[j]))
                     print("\ttop-{0} score: {1}".format(j + 1, scores[j]))
             if save_gif:
-                Add_text_to_video(
+                self.Add_text_to_video(
                     self.input_file[0],
                     text=f"{str(classes[0])} {float(scores[0]):.5f}")
 
