@@ -12,11 +12,12 @@
 - 【1月21号20:15-21:30】多模态学习和检索方法
 
 👀 **报名链接**: https://paddleqiyeban.wjx.cn/vj/QIValIZ.aspx?udsid=419689
+**课程回放链接**:  https://aistudio.baidu.com/aistudio/course/introduce/6742
 
 ​																	  💖 **欢迎大家扫码入群讨论** 💖
 <div align="center">
   <img src="docs/images/user_group.png" width=250/></div>
-  
+
 - 添加成功后回复【视频】加入交流群
 
 ## 简介
@@ -34,6 +35,8 @@ PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_githu
 ## 模型案例库
 
 ### 模型
+
+- 模型库使用前请参考[安装说明](docs/zh-CN/install.md)、[使用指南](docs/zh-CN/usage.md)。
 
 <table style="margin-left:auto;margin-right:auto;font-size:1.3vw;padding:3px 5px;text-align:center;vertical-align:center;">
   <tr>
@@ -114,8 +117,6 @@ PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_githu
   </tr>
 </table>
 
-- 模型库使用前请参考[安装说明](docs/zh-CN/install.md)、[使用指南](docs/zh-CN/usage.md)。
-
 
 ### 数据集
 
@@ -169,7 +170,7 @@ PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_githu
     <td colspan="4">文本视频检索</td>
   </tr>
   <tr>
-    <td><a href="applications/T2VLAD/docs/dataset.md">MSR-VTT</a> (<a href="https://www.microsoft.com/en-us/research/publication/msr-vtt-a-large-video-description-dataset-for-bridging-video-and-language/" rel="nofollow">Homepage</a>) (CVPR'2016)</td>
+    <td><a href="docs/zh-CN/dataset/msrvtt.md">MSR-VTT</a> (<a href="https://www.microsoft.com/en-us/research/publication/msr-vtt-a-large-video-description-dataset-for-bridging-video-and-language/" rel="nofollow">Homepage</a>) (CVPR'2016)</td>
     <td></td>
     <td></td>
     <td></td>
@@ -220,15 +221,13 @@ PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_githu
 
 
 ## 赛事支持
-- [CCKS 2021：知识增强的视频语义理解](https://www.biendata.xyz/competition/ccks_2021_videounderstanding/)
-- [基于飞桨实现花样滑冰选手骨骼点动作识别大赛](https://aistudio.baidu.com/aistudio/competition/detail/115/0/introduction)
+
+- [基于飞桨实现花样滑冰选手骨骼点动作识别大赛](https://aistudio.baidu.com/aistudio/competition/detail/115/0/introduction), [AI Studio项目](https://aistudio.baidu.com/aistudio/projectdetail/2417717), [视频教程](https://www.bilibili.com/video/BV1w3411172G)
 - [基于飞桨实现乒乓球时序动作定位大赛](https://aistudio.baidu.com/aistudio/competition/detail/127/0/introduction)
+- [CCKS 2021：知识增强的视频语义理解](https://www.biendata.xyz/competition/ccks_2021_videounderstanding/)
 
 ## 许可证书
 本项目的发布受[Apache 2.0 license](LICENSE)许可认证。
 
-
-## 欢迎贡献
-我们欢迎您的任何贡献并感谢您的支持，更多信息请参考 [contribution guidelines](docs/CONTRIBUTING.md).
-
+## 致谢
 - 非常感谢 [mohui37](https://github.com/mohui37)、[zephyr-fun](https://github.com/zephyr-fun)、[voipchina](https://github.com/voipchina) 贡献相关代码
