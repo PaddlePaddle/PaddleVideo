@@ -5,12 +5,14 @@
 - [数据集介绍](#数据集介绍)
 - [T2VLAD模型数据准备](#T2VLAD模型数据准备)
 - [ActBERT模型数据准备](#T2VLAD模型数据准备)
+- [参考文献](#参考文献)
 
 ## 数据集介绍
 
 MSR-VTT(Microsoft Research Video to Text) 是一个包含视频及字幕的大规模数据集，由来自20个类别的10,000个视频片段组成，每个视频片段由20个英文句子注释。我们使用9000个视频片段用于训练，1000个用于测试。更多详细信息可以参考网站：[MSRVTT](https://www.microsoft.com/en-us/research/publication/msr-vtt-a-large-video-description-dataset-for-bridging-video-and-language/)
 
-## [T2VLAD模型](../../../applications/T2VLAD/README.md)数据准备
+## T2VLAD模型数据准备
+[T2VLAD模型文档](../../../applications/T2VLAD/README.md)
 
 为了方便使用，我们提供的数据版本已对MSR-VTT数据集中对视频进行了特征提取。
 
@@ -42,7 +44,8 @@ bash download_features.sh
 
 ```
 
-## [ActBERT模型](../model_zoo/multimodal/actbert.md)数据准备
+## ActBERT模型数据准备
+[ActBERT模型文档](../model_zoo/multimodal/actbert.md)
 
 下载数据特征：
 ```

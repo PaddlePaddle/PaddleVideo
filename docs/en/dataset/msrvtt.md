@@ -14,11 +14,9 @@
 MSR-VTT(Microsoft Research Video to Text) is a large-scale dataset containing videos and subtitles, which is composed of 10000 video clips from 20 categories, and each video clip is annotated with 20 English sentences. We used 9000 video clips for training and 1000 for testing. For more details, please refer to the website: [MSRVTT](https://www.microsoft.com/en-us/research/publication/msr-vtt-a-large-video-description-dataset-for-bridging-video-and-language/)
 
 <a name="1.2"></a>
-## [Download for T2VLAD](../../../applications/T2VLAD/README_en.md)
+## Download for T2VLAD
 
-为了方便使用，我们提供的数据版本已对MSR-VTT数据集中对视频进行了特征提取。
-
-首先，请确保在 `data` 目录下，输入如下命令，下载数据集。
+[T2VLAD doc](../../../applications/T2VLAD/README_en.md)
 
 For ease of use, we provided extracted features of video.
 
@@ -50,7 +48,9 @@ After downloading, the files in the data directory are organized as follows:
 
 ```
 <a name="1.3"></a>
-## [Download for ActBERT](../model_zoo/multimodal/actbert.md)
+## Download for ActBERT
+
+[ActBERT doc](../model_zoo/multimodal/actbert.md)
 
 Download data features:
 ```
