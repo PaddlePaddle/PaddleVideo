@@ -16,7 +16,7 @@
 ​																	  💖 **欢迎大家扫码入群讨论** 💖
 <div align="center">
   <img src="docs/images/user_group.png" width=250/></div>
-  
+
 - 添加成功后回复【视频】加入交流群
 
 ## 简介
@@ -202,6 +202,7 @@ PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_githu
 | [PP-Care](applications/PP-Care) | 3DMRI医疗图像识别方案 |
 | [EIVideo](applications/EIVideo) | 视频交互式分割工具|
 | [Anti-UAV](applications/Anti-UAV) |无人机检测方案|
+| [AbnormalActionDetection](applications/AbnormalActionDetection) |异常行为检测方案|
 
 
 ## 文档教程

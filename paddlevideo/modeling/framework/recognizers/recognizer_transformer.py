@@ -10,7 +10,6 @@
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 
-from matplotlib.pyplot import axis
 import paddle
 import paddle.nn.functional as F
 from paddlevideo.utils import get_logger

@@ -106,3 +106,72 @@ class FrameDataset(BaseDataset):
                 idx = random.randint(0, len(self.info) - 1)
                 continue
             return results['imgs'], np.array([results['labels']])
+
+
+@DATASETS.register()
+class FrameDataset_Sport(BaseDataset):
+    """Video dataset for action recognition
+       The dataset loads raw videos and apply specified transforms on them.
+       The index file is a file with multiple lines, and each line indicates
+       a sample video with the filepath and label, which are split with a whitesapce.
+       Example of a inde file:
+       .. code-block:: txt
+           path/000.mp4 1
+           path/001.mp4 1
+           path/002.mp4 2
+           path/003.mp4 2
+       Args:
+           file_path(str): Path to the index file.
+           pipeline(XXX): A sequence of data transforms.
+           **kwargs: Keyword arguments for ```BaseDataset```.
+    """
+    def __init__(self, file_path, pipeline, num_retries=5, suffix='', **kwargs):
+        self.num_retries = num_retries
+        self.suffix = suffix
+        super().__init__(file_path, pipeline, **kwargs)
+
+    def load_file(self):
+        """Load index file to get video information."""
+        info = []
+        with open(self.file_path, 'r') as fin:
+            for line in fin:
+                line_split = line.strip().split()
+                frame_dir = line_split[0]
+                if self.data_prefix is not None:
+                    frame_dir = osp.join(self.data_prefix, frame_dir)
+                info.append(dict(frame_dir=frame_dir, suffix=self.suffix))
+        return info
+
+    def prepare_train(self, idx):
+        """TRAIN & VALID. Prepare the data for training/valid given the index."""
+        #Try to catch Exception caused by reading corrupted video file
+        for ir in range(self.num_retries):
+            try:
+                results = copy.deepcopy(self.info[idx])
+                results = self.pipeline(results)
+            except Exception as e:
+                #logger.info(e)
+                if ir < self.num_retries - 1:
+                    logger.info(
+                        "Error when loading {}, have {} trys, will try again".
+                        format(results['filename'], ir))
+                idx = random.randint(0, len(self.info) - 1)
+                continue
+            return results['imgs'], np.array([results['labels']])
+
+    def prepare_test(self, idx):
+        """TEST. Prepare the data for test given the index."""
+        #Try to catch Exception caused by reading corrupted video file
+        for ir in range(self.num_retries):
+            try:
+                results = copy.deepcopy(self.info[idx])
+                results = self.pipeline(results)
+            except Exception as e:
+                #logger.info(e)
+                if ir < self.num_retries - 1:
+                    logger.info(
+                        "Error when loading {}, have {} trys, will try again".
+                        format(results['filename'], ir))
+                idx = random.randint(0, len(self.info) - 1)
+                continue
+            return results['imgs'], np.array([results['labels']])

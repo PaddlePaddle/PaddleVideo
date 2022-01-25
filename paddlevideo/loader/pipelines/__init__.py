@@ -25,7 +25,7 @@ from .decode_image import ImageDecoder
 from .decode_sampler import DecodeSampler
 from .mix import Cutmix, Mixup, VideoMix
 from .multimodal import FeaturePadding, RandomCap, RandomMask, Tokenize
-from .sample import Sampler
+from .sample import Sampler, SamplerPkl
 from .sample_ava import *
 from .segmentation import MultiNorm, MultiRestrictSize
 from .skeleton_pipeline import AutoPadding, Iden, SkeletonNorm
@@ -39,5 +39,6 @@ __all__ = [
     'GetVideoLabel', 'Cutmix', 'CenterCrop', 'RandomCrop', 'LoadFeat',
     'RandomCap', 'JitterScale', 'Iden', 'VideoMix', 'ColorJitter', 'RandomFlip',
     'ToArray', 'FeaturePadding', 'GetMatchMap', 'GroupRandomFlip', 'MultiCrop',
-    'SFMRI_DecodeSampler', 'MultiRestrictSize', 'MultiNorm', 'RandomResizedCrop'
+    'SFMRI_DecodeSampler', 'MultiRestrictSize', 'MultiNorm',
+    'RandomResizedCrop', 'SamplerPkl'
 ]
