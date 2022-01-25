@@ -20,7 +20,7 @@ T2VLAD is proposed by Baidu in CVPR2021 for text-video retrieval. Text-video ret
 
 
 ## Data
-Please refer to MSR-VTT data download and preparation doc [MSR-VTT data](./docs/dataset.md)
+Please refer to MSR-VTT data download and preparation doc [MSR-VTT data](../../docs/en/dataset/msrvtt.md)
 
 ## Train
 ### Train on MSR-VTT
@@ -62,5 +62,3 @@ Video $\rightarrow$ Text
 
 - [T2VLAD: Global-Local Sequence Alignment for Text-Video Retrieval
 ](https://arxiv.org/pdf/2104.10054.pdf), Xiaohan Wang, Linchao Zhu, Yi Yang
-
-
