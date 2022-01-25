@@ -2,16 +2,19 @@
 
 # PaddleVideo
 
-​ 💖 **Welcome everyone to scan the code and join the group discussion** 💖
+​ 💖 **Welcome to scan the code and join the group discussion** 💖
+
 <div align="center">
   <img src="docs/images/user_group.png" width=250/></div>
+
+- Scan the QR code below with your Wechat and reply "video", you can access to official technical exchange group. Look forward to your participation.
 
 ## Introduction
 
 ![python version](https://img.shields.io/badge/python-3.7+-orange.svg) ![paddle version](https://img.shields.io/badge/PaddlePaddle-2.0-blue )
 
 
-PaddleVideo is a video model development kit produced by [PaddlePaddle Official](https://www.paddlepaddle.org.cn/?fr=paddleEdu_github), which aims to help developers better conduct academic research and industrial practice in the video field.
+PaddleVideo is a toolset for video tasks prepared for the industry and academia. This repository provides examples and best practice guildelines for exploring deep learning algorithm in the scene of video area.
 
 <div align="center">
   <img src="docs/images/home.gif" width="450px"/><br>
@@ -21,6 +24,8 @@ PaddleVideo is a video model development kit produced by [PaddlePaddle Official]
 ## Model and Applications
 
 ### Model zoo
+
+- Please refer to [Installation guide](docs/zh-CN/install.md) and [Usage doc](docs/zh-CN/usage.md) before using the model zoo.
 
 <table style="margin-left:auto;margin-right:auto;font-size:1.3vw;padding:3px 5px;text-align:center;vertical-align:center;">
   <tr>
@@ -101,8 +106,6 @@ PaddleVideo is a video model development kit produced by [PaddlePaddle Official]
   </tr>
 </table>
 
-- Please refer to [Installation Instructions](docs/zh-CN/install.md) and [Usage Guide](docs/zh-CN/usage.md) before using the model library.
-
 
 ### Dataset
 
@@ -156,7 +159,7 @@ PaddleVideo is a video model development kit produced by [PaddlePaddle Official]
     <td colspan="4">Text-Video Retrieval</td>
   </tr>
   <tr>
-    <td><a href="applications/T2VLAD/docs/dataset.md">MSR-VTT</a> (<a href="https://www.microsoft.com/en-us/research/publication/msr-vtt-a-large-video-description-dataset-for-bridging-video-and-language/" rel="nofollow">Homepage</a>) (CVPR'2016)</td>
+    <td><a href="docs/zh-CN/dataset/msrvtt.md">MSR-VTT</a> (<a href="https://www.microsoft.com/en-us/research/publication/msr-vtt-a-large-video-description-dataset-for-bridging-video-and-language/" rel="nofollow">Homepage</a>) (CVPR'2016)</td>
     <td></td>
     <td></td>
     <td></td>
@@ -206,5 +209,16 @@ PaddleVideo is a video model development kit produced by [PaddlePaddle Official]
     - [How to mention PR](./docs/zh-CN/contribute/how_to_contribute.md)
 
 
-## Tournament Support
+## Competition
+
+- [Figure skating action recoginition using skeleton based on PaddlePaddle](https://aistudio.baidu.com/aistudio/competition/detail/115/0/introduction), [AI Studio projects](https://aistudio.baidu.com/aistudio/projectdetail/2417717), [video course](https://www.bilibili.com/video/BV1w3411172G)
+- [Table tennis action proposal localization based on PaddlePaddle](https://aistudio.baidu.com/aistudio/competition/detail/127/0/introduction)
 - [CCKS 2021: Knowledge Augmented Video Semantic Understanding](https://www.biendata.xyz/competition/ccks_2021_videounde)
+
+## License
+
+PaddleVideo is released under the [Apache 2.0 license](LICENSE).
+
+
+## Thanks
+- Many thanks to [mohui37](https://github.com/mohui37)、[zephyr-fun](https://github.com/zephyr-fun)、[voipchina](https://github.com/voipchina) for contributing the code for prediction.
