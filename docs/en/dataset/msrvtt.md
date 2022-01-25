@@ -20,7 +20,7 @@ MSR-VTT(Microsoft Research Video to Text) is a large-scale dataset containing vi
 
 For ease of use, we provided extracted features of video.
 
-First, make sure to enter the following command in the `data` directory to download the dataset.
+First, make sure to enter the following command in the `applications/T2VLAD/data` directory to download the dataset.
 
 ```bash
 bash download_features.sh
