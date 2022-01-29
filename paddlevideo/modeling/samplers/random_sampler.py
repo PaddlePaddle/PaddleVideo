@@ -36,7 +36,7 @@ class SamplingResult():
 
         if gt_bboxes.numel().numpy()[0] == 0:
             assert self.pos_assigned_gt_inds.numel() == 0
-            self.pos_gt_bboxes = torch.empty_like(gt_bboxes).view(-1, 4)
+            self.pos_gt_bboxes = paddle.empty_like(gt_bboxes).view(-1, 4)
         else:
             if len(gt_bboxes.shape) < 2:
                 gt_bboxes = gt_bboxes.view(-1, 4)
