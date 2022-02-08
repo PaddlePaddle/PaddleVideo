@@ -22,6 +22,13 @@ import cv2
 
 from ..registry import PIPELINES
 
+try:
+    import cPickle as pickle
+    from cStringIO import StringIO
+except ImportError:
+    import pickle
+    from io import BytesIO
+
 
 @PIPELINES.register()
 class Sampler(object):
@@ -287,3 +294,77 @@ class Sampler(object):
                 raise NotImplementedError
 
             return self._get(frames_idx, results)
+
+
+@PIPELINES.register()
+class SamplerPkl(object):
+    """
+    Sample frames id.
+    NOTE: Use PIL to read image here, has diff with CV2
+    Args:
+        num_seg(int): number of segments.
+        seg_len(int): number of sampled frames in each segment.
+        mode(str): 'train', 'valid'
+    Returns:
+        frames_idx: the index of sampled #frames.
+    """
+    def __init__(self, num_seg, seg_len, backend='pillow', valid_mode=False):
+        self.num_seg = num_seg
+        self.seg_len = seg_len
+        self.valid_mode = valid_mode
+        self.backend = backend
+
+    def _get(self, buf):
+        if isinstance(buf, str):
+            img = Image.open(StringIO(buf))
+        else:
+            img = Image.open(BytesIO(buf))
+        img = img.convert('RGB')
+        if self.backend != 'pillow':
+            img = np.array(img)
+        return img
+
+    def __call__(self, results):
+        """
+        Args:
+            frames_len: length of frames.
+        return:
+            sampling id.
+        """
+        filename = results['frame_dir']
+        data_loaded = pickle.load(open(filename, 'rb'), encoding='bytes')
+        video_name, label, frames = data_loaded
+        if isinstance(label, dict):
+            label = label['动作类型']
+        results['frames_len'] = len(frames)
+        results['labels'] = label
+        frames_len = results['frames_len']
+        average_dur = int(int(frames_len) / self.num_seg)
+        imgs = []
+        for i in range(self.num_seg):
+            idx = 0
+            if not self.valid_mode:
+                if average_dur >= self.seg_len:
+                    idx = random.randint(0, average_dur - self.seg_len)
+                    idx += i * average_dur
+                elif average_dur >= 1:
+                    idx += i * average_dur
+                else:
+                    idx = i
+            else:
+                if average_dur >= self.seg_len:
+                    idx = (average_dur - 1) // 2
+                    idx += i * average_dur
+                elif average_dur >= 1:
+                    idx += i * average_dur
+                else:
+                    idx = i
+
+            for jj in range(idx, idx + self.seg_len):
+                imgbuf = frames[int(jj % results['frames_len'])]
+                img = self._get(imgbuf)
+                imgs.append(img)
+        results['backend'] = self.backend
+        results['imgs'] = imgs
+
+        return results

@@ -3,7 +3,6 @@ MODEL: #MODEL field
     backbone: #Mandatory, indicate the type of backbone, associate to the 'paddlevideo/modeling/backbones/' .
         name: "SwinTransformer3D" #Mandatory, The name of backbone.
         pretrained: "data/SwinTransformer_imagenet.pdparams" #Optional, pretrained model path.
-        num_seg: 32 # tell test program model's num_seg
         patch_size: [2, 4, 4]
         embed_dim: 128
         depths: [2, 2, 18, 2]
@@ -164,7 +163,9 @@ GRADIENT_ACCUMULATION:
 
 INFERENCE:
     name: 'VideoSwin_Inference_helper'
-    num_seg: 32
+    num_seg: 1
+    seg_len: 32
+    short_size: 256
     target_size: 224
 
 model_name: "VideoSwin"

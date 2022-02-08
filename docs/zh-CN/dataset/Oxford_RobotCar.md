@@ -59,6 +59,7 @@
     ```
     附原始未处理数据下载地址：
     ```shell
+    # 白天数据
     https://videotag.bj.bcebos.com/Data/original-ADDS/day_train_all.7z.001
     https://videotag.bj.bcebos.com/Data/original-ADDS/day_train_all.7z.002
     https://videotag.bj.bcebos.com/Data/original-ADDS/day_train_all.7z.003
@@ -70,6 +71,9 @@
     https://videotag.bj.bcebos.com/Data/original-ADDS/day_train_all.7z.009
     https://videotag.bj.bcebos.com/Data/original-ADDS/day_train_all.7z.010
     https://videotag.bj.bcebos.com/Data/original-ADDS/day_train_all.7z.011
+    https://videotag.bj.bcebos.com/Data/original-ADDS/day_train_all.7z.012
+
+    # 夜晚数据
     https://videotag.bj.bcebos.com/Data/original-ADDS/night_train_all.7z.001
     https://videotag.bj.bcebos.com/Data/original-ADDS/night_train_all.7z.002
     https://videotag.bj.bcebos.com/Data/original-ADDS/night_train_all.7z.003
@@ -80,6 +84,11 @@
     https://videotag.bj.bcebos.com/Data/original-ADDS/night_train_all.7z.008
     https://videotag.bj.bcebos.com/Data/original-ADDS/night_train_all.7z.009
     https://videotag.bj.bcebos.com/Data/original-ADDS/night_train_all.7z.010
+    https://videotag.bj.bcebos.com/Data/original-ADDS/night_train_all.7z.011
+    https://videotag.bj.bcebos.com/Data/original-ADDS/night_train_all.7z.012
+    https://videotag.bj.bcebos.com/Data/original-ADDS/night_train_all.7z.013
+    https://videotag.bj.bcebos.com/Data/original-ADDS/night_train_all.7z.014
+    https://videotag.bj.bcebos.com/Data/original-ADDS/night_train_all.7z.015
     ```
 ## 数据预处理
 

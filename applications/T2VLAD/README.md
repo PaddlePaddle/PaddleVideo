@@ -22,7 +22,7 @@ T2VLAD是百度在CVPR2021提出的文本视频检索模型。文本视频检索
 
 ## 数据准备
 
-MSR-VTT数据下载及准备请参考 [MSR-VTT数据准备](./docs/dataset.md)
+MSR-VTT数据下载及准备请参考 [MSR-VTT数据准备](../../docs/zh-CN/dataset/msrvtt.md)
 
 ## 模型训练
 
@@ -67,4 +67,3 @@ Video $\rightarrow$ Text
 
 - [T2VLAD: Global-Local Sequence Alignment for Text-Video Retrieval
 ](https://arxiv.org/pdf/2104.10054.pdf), Xiaohan Wang, Linchao Zhu, Yi Yang
-

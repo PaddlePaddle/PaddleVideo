@@ -84,10 +84,4 @@ pip install paddlevideo==0.0.1
 ppvideo --model_name='ppTSM' --video_file='data/example.avi'
 ```
 
-python安装包更多使用方法参考[paddlevideo包使用教程](./whl_zh.md)。
-
 ---
-
-**从Docker安装PaddleVideo**
-
-安装我们提供的Docker运行环境来体验PaddleVideo，coming soon！
