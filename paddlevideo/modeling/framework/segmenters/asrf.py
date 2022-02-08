@@ -14,6 +14,7 @@ from ...registry import SEGMENTERS
 from .base import BaseSegmenter
 
 import paddle
+import paddle.nn.functional as F
 from .utils import ASRFPostProcessing
 
 
@@ -90,6 +91,7 @@ class ASRF(BaseSegmenter):
         outputs_dict = dict()
         outputs_dict['loss'] = output_loss
         outputs_dict['predict'] = predicted[0, :]
+        outputs_dict['output_np'] = F.sigmoid(outputs_cls[-1])
         return outputs_dict
 
     def test_step(self, data_batch):
@@ -97,6 +99,7 @@ class ASRF(BaseSegmenter):
         """
         feature, _, _ = data_batch
 
+        outputs_dict = dict()
         # call forward
         outputs_cls, outputs_boundary = self.forward_net(feature)
         # transfer data
@@ -106,7 +109,9 @@ class ASRF(BaseSegmenter):
         # predict post process
         predicted = ASRFPostProcessing(outputs_cls_np, outputs_boundary_np,
                                        self.postprocessing_method)
-        return predicted[0, :]
+        outputs_dict['predict'] = paddle.to_tensor(predicted[0, :])
+        outputs_dict['output_np'] = F.sigmoid(outputs_cls[-1])
+        return outputs_dict
 
     def infer_step(self, data_batch):
         """Infering setp.
@@ -116,8 +121,11 @@ class ASRF(BaseSegmenter):
         # call forward
         outputs_cls, outputs_boundary = self.forward_net(feature)
         # transfer data
-        outputs_cls_np = outputs_cls[-1].numpy()
-        outputs_boundary_np = outputs_boundary[-1].numpy()
+        outputs_cls_np = outputs_cls[-1]
+        outputs_boundary_np = outputs_boundary[-1]
 
-        outputs = [outputs_cls_np, outputs_boundary_np]
+        outputs = [
+            outputs_cls_np, outputs_boundary_np,
+            F.sigmoid(outputs_cls[-1])
+        ]
         return outputs

@@ -38,7 +38,9 @@ class GaussianSmoothing(nn.Layer):
         # The gaussian kernel is the product of the
         # gaussian function of each dimension.
         kernel = 1
-        meshgrid = paddle.meshgrid(paddle.arange(kernel_size))[0].float()
+        meshgrid = paddle.arange(kernel_size)
+
+        meshgrid = paddle.cast(meshgrid, dtype='float32')
 
         mean = (kernel_size - 1) / 2
         kernel = kernel / (sigma * math.sqrt(2 * math.pi))
@@ -47,7 +49,7 @@ class GaussianSmoothing(nn.Layer):
         # Make sure sum of values in gaussian kernel equals 1.
         # kernel = kernel / paddle.max(kernel)
 
-        self.kernel = kernel.view(1, 1, *kernel.size())
+        self.kernel = paddle.reshape(kernel, [1, 1, -1])
 
     def forward(self, inputs):
         """
@@ -58,13 +60,13 @@ class GaussianSmoothing(nn.Layer):
             filtered (paddle.Tensor): Filtered output.
         """
         _, c, _ = inputs.shape
-        inputs = F.pad(
-            inputs,
-            pad=((self.kernel_size - 1) // 2, (self.kernel_size - 1) // 2),
-            mode="reflect",
-        )
-        kernel = self.kernel.repeat(c, *[1] * (self.kernel.dim() - 1)).to(
-            inputs.device)
+        inputs = F.pad(inputs,
+                       pad=((self.kernel_size - 1) // 2,
+                            (self.kernel_size - 1) // 2),
+                       mode="reflect",
+                       data_format='NCL')
+
+        kernel = paddle.expand(self.kernel, shape=[c, 1, self.kernel_size])
         return F.conv1d(inputs, weight=kernel, groups=c)
 
 

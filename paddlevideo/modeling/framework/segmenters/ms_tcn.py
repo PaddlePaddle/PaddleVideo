@@ -14,6 +14,7 @@ from ...registry import SEGMENTERS
 from .base import BaseSegmenter
 
 import paddle
+import paddle.nn.functional as F
 
 
 @SEGMENTERS.register()
@@ -67,7 +68,7 @@ class MSTCN(BaseSegmenter):
         outputs_dict = dict()
         outputs_dict['loss'] = loss
         outputs_dict['predict'] = predicted
-        outputs_dict['output_np'] = output[-1]
+        outputs_dict['output_np'] = F.sigmoid(output[-1])
         return outputs_dict
 
     def test_step(self, data_batch):
@@ -81,7 +82,7 @@ class MSTCN(BaseSegmenter):
         predicted = paddle.argmax(output[-1], axis=1)
         predicted = paddle.squeeze(predicted)
         outputs_dict['predict'] = predicted
-        outputs_dict['output_np'] = output[-1]
+        outputs_dict['output_np'] = F.sigmoid(output[-1])
         return outputs_dict
 
     def infer_step(self, data_batch):
@@ -93,4 +94,5 @@ class MSTCN(BaseSegmenter):
         output = self.forward_net(video_feat)
         predicted = paddle.argmax(output[-1], axis=1)
         predicted = paddle.squeeze(predicted)
-        return predicted, output[-1]
+        output_np = F.sigmoid(output[-1])
+        return predicted, output_np

@@ -1,11 +1,3 @@
-'''
-Author: Thyssen Wen
-Date: 2022-01-10 15:57:12
-LastEditors: Thyssen Wen
-LastEditTime: 2022-01-11 10:15:13
-Description: file content
-FilePath: \TAS\transform_label.py
-'''
 import json
 import numpy as np
 import argparse
@@ -26,8 +18,9 @@ def generate_mapping_list_txt(action_dict, out_path):
     f.close()
 
 
-def segmentation_convert_localization_label(prefix_data_path, out_path, action_dict, fps):
-    label_path = os.path.join(prefix_data_path, "groundTruth")
+def segmentation_convert_localization_label(prefix_data_path, out_path,
+                                            action_dict, fps):
+    label_path = os.path.join(prefix_data_path)
     label_txt_name_list = os.listdir(label_path)
 
     labels_dict = {}
@@ -36,12 +29,12 @@ def segmentation_convert_localization_label(prefix_data_path, out_path, action_d
     for label_name in tqdm(label_txt_name_list, desc='label convert:'):
         label_dict = {}
         label_dict["url"] = label_name.split(".")[0] + ".mp4"
-        label_txt_path = os.path.join(prefix_data_path, "groundTruth", label_name)
-        
+        label_txt_path = os.path.join(prefix_data_path, label_name)
+
         with open(label_txt_path, "r", encoding='utf-8') as f:
             gt = f.read().split("\n")[:-1]
         label_dict["total_frames"] = len(gt)
-        
+
         boundary_index_list = [0]
         before_action_name = gt[0]
         for index in range(1, len(gt)):
@@ -59,15 +52,15 @@ def segmentation_convert_localization_label(prefix_data_path, out_path, action_d
                 label_action_dict["label_names"] = action_name
                 label_action_dict["start_id"] = start_sec
                 label_action_dict["end_id"] = end_sec
-                label_action_dict["label_ids"] = action_id
+                label_action_dict["label_ids"] = [action_id]
                 actions_list.append(label_action_dict)
-        
+
         label_dict["actions"] = actions_list
         labels_list.append(label_dict)
     labels_dict["gts"] = labels_list
     output_path = os.path.join(out_path, "output.json")
-    f=open(output_path,"w", encoding='utf-8')
-    f.write(json.dumps(labels_dict, indent = 4))
+    f = open(output_path, "w", encoding='utf-8')
+    f.write(json.dumps(labels_dict, indent=4))
     f.close()
 
 
@@ -126,13 +119,13 @@ def localization_convert_segmentation_label(label, prefix_data_path, out_path):
                 seg_label[start_index:end_index] = label_name * (end_index -
                                                                  start_index)
             elif start_index < num_feture - 1:
-                seg_label[start_index:] = label_name * (end_index - start_index)
+                seg_label[start_index:] = label_name * (num_feture -
+                                                        start_index)
             else:
                 pass
 
         if len(seg_label) != num_feture:
             seg_label = seg_label[:num_feture]
-
         out_txt_file_path = os.path.join(out_path, "groundTruth",
                                          video_name + ".txt")
         str = '\n'

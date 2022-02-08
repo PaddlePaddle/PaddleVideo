@@ -12,7 +12,6 @@
 
 import numpy as np
 import argparse
-import paddle.nn.functional as F
 import pandas as pd
 
 from .registry import METRIC
@@ -146,7 +145,7 @@ def f_score(recognized, ground_truth, overlap, bg_class=["background", "None"]):
     return float(tp), float(fp), float(fn)
 
 
-def boundary_AR(pred_boundary, gt_boundary, overlap_list, max_proposal=100):
+def boundary_AR(pred_boundary, gt_boundary, overlap_list, max_proposal):
 
     p_label, p_start, p_end, p_scores = pred_boundary
     y_label, y_start, y_end, _ = gt_boundary
@@ -166,9 +165,11 @@ def boundary_AR(pred_boundary, gt_boundary, overlap_list, max_proposal=100):
     p_scores = list(pdf["scores"])
 
     # refine AN
-    if len(p_label) < max_proposal:
+    if len(p_label) < max_proposal and len(p_label) > 0:
         p_label = p_label + [p_label[-1]] * (max_proposal - len(p_label))
         p_start = p_start + [p_start[-1]] * (max_proposal - len(p_start))
+        p_start = p_start + p_start[len(p_start) -
+                                    (max_proposal - len(p_start)):]
         p_end = p_end + [p_end[-1]] * (max_proposal - len(p_end))
         p_scores = p_scores + [p_scores[-1]] * (max_proposal - len(p_scores))
     elif len(p_label) > max_proposal:
@@ -191,8 +192,7 @@ def boundary_AR(pred_boundary, gt_boundary, overlap_list, max_proposal=100):
                 p_start[j], y_start)
             union = np.maximum(p_end[j], y_end) - np.minimum(
                 p_start[j], y_start)
-            IoU = (1.0 * intersection / union) * (
-                [p_label[j] == y_label[x] for x in range(len(y_label))])
+            IoU = (1.0 * intersection / union)
             # Get the best scoring segment
             idx = np.array(IoU).argmax()
 
@@ -258,7 +258,7 @@ class SegmentationMetric(BaseMetric):
         groundTruth = data[1]
 
         predicted = outputs['predict']
-        output_np = F.sigmoid(outputs['output_np'])
+        output_np = outputs['output_np']
 
         outputs_np = predicted.numpy()
         outputs_arr = output_np.numpy()[0, :]
@@ -320,7 +320,7 @@ class SegmentationMetric(BaseMetric):
             AR = boundary_AR(pred_boundary,
                              gt_boundary,
                              self.overlap,
-                             max_proposal=AN)
+                             max_proposal=(AN + 1))
             self.AR_at_AN[AN].append(AR)
 
     def accumulate(self):
@@ -341,11 +341,10 @@ class SegmentationMetric(BaseMetric):
 
         # proposal metric
         proposal_AUC = np.array(self.AR_at_AN) * 100
-        print(proposal_AUC.shape)
         AUC = np.mean(proposal_AUC)
-        AR_at_AN1 = np.mean(proposal_AUC[0, :]) * 100
-        AR_at_AN5 = np.mean(proposal_AUC[4, :]) * 100
-        AR_at_AN15 = np.mean(proposal_AUC[14, :]) * 100
+        AR_at_AN1 = np.mean(proposal_AUC[0, :])
+        AR_at_AN5 = np.mean(proposal_AUC[4, :])
+        AR_at_AN15 = np.mean(proposal_AUC[14, :])
 
         # log metric
         log_mertic_info = "dataset model performence: "
