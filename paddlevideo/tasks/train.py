@@ -98,7 +98,7 @@ def train_model(cfg,
         model = paddle.DataParallel(model)
 
     if use_fleet:
-        model = paddle.distributed_model(model)
+        model = fleet.distributed_model(model)
 
     # 2. Construct dataset and dataloader
     train_dataset = build_dataset((cfg.DATASET.train, cfg.PIPELINE.train))
