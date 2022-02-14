@@ -18,7 +18,7 @@ from paddle.fluid import ParamAttr
 
 import logging
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('LSTM')
 
 def is_parameter(var):
     """is_parameter"""
@@ -294,8 +294,8 @@ class ActionNet:
         self.loss_iou_ = fluid.layers.scale(sum_cost_iou, scale=self.num_gpus, bias_after_scale=False)
         alpha = 10
         self.loss_ = self.loss_cls_ + alpha * self.loss_iou_
+        #self.loss_ = self.loss_cls_
         return self.loss_
-
 
     def outputs(self):
         """outputs"""

@@ -42,6 +42,10 @@
 datasets/EuroCup2016/label_cls8_train.json
 datasets/EuroCup2016/label_cls8_val.json
 ```
+下载数据集：
+```
+cd datasets/EuroCup2016 && sh download_dataset.sh
+```
 
 - 数据集gts处理, 将原始标注数据处理成如下json格式
 ```
@@ -88,11 +92,6 @@ cd datasets/script && python get_frames_pcm.py
 - image 采样频率fps=5，如果有些动作时间较短，可以适当提高采样频率
 - BMN windows=200，即40s，所以测试自己的数据时，视频时长需大于40s
 
-### 基础镜像
-```
-docker pull tmtalgo/paddleaction:action-detection-v2
-```
-
 ### 代码结构
 ```
 |-- root_dir
@@ -121,12 +120,12 @@ docker pull tmtalgo/paddleaction:action-detection-v2
     |--  train_lstm.sh             # lstm训练启动脚本
 ```
 
-### step1 ppTSM训练
+### step1 PP-TSM训练
 
-#### step1.1  ppTSM 训练数据处理
-由frames结合gts生成训练所需要的正负样本
+#### step1.1  PP-TSM 训练数据处理
+由frames结合gts生成训练所需要的正负样本。注意按照实际路径更新python文件中的 `data_dir`
 ```
-cd datasets/script && python get_instance_for_tsn.py
+cd datasets/script && python get_instance_for_pptsm.py
 
 # 文件名按照如下格式
 '{}_{}_{}_{}'.format(video_basename, start_id, end_id, label)
@@ -135,14 +134,15 @@ cd datasets/script && python get_instance_for_tsn.py
 ```
    |--  datasets                   # 训练数据集和处理脚本
         |--  EuroCup2016           # xx数据集
-            |--  input_for_tsn     # tsn/tsm训练的数据
+            |--  input_for_pptsm     # pptsm训练的数据
 ```
 
-#### step1.2 ppTSM模型训练
+#### step1.2 PP-TSM模型训练
 我们提供了足球数据训练的模型，参考checkpoints
 如果需要在自己的数据上训练，可参考
 https://github.com/PaddlePaddle/PaddleVideo/tree/release/2.0
 config.yaml参考configs文件夹下pptsm_football_v2.0.yaml
+注意更换config文件中的file_path
 ```
 # https://github.com/PaddlePaddle/PaddleVideo/tree/release/2.0
 cd ${PaddleVideo}
@@ -156,16 +156,28 @@ python -B -m paddle.distributed.launch \
 ```
 
 #### step1.3 ppTSM模型转为预测模式
+在转为预测模式前，需要修改 `PaddleVideo/paddlevideo/modeling/framework/recognizers/recognizer2d.py` 文件，将 infer_step 函数更新为如下代码：
+```python
+def infer_step(self, data_batch):
+        """Define how the model is going to test, from input to output."""
+        imgs = data_batch[0]
+        imgs = paddle.reshape_(imgs, [-1] + list(imgs.shape[2:]))
+        feature = self.backbone(imgs)
+        feat = self.avgpool2d(feature)
+        return feat
 ```
-# https://github.com/PaddlePaddle/PaddleVideo/tree/release/2.0
+再执行如下命令：
+
+```
 cd ${PaddleVideo}
 python tools/export_model.py -c ${FootballAcation}/train_proposal/configs/pptsm_football_v2.0.yaml \
-                               -p ${pptsm_train_dir}/checkpoints/models_pptsm/ppTSM_epoch_00057.pdparams \
+                               -p ${pptsm_train_dir}/checkpoints/ppTSM_best.pdparams \
                                -o {FootballAcation}/checkpoints/ppTSM
 ```
 
 ####  step1.4  基于ppTSM的视频特征提取
-image and audio特征提取，保存到datasets features文件夹下
+image and audio特征提取，保存到datasets features文件夹下。注意更改python文件中 dataset_dir 的路径，以及configs.yaml文件下的模型路径。
+
 ```
 cd ${FootballAcation}
 cd extractor && python extract_feat.py
@@ -222,7 +234,7 @@ cd datasets/script && python get_instance_for_bmn.py
 我们同样提供了足球数据训练的模型，参考checkpoints
 如果要在自己的数据上训练，步骤与step1.2 ppTSM 训练相似，可参考
 https://github.com/PaddlePaddle/PaddleVideo/tree/release/2.0
-config.yaml参考configs文件夹下bmn_football_v2.0.yaml
+config.yaml参考configs文件夹下bmn_football_v2.0.yaml。训练前需更改config文件，配置好路径及其他参数。
 ```
 # https://github.com/PaddlePaddle/PaddleVideo/tree/release/2.0
 cd ${PaddleVideo}
@@ -240,13 +252,13 @@ python -B -m paddle.distributed.launch \
 ```
 # https://github.com/PaddlePaddle/PaddleVideo/tree/release/2.0
 $cd {PaddleVideo}
-python tools/export_model.py -c ${FootballAcation}/train_proposal/configs/bmn_football_v2.yaml \
+python tools/export_model.py -c ${FootballAcation}/train_proposal/configs/bmn_football_v2.0.yaml \
                                -p ${bmn_train_dir}/checkpoints/models_bmn/bmn_epoch16.pdparams \
-                               -o {FootballAcation}/checkpoints/ppTSM
+                               -o {FootballAcation}/checkpoints/BMN
 ```
 
 #### step2.4  BMN模型预测
-得到动作proposal信息： start_id, end_id, score
+得到动作proposal信息： start_id, end_id, score。预测前需先修改文件中的dataset_dir 以及configs.yaml文件下的模型路径。
 ```
 cd extractor && python extract_bmn.py
 # 数据格式
@@ -282,7 +294,7 @@ cd extractor && python extract_bmn.py
 ### step3 LSTM训练
 
 #### step3.1  LSTM训练数据处理
-将BMN得到的proposal截断并处理成LSTM训练所需数据集
+将BMN得到的proposal截断并处理成LSTM训练所需数据集。同理，注意数据集文件修改路径。
 ```
 cd datasets/script && python get_instance_for_lstm.py
 # 数据格式1，label_info
@@ -334,15 +346,18 @@ cd datasets/script && python get_instance_for_lstm.py
 
 #### step3.2  LSTM训练
 ```
-sh run.sh	# LSTM 模块
+python -u scenario_lib/train.py  \
+    --model_name=ActionNet \
+    --config=conf/conf.txt \
+    --save_dir=$save_dir
+    --log_interval=5 \
+    --valid_interval=1
 ```
 
 #### step3.3 LSTM模型转为预测模式
 ```
-${FootballAction}
-python tools/export_model.py -c ${FootballAction}/train_lstm/conf/conf.yaml \
-                               -p ${lstm_train_dir}/checkpoints/models_lstm/bmn_epoch29.pdparams \
-                               -o {FootballAction}/checkpoints/LSTM
+${FootballAction}/train_lstm
+python inference_model.py --config=conf/conf.yaml --weights=$weight_path/LSTM.pdparams --save_dir=$save_dir
 ```
 
 ## 模型推理

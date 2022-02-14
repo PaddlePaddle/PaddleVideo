@@ -14,7 +14,7 @@ sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding = 'utf-8')
 
 dataset = "/home/work/datasets"
 
-label_index_file = './configs/index_label_football_7.json'
+label_index_file = './configs/index_label_football_8.json'
 eval_datasets = ['EuroCup2016']
 label_files = {'train': 'label_cls8_train.json',
                'validation': 'label_cls8_val.json'}

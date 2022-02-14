@@ -80,9 +80,9 @@ def gen_gts_for_bmn(gts_data):
                     'actions':
                     root_actions
                 })
-    #with open('temp.json', 'w', encoding='utf-8') as f:
-    #   data = json.dumps(gts_bmn, indent=4)
-    #   f.write(data)
+    with open('temp.json', 'w', encoding='utf-8') as f:
+       data = json.dumps(gts_bmn, indent=4)
+       f.write(data)
 
     return gts_bmn
 
@@ -130,8 +130,8 @@ def combile_gts(gts_bmn, gts_process, mode):
                 before_id = segment['before_id']
                 after_id = segment['after_id']
                 actions = segment['actions']
-                box0 = max(actions[-1]['end_id'] - bmn_window, before_id)
-                box1 = min(actions[0]['start_id'], after_id - bmn_window)
+                box0 = int(max(actions[-1]['end_id'] - bmn_window, before_id))
+                box1 = int(min(actions[0]['start_id'], after_id - bmn_window))
                 if box0 <= box1:
                     cur_start = random.randint(box0, box1)
                     cur_end = cur_start + bmn_window
@@ -173,22 +173,38 @@ def save_feature_to_numpy(gts_bmn, folder):
             'start': int(start_id),
             'end': int(end_id)
         })
+
     for item, values in process_gts_bmn.items():
         feat_path = os.path.join(feat_dir, item + '.pkl')
         print(feat_path)
+        feature = pickle.load(open(feat_path, 'rb'))
+        image_feature = feature['image_feature']
+        pcm_feature = feature['pcm_feature']
+
+        pcm_feature = pcm_feature.reshape((pcm_feature.shape[0] * 5, 640))
+        min_length = min(image_feature.shape[0], pcm_feature.shape[0])
+        if min_length == 0:
+            continue
+        image_feature = image_feature[:min_length, :]
+        pcm_feature = pcm_feature[:min_length, :]
+        feature_video = np.concatenate((image_feature, pcm_feature), axis=1)
         #feature_video = pickle.load(open(feat_path, 'rb'))['features']
-        feature_video = pickle.load(open(feat_path, 'rb'))['image_feature']
+        #feature_video = pickle.load(open(feat_path, 'rb'))['image_feature']
         for value in values:
             save_cut_name = os.path.join(folder, value['name'])
-            start_frame = (value['start'] - 1) * fps
-            end_frame = (value['end'] - 1) * fps
+            #start_frame = (value['start'] - 1) * fps
+            #end_frame = (value['end'] - 1) * fps
+            start_frame = (value['start']) * fps
+            end_frame = (value['end']) * fps
             if end_frame > len(feature_video):
+                del gts_bmn[value['name']]
                 continue
             feature_cut = [
                 feature_video[i] for i in range(start_frame, end_frame)
             ]
             np_feature_cut = np.array(feature_cut, dtype=np.float32)
             np.save(save_cut_name, np_feature_cut)
+    return gts_bmn
 
 
 if __name__ == "__main__":
@@ -200,9 +216,9 @@ if __name__ == "__main__":
         gts_data = json.load(open(label_file, 'rb'))
         gts_process = gen_gts_for_bmn(gts_data)
         gts_bmn = combile_gts(gts_bmn, gts_process, item)
+    
+    gts_bmn = save_feature_to_numpy(gts_bmn, out_dir + '/feature')
 
     with open(out_dir + '/label.json', 'w', encoding='utf-8') as f:
         data = json.dumps(gts_bmn, indent=4, ensure_ascii=False)
         f.write(data)
-
-    save_feature_to_numpy(gts_bmn, out_dir + '/feature')
