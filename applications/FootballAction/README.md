@@ -92,6 +92,9 @@ cd datasets/script && python get_frames_pcm.py
 - image 采样频率fps=5，如果有些动作时间较短，可以适当提高采样频率
 - BMN windows=200，即40s，所以测试自己的数据时，视频时长需大于40s
 
+### 基础镜像
+docker pull tmtalgo/paddleaction:action-detection-v2
+
 ### 代码结构
 ```
 |-- root_dir
@@ -156,8 +159,13 @@ python -B -m paddle.distributed.launch \
 ```
 
 #### step1.3 ppTSM模型转为预测模式
-在转为预测模式前，需要修改 `PaddleVideo/paddlevideo/modeling/framework/recognizers/recognizer2d.py` 文件，将 infer_step 函数更新为如下代码：
+在转为预测模式前，需要修改 `PaddleVideo/paddlevideo/modeling/framework/recognizers/recognizer2d.py` 文件，将 init 和 infer_step 函数分别更新为如下代码：
+
 ```python
+def __init__(self, backbone=None, head=None):
+        super().__init__(backbone=backbone, head=head)
+        self.avgpool2d = paddle.nn.AdaptiveAvgPool2D((1, 1), data_format='NCHW')
+
 def infer_step(self, data_batch):
         """Define how the model is going to test, from input to output."""
         imgs = data_batch[0]
