@@ -118,7 +118,6 @@ output_dir/
 # IDE
 .vscode
 .idea
-analysis
 
 # model output
 output
