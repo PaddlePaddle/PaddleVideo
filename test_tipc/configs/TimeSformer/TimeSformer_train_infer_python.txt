@@ -6,7 +6,7 @@ Global.use_gpu:null|null
 Global.auto_cast:null
 -o epochs:2
 null:null
-DATASET.batch_size:null
+-o DATASET.batch_size:null
 -o MODEL.backbone.pretrained:'data/ViT_base_patch16_224_pretrained.pdparams'
 train_model_name:null
 train_infer_video_dir:null
@@ -49,3 +49,9 @@ inference:tools/predict.py --config configs/recognition/timesformer/timesformer_
 null:null
 --enable_benchmark:True
 --params_file:inference/TimeSformer/TimeSformer.pdiparams
+===========================train_benchmark_params==========================
+batch_size:1|14
+fp_items:fp32
+epoch:1
+--profiler_options:batch_range=[10,20];state=GPU;tracer_option=Default;profile_path=model.profile
+flags:FLAGS_conv_workspace_size_limit=800
