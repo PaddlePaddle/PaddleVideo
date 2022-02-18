@@ -7,7 +7,7 @@ import numpy as np
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
-dataset_names = ["50salads", "breakfast", "gtea", "baseball"]
+dataset_names = ["50salads", "breakfast", "gtea"]
 
 
 def get_class2id_map(dataset: str,
