@@ -78,7 +78,7 @@ def KaimingUniform_like_torch(weight_npy,
 
 
 def init_bias(weight_npy, bias_npy):
-    # 注意这里是weight不是bias
+    # attention this weight is not bias
     fan_in, fan_out = _calculate_fan_in_and_fan_out(weight_npy)
     bound = 1.0 / math.sqrt(fan_in)
     return np.random.uniform(-bound, bound, bias_npy.shape)
@@ -152,5 +152,3 @@ class MSTCN(nn.Layer):
                 if layer.bias is not None:
                     layer.bias.set_value(
                         init_bias(layer.weight, layer.bias).astype('float32'))
-                # weight_init_(layer, 'KaimingUniform')
-                # weight_init_(layer, 'Normal', mean=0.0, std=0.02)

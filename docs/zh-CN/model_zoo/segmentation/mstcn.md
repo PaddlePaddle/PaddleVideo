@@ -23,16 +23,16 @@ MS-TCN Overview
 
 ## 数据准备
 
-MS-TCN的训练数据可以选择50salads、breakfast、GTEA三个数据集，数据下载及准备请参考[视频动作分割数据集](../../dataset/SegmentationDataset.md)
+MS-TCN的训练数据可以选择50salads、breakfast、gtea三个数据集，数据下载及准备请参考[视频动作分割数据集](../../dataset/SegmentationDataset.md)
 
 ## 模型训练
 
 数据准备完毕后，可以通过如下方式启动训练：
 
 ```bash
-# GTEA数据集
+# gtea数据集
 export CUDA_VISIBLE_DEVICES=3
-python3.7 main.py  --validate -c configs/segmentation/ms_tcn/ms_tcn_GTEA.yaml
+python3.7 main.py  --validate -c configs/segmentation/ms_tcn/ms_tcn_gtea.yaml
 ```
 
 - 从头开始训练，使用上述启动命令行或者脚本程序即可启动训练，不需要用到预训练模型，视频动作分割模型通常为全卷积网络，由于视频的长度不一，故视频动作分割模型的scr字段通常设为1，即不需要批量训练，目前也仅支持**单样本**训练
@@ -42,7 +42,7 @@ python3.7 main.py  --validate -c configs/segmentation/ms_tcn/ms_tcn_GTEA.yaml
 可通过如下方式进行模型测试：
 
 ```bash
-python main.py  --test -c configs/segmentation/ms_tcn/ms_tcn_GTEA.yaml --weights=./output/MSTCN/MSTCN_epoch_00011.pdparams
+python main.py  --test -c configs/segmentation/ms_tcn/ms_tcn_gtea.yaml --weights=./output/MSTCN/MSTCN_epoch_00011.pdparams
 ```
 
 - 指标的具体实现是参考MS-TCN作者[evel.py](https://github.com/yabufarha/ms-tcn/blob/master/eval.py)提供的测试脚本，计算Acc、Edit和F1分数。
@@ -61,7 +61,7 @@ python main.py  --test -c configs/segmentation/ms_tcn/ms_tcn_GTEA.yaml --weights
 | paper | 80.7% | 67.9% | 76.3% | 74.0% | 64.5% |
 | paddle | 81.1% | 71.5% | 77.9% | 75.5% | 66.5% |
 
-在GTEA数据集下评估精度如下:
+在gtea数据集下评估精度如下:
 
 | Model | Acc | Edit | F1@0.1 | F1@0.25 | F1@0.5 |
 | :---: | :---: | :---: | :---: | :---: | :---: |
@@ -75,7 +75,7 @@ python main.py  --test -c configs/segmentation/ms_tcn/ms_tcn_GTEA.yaml --weights
 
 ```bash
 python3.7 tools/export_model.py \
-    -c configs/segmentation/ms_tcn/ms_tcn_GTEA.yaml \
+    -c configs/segmentation/ms_tcn/ms_tcn_gtea.yaml \
     --p ./output/MSTCN/MSTCN_epoch_00011.pdparams \
     -o ./inference
 ```
@@ -86,7 +86,7 @@ python3.7 tools/export_model.py \
 
 ```bash
 python3.7 tools/predict.py --input_file data/gtea/splits/test.split1.bundle \
-                           --config configs/segmentation/ms_tcn/ms_tcn_GTEA.yaml \
+                           --config configs/segmentation/ms_tcn/ms_tcn_gtea.yaml \
                            --model_file inference/MSTCN.pdmodel \
                            --params_file inference/MSTCN.pdiparams \
                            --use_gpu=True \

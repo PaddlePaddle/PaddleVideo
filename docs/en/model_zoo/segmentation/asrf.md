@@ -23,7 +23,7 @@ MS-TCN Overview
 
 ## Data
 
-ASRF can choose 50salads, breakfast, GTEA as trianing set. Please refer to Video Action Segmentation dataset download and preparation doc [Video Action Segmentation dataset](../../dataset/SegmentationDataset.md)
+ASRF can choose 50salads, breakfast, gtea as trianing set. Please refer to Video Action Segmentation dataset download and preparation doc [Video Action Segmentation dataset](../../dataset/SegmentationDataset.md)
 
 Unlike MS-TCN, ASRF model requires additional data construction. The script process is as follows
 ```bash
@@ -35,9 +35,9 @@ python data/prepare_asrf_data.py --dataset_dir data/
 After prepare dataset, we can run sprits.
 
 ```bash
-# GTEA dataset
+# gtea dataset
 export CUDA_VISIBLE_DEVICES=3
-python3.7 main.py  --validate -c configs/segmentation/asrf/asrf_GTEA.yaml
+python3.7 main.py  --validate -c configs/segmentation/asrf/asrf_gtea.yaml
 ```
 
 - Start the training by using the above command line or script program. There is no need to use the pre training model. The video action segmentation model is usually a full convolution network. Due to the different lengths of videos, the `DATASET.batch_size` of the video action segmentation model is usually set to `1`, that is, batch training is not required. At present, only **single sample** training is supported.
@@ -47,7 +47,7 @@ python3.7 main.py  --validate -c configs/segmentation/asrf/asrf_GTEA.yaml
 Test MS-TCN on dataset scripts:
 
 ```bash
-python main.py  --test -c configs/segmentation/asrf/asrf_GTEA.yaml --weights=./output/ASRF/ASRF_epoch_00001.pdparams
+python main.py  --test -c configs/segmentation/asrf/asrf_gtea.yaml --weights=./output/ASRF/ASRF_epoch_00001.pdparams
 ```
 
 - The specific implementation of the index is to calculate ACC, edit and F1 scores by referring to the test script[evel.py](https://github.com/yabufarha/ms-tcn/blob/master/eval.py) provided by the author of ms-tcn.
@@ -70,7 +70,7 @@ Accuracy on 50salads dataset:
 | pytorch | 81.4% | 75.6% | 82.7% | 81.2% | 77.2% |
 | paddle | 81.6% | 75.8% | 83.0% | 81.5% | 74.8% |
 
-Accuracy on GTEA dataset:
+Accuracy on gtea dataset:
 
 | Model | Acc | Edit | F1@0.1 | F1@0.25 | F1@0.5 |
 | :---: | :---: | :---: | :---: | :---: | :---: |
@@ -84,7 +84,7 @@ Accuracy on GTEA dataset:
 
 ```bash
 python3.7 tools/export_model.py \
-    -c configs/segmentation/asrf/asrf_GTEA.yaml \
+    -c configs/segmentation/asrf/asrf_gtea.yaml \
     --p ./output/ASRF/ASRF_epoch_00001.pdparams \
     -o ./inference
 ```
@@ -95,7 +95,7 @@ python3.7 tools/export_model.py \
 
 ```bash
 python3.7 tools/predict.py --input_file /workspace/wenwujun/PaddleVideo/data/50salads/features/rgb-01-1.npy \
-                           --config configs/segmentation/asrf/asrf_GTEA.yaml \
+                           --config configs/segmentation/asrf/asrf_gtea.yaml \
                            --model_file inference/ASRF.pdmodel \
                            --params_file inference/ASRF.pdiparams \
                            --use_gpu=True \

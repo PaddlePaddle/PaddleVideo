@@ -23,16 +23,16 @@ MS-TCN Overview
 
 ## Data
 
-MS-TCN can choose 50salads, breakfast, GTEA as trianing set. Please refer to Video Action Segmentation dataset download and preparation doc [Video Action Segmentation dataset](../../dataset/SegmentationDataset.md)
+MS-TCN can choose 50salads, breakfast, gtea as trianing set. Please refer to Video Action Segmentation dataset download and preparation doc [Video Action Segmentation dataset](../../dataset/SegmentationDataset.md)
 
 ## Train
 
 After prepare dataset, we can run sprits.
 
 ```bash
-# GTEA dataset
+# gtea dataset
 export CUDA_VISIBLE_DEVICES=3
-python3.7 main.py  --validate -c configs/segmentation/ms_tcn/ms_tcn_GTEA.yaml
+python3.7 main.py  --validate -c configs/segmentation/ms_tcn/ms_tcn_gtea.yaml
 ```
 
 - Start the training by using the above command line or script program. There is no need to use the pre training model. The video action segmentation model is usually a full convolution network. Due to the different lengths of videos, the `DATASET.batch_size` of the video action segmentation model is usually set to `1`, that is, batch training is not required. At present, only **single sample** training is supported.
@@ -42,7 +42,7 @@ python3.7 main.py  --validate -c configs/segmentation/ms_tcn/ms_tcn_GTEA.yaml
 Test MS-TCN on dataset scripts:
 
 ```bash
-python main.py  --test -c configs/segmentation/ms_tcn/ms_tcn_GTEA.yaml --weights=./output/MSTCN/MSTCN_epoch_00011.pdparams
+python main.py  --test -c configs/segmentation/ms_tcn/ms_tcn_gtea.yaml --weights=./output/MSTCN/MSTCN_epoch_00011.pdparams
 ```
 
 - The specific implementation of the index is to calculate ACC, edit and F1 scores by referring to the test script[evel.py](https://github.com/yabufarha/ms-tcn/blob/master/eval.py) provided by the author of ms-tcn.
@@ -61,7 +61,7 @@ Accuracy on 50salads dataset:
 | paper | 80.7% | 67.9% | 76.3% | 74.0% | 64.5% |
 | paddle | 81.1% | 71.5% | 77.9% | 75.5% | 66.5% |
 
-Accuracy on GTEA dataset:
+Accuracy on gtea dataset:
 
 | Model | Acc | Edit | F1@0.1 | F1@0.25 | F1@0.5 |
 | :---: | :---: | :---: | :---: | :---: | :---: |
@@ -74,7 +74,7 @@ Accuracy on GTEA dataset:
 
 ```bash
 python3.7 tools/export_model.py \
-    -c configs/segmentation/ms_tcn/ms_tcn_GTEA.yaml \
+    -c configs/segmentation/ms_tcn/ms_tcn_gtea.yaml \
     --p ./output/MSTCN/MSTCN_epoch_00011.pdparams \
     -o ./inference
 ```
@@ -85,7 +85,7 @@ python3.7 tools/export_model.py \
 
 ```bash
 python3.7 tools/predict.py --input_file data/example_feat.list \
-                           --config configs/segmentation/ms_tcn/ms_tcn_GTEA.yaml \
+                           --config configs/segmentation/ms_tcn/ms_tcn_gtea.yaml \
                            --model_file inference/MSTCN.pdmodel \
                            --params_file inference/MSTCN.pdiparams \
                            --use_gpu=True \

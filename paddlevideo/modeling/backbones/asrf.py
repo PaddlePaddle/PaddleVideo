@@ -42,12 +42,6 @@ class ASRF(nn.Layer):
         self.num_stages = num_stages
         self.num_layers = num_layers
 
-        self.init_weights()
-
-    def init_weights(self):
-        """
-        initialize model layers' weight
-        """
         # define layers
         self.conv_in = nn.Conv1D(self.in_channel, self.num_features, 1)
 
@@ -57,6 +51,12 @@ class ASRF(nn.Layer):
         ]
         self.shared_layers = nn.LayerList(shared_layers)
 
+        self.init_weights()
+
+    def init_weights(self):
+        """
+        initialize model layers' weight
+        """
         # init weight
         for layer in self.sublayers():
             if isinstance(layer, nn.Conv1D):

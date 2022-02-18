@@ -23,7 +23,7 @@ ASRF Overview
 
 ## 数据准备
 
-ASRF的训练数据可以选择50salads、breakfast、GTEA三个数据集，数据下载及准备请参考[视频动作分割数据集](../../dataset/SegmentationDataset.md)
+ASRF的训练数据可以选择50salads、breakfast、gtea三个数据集，数据下载及准备请参考[视频动作分割数据集](../../dataset/SegmentationDataset.md)
 
 不同于MS-TCN，ASRF模型需要额外的数据构建，脚本流程如下
 ```bash
@@ -35,9 +35,9 @@ python data/prepare_asrf_data.py --dataset_dir data/
 数据准备完毕后，可以通过如下方式启动训练：
 
 ```bash
-# GTEA数据集
+# gtea数据集
 export CUDA_VISIBLE_DEVICES=3
-python3.7 main.py  --validate -c configs/segmentation/asrf/asrf_GTEA.yaml
+python3.7 main.py  --validate -c configs/segmentation/asrf/asrf_gtea.yaml
 ```
 
 - 从头开始训练，使用上述启动命令行或者脚本程序即可启动训练，不需要用到预训练模型，视频动作分割模型通常为全卷积网络，由于视频的长度不一，故视频动作分割模型的scr字段通常设为1，即不需要批量训练，目前也仅支持**单样本**训练
@@ -47,7 +47,7 @@ python3.7 main.py  --validate -c configs/segmentation/asrf/asrf_GTEA.yaml
 可通过如下方式进行模型测试：
 
 ```bash
-python main.py  --test -c configs/segmentation/asrf/asrf_GTEA.yaml --weights=./output/ASRF/ASRF_epoch_00001.pdparams
+python main.py  --test -c configs/segmentation/asrf/asrf_gtea.yaml --weights=./output/ASRF/ASRF_epoch_00001.pdparams
 ```
 
 - 指标的具体实现是参考MS-TCN作者[evel.py](https://github.com/yabufarha/ms-tcn/blob/master/eval.py)提供的测试脚本，计算Acc、Edit和F1分数。
@@ -70,7 +70,7 @@ python main.py  --test -c configs/segmentation/asrf/asrf_GTEA.yaml --weights=./o
 | pytorch | 81.4% | 75.6% | 82.7% | 81.2% | 77.2% |
 | paddle | 81.6% | 75.8% | 83.0% | 81.5% | 74.8% |
 
-在GTEA数据集下评估精度如下:
+在gtea数据集下评估精度如下:
 
 | Model | Acc | Edit | F1@0.1 | F1@0.25 | F1@0.5 |
 | :---: | :---: | :---: | :---: | :---: | :---: |
@@ -85,7 +85,7 @@ python main.py  --test -c configs/segmentation/asrf/asrf_GTEA.yaml --weights=./o
 
 ```bash
 python3.7 tools/export_model.py \
-    -c configs/segmentation/asrf/asrf_GTEA.yaml \
+    -c configs/segmentation/asrf/asrf_gtea.yaml \
     --p ./output/ASRF/ASRF_epoch_00001.pdparams \
     -o ./inference
 ```
@@ -96,7 +96,7 @@ python3.7 tools/export_model.py \
 
 ```bash
 python3.7 tools/predict.py --input_file /workspace/wenwujun/PaddleVideo/data/50salads/features/rgb-01-1.npy \
-                           --config configs/segmentation/asrf/asrf_GTEA.yaml \
+                           --config configs/segmentation/asrf/asrf_gtea.yaml \
                            --model_file inference/ASRF.pdmodel \
                            --params_file inference/ASRF.pdiparams \
                            --use_gpu=True \
