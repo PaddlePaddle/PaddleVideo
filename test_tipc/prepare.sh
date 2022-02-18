@@ -15,13 +15,13 @@ MODE=$2
 
 dataline=$(cat ${FILENAME})
 
-python3.7 -m pip install unrar
+pip install unrar
 
 git clone https://github.com/LDOUBLEV/AutoLog
 cd AutoLog
-python3.7 -m pip install -r requirements.txt
+pip install -r requirements.txt
 python3.7 setup.py bdist_wheel
-python3.7 -m pip install ./dist/auto_log-1.0.0-py3-none-any.whl
+pip install ./dist/auto_log-1.0.0-py3-none-any.whl
 cd ..
 
 # parser params
@@ -94,7 +94,7 @@ if [ ${MODE} = "lite_train_lite_infer" ];then
         ## download & decompression training data
         wget -nc https://videotag.bj.bcebos.com/Data/yt8m_rawframe_small.tar
         tar -xf yt8m_rawframe_small.tar
-        python3.7 -m pip install tensorflow-gpu==1.14.0 -i https://pypi.tuna.tsinghua.edu.cn/simple
+        pip install tensorflow-gpu==1.14.0 -i https://pypi.tuna.tsinghua.edu.cn/simple
         python3.7 tf2pkl.py ./frame ./pkl_frame/
         ls pkl_frame/train*.pkl > train_small.list # 将train*.pkl的路径写入train_small.list
         ls pkl_frame/validate*.pkl > val_small.list # 将validate*.pkl的路径写入val_small.list
@@ -214,7 +214,7 @@ elif [ ${MODE} = "whole_train_whole_infer" ];then
         ## download & decompression training data
         curl data.yt8m.org/download.py | partition=2/frame/train mirror=asia python
         curl data.yt8m.org/download.py | partition=2/frame/validate mirror=asia python
-        python3.7 -m pip install tensorflow-gpu==1.14.0 -i https://pypi.tuna.tsinghua.edu.cn/simple
+        pip install tensorflow-gpu==1.14.0 -i https://pypi.tuna.tsinghua.edu.cn/simple
         cd ..
         python3.7 tf2pkl.py ./frame ./pkl_frame/
         ls pkl_frame/train*.pkl > train.list # 将train*.pkl的路径写入train.list
@@ -309,7 +309,7 @@ elif [ ${MODE} = "lite_train_whole_infer" ];then
         ## download & decompression training data
         wget -nc https://videotag.bj.bcebos.com/Data/yt8m_rawframe_small.tar
         tar -xf yt8m_rawframe_small.tar
-        python3.7 -m pip install tensorflow-gpu==1.14.0 -i https://pypi.tuna.tsinghua.edu.cn/simple
+        pip install tensorflow-gpu==1.14.0 -i https://pypi.tuna.tsinghua.edu.cn/simple
         python3.7 tf2pkl.py ./frame ./pkl_frame/
         ls pkl_frame/train*.pkl > train_small.list # 将train*.pkl的路径写入train_small.list
         ls pkl_frame/validate*.pkl > val_small.list # 将validate*.pkl的路径写入val_small.list
@@ -370,6 +370,63 @@ elif [ ${MODE} = "whole_infer" ];then
     elif [ ${model_name} == "BMN" ]; then
         # download pretrained weights
         wget -nc -P ./data https://videotag.bj.bcebos.com/PaddleVideo/BMN/BMN.pdparams --no-check-certificate
+    else
+        echo "Not added into TIPC yet."
+    fi
+fi
+
+if [ ${MODE} = "benchmark_train" ];then
+    pip install -r requirements.txt  # TODO(hesensen): 之后改回pip
+    if [ ${model_name} == "PP-TSM" ]; then
+        echo "Not added into TIPC yet."
+    elif [ ${model_name} == "PP-TSN" ]; then
+        echo "Not added into TIPC yet."
+    elif [ ${model_name} == "AGCN" ]; then
+        echo "Not added into TIPC yet."
+    elif [ ${model_name} == "STGCN" ]; then
+        echo "Not added into TIPC yet."
+    elif [ ${model_name} == "TSM" ]; then
+        # pretrain lite train data
+        pushd ./data/k400
+        wget -nc https://videotag.bj.bcebos.com/Data/k400_rawframes_small.tar
+        tar -xf k400_rawframes_small.tar
+        popd
+        # download pretrained weights
+        wget -nc -P ./data https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_pretrain.pdparams --no-check-certificate
+    elif [ ${model_name} == "TSN" ]; then
+        # pretrain lite train data
+        pushd ./data/k400
+        wget -nc https://videotag.bj.bcebos.com/Data/k400_rawframes_small.tar
+        tar -xf k400_rawframes_small.tar
+        popd
+        # download pretrained weights
+        wget -nc -P ./data https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_pretrain.pdparams --no-check-certificate
+    elif [ ${model_name} == "TimeSformer" ]; then
+        # pretrain lite train data
+        pushd ./data/k400
+        wget -nc https://videotag.bj.bcebos.com/Data/k400_videos_small.tar
+        tar -xf k400_videos_small.tar
+        popd
+        # download pretrained weights
+        wget -nc -P ./data https://paddle-imagenet-models-name.bj.bcebos.com/dygraph/ViT_base_patch16_224_pretrained.pdparams --no-check-certificate
+    elif [ ${model_name} == "AttentionLSTM" ]; then
+        echo "Not added into TIPC yet."
+    elif [ ${model_name} == "SlowFast" ]; then
+        # pretrain lite train data
+        pushd ./data/k400
+        wget -nc https://videotag.bj.bcebos.com/Data/k400_videos_small.tar
+        tar -xf k400_videos_small.tar
+        popd
+    elif [ ${model_name} == "BMN" ]; then
+        # pretrain lite train data
+        pushd ./data
+        mkdir bmn_data
+        cd bmn_data
+        wget -nc https://paddlemodels.bj.bcebos.com/video_detection/bmn_feat.tar.gz
+        tar -xf bmn_feat.tar.gz
+        wget -nc https://paddlemodels.bj.bcebos.com/video_detection/activitynet_1.3_annotations.json
+        wget -nc https://paddlemodels.bj.bcebos.com/video_detection/activity_net_1_3_new.json
+        popd
     else
         echo "Not added into TIPC yet."
     fi
