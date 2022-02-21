@@ -6,7 +6,7 @@
 
 - 数据集文件树形式
 ```txt
-─── GTEA
+─── gtea
     ├── features
     │   ├── S1_Cheese_C1.npy
     │   ├── S1_Coffee_C1.npy
