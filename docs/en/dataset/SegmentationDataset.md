@@ -6,7 +6,7 @@ The video motion segmentation model uses breakfast, 50salads and gtea data sets.
 
 - Dataset tree
 ```txt
-─── GTEA
+─── gtea
     ├── features
     │   ├── S1_Cheese_C1.npy
     │   ├── S1_Coffee_C1.npy
