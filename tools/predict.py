@@ -24,6 +24,7 @@ from paddlevideo.utils import get_config
 
 
 def parse_args():
+
     def str2bool(v):
         return v.lower() in ("true", "t", "1")
 
@@ -149,7 +150,10 @@ def main():
         output_tensor_list.append(predictor.get_output_handle(item))
 
     # get the absolute file path(s) to be processed
-    files = parse_file_paths(args.input_file)
+    if model_name in ["MSTCN", "ASRF"]:
+        files = InferenceHelper.get_process_file(args.input_file)
+    else:
+        files = parse_file_paths(args.input_file)
 
     if model_name == 'TransNetV2':
         for file in files:
@@ -167,6 +171,7 @@ def main():
 
             # Post process output
             InferenceHelper.postprocess(outputs)
+
     elif model_name == 'AVA_SlowFast_FastRcnn':
         for file in files:  # for videos
             inputs = InferenceHelper.preprocess(file)
@@ -181,7 +186,6 @@ def main():
                     else:
                         input_tmp = input[i]
                     input_tensor_list[i].copy_from_cpu(input_tmp)
-
                 predictor.run()
                 output = []
                 for j in range(len(output_tensor_list)):
@@ -192,7 +196,7 @@ def main():
             InferenceHelper.postprocess(outputs)
     else:
         if args.enable_benchmark:
-            test_video_num = 300
+            test_video_num = 50
             num_warmup = 10
 
             # instantiate auto log

@@ -21,7 +21,6 @@ import paddle.distributed as dist
 import paddle.distributed.fleet as fleet
 from paddlevideo.utils import (add_profiler_step, build_record, get_logger,
                                load, log_batch, log_epoch, mkdir, save)
-
 from ..loader.builder import build_dataloader, build_dataset
 from ..metrics.ava_utils import collect_results_cpu
 from ..modeling.builder import build_model
@@ -261,6 +260,7 @@ def train_model(cfg,
             #single_gpu_test and multi_gpu_test
             for i, data in enumerate(valid_loader):
                 outputs = model(data, mode='valid')
+
                 if cfg.MODEL.framework == "FastRCNN":
                     results.extend(outputs)
 
@@ -300,7 +300,7 @@ def train_model(cfg,
                 return best, best_flag
 
             # forbest2, cfg.MODEL.framework != "FastRCNN":
-            for top_flag in ['hit_at_one', 'top1', 'rmse']:
+            for top_flag in ['hit_at_one', 'top1', 'rmse', "F1@0.50"]:
                 if record_list.get(top_flag):
                     if top_flag != 'rmse' and record_list[top_flag].avg > best:
                         best = record_list[top_flag].avg
@@ -340,6 +340,10 @@ def train_model(cfg,
                 elif cfg.MODEL.framework == "DepthEstimator":
                     logger.info(
                         f"Already save the best model (rmse){int(best * 10000) / 10000}"
+                    )
+                elif cfg.MODEL.framework in ['MSTCN', 'ASRF']:
+                    logger.info(
+                        f"Already save the best model (F1@0.50){int(best * 10000) / 10000}"
                     )
                 else:
                     logger.info(

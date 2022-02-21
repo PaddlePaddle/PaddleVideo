@@ -1,0 +1,85 @@
+MODEL: #MODEL field
+    framework: "MSTCN" #Mandatory, indicate the type of network, associate to the 'paddlevideo/modeling/framework/' .
+    backbone: #Mandatory, indicate the type of backbone, associate to the 'paddlevideo/modeling/backbones/' .
+        name: "MSTCN" #Mandatory, The name of backbone.
+        num_stages: 4 #Optional, the number of stages.
+        num_layers: 10 # Optional, the number of layers in each stage.
+        num_f_maps: 64 #Optional, the number of channels in each layers.
+        dim: 2048 #Optional, the number of channels in input feature.
+        num_classes: 19 #Optional, the number of classes to be classified.
+    head:
+        name: "MSTCNHead" #Mandatory, indicate the type of head, associate to the 'paddlevideo/modeling/heads'
+        num_classes: 19 #Optional, the number of classes to be classified.
+        in_channels: 64 #Optional, the number of channels in input feature.
+
+
+DATASET: #DATASET field
+    batch_size: 1 #! Mandatory, bacth size， segmentation only support batch_size 1
+    num_workers: 1 #Mandatory, the number of subprocess on each GPU.
+    test_batch_size: 1
+    test_num_workers: 0
+    train:
+        format: "MSTCNDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
+        file_path: "./data/50salads/splits/train.split5.bundle" #Mandatory, train data index file path
+        feature_path: "./data/50salads/features"
+        gt_path: "./data/50salads/groundTruth"
+        actions_map_file_path: "./data/50salads/mapping.txt"
+    valid:
+        format: "MSTCNDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
+        file_path: "./data/50salads/splits/test.split5.bundle" #Mandatory, valid data index file path
+        feature_path: "./data/50salads/features"
+        gt_path: "./data/50salads/groundTruth"
+        actions_map_file_path: "./data/50salads/mapping.txt"
+    test:
+        format: "MSTCNDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
+        file_path: "./data/50salads/splits/test.split5.bundle" #Mandatory, test data index file path
+        feature_path: "./data/50salads/features"
+        gt_path: "./data/50salads/groundTruth"
+        actions_map_file_path: "./data/50salads/mapping.txt"
+
+PIPELINE: #PIPELINE field
+    train: #Mandotary, indicate the pipeline to deal with the training data, associate to the 'paddlevideo/loader/pipelines/'
+        sample:
+            name: "SegmentationSampler"
+            sample_rate: 2
+        #transform: #Mandotary, image transfrom operator
+
+    valid: #Mandotary, indicate the pipeline to deal with the training data, associate to the 'paddlevideo/loader/pipelines/'
+        sample:
+            name: "SegmentationSampler"
+            sample_rate: 2
+        #transform: #Mandotary, image transfrom operator
+
+    test: #Mandatory, indicate the pipeline to deal with the validing data. associate to the 'paddlevideo/loader/pipelines/'
+        sample:
+            name: "SegmentationSampler"
+            sample_rate: 2
+        #transform: #Mandotary, image transfrom operator
+
+
+OPTIMIZER: #OPTIMIZER field
+    name: 'Adam'
+    learning_rate:
+        name: 'PiecewiseDecay'
+        boundaries: [50]
+        values: [0.0005, 1]
+
+METRIC:
+    name: 'SegmentationMetric'
+    overlap: [.1, .25, .5]
+    actions_map_file_path: "./data/50salads/mapping.txt"
+    tolerance: 5
+    boundary_threshold: 0.7
+
+
+INFERENCE:
+    name: 'MSTCN_Inference_helper'
+    num_channels: 2048
+    actions_map_file_path: "./data/50salads/mapping.txt"
+    feature_path: "./data/50salads/features"
+
+
+model_name: "MSTCN"
+log_interval: 40 #Optional, the interal of logger, default:10
+epochs: 50 #Mandatory, total epoch
+save_interval: 40
