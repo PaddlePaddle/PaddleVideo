@@ -32,41 +32,52 @@ MS-TCN的训练数据可以选择50salads、breakfast、gtea三个数据集，�
 ```bash
 # gtea数据集
 export CUDA_VISIBLE_DEVICES=3
-python3.7 main.py  --validate -c configs/segmentation/ms_tcn/ms_tcn_gtea.yaml
+python3.7 main.py  --validate -c configs/segmentation/ms_tcn/ms_tcn_gtea.yaml --seed 1538574472
 ```
 
-- 从头开始训练，使用上述启动命令行或者脚本程序即可启动训练，不需要用到预训练模型，视频动作分割模型通常为全卷积网络，由于视频的长度不一，故视频动作分割模型的scr字段通常设为1，即不需要批量训练，目前也仅支持**单样本**训练
+- 从头开始训练，使用上述启动命令行或者脚本程序即可启动训练，不需要用到预训练模型，视频动作分割模型通常为全卷积网络，由于视频的长度不一，故视频动作分割模型的batch_size字段通常设为1，即不需要批量训练，目前也仅支持**单样本**训练
 
 ## 模型测试
 
 可通过如下方式进行模型测试：
 
 ```bash
-python main.py  --test -c configs/segmentation/ms_tcn/ms_tcn_gtea.yaml --weights=./output/MSTCN/MSTCN_epoch_00011.pdparams
+python main.py  --test -c configs/segmentation/ms_tcn/ms_tcn_gtea.yaml --weights=./output/MSTCN/MSTCN_split_1_best.pdparams
 ```
 
 - 指标的具体实现是参考MS-TCN作者[evel.py](https://github.com/yabufarha/ms-tcn/blob/master/eval.py)提供的测试脚本，计算Acc、Edit和F1分数。
 
-在Breakfast数据集下评估精度如下:
+- 数据集的评估方法采用MS-TCN论文中的折交验证方法，而折交的划分方式与MS-TCN论文中相同。
+
+在Breakfast数据集下评估精度如下(采用4折交验证):
 
 | Model | Acc | Edit | F1@0.1 | F1@0.25 | F1@0.5 |
 | :---: | :---: | :---: | :---: | :---: | :---: |
 | paper | 66.3% | 61.7% | 48.1% | 48.1% | 37.9% |
 | paddle | 65.2% | 61.5% | 53.7% | 49.2% | 38.8% |
 
-在50salads数据集下评估精度如下:
+在50salads数据集下评估精度如下(采用5折交验证):
 
 | Model | Acc | Edit | F1@0.1 | F1@0.25 | F1@0.5 |
 | :---: | :---: | :---: | :---: | :---: | :---: |
 | paper | 80.7% | 67.9% | 76.3% | 74.0% | 64.5% |
 | paddle | 81.1% | 71.5% | 77.9% | 75.5% | 66.5% |
 
-在gtea数据集下评估精度如下:
+在gtea数据集下评估精度如下(采用4折交验证):
 
 | Model | Acc | Edit | F1@0.1 | F1@0.25 | F1@0.5 |
 | :---: | :---: | :---: | :---: | :---: | :---: |
 | paper | 79.2% | 81.4% | 87.5% | 85.4% | 74.6% |
-| paddle | 76.3% | 82.7% | 87.7% | 83.7% | 71.4% |
+| paddle | 76.9% | 81.8% | 86.4% | 84.7% | 74.8% |
+
+给出在gtea数据集下的折交的模型权重
+
+Test_Data| F1@0.5 | checkpoints |
+| :----: | :----: | :---- |
+| gtea_split1 | 70.2509 | [MSTCN_split_1_best.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/MSTCN_split_1_best.pdparams) |
+| gtea_split2 | 70.7224 | [MSTCN_split_2_best.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/MSTCN_split_2_best.pdparams) |
+| gtea_split3 | 80.0 | [MSTCN_split_3_best.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/MSTCN_split_3_best.pdparams) |
+| gtea_split4 | 78.1609 | [MSTCN_split_4_best.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/MSTCN_split_4_best.pdparams) |
 
 
 ## 模型推理

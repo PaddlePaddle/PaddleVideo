@@ -47,14 +47,16 @@ python3.7 main.py  --validate -c configs/segmentation/asrf/asrf_gtea.yaml
 Test MS-TCN on dataset scripts:
 
 ```bash
-python main.py  --test -c configs/segmentation/asrf/asrf_gtea.yaml --weights=./output/ASRF/ASRF_epoch_00001.pdparams
+python main.py  --test -c configs/segmentation/asrf/asrf_gtea.yaml --weights=./output/ASRF/ASRF_split_1_best.pdparams
 ```
 
 - The specific implementation of the index is to calculate ACC, edit and F1 scores by referring to the test script[evel.py](https://github.com/yabufarha/ms-tcn/blob/master/eval.py) provided by the author of ms-tcn.
 
 The reproduction of pytorch comes from the official [code base](https://github.com/yiskw713/asrf)
 
-Accuracy on Breakfast dataset:
+- The evaluation method of data set adopts the folding verification method in ms-tcn paper, and the division method of folding is the same as that in ms-tcn paper.
+
+Accuracy on Breakfast dataset(4 folding verification):
 
 | Model | Acc | Edit | F1@0.1 | F1@0.25 | F1@0.5 |
 | :---: | :---: | :---: | :---: | :---: | :---: |
@@ -62,7 +64,7 @@ Accuracy on Breakfast dataset:
 | pytorch | 65.8% | 71.0% | 72.3% | 66.5% | 54.9% |
 | paddle | 66.1% | 71.9% | 73.3% | 67.9% | 55.7% |
 
-Accuracy on 50salads dataset:
+Accuracy on 50salads dataset(5 folding verification):
 
 | Model | Acc | Edit | F1@0.1 | F1@0.25 | F1@0.5 |
 | :---: | :---: | :---: | :---: | :---: | :---: |
@@ -70,13 +72,21 @@ Accuracy on 50salads dataset:
 | pytorch | 81.4% | 75.6% | 82.7% | 81.2% | 77.2% |
 | paddle | 81.6% | 75.8% | 83.0% | 81.5% | 74.8% |
 
-Accuracy on gtea dataset:
+Accuracy on gtea dataset(4 folding verification):
 
 | Model | Acc | Edit | F1@0.1 | F1@0.25 | F1@0.5 |
 | :---: | :---: | :---: | :---: | :---: | :---: |
 | paper | 77.3% | 83.7% | 89.4% | 87.8% | 79.8% |
 | pytorch | 76.3% | 79.6% | 87.3% | 85.8% | 74.9% |
-| paddle | 77.4% | 77.9% | 85.6% | 84.6% | 76.3% |
+| paddle | 77.1% | 83.3% | 88.9% | 87.5% | 79.1% |
+
+Model weight for gtea
+Test_Data| F1@0.5 | checkpoints |
+| :----: | :----: | :---- |
+| gtea_split1 | 72.4409 | [ASRF_split_1_best.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ASRF_split_1_best.pdparams) |
+| gtea_split2 | 76.6666 | [ASRF_split_2_best.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ASRF_split_2_best.pdparams) |
+| gtea_split3 | 84.5528 | [ASRF_split_3_best.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ASRF_split_3_best.pdparams) |
+| gtea_split4 | 82.6771 | [ASRF_split_4_best.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ASRF_split_4_best.pdparams) |
 
 ## Infer
 

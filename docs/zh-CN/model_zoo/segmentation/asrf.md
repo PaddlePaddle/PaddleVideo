@@ -37,24 +37,26 @@ python data/prepare_asrf_data.py --dataset_dir data/
 ```bash
 # gtea数据集
 export CUDA_VISIBLE_DEVICES=3
-python3.7 main.py  --validate -c configs/segmentation/asrf/asrf_gtea.yaml
+python3.7 main.py  --validate -c configs/segmentation/asrf/asrf_gtea.yaml --seed 1538574472
 ```
 
-- 从头开始训练，使用上述启动命令行或者脚本程序即可启动训练，不需要用到预训练模型，视频动作分割模型通常为全卷积网络，由于视频的长度不一，故视频动作分割模型的scr字段通常设为1，即不需要批量训练，目前也仅支持**单样本**训练
+- 从头开始训练，使用上述启动命令行或者脚本程序即可启动训练，不需要用到预训练模型，视频动作分割模型通常为全卷积网络，由于视频的长度不一，故视频动作分割模型的batch_size字段通常设为1，即不需要批量训练，目前也仅支持**单样本**训练
 
 ## 模型测试
 
 可通过如下方式进行模型测试：
 
 ```bash
-python main.py  --test -c configs/segmentation/asrf/asrf_gtea.yaml --weights=./output/ASRF/ASRF_epoch_00001.pdparams
+python main.py  --test -c configs/segmentation/asrf/asrf_gtea.yaml --weights=./output/ASRF/ASRF_split_1_best.pdparams
 ```
 
 - 指标的具体实现是参考MS-TCN作者[evel.py](https://github.com/yabufarha/ms-tcn/blob/master/eval.py)提供的测试脚本，计算Acc、Edit和F1分数。
 
 - pytorch的复现来源于官方提供的[代码库](https://github.com/yiskw713/asrf)
 
-在Breakfast数据集下评估精度如下:
+- 数据集的评估方法采用MS-TCN论文中的折交验证方法，而折交的划分方式与MS-TCN论文中相同。
+
+在Breakfast数据集下评估精度如下(采用4折交验证):
 
 | Model | Acc | Edit | F1@0.1 | F1@0.25 | F1@0.5 |
 | :---: | :---: | :---: | :---: | :---: | :---: |
@@ -62,7 +64,7 @@ python main.py  --test -c configs/segmentation/asrf/asrf_gtea.yaml --weights=./o
 | pytorch | 65.8% | 71.0% | 72.3% | 66.5% | 54.9% |
 | paddle | 66.1% | 71.9% | 73.3% | 67.9% | 55.7% |
 
-在50salads数据集下评估精度如下:
+在50salads数据集下评估精度如下(采用5折交验证):
 
 | Model | Acc | Edit | F1@0.1 | F1@0.25 | F1@0.5 |
 | :---: | :---: | :---: | :---: | :---: | :---: |
@@ -70,13 +72,22 @@ python main.py  --test -c configs/segmentation/asrf/asrf_gtea.yaml --weights=./o
 | pytorch | 81.4% | 75.6% | 82.7% | 81.2% | 77.2% |
 | paddle | 81.6% | 75.8% | 83.0% | 81.5% | 74.8% |
 
-在gtea数据集下评估精度如下:
+在gtea数据集下评估精度如下(采用4折交验证):
 
 | Model | Acc | Edit | F1@0.1 | F1@0.25 | F1@0.5 |
 | :---: | :---: | :---: | :---: | :---: | :---: |
 | paper | 77.3% | 83.7% | 89.4% | 87.8% | 79.8% |
 | pytorch | 76.3% | 79.6% | 87.3% | 85.8% | 74.9% |
-| paddle | 77.4% | 77.9% | 85.6% | 84.6% | 76.3% |
+| paddle | 77.1% | 83.3% | 88.9% | 87.5% | 79.1% |
+
+给出在gtea数据集下的折交的模型权重
+
+Test_Data| F1@0.5 | checkpoints |
+| :----: | :----: | :---- |
+| gtea_split1 | 72.4409 | [ASRF_split_1_best.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ASRF_split_1_best.pdparams) |
+| gtea_split2 | 76.6666 | [ASRF_split_2_best.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ASRF_split_2_best.pdparams) |
+| gtea_split3 | 84.5528 | [ASRF_split_3_best.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ASRF_split_3_best.pdparams) |
+| gtea_split4 | 82.6771 | [ASRF_split_4_best.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ASRF_split_4_best.pdparams) |
 
 
 ## 模型推理
