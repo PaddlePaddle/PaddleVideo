@@ -40,12 +40,14 @@ def train_model(cfg,
 
     Args:
         cfg (dict): configuration.
-        weights (str): weights path for finetuning.
-        parallel (bool): Whether multi-cards training. Default: True.
-        validate (bool): Whether to do evaluation. Default: False.
-        amp (bool): Whether to use automatic mixed precision during training. Default: False.
-        use_fleet (bool):
-        profiler_options (str): Activate the profiler function Default: None.
+        weights (str, optional): weights path for finetuning. Defaults to None.
+        parallel (bool, optional): whether multi-cards training. Defaults to True.
+        validate (bool, optional): whether to do evaluation. Defaults to True.
+        amp (bool, optional): whether to use automatic mixed precision during training. Defaults to False.
+        max_iters (int, optional): max running iters in an epoch. Defaults to None.
+        use_fleet (bool, optional): whether to use fleet. Defaults to False.
+        profiler_options (str, optional): configuration for the profiler function. Defaults to None.
+
     """
     if use_fleet:
         fleet.init(is_collective=True)
@@ -355,10 +357,10 @@ def train_model(cfg,
             save(
                 optimizer.state_dict(),
                 osp.join(output_dir,
-                         model_name + f"_epoch_{epoch+1:05d}.pdopt"))
+                         model_name + f"_epoch_{epoch + 1:05d}.pdopt"))
             save(
                 model.state_dict(),
                 osp.join(output_dir,
-                         model_name + f"_epoch_{epoch+1:05d}.pdparams"))
+                         model_name + f"_epoch_{epoch + 1:05d}.pdparams"))
 
     logger.info(f'training {model_name} finished')
