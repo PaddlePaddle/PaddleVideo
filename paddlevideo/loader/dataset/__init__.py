@@ -21,6 +21,9 @@ from .frame import FrameDataset, FrameDataset_Sport
 from .MRI import MRIDataset
 from .MRI_SlowFast import SFMRIDataset
 from .msrvtt import MSRVTTDataset
+from .actbert_dataset import ActBertDataset
+from .asrf_dataset import ASRFDataset
+from .ms_tcn_dataset import MSTCNDataset
 from .oxford import MonoDataset
 from .skeleton import SkeletonDataset
 from .slowfast_video import SFVideoDataset
@@ -30,5 +33,5 @@ __all__ = [
     'VideoDataset', 'FrameDataset', 'SFVideoDataset', 'BMNDataset',
     'FeatureDataset', 'SkeletonDataset', 'AVADataset', 'MonoDataset',
     'MSRVTTDataset', 'ActBertDataset', 'DavisDataset', 'MRIDataset',
-    'SFMRIDataset', 'FrameDataset_Sport'
+    'SFMRIDataset', 'FrameDataset_Sport', 'MSTCNDataset', 'ASRFDataset'
 ]

@@ -73,7 +73,8 @@ def main():
     print(params_info)
 
     if args.FLOPs:
-        flops_info = paddleslim.analysis.flops(model, [1, 1, num_seg, 3, img_size, img_size])
+        flops_info = paddleslim.analysis.flops(
+            model, [1, 1, num_seg, 3, img_size, img_size])
         print(flops_info)
 
 
