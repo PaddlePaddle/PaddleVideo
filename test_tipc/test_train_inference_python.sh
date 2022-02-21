@@ -309,9 +309,9 @@ else
                     run_export=${export_value2}
                 else
                     run_train=${norm_trainer}
-                    if [ ${MODE} != "benchmark_train" ] && [[ ! ${MODE} =~ "whole_train"]]; then
+                    if [[ ${MODE} != "benchmark_train" ]] && [[ ! ${MODE} =~ "whole_train" ]]; then
                         # 训练参数末尾加上--max_iters=30和--log_interval=1，以便运行并输出足量数据
-                        norm_trainer=${norm_trainer}" --max_iters=30"
+                        run_train=${run_train}" --max_iters=30"
                     fi
                     run_export=${norm_export}
                 fi
