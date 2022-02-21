@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import paddle
-import time
 from paddlevideo.utils import get_logger, load
 
 from ..loader.builder import build_dataloader, build_dataset

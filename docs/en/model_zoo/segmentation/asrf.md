@@ -27,7 +27,7 @@ ASRF can choose 50salads, breakfast, gtea as trianing set. Please refer to Video
 
 Unlike MS-TCN, ASRF model requires additional data construction. The script process is as follows
 ```bash
-python data/prepare_asrf_data.py --dataset_dir data/
+python data/50salads/prepare_asrf_data.py --dataset_dir data/
 ```
 
 ## Train

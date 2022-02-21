@@ -27,7 +27,7 @@ ASRF的训练数据可以选择50salads、breakfast、gtea三个数据集，数�
 
 不同于MS-TCN，ASRF模型需要额外的数据构建，脚本流程如下
 ```bash
-python data/prepare_asrf_data.py --dataset_dir data/
+python data/50salads/prepare_asrf_data.py --dataset_dir data/
 ```
 
 ## 模型训练

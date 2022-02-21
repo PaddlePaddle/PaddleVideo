@@ -112,7 +112,11 @@ venv.bak/
 .mypy_cache/
 
 # data
-data/
+data/*
+!data/50salads
+data/50salads/*
+!data/50salads/transform_segmentation_label.py
+!data/50salads/prepare_asrf_data.py
 output_dir/
 
 # IDE
@@ -123,3 +127,4 @@ output_dir/
 output
 .log.txt
 inference
+
