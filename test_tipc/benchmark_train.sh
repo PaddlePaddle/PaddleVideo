@@ -134,8 +134,8 @@ func_sed_params "$FILENAME" "${line_export_py_2}" "null"
 func_sed_params "$FILENAME" "${line_export_py_3}" "null"
 func_sed_params "$FILENAME" "${line_python}"  "$python"
 
-# 末尾加上--log_interval=1，以便输出足量数据
-set_log_interval_cmd="sed -i '${line_norm_train}s/.*/& -o log_interval=1/' '${filename}'"
+# 末尾加上--max_iters=30和--log_interval=1，以便运行并输出足量数据
+set_log_interval_cmd="sed -i '${line_norm_train}s/.*/& --max_iters=30 -o log_interval=1/' '${filename}'"
 eval $set_log_interval_cmd
 
 # 去掉--validate，benchmark不需要validate

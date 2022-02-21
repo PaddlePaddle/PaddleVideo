@@ -145,16 +145,16 @@ function func_inference(){
     for use_gpu in ${use_gpu_list[*]}; do
         if [ ${use_gpu} = "False" ] || [ ${use_gpu} = "cpu" ]; then
             for use_mkldnn in ${use_mkldnn_list[*]}; do
-                if [ ${use_mkldnn} = "False" ] && [ ${_flag_quant} = "True" ]; then
+                if [[ ${use_mkldnn} = "False" ]] && [[ ${_flag_quant} = "True" ]]; then
                     continue
                 fi
                 for threads in ${cpu_threads_list[*]}; do
                     for batch_size in ${batch_size_list[*]}; do
                         for precision in ${precision_list[*]}; do
-                            if [ ${use_mkldnn} = "False" ] && [ ${precision} = "fp16" ]; then
+                            if [[ ${use_mkldnn} = "False" ]] && [[ ${precision} = "fp16" ]]; then
                                 continue
                             fi # skip when enable fp16 but disable mkldnn
-                            if [ ${_flag_quant} = "True" ] && [ ${precision} != "int8" ]; then
+                            if [[ ${_flag_quant} = "True" ]] && [[ ${precision} != "int8" ]]; then
                                 continue
                             fi # skip when quant model inference but precision is not int8
                             set_precision=$(func_set_params "${precision_key}" "${precision}")
@@ -185,10 +185,10 @@ function func_inference(){
                     if [[ ${_flag_quant} = "False" ]] && [[ ${precision} =~ "int8" ]]; then
                         continue
                     fi
-                    if [[ ${precision} =~ "fp16" || ${precision} =~ "int8" ]] && [ ${use_trt} = "False" ]; then
+                    if [[ ${precision} =~ "fp16" || ${precision} =~ "int8" ]] && [[ ${use_trt} = "False" ]]; then
                         continue
                     fi
-                    if [[ ${use_trt} = "False" || ${precision} =~ "int8" ]] && [ ${_flag_quant} = "True" ]; then
+                    if [[ ${use_trt} = "False" || ${precision} =~ "int8" ]] && [[ ${_flag_quant} = "True" ]]; then
                         continue
                     fi
                     for batch_size in ${batch_size_list[*]}; do
@@ -309,6 +309,10 @@ else
                     run_export=${export_value2}
                 else
                     run_train=${norm_trainer}
+                    if [ ${MODE} != "benchmark_train" ] && [[ ! ${MODE} =~ "whole_train"]]; then
+                        # 训练参数末尾加上--max_iters=30和--log_interval=1，以便运行并输出足量数据
+                        norm_trainer=${norm_trainer}" --max_iters=30"
+                    fi
                     run_export=${norm_export}
                 fi
 
