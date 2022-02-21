@@ -380,26 +380,12 @@ class ASRFLoss(nn.Layer):
             label_path=boundary_path)
         self.lambda_bound_loss = lambda_bound_loss
 
-        # self.cnt = 1
-
     def forward(self, x, output_cls, label, outputs_boundary, boundary):
         loss = 0.0
-        # if self.cnt == 1:
-        #     output_dict = {}
-        #     # index = 1
-        #     output_dict["x"] = x
-        #     output_dict["output_cls"] = output_cls
-        #     output_dict["label"] = label
-        #     output_dict["outputs_boundary"] = outputs_boundary
-        #     output_dict["boundary"] = boundary
         if isinstance(output_cls, list):
             n = len(output_cls)
             for out in output_cls:
                 loss += self.criterion_cls(out, label, x) / n
-                # if self.cnt == 1:
-                # output_dict['cls_out' + str(index)] = out
-                # output_dict['cls_label' + str(index)] = label
-                # index += 1
         else:
             loss += self.criterion_cls(output_cls, label, x)
 
@@ -412,7 +398,4 @@ class ASRFLoss(nn.Layer):
             loss += self.lambda_bound_loss * self.criterion_boundary(
                 outputs_boundary, boundary)
 
-        # if self.cnt == 1:
-        #     paddle.save(output_dict, "/workspace/wenwujun/compare/paddle_modle_output.pdparams")
-        #     self.cnt += 1
         return loss

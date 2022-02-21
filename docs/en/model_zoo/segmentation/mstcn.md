@@ -81,27 +81,7 @@ Test_Data| F1@0.5 | checkpoints |
 
 ## Infer
 
-### export inference model
-
-```bash
-python3.7 tools/export_model.py \
-    -c configs/segmentation/ms_tcn/ms_tcn_gtea.yaml \
-    --p ./output/MSTCN/MSTCN_epoch_00011.pdparams \
-    -o ./inference
-```
-
 - Args usage please refer to [Model Inference](https://github.com/PaddlePaddle/PaddleVideo/blob/release/2.0/docs/zh-CN/start.md#2-%E6%A8%A1%E5%9E%8B%E6%8E%A8%E7%90%86).
-
-### infer
-
-```bash
-python3.7 tools/predict.py --input_file data/example_feat.list \
-                           --config configs/segmentation/ms_tcn/ms_tcn_gtea.yaml \
-                           --model_file inference/MSTCN.pdmodel \
-                           --params_file inference/MSTCN.pdiparams \
-                           --use_gpu=True \
-                           --use_tensorrt=False
-```
 
 ## Reference
 

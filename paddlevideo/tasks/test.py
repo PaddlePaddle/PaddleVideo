@@ -77,7 +77,6 @@ def test_model(cfg, weights, parallel=True):
     if cfg.MODEL.framework == "FastRCNN":
         Metric.set_dataset_info(dataset.info, len(dataset))
 
-    warmup_num = 20
     for batch_id, data in enumerate(data_loader):
         if cfg.model_name in [
                 'CFBI'
@@ -86,11 +85,4 @@ def test_model(cfg, weights, parallel=True):
         else:
             outputs = model(data, mode='test')
             Metric.update(batch_id, data, outputs)
-            if batch_id == warmup_num:
-                clock = time.time()
-    test_cost = time.time() - clock
-    test_num = len(data_loader) - warmup_num
     Metric.accumulate()
-    print(
-        f"#Test examples={test_num}, times cost={test_cost}, avg_cost={test_cost / test_num:.2f}s"
-    )

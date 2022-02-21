@@ -21,11 +21,9 @@ import paddle.distributed as dist
 import paddle.distributed.fleet as fleet
 from paddlevideo.utils import (add_profiler_step, build_record, get_logger,
                                load, log_batch, log_epoch, mkdir, save)
-
 from ..loader.builder import build_dataloader, build_dataset
 from ..metrics.ava_utils import collect_results_cpu
 from ..modeling.builder import build_model
-from ..metrics import build_metric
 from ..solver import build_lr, build_optimizer
 from ..utils import do_preciseBN
 
@@ -123,12 +121,6 @@ def train_model(cfg,
         )
         valid_loader = build_dataloader(valid_dataset,
                                         **validate_dataloader_setting)
-        cfg.METRIC.data_size = len(valid_dataset)
-        cfg.METRIC.batch_size = batch_size
-        cfg.METRIC.log_interval = cfg.log_interval
-        # build metric
-        if cfg.METRIC.name == "SegmentationMetric":
-            Metric = build_metric(cfg.METRIC)
 
     # 3. Construct solver.
     lr = build_lr(cfg.OPTIMIZER.learning_rate, len(train_loader))
@@ -268,9 +260,6 @@ def train_model(cfg,
             for i, data in enumerate(valid_loader):
                 outputs = model(data, mode='valid')
 
-                if cfg.METRIC.name == "SegmentationMetric":
-                    Metric.update(i, data, outputs)
-
                 if cfg.MODEL.framework == "FastRCNN":
                     results.extend(outputs)
 
@@ -309,15 +298,8 @@ def train_model(cfg,
                     best_flag = True
                 return best, best_flag
 
-            if cfg.METRIC.name == "SegmentationMetric":
-                record_list.update(Metric.accumulate())
-                if record_list["F1@0.50"] > best:
-                    best = record_list["F1@0.50"]
-                    best_flag = True
-                return best, best_flag
-
             # forbest2, cfg.MODEL.framework != "FastRCNN":
-            for top_flag in ['hit_at_one', 'top1', 'rmse']:
+            for top_flag in ['hit_at_one', 'top1', 'rmse', "F1@0.50"]:
                 if record_list.get(top_flag):
                     if top_flag != 'rmse' and record_list[top_flag].avg > best:
                         best = record_list[top_flag].avg

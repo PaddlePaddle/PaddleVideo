@@ -46,9 +46,13 @@ class MSTCN(BaseSegmenter):
         loss = 0.
         for i in range(len(output)):
             loss += self.head.loss(output[i], video_gt)
+
+        predicted = paddle.argmax(output[-1], axis=1)
+        predicted = paddle.squeeze(predicted)
+
         loss_metrics = dict()
         loss_metrics['loss'] = loss
-
+        loss_metrics['F1@0.50'] = self.head.get_F1_score(predicted, video_gt)
         return loss_metrics
 
     def val_step(self, data_batch):
@@ -67,8 +71,7 @@ class MSTCN(BaseSegmenter):
 
         outputs_dict = dict()
         outputs_dict['loss'] = loss
-        outputs_dict['predict'] = predicted
-        outputs_dict['output_np'] = F.sigmoid(output[-1])
+        outputs_dict['F1@0.50'] = self.head.get_F1_score(predicted, video_gt)
         return outputs_dict
 
     def test_step(self, data_batch):

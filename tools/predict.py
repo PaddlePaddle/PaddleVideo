@@ -24,6 +24,7 @@ from paddlevideo.utils import get_config
 
 
 def parse_args():
+
     def str2bool(v):
         return v.lower() in ("true", "t", "1")
 
@@ -250,7 +251,7 @@ def main():
             if args.enable_benchmark:
                 autolog.times.stamp()
 
-            InferenceHelper.postprocess([batched_outputs],
+            InferenceHelper.postprocess(batched_outputs,
                                         not args.enable_benchmark)
 
             # get post process time cost

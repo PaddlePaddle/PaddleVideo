@@ -54,14 +54,26 @@ class ASRF(BaseSegmenter):
         feature, label, boundary = data_batch
         # call forward
         outputs_cls, outputs_boundary = self.forward_net(feature)
+
+        # transfer data
+        outputs_cls_np = outputs_cls[-1].numpy()
+        outputs_boundary_np = outputs_boundary[-1].numpy()
+
         # caculate loss
         if self.loss is not None:
             output_loss = self.loss(feature, outputs_cls, label,
                                     outputs_boundary, boundary)
         else:
             output_loss = None
+
+        # predict post process
+        predicted = ASRFPostProcessing(outputs_cls_np, outputs_boundary_np,
+                                       self.postprocessing_method)
+        predicted = paddle.squeeze(predicted)
+
         loss_metrics = dict()
         loss_metrics['loss'] = output_loss
+        loss_metrics['F1@0.50'] = self.head.get_F1_score(predicted, label)
 
         return loss_metrics
 
@@ -87,11 +99,11 @@ class ASRF(BaseSegmenter):
         # predict post process
         predicted = ASRFPostProcessing(outputs_cls_np, outputs_boundary_np,
                                        self.postprocessing_method)
+        predicted = paddle.squeeze(predicted)
 
         outputs_dict = dict()
         outputs_dict['loss'] = output_loss
-        outputs_dict['predict'] = predicted[0, :]
-        outputs_dict['output_np'] = F.sigmoid(outputs_cls[-1])
+        outputs_dict['F1@0.50'] = self.head.get_F1_score(predicted, label)
         return outputs_dict
 
     def test_step(self, data_batch):
