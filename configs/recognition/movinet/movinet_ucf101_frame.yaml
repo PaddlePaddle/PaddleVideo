@@ -8,8 +8,6 @@ MODEL: #MODEL field
     cfg: "A0"
   head:
     name: "MoViNetHead" #Mandatory, indicate the type of head, associate to the 'paddlevideo/modeling/heads'
-    # num_classes: 101
-    # in_channels: 2048
 
 DATASET: #DATASET field
   batch_size: 32 #Mandatory, bacth size
