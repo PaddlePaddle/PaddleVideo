@@ -410,7 +410,7 @@ cd predict && python eval.py results.json
 
 
 ## 模型优化
-- 基础特征模型（图像）替换为ppTSM，准确率由84%提升到94%
+- 基础特征模型（图像）替换为PP-TSM，准确率由84%提升到94%
 - 基础特征模型（音频）没变动
 - BMN，请使用paddlevideo最新版
 - LSTM，暂时提供v1.8训练代码（后续升级为v2.0），也可自行尝试使用paddlevideo-2.0中的attentation lstm
