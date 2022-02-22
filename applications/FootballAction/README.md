@@ -128,17 +128,7 @@ cd checkpoints
 sh  download.sh
 ```
 
-将 `predict/action_detect/models/pptsm_infer.py` 文件中的
-```python
-self.output_tensor = self.predictor.get_output_handle(output_names[0])
-```
-替换为
-```python
-self.output_tensor = self.predictor.get_output_handle(output_names[1])
-```
-这里需要注意，只有在使用我们提供的模型直接进行推理时，才需完成本步骤，如通过模型训练再推理时，无需此步。
-
-运行预测代码
+进行预测前需要修改 `predict/configs/configs.yaml` 文件，修改模型路径。运行预测代码：
 ```
 cd predict && python predict.py
 ```
@@ -211,6 +201,16 @@ python tools/export_model.py -c ${FootballAcation}/train_proposal/configs/pptsm_
 ```
 
 ####  step1.4  基于PP-TSM的视频特征提取
+
+将 `predict/action_detect/models/pptsm_infer.py` 文件中的
+```python
+self.output_tensor = self.predictor.get_output_handle(output_names[1])
+```
+替换为
+```python
+self.output_tensor = self.predictor.get_output_handle(output_names[0])
+```
+
 image and audio特征提取，保存到datasets features文件夹下。注意更改python文件中 dataset_dir 的路径，以及configs.yaml文件下的模型路径。
 
 ```
@@ -227,7 +227,6 @@ video_features = {'image_feature': np_image_features,
         |--  EuroCup2016            # xx数据集
             |--  features          # 视频的图像+音频特征
 ```
-
 
 ### step2 BMN训练
 BMN训练代码为：https://github.com/PaddlePaddle/PaddleVideo/tree/release/2.0
