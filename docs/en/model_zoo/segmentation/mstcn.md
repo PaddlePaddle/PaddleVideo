@@ -42,7 +42,7 @@ python3.7 main.py  --validate -c configs/segmentation/ms_tcn/ms_tcn_gtea.yaml --
 Test MS-TCN on dataset scripts:
 
 ```bash
-python main.py  --test -c configs/segmentation/ms_tcn/ms_tcn_gtea.yaml --weights=./output/MSTCN/MSTCN_split_1_best.pdparams
+python main.py  --test -c configs/segmentation/ms_tcn/ms_tcn_gtea.yaml --weights=./output/MSTCN/MSTCN_split_1.pdparams
 ```
 
 - The specific implementation of the index is to calculate ACC, edit and F1 scores by referring to the test script[evel.py](https://github.com/yabufarha/ms-tcn/blob/master/eval.py) provided by the author of ms-tcn.
@@ -74,10 +74,10 @@ Model weight for gtea
 
 Test_Data| F1@0.5 | checkpoints |
 | :----: | :----: | :---- |
-| gtea_split1 | 70.2509 | [MSTCN_gtea_split_1_best.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/MSTCN_gtea_split_1.pdparams) |
-| gtea_split2 | 70.7224 | [MSTCN_gtea_split_2_best.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/MSTCN_gtea_split_2_best.pdparams) |
-| gtea_split3 | 80.0 | [MSTCN_gtea_split_3_best.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/MSTCN_gtea_split_3_best.pdparams) |
-| gtea_split4 | 78.1609 | [MSTCN_gtea_split_4_best.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/MSTCN_gtea_split_4_best.pdparams) |
+| gtea_split1 | 70.2509 | [MSTCN_gtea_split_1.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/MSTCN_gtea_split_1.pdparams) |
+| gtea_split2 | 70.7224 | [MSTCN_gtea_split_2.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/MSTCN_gtea_split_2.pdparams) |
+| gtea_split3 | 80.0 | [MSTCN_gtea_split_3.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/MSTCN_gtea_split_3.pdparams) |
+| gtea_split4 | 78.1609 | [MSTCN_gtea_split_4.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/MSTCN_gtea_split_4.pdparams) |
 
 ## Infer
 
@@ -85,7 +85,7 @@ Test_Data| F1@0.5 | checkpoints |
 
 ```bash
 python3.7 tools/export_model.py -c configs/segmentation/ms_tcn/ms_tcn_gtea.yaml \
-                                -p data/MSTCN_gtea_split_1_best.pdparams \
+                                -p data/MSTCN_gtea_split_1.pdparams \
                                 -o inference/MSTCN
 ```
 
