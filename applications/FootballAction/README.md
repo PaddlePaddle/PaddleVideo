@@ -4,9 +4,10 @@
 ## 内容
 - [模型简介](#模型简介)
 - [数据准备](#数据准备)
+- [使用提供的模型推理](#使用提供的模型推理)
 - [模型训练](#模型训练)
+- [使用训练模型推理](#使用训练模型推理)
 - [模型评估](#模型评估)
-- [模型推理](#模型推理)
 - [模型优化](#模型优化)
 - [模型部署](#模型部署)
 - [参考论文](#参考论文)
@@ -86,14 +87,10 @@ cd datasets/script && python get_frames_pcm.py
             |--  label_val.json    # 验证集原始gts
 ```
 
-
-## 模型训练
-采样方式：
-- image 采样频率fps=5，如果有些动作时间较短，可以适当提高采样频率
-- BMN windows=200，即40s，所以测试自己的数据时，视频时长需大于40s
-
 ### 基础镜像
+```bash
 docker pull tmtalgo/paddleaction:action-detection-v2
+```
 
 ### 代码结构
 ```
@@ -122,6 +119,36 @@ docker pull tmtalgo/paddleaction:action-detection-v2
     |--  train_bmn.sh              # bmn训练启动脚本
     |--  train_lstm.sh             # lstm训练启动脚本
 ```
+## 使用提供的模型推理
+可以通过如下命令直接进行推理，无需训练。
+
+首先，通过以下命令，下载训练好的模型文件：
+```bash
+cd checkpoints
+sh  download.sh
+```
+
+将 `predict/action_detect/models/pptsm_infer.py` 文件中的
+```python
+self.output_tensor = self.predictor.get_output_handle(output_names[0])
+```
+替换为
+```python
+self.output_tensor = self.predictor.get_output_handle(output_names[1])
+```
+这里需要注意，只有在使用我们提供的模型直接进行推理时，才需完成本步骤，如通过模型训练再推理时，无需此步。
+
+运行预测代码
+```
+cd predict && python predict.py
+```
+产出文件：results.json
+
+
+## 模型训练
+采样方式：
+- image 采样频率fps=5，如果有些动作时间较短，可以适当提高采样频率
+- BMN windows=200，即40s，所以测试自己的数据时，视频时长需大于40s
 
 ### step1 PP-TSM训练
 
@@ -158,7 +185,7 @@ python -B -m paddle.distributed.launch \
     -o output_dir=$save_dir
 ```
 
-#### step1.3 ppTSM模型转为预测模式
+#### step1.3 PP-TSM模型转为预测模式
 在转为预测模式前，需要修改 `PaddleVideo/paddlevideo/modeling/framework/recognizers/recognizer2d.py` 文件，将 init 和 infer_step 函数分别更新为如下代码：
 
 ```python
@@ -183,7 +210,7 @@ python tools/export_model.py -c ${FootballAcation}/train_proposal/configs/pptsm_
                                -o {FootballAcation}/checkpoints/ppTSM
 ```
 
-####  step1.4  基于ppTSM的视频特征提取
+####  step1.4  基于PP-TSM的视频特征提取
 image and audio特征提取，保存到datasets features文件夹下。注意更改python文件中 dataset_dir 的路径，以及configs.yaml文件下的模型路径。
 
 ```
@@ -368,7 +395,7 @@ ${FootballAction}/train_lstm
 python inference_model.py --config=conf/conf.yaml --weights=$weight_path/LSTM.pdparams --save_dir=$save_dir
 ```
 
-## 模型推理
+## 使用训练模型推理
 运行预测代码
 ```
 cd predict && python predict.py
