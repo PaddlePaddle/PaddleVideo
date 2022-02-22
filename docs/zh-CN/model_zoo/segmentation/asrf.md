@@ -84,15 +84,57 @@ python main.py  --test -c configs/segmentation/asrf/asrf_gtea.yaml --weights=./o
 
 Test_Data| F1@0.5 | checkpoints |
 | :----: | :----: | :---- |
-| gtea_split1 | 72.4409 | [ASRF_split_1_best.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ASRF_split_1_best.pdparams) |
-| gtea_split2 | 76.6666 | [ASRF_split_2_best.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ASRF_split_2_best.pdparams) |
-| gtea_split3 | 84.5528 | [ASRF_split_3_best.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ASRF_split_3_best.pdparams) |
-| gtea_split4 | 82.6771 | [ASRF_split_4_best.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ASRF_split_4_best.pdparams) |
+| gtea_split1 | 72.4409 | [ASRF_gtea_split_1_best.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ASRF_gtea_split_1_best.pdparams) |
+| gtea_split2 | 76.6666 | [ASRF_gtea_split_2_best.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ASRF_gtea_split_2_best.pdparams) |
+| gtea_split3 | 84.5528 | [ASRF_gtea_split_3_best.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ASRF_gtea_split_3_best.pdparams) |
+| gtea_split4 | 82.6771 | [ASRF_gtea_split_4_best.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ASRF_gtea_split_4_best.pdparams) |
 
 
 ## 模型推理
 
+### 导出inference模型
+
+```bash
+python3.7 tools/export_model.py -c configs/segmentation/asrf/asrf_gtea.yaml \
+                                -p data/ASRF_gtea_split_1_best.pdparams \
+                                -o inference/ASRF
+```
+
+上述命令将生成预测所需的模型结构文件`ASRF.pdmodel`和模型权重文件`ASRF.pdiparams`。
+
 - 各参数含义可参考[模型推理方法](https://github.com/PaddlePaddle/PaddleVideo/blob/release/2.0/docs/zh-CN/start.md#2-%E6%A8%A1%E5%9E%8B%E6%8E%A8%E7%90%86)
+
+### 使用预测引擎推理
+
+输入预测模型的txt文件为需要预测的文件列表，如:
+```
+S1_Cheese_C1.npy
+S1_CofHoney_C1.npy
+S1_Coffee_C1.npy
+S1_Hotdog_C1.npy
+...
+```
+
+```bash
+python3.7 tools/predict.py --input_file data/gtea/splits/test.split1.bundle \
+                           --config configs/segmentation/asrf/asrf_gtea.yaml \
+                           --model_file inference/ASRF/ASRF.pdmodel \
+                           --params_file inference/ASRF/ASRF.pdiparams \
+                           --use_gpu=True \
+                           --use_tensorrt=False
+```
+
+输出示例如下:
+
+```bash
+result write in : ./inference/infer_results/S1_Cheese_C1.txt
+result write in : ./inference/infer_results/S1_CofHoney_C1.txt
+result write in : ./inference/infer_results/S1_Coffee_C1.txt
+result write in : ./inference/infer_results/S1_Hotdog_C1.txt
+result write in : ./inference/infer_results/S1_Pealate_C1.txt
+result write in : ./inference/infer_results/S1_Peanut_C1.txt
+result write in : ./inference/infer_results/S1_Tea_C1.txt
+```
 
 
 ## 参考论文

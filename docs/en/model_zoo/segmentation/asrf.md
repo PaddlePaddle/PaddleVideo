@@ -83,14 +83,55 @@ Accuracy on gtea dataset(4 folding verification):
 Model weight for gtea
 Test_Data| F1@0.5 | checkpoints |
 | :----: | :----: | :---- |
-| gtea_split1 | 72.4409 | [ASRF_split_1_best.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ASRF_split_1_best.pdparams) |
-| gtea_split2 | 76.6666 | [ASRF_split_2_best.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ASRF_split_2_best.pdparams) |
-| gtea_split3 | 84.5528 | [ASRF_split_3_best.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ASRF_split_3_best.pdparams) |
-| gtea_split4 | 82.6771 | [ASRF_split_4_best.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ASRF_split_4_best.pdparams) |
-
+| gtea_split1 | 72.4409 | [ASRF_gtea_split_1_best.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ASRF_gtea_split_1_best.pdparams) |
+| gtea_split2 | 76.6666 | [ASRF_gtea_split_2_best.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ASRF_gtea_split_2_best.pdparams) |
+| gtea_split3 | 84.5528 | [ASRF_gtea_split_3_best.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ASRF_gtea_split_3_best.pdparams) |
+| gtea_split4 | 82.6771 | [ASRF_gtea_split_4_best.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ASRF_gtea_split_4_best.pdparams) |
 ## Infer
 
+### export inference model
+
+```bash
+python3.7 tools/export_model.py -c configs/segmentation/asrf/asrf_gtea.yaml \
+                                -p data/ASRF_gtea_split_1_best.pdparams \
+                                -o inference/ASRF
+```
+
+To get model architecture file `ASRF.pdmodel` and parameters file `ASRF.pdiparams`, use:
+
 - Args usage please refer to [Model Inference](https://github.com/PaddlePaddle/PaddleVideo/blob/release/2.0/docs/zh-CN/start.md#2-%E6%A8%A1%E5%9E%8B%E6%8E%A8%E7%90%86).
+
+### infer
+
+Input file are the file list for infering, for example:
+```
+S1_Cheese_C1.npy
+S1_CofHoney_C1.npy
+S1_Coffee_C1.npy
+S1_Hotdog_C1.npy
+...
+```
+
+```bash
+python3.7 tools/predict.py --input_file data/gtea/splits/test.split1.bundle \
+                           --config configs/segmentation/asrf/asrf_gtea.yaml \
+                           --model_file inference/ASRF/ASRF.pdmodel \
+                           --params_file inference/ASRF/ASRF.pdiparams \
+                           --use_gpu=True \
+                           --use_tensorrt=False
+```
+
+example of logs:
+
+```bash
+result write in : ./inference/infer_results/S1_Cheese_C1.txt
+result write in : ./inference/infer_results/S1_CofHoney_C1.txt
+result write in : ./inference/infer_results/S1_Coffee_C1.txt
+result write in : ./inference/infer_results/S1_Hotdog_C1.txt
+result write in : ./inference/infer_results/S1_Pealate_C1.txt
+result write in : ./inference/infer_results/S1_Peanut_C1.txt
+result write in : ./inference/infer_results/S1_Tea_C1.txt
+```
 
 
 ## Reference
