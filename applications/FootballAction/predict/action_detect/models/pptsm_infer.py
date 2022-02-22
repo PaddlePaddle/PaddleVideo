@@ -39,6 +39,7 @@ class InferModel(object):
 
         output_names = self.predictor.get_output_names()
         self.output_tensor = self.predictor.get_output_handle(output_names[1])
+        #self.output_tensor = self.predictor.get_output_handle(output_names[0])
 
 
     def infer(self, input):

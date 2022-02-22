@@ -336,8 +336,12 @@ class SamplerPkl(object):
         video_name, label, frames = data_loaded
         if isinstance(label, dict):
             label = label['动作类型']
+            results['labels'] = label
+        elif len(label) == 1:
+            results['labels'] = int(label[0])
+        else:
+            results['labels'] = int(label[0]) if random.random() < 0.5 else int(label[1])
         results['frames_len'] = len(frames)
-        results['labels'] = label
         frames_len = results['frames_len']
         average_dur = int(int(frames_len) / self.num_seg)
         imgs = []

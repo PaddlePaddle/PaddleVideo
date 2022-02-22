@@ -27,7 +27,7 @@ import code
 import logging
 
 python_ver = sys.version_info
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('LSTM')
 
 
 class FeatureReader:

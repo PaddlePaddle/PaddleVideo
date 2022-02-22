@@ -21,7 +21,7 @@ import paddle.fluid as fluid
 import logging
 
 #logger = loginfo.Logger()
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('LSTM')
 best_test_acc1 = 0
 min_test_loss = float("inf")
 

@@ -36,7 +36,6 @@ def load_model(cfg_file="configs/configs.yaml"):
 
     t0 = time.time()
     global image_model, audio_model
-    # image_model = net_prop.ModelProp(infer_configs, 'TSN')
     image_model = image_model.InferModel(infer_configs)
     audio_model = audio_model.InferModel(infer_configs)
     t1 = time.time()
@@ -55,7 +54,6 @@ def video_classify(video_name):
     # step 1: extract feature
     t0 = time.time()
     image_path_list = get_images(imgs_path)
-    # infer_configs['TSN']['frame_list'] = image_path_list
     infer_configs['PPTSM']['frame_list'] = image_path_list
     infer_configs['AUDIO']['pcm_file'] = pcm_path
     image_features = image_model.predict(infer_configs)
@@ -82,8 +80,7 @@ def video_classify(video_name):
 
 
 if __name__ == '__main__':
-    # dataset_dir = "/home/work/datasets/EuroCup2016"
-    dataset_dir = os.path.abspath(sys.argv[1])
+    dataset_dir = "/home/work/PaddleVideo/applications/FootballAction/datasets/EuroCup2016"
     if not os.path.exists(dataset_dir + '/features'):
         os.mkdir(dataset_dir + '/features')
 

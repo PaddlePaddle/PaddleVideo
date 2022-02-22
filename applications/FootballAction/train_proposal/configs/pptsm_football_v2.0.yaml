@@ -2,7 +2,7 @@ MODEL:                                      #MODEL field
     framework: "Recognizer2D"               #Mandatory, indicate the type of network.
     backbone:                               #Mandatory, indicate the type of backbone.
         name: "ResNetTweaksTSM"             #Mandatory, The name of backbone.
-        pretrained: "/home/work/pretrain/ResNet50_vd_ssld_v2_pretrained.pdparams"
+        pretrained: "/home/work/PaddleVideo/applications/FootballAction/pretrain/ResNet50_vd_ssld_v2_pretrained.pdparams"
         num_seg: 8
         depth: 50                           #Optional, the depth of backbone architecture.
     head:
@@ -18,19 +18,19 @@ DATASET:                                    #DATASET field
     test_batch_size: 16
     num_workers: 4                          #Mandatory, XXX the number of subprocess on each GPU.
     train:
-        format: "FrameDataset"              #Mandatory, indicate the type of dataset
+        format: "FrameDataset_Sport"              #Mandatory, indicate the type of dataset
         data_prefix: ""                     #Mandatory, train data root path
-        file_path: "/home/work/datasets/train_list/football_tsn_train.list"     #Mandatory, train data index file path
+        file_path: "/home/work/PaddleVideo/applications/FootballAction/datasets/train_list/football_tsn_train.list"     #Mandatory, train data index file path
         suffix: 'img_{:05}.jpg'
     valid:
-        format: "FrameDataset"              #Mandatory, indicate the type of dataset
+        format: "FrameDataset_Sport"              #Mandatory, indicate the type of dataset
         data_prefix: ""                     #Mandatory, valid data root path
-        file_path: "/home/work/datasets/train_list/football_tsn_val.list"       #Mandatory, valid data index file path
+        file_path: "/home/work/PaddleVideo/applications/FootballAction/datasets/train_list/football_tsn_val.list"       #Mandatory, valid data index file path
         suffix: 'img_{:05}.jpg'
     test:
-        format: "FrameDataset"              #Mandatory, indicate the type of dataset
+        format: "FrameDataset_Sport"              #Mandatory, indicate the type of dataset
         data_prefix: ""                     #Mandatory, valid data root path
-        file_path: "/home/work/datasets/train_list/football_tsn_val.list"       #Mandatory, valid data index file path
+        file_path: "/home/work/PaddleVideo/applications/FootballAction/datasets/train_list/football_tsn_val.list"       #Mandatory, valid data index file path
         suffix: 'img_{:05}.jpg'
 
 
@@ -115,8 +115,13 @@ METRIC:
 
 
 PRECISEBN:
-  preciseBN_interval: 5                         # epoch interval to do preciseBN, default 1.
-  num_iters_preciseBN: 80                       # how many batches used to do preciseBN, default 200.
+    preciseBN_interval: 5                         # epoch interval to do preciseBN, default 1.
+    num_iters_preciseBN: 80                       # how many batches used to do preciseBN, default 200.
+
+INFERENCE:
+    name: 'ppTSM_Inference_helper'
+    num_seg: 8
+    target_size: 224
 
 model_name: "ppTSM"
 log_interval: 20                                #Optional, the interal of logger, default:10
