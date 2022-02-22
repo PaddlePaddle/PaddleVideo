@@ -2,7 +2,6 @@ MODEL:                                              #MODEL field
   framework: "BMNLocalizer"
   backbone:
     name: "BMN"
-    pretrained: "/home/work/pretrain/ResNet50_vd_ssld_v2_pretrained.pdparams"
     feat_dim: 2688
     tscale: 200
     dscale: 200
@@ -20,23 +19,23 @@ DATASET:                                            #DATASET field
   num_workers: 8
   train:
     format: "BMNDataset"
-    file_path: "/home/work/datasets/train_list/football_bmn_label.json"
+    file_path: "/home/work/PaddleVideo/applications/FootballAction/datasets/train_list/football_bmn_label.json"
     subset: "train"
   valid:
     format: "BMNDataset"
-    file_path: "/home/work/datasets/train_list/football_bmn_label.json"
+    file_path: "/home/work/PaddleVideo/applications/FootballAction/datasets/train_list/football_bmn_label.json"
     subset: "validation"
   test:
     format: "BMNDataset"
     test_mode: True
-    file_path: "/home/work/datasets/train_list/football_bmn_label.json"
+    file_path: "/home/work/PaddleVideo/applications/FootballAction/datasets/train_list/football_bmn_label.json"
     subset: "validation"
 
 PIPELINE:                                           #PIPELINE field
   train:                                            #Mandotary, indicate the pipeline to deal with the training data
     load_feat:
       name: "LoadFeat"
-      feat_path: "/home/work/datasets"
+      feat_path: "/home/work/PaddleVideo/applications/FootballAction/datasets"
     transform:                                      #Mandotary, image transfrom operator
       - GetMatchMap:
           tscale: 200
@@ -47,7 +46,7 @@ PIPELINE:                                           #PIPELINE field
   valid:                                            #Mandotary, indicate the pipeline to deal with the training data
     load_feat:
       name: "LoadFeat"
-      feat_path: "/home/work/datasets"
+      feat_path: "/home/work/PaddleVideo/applications/FootballAction/datasets"
     transform:                                      #Mandotary, image transfrom operator
       - GetMatchMap:
           tscale: 200
@@ -58,7 +57,7 @@ PIPELINE:                                           #PIPELINE field
   test:                                             #Mandatory, indicate the pipeline to deal with the validing data
     load_feat:
       name: "LoadFeat"
-      feat_path: "/home/work/datasets"
+      feat_path: "/home/work/PaddleVideo/applications/FootballAction/datasets"
     transform:                                      #Mandotary, image transfrom operator
       - GetMatchMap:
           tscale: 200
@@ -77,15 +76,12 @@ OPTIMIZER:                                          #OPTIMIZER field
     name: 'L2'
     value: 1e-4
 
-METRIC:
-  name: 'BMNMetric'
-  tscale: 200
-  dscale: 200
-  file_path: "data/dataset/bmn_data/activitynet_1.3_annotations.json"
-  ground_truth_filename: "data/dataset/bmn_data/activity_net_1_3_new.json"
-  subset: "validation"
-  output_path: "data/bmn/BMN_Test_output"
-  result_path: "data/bmn/BMN_Test_results"
+INFERENCE:
+    name: 'BMN_Inference_helper'
+    feat_dim: 2688
+    dscale: 100
+    tscale: 100
+    result_path: "/workspace/PaddleVideo/applications/FootballAction/BMN_INFERENCE_results"
 
 model_name: BMN
 epochs: 20                                          #Mandatory, total epoch

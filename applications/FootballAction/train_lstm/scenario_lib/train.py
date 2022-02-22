@@ -25,11 +25,14 @@ import config
 import action_net
 import utils
 import logging
+import paddle
 
+paddle.enable_static()
 o_path = os.getcwd()
 sys.path.append(o_path)
 #logger = loginfo.Logger()
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('LSTM')
+logger.setLevel(logging.INFO)
 
 
 def parse_args():

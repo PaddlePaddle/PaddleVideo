@@ -1,7 +1,7 @@
 COMMON:
     fps: 5
     use_gpu: True
-    label_dic: '/workspace/PaddleVideo/applications/FootballAction/predict/configs/index_label_football_8.json' 
+    label_dic: '/home/work/inference/configs/index_label_football_8.json' 
     # debug
     PCM_ONLY: False
     DEBUG: False
@@ -10,8 +10,8 @@ COMMON:
 
 PPTSM:
     name: "PPTSM"
-    model_file: "/workspace/PaddleVideo/applications/FootballAction/checkpoints/ppTSM/ppTSM.pdmodel"
-    params_file: "/workspace/PaddleVideo/applications/FootballAction/checkpoints/ppTSM/ppTSM.pdiparams"
+    model_file: "/home/work/inference/checkpoints/ppTSM/ppTSM.pdmodel"
+    params_file: "/home/work/inference/checkpoints/ppTSM/ppTSM.pdiparams"
     gpu_mem: 8000
     device_id: 0
     seg_num: 8
@@ -26,8 +26,8 @@ PPTSM:
 
 AUDIO:
     name: "AUDIO"
-    model_file: "/workspace/PaddleVideo/applications/FootballAction/checkpoints/AUDIO/__model__"
-    params_file: "/workspace/PaddleVideo/applications/FootballAction/checkpoints/AUDIO/__param__"
+    model_file: "/home/work/inference/checkpoints/AUDIO/__model__"
+    params_file: "/home/work/inference/checkpoints/AUDIO/__param__"
     gpu_mem: 8000
     device_id: 0
     sample_rate: 16000
@@ -35,8 +35,8 @@ AUDIO:
 
 BMN:
     name: "BMN"
-    model_file: "/workspace/PaddleVideo/applications/FootballAction/checkpoints/BMN/__model__"
-    params_file: "/workspace/PaddleVideo/applications/FootballAction/checkpoints/BMN/__param__"
+    model_file: "/home/work/inference/checkpoints/BMN/__model__"
+    params_file: "/home/work/inference/checkpoints/BMN/__param__"
     gpu_mem: 8000
     device_id: 0
     window_step: 200        # 200
@@ -48,8 +48,8 @@ BMN:
 
 ACTION:
     name: "ACTION"
-    model_file: "/workspace/PaddleVideo/applications/FootballAction/checkpoints/LSTM/__model__"
-    params_file: "/workspace/PaddleVideo/applications/FootballAction/checkpoints/LSTM/__param__"
+    model_file: "/home/work/inference/checkpoints/LSTM/__model__"
+    params_file: "/home/work/inference/checkpoints/LSTM/__param__"
     gpu_mem: 8000
     device_id: 0
     batch_size: 32

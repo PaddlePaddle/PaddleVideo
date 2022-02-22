@@ -78,7 +78,7 @@ def gen_instance_pkl(label_data, save_folder):
 
 if __name__ == "__main__":
     for item, value in label_files.items():
-        save_folder = os.path.join(dataset, 'input_for_tsn', item)
+        save_folder = os.path.join(dataset, 'input_for_pptsm', item)
         if not os.path.exists(save_folder):
             os.makedirs(save_folder)
 
@@ -88,7 +88,7 @@ if __name__ == "__main__":
         gen_instance_pkl(label_data, save_folder)
 
     # gen train val list
-    data_dir = '/home/work/datasets/EuroCup2016/input_for_tsn/'
+    data_dir = '/home/work/PaddleVideo/applications/FootballAction/datasets/EuroCup2016/input_for_pptsm/'
     os.system('find ' + data_dir + 'train -name "*.pkl" > ' + data_dir +
               'train.list')
     os.system('find ' + data_dir + 'val -name "*.pkl" > ' + data_dir +
