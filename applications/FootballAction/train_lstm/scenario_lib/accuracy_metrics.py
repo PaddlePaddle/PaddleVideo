@@ -21,8 +21,7 @@ import numpy as np
 import datetime
 import logging
 
-#logger = loginfo.Logger()
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('LSTM')
 
 
 class MetricsCalculator():

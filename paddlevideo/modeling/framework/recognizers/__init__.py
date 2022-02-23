@@ -19,9 +19,10 @@ from .recognizer_gcn import RecognizerGCN
 from .recognizerMRI import RecognizerMRI
 from .recognizer3dMRI import Recognizer3DMRI
 from .recognizer_transformer_MRI import RecognizerTransformer_MRI
+from .recognizer_movinet_frame import MoViNetRecognizerFrame
 
 __all__ = [
     'BaseRecognizer', 'Recognizer1D', 'Recognizer2D', 'Recognizer3D',
     'RecognizerTransformer', 'RecognizerGCN', 'RecognizerMRI',
-    'Recognizer3DMRI', 'RecognizerTransformer_MRI'
+    'Recognizer3DMRI', 'RecognizerTransformer_MRI', 'MoViNetRecognizerFrame'
 ]

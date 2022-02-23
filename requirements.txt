@@ -19,3 +19,6 @@ lap
 motmetrics
 xmltodict
 openpyxl
+git+https://github.com/LDOUBLEV/AutoLog
+einops
+fvcore==0.1.5.post20210630

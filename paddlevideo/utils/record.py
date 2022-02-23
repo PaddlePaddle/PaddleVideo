@@ -56,6 +56,8 @@ def build_record(cfg):
         record_list.append(("losses_day", AverageMeter("losses_day", '.5f')))
         record_list.append(("losses_night", AverageMeter("losses_night",
                                                          '.5f')))
+    elif 'MSTCN' in cfg.framework or 'ASRF' in cfg.framework:
+        record_list.append(("F1@0.50", AverageMeter("F1@0.50", '.5f')))
 
     record_list.append(("batch_time", AverageMeter('batch_cost', '.5f')))
     record_list.append(("reader_time", AverageMeter('reader_cost', '.5f')))
@@ -67,6 +69,7 @@ class AverageMeter(object):
     """
     Computes and stores the average and current value
     """
+
     def __init__(self, name='', fmt='f', need_avg=True):
         self.name = name
         self.fmt = fmt

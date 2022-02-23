@@ -29,10 +29,14 @@ from .timesformer_head import TimeSformerHead
 from .transnetv2_head import TransNetV2Head
 from .tsm_head import TSMHead
 from .tsn_head import TSNHead
+from .ms_tcn_head import MSTCNHead
+from .asrf_head import ASRFHead
+from .movinet_head import MoViNetHead
 
 __all__ = [
     'BaseHead', 'TSNHead', 'TSMHead', 'ppTSMHead', 'ppTSNHead', 'SlowFastHead',
     'AttentionLstmHead', 'TimeSformerHead', 'STGCNHead', 'TransNetV2Head',
     'I3DHead', 'SingleRoIExtractor3D', 'AVARoIHead', 'BBoxHeadAVA', 'AddsHead',
-    'ppTimeSformerHead', 'CollaborativeEnsemblerMS'
+    'ppTimeSformerHead', 'CollaborativeEnsemblerMS', 'MSTCNHead', 'ASRFHead',
+    'MoViNetHead'
 ]

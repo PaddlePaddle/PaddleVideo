@@ -10,7 +10,7 @@
 
 ## 简介
 
-本章将介绍如何安装PaddlePaddle、PaddleVideo及其依赖项。
+使用PaddleVideo之前，请先安装PaddlePaddle及相关依赖项。
 
 
 ## 安装PaddlePaddle

@@ -41,10 +41,11 @@ class BaseHead(nn.Layer):
         ls_eps (float): label smoothing epsilon. Default: 0. .
 
     """
+
     def __init__(
         self,
-        num_classes,
-        in_channels,
+        num_classes=None,
+        in_channels=None,
         loss_cfg=dict(
             name="CrossEntropyLoss"
         ),  #TODO(shipping): only pass a name or standard build cfg format.

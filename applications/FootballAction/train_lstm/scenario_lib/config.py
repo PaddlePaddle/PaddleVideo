@@ -62,7 +62,7 @@ def merge_configs(cfg, sec, args_dict):
 
 def print_configs(cfg, mode):
     """print_configs"""
-    logger = logging.getLogger(__name__)
+    logger = logging.getLogger('LSTM')
     logger.info(
         "---------------- {:>5} Arguments ----------------".format(mode))
     for sec, sec_items in cfg.items():
