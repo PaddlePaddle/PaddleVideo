@@ -14,7 +14,9 @@
 
 import os
 import numpy as np
+import paddle.nn.functional as F
 import random
+import paddle
 from ..registry import PIPELINES
 """pipeline ops for Activity Net.
 """
@@ -28,6 +30,7 @@ class AutoPadding(object):
         window_size: int, temporal size of skeleton feature.
         random_pad: bool, whether do random padding when frame length < window size. Default: False.
     """
+
     def __init__(self, window_size, random_pad=False):
         self.window_size = window_size
         self.random_pad = random_pad
@@ -72,6 +75,7 @@ class SkeletonNorm(object):
     Args:
         aixs: dimensions of vertex coordinate. 2 for (x,y), 3 for (x,y,z). Default: 2.
     """
+
     def __init__(self, axis=2, squeeze=False):
         self.axis = axis
         self.squeeze = squeeze
@@ -98,6 +102,7 @@ class Iden(object):
     """
     Wrapper Pipeline
     """
+
     def __init__(self, label_expand=True):
         self.label_expand = label_expand
 
@@ -108,4 +113,125 @@ class Iden(object):
         if 'label' in results and self.label_expand:
             label = results['label']
             results['label'] = np.expand_dims(label, 0).astype('int64')
+        return results
+
+
+@PIPELINES.register()
+class RandomRotation(object):
+    """
+    Random rotation sketeton.
+    Args:
+        argument: bool, if rotation.
+        theta: float, rotation rate.
+    """
+
+    def __init__(self, argument, theta=0.3):
+        self.theta = theta
+        self.argument = argument
+
+    def _rot(self, rot):
+        """
+        rot: T,3
+        """
+        cos_r, sin_r = np.cos(rot), np.sin(rot)  # T,3
+        zeros = np.zeros((rot.shape[0], 1))  # T,1
+        ones = np.ones((rot.shape[0], 1))  # T,1
+
+        r1 = np.stack((ones, zeros, zeros), axis=-1)  # T,1,3
+        rx2 = np.stack((zeros, cos_r[:, 0:1], sin_r[:, 0:1]), axis=-1)  # T,1,3
+        rx3 = np.stack((zeros, -sin_r[:, 0:1], cos_r[:, 0:1]), axis=-1)  # T,1,3
+        rx = np.concatenate((r1, rx2, rx3), axis=1)  # T,3,3
+
+        ry1 = np.stack((cos_r[:, 1:2], zeros, -sin_r[:, 1:2]), axis=-1)
+        r2 = np.stack((zeros, ones, zeros), axis=-1)
+        ry3 = np.stack((sin_r[:, 1:2], zeros, cos_r[:, 1:2]), axis=-1)
+        ry = np.concatenate((ry1, r2, ry3), axis=1)
+
+        rz1 = np.stack((cos_r[:, 2:3], sin_r[:, 2:3], zeros), axis=-1)
+        r3 = np.stack((zeros, zeros, ones), axis=-1)
+        rz2 = np.stack((-sin_r[:, 2:3], cos_r[:, 2:3], zeros), axis=-1)
+        rz = np.concatenate((rz1, rz2, r3), axis=1)
+
+        rot = np.matmul(np.matmul(rz, ry), rx)
+        return rot
+
+    def __call__(self, results):
+        # C,T,V,M
+        data = results['data']
+        if self.argument:
+            C, T, V, M = data.shape
+            data_numpy = np.transpose(data, (1, 0, 2, 3)).conjugate().reshape(
+                T, C, V * M)  # T,3,V*M
+            rot = np.random.uniform(-self.theta, self.theta, 3)
+            rot = np.stack([
+                rot,
+            ] * T, axis=0)
+            rot = self._rot(rot)  # T,3,3
+            data_numpy = np.matmul(rot, data_numpy)
+            data_numpy = data_numpy.reshape(T, C, V, M)
+            data_numpy = np.transpose(data_numpy, (1, 0, 2, 3))
+            data = data_numpy
+        results['data'] = data.astype(np.float32)
+        return results
+
+
+@PIPELINES.register()
+class SketeonCropSample(object):
+    """
+    Sketeon Crop Sampler.
+    Args:
+        crop_model: str, crop model, support: ['center'].
+        p_interval: list, crop len
+        window_size: int, sample windows size.
+    """
+
+    def __init__(self, window_size, crop_model='center', p_interval=1):
+        assert crop_model in ['center'], "Don't support :" + crop_model
+
+        self.crop_model = crop_model
+        self.window_size = window_size
+        self.p_interval = p_interval
+
+    def __call__(self, results):
+        if self.crop_model == 'center':
+            # input: C,T,V,M
+            data = results['data']
+            valid_frame_num = np.sum(data.sum(0).sum(-1).sum(-1) != 0)
+
+            C, T, V, M = data.shape
+            begin = 0
+            end = valid_frame_num
+            valid_size = end - begin
+
+            #crop
+            if len(self.p_interval) == 1:
+                p = self.p_interval[0]
+                bias = int((1 - p) * valid_size / 2)
+                data = data[:, begin + bias:end - bias, :, :]  # center_crop
+                cropped_length = data.shape[1]
+            else:
+                p = np.random.rand(1) * (self.p_interval[1] - self.p_interval[0]
+                                         ) + self.p_interval[0]
+                # constraint cropped_length lower bound as 64
+                cropped_length = np.minimum(
+                    np.maximum(int(np.floor(valid_size * p)), 64), valid_size)
+                bias = np.random.randint(0, valid_size - cropped_length + 1)
+                data = data[:, begin + bias:begin + bias + cropped_length, :, :]
+
+            # resize
+            data = np.transpose(data, (0, 2, 3, 1)).conjugate().reshape(
+                C * V * M, cropped_length)
+            data = data[None, None, :, :]
+            # could perform both up sample and down sample
+            data_tensor = paddle.to_tensor(data)
+            data_tensor = F.interpolate(data_tensor,
+                                        size=(C * V * M, self.window_size),
+                                        mode='bilinear',
+                                        align_corners=False).squeeze()
+            data = paddle.transpose(
+                paddle.reshape(data_tensor, (C, V, M, self.window_size)),
+                (0, 3, 1, 2)).numpy()
+        else:
+            raise NotImplementedError
+        results['data'] = data
         return results

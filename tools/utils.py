@@ -36,7 +36,8 @@ from paddlevideo.loader.pipelines import (
     AutoPadding, CenterCrop, DecodeSampler, FeatureDecoder, FrameDecoder,
     GroupResize, Image2Array, ImageDecoder, JitterScale, MultiCrop,
     Normalization, PackOutput, Sampler, SamplerPkl, Scale, SkeletonNorm,
-    TenCrop, ToArray, UniformCrop, VideoDecoder, SegmentationSampler)
+    TenCrop, ToArray, UniformCrop, VideoDecoder, SegmentationSampler,
+    SketeonCropSample)
 from paddlevideo.metrics.ava_utils import read_labelmap
 from paddlevideo.metrics.bmn_metric import boundary_choose, soft_nms
 from paddlevideo.utils import Registry, build, get_config
@@ -696,6 +697,43 @@ class STGCN_Inference_helper(Base_Inference_helper):
         data = np.load(input_file)
         results = {'data': data}
         ops = [AutoPadding(window_size=self.window_size), SkeletonNorm()]
+        for op in ops:
+            results = op(results)
+
+        res = np.expand_dims(results['data'], axis=0).copy()
+        return [res]
+
+
+@INFERENCE.register()
+class CTRGCN_Inference_helper(Base_Inference_helper):
+
+    def __init__(self,
+                 num_channels=3,
+                 vertex_nums=25,
+                 person_nums=2,
+                 window_size=64,
+                 p_interval=[0.95],
+                 top_k=1):
+        self.window_size = window_size
+        self.p_interval = p_interval
+        self.num_channels = num_channels
+        self.vertex_nums = vertex_nums
+        self.person_nums = person_nums
+        self.top_k = top_k
+
+    def preprocess(self, input_file):
+        """
+        input_file: str, file path
+        return: list
+        """
+        assert os.path.isfile(input_file) is not None, "{0} not exists".format(
+            input_file)
+        data = np.load(input_file)
+        results = {'data': data}
+        ops = [
+            SketeonCropSample(window_size=self.window_size,
+                              p_interval=self.p_interval)
+        ]
         for op in ops:
             results = op(results)
 
