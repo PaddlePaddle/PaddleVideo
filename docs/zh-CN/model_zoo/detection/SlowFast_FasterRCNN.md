@@ -65,6 +65,11 @@ python main.py --test \
    -c configs/detection/ava/ava.yaml
 ```
 
+| architecture | depth | Pretrain Model |  frame length x sample rate  | MAP | AVA version | model |
+| ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |------------- |
+| SlowFast | R50 | [Kinetics 400](https://videotag.bj.bcebos.com/PaddleVideo/SlowFast/SlowFast_8*8.pdparams) | 8 x 8 | 23.2 | 2.1 | [`link`](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/SlowFastRCNN_AVA.pdparams) |
+
+
 ## 模型推理
 
 本项目动作识别分成两个阶段，第一个阶段得到人的proposals，然后再输入到SlowFast+FasterRCNN模型中进行动作识别。
