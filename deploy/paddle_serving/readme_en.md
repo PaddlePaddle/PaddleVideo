@@ -47,10 +47,6 @@ pip3 install paddle-serving-server-gpu==0.7.0.post112  # GPU with CUDA11.2 + Ten
 ## Action recognition service deployment
 ### Model conversion
 When using PaddleServing for service deployment, you need to convert the saved inference model into a Serving model. The following takes the PP-TSM model as an example to introduce how to deploy the image classification service.
-- Go to the working directory:
-```bash
-cd deploy/paddleserving
-```
 
 - Download the trained PP-TSM model and convert it to an inference model:
 ```bash
@@ -121,6 +117,10 @@ pipeline_rpc_client.py  # python script for sending pipeline prediction request 
 classification_web_service.py  # python script to start the pipeline server
 ```
 #### Python Serving
+- Go to the working directory:
+```bash
+cd deploy/paddleserving
+```
 - Start the service:
 ```bash
 # Start in the current command line window and stay in front

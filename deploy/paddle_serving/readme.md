@@ -46,10 +46,6 @@ pip3 install paddle-serving-server-gpu==0.7.0.post112  # GPU with CUDA11.2 + Ten
 ## 动作识别服务部署
 ### 模型转换
 使用 PaddleServing 做服务化部署时，需要将保存的 inference 模型转换为 Serving 模型。下面以 PP-TSM 模型为例，介绍如何部署图像分类服务。
-- 进入工作目录：
-```bash
-cd deploy/paddleserving
-```
 - 下载训练好的 PP-TSM 的模型，并转化为inference模型：
 ```bash
 wget -P data/ https://videotag.bj.bcebos.com/PaddleVideo-release2.1/PPTSM/ppTSM_k400_uniform.pdparams
@@ -115,6 +111,10 @@ pipeline_rpc_client.py     		   # rpc方式发送pipeline预测请求的python�
 classification_web_service.py      # 启动pipeline服务端的python脚本
 ```
 #### Python Serving
+- 进入工作目录：
+```bash
+cd deploy/paddleserving
+```
 - 启动服务：
 ```bash
 # 在当前命令行窗口启动并保持在前端
