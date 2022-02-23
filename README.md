@@ -1,10 +1,4 @@
 
-# Applications
+Source code now lives in the [develop/applications](https://github.com/PaddlePaddle/PaddleVideo/tree/develop/applications)
 
-we release some interesting projects in this branch.
-
-- [VideoTag](VideoTag/)
-
-- [FootballAction](FootballAction/)
-
-- welcomes your interesting projects
+- This branch is deprecated.
