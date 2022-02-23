@@ -13,7 +13,7 @@ train_model_name:null
 -o DATASET.train.file_path:null
 ##
 trainer:norm_train
-norm_train:main.py --validate -c configs/localization/bmn.yaml --seed 1234 --max_iters=30
+norm_train:main.py --validate -c configs/localization/bmn.yaml --seed 1234
 pact_train:null
 fpgm_train:null
 distill_train:null
