@@ -65,6 +65,12 @@ python main.py --test \
    -c configs/detection/ava/ava.yaml
 ```
 
+
+| architecture | depth | Pretrain Model |  frame length x sample rate  | MAP | AVA version | model |
+| ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |------------- |
+| SlowFast | R50 | [Kinetics 400](https://videotag.bj.bcebos.com/PaddleVideo/SlowFast/SlowFast_8*8.pdparams) | 8 x 8 | 23.2 | 2.1 | [`link`](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/SlowFastRCNN_AVA.pdparams) |
+
+
 ## Inference
 
 The action detection of this project is divided into two stages. In the first stage, humans' proposals are obtained, and then input into the SlowFast+FasterRCNN model for action recognition.
