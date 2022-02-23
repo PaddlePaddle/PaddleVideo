@@ -776,7 +776,7 @@ class MSTCN_Inference_helper(Base_Inference_helper):
             f = open(write_path, "w")
             f.writelines(recog_content)
             f.close()
-        print("file write in : " + reslut_path + " Write result success!")
+        print("result write in : " + write_path)
 
 
 @INFERENCE.register()
@@ -868,7 +868,7 @@ class ASRF_Inference_helper(Base_Inference_helper):
             f = open(write_path, "w")
             f.writelines(recog_content)
             f.close()
-        print("file write in : " + reslut_path + " Write result success!")
+        print("result write in : " + write_path)
 
 
 @INFERENCE.register()

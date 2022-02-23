@@ -42,7 +42,7 @@ python3.7 main.py  --validate -c configs/segmentation/ms_tcn/ms_tcn_gtea.yaml --
 可通过如下方式进行模型测试：
 
 ```bash
-python main.py  --test -c configs/segmentation/ms_tcn/ms_tcn_gtea.yaml --weights=./output/MSTCN/MSTCN_split_1_best.pdparams
+python main.py  --test -c configs/segmentation/ms_tcn/ms_tcn_gtea.yaml --weights=./output/MSTCN/MSTCN_split_1.pdparams
 ```
 
 - 指标的具体实现是参考MS-TCN作者[evel.py](https://github.com/yabufarha/ms-tcn/blob/master/eval.py)提供的测试脚本，计算Acc、Edit和F1分数。
@@ -74,17 +74,57 @@ python main.py  --test -c configs/segmentation/ms_tcn/ms_tcn_gtea.yaml --weights
 
 Test_Data| F1@0.5 | checkpoints |
 | :----: | :----: | :---- |
-| gtea_split1 | 70.2509 | [MSTCN_split_1_best.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/MSTCN_split_1_best.pdparams) |
-| gtea_split2 | 70.7224 | [MSTCN_split_2_best.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/MSTCN_split_2_best.pdparams) |
-| gtea_split3 | 80.0 | [MSTCN_split_3_best.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/MSTCN_split_3_best.pdparams) |
-| gtea_split4 | 78.1609 | [MSTCN_split_4_best.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/MSTCN_split_4_best.pdparams) |
+| gtea_split1 | 70.2509 | [MSTCN_gtea_split_1.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/MSTCN_gtea_split_1.pdparams) |
+| gtea_split2 | 70.7224 | [MSTCN_gtea_split_2.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/MSTCN_gtea_split_2.pdparams) |
+| gtea_split3 | 80.0 | [MSTCN_gtea_split_3.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/MSTCN_gtea_split_3.pdparams) |
+| gtea_split4 | 78.1609 | [MSTCN_gtea_split_4.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/MSTCN_gtea_split_4.pdparams) |
 
 
 ## 模型推理
 
 ### 导出inference模型
 
+```bash
+python3.7 tools/export_model.py -c configs/segmentation/ms_tcn/ms_tcn_gtea.yaml \
+                                -p data/MSTCN_gtea_split_1.pdparams \
+                                -o inference/MSTCN
+```
+
+上述命令将生成预测所需的模型结构文件`MSTCN.pdmodel`和模型权重文件`MSTCN.pdiparams`。
+
 - 各参数含义可参考[模型推理方法](https://github.com/PaddlePaddle/PaddleVideo/blob/release/2.0/docs/zh-CN/start.md#2-%E6%A8%A1%E5%9E%8B%E6%8E%A8%E7%90%86)
+
+### 使用预测引擎推理
+
+输入预测模型的txt文件为需要预测的文件列表，如:
+```
+S1_Cheese_C1.npy
+S1_CofHoney_C1.npy
+S1_Coffee_C1.npy
+S1_Hotdog_C1.npy
+...
+```
+
+```bash
+python3.7 tools/predict.py --input_file data/gtea/splits/test.split1.bundle \
+                           --config configs/segmentation/ms_tcn/ms_tcn_gtea.yaml \
+                           --model_file inference/MSTCN/MSTCN.pdmodel \
+                           --params_file inference/MSTCN/MSTCN.pdiparams \
+                           --use_gpu=True \
+                           --use_tensorrt=False
+```
+
+输出示例如下:
+
+```bash
+result write in : ./inference/infer_results/S1_Cheese_C1.txt
+result write in : ./inference/infer_results/S1_CofHoney_C1.txt
+result write in : ./inference/infer_results/S1_Coffee_C1.txt
+result write in : ./inference/infer_results/S1_Hotdog_C1.txt
+result write in : ./inference/infer_results/S1_Pealate_C1.txt
+result write in : ./inference/infer_results/S1_Peanut_C1.txt
+result write in : ./inference/infer_results/S1_Tea_C1.txt
+```
 
 ## 参考论文
 
