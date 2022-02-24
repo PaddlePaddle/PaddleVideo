@@ -226,7 +226,7 @@ namespace PaddleVideo
                 {
                     config.EnableTensorRtEngine(
                         1 << 30, // workspaceSize
-                        this->rec_batch_num * this->num_seg * 1, // maxBatchSize 
+                        this->rec_batch_num * this->num_seg * 1, // maxBatchSize
                         30, // minSubgraphSize
                         precision, // precision
                         false,// useStatic
@@ -241,20 +241,21 @@ namespace PaddleVideo
                         30, // minSubgraphSize
                         precision,// precision
                         false,// useStatic
-                        false //useCalibMode 
+                        false //useCalibMode
                     );
                 }
                 else
                 {
                     config.EnableTensorRtEngine(
                         1 << 30, // workspaceSize
-                        this->rec_batch_num, // maxBatchSize 
+                        this->rec_batch_num, // maxBatchSize
                         30, // minSubgraphSize
                         precision,// precision
                         false,// useStatic
                         false //useCalibMode
                     );
                 }
+
                 std::map<std::string, std::vector<int> > min_input_shape =
                 {
                     {"data_batch_0", {1, this->num_seg, 3, 1, 1}}
