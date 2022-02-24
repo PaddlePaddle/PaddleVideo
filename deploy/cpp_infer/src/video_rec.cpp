@@ -225,40 +225,52 @@ namespace PaddleVideo
                 if (this->inference_model_name == "ppTSM" || this->inference_model_name == "TSM")
                 {
                     config.EnableTensorRtEngine(
-                        1 << 20, this->rec_batch_num * this->num_seg * 1, 3,
-                        precision,
-                        false, false);
+                        1 << 30, // workspaceSize
+                        this->rec_batch_num * this->num_seg * 1, // maxBatchSize 
+                        30, // minSubgraphSize
+                        precision, // precision
+                        false,// useStatic
+                        false //useCalibMode
+                    );
                 }
                 else if(this->inference_model_name == "ppTSN" || this->inference_model_name == "TSN")
                 {
                     config.EnableTensorRtEngine(
-                        1 << 20, this->rec_batch_num * this->num_seg * 10, 3,
-                        precision,
-                        false, false);
+                        1 << 30,
+                        this->rec_batch_num * this->num_seg * 10,
+                        30, // minSubgraphSize
+                        precision,// precision
+                        false,// useStatic
+                        false //useCalibMode 
+                    );
                 }
                 else
                 {
                     config.EnableTensorRtEngine(
-                        1 << 20, this->rec_batch_num, 3,
-                        precision,
-                        false, false);
+                        1 << 30, // workspaceSize
+                        this->rec_batch_num, // maxBatchSize 
+                        30, // minSubgraphSize
+                        precision,// precision
+                        false,// useStatic
+                        false //useCalibMode
+                    );
                 }
-                // std::map<std::string, std::vector<int>> min_input_shape =
-                // {
-                //     {"data_batch", {1, 1, 1, 1, 1}}
-                // };
-                // std::map<std::string, std::vector<int>> max_input_shape =
-                // {
-                //     {"data_batch", {10,  this->num_seg, 3, 224, 224}}
-                // };
-                // std::map<std::string, std::vector<int>> opt_input_shape =
-                // {
-                //     {"data_batch", {this->rec_batch_num,  this->num_seg, 3, 224, 224}}
-                // };
+                std::map<std::string, std::vector<int> > min_input_shape =
+                {
+                    {"data_batch_0", {1, this->num_seg, 3, 1, 1}}
+                };
+                std::map<std::string, std::vector<int> > max_input_shape =
+                {
+                    {"data_batch_0", {1, this->num_seg, 3, 256, 256}}
+                };
+                std::map<std::string, std::vector<int> > opt_input_shape =
+                {
+                    {"data_batch_0", {this->rec_batch_num,  this->num_seg, 3, 224, 224}}
+                };
 
-                // config.SetTRTDynamicShapeInfo(min_input_shape, max_input_shape,
-                //                               opt_input_shape);
-            }
+                config.SetTRTDynamicShapeInfo(min_input_shape, max_input_shape,
+                                              opt_input_shape);
+                std::cout << "Enable TensorRT is: " << config.tensorrt_engine_enabled() << std::endl;            }
         }
         else
         {
