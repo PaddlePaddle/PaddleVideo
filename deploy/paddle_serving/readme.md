@@ -105,10 +105,10 @@ fetch_var {
 paddleserving 目录包含了启动 pipeline 服务、C++ serving服务(TODO)和发送预测请求的代码，具体包括：
 ```bash
 __init__.py
-configs/xxx.yaml                   # 启动pipeline服务的配置文件
-pipeline_http_client.py            # http方式发送pipeline预测请求的python脚本
-pipeline_rpc_client.py     		   # rpc方式发送pipeline预测请求的python脚本
-classification_web_service.py      # 启动pipeline服务端的python脚本
+configs/xxx.yaml            # 启动pipeline服务的配置文件
+pipeline_http_client.py     # http方式发送pipeline预测请求的python脚本
+pipeline_rpc_client.py      # rpc方式发送pipeline预测请求的python脚本
+recognition_web_service.py  # 启动pipeline服务端的python脚本
 ```
 #### Python Serving
 - 进入工作目录：

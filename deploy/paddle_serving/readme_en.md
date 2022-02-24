@@ -111,10 +111,10 @@ fetch_var {
 The paddleserving directory contains the code for starting the pipeline service, C++ serving service (TODO) and sending prediction requests, including:
 ```bash
 __init__.py
-configs/xxx.yaml  # start the configuration file of the pipeline service
-pipeline_http_client.py  # python script for sending pipeline prediction request via http
-pipeline_rpc_client.py  # python script for sending pipeline prediction request in rpc mode
-classification_web_service.py  # python script to start the pipeline server
+configs/xxx.yaml            # start the configuration file of the pipeline service
+pipeline_http_client.py     # python script for sending pipeline prediction request via http
+pipeline_rpc_client.py      # python script for sending pipeline prediction request in rpc mode
+recognition_web_service.py  # python script to start the pipeline server
 ```
 #### Python Serving
 - Go to the working directory:
