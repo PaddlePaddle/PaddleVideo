@@ -46,6 +46,11 @@ PIPELINE: #PIPELINE field
         transform: #Mandotary, image transfrom operator
             - RandomRotation:
                 argument: True
+            - SketeonModalityTransform:
+                joint: Fasle
+                bone: True
+                motion: False
+                graph: 'ntu_rgb_d'
     valid: #Mandotary, indicate the pipeline to deal with the training data, associate to the 'paddlevideo/loader/pipelines/'
         sample:
             - Iden:
@@ -55,6 +60,11 @@ PIPELINE: #PIPELINE field
         transform: #Mandotary, image transfrom operator
             - RandomRotation:
                 argument: False
+            - SketeonModalityTransform:
+                joint: Fasle
+                bone: True
+                motion: False
+                graph: 'ntu_rgb_d'
     test: #Mandotary, indicate the pipeline to deal with the training data, associate to the 'paddlevideo/loader/pipelines/'
         sample:
             - Iden:
@@ -64,6 +74,11 @@ PIPELINE: #PIPELINE field
         transform: #Mandotary, image transfrom operator
             - RandomRotation:
                 argument: False
+            - SketeonModalityTransform:
+                joint: Fasle
+                bone: True
+                motion: False
+                graph: 'ntu_rgb_d'
 
 OPTIMIZER: #OPTIMIZER field
   name: 'Momentum'

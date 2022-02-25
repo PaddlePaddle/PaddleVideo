@@ -235,3 +235,46 @@ class SketeonCropSample(object):
             raise NotImplementedError
         results['data'] = data
         return results
+
+
+@PIPELINES.register()
+class SketeonModalityTransform(object):
+    """
+    Sketeon Crop Sampler.
+    Args:
+        crop_model: str, crop model, support: ['center'].
+        p_interval: list, crop len
+        window_size: int, sample windows size.
+    """
+
+    def __init__(self, bone, motion, joint=True, graph='ntu_rgb_d'):
+
+        self.joint = joint
+        self.bone = bone
+        self.motion = motion
+        self.graph = graph
+        if self.graph == "ntu_rgb_d":
+            self.bone_pairs = ((1, 2), (2, 21), (3, 21), (4, 3), (5, 21),
+                               (6, 5), (7, 6), (8, 7), (9, 21), (10, 9),
+                               (11, 10), (12, 11), (13, 1), (14, 13), (15, 14),
+                               (16, 15), (17, 1), (18, 17), (19, 18), (20, 19),
+                               (22, 23), (21, 21), (23, 8), (24, 25), (25, 12))
+        else:
+            raise NotImplementedError
+
+    def __call__(self, results):
+        if self.joint:
+            return results
+        data_numpy = results['data']
+        if self.bone:
+            bone_data_numpy = np.zeros_like(data_numpy)
+            for v1, v2 in self.bone_pairs:
+                bone_data_numpy[:, :, v1 -
+                                1] = data_numpy[:, :, v1 -
+                                                1] - data_numpy[:, :, v2 - 1]
+            data_numpy = bone_data_numpy
+        if self.motion:
+            data_numpy[:, :-1] = data_numpy[:, 1:] - data_numpy[:, :-1]
+            data_numpy[:, -1] = 0
+        results['data'] = data_numpy
+        return results
