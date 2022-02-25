@@ -17,7 +17,7 @@
   <img src="./images/SlowFast_FasterRCNN.png" width="640px"/><br>
 </div>
 
-AIStudio项目[基于时空信息的异常行为检测](https://aistudio.baidu.com/aistudio/projectdetail/3431613)
+AIStudio项目: [基于时空信息的异常行为检测](https://aistudio.baidu.com/aistudio/projectdetail/3431613)
 
 ## 数据准备
 
