@@ -23,7 +23,7 @@
  - LSTM，动作分类 + 回归
 
 
-参考AIStudio项目： [基于PP-TSM+BMN+LSTM实现足球精彩时刻剪辑](https://aistudio.baidu.com/aistudio/projectdetail/3473391?channelType=0&channel=0)
+AIStudio项目： [基于PP-TSM+BMN+LSTM实现足球精彩时刻剪辑](https://aistudio.baidu.com/aistudio/projectdetail/3473391?channelType=0&channel=0)
 
 
 ## 数据准备
