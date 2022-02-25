@@ -20,7 +20,10 @@ import copy
 import json
 from ..registry import PIPELINES
 
-from paddlenlp.transformers import BertTokenizer
+try:
+    from paddlenlp.transformers import BertTokenizer
+except ImportError as e:
+    print(e)
 
 
 @PIPELINES.register()

@@ -16,10 +16,15 @@ import os.path as osp
 import copy
 import random
 import numpy as np
-import lmdb
+try:
+    import lmdb
+except ImportError as e:
+    print(e)
 import pickle
-
-from paddlenlp.transformers import BertTokenizer
+try:
+    from paddlenlp.transformers import BertTokenizer
+except ImportError as e:
+    print(e)
 from ..registry import DATASETS
 from .base import BaseDataset
 from ...utils import get_logger

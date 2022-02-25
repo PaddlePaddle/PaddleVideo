@@ -3,8 +3,10 @@ from itertools import repeat
 from typing import Any, Callable, Optional, Tuple, Union
 
 import paddle
-from einops import rearrange
-
+try:
+    from einops import rearrange
+except ImportError as e:
+    print(e)
 container_abcs = collections.abc
 from ..registry import BACKBONES
 from collections import OrderedDict
@@ -31,7 +33,6 @@ def same_padding(x: paddle.Tensor, in_height: int, in_width: int, stride_h: int,
 
 
 def _ntuple(n):
-
     def parse(x):
         if isinstance(x, container_abcs.Iterable):
             return x
@@ -71,7 +72,6 @@ class Identity(paddle.nn.Layer):
         args: any argument (unused)
         kwargs: any keyword argument (unused)
     """
-
     def __init__(self, *args, **kwargs):
         super(Identity, self).__init__()
 
@@ -80,7 +80,6 @@ class Identity(paddle.nn.Layer):
 
 
 class CausalModule(paddle.nn.Layer):
-
     def __init__(self) -> None:
         super().__init__()
         self.activation = None
@@ -90,7 +89,6 @@ class CausalModule(paddle.nn.Layer):
 
 
 class Conv2dBNActivation(paddle.nn.Sequential):
-
     def __init__(
         self,
         in_planes: int,
@@ -128,7 +126,6 @@ class Conv2dBNActivation(paddle.nn.Sequential):
 
 
 class Conv3DBNActivation(paddle.nn.Sequential):
-
     def __init__(
         self,
         in_planes: int,
@@ -168,7 +165,6 @@ class Conv3DBNActivation(paddle.nn.Sequential):
 
 
 class ConvBlock3D(CausalModule):
-
     def __init__(
         self,
         in_planes: int,
@@ -317,7 +313,6 @@ def _no_grad_fill_ones(tensor):
 
 
 class TemporalCGAvgPool3D(CausalModule):
-
     def __init__(self, ) -> None:
         super().__init__()
         self.n_cumulated_values = 0
@@ -351,7 +346,6 @@ class TemporalCGAvgPool3D(CausalModule):
 
 
 class SqueezeExcitation(paddle.nn.Layer):
-
     def __init__(self,
                  input_channels: int,
                  activation_2: paddle.nn.Layer,
@@ -403,7 +397,6 @@ class SqueezeExcitation(paddle.nn.Layer):
 
 
 class tfAvgPool3D(paddle.nn.Layer):
-
     def __init__(self) -> None:
         super().__init__()
         self.avgf = paddle.nn.AvgPool3D((1, 3, 3), stride=(1, 2, 2))
@@ -433,7 +426,6 @@ class tfAvgPool3D(paddle.nn.Layer):
 
 
 class BasicBneck(paddle.nn.Layer):
-
     def __init__(
         self,
         cfg,
@@ -534,7 +526,6 @@ class BasicBneck(paddle.nn.Layer):
 
 @BACKBONES.register()
 class MoViNet(paddle.nn.Layer):
-
     def __init__(self,
                  cfg,
                  causal: bool = True,

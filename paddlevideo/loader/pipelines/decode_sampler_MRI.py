@@ -17,7 +17,10 @@ import random
 
 import numpy as np
 from PIL import Image
-import SimpleITK as sitk
+try:
+    import SimpleITK as sitk
+except ImportError as e:
+    print(f"{e}, [SimpleITK] package may needed.")
 import cv2
 
 from ..registry import PIPELINES

@@ -2,7 +2,10 @@
 Inspired by
 https://github.com/PeizeSun/SparseR-CNN/blob/dff4c43a9526a6d0d2480abc833e78a7c29ddb1a/detectron2/config/defaults.py
 """
-from fvcore.common.config import CfgNode as CN
+try:
+    from fvcore.common.config import CfgNode as CN
+except ImportError as e:
+    print(e)
 
 
 def fill_SE_config(
