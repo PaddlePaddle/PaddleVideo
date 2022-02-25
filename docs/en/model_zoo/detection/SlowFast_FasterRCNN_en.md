@@ -13,6 +13,7 @@
 Before getting started, you may need to install additional dependencies as follows:
 ```bash
 python -m pip install moviepy
+python -m pip install et_xmlfile
 python -m pip install paddledet
 ```
 

@@ -13,6 +13,7 @@
 在开始使用之前，您可能需要按照以下命令安装额外的依赖包：
 ```bash
 python -m pip install moviepy
+python -m pip install et_xmlfile
 python -m pip install paddledet
 ```
 
