@@ -194,11 +194,11 @@ There are two ways to obtain the Paddle prediction library, which will be descri
     Take PP-TSM as an example, the above parameters are as follows (the xxx part is modified according to the user's own machine situation)
 
     ```bash
-    OPENCV_DIR=/xxx/xxx/xxx/xxx/xxx/xxx/opencv3
-    LIB_DIR=/xxx/xxx/xxx/xxx/xxx/paddle_inference
-    CUDA_LIB_DIR=/xxx/xxx/cuda-xxx/lib64
-    CUDNN_LIB_DIR=/xxx/xxx/cuda-xxx/lib64
-    TENSORRT_DIR=/xxx/xxx/TensorRT-7.0.0.11
+    OPENCV_DIR=/path/to/opencv3
+    LIB_DIR=/path/to/paddle_inference
+    CUDA_LIB_DIR=/path/to/cuda/lib64
+    CUDNN_LIB_DIR=/path/to/cuda/lib64
+    TENSORRT_DIR=/path/to/TensorRT-x.x.x.x
     ```
 
     Among them, `OPENCV_DIR` is the address where opencv is compiled and installed; `LIB_DIR` is the download (`paddle_inference` folder) or compiled Paddle prediction library address (`build/paddle_inference_install_dir` folder); `CUDA_LIB_DIR` is the cuda library file address , In docker, it is `/usr/local/cuda/lib64`; `CUDNN_LIB_DIR` is the address of the cudnn library file, in docker it is `/usr/lib/x86_64-linux-gnu/`. **Note: The above paths are written as absolute paths, do not write relative paths. **
