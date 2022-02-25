@@ -14,13 +14,16 @@
 
 
 ## 模型简介
-该代码库用于体育动作检测+识别, 基于paddle2.0版本开发，结合PaddleVideo中的ppTSM, BMN, attentionLSTM的多个视频模型进行视频时空二阶段检测算法。
+该代码库用于体育动作检测+识别, 基于paddle2.0版本开发，结合PaddleVideo中的PP-TSM, BMN, AttentionLSTM的多个视频模型进行视频时空二阶段检测算法。
 主要分为如下几步
  - 特征抽取
-    - 图像特性，ppTSM
-    - 音频特征，Vggsound
+    - 图像特性，PP-TSM
+    - 音频特征，VGGish
  - proposal提取，BMN
  - LSTM，动作分类 + 回归
+
+
+参考AIStudio项目： [基于PP-TSM+BMN+LSTM实现足球精彩时刻剪辑](https://aistudio.baidu.com/aistudio/projectdetail/3473391?channelType=0&channel=0)
 
 
 ## 数据准备
