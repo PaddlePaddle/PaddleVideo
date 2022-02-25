@@ -20,7 +20,7 @@ import PIL.Image as pil
 try:
     import skimage.transform
 except ImportError as e:
-    print(f"{e}, [scikit-image] package may needed.")
+    print(f"{e}, [scikit-image] package and it's dependencies may needed.")
 from PIL import Image
 
 from ..registry import PIPELINES

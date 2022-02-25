@@ -947,7 +947,9 @@ class TransNetV2_Inference_helper():
         try:
             import ffmpeg
         except ImportError as e:
-            print(f"{e}, [ffmpeg-python] package may needed.")
+            print(
+                f"{e}, [ffmpeg-python] package and it's dependencies may needed."
+            )
         assert os.path.isfile(input_file) is not None, "{0} not exists".format(
             input_file)
         self.input_file = input_file

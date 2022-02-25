@@ -84,7 +84,7 @@ from scipy.ndimage import interpolation, binary_dilation
 try:
     from skimage import morphology, transform
 except ImportError as e:
-    print(f"{e}, [scikit-image] package may needed.")
+    print(f"{e}, [scikit-image] package and it's dependencies may needed.")
 import paddle
 import cv2
 import random

@@ -203,7 +203,7 @@ def main():
                 import auto_log
             except ImportError as e:
                 print(
-                    f"{e}, [git+https://github.com/LDOUBLEV/AutoLog] package may needed."
+                    f"{e}, [git+https://github.com/LDOUBLEV/AutoLog] package and it's dependencies may needed."
                 )
             pid = os.getpid()
             autolog = auto_log.AutoLogger(model_name=cfg.model_name,

@@ -21,7 +21,7 @@ import math
 try:
     import ppdet
 except ImportError as e:
-    print(f"{e}, [paddledet] package may needed.")
+    print(f"{e}, [paddledet] package and it's dependencies may needed.")
 
 __dir__ = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.abspath(os.path.join(__dir__, '../')))
