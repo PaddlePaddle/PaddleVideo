@@ -227,7 +227,7 @@ namespace PaddleVideo
                     config.EnableTensorRtEngine(
                         1 << 30, // workspaceSize
                         this->rec_batch_num * this->num_seg * 1, // maxBatchSize
-                        30, // minSubgraphSize
+                        3, // minSubgraphSize
                         precision, // precision
                         false,// useStatic
                         false //useCalibMode
@@ -238,7 +238,7 @@ namespace PaddleVideo
                     config.EnableTensorRtEngine(
                         1 << 30,
                         this->rec_batch_num * this->num_seg * 10,
-                        30, // minSubgraphSize
+                        3, // minSubgraphSize
                         precision,// precision
                         false,// useStatic
                         false //useCalibMode
@@ -249,29 +249,33 @@ namespace PaddleVideo
                     config.EnableTensorRtEngine(
                         1 << 30, // workspaceSize
                         this->rec_batch_num, // maxBatchSize
-                        30, // minSubgraphSize
+                        3, // minSubgraphSize
                         precision,// precision
                         false,// useStatic
                         false //useCalibMode
                     );
                 }
 
-                std::map<std::string, std::vector<int> > min_input_shape =
-                {
-                    {"data_batch_0", {1, this->num_seg, 3, 1, 1}}
-                };
-                std::map<std::string, std::vector<int> > max_input_shape =
-                {
-                    {"data_batch_0", {1, this->num_seg, 3, 256, 256}}
-                };
-                std::map<std::string, std::vector<int> > opt_input_shape =
-                {
-                    {"data_batch_0", {this->rec_batch_num,  this->num_seg, 3, 224, 224}}
-                };
+                std::cout << "Enable TensorRT is: " << config.tensorrt_engine_enabled() << std::endl;
 
-                config.SetTRTDynamicShapeInfo(min_input_shape, max_input_shape,
-                                              opt_input_shape);
-                std::cout << "Enable TensorRT is: " << config.tensorrt_engine_enabled() << std::endl;            }
+                /* some model dose not suppport dynamic shape with TRT, deactivate it by default */
+
+                // std::map<std::string, std::vector<int> > min_input_shape =
+                // {
+                //     {"data_batch_0", {1, this->num_seg, 3, 1, 1}}
+                // };
+                // std::map<std::string, std::vector<int> > max_input_shape =
+                // {
+                //     {"data_batch_0", {1, this->num_seg, 3, 256, 256}}
+                // };
+                // std::map<std::string, std::vector<int> > opt_input_shape =
+                // {
+                //     {"data_batch_0", {this->rec_batch_num,  this->num_seg, 3, 224, 224}}
+                // };
+
+                // config.SetTRTDynamicShapeInfo(min_input_shape, max_input_shape,
+                //                               opt_input_shape);
+            }
         }
         else
         {

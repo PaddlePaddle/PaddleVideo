@@ -101,12 +101,12 @@ PaddleVideo模型部署。
 
 #### 1.2.1 直接下载安装
 
-* [Paddle预测库官网](https://paddleinference.paddlepaddle.org.cn/v2.1/user_guides/download_lib.html) 上提供了不同cuda版本的Linux预测库，可以在官网查看并**选择合适的预测库版本**（建议选择paddle版本>=2.0.1版本的预测库）。
+* [Paddle预测库官网](https://paddleinference.paddlepaddle.org.cn/v2.2/user_guides/download_lib.html) 上提供了不同cuda版本的Linux预测库，可以在官网查看并**选择合适的预测库版本**（建议选择paddle版本>=2.0.1版本的预测库）。
 
 * 下载得到一个`paddle_inference.tgz`压缩包，然后将它解压成文件夹，命令如下(以机器环境为gcc8.2为例)：
 
     ```bash
-    wget https://paddle-inference-lib.bj.bcebos.com/2.1.1-gpu-cuda10.1-cudnn7-mkl-gcc8.2/paddle_inference.tgz
+    wget https://paddle-inference-lib.bj.bcebos.com/2.2.2/cxx_c/Linux/GPU/x86-64_gcc8.2_avx_mkl_cuda10.1_cudnn7.6.5_trt6.0.1.5/paddle_inference.tgz
     tar -xf paddle_inference.tgz
     ```
 
@@ -118,7 +118,7 @@ PaddleVideo模型部署。
 
     ```shell
     git clone https://github.com/PaddlePaddle/Paddle.git
-    git checkout release/2.1
+    git checkout release/2.2
     ```
 
 * 进入Paddle目录后，编译方法如下。
@@ -217,6 +217,14 @@ PaddleVideo模型部署。
 
 其中，`mode`为必选参数，表示选择的功能，取值范围['rec']，表示**视频识别**（更多功能会陆续加入）。
 
+注意：如果要在预测时开启TensorRT优化选项，需要先运行以下命令设置好TensorRT的相关路径。
+```bash
+export PATH=$PATH:/path/to/cuda/bin
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/path/to/cuda/bin
+export LIBRARY_PATH=$LIBRARY_PATH:/path/to/cuda/bin
+export LD_LIBRARY_PATH=/path/to/TensorRT-x.x.x.x/lib:$LD_LIBRARY_PATH
+```
+
 ##### 1. 调用视频识别：
 ```bash
 # 调用PP-TSM识别
@@ -292,4 +300,4 @@ I1125 08:10:45.834602 13955 autolog.h:67] preprocess_time(ms): 10.6524, inferenc
 
 ### 3 注意
 
-* 在使用Paddle预测库时，推荐使用2.1.0版本的预测库。
+* 在使用Paddle预测库时，推荐使用2.2.2版本的预测库。
