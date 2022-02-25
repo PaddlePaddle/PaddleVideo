@@ -6,6 +6,11 @@ This chapter introduces the C++ deployment method of the PaddleVideo model. For 
 C++ is better than python in terms of performance calculation. Therefore, in most CPU and GPU deployment scenarios, C++ deployment methods are mostly used. This section will introduce how to configure the C++ environment in the Linux (CPU/GPU) environment and complete it.
 PaddleVideo model deployment.
 
+Before getting started, you may need to install additional dependencies as follows:
+```bash
+python -m pip install [paddledet](git+https://github.com/LDOUBLEV/AutoLog)
+```
+
 ## 1. Prepare the environment
 
 - For Linux environment, docker is recommended.

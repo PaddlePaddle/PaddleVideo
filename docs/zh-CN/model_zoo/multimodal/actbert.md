@@ -11,6 +11,11 @@
 - [模型测试](#模型测试)
 - [参考论文](#参考论文)
 
+在开始使用之前，您可能需要按照以下命令安装额外的依赖包：
+```bash
+python -m pip install paddlenlp
+python -m pip install lmdb
+```
 
 ## 模型简介
 

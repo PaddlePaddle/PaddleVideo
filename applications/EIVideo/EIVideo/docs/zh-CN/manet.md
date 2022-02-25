@@ -1,4 +1,4 @@
-[English](../../../en/model_zoo/partition/manet.md) | 简体中文
+[English](../en/manet.md) | 简体中文
 
 # Ma-Net视频切分模型
 
@@ -14,8 +14,10 @@
 
 - [模型推理](#模型推理)
 
-
-
+在开始使用之前，您可能需要按照以下命令安装额外的依赖包：
+```bash
+python -m pip install scikit-image
+```
 
 ## 模型简介
 

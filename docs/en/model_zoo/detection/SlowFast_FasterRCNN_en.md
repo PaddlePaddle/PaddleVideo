@@ -1,4 +1,4 @@
-[简体中文](../../../zh-CN/model_zoo/detection/SlowFast_FastRCNN.md) | English
+[简体中文](../../../zh-CN/model_zoo/detection/SlowFast_FasterRCNN.md) | English
 
 # SlowFast_FasterRCNN
 
@@ -10,6 +10,11 @@
 - [Test](#Test)
 - [Inference](#Inference)
 
+Before getting started, you may need to install additional dependencies as follows:
+```bash
+python -m pip install moviepy
+python -m pip install paddledet
+```
 
 ## Introduction
 

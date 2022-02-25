@@ -11,6 +11,11 @@
 - [Inference](#Inference)
 - [Reference](#Reference)
 
+Before getting started, you may need to install additional dependencies as follows:
+```bash
+python -m pip install scikit-image
+python -m pip install matplotlib
+```
 
 ## Introduction
 
