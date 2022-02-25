@@ -194,9 +194,9 @@ TSN模型默认以mp4的视频文件作为输入，训练时需要先对视频�
 
 ## 扩展内容
 
-- 更多关于TSN模型的内容可参考PaddleCV视频库[TSN视频分类模型](../../models/tsn/README.md)。
+- 更多关于TSN模型的内容可参考PaddleCV视频库[TSN视频分类模型](https://github.com/PaddlePaddle/models/blob/develop/PaddleCV/video/models/tsn/README.md)。
 
-- 更多关于AttentionLSTM模型的内容可参考PaddleCV视频库[AttentionLSTM视频分类模型](../../models/attention_lstm/README.md)。
+- 更多关于AttentionLSTM模型的内容可参考PaddleCV视频库[AttentionLSTM视频分类模型](https://github.com/PaddlePaddle/models/tree/develop/PaddleCV/video/models/attention_lstm)。
 
 
 ## 参考论文
