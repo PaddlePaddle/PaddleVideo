@@ -20,13 +20,17 @@ import sys
 import cv2
 try:
     import imageio
-except Exception as e:
-    print(e)
+except ImportError as e:
+    print(
+        f"{e}, [imageio] package and it's dependencies is required for VideoSwin."
+    )
 try:
     import matplotlib as mpl
     import matplotlib.cm as cm
-except Exception as e:
-    print(e)
+except ImportError as e:
+    print(
+        f"{e}, [matplotlib] package and it's dependencies is required for ADDS."
+    )
 import numpy as np
 import paddle
 import paddle.nn.functional as F
