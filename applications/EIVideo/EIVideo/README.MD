@@ -1,6 +1,6 @@
 # 交互式视频智能标注工具 - CLI(Command Line Interface)
 
-在开始使用之前，您可能需要按照以下命令安装额外的依赖包：
+在开始使用之前，您需要按照以下命令安装额外的依赖包：
 ```bash
 python -m pip install scikit-image
 ```

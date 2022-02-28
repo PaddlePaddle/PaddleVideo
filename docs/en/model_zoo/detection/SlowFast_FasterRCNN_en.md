@@ -10,7 +10,7 @@
 - [Test](#Test)
 - [Inference](#Inference)
 
-Before getting started, you may need to install additional dependencies as follows:
+Before getting started, you need to install additional dependencies as follows:
 ```bash
 python -m pip install moviepy
 python -m pip install et_xmlfile

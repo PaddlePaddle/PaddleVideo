@@ -10,7 +10,7 @@
 - [模型测试](#模型测试)
 - [模型推理](#模型推理)
 
-在开始使用之前，您可能需要按照以下命令安装额外的依赖包：
+在开始使用之前，您需要按照以下命令安装额外的依赖包：
 ```bash
 python -m pip install moviepy
 python -m pip install et_xmlfile

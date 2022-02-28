@@ -14,7 +14,7 @@
 
 - [Inference](#Inference)
 
-Before getting started, you may need to install additional dependencies as follows:
+Before getting started, you need to install additional dependencies as follows:
 ```bash
 python -m pip install scikit-image
 ```

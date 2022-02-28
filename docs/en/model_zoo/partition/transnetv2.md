@@ -12,7 +12,7 @@
 - [Details](#Details)
 - [Reference](#Reference)
 
-Before getting started, you may need to install additional dependencies as follows:
+Before getting started, you need to install additional dependencies as follows:
 ```bash
 python -m pip install ffmpeg-python==0.2.0
 ```

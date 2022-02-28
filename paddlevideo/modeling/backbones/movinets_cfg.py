@@ -5,7 +5,8 @@ https://github.com/PeizeSun/SparseR-CNN/blob/dff4c43a9526a6d0d2480abc833e78a7c29
 try:
     from fvcore.common.config import CfgNode as CN
 except ImportError as e:
-    print(e)
+    print(
+        f"{e}, [fvcore] package and it's dependencies is required for MoViNet.")
 
 
 def fill_SE_config(

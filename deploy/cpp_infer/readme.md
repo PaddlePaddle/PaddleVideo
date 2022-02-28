@@ -6,7 +6,7 @@
 C++在性能计算上优于python，因此，在大多数CPU、GPU部署场景，多采用C++的部署方式，本节将介绍如何在Linux（CPU/GPU）环境下配置C++环境并完成
 PaddleVideo模型部署。
 
-在开始使用之前，您可能需要按照以下命令安装额外的依赖包：
+在开始使用之前，您需要按照以下命令安装额外的依赖包：
 ```bash
 python -m pip install git+https://github.com/LDOUBLEV/AutoLog
 ```

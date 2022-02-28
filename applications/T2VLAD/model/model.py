@@ -30,7 +30,9 @@ from model.net_vlad import NetVLAD
 try:
     from paddlenlp.transformers import BertModel
 except ImportError as e:
-    print(e)
+    print(
+        f"{e}, [paddlenlp] package and it's dependencies is required for T2VLAD."
+    )
 
 
 class Mish(nn.Layer):

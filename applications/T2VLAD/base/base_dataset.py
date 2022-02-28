@@ -32,7 +32,9 @@ from zsvision.zs_utils import memcache
 try:
     from paddlenlp.transformers import BertTokenizer
 except ImportError as e:
-    print(e)
+    print(
+        f"{e}, [paddlenlp] package and it's dependencies is required for T2VLAD."
+    )
 from utils import ensure_tensor, expert_tensor_storage
 
 # For SLURM usage, buffering makes it difficult to see events as they happen, so we set

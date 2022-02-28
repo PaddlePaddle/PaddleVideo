@@ -6,7 +6,8 @@ import paddle
 try:
     from einops import rearrange
 except ImportError as e:
-    print(e)
+    print(
+        f"{e}, [einops] package and it's dependencies is required for MoViNet.")
 container_abcs = collections.abc
 from ..registry import BACKBONES
 from collections import OrderedDict

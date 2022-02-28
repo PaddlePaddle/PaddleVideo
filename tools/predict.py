@@ -202,9 +202,9 @@ def main():
             try:
                 import auto_log
             except ImportError as e:
-                print(
-                    f"{e}, [git+https://github.com/LDOUBLEV/AutoLog] package and it's dependencies may needed."
-                )
+                print(f"{e}, [git+https://github.com/LDOUBLEV/AutoLog] "
+                      f"package and it's dependencies is required for "
+                      f"python-inference when enable_benchmark=True.")
             pid = os.getpid()
             autolog = auto_log.AutoLogger(model_name=cfg.model_name,
                                           model_precision=args.precision,
