@@ -18,7 +18,10 @@ import shutil
 import sys
 
 import cv2
-import imageio
+try:
+    import imageio
+except Exception as e:
+    print(e)
 try:
     import matplotlib as mpl
     import matplotlib.cm as cm
