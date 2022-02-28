@@ -105,7 +105,7 @@ docker pull tmtalgo/paddleaction:action-detection-v2
             |--  features          # tsn和audio特征, image fps=5, audio 每秒(1024)
             |--  input_for_bmn     # bmn训练的输入数据，widows=40
             |--  input_for_lstm    # lstm训练的输入数据
-            |--  input_for_tsn     # tsn训练的数据数据
+            |--  input_for_pptsm     # pptsm训练的数据数据
             |--  mp4               # 原始视频.mp4
             |--  frames            # 图像帧, fps=5, '.jpg'格式
             |--  pcm               # 音频pcm, 音频采样率16000，采用通道数1
