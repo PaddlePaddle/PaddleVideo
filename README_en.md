@@ -196,10 +196,10 @@ PaddleVideo is a toolset for video tasks prepared for the industry and academia.
 
 ## Documentation tutorial
 - AI-Studio Tutorial
-    - [[Official] Paddle2.1 realizes video understanding optimization model -- PP-TSM](https://aistudio.baidu.com/aistudio/projectdetail/3399656?contributionType=1)
-    - [[Official] Paddle2.1 realizes video understanding optimization model -- PP-TSN](https://aistudio.baidu.com/aistudio/projectdetail/2879980?contributionType=1)
-    - [[Official] Paddle 2.1 realizes the classic model of video understanding - TSN](https://aistudio.baidu.com/aistudio/projectdetail/2250682)
-    - [[Official] Paddle 2.1 realizes the classic model of video understanding - TSM](https://aistudio.baidu.com/aistudio/projectdetail/2310889)
+    - [[Official] Paddle 2.1 realizes video understanding optimization model -- PP-TSM](https://aistudio.baidu.com/aistudio/projectdetail/3399656?contributionType=1)
+    - [[Official] Paddle 2.1 realizes video understanding optimization model -- PP-TSN](https://aistudio.baidu.com/aistudio/projectdetail/2879980?contributionType=1)
+    - [[Official] Paddle 2.1 realizes the classic model of video understanding -- TSN](https://aistudio.baidu.com/aistudio/projectdetail/2250682)
+    - [[Official] Paddle 2.1 realizes the classic model of video understanding -- TSM](https://aistudio.baidu.com/aistudio/projectdetail/2310889)
     - [BMN video action positioning](https://aistudio.baidu.com/aistudio/projectdetail/2250674)
     - [ST-GCN Tutorial for Figure Skate Skeleton Point Action Recognition](https://aistudio.baidu.com/aistudio/projectdetail/2417717)
     - [[Practice]video understanding transformer model TimeSformer](https://aistudio.baidu.com/aistudio/projectdetail/3413254?contributionType=1)

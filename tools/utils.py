@@ -18,9 +18,19 @@ import shutil
 import sys
 
 import cv2
-import imageio
-import matplotlib as mpl
-import matplotlib.cm as cm
+try:
+    import imageio
+except ImportError as e:
+    print(
+        f"{e}, [imageio] package and it's dependencies is required for VideoSwin."
+    )
+try:
+    import matplotlib as mpl
+    import matplotlib.cm as cm
+except ImportError as e:
+    print(
+        f"{e}, [matplotlib] package and it's dependencies is required for ADDS."
+    )
 import numpy as np
 import paddle
 import paddle.nn.functional as F
@@ -992,7 +1002,12 @@ class TransNetV2_Inference_helper():
         input_file: str, file path
         return: iterator
         """
-        import ffmpeg
+        try:
+            import ffmpeg
+        except ImportError as e:
+            print(
+                f"{e}, [ffmpeg-python] package and it's dependencies is required for TransNetV2."
+            )
         assert os.path.isfile(input_file) is not None, "{0} not exists".format(
             input_file)
         self.input_file = input_file

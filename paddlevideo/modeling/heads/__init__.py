@@ -13,11 +13,14 @@
 # limitations under the License.
 
 from .adds_head import AddsHead
+from .asrf_head import ASRFHead
 from .attention_lstm_head import AttentionLstmHead
 from .base import BaseHead
 from .bbox_head import BBoxHeadAVA
 from .cfbi_head import CollaborativeEnsemblerMS
 from .i3d_head import I3DHead
+from .movinet_head import MoViNetHead
+from .ms_tcn_head import MSTCNHead
 from .pptimesformer_head import ppTimeSformerHead
 from .pptsm_head import ppTSMHead
 from .pptsn_head import ppTSNHead
