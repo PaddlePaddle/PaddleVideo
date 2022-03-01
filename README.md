@@ -208,10 +208,10 @@ PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_githu
 
 ## 文档教程
 - AI-Studio教程
-    - [【官方】Paddle2.1实现视频理解优化模型 -- PP-TSM](https://aistudio.baidu.com/aistudio/projectdetail/3399656?contributionType=1)
-    - [【官方】Paddle2.1实现视频理解优化模型 -- PP-TSN](https://aistudio.baidu.com/aistudio/projectdetail/2879980?contributionType=1)
-    - [【官方】Paddle 2.1实现视频理解经典模型 - TSN](https://aistudio.baidu.com/aistudio/projectdetail/2250682)
-    - [【官方】Paddle 2.1实现视频理解经典模型 - TSM](https://aistudio.baidu.com/aistudio/projectdetail/2310889)
+    - [【官方】Paddle 2.1实现视频理解优化模型 -- PP-TSM](https://aistudio.baidu.com/aistudio/projectdetail/3399656?contributionType=1)
+    - [【官方】Paddle 2.1实现视频理解优化模型 -- PP-TSN](https://aistudio.baidu.com/aistudio/projectdetail/2879980?contributionType=1)
+    - [【官方】Paddle 2.1实现视频理解经典模型 -- TSN](https://aistudio.baidu.com/aistudio/projectdetail/2250682)
+    - [【官方】Paddle 2.1实现视频理解经典模型 -- TSM](https://aistudio.baidu.com/aistudio/projectdetail/2310889)
     - [BMN视频动作定位](https://aistudio.baidu.com/aistudio/projectdetail/2250674)
     - [花样滑冰选手骨骼点动作识别ST-GCN教程](https://aistudio.baidu.com/aistudio/projectdetail/2417717)
     - [【实践】CV领域的Transformer模型TimeSformer实现视频理解](https://aistudio.baidu.com/aistudio/projectdetail/3413254?contributionType=1)

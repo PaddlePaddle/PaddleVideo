@@ -20,7 +20,12 @@ import copy
 import json
 from ..registry import PIPELINES
 
-from paddlenlp.transformers import BertTokenizer
+try:
+    from paddlenlp.transformers import BertTokenizer
+except ImportError as e:
+    print(
+        f"{e}, [paddlenlp] package and it's dependencies is required for ActBERT."
+    )
 
 
 @PIPELINES.register()

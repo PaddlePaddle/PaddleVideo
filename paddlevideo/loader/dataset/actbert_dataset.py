@@ -16,11 +16,18 @@ import os.path as osp
 import copy
 import random
 import numpy as np
-import lmdb
+try:
+    import lmdb
+except ImportError as e:
+    print(f"{e}, [lmdb] package and it's dependencies is required for ActBERT.")
 import pickle
 import json
-
-from paddlenlp.transformers import BertTokenizer
+try:
+    from paddlenlp.transformers import BertTokenizer
+except ImportError as e:
+    print(
+        f"{e}, [paddlenlp] package and it's dependencies is required for ActBERT."
+    )
 from ..registry import DATASETS
 from .base import BaseDataset
 from ...utils import get_logger

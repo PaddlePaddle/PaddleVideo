@@ -11,6 +11,11 @@
 - [模型推理](#模型推理)
 - [参考论文](#参考论文)
 
+在开始使用之前，您需要按照以下命令安装额外的依赖包：
+```bash
+python -m pip install scikit-image
+python -m pip install matplotlib
+```
 
 ## 模型简介
 

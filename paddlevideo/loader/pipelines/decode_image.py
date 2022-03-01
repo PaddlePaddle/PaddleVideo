@@ -16,7 +16,13 @@ import os
 
 import numpy as np
 import PIL.Image as pil
-import skimage.transform
+
+try:
+    import skimage.transform
+except ImportError as e:
+    print(
+        f"{e}, [scikit-image] package and it's dependencies is required for ADDS."
+    )
 from PIL import Image
 
 from ..registry import PIPELINES

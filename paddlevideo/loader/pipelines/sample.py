@@ -17,7 +17,12 @@ import random
 
 import numpy as np
 from PIL import Image
-import SimpleITK as sitk
+try:
+    import SimpleITK as sitk
+except ImportError as e:
+    print(
+        f"{e}, [SimpleITK] package and it's dependencies is required for PP-Care."
+    )
 import cv2
 
 from ..registry import PIPELINES
@@ -340,7 +345,8 @@ class SamplerPkl(object):
         elif len(label) == 1:
             results['labels'] = int(label[0])
         else:
-            results['labels'] = int(label[0]) if random.random() < 0.5 else int(label[1])
+            results['labels'] = int(label[0]) if random.random() < 0.5 else int(
+                label[1])
         results['frames_len'] = len(frames)
         frames_len = results['frames_len']
         average_dur = int(int(frames_len) / self.num_seg)
