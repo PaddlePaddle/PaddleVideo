@@ -35,16 +35,26 @@ Please refer to NTU-RGBD data download and preparation doc [NTU-RGBD](../../data
 - Train CTR-GCN on NTU-RGBD scripts using single gpu：
 
 ```bash
-python main.py --validate -c configs/recognition/ctrgcn/ctrgcn_ntucs.yaml --seed 1
+# joint modality
+python main.py --validate -c configs/recognition/ctrgcn/ctrgcn_ntucs_joint.yaml --seed 1
+
+# bone modality
+python main.py --validate -c configs/recognition/ctrgcn/ctrgcn_ntucs_bone.yaml --seed 1
+
+# motion modality
+python main.py --validate -c configs/recognition/ctrgcn/ctrgcn_ntucs_motion.yaml --seed 1
+
+# bone motion modality
+python main.py --validate -c configs/recognition/ctrgcn/ctrgcn_ntucs_bone_motion.yaml --seed 1
 ```
 
 - Train CTR-GCN on NTU-RGBD scriptsusing multi gpus:
 
 ```bash
-python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3"  --log_dir=log_ctrgcn  main.py  --validate -c configs/recognition/ctrgcn/ctrgcn_ntucs.yaml
+python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3"  --log_dir=log_ctrgcn  main.py  --validate -c configs/recognition/ctrgcn/ctrgcn_ntucs_joint.yaml
 ```
 
-- config file `ctrgcn_ntucs.yaml` corresponding to the config of CTR-GCN on NTU-RGB+D dataset with cross-subject splits.
+- config file `ctrgcn_ntucs_joint.yaml` corresponding to the config of CTR-GCN on NTU-RGB+D dataset with cross-subject splits.
 
 
 ## Test
@@ -54,7 +64,17 @@ python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3"  --log_dir=log_ctrgcn
 - Test scripts：
 
 ```bash
-python3.7 main.py --test -c configs/recognition/ctrgcn/ctrgcn_ntucs.yaml -w output/CTRGCN/CTRGCN_best.pdparams
+# joint modality
+python3.7 main.py --test -c configs/recognition/ctrgcn/ctrgcn_ntucs_joint.yaml -w data/CTRGCN_ntucs_joint.pdparams
+
+# bone modality
+python3.7 main.py --test -c configs/recognition/ctrgcn/ctrgcn_ntucs_bone.yaml -w data/CTRGCN_ntucs_bone.pdparams
+
+# motion modality
+python3.7 main.py --test -c configs/recognition/ctrgcn/ctrgcn_ntucs_motion.yaml -w data/CTRGCN_ntucs_motion.pdparams
+
+# bone motion modality
+python3.7 main.py --test -c configs/recognition/ctrgcn/ctrgcn_ntucs_bone_motion.yaml -w data/CTRGCN_ntucs_bone_motion.pdparams
 ```
 
 - Specify the config file with `-c`, specify the weight path with `-w`.
@@ -62,9 +82,12 @@ python3.7 main.py --test -c configs/recognition/ctrgcn/ctrgcn_ntucs.yaml -w outp
 
 Accuracy on NTU-RGB+D dataset:
 
-| split | Top-1 | checkpoints |
-| :----: | :----: | :---- |
-| cross-subject | 86.02 | [CTRGCN_ntucs.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/CTRGCN_ntucs.pdparams) |
+| split | modality | Top-1 | checkpoints |
+| :----: | :----: | :----: | :----: |
+| cross-subject | joint | 86.02 | [CTRGCN_ntucs_joint.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/CTRGCN_ntucs_joint.pdparams) |
+| cross-subject | bone | 85.24 | [CTRGCN_ntucs_bone.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/CTRGCN_ntucs_bone.pdparams) |
+| cross-subject | motion | 85.33 | [CTRGCN_ntucs_motion.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/CTRGCN_ntucs_motion.pdparams) |
+| cross-subject | bone motion | 84.53 | [CTRGCN_ntucs_bone_motion.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/CTRGCN_ntucs_bone_motion.pdparams) |
 
 
 ## Inference
@@ -72,9 +95,9 @@ Accuracy on NTU-RGB+D dataset:
 ### export inference model
 
 ```bash
-python3.7 tools/export_model.py -c configs/recognition/ctrgcn/ctrgcn_ntucs.yaml \
-                                -p data/CTRGCN_ntucs.pdparams \
-                                -o inference/STGCN
+python3.7 tools/export_model.py -c configs/recognition/ctrgcn/ctrgcn_ntucs_joint.yaml \
+                                -p data/CTRGCN_ntucs_joint.pdparams \
+                                -o inference/CTRGCN
 ```
 
  To get model architecture file `CTRGCN.pdmodel` and parameters file `CTRGCN.pdiparams`, use:
@@ -85,9 +108,9 @@ python3.7 tools/export_model.py -c configs/recognition/ctrgcn/ctrgcn_ntucs.yaml 
 
 ```bash
 python3.7 tools/predict.py --input_file data/example_NTU-RGB-D_sketeton.npy \
-                           --config configs/recognition/ctrgcn/ctrgcn_ntucs.yaml \
-                           --model_file inference/CTRGCN/CTRGCN.pdmodel \
-                           --params_file inference/CTRGCN/CTRGCN.pdiparams \
+                           --config configs/recognition/ctrgcn/ctrgcn_ntucs_joint.yaml \
+                           --model_file inference/CTRGCN_joint/CTRGCN_joint.pdmodel \
+                           --params_file inference/CTRGCN_joint/CTRGCN_joint.pdiparams \
                            --use_gpu=True \
                            --use_tensorrt=False
 ```

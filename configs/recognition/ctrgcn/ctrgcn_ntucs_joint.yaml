@@ -47,8 +47,8 @@ PIPELINE: #PIPELINE field
             - RandomRotation:
                 argument: True
             - SketeonModalityTransform:
-                joint: Fasle
-                bone: True
+                joint: True
+                bone: Fasle
                 motion: False
                 graph: 'ntu_rgb_d'
     valid: #Mandotary, indicate the pipeline to deal with the training data, associate to the 'paddlevideo/loader/pipelines/'
@@ -61,8 +61,8 @@ PIPELINE: #PIPELINE field
             - RandomRotation:
                 argument: False
             - SketeonModalityTransform:
-                joint: Fasle
-                bone: True
+                joint: True
+                bone: Fasle
                 motion: False
                 graph: 'ntu_rgb_d'
     test: #Mandotary, indicate the pipeline to deal with the training data, associate to the 'paddlevideo/loader/pipelines/'
@@ -75,8 +75,8 @@ PIPELINE: #PIPELINE field
             - RandomRotation:
                 argument: False
             - SketeonModalityTransform:
-                joint: Fasle
-                bone: True
+                joint: True
+                bone: Fasle
                 motion: False
                 graph: 'ntu_rgb_d'
 
@@ -104,7 +104,7 @@ INFERENCE:
     vertex_nums: 25
     person_nums: 2
 
-model_name: "CTRGCN"
+model_name: "CTRGCN_joint"
 log_interval: 10 #Optional, the interal of logger, default:10
 epochs: 65 #Mandatory, total epoch
 save_interval: 10

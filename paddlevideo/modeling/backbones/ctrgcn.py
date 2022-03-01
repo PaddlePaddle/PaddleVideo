@@ -168,14 +168,11 @@ class MultiScale_TemporalConv(nn.Layer):
                 nn.Conv2D(in_channels,
                           branch_channels,
                           kernel_size=1,
-                          padding=0),
-                nn.BatchNorm2D(branch_channels),
+                          padding=0), nn.BatchNorm2D(branch_channels),
                 nn.ReLU(),
                 nn.MaxPool2D(kernel_size=(3, 1),
                              stride=(stride, 1),
-                             padding=(1, 0)),
-                nn.BatchNorm2D(branch_channels)  # 为什么还要加bn
-            ))
+                             padding=(1, 0)), nn.BatchNorm2D(branch_channels)))
 
         self.branches.append(
             nn.Sequential(

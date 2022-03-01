@@ -34,16 +34,26 @@ NTU-RGBD数据下载及准备请参考[NTU-RGBD数据准备](../../dataset/ntu-r
 - NTU-RGBD数据集单卡训练，启动命令如下：
 
 ```bash
-python main.py --validate -c configs/recognition/ctrgcn/ctrgcn_ntucs.yaml --seed 1
+# joint modality
+python main.py --validate -c configs/recognition/ctrgcn/ctrgcn_ntucs_joint.yaml --seed 1
+
+# bone modality
+python main.py --validate -c configs/recognition/ctrgcn/ctrgcn_ntucs_bone.yaml --seed 1
+
+# motion modality
+python main.py --validate -c configs/recognition/ctrgcn/ctrgcn_ntucs_motion.yaml --seed 1
+
+# bone motion modality
+python main.py --validate -c configs/recognition/ctrgcn/ctrgcn_ntucs_bone_motion.yaml --seed 1
 ```
 
 - NTU-RGBD数据集使用4卡训练，启动命令如下:
 
 ```bash
-python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3"  --log_dir=log_ctrgcn  main.py  --validate -c configs/recognition/ctrgcn/ctrgcn_ntucs.yaml
+python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3"  --log_dir=log_ctrgcn  main.py  --validate -c configs/recognition/ctrgcn/ctrgcn_ntucs_joint.yaml
 ```
 
-- 配置文件`ctrgcn_ntucs.yaml`为NTU-RGB+D数据集按cross-subject划分方式对应的训练配置。
+- 配置文件`ctrgcn_ntucs_joint.yaml`为NTU-RGB+D数据集按cross-subject划分方式对应的训练配置。
 
 
 ## 模型测试
@@ -53,16 +63,32 @@ python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3"  --log_dir=log_ctrgcn
 - 模型测试的启动命令如下：
 
 ```bash
-python3.7 main.py --test -c configs/recognition/ctrgcn/ctrgcn_ntucs.yaml -w output/CTRGCN/CTRGCN_best.pdparams
+# joint modality
+python3.7 main.py --test -c configs/recognition/ctrgcn/ctrgcn_ntucs_joint.yaml -w data/CTRGCN_ntucs_joint.pdparams
+
+# bone modality
+python3.7 main.py --test -c configs/recognition/ctrgcn/ctrgcn_ntucs_bone.yaml -w data/CTRGCN_ntucs_bone.pdparams
+
+# motion modality
+python3.7 main.py --test -c configs/recognition/ctrgcn/ctrgcn_ntucs_motion.yaml -w data/CTRGCN_ntucs_motion.pdparams
+
+# bone motion modality
+python3.7 main.py --test -c configs/recognition/ctrgcn/ctrgcn_ntucs_bone_motion.yaml -w data/CTRGCN_ntucs_bone_motion.pdparams
 ```
 
 - 通过`-c`参数指定配置文件，通过`-w`指定权重存放路径进行模型测试。
 
 模型在NTU-RGB+D数据集上实验精度如下:
 
-| split | Top-1 | checkpoints |
-| :----: | :----: | :----: |
-| cross-subject | 86.02 | [CTRGCN_ntucs.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/CTRGCN_ntucs.pdparams) |
+| split | modality | Top-1 | checkpoints |
+| :----: | :----: | :----: | :----: |
+| cross-subject | joint | 86.02 | [CTRGCN_ntucs_joint.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/CTRGCN_ntucs_joint.pdparams) |
+| cross-subject | bone | 85.24 | [CTRGCN_ntucs_bone.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/CTRGCN_ntucs_bone.pdparams) |
+| cross-subject | motion | 85.33 | [CTRGCN_ntucs_motion.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/CTRGCN_ntucs_motion.pdparams) |
+| cross-subject | bone motion | 84.53 | [CTRGCN_ntucs_bone_motion.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/CTRGCN_ntucs_bone_motion.pdparams) |
+
+
+
 
 
 ## 模型推理
@@ -70,12 +96,12 @@ python3.7 main.py --test -c configs/recognition/ctrgcn/ctrgcn_ntucs.yaml -w outp
 ### 导出inference模型
 
 ```bash
-python3.7 tools/export_model.py -c configs/recognition/ctrgcn/ctrgcn_ntucs.yaml \
-                                -p data/CTRGCN_ntucs.pdparams \
+python3.7 tools/export_model.py -c configs/recognition/ctrgcn/ctrgcn_ntucs_joint.yaml \
+                                -p data/CTRGCN_ntucs_joint.pdparams \
                                 -o inference/CTRGCN
 ```
 
-上述命令将生成预测所需的模型结构文件`CTRGCN.pdmodel`和模型权重文件`CTRGCN.pdiparams`。
+上述命令将生成预测所需的模型结构文件`CTRGCN_joint.pdmodel`和模型权重文件`CTRGCN_joint.pdiparams`。
 
 - 各参数含义可参考[模型推理方法](https://github.com/PaddlePaddle/PaddleVideo/blob/release/2.0/docs/zh-CN/start.md#2-%E6%A8%A1%E5%9E%8B%E6%8E%A8%E7%90%86)
 
@@ -83,9 +109,9 @@ python3.7 tools/export_model.py -c configs/recognition/ctrgcn/ctrgcn_ntucs.yaml 
 
 ```bash
 python3.7 tools/predict.py --input_file data/example_NTU-RGB-D_sketeton.npy \
-                           --config configs/recognition/ctrgcn/ctrgcn_ntucs.yaml \
-                           --model_file inference/CTRGCN/CTRGCN.pdmodel \
-                           --params_file inference/CTRGCN/CTRGCN.pdiparams \
+                           --config configs/recognition/ctrgcn/ctrgcn_ntucs_joint.yaml \
+                           --model_file inference/CTRGCN_joint/CTRGCN_joint.pdmodel \
+                           --params_file inference/CTRGCN_joint/CTRGCN_joint.pdiparams \
                            --use_gpu=True \
                            --use_tensorrt=False
 ```
