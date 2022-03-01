@@ -27,7 +27,12 @@ from collections import OrderedDict
 
 from base import BaseModel
 from model.net_vlad import NetVLAD
-from paddlenlp.transformers import BertModel
+try:
+    from paddlenlp.transformers import BertModel
+except ImportError as e:
+    print(
+        f"{e}, [paddlenlp] package and it's dependencies is required for T2VLAD."
+    )
 
 
 class Mish(nn.Layer):
@@ -42,10 +47,13 @@ class Mish(nn.Layer):
         '''
         return input * paddle.tanh(F.softplus(input))
 
+
 def kronecker_prod(t1, t2):
     # kronecker is performed along the last dim
-    kron = paddle.bmm(t1.reshape([-1, t1.size(-1)], 1), t2.reshape([-1, 1, t2.size(-1)]))
+    kron = paddle.bmm(t1.reshape([-1, t1.size(-1)], 1),
+                      t2.reshape([-1, 1, t2.size(-1)]))
     return kron.reshape[(t1.shape[0], t1.shape[1], -1)]
+
 
 def drop_nans(x, ind, validate_missing):
     """Remove nans, which we expect to find at missing indices.
@@ -62,7 +70,8 @@ def drop_nans(x, ind, validate_missing):
     if missing.numel():
         if validate_missing:
             vals = x[missing[0]]
-            assert paddle.isnan(vals.reshape([-1])[0]), "expected nans at missing locations"
+            assert paddle.isnan(vals.reshape(
+                [-1])[0]), "expected nans at missing locations"
         #Prevent overwrite of the original tensor
         x_ = x
         x_[missing] = 0
@@ -71,8 +80,10 @@ def drop_nans(x, ind, validate_missing):
         raise ValueError("Still find nans after removing it!")
     return x
 
+
 class CENet(BaseModel):
-    def __init__(self, text_dim, expert_dims, vlad_clusters, ghost_clusters, feat_aggregation, ce_shared_dim, use_mish, mimic_ce_dims):
+    def __init__(self, text_dim, expert_dims, vlad_clusters, ghost_clusters,
+                 feat_aggregation, ce_shared_dim, use_mish, mimic_ce_dims):
         super().__init__()
         self.expert_dims = expert_dims
         self.feat_aggregation = feat_aggregation
@@ -99,12 +110,21 @@ class CENet(BaseModel):
             same_dim=ce_shared_dim,
         )
 
-    def forward(self, experts, ind, cap_id=None, att_mask=None, text=None, raw_captions=None, text_token_mask=None):
+    def forward(self,
+                experts,
+                ind,
+                cap_id=None,
+                att_mask=None,
+                text=None,
+                raw_captions=None,
+                text_token_mask=None):
         aggregated_experts = OrderedDict()
 
         # Handle all nan-checks
         for mod in self.expert_dims:
-            experts[mod] = drop_nans(x=experts[mod], ind=ind[mod], validate_missing=True)
+            experts[mod] = drop_nans(x=experts[mod],
+                                     ind=ind[mod],
+                                     validate_missing=True)
             aggregated_experts[mod] = experts[mod]
 
         start = time.time()
@@ -112,29 +132,38 @@ class CENet(BaseModel):
         # members of the minibatch, so the total pooling op does the following:
         # pooling: B x captions_per_video x max_sentence_length x text_feat_dim
         # -> B x captions_per_video (cluster_dim * text_feat_dim)
-        B, captions_per_video, max_words, text_feat_dim = text.shape 
+        B, captions_per_video, max_words, text_feat_dim = text.shape
         text = text.reshape([B * captions_per_video, max_words, text_feat_dim])
         if isinstance(self.text_pooling, NetVLAD):
             kwargs = {"mask": text_token_mask}
         else:
             kwargs = {}
-        cap_id = cap_id.reshape([B * captions_per_video, -1]) 
-        att_mask = att_mask.reshape([B * captions_per_video, -1]) 
-        att_mask = att_mask.unsqueeze(axis=[1,2])
-        bert_out = self.text_bert(cap_id, token_type_ids=None, attention_mask=att_mask)
+        cap_id = cap_id.reshape([B * captions_per_video, -1])
+        att_mask = att_mask.reshape([B * captions_per_video, -1])
+        att_mask = att_mask.unsqueeze(axis=[1, 2])
+        bert_out = self.text_bert(cap_id,
+                                  token_type_ids=None,
+                                  attention_mask=att_mask)
         text = bert_out[0]
         text, _, save_ass = self.text_pooling(text, **kwargs)
         text = text.reshape([B, captions_per_video, -1])
 
-        return self.ce(text, aggregated_experts, ind, raw_captions, self.text_pooling, start)
+        return self.ce(text, aggregated_experts, ind, raw_captions,
+                       self.text_pooling, start)
 
 
 def _get_clones(module, N):
-    return nn.LayerList([copy.deepcopy(module) for i in range(N)]) 
+    return nn.LayerList([copy.deepcopy(module) for i in range(N)])
+
 
 class TransformerLayer(nn.Layer):
-    def __init__(self, d_model, nhead, dim_feedforward=2048, dropout=0.1,
-                 activation="relu", normalize_before=True):
+    def __init__(self,
+                 d_model,
+                 nhead,
+                 dim_feedforward=2048,
+                 dropout=0.1,
+                 activation="relu",
+                 normalize_before=True):
         super().__init__()
         self.self_attn = nn.MultiHeadAttention(d_model, nhead, dropout=dropout)
         # Implementation of Feedforward model
@@ -153,7 +182,8 @@ class TransformerLayer(nn.Layer):
     def with_pos_embed(self, tensor, pos: Optional[Tensor]):
         return tensor if pos is None else tensor + pos
 
-    def forward_post(self, src,
+    def forward_post(self,
+                     src,
                      src_mask: Optional[Tensor] = None,
                      pos: Optional[Tensor] = None):
         q = k = self.with_pos_embed(src, pos)
@@ -168,8 +198,9 @@ class TransformerLayer(nn.Layer):
         src = src + self.dropout2(src2)
         src = self.norm2(src)
         return src
-    
-    def forward_pre(self, src,
+
+    def forward_pre(self,
+                    src,
                     src_mask: Optional[Tensor] = None,
                     pos: Optional[Tensor] = None):
         src2 = self.norm1(src)
@@ -185,12 +216,14 @@ class TransformerLayer(nn.Layer):
         src = src + self.dropout2(src2)
         return src
 
-    def forward(self, src,
+    def forward(self,
+                src,
                 src_mask: Optional[Tensor] = None,
                 pos: Optional[Tensor] = None):
         if self.normalize_before:
             return self.forward_pre(src, src_mask, pos)
         return self.forward_post(src, src_mask, pos)
+
 
 class Transformer(nn.Layer):
     def __init__(self, encoder_layer, num_layers, norm=None):
@@ -201,11 +234,12 @@ class Transformer(nn.Layer):
         self._reset_parameters()
 
     def _reset_parameters(self):
-        for p in self.parameters(): # may have a problem
+        for p in self.parameters():  # may have a problem
             if p.dim() > 1:
-                nn.initializer.XavierUniform(p) 
+                nn.initializer.XavierUniform(p)
 
-    def forward(self, src,
+    def forward(self,
+                src,
                 mask: Optional[Tensor] = None,
                 pos: Optional[Tensor] = None):
         output = src
@@ -218,8 +252,10 @@ class Transformer(nn.Layer):
 
         return output
 
+
 class CEModule(nn.Layer):
-    def __init__(self, expert_dims, text_dim, use_mish, mimic_ce_dims, vlad_feat_sizes, same_dim):
+    def __init__(self, expert_dims, text_dim, use_mish, mimic_ce_dims,
+                 vlad_feat_sizes, same_dim):
         super().__init__()
 
         modalities = list(expert_dims.keys())
@@ -240,7 +276,7 @@ class CEModule(nn.Layer):
 
         num_mods = len(expert_dims)
         self.moe_fc = nn.Linear(text_dim, len(expert_dims))
-        self.moe_weights = paddle.ones([1, num_mods]) / num_mods 
+        self.moe_weights = paddle.ones([1, num_mods]) / num_mods
 
         # The batch size of the face input can vary (due to missing inputs), so we
         # probably shouldn't use BN on this branch. It's probably fine to leave it
@@ -252,37 +288,51 @@ class CEModule(nn.Layer):
         # be projected to `same_dim` (to allow fusion). The only excpetion is for an
         # ablation in which we mimic the `same_dim` reduction to measure whether this
         # projection influences overall performance.
- 
+
         self.repeat_temporal = {}
         for mod in modalities:
             self.repeat_temporal[mod] = 1
 
-        in_dims = [expert_dims[mod][0] * self.repeat_temporal[mod] for mod in modalities]
-        agg_dims = [expert_dims[mod][1] * self.repeat_temporal[mod] for mod in modalities]
-        feat_dims = [expert_dims[mod][0] // self.vlad_feat_sizes[mod] for mod in modalities]
+        in_dims = [
+            expert_dims[mod][0] * self.repeat_temporal[mod]
+            for mod in modalities
+        ]
+        agg_dims = [
+            expert_dims[mod][1] * self.repeat_temporal[mod]
+            for mod in modalities
+        ]
+        feat_dims = [
+            expert_dims[mod][0] // self.vlad_feat_sizes[mod]
+            for mod in modalities
+        ]
         if self.vis_transformer:
             num_encoder_layers = 1
             d_model = 768
             nhead = 4
             dim_feedforward = 768
-            dropout=0 #dropout=0.1
-            normalize_before=True
-            encoder_layer = TransformerLayer(d_model, nhead, dim_feedforward,dropout)
+            dropout = 0  #dropout=0.1
+            normalize_before = True
+            encoder_layer = TransformerLayer(d_model, nhead, dim_feedforward,
+                                             dropout)
             encoder_norm = nn.LayerNorm(d_model) if normalize_before else None
-            self.transformers = Transformer(encoder_layer, num_encoder_layers, encoder_norm)
+            self.transformers = Transformer(encoder_layer, num_encoder_layers,
+                                            encoder_norm)
 
         if self.mimic_ce_dims:
             dim_reducers = [ReduceDim(in_dim, same_dim) for in_dim in feat_dims]
             self.video_dim_reduce = nn.LayerList(dim_reducers)
 
-        gated_vid_embds = [GatedEmbeddingUnit(in_dim, same_dim, use_bn=True)
-                            for in_dim in feat_dims]
+        gated_vid_embds = [
+            GatedEmbeddingUnit(in_dim, same_dim, use_bn=True)
+            for in_dim in feat_dims
+        ]
         text_out_dims = [same_dim for _ in agg_dims]
         self.video_GU = nn.LayerList(gated_vid_embds)
-        gated_text_embds = [GatedEmbeddingUnit(text_dim, dim, use_bn=True) for
-                            dim in text_out_dims]
+        gated_text_embds = [
+            GatedEmbeddingUnit(text_dim, dim, use_bn=True)
+            for dim in text_out_dims
+        ]
         self.text_GU = nn.LayerList(gated_text_embds)
-        
 
     def compute_moe_weights(self, text, ind):
         # compute weights for all captions (including when assigned K captions to
@@ -293,7 +343,7 @@ class CEModule(nn.Layer):
         assert 1 <= M <= 10, msg
 
         # Treat each caption independently in the softmax (which runs over modalities)
-        text = text.reshape([B * K, D]) 
+        text = text.reshape([B * K, D])
 
         moe_weights = self.moe_fc(text)  # BK x D -> BK x M
         moe_weights = F.softmax(moe_weights, axis=1)
@@ -311,15 +361,15 @@ class CEModule(nn.Layer):
         text_embd = {}
 
         # Unroll repeated captions into present minibatch
-        B, captions_per_video, feat_dim = text.shape 
-        text = text.reshape([B * captions_per_video, feat_dim]) 
+        B, captions_per_video, feat_dim = text.shape
+        text = text.reshape([B * captions_per_video, feat_dim])
         for modality, layer in zip(self.modalities, self.text_GU):
             # NOTE: Due to the batch norm, the gated units are sensitive to passing
             # in a lot of zeroes, so we do the masking step after the forwards pass
             text_ = layer(text)
 
             # We always assume that text is available for retrieval
-            text_ = text_.reshape([B, captions_per_video, -1]) 
+            text_ = text_.reshape([B, captions_per_video, -1])
             text_embd[modality] = text_
         text = text.reshape([B, captions_per_video, -1])
 
@@ -331,7 +381,7 @@ class CEModule(nn.Layer):
         # MOE weights computation + normalization - note that we use the first caption
         # sample to predict the weights
         moe_weights = self.compute_moe_weights(text, ind=ind)
-        text_local = text.reshape([B*captions_per_video, -1])
+        text_local = text.reshape([B * captions_per_video, -1])
 
         vis_local = {}
         for modality in self.modalities:
@@ -343,12 +393,12 @@ class CEModule(nn.Layer):
             for modality, layer in zip(self.modalities, self.video_dim_reduce):
                 all_vis_feat.append(layer(vis_local[modality]))
         all_vis_feat = paddle.concat(all_vis_feat, axis=1)
-    
+
         if self.vis_transformer:
             experts_tensor = all_vis_feat
-            experts_tensor = experts_tensor.transpose([1, 0, 2]) 
+            experts_tensor = experts_tensor.transpose([1, 0, 2])
             att_out = self.transformers(experts_tensor, mask=None, pos=None)
-            all_vis_feat = att_out.transpose([1, 0, 2]) 
+            all_vis_feat = att_out.transpose([1, 0, 2])
 
         vis_local, _, save_ass = vis_vlad(all_vis_feat, freeze=True)
         cross_view_conf_matrix_tv = paddle.matmul(text_local, vis_local.t())
@@ -357,21 +407,22 @@ class CEModule(nn.Layer):
             experts[modality] = experts[modality].max(axis=1)
 
         for modality, layer in zip(self.modalities, self.video_GU):
-                experts[modality] = layer(experts[modality])
+            experts[modality] = layer(experts[modality])
 
         cross_view_conf_matrix = sharded_cross_view_inner_product(
-                ind=ind,
-                vid_embds=experts,
-                text_embds=text_embd,
-                text_weights=moe_weights,
-                subspaces=self.modalities,
-                raw_captions=raw_captions,
-            )
+            ind=ind,
+            vid_embds=experts,
+            text_embds=text_embd,
+            text_weights=moe_weights,
+            subspaces=self.modalities,
+            raw_captions=raw_captions,
+        )
         cross_view_conf_matrix = 0.5 * cross_view_conf_matrix + 0.5 * cross_view_conf_matrix_tv
         return {
             "modalities": self.modalities,
             "cross_view_conf_matrix": cross_view_conf_matrix,
         }
+
 
 class GatedEmbeddingUnit(nn.Layer):
     def __init__(self, input_dimension, output_dimension, use_bn):
@@ -385,6 +436,7 @@ class GatedEmbeddingUnit(nn.Layer):
         x = F.normalize(x)
         return x
 
+
 class ReduceDim(nn.Layer):
     def __init__(self, input_dimension, output_dimension):
         super(ReduceDim, self).__init__()
@@ -394,6 +446,7 @@ class ReduceDim(nn.Layer):
         x = self.fc(x)
         x = F.normalize(x, axis=-1)
         return x
+
 
 class ContextGating(nn.Layer):
     def __init__(self, dimension, add_batch_norm=True):
@@ -408,8 +461,15 @@ class ContextGating(nn.Layer):
             x1 = self.batch_norm(x1)
         x = paddle.concat([x, x1], axis=1)
         return F.glu(x, axis=1)
-        
-def sharded_cross_view_inner_product(vid_embds, text_embds, text_weights, subspaces, ind, tol=1E-5, raw_captions=None):
+
+
+def sharded_cross_view_inner_product(vid_embds,
+                                     text_embds,
+                                     text_weights,
+                                     subspaces,
+                                     ind,
+                                     tol=1E-5,
+                                     raw_captions=None):
     """Compute a similarity matrix from sharded vectors.
 
     Args:
@@ -429,7 +489,7 @@ def sharded_cross_view_inner_product(vid_embds, text_embds, text_weights, subspa
     T, num_caps, _ = text_embds[subspaces[0]].shape
 
     # unroll separate captions onto first dimension and treat them separately
-    sims = paddle.zeros([T * num_caps, B]) 
+    sims = paddle.zeros([T * num_caps, B])
     text_weights = text_weights.reshape([T * num_caps, -1])
     if True:
         mus = [round(x, 3) for x in text_weights.mean(0).numpy().tolist()]
@@ -444,26 +504,30 @@ def sharded_cross_view_inner_product(vid_embds, text_embds, text_weights, subspa
         ind[modality] = paddle.to_tensor(ind[modality], dtype='float32')
         available[:, :, ii] = ind[modality]
     msg = "expected `available` modality mask to only contain 0s or 1s"
-    assert set(paddle.unique(available).cpu().numpy()).issubset(set([0, 1])), msg 
+    assert set(paddle.unique(available).cpu().numpy()).issubset(set([0,
+                                                                     1])), msg
     # set the text weights along the first axis and combine with availabilities to
     # produce a <T x B x num_experts> tensor
-    text_weight_tensor = text_weights.reshape([T*num_caps, 1, len(subspaces)]) * available 
+    text_weight_tensor = text_weights.reshape([T * num_caps, 1,
+                                               len(subspaces)]) * available
     # normalise to account for missing experts
-    normalising_weights = text_weight_tensor.sum(2).reshape([T*num_caps, B, 1]) 
+    normalising_weights = text_weight_tensor.sum(2).reshape(
+        [T * num_caps, B, 1])
     text_weight_tensor = paddle.divide(text_weight_tensor, normalising_weights)
 
     l2_mass_text, l2_mass_vid = 1, 1
 
     for idx, modality in enumerate(subspaces):
-        vid_embd_ = vid_embds[modality].reshape([B, -1]) / l2_mass_vid 
+        vid_embd_ = vid_embds[modality].reshape([B, -1]) / l2_mass_vid
         text_embd_ = text_embds[modality].reshape([T * num_caps, -1])
         msg = "expected weights to be applied to text embeddings"
         assert text_embd_.shape[0] == text_weights.shape[0], msg
         text_embd_ = text_embd_ / l2_mass_text
         weighting = text_weight_tensor[:, :, idx]
-        sims += weighting * paddle.matmul(text_embd_, vid_embd_.t())  # (T x num_caps) x (B)
+        sims += weighting * paddle.matmul(text_embd_,
+                                          vid_embd_.t())  # (T x num_caps) x (B)
 
-    if paddle.isnan(sims).sum().item(): 
+    if paddle.isnan(sims).sum().item():
         raise ValueError("Found nans in similarity matrix!")
 
     return sims

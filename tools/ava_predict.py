@@ -18,8 +18,11 @@ import os, sys
 import copy as cp
 import cv2
 import math
-
-import ppdet
+try:
+    import ppdet
+except ImportError as e:
+    print(
+        f"{e}, [paddledet] package and it's dependencies is required for AVA.")
 
 __dir__ = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.abspath(os.path.join(__dir__, '../')))
@@ -159,7 +162,6 @@ def frame_extraction(video_path, target_dir):
 
 
 def parse_args():
-
     def str2bool(v):
         return v.lower() in ("true", "t", "1")
 

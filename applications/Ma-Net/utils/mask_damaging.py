@@ -1,7 +1,11 @@
 import numpy as np
 from scipy.ndimage import interpolation
-from skimage import morphology
-from skimage import transform
+try:
+    from skimage import morphology, transform
+except ImportError as e:
+    print(
+        f"{e}, [scikit-image] package and it's dependencies is required for MA-Net."
+    )
 import paddle
 import cv2
 import random

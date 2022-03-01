@@ -10,6 +10,10 @@
 - [模型部署](#模型部署)
 - [参考论文](#参考论文)
 
+在开始使用之前，您需要按照以下命令安装额外的依赖包：
+```bash
+python -m pip install imageio
+```
 
 ## 模型简介
 该代码库用于乒乓球动作识别, 基于paddle2.2版本开发，结合PaddleVideo中的VideoSwinTransformer模型，对给定的乒乓球视频进行动作分类。
