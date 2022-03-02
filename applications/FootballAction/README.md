@@ -394,7 +394,7 @@ python -u scenario_lib/train.py  \
 #### step3.3 LSTM模型转为预测模式
 ```
 ${FootballAction}/train_lstm
-python inference_model.py --config=conf/conf.yaml --weights=$weight_path/LSTM.pdparams --save_dir=$save_dir
+python inference_model.py --config=conf/conf.txt --weights=$weight_path/LSTM.pdparams --save_dir=$save_dir
 ```
 
 ## 使用训练模型推理
