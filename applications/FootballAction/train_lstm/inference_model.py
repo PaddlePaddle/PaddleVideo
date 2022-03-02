@@ -26,7 +26,7 @@ except:
 import paddle
 import paddle.fluid as fluid
 
-from utils.config_utils import *
+from scenario_lib.config import *
 import scenario_lib.action_net as action_net
 
 paddle.enable_static()
