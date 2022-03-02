@@ -182,8 +182,7 @@ for batch_size in ${batch_size_list[*]}; do
             func_sed_params "$FILENAME" "${line_batchsize}" "$batch_size"
             func_sed_params "$FILENAME" "${line_epoch}" "$epoch"
             gpu_id=$(set_gpu_id $device_num)
-            # echo $device_num_list
-            # exit
+
             if [ ${#gpu_id} -le 1 ];then
                 run_process_type="SingleP"
                 log_path="$SAVE_LOG/profiling_log"
@@ -196,8 +195,6 @@ for batch_size in ${batch_size_list[*]}; do
                 # for models which need to accumulate gradient.
                 if [[ ${model_name} =~ "TimeSformer" ]]; then
                     global_bs=`expr ${batch_size} \* ${device_num:3:4} \* 8`
-                    # echo globalbs=$global_bs
-                    # exit
                     modify_global_bs_cmd="sed -i '${line_norm_train}s/.*/& -o GRADIENT_ACCUMULATION.global_batch_size=${global_bs}/' '${filename}'"
                     eval $modify_global_bs_cmd
                 fi
@@ -220,8 +217,6 @@ for batch_size in ${batch_size_list[*]}; do
                 # for models which need to accumulate gradient.
                 if [[ ${model_name} =~ "TimeSformer" ]]; then
                     global_bs=`expr ${batch_size} \* ${device_num:3:4} \* 8`
-                    # echo globalbs=$global_bs
-                    # exit
                     modify_global_bs_cmd="sed -i '${line_norm_train}s/.*/& -o GRADIENT_ACCUMULATION.global_batch_size=${global_bs}/' '${filename}'"
                     eval $modify_global_bs_cmd
                 fi
@@ -277,8 +272,6 @@ for batch_size in ${batch_size_list[*]}; do
                 # for models which need to accumulate gradient.
                 if [[ ${model_name} =~ "TimeSformer" ]]; then
                     global_bs=`expr ${batch_size} \* ${device_num:3:4} \* 8`
-                    # echo globalbs=$global_bs
-                    # exit
                     modify_global_bs_cmd="sed -i '${line_norm_train}s/.*/& -o GRADIENT_ACCUMULATION.global_batch_size=${global_bs}/' '${filename}'"
                     eval $modify_global_bs_cmd
                 fi
