@@ -82,7 +82,7 @@ python3.7 main.py --test -c configs/recognition/ctrgcn/ctrgcn_ntucs_bone_motion.
 
 | split | modality | Top-1 | checkpoints |
 | :----: | :----: | :----: | :----: |
-| cross-subject | joint | 86.02 | [CTRGCN_ntucs_joint.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/CTRGCN_ntucs_joint.pdparams) |
+| cross-subject | joint | 89.93 | [CTRGCN_ntucs_joint.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/CTRGCN_ntucs_joint.pdparams) |
 | cross-subject | bone | 85.24 | [CTRGCN_ntucs_bone.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/CTRGCN_ntucs_bone.pdparams) |
 | cross-subject | motion | 85.33 | [CTRGCN_ntucs_motion.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/CTRGCN_ntucs_motion.pdparams) |
 | cross-subject | bone motion | 84.53 | [CTRGCN_ntucs_bone_motion.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/CTRGCN_ntucs_bone_motion.pdparams) |

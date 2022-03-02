@@ -23,17 +23,17 @@ DATASET: #DATASET field
     test_num_workers: 0
     train:
         format: "SkeletonDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
-        file_path: "./data/NTU-RGB-D/xsub/train_data.npy" #Mandatory, train data index file path
-        label_path: "./data/NTU-RGB-D/xsub/train_label.pkl"
+        file_path: "./data/ntu-rgb-d/xsub/train_data.npy" #Mandatory, train data index file path
+        label_path: "./data/ntu-rgb-d/xsub/train_label.pkl"
     valid:
         format: "SkeletonDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
-        file_path: "./data/NTU-RGB-D/xsub/val_data.npy" #Mandatory, valid data index file path
-        label_path: "./data/NTU-RGB-D/xsub/val_label.pkl"
+        file_path: "./data/ntu-rgb-d/xsub/val_data.npy" #Mandatory, valid data index file path
+        label_path: "./data/ntu-rgb-d/xsub/val_label.pkl"
         test_mode: True
     test:
         format: "SkeletonDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
-        file_path: "./data/NTU-RGB-D/xsub/val_data.npy" #Mandatory, valid data index file path
-        label_path: "./data/NTU-RGB-D/xsub/val_label.pkl"
+        file_path: "./data/ntu-rgb-d/xsub/val_data.npy" #Mandatory, valid data index file path
+        label_path: "./data/ntu-rgb-d/xsub/val_label.pkl"
         test_mode: True
 
 PIPELINE: #PIPELINE field
@@ -84,9 +84,11 @@ OPTIMIZER: #OPTIMIZER field
   name: 'Momentum'
   momentum: 0.9
   learning_rate:
-    name: 'PiecewiseDecay'
+    name: 'CustomWarmupAdjustDecay'
+    step_base_lr: 0.1
+    warmup_epochs: 5
+    lr_decay_rate: 0.1
     boundaries: [35, 55]
-    values: [0.1, 0.01, 0.001]
   weight_decay:
     name: 'L2'
     value: 1e-4
@@ -105,6 +107,6 @@ INFERENCE:
     person_nums: 2
 
 model_name: "CTRGCN_joint"
-log_interval: 10 #Optional, the interal of logger, default:10
+log_interval: 100 #Optional, the interal of logger, default:10
 epochs: 65 #Mandatory, total epoch
 save_interval: 10
