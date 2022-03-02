@@ -12,6 +12,7 @@ lstm_size_img = 2048
 lstm_size_audio = 1024
 num_classes = 8
 save_dir = "."
+with_bn = True
 
 [TRAIN]
 epoch = 20
