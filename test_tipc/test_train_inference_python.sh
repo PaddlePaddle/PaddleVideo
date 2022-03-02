@@ -128,7 +128,7 @@ if [ ${MODE} = "klquant_whole_infer" ]; then
     infer_value1=$(func_parser_value "${lines[17]}")
 fi
 
-LOG_PATH="./test_tipc/output/${model_name}"
+LOG_PATH="./test_tipc/output"
 mkdir -p ${LOG_PATH}
 status_log="${LOG_PATH}/results_python.log"
 
@@ -168,8 +168,8 @@ function func_inference(){
                             set_benchmark=$(func_set_params "${benchmark_key}" "${benchmark_value}")
                             set_batchsize=$(func_set_params "${batch_size_key}" "${batch_size}")
                             set_cpu_threads=$(func_set_params "${cpu_threads_key}" "${threads}")
-                            set_model_dir=$(func_set_params "${infer_model_key}" "${infer_model_value}")
-                            set_infer_params1=$(func_set_params "${infer_key1}" "${infer_value1}")
+                            set_model_dir=$(func_set_params "${infer_model_key}" "${_model_dir}/${infer_model_value}")
+                            set_infer_params1=$(func_set_params "${infer_key1}" "${_model_dir}/${infer_value1}")
                             command="${_python} ${_script} ${use_gpu_key}=${use_gpu} ${use_mkldnn_key}=${use_mkldnn} ${set_cpu_threads} ${set_model_dir} ${set_batchsize} ${set_infer_data} ${set_benchmark} ${set_precision} ${set_infer_params1} > ${_save_log_path} 2>&1 "
                             eval $command
                             last_status=${PIPESTATUS[0]}
@@ -202,8 +202,8 @@ function func_inference(){
                         set_batchsize=$(func_set_params "${batch_size_key}" "${batch_size}")
                         set_tensorrt=$(func_set_params "${use_trt_key}" "${use_trt}")
                         set_precision=$(func_set_params "${precision_key}" "${precision}")
-                        set_model_dir=$(func_set_params "${infer_model_key}" "${infer_model_value}")
-                        set_infer_params1=$(func_set_params "${infer_key1}" "${infer_value1}")
+                        set_model_dir=$(func_set_params "${infer_model_key}" "${_model_dir}/${infer_model_value}")
+                        set_infer_params1=$(func_set_params "${infer_key1}" "${_model_dir}/${infer_value1}")
                         command="${_python} ${_script} ${use_gpu_key}=${use_gpu} ${set_tensorrt} ${set_precision} ${set_model_dir} ${set_batchsize} ${set_infer_data} ${set_benchmark} ${set_infer_params1} > ${_save_log_path} 2>&1 "
 
                         eval $command
@@ -380,7 +380,12 @@ else
                 fi
                 # run test
                 if [ ${eval_py} != "null" ]; then
-                    set_eval_params1=$(func_set_params "${eval_key1}" "${eval_value1}")
+                    real_model_name=${model_name/PP-/pp}
+                    if [[ $norm_trainer =~ "--validate" ]]; then
+                        set_eval_params1=$(func_set_params "${eval_key1}" "${save_log}/${real_model_name}_best.pdparams")
+                    else
+                        set_eval_params1=$(func_set_params "${eval_key1}" "${save_log}/${real_model_name}_epoch_00001.pdparams")
+                    fi
                     if [[ $MODE =~ "lite_infer" ]] && [[ ${train_param_key1} != "null" ]]; then
                         eval_cmd="${python} ${eval_py} ${set_use_gpu} ${set_eval_params1} ${train_param_key1}=${train_param_value1}"
                     else
@@ -391,10 +396,15 @@ else
                 fi
                 # run export model
                 if [ ${run_export} != "null" ]; then
-                    # run export model
                     save_infer_path="${save_log}"
-                    set_export_weight=$(func_set_params "${export_weight}" "${eval_value1}")
-                    set_save_infer_key=$(func_set_params "${save_infer_key}" "${save_infer_value}")
+                    real_model_name=${model_name/PP-/pp}
+                    if [[ $norm_trainer =~ "--validate" ]]; then
+                        set_export_weight=$(func_set_params "${export_weight}" "${save_log}/${real_model_name}_best.pdparams")
+                    else
+                        set_export_weight=$(func_set_params "${export_weight}" "${save_log}/${real_model_name}_best.pdparams")
+                    fi
+
+                    set_save_infer_key=$(func_set_params "${save_infer_key}" "${save_log}")
                     export_cmd="${python} ${run_export} ${set_export_weight} ${set_save_infer_key}"
                     eval $export_cmd
                     status_check $? "${export_cmd}" "${status_log}"
@@ -403,7 +413,7 @@ else
                     eval $env
                     save_infer_path="${save_log}"
                     if [ ${inference_dir} != "null" ] && [ ${inference_dir} != '##' ]; then
-                        infer_model_dir="${save_infer_path}/${inference_dir}"
+                        infer_model_dir=${save_infer_path}
                     else
                         infer_model_dir=${save_infer_path}
                     fi

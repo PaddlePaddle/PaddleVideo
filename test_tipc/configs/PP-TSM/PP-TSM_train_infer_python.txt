@@ -5,7 +5,7 @@ gpu_list:0|0,1
 Global.use_gpu:null|null
 Global.auto_cast:null
 -o epochs:2
-null:null
+-o output_dir:null
 -o DATASET.batch_size:2
 -o MODEL.backbone.pretrained:'data/ResNet50_vd_ssld_v2_pretrained.pdparams'
 train_model_name:null
@@ -22,7 +22,7 @@ null:null
 ##
 ===========================eval_params===========================
 eval:main.py --test -c configs/recognition/pptsm/pptsm_k400_frames_uniform.yaml
--w:output/ppTSM/ppTSM_best.pdparams
+-w:./test_tipc/output/ppTSM_best.pdparams
 ##
 ===========================infer_params===========================
 -o:inference/ppTSM
@@ -44,8 +44,10 @@ inference:tools/predict.py --config configs/recognition/pptsm/pptsm_k400_frames_
 --batch_size:1|2
 --use_tensorrt:False|True
 --precision:fp32|fp16
---model_file:inference/ppTSM/ppTSM.pdmodel
+--model_file:ppTSM.pdmodel
 --input_file:./data/example.avi
 null:null
 --enable_benchmark:True
---params_file:inference/ppTSM/ppTSM.pdiparams
+--params_file:ppTSM.pdiparams
+===========================infer_benchmark_params==========================
+random_infer_input:[{float32,[8, 3, 224, 224]}]
