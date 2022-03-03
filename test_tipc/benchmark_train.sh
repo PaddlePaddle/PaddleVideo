@@ -182,8 +182,7 @@ for batch_size in ${batch_size_list[*]}; do
             func_sed_params "$FILENAME" "${line_batchsize}" "$batch_size"
             func_sed_params "$FILENAME" "${line_epoch}" "$epoch"
             gpu_id=$(set_gpu_id $device_num)
-            # echo $device_num_list
-            # exit
+
             if [ ${#gpu_id} -le 1 ];then
                 run_process_type="SingleP"
                 log_path="$SAVE_LOG/profiling_log"
@@ -192,6 +191,13 @@ for batch_size in ${batch_size_list[*]}; do
                 func_sed_params "$FILENAME" "${line_gpuid}" "0"  # sed used gpu_id
                 # set profile_option params
                 tmp=`sed -i "${line_profile}s/.*/${profile_option}/" "${FILENAME}"`
+
+                # for models which need to accumulate gradient.
+                if [[ ${model_name} =~ "TimeSformer" ]]; then
+                    global_bs=`expr ${batch_size} \* ${device_num:3:4} \* 8`
+                    modify_global_bs_cmd="sed -i '${line_norm_train}s/.*/& -o GRADIENT_ACCUMULATION.global_batch_size=${global_bs}/' '${filename}'"
+                    eval $modify_global_bs_cmd
+                fi
 
                 # run test_train_inference_python.sh
                 cmd="bash test_tipc/test_train_inference_python.sh ${FILENAME} benchmark_train > ${log_path}/${log_name} 2>&1 "
@@ -207,6 +213,14 @@ for batch_size in ${batch_size_list[*]}; do
                 log_name="${repo_name}_${model_name}_bs${batch_size}_${precision}_${run_process_type}_${run_mode}_${device_num}_log"
                 speed_log_name="${repo_name}_${model_name}_bs${batch_size}_${precision}_${run_process_type}_${run_mode}_${device_num}_speed"
                 func_sed_params "$FILENAME" "${line_profile}" "null"  # sed profile_id as null
+
+                # for models which need to accumulate gradient.
+                if [[ ${model_name} =~ "TimeSformer" ]]; then
+                    global_bs=`expr ${batch_size} \* ${device_num:3:4} \* 8`
+                    modify_global_bs_cmd="sed -i '${line_norm_train}s/.*/& -o GRADIENT_ACCUMULATION.global_batch_size=${global_bs}/' '${filename}'"
+                    eval $modify_global_bs_cmd
+                fi
+
                 cmd="bash test_tipc/test_train_inference_python.sh ${FILENAME} benchmark_train > ${log_path}/${log_name} 2>&1 "
                 echo $cmd
                 job_bt=`date '+%Y%m%d%H%M%S'`
@@ -254,6 +268,13 @@ for batch_size in ${batch_size_list[*]}; do
                 eval "cat ${log_path}/${log_name}"
                 # parser log
                 _model_name="${model_name}_bs${batch_size}_${precision}_${run_process_type}_${run_mode}"
+
+                # for models which need to accumulate gradient.
+                if [[ ${model_name} =~ "TimeSformer" ]]; then
+                    global_bs=`expr ${batch_size} \* ${device_num:3:4} \* 8`
+                    modify_global_bs_cmd="sed -i '${line_norm_train}s/.*/& -o GRADIENT_ACCUMULATION.global_batch_size=${global_bs}/' '${filename}'"
+                    eval $modify_global_bs_cmd
+                fi
 
                 cmd="${python} ${BENCHMARK_ROOT}/scripts/analysis.py --filename ${log_path}/${log_name} \
                         --speed_log_file '${speed_log_path}/${speed_log_name}' \
