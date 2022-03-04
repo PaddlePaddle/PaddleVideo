@@ -22,7 +22,7 @@ null:null
 ##
 ===========================eval_params===========================
 eval:main.py --test -c configs/recognition/tsm/tsm_k400_frames.yaml
--w:./test_tipc/output/TSM_best.pdparams
+-w:./test_tipc/output/TSM/TSM_epoch_00001.pdparams
 ##
 ===========================infer_params===========================
 -o:inference/TSM

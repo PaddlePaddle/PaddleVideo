@@ -22,7 +22,7 @@ null:null
 ##
 ===========================eval_params===========================
 eval:main.py --test -c configs/recognition/pptsn/pptsn_k400_videos.yaml
--w:./test_tipc/output/ppTSN_best.pdparams
+-w:./test_tipc/output/ppTSN_epoch_00001.pdparams
 ##
 ===========================infer_params===========================
 -o:inference/ppTSN

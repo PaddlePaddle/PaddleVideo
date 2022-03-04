@@ -22,7 +22,7 @@ null:null
 ##
 ===========================eval_params===========================
 eval:main.py --test -c configs/recognition/pptsm/pptsm_k400_frames_uniform.yaml
--w:./test_tipc/output/ppTSM_best.pdparams
+-w:./test_tipc/output/ppTSM/ppTSM_epoch_00001.pdparams
 ##
 ===========================infer_params===========================
 -o:inference/ppTSM

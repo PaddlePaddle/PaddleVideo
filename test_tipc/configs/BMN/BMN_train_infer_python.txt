@@ -22,7 +22,7 @@ null:null
 ##
 ===========================eval_params===========================
 eval:main.py --test -c configs/localization/bmn.yaml
--w:./test_tipc/output/BMN_epoch_00001.pdparams
+-w:./test_tipc/output/BMN/BMN_epoch_00001.pdparams
 ##
 ===========================infer_params===========================
 -o:inference/BMN

@@ -22,7 +22,7 @@ null:null
 ##
 ===========================eval_params===========================
 eval:main.py --test -c configs/recognition/timesformer/timesformer_k400_videos.yaml
--w:./test_tipc/output/TimeSformer_best.pdparams
+-w:./test_tipc/output/TimeSformer/TimeSformer_epoch_00001.pdparams
 ##
 ===========================infer_params===========================
 -o:inference/TimeSformer

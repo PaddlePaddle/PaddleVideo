@@ -22,7 +22,7 @@ null:null
 ##
 ===========================eval_params===========================
 eval:main.py --test -c configs/recognition/attention_lstm/attention_lstm_youtube8m.yaml
--w:./test_tipc/output/AttentionLSTM_best.pdparams
+-w:./test_tipc/output/AttentionLSTM/AttentionLSTM_epoch_00001.pdparams
 ##
 ===========================infer_params===========================
 -o:inference/AttentionLSTM
