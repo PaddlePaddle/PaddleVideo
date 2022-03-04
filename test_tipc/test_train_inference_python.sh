@@ -381,11 +381,7 @@ else
                 # run test
                 if [ ${eval_py} != "null" ]; then
                     real_model_name=${model_name/PP-/pp}
-                    if [[ $norm_trainer =~ "--validate" ]]; then
-                        set_eval_params1=$(func_set_params "${eval_key1}" "${save_log}/${real_model_name}_best.pdparams")
-                    else
-                        set_eval_params1=$(func_set_params "${eval_key1}" "${save_log}/${real_model_name}_epoch_00001.pdparams")
-                    fi
+                    set_eval_params1=$(func_set_params "${eval_key1}" "${save_log}/${real_model_name}_epoch_00001.pdparams")
                     if [[ $MODE =~ "lite_infer" ]] && [[ ${train_param_key1} != "null" ]]; then
                         eval_cmd="${python} ${eval_py} ${set_use_gpu} ${set_eval_params1} ${train_param_key1}=${train_param_value1}"
                     else
@@ -398,11 +394,7 @@ else
                 if [ ${run_export} != "null" ]; then
                     save_infer_path="${save_log}"
                     real_model_name=${model_name/PP-/pp}
-                    if [[ $norm_trainer =~ "--validate" ]]; then
-                        set_export_weight=$(func_set_params "${export_weight}" "${save_log}/${real_model_name}_best.pdparams")
-                    else
-                        set_export_weight=$(func_set_params "${export_weight}" "${save_log}/${real_model_name}_best.pdparams")
-                    fi
+                    set_export_weight=$(func_set_params "${export_weight}" "${save_log}/${real_model_name}_best.pdparams")
 
                     set_save_infer_key=$(func_set_params "${save_infer_key}" "${save_log}")
                     export_cmd="${python} ${run_export} ${set_export_weight} ${set_save_infer_key}"
