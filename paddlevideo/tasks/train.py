@@ -69,8 +69,8 @@ def train_model(cfg,
 
         cur_global_batch_size = batch_size * num_gpus  # The number of batches calculated by all GPUs at one time
         assert global_batch_size % cur_global_batch_size == 0, \
-            f"The global batchsize must be divisible by cur_global_batch_size, but \
-                {global_batch_size} % {cur_global_batch_size} != 0"
+            "The global batchsize must be divisible by cur_global_batch_size, " \
+                f"but {global_batch_size} % {cur_global_batch_size} != 0"
 
         cfg.GRADIENT_ACCUMULATION[
             "num_iters"] = global_batch_size // cur_global_batch_size
