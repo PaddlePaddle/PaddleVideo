@@ -125,7 +125,6 @@ data/ntu-rgb-d/*
 !data/ntu-rgb-d/get_raw_denoised_data.py
 !data/ntu-rgb-d/get_raw_skes_data.py
 !data/ntu-rgb-d/seq_transformation.py
-!data/ntu-rgb-d/statistics
 output_dir/
 
 # IDE
