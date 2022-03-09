@@ -27,7 +27,7 @@ eval:main.py --test -c configs/recognition/pptsn/pptsn_k400_videos.yaml
 ===========================infer_params===========================
 -o:inference/ppTSN
 -p:null
-norm_export:tools/export_model.py -c configs/recognition/pptsn/pptsn_k400_videos.yaml
+norm_export:tools/export_model.py -c configs/recognition/pptsn/pptsn_k400_videos.yaml --save_name inference
 quant_export:null
 fpgm_export:null
 distill_export:null
@@ -44,10 +44,10 @@ inference:tools/predict.py --config configs/recognition/pptsn/pptsn_k400_videos.
 --batch_size:1|2
 --use_tensorrt:False|True
 --precision:fp32|fp16
---model_file:ppTSN.pdmodel
+--model_file:inference.pdmodel
 --input_file:./data/example.avi
 null:null
 --enable_benchmark:True
---params_file:ppTSN.pdiparams
+--params_file:inference.pdiparams
 ===========================infer_benchmark_params==========================
 random_infer_input:[{float32,[250, 3, 224, 224]}]

@@ -27,7 +27,7 @@ eval:main.py --test -c configs/recognition/stgcn/stgcn_fsd.yaml -o DATASET.train
 ===========================infer_params===========================
 -o:inference/STGCN
 -p:null
-norm_export:tools/export_model.py -c configs/recognition/stgcn/stgcn_fsd.yaml
+norm_export:tools/export_model.py -c configs/recognition/stgcn/stgcn_fsd.yaml --save_name inference
 quant_export:null
 fpgm_export:null
 distill_export:null
@@ -44,10 +44,10 @@ inference:tools/predict.py --config configs/recognition/stgcn/stgcn_fsd.yaml
 --batch_size:1|2
 --use_tensorrt:False|True
 --precision:fp32|fp16
---model_file:STGCN.pdmodel
+--model_file:inference.pdmodel
 --input_file:./data/fsd10/example_skeleton.npy
 null:null
 --enable_benchmark:True
---params_file:STGCN.pdiparams
+--params_file:inference.pdiparams
 ===========================infer_benchmark_params==========================
 random_infer_input:[{float32,[2, 350, 25, 1]}]

@@ -27,7 +27,7 @@ eval:main.py --test -c configs/recognition/tsn/tsn_k400_frames.yaml
 ===========================infer_params===========================
 -o:inference/TSN
 -p:null
-norm_export:tools/export_model.py -c configs/recognition/tsn/tsn_k400_frames.yaml
+norm_export:tools/export_model.py -c configs/recognition/tsn/tsn_k400_frames.yaml --save_name inference
 quant_export:null
 fpgm_export:null
 distill_export:null
@@ -44,11 +44,11 @@ inference:tools/predict.py --config configs/recognition/tsn/tsn_k400_frames.yaml
 --batch_size:1|2
 --use_tensorrt:False|True
 --precision:fp32|fp16
---model_file:TSN.pdmodel
+--model_file:inference.pdmodel
 --input_file:./data/example.avi
 null:null
 --enable_benchmark:True
---params_file:TSN.pdiparams
+--params_file:inference.pdiparams
 ===========================train_benchmark_params==========================
 batch_size:32
 fp_items:fp32

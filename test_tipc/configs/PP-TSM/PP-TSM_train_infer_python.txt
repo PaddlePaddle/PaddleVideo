@@ -27,7 +27,7 @@ eval:main.py --test -c configs/recognition/pptsm/pptsm_k400_frames_uniform.yaml
 ===========================infer_params===========================
 -o:inference/ppTSM
 -p:null
-norm_export:tools/export_model.py -c configs/recognition/pptsm/pptsm_k400_frames_uniform.yaml
+norm_export:tools/export_model.py -c configs/recognition/pptsm/pptsm_k400_frames_uniform.yaml --save_name inference
 quant_export:null
 fpgm_export:null
 distill_export:null
@@ -44,10 +44,10 @@ inference:tools/predict.py --config configs/recognition/pptsm/pptsm_k400_frames_
 --batch_size:1|2
 --use_tensorrt:False|True
 --precision:fp32|fp16
---model_file:ppTSM.pdmodel
+--model_file:inference.pdmodel
 --input_file:./data/example.avi
 null:null
 --enable_benchmark:True
---params_file:ppTSM.pdiparams
+--params_file:inference.pdiparams
 ===========================infer_benchmark_params==========================
 random_infer_input:[{float32,[8, 3, 224, 224]}]
