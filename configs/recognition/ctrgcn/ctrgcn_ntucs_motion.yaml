@@ -1,0 +1,112 @@
+MODEL: #MODEL field
+    framework: "RecognizerGCN" #Mandatory, indicate the type of network, associate to the 'paddlevideo/modeling/framework/' .
+    backbone: #Mandatory, indicate the type of backbone, associate to the 'paddlevideo/modeling/backbones/' .
+        name: "CTRGCN" #Mandatory, The name of backbone.
+        num_point: 25
+        num_person: 2
+        base_channel: 64
+        graph: "ntu_rgb_d"
+        graph_args:
+            labeling_mode: "spatial"
+        in_channels: 3
+        adaptive: True
+    head:
+        name: "CTRGCNHead" #Mandatory, indicate the type of head, associate to the 'paddlevideo/modeling/heads'
+        num_classes: 60  #Optional, the number of classes to be classified.
+        in_channels: 64
+        drop_out: 0
+
+DATASET: #DATASET field
+    batch_size: 64 #Mandatory, bacth size
+    num_workers: 4 #Mandatory, the number of subprocess on each GPU.
+    test_batch_size: 64
+    test_num_workers: 0
+    train:
+        format: "SkeletonDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
+        file_path: "./data/ntu-rgb-d/xsub/train_data.npy" #Mandatory, train data index file path
+        label_path: "./data/ntu-rgb-d/xsub/train_label.pkl"
+    valid:
+        format: "SkeletonDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
+        file_path: "./data/ntu-rgb-d/xsub/val_data.npy" #Mandatory, valid data index file path
+        label_path: "./data/ntu-rgb-d/xsub/val_label.pkl"
+        test_mode: True
+    test:
+        format: "SkeletonDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
+        file_path: "./data/ntu-rgb-d/xsub/val_data.npy" #Mandatory, valid data index file path
+        label_path: "./data/ntu-rgb-d/xsub/val_label.pkl"
+        test_mode: True
+
+PIPELINE: #PIPELINE field
+    train: #Mandotary, indicate the pipeline to deal with the training data, associate to the 'paddlevideo/loader/pipelines/'
+        sample:
+            - Iden:
+            - SketeonCropSample:
+                window_size: 64
+                p_interval: [0.5, 1]
+        transform: #Mandotary, image transfrom operator
+            - RandomRotation:
+                argument: True
+            - SketeonModalityTransform:
+                joint: Fasle
+                bone: False
+                motion: True
+                graph: 'ntu_rgb_d'
+    valid: #Mandotary, indicate the pipeline to deal with the training data, associate to the 'paddlevideo/loader/pipelines/'
+        sample:
+            - Iden:
+            - SketeonCropSample:
+                window_size: 64
+                p_interval: [0.95]
+        transform: #Mandotary, image transfrom operator
+            - RandomRotation:
+                argument: False
+            - SketeonModalityTransform:
+                joint: Fasle
+                bone: False
+                motion: True
+                graph: 'ntu_rgb_d'
+    test: #Mandotary, indicate the pipeline to deal with the training data, associate to the 'paddlevideo/loader/pipelines/'
+        sample:
+            - Iden:
+            - SketeonCropSample:
+                window_size: 64
+                p_interval: [0.95]
+        transform: #Mandotary, image transfrom operator
+            - RandomRotation:
+                argument: False
+            - SketeonModalityTransform:
+                joint: Fasle
+                bone: False
+                motion: True
+                graph: 'ntu_rgb_d'
+
+OPTIMIZER: #OPTIMIZER field
+  name: 'Momentum'
+  momentum: 0.9
+  learning_rate:
+    name: 'CustomWarmupAdjustDecay'
+    step_base_lr: 0.1
+    warmup_epochs: 5
+    lr_decay_rate: 0.1
+    boundaries: [35, 55]
+  weight_decay:
+    name: 'L2'
+    value: 1e-4
+  use_nesterov: True
+
+
+METRIC:
+    name: 'SkeletonMetric'
+
+INFERENCE:
+    name: 'CTRGCN_Inference_helper'
+    window_size: 64
+    p_interval: [0.95]
+    num_channels: 3
+    vertex_nums: 25
+    person_nums: 2
+
+model_name: "CTRGCN_motion"
+log_interval: 100 #Optional, the interal of logger, default:10
+epochs: 65 #Mandatory, total epoch
+save_interval: 10

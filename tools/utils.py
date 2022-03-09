@@ -46,7 +46,8 @@ from paddlevideo.loader.pipelines import (
     AutoPadding, CenterCrop, DecodeSampler, FeatureDecoder, FrameDecoder,
     GroupResize, Image2Array, ImageDecoder, JitterScale, MultiCrop,
     Normalization, PackOutput, Sampler, SamplerPkl, Scale, SkeletonNorm,
-    TenCrop, ToArray, UniformCrop, VideoDecoder, SegmentationSampler)
+    TenCrop, ToArray, UniformCrop, VideoDecoder, SegmentationSampler,
+    SketeonCropSample)
 from paddlevideo.metrics.ava_utils import read_labelmap
 from paddlevideo.metrics.bmn_metric import boundary_choose, soft_nms
 from paddlevideo.utils import Registry, build, get_config
@@ -123,6 +124,7 @@ def build_inference_helper(cfg):
 
 
 class Base_Inference_helper():
+
     def __init__(self,
                  num_seg=8,
                  seg_len=1,
@@ -179,6 +181,7 @@ class Base_Inference_helper():
 
 @INFERENCE.register()
 class ppTSM_Inference_helper(Base_Inference_helper):
+
     def __init__(self,
                  num_seg=8,
                  seg_len=1,
@@ -218,6 +221,7 @@ class ppTSM_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class ppTSN_Inference_helper(Base_Inference_helper):
+
     def __init__(self,
                  num_seg=25,
                  seg_len=1,
@@ -263,6 +267,7 @@ class ppTSN_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class BMN_Inference_helper(Base_Inference_helper):
+
     def __init__(self, feat_dim, dscale, tscale, result_path):
         self.feat_dim = feat_dim
         self.dscale = dscale
@@ -349,6 +354,7 @@ class BMN_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class TimeSformer_Inference_helper(Base_Inference_helper):
+
     def __init__(self,
                  num_seg=8,
                  seg_len=1,
@@ -394,6 +400,7 @@ class TimeSformer_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class VideoSwin_Inference_helper(Base_Inference_helper):
+
     def __init__(self,
                  num_seg=4,
                  seg_len=32,
@@ -474,6 +481,7 @@ class VideoSwin_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class VideoSwin_TableTennis_Inference_helper(Base_Inference_helper):
+
     def __init__(self,
                  num_seg=1,
                  seg_len=32,
@@ -602,6 +610,7 @@ class VideoSwin_TableTennis_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class SlowFast_Inference_helper(Base_Inference_helper):
+
     def __init__(self,
                  num_frames=32,
                  sampling_rate=2,
@@ -675,6 +684,7 @@ class SlowFast_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class STGCN_Inference_helper(Base_Inference_helper):
+
     def __init__(self,
                  num_channels,
                  window_size,
@@ -705,7 +715,45 @@ class STGCN_Inference_helper(Base_Inference_helper):
 
 
 @INFERENCE.register()
+class CTRGCN_Inference_helper(Base_Inference_helper):
+
+    def __init__(self,
+                 num_channels=3,
+                 vertex_nums=25,
+                 person_nums=2,
+                 window_size=64,
+                 p_interval=[0.95],
+                 top_k=1):
+        self.window_size = window_size
+        self.p_interval = p_interval
+        self.num_channels = num_channels
+        self.vertex_nums = vertex_nums
+        self.person_nums = person_nums
+        self.top_k = top_k
+
+    def preprocess(self, input_file):
+        """
+        input_file: str, file path
+        return: list
+        """
+        assert os.path.isfile(input_file) is not None, "{0} not exists".format(
+            input_file)
+        data = np.load(input_file)
+        results = {'data': data}
+        ops = [
+            SketeonCropSample(window_size=self.window_size,
+                              p_interval=self.p_interval)
+        ]
+        for op in ops:
+            results = op(results)
+
+        res = np.expand_dims(results['data'], axis=0).copy()
+        return [res]
+
+
+@INFERENCE.register()
 class MSTCN_Inference_helper(Base_Inference_helper):
+
     def __init__(self, num_channels, actions_map_file_path, feature_path=None):
         self.num_channels = num_channels
         file_ptr = open(actions_map_file_path, 'r')
@@ -781,6 +829,7 @@ class MSTCN_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class ASRF_Inference_helper(Base_Inference_helper):
+
     def __init__(self,
                  num_channels,
                  actions_map_file_path,
@@ -872,6 +921,7 @@ class ASRF_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class AttentionLSTM_Inference_helper(Base_Inference_helper):
+
     def __init__(
             self,
             num_classes,  #Optional, the number of classes to be classified.
@@ -912,6 +962,7 @@ class AttentionLSTM_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class TransNetV2_Inference_helper():
+
     def __init__(self,
                  num_frames,
                  height,
@@ -1089,6 +1140,7 @@ class TransNetV2_Inference_helper():
 
 @INFERENCE.register()
 class ADDS_Inference_helper(Base_Inference_helper):
+
     def __init__(self,
                  frame_idxs=[0],
                  num_scales=4,
@@ -1186,6 +1238,7 @@ class ADDS_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class AVA_SlowFast_FastRCNN_Inference_helper(Base_Inference_helper):
+
     def __init__(self,
                  detection_model_name,
                  detection_model_weights,
