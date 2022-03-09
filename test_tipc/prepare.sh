@@ -17,13 +17,7 @@ dataline=$(cat ${FILENAME})
 
 pip install unrar
 
-git clone https://github.com/LDOUBLEV/AutoLog
-cd AutoLog
-pip install -r requirements.txt
-python3.7 setup.py bdist_wheel
-pip install ./dist/auto_log-1.0.0-py3-none-any.whl
-cd ..
-
+pip install git+https://github.com/LDOUBLEV/AutoLog
 # parser params
 IFS=$'\n'
 lines=(${dataline})
