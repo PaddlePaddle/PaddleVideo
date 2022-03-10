@@ -19,8 +19,8 @@
 | Version | Top1 |
 | :------ | :----: |
 | Ours ([swa](#refer-anchor-1)+distill+16frame) | 79.44 |
-| Ours ([swa](#refer-anchor-1)+distill)  | 78.82 |
-| Ours ([swa](#refer-anchor-1)) | **78.54** |
+| Ours ([swa](#refer-anchor-1)+distill)  | 78.87 |
+| Ours ([swa](#refer-anchor-1)) | **78.61** |
 | [mmaction2](https://github.com/open-mmlab/mmaction2/tree/master/configs/recognition/timesformer#kinetics-400) | 77.92 |
 
 
