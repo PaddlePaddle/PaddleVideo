@@ -113,10 +113,18 @@ venv.bak/
 
 # data
 data/*
+# 50salads data
 !data/50salads
 data/50salads/*
 !data/50salads/transform_segmentation_label.py
 !data/50salads/prepare_asrf_data.py
+# ntu-rgb-d data
+!data/ntu-rgb-d
+data/ntu-rgb-d/*
+!data/ntu-rgb-d/download_dataset.sh
+!data/ntu-rgb-d/get_raw_denoised_data.py
+!data/ntu-rgb-d/get_raw_skes_data.py
+!data/ntu-rgb-d/seq_transformation.py
 output_dir/
 
 # IDE

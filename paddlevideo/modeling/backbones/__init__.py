@@ -33,11 +33,19 @@ from .swin_transformer import SwinTransformer3D
 from .transnetv2 import TransNetV2
 from .vit import VisionTransformer
 from .vit_tweaks import VisionTransformer_tweaks
+from .ms_tcn import MSTCN
+from .asrf import ASRF
+from .resnet_tsn_MRI import ResNetTSN_MRI
+from .resnet_tsm_MRI import ResNetTSM_MRI
+from .resnet_slowfast_MRI import ResNetSlowFast_MRI
+from .cfbi import CFBI
+from .ctrgcn import CTRGCN
+from .movinet import MoViNet
 
 __all__ = [
     'ResNet', 'ResNetTSM', 'ResNetTweaksTSM', 'ResNetSlowFast', 'BMN',
     'ResNetTweaksTSN', 'VisionTransformer', 'STGCN', 'AGCN', 'TransNetV2',
-    'ADDS_DepthNet', 'VisionTransformer_tweaks', 'SwinTransformer3D',
-    'BertForMultiModalPreTraining', 'ResNetTSN_MRI', 'ResNetTSM_MRI',
-    'ResNetSlowFast_MRI', 'CFBI', 'MSTCN', 'ASRF', 'MoViNet'
+    'ADDS_DepthNet', 'VisionTransformer_tweaks', 'BertForMultiModalPreTraining',
+    'ResNetTSN_MRI', 'ResNetTSM_MRI', 'ResNetSlowFast_MRI', 'CFBI', 'MSTCN',
+    'ASRF', 'MoViNet', 'SwinTransformer3D', 'CTRGCN'
 ]
