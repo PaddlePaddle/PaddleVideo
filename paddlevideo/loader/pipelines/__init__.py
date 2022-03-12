@@ -20,18 +20,18 @@ from .augmentations import (CenterCrop, ColorJitter, GroupRandomFlip,
                             UniformCrop)
 from .augmentations_ava import *
 from .compose import Compose
-from .decode import FeatureDecoder, FrameDecoder, VideoDecoder
+from .decode import FeatureDecoder, FrameDecoder, MatDecoder, VideoDecoder
 from .decode_image import ImageDecoder
 from .decode_sampler import DecodeSampler
+from .decode_sampler_MRI import SFMRI_DecodeSampler
 from .mix import Cutmix, Mixup, VideoMix
 from .multimodal import FeaturePadding, RandomCap, RandomMask, Tokenize
 from .sample import Sampler, SamplerPkl
 from .sample_ava import *
 from .segmentation import MultiNorm, MultiRestrictSize
-from .skeleton_pipeline import AutoPadding, Iden, SkeletonNorm
-from .skeleton_pipeline import SketeonCropSample, SketeonModalityTransform, RandomRotation
-from .decode_sampler_MRI import SFMRI_DecodeSampler
 from .segmentation_pipline import SegmentationSampler
+from .skeleton_pipeline import (AutoPadding, Iden, RandomRotation, SkeletonNorm,
+                                SketeonCropSample, SketeonModalityTransform)
 
 __all__ = [
     'ImageDecoder', 'RandomMask', 'UniformCrop', 'SkeletonNorm', 'Tokenize',
@@ -43,5 +43,6 @@ __all__ = [
     'ToArray', 'FeaturePadding', 'GetMatchMap', 'GroupRandomFlip', 'MultiCrop',
     'SFMRI_DecodeSampler', 'MultiRestrictSize', 'MultiNorm',
     'RandomResizedCrop', 'SamplerPkl', 'SegmentationSampler',
-    'SketeonCropSample', 'SketeonModalityTransform', 'RandomRotation'
+    'SketeonCropSample', 'SketeonModalityTransform', 'RandomRotation',
+    'MatDecoder'
 ]

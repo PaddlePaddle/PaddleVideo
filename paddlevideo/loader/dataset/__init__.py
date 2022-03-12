@@ -13,17 +13,18 @@
 # limitations under the License.
 
 from .actbert_dataset import ActBertDataset
+from .asrf_dataset import ASRFDataset
 from .ava_dataset import AVADataset
 from .bmn_dataset import BMNDataset
 from .davis_dataset import DavisDataset
 from .feature import FeatureDataset
 from .frame import FrameDataset, FrameDataset_Sport
+from .hdf5_dataset import HDF5Dataset
+from .mat_dataset import MatDataset
 from .MRI import MRIDataset
 from .MRI_SlowFast import SFMRIDataset
-from .msrvtt import MSRVTTDataset
-from .actbert_dataset import ActBertDataset
-from .asrf_dataset import ASRFDataset
 from .ms_tcn_dataset import MSTCNDataset
+from .msrvtt import MSRVTTDataset
 from .oxford import MonoDataset
 from .skeleton import SkeletonDataset
 from .slowfast_video import SFVideoDataset
@@ -33,5 +34,6 @@ __all__ = [
     'VideoDataset', 'FrameDataset', 'SFVideoDataset', 'BMNDataset',
     'FeatureDataset', 'SkeletonDataset', 'AVADataset', 'MonoDataset',
     'MSRVTTDataset', 'ActBertDataset', 'DavisDataset', 'MRIDataset',
-    'SFMRIDataset', 'FrameDataset_Sport', 'MSTCNDataset', 'ASRFDataset'
+    'SFMRIDataset', 'FrameDataset_Sport', 'MSTCNDataset', 'ASRFDataset',
+    'MatDataset', 'HDF5Dataset'
 ]

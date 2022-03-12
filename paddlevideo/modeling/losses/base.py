@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from abc import  abstractmethod
-import paddle
+from abc import abstractmethod
 import paddle.nn as nn
+
 
 #XXX use _forward?? or forward??
 class BaseWeightedLoss(nn.Layer):
@@ -27,7 +27,6 @@ class BaseWeightedLoss(nn.Layer):
         loss_weight (float): Factor scalar multiplied on the loss.
             Default: 1.0.
     """
-
     def __init__(self, loss_weight=1.0):
         super().__init__()
         self.loss_weight = loss_weight

@@ -12,23 +12,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from .ava_metric import AVAMetric
 from .bmn_metric import BMNMetric
 from .build import build_metric
 from .center_crop_metric import CenterCropMetric
+from .center_crop_metric_MRI import CenterCropMetric_MRI
 from .depth_metric import DepthMetric
 from .msrvtt_metric import MSRVTTMetric
 from .multi_crop_metric import MultiCropMetric
 from .registry import METRIC
+from .rmse_metric import RMSEMetric
+from .segmentation_metric import SegmentationMetric
 from .skeleton_metric import SkeletonMetric
 from .transnetv2_metric import TransNetV2Metric
-from .youtube8m.eval_util import HitOneMetric
-from .segmentation_metric import SegmentationMetric
-from .ava_metric import AVAMetric
 from .vos_metric import VOSMetric
-from .center_crop_metric_MRI import CenterCropMetric_MRI
+from .youtube8m.eval_util import HitOneMetric
 
 __all__ = [
     'METRIC', 'build_metric', 'MultiCropMetric', 'BMNMetric',
     'CenterCropMetric', 'SkeletonMetric', 'HitOneMetric', 'TransNetV2Metric',
-    'DepthMetric', 'MSRVTTMetric', 'VOSMetric', 'CenterCropMetric_MRI','AVAMetric', 'SegmentationMetric'
+    'DepthMetric', 'MSRVTTMetric', 'VOSMetric', 'CenterCropMetric_MRI',
+    'AVAMetric', 'SegmentationMetric', 'RMSEMetric'
 ]

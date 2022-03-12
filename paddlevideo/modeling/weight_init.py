@@ -155,3 +155,49 @@ def kaiming_normal_(tensor, a=0., mode='fan_in', nonlinearity='leaky_relu'):
     with paddle.no_grad():
         paddle.nn.initializer.Normal(0, std)(tensor)
         return tensor
+
+
+def kaiming_uniform_(tensor, a=0, mode='fan_in', nonlinearity='leaky_relu'):
+    def _calculate_correct_fan(tensor: paddle.Tensor, mode: str):
+        mode = mode.lower()
+        valid_modes = ['fan_in', 'fan_out']
+        if mode not in valid_modes:
+            raise ValueError(
+                "Mode {} not supported, please use one of {}".format(
+                    mode, valid_modes))
+
+        fan_in, fan_out = _calculate_fan_in_and_fan_out(tensor)
+        return fan_in if mode == 'fan_in' else fan_out
+
+    def calculate_gain(nonlinearity: str, param=None):
+        linear_fns = [
+            'linear', 'conv1d', 'conv2d', 'conv3d', 'conv_transpose1d',
+            'conv_transpose2d', 'conv_transpose3d'
+        ]
+        if nonlinearity in linear_fns or nonlinearity == 'sigmoid':
+            return 1
+        elif nonlinearity == 'tanh':
+            return 5.0 / 3
+        elif nonlinearity == 'relu':
+            return math.sqrt(2.0)
+        elif nonlinearity == 'leaky_relu':
+            if param is None:
+                negative_slope = 0.01
+            elif not isinstance(param, bool) and isinstance(
+                    param, int) or isinstance(param, float):
+                negative_slope = param
+            else:
+                raise ValueError(
+                    "negative_slope {} not a valid number".format(param))
+            return math.sqrt(2.0 / (1 + negative_slope**2))
+        else:
+            raise ValueError("Unsupported nonlinearity {}".format(nonlinearity))
+
+    fan = _calculate_correct_fan(tensor, mode)
+    gain = calculate_gain(nonlinearity, a)
+    std = gain / math.sqrt(fan)
+    bound = math.sqrt(
+        3.0) * std  # Calculate uniform bounds from standard deviation
+    with paddle.no_grad():
+        tensor.set_value(paddle.uniform(tensor.shape, min=-bound, max=bound))
+        return tensor

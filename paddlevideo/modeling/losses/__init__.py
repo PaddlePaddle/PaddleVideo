@@ -12,15 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from .actbert_loss import ActBertLoss
+from .asrf_loss import ASRFLoss
 from .base import BaseWeightedLoss
 from .bmn_loss import BMNLoss
 from .cross_entropy_loss import CrossEntropyLoss
 from .depth_loss import ADDSLoss
+from .mse_loss import MSELoss
 from .transnetv2_loss import TransNetV2Loss
-from .actbert_loss import ActBertLoss
-from .asrf_loss import ASRFLoss
+from .tv_loss import TVLoss
 
 __all__ = [
     'CrossEntropyLoss', 'BMNLoss', 'TransNetV2Loss', 'ActBertLoss', 'ADDSLoss',
-    'BaseWeightedLoss', 'ASRFLoss'
+    'BaseWeightedLoss', 'ASRFLoss', 'MSELoss', 'TVLoss'
 ]

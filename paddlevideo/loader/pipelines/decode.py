@@ -12,13 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import numpy as np
+import math
+import pickle
+import random
+
 import av
 import cv2
-import pickle
 import decord as de
-import math
-import random
+import numpy as np
+import scipy.io as sio
+
 from ..registry import PIPELINES
 
 
@@ -283,3 +286,25 @@ class FeatureDecoder(object):
         for ind in label:
             one_hot_label[int(ind)] = 1
         return one_hot_label
+
+
+@PIPELINES.register()
+class MatDecoder(object):
+    """Parse images and labels from *.mat file usin scipy.io
+    """
+    def __init__(self):
+        pass
+
+    def __call__(self, results):
+        filepath = results['filename']
+        mat = sio.loadmat(filepath)
+        im_gt_y = mat['im_gt_y']  # [h, w]
+        im_b_y = mat['im_b_y']  # [h, w]
+        im_gt_y = im_gt_y.astype('float32')
+        im_b_y = im_b_y.astype('float32')
+
+        im_gt_y = np.expand_dims(im_gt_y, axis=0)
+        im_b_y = np.expand_dims(im_b_y, axis=0)
+
+        results = {'imgs': im_b_y, 'labels': im_gt_y}
+        return results
