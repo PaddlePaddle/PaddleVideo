@@ -50,7 +50,7 @@ class SkeletonMetric(BaseMetric):
         if len(data) == 2:  # data with label
             labels = data[1]
             top1 = paddle.metric.accuracy(input=outputs, label=labels, k=1)
-            top5 = paddle.metric.accuracy(input=outputs, label=labels, k=5)
+            top5 = paddle.metric.accuracy(input=outputs, label=labels, k=2)
             if self.world_size > 1:
                 top1 = paddle.distributed.all_reduce(
                     top1, op=paddle.distributed.ReduceOp.SUM) / self.world_size
