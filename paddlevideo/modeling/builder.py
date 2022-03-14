@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .registry import BACKBONES, HEADS, LOSSES, RECOGNIZERS, LOCALIZERS, ROI_EXTRACTORS, DETECTORS, BBOX_ASSIGNERS, BBOX_SAMPLERS, BBOX_CODERS, PARTITIONERS, MULTIMODAL, SEGMENT, SEGMENTERS
+from .registry import BACKBONES, HEADS, LOSSES, RECOGNIZERS, LOCALIZERS, ROI_EXTRACTORS, DETECTORS, BBOX_ASSIGNERS, BBOX_SAMPLERS, BBOX_CODERS, PARTITIONERS, MULTIMODAL, SEGMENT, SEGMENTERS, RESOLVERS
 from ..utils import build
 from .registry import (BACKBONES, BBOX_ASSIGNERS, BBOX_CODERS, BBOX_SAMPLERS,
                        DETECTORS, ESTIMATORS, HEADS, LOCALIZERS, LOSSES,
@@ -104,6 +104,11 @@ def build_segment(cfg):
     return build(cfg, SEGMENT, key='framework')
 
 
+def build_resolver(cfg):
+    """Build segment."""
+    return build(cfg, RESOLVERS, key='framework')
+
+
 def build_model(cfg):
     cfg_copy = cfg.copy()
     framework_type = cfg_copy.get('framework')
@@ -123,5 +128,7 @@ def build_model(cfg):
         return build_segmenter(cfg)
     elif framework_type in SEGMENT:
         return build_segment(cfg)
+    elif framework_type in RESOLVERS:
+        return build_resolver(cfg)
     else:
         raise NotImplementedError

@@ -28,7 +28,7 @@ def build_record(cfg):
         ("loss", AverageMeter('loss', '7.5f')),
         ("lr", AverageMeter('lr', 'f', need_avg=False)),
     ]
-    if 'Recognizer1D' in cfg.framework:  #TODO: required specify str in framework
+    if 'Recognizer1D' in cfg.framework:  # TODO: required specify str in framework
         record_list.append(("hit_at_one", AverageMeter("hit_at_one", '.5f')))
         record_list.append(("perr", AverageMeter("perr", '.5f')))
         record_list.append(("gap", AverageMeter("gap", '.5f')))
@@ -56,6 +56,8 @@ def build_record(cfg):
         record_list.append(("losses_day", AverageMeter("losses_day", '.5f')))
         record_list.append(("losses_night", AverageMeter("losses_night",
                                                          '.5f')))
+    elif 'Resolver2D' in cfg.framework:
+        record_list.append(("rmse", AverageMeter("rmse", '.5f')))
     elif 'MSTCN' in cfg.framework or 'ASRF' in cfg.framework:
         record_list.append(("F1@0.50", AverageMeter("F1@0.50", '.5f')))
 
@@ -69,7 +71,6 @@ class AverageMeter(object):
     """
     Computes and stores the average and current value
     """
-
     def __init__(self, name='', fmt='f', need_avg=True):
         self.name = name
         self.fmt = fmt

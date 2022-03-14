@@ -69,10 +69,11 @@ class Attention_net(nn.Layer):
         vc = self.Vc(x)
         qc = self.Qc(x)
 
-        vc_reshape = vc.reshape([x.shape[0], x.shape[1], -1])
+        numel_hw = paddle.shape(x)[-2] * paddle.shape(x)[-1]
+        vc_reshape = vc.reshape([-1, x.shape[1], numel_hw])
         vc_reshape = vc_reshape.transpose([0, 2, 1])
-        qc_reshape = qc.reshape([x.shape[0], x.shape[1], -1])
-        kc_reshape = kc.reshape([x.shape[0], x.shape[1], -1])
+        qc_reshape = qc.reshape([-1, x.shape[1], numel_hw])
+        kc_reshape = kc.reshape([-1, x.shape[1], numel_hw])
         kc_reshape = kc_reshape.transpose([0, 2, 1])
 
         qvc = paddle.matmul(qc_reshape, vc_reshape)
@@ -84,10 +85,10 @@ class Attention_net(nn.Layer):
         Oc = vector_c_reshape.reshape(
             [x.shape[0], x.shape[1], x.shape[2], x.shape[3]])
 
-        vp_reshape = vc.reshape([x.shape[0], x.shape[1], -1])
+        vp_reshape = vc.reshape([-1, x.shape[1], numel_hw])
         vp_reshape = vp_reshape.transpose([0, 2, 1])
-        qp_reshape = qc.reshape([x.shape[0], x.shape[1], -1])
-        kp_reshape = kc.reshape([x.shape[0], x.shape[1], -1])
+        qp_reshape = qc.reshape([-1, x.shape[1], numel_hw])
+        kp_reshape = kc.reshape([-1, x.shape[1], numel_hw])
         kp_reshape = kp_reshape.transpose([0, 2, 1])
 
         kqp = paddle.matmul(kp_reshape, qp_reshape)

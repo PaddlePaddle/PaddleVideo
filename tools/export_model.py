@@ -164,6 +164,10 @@ def get_input_spec(cfg, model_name):
             InputSpec(shape=[None, cfg.num_channels, cfg.height, cfg.width],
                       dtype='float32'),
         ]]
+    elif model_name in ['WAFP']:
+        input_spec = [[
+            InputSpec(shape=[None, 1, cfg.height, cfg.width], dtype='float32'),
+        ]]
     elif model_name in ['AVA_SlowFast_FastRcnn']:
         input_spec = [[
             InputSpec(shape=[

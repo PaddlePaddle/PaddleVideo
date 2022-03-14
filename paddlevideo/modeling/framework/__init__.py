@@ -19,10 +19,11 @@ from .recognizers import BaseRecognizer, Recognizer2D
 from .multimodal import ActBert, BaseMultimodal
 from .segment import BaseSegment, CFBI
 from .segmenters import MSTCN
+from .resolvers import BaseResolver, Resolver2D
 
 __all__ = [
     'BaseRecognizer', 'Recognizer2D', 'BaseLocalizer', 'BMNLocalizer',
     'BasePartitioner', 'TransNetV2Partitioner', 'BaseEstimator',
     'DepthEstimator', 'BaseMultimodal', 'ActBert', 'BaseSegment', 'CFBI',
-    'MSTCN'
+    'MSTCN', 'BaseResolver', 'Resolver2D'
 ]

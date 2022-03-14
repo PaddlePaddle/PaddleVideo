@@ -22,7 +22,7 @@ from .heads import (AVARoIHead, BaseHead, BBoxHeadAVA, SingleRoIExtractor3D,
                     TSNHead)
 from .losses import CrossEntropyLoss
 from .registry import (BACKBONES, DETECTORS, HEADS, LOCALIZERS, LOSSES,
-                       PARTITIONERS, RECOGNIZERS, ROI_EXTRACTORS)
+                       PARTITIONERS, RECOGNIZERS, ROI_EXTRACTORS, RESOLVERS)
 from .samplers import RandomSampler
 from .weight_init import kaiming_normal_, trunc_normal_, weight_init_
 
@@ -30,7 +30,7 @@ __all__ = [
     'BACKBONES', 'HEADS', 'RECOGNIZERS', 'LOCALIZERS', 'PARTITIONERS', 'LOSSES',
     'build_recognizer', 'build_localizer', 'build_head', 'build_backbone',
     'build_loss', 'ResNet', 'TSNHead', 'BaseHead', 'BaseRecognizer',
-    'Recognizer2d', 'CrossEntropyLoss', 'ROI_EXTRACTORS',
+    'Recognizer2d', 'CrossEntropyLoss', 'ROI_EXTRACTORS', 'RESOLVERS',
     'SingleRoIExtractor3D', 'AVARoIHead', 'BBoxHeadAVA', 'MaxIoUAssignerAVA',
     'RandomSampler', 'DETECTORS', 'kaiming_normal_', 'trunc_normal_',
     'weight_init_'

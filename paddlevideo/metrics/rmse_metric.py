@@ -58,7 +58,7 @@ class RMSEMetric(BaseMetric):
     def accumulate(self):
         """accumulate metrics when finished all iters.
         """
-        logger.info('[TEST] finished, avg_rmse = {} avg_ssim = {}'.format(
+        logger.info('[TEST] finished, avg_rmse = {}, avg_ssim = {}.'.format(
             np.mean(np.array(self.rmses)), np.mean(np.array(self.ssims))))
 
     def _compute_rmse(self, imgs1: paddle.Tensor,

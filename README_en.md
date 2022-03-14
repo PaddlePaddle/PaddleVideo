@@ -104,6 +104,17 @@ PaddleVideo is a toolset for video tasks prepared for the industry and academia.
     <td></td>
     <td></td>
   </tr>
+  <tr>
+    <td colspan="5" style="font-weight:bold;">Super-resolution</td>
+  </tr>
+  <tr>
+    <td><a href="./docs/zh-CN/model_zoo/estimation/adds.md">WAFP</a> (Depth Super-Resolution')</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+
 </table>
 
 
@@ -151,6 +162,15 @@ PaddleVideo is a toolset for video tasks prepared for the industry and academia.
   </tr>
   <tr>
     <td><a href="docs/en/dataset/Oxford_RobotCar.md">Oxford-RobotCar</a> (<a href="https://robotcar-dataset.robots.ox.ac.uk/" rel="nofollow">Homepage</a>) (IJRR'2017)</td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td colspan="4">Depth Super-resolution</td>
+  </tr>
+  <tr>
+    <td><a href="TODO">TODO</a> (<a href="TODO" rel="nofollow">Homepage</a>) (TODO')</td>
     <td></td>
     <td></td>
     <td></td>

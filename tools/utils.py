@@ -44,7 +44,7 @@ from abc import abstractmethod
 from paddlevideo.loader.builder import build_pipeline
 from paddlevideo.loader.pipelines import (
     AutoPadding, CenterCrop, DecodeSampler, FeatureDecoder, FrameDecoder,
-    GroupResize, Image2Array, ImageDecoder, JitterScale, MultiCrop,
+    GroupResize, Image2Array, ImageDecoder, MatDecoder, JitterScale, MultiCrop,
     Normalization, PackOutput, Sampler, SamplerPkl, Scale, SkeletonNorm,
     TenCrop, ToArray, UniformCrop, VideoDecoder, SegmentationSampler,
     SketeonCropSample)
@@ -124,7 +124,6 @@ def build_inference_helper(cfg):
 
 
 class Base_Inference_helper():
-
     def __init__(self,
                  num_seg=8,
                  seg_len=1,
@@ -181,7 +180,6 @@ class Base_Inference_helper():
 
 @INFERENCE.register()
 class ppTSM_Inference_helper(Base_Inference_helper):
-
     def __init__(self,
                  num_seg=8,
                  seg_len=1,
@@ -221,7 +219,6 @@ class ppTSM_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class ppTSN_Inference_helper(Base_Inference_helper):
-
     def __init__(self,
                  num_seg=25,
                  seg_len=1,
@@ -267,7 +264,6 @@ class ppTSN_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class BMN_Inference_helper(Base_Inference_helper):
-
     def __init__(self, feat_dim, dscale, tscale, result_path):
         self.feat_dim = feat_dim
         self.dscale = dscale
@@ -354,7 +350,6 @@ class BMN_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class TimeSformer_Inference_helper(Base_Inference_helper):
-
     def __init__(self,
                  num_seg=8,
                  seg_len=1,
@@ -400,7 +395,6 @@ class TimeSformer_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class VideoSwin_Inference_helper(Base_Inference_helper):
-
     def __init__(self,
                  num_seg=4,
                  seg_len=32,
@@ -481,7 +475,6 @@ class VideoSwin_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class VideoSwin_TableTennis_Inference_helper(Base_Inference_helper):
-
     def __init__(self,
                  num_seg=1,
                  seg_len=32,
@@ -610,7 +603,6 @@ class VideoSwin_TableTennis_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class SlowFast_Inference_helper(Base_Inference_helper):
-
     def __init__(self,
                  num_frames=32,
                  sampling_rate=2,
@@ -684,7 +676,6 @@ class SlowFast_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class STGCN_Inference_helper(Base_Inference_helper):
-
     def __init__(self,
                  num_channels,
                  window_size,
@@ -716,7 +707,6 @@ class STGCN_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class CTRGCN_Inference_helper(Base_Inference_helper):
-
     def __init__(self,
                  num_channels=3,
                  vertex_nums=25,
@@ -753,7 +743,6 @@ class CTRGCN_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class MSTCN_Inference_helper(Base_Inference_helper):
-
     def __init__(self, num_channels, actions_map_file_path, feature_path=None):
         self.num_channels = num_channels
         file_ptr = open(actions_map_file_path, 'r')
@@ -829,7 +818,6 @@ class MSTCN_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class ASRF_Inference_helper(Base_Inference_helper):
-
     def __init__(self,
                  num_channels,
                  actions_map_file_path,
@@ -921,7 +909,6 @@ class ASRF_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class AttentionLSTM_Inference_helper(Base_Inference_helper):
-
     def __init__(
             self,
             num_classes,  #Optional, the number of classes to be classified.
@@ -962,7 +949,6 @@ class AttentionLSTM_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class TransNetV2_Inference_helper():
-
     def __init__(self,
                  num_frames,
                  height,
@@ -1140,7 +1126,6 @@ class TransNetV2_Inference_helper():
 
 @INFERENCE.register()
 class ADDS_Inference_helper(Base_Inference_helper):
-
     def __init__(self,
                  frame_idxs=[0],
                  num_scales=4,
@@ -1220,11 +1205,19 @@ class ADDS_Inference_helper(Base_Inference_helper):
                 file_name = os.path.basename(self.input_file[i]).split('.')[0]
                 save_path = os.path.join(save_dir,
                                          file_name + "_depth" + ".png")
-                pred_depth_color = self._convertPNG(pred_depth)
+                pred_depth_color = self._convert_to_pseudo_color(pred_depth)
                 pred_depth_color.save(save_path)
                 print(f"pred depth image saved to: {save_path}")
 
-    def _convertPNG(self, image_numpy):
+    def _convert_to_pseudo_color(self, image_numpy: np.ndarray) -> Image.Image:
+        """convert single-channel image to pseudo color image.
+
+        Args:
+            image_numpy (np.ndarray): single channel image, such as depth image, gray scale image.
+
+        Returns:
+            Image.Image: converted image in PIL format.
+        """
         disp_resized = cv2.resize(image_numpy, (1280, 640))
         disp_resized_np = disp_resized
         vmax = np.percentile(disp_resized_np, 95)
@@ -1237,8 +1230,75 @@ class ADDS_Inference_helper(Base_Inference_helper):
 
 
 @INFERENCE.register()
-class AVA_SlowFast_FastRCNN_Inference_helper(Base_Inference_helper):
+class WAFP_Inference_helper(Base_Inference_helper):
+    def __init__(self,
+                 num_channels: int = 1,
+                 height: int = 368,
+                 width: int = 440):
+        self.height = height
+        self.width = width
 
+    def preprocess(self, input_file):
+        """
+        input_file: str, file path
+        return: list
+        """
+        assert os.path.isfile(input_file) is not None, "{0} not exists".format(
+            input_file)
+        results = {
+            'filename': input_file,
+        }
+        ops = [MatDecoder()]
+        for op in ops:
+            results = op(results)
+        res = results['imgs']  # [h,w]
+        res = np.expand_dims(res, axis=0).copy()  # [b,1,h,w]
+        return [res]
+
+    def postprocess(self, output, print_output, save_dir='data/'):
+        """
+        output: list
+        """
+        if not isinstance(self.input_file, list):
+            self.input_file = [
+                self.input_file,
+            ]
+        N = len(self.input_file)
+        for i in range(N):
+            pred = output[i]  # [H, W]
+            if print_output:
+                print("Current input image: {0}".format(self.input_file[i]))
+                file_name = os.path.basename(self.input_file[i]).split('.')[0]
+                save_path = os.path.join(save_dir,
+                                         file_name + "wafp_output" + ".png")
+                pred_color = self._convert_to_pseudo_color(pred)
+                pred_color.save(save_path)
+                print(f"pred output image saved to: {save_path}")
+
+    def _convert_to_pseudo_color(self, image_numpy: np.ndarray) -> Image.Image:
+        """convert single-channel image to pseudo color image.
+
+        Args:
+            image_numpy (np.ndarray): single channel image, such as depth image, gray scale image.
+
+        Returns:
+            Image.Image: converted image in PIL format.
+        """
+        while image_numpy.ndim >= 3 and image_numpy.shape[0] == 1:
+            image_numpy = np.squeeze(image_numpy, axis=0)
+        disp_resized = image_numpy
+        disp_resized_np = disp_resized
+        vmax = np.percentile(disp_resized_np, 95)
+        normalizer = mpl.colors.Normalize(vmin=disp_resized_np.min(), vmax=vmax)
+        mapper = cm.ScalarMappable(norm=normalizer, cmap='magma')
+        colormapped_im = (mapper.to_rgba(disp_resized_np)[:, :, :3] *
+                          255).astype(np.uint8)
+        im = Image.fromarray(colormapped_im)
+        return im
+
+
+@INFERENCE.register()
+class AVA_SlowFast_FastRCNN_Inference_helper(Base_Inference_helper):
     def __init__(self,
                  detection_model_name,
                  detection_model_weights,

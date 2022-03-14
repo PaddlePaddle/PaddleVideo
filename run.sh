@@ -14,7 +14,7 @@ python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log
 # run adds training
 # python3.7 main.py --validate -c configs/estimation/adds/adds.yaml --seed 20
 
-# run WAFP-Net training
+# run wafp training
 # python3.7 main.py -c configs/resolution/wafp/wafp.yaml --seed 42
 
 # run tsm training

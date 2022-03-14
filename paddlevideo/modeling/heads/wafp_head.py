@@ -41,49 +41,51 @@ class WAFPHead(paddle.nn.Layer):
         pass
 
     def loss(self,
-             out1: paddle.Tensor,
-             out2: paddle.Tensor,
-             out3: paddle.Tensor,
-             out: paddle.Tensor,
-             target: paddle.Tensor,
-             scale: int,
-             valid_mode=False) -> paddle.Tensor:
+             out1: paddle.Tensor = None,
+             out2: paddle.Tensor = None,
+             out3: paddle.Tensor = None,
+             out: paddle.Tensor = None,
+             target: paddle.Tensor = None,
+             scale: int = 0,
+             valid_mode: bool = False) -> Dict:
 
         losses = dict()
-        loss1 = self.loss_func(out1, target)
-        loss2 = self.loss_func(out2, target)
-        loss3 = self.loss_func(out3, target)
-        loss5 = self.loss_func(out, target)
-        tv_loss1 = self.regular_func(out)
-        tv_loss2 = self.regular_func(out3)
+        if not valid_mode:
+            loss1 = self.loss_func(out1, target)
+            loss2 = self.loss_func(out2, target)
+            loss3 = self.loss_func(out3, target)
+            loss5 = self.loss_func(out, target)
+            tv_loss1 = self.regular_func(out)
+            tv_loss2 = self.regular_func(out3)
 
-        losses['loss'] = \
-            0.1 * loss1 + \
-            0.2 * loss2 + \
-            0.3 * loss3 + \
-            0.4 * loss5 + \
-            0.05 * tv_loss1 +\
-            0.05 * tv_loss2
+            losses['loss'] = \
+                0.1 * loss1 + \
+                0.2 * loss2 + \
+                0.3 * loss3 + \
+                0.4 * loss5 + \
+                0.05 * tv_loss1 +\
+                0.05 * tv_loss2
+        else:
+            loss5 = self.loss_func(out, target)
+            losses['loss'] = loss5
 
-        if valid_mode:
             im_h_y = out[0]  # [1,h,w]
             im_h_y = im_h_y * 255.0  # [1,h,w]
             im_h_y = im_h_y.clip(0.0, 255.0)  # [1,h,w]
             im_h_y = im_h_y[0]  # [h,w]
-
             im_h_y = im_h_y / 255.0  # [h,w]
             target = target.squeeze()
 
-            rmse_predicted = self.compute_rmse(target,
-                                               im_h_y,
-                                               shave_border=scale)
+            rmse_predicted = self._compute_rmse(target,
+                                                im_h_y,
+                                                shave_border=scale)
             losses['rmse'] = rmse_predicted
         return losses
 
-    def compute_rmse(self,
-                     pred: paddle.Tensor,
-                     gt: paddle.Tensor,
-                     shave_border: int = 0) -> paddle.Tensor:
+    def _compute_rmse(self,
+                      pred: paddle.Tensor,
+                      gt: paddle.Tensor,
+                      shave_border: int = 0) -> paddle.Tensor:
 
         height, width = pred.shape[:2]
 

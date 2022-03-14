@@ -20,7 +20,11 @@ import av
 import cv2
 import decord as de
 import numpy as np
-import scipy.io as sio
+try:
+    import scipy.io as sio
+except ImportError as e:
+    print(
+        f"{e}, [scipy] package and it's dependencies is required for WAFP-Net.")
 
 from ..registry import PIPELINES
 
@@ -298,13 +302,15 @@ class MatDecoder(object):
     def __call__(self, results):
         filepath = results['filename']
         mat = sio.loadmat(filepath)
-        im_gt_y = mat['im_gt_y']  # [h, w]
-        im_b_y = mat['im_b_y']  # [h, w]
-        im_gt_y = im_gt_y.astype('float32')
-        im_b_y = im_b_y.astype('float32')
+        im_gt_y = mat.get('im_gt_y', None)  # [h, w]
+        im_b_y = mat.get('im_b_y', None)  # [h, w]
+        if im_gt_y is not None:
+            im_gt_y = im_gt_y.astype('float32')
+            im_gt_y = np.expand_dims(im_gt_y, axis=0)
+        if im_b_y is not None:
+            im_b_y = im_b_y.astype('float32')
+            im_b_y = np.expand_dims(im_b_y, axis=0)
 
-        im_gt_y = np.expand_dims(im_gt_y, axis=0)
-        im_b_y = np.expand_dims(im_b_y, axis=0)
-
-        results = {'imgs': im_b_y, 'labels': im_gt_y}
+        results['imgs'] = im_b_y
+        results['labels'] = im_gt_y
         return results

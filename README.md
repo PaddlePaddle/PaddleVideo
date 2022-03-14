@@ -115,6 +115,16 @@ PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_githu
     <td></td>
     <td></td>
   </tr>
+  <tr>
+    <td colspan="5" style="font-weight:bold;">超分辨率</td>
+  </tr>
+  <tr>
+    <td><a href="./docs/zh-CN/model_zoo/estimation/adds.md">WAFP</a> (Depth Super-Resolution')</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
 </table>
 
 
@@ -162,6 +172,15 @@ PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_githu
   </tr>
   <tr>
     <td><a href="docs/zh-CN/dataset/Oxford_RobotCar.md">Oxford-RobotCar</a> (<a href="https://robotcar-dataset.robots.ox.ac.uk/" rel="nofollow">Homepage</a>) (IJRR'2017)</td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td colspan="4">深度图超分辨率</td>
+  </tr>
+  <tr>
+    <td><a href="TODO">TODO</a> (<a href="TODO" rel="nofollow">Homepage</a>) (TODO'TODO)</td>
     <td></td>
     <td></td>
     <td></td>

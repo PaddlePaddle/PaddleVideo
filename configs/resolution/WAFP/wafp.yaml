@@ -7,7 +7,15 @@ MODEL: #MODEL field
     head:
         name: 'WAFPHead' # only compute loss and metrics.
     runtime_cfg:
+        val:
+            mode: patch  # must be patch in validate
+            scale: 4  # must be 4
+            patch_size: 61  # must be 61
         test:
+            mode: patch
+            scale: 4
+            patch_size: 61
+        infer:
             mode: patch
             scale: 4
             patch_size: 61
@@ -34,10 +42,10 @@ PIPELINE: #PIPELINE field
     train: #Mandotary, indicate the pipeline to deal with the training data, associate to the 'paddlevideo/loader/pipelines/'
     valid:
         decode:
-            MatDecoder:
+            name: 'MatDecoder'
     test:
         decode:
-            MatDecoder:
+            name: 'MatDecoder'
 
 OPTIMIZER: #OPTIMIZER field
     name: 'Momentum' #Mandatory, the type of optimizer, associate to the 'paddlevideo/solver/'
@@ -58,8 +66,10 @@ METRIC:
     name: 'RMSEMetric'
     scale: 4
 
-# INFERENCE:
-    # name: 'WAFP_Inference_helper'
+INFERENCE:
+    name: 'WAFP_Inference_helper'
+    height: 368
+    width: 440
 
 model_name: "WAFP"
 log_interval: 1 #Optional, the interal of logger, default:10

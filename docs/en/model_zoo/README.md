@@ -22,9 +22,10 @@ We implemented action recgonition model and action localization model in this re
 | action detection| [BMN](./localization/bmn.md) | [bmn.yaml](../../../configs/localization/bmn.yaml) | [ActivityNet](../dataset/ActivityNet.md) |  AUC | 67.23 | [BMN.pdparams](https://videotag.bj.bcebos.com/PaddleVideo/BMN/BMN.pdparams) |
 | shot boundary detection | [TransNetV2](./partition/transnetv2.md) | [transnetv2.yaml](../../../configs/partitioners/transnetv2/transnetv2.yaml) | ClipShots | F1 scores | 76.1 |  |
 | monocular depth estimation | [ADDS](./estimation/adds.md) | [adds.yaml](../../../configs/estimation/adds/adds.yaml) | Oxford_RobotCar | Abs Rel | 0.209 | [ADDS_car.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ADDS_car.pdparams) |
+| monocular depth super-resolution | [WAFP](./resolution/wafp.md) | [adds.yaml](../../../configs/resolution/wafp/wafp.yaml) | TODO | RMSE | 2.5762 | [WAFP.pdparams](TODO) |
 
 
-# Reference  
+# Reference
 
 - [Attention Clusters: Purely Attention Based Local Feature Integration for Video Classification](https://arxiv.org/abs/1711.09550), Xiang Long, Chuang Gan, Gerard de Melo, Jiajun Wu, Xiao Liu, Shilei Wen
 - [BMN: Boundary-Matching Network for Temporal Action Proposal Generation](https://arxiv.org/abs/1907.09702), Tianwei Lin, Xiao Liu, Xin Li, Errui Ding, Shilei Wen.
@@ -37,4 +38,4 @@ We implemented action recgonition model and action localization model in this re
 - [Skeleton-Based Action Recognition with Multi-Stream Adaptive Graph Convolutional Networks](https://arxiv.org/abs/1912.06971), Lei Shi, Yifan Zhang, Jian Cheng, Hanqing Lu
 - [TransNet V2: An effective deep network architecture for fast shot transition detection](https://arxiv.org/abs/2008.04838), Tomáš Souček, Jakub Lokoč
 - [Self-supervised Monocular Depth Estimation for All Day Images using Domain Separation](https://arxiv.org/abs/2108.07628), Lina Liu, Xibin Song, Mengmeng Wang
-
+- [WAFP-Net: Weighted Attention Fusion based Progressive Residual Learning for Depth Map Super-resolution](TODO), Xibin Song, Dingfu Zhou, Wei Li∗, Yuchao Dai, Liu Liu, Hongdong Li, Ruigang Yang and Liangjun Zhang
