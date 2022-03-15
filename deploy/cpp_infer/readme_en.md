@@ -56,7 +56,7 @@ python -m pip install [paddledet](git+https://github.com/LDOUBLEV/AutoLog)
     ```bash
     cd opencv-3.4.7
 
-    root_path=/xxx/xxx/xxx/xxx/opencv-3.4.7 # That is the absolute path of opencv-3.4.7
+    root_path=$PWD  # That is the absolute path of opencv-3.4.7
     install_path=${root_path}/opencv3
 
     rm -rf build
@@ -90,13 +90,14 @@ python -m pip install [paddledet](git+https://github.com/LDOUBLEV/AutoLog)
 
     Finally, the installation path `install_path` will be used as the specified path, and a folder of `opencv3` will be obtained. The file structure is shown below.
 
-    ```
-    opencv3/
-    ├── bin/
-    ├── include/
-    ├── lib/
-    ├── lib64/
-    └── share/
+    ```shell
+    opencv-3.4.7/
+    ├── opencv3/
+    │   ├── bin/
+    │   ├── include/
+    │   ├── lib/
+    │   ├── lib64/
+    │   └── share/
     ```
 
 ### 1.2 Download or compile Paddle prediction library
@@ -106,7 +107,7 @@ There are two ways to obtain the Paddle prediction library, which will be descri
 
 #### 1.2.1 Download and install directly
 
-* [Paddle prediction library official website](https://paddleinference.paddlepaddle.org.cn/v2.2/user_guides/download_lib.html) provides different cuda versions of Linux prediction libraries, you can Check and **select the appropriate prediction library version** on the official website (it is recommended to select the prediction library with paddle version>=2.0.1).
+* [Paddle prediction library official website](https://paddleinference.paddlepaddle.org.cn/v2.2/user_guides/download_lib.html) provides different cuda versions of Linux prediction libraries, you can Check and **select the appropriate prediction library version** on the official website (it is recommended to select the prediction library with paddle version>=2.0.1, and the prediction library of 2.2.2 is recommended).
 
 * Download and get a `paddle_inference.tgz` compressed package, and then unzip it into a folder, the command is as follows (taking the machine environment as gcc8.2 as an example):
 
@@ -151,12 +152,13 @@ There are two ways to obtain the Paddle prediction library, which will be descri
 
 * After the compilation is complete, you can see the following files and folders are generated under the file `build/paddle_inference_install_dir/`.
 
-    ```bash
-    build/paddle_inference_install_dir/
-    ├── CMakeCache.txt
-    ├── paddle/
-    ├── third_party
-    └── version.txt
+    ```
+    build/
+    └── paddle_inference_install_dir/
+        ├── CMakeCache.txt
+        ├── paddle/
+        ├── third_party/
+        └── version.txt
     ```
 
     Among them, `paddle` is the Paddle library required for C++ prediction, and `version.txt` contains the version information of the current prediction library.
@@ -170,9 +172,9 @@ There are two ways to obtain the Paddle prediction library, which will be descri
     ```
     inference/
     └── ppTSM/
-    ├── ppTSM.pdiparams
-    ├── ppTSM.pdiparamsinfo
-    └── ppTSM.pdmodel
+        ├── ppTSM.pdiparams
+        ├── ppTSM.pdiparamsinfo
+        └── ppTSM.pdmodel
     ```
 
 
@@ -191,23 +193,22 @@ There are two ways to obtain the Paddle prediction library, which will be descri
     ```shell
     OPENCV_DIR=your_opencv_dir
     LIB_DIR=your_paddle_inference_dir
-    CUDA_LIB_DIR=your_cuda_lib_dir
-    CUDNN_LIB_DIR=your_cudnn_lib_dir
-    TENSORRT_DIR=your_tensorRT_dir
+    CUDA_LIB_DIR=/usr/local/cuda/lib64
+    CUDNN_LIB_DIR=/usr/lib/x86_64-linux-gnu/
     ```
 
-    Take PP-TSM as an example, the above parameters are as follows (the xxx part is modified according to the user's own machine situation)
+    The above parameters are as follows (the following path users can modify according to their own machine conditions)
 
-    ```bash
-    OPENCV_DIR=/path/to/opencv3
-    LIB_DIR=/path/to/paddle_inference
-    CUDA_LIB_DIR=/path/to/cuda/lib64
-    CUDNN_LIB_DIR=/path/to/cuda/lib64
-    TENSORRT_DIR=/path/to/TensorRT-x.x.x.x
-    ```
+    `OPENCV_DIR` is the address where opencv is compiled and installed
+     `LIB_DIR` is the download (`paddle_inference` folder) or the generated Paddle prediction library address (`build/paddle_inference_install_dir` folder)
+     `CUDA_LIB_DIR` is the address of the cuda library file, which is `/usr/local/cuda/lib64` in docker
+     `CUDNN_LIB_DIR` is the cudnn library file address, which is `/usr/lib/x86_64-linux-gnu/` in docker.
+     **If you want to enable TensorRT acceleration during prediction, you need to modify the code at `tools/build.sh`3**
+     1. Set `DWITH_GPU=ON`
+     2. Set `DWITH_TENSORRT=ON`
+     3. Set `TENSORRT_DIR=/path/to/TensorRT-x.x.x.x`
 
-    Among them, `OPENCV_DIR` is the address where opencv is compiled and installed; `LIB_DIR` is the download (`paddle_inference` folder) or compiled Paddle prediction library address (`build/paddle_inference_install_dir` folder); `CUDA_LIB_DIR` is the cuda library file address , In docker, it is `/usr/local/cuda/lib64`; `CUDNN_LIB_DIR` is the address of the cudnn library file, in docker it is `/usr/lib/x86_64-linux-gnu/`. **Note: The above paths are written as absolute paths, do not write relative paths. **
-
+    **The above paths are all absolute paths, do not use relative paths**
 
 * After the compilation is complete, an executable file named `ppvideo` will be generated in the `cpp_infer/build` folder.
 
@@ -222,32 +223,25 @@ Operation mode:
 
 Among them, `mode` is a required parameter, which means the selected function, and the value range is ['rec'], which means **video recognition** (more functions will be added in succession).
 
-Note: Note: If you want to enable the TensorRT optimization option during prediction, you need to run the following command to set the relevant path of TensorRT.
-```bash
-export PATH=$PATH:/path/to/cuda/bin
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/path/to/cuda/bin
-export LIBRARY_PATH=$LIBRARY_PATH:/path/to/cuda/bin
-export LD_LIBRARY_PATH=/path/to/TensorRT-x.x.x.x/lib:$LD_LIBRARY_PATH
-```
 
 ##### 1. Call video recognition:
 
 ```bash
 # run PP-TSM inference
 ./build/ppvideo rec \
-    --rec_model_dir=../../inference/ppTSM \
-    --inference_model_name=ppTSM \
-    --video_dir=./example_video_dir \
-    --num_seg=8 \
-    --seg_len=1
+--rec_model_dir=../../inference/ppTSM \
+--inference_model_name=ppTSM \
+--video_dir=./example_video_dir \
+--num_seg=8 \
+--seg_len=1
 
 # run PP-TSN inference
 ./build/ppvideo rec \
-    --rec_model_dir=../../inference/ppTSN \
-    --inference_model_name=ppTSN \
-    --video_dir=./example_video_dir \
-    --num_seg=25 \
-    --seg_len=1
+--rec_model_dir=../../inference/ppTSN \
+--inference_model_name=ppTSN \
+--video_dir=./example_video_dir \
+--num_seg=25 \
+--seg_len=1
 ```
 More parameters are as follows:
 
@@ -302,6 +296,21 @@ I1125 08:10:45.834594 13955 autolog.h:65] Total time spent(ms): 2739
 I1125 08:10:45.834602 13955 autolog.h:67] preprocess_time(ms): 10.6524, inference_time(ms): 1269.55, postprocess_time(ms): 0.009118
 ```
 
-### 3 Attention
+### 3 FAQ
 
-* When using the Paddle prediction library, it is recommended to use the prediction library of version 2.2.2.
+1. The following error occurred during the compilation of the demo
+
+     ```shell
+     make[2]: *** No rule to make target '/usr/lib/x86_64-linux-gn/libcudnn.so', needed by 'ppvideo'. Stop.
+     make[2]: *** Waiting for unfinished jobs....
+     [ 16%] Building CXX object CMakeFiles/ppvideo.dir/src/main.cpp.o
+     [ 50%] Building CXX object CMakeFiles/ppvideo.dir/src/preprocess_op.cpp.o
+     [ 50%] Building CXX object CMakeFiles/ppvideo.dir/src/postprocess_op.cpp.o
+     [83%] Building CXX object CMakeFiles/ppvideo.dir/src/utility.cpp.o
+     [ 83%] Building CXX object CMakeFiles/ppvideo.dir/src/video_rec.cpp.o
+     CMakeFiles/Makefile2:95: recipe for target 'CMakeFiles/ppvideo.dir/all' failed
+     make[1]: *** [CMakeFiles/ppvideo.dir/all] Error 2
+     Makefile:83: recipe for target 'all' failed
+     make: *** [all] Error 2
+     ````
+     It may be that `CUDNN_LIB_DIR` is set incorrectly, resulting in that `libcudnn.so` in this directory cannot be found.
