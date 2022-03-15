@@ -44,7 +44,7 @@ DATASET: #DATASET field
   num_workers: 1
   train:
     format: "AVADataset" #the Class name of the dataset used by youerself
-    data_prefix: 'PATH_TO_AVA_FRAMES_OF_15min_VIDEOS' #Mandatory, train data root path
+    data_prefix: 'data/ava/videos_15min' #Mandatory, train data root path
     file_path: "data/ava/annotations/ava_train_v2.1.csv" #Mandatory, train data index file path
     exclude_file: "data/ava/annotations/ava_train_excluded_timestamps_v2.1.csv"
     proposal_file: "data/ava/annotations/ava_dense_proposals_train.FAIR.recall_93.9.pkl"
@@ -55,7 +55,7 @@ DATASET: #DATASET field
     timestamp_end: 1800
   valid:
     format: "AVADataset"
-    data_prefix: 'PATH_TO_AVA_FRAMES_OF_15min_VIDEOS' #Mandatory, train data root path
+    data_prefix: 'data/ava/videos_15min' #Mandatory, train data root path
     file_path: "data/ava/annotations/ava_val_v2.1.csv"
     exclude_file: "data/ava/annotations/ava_val_excluded_timestamps_v2.1.csv"
     proposal_file: "data/ava/annotations/ava_dense_proposals_val.FAIR.recall_93.9.pkl"
@@ -67,7 +67,7 @@ DATASET: #DATASET field
     test_mode: True
   test:
       format: "AVADataset" #Mandotary, indicate the type of test dataset, please refer to the 'paddlevideo/loader/dataset'.
-      data_prefix: "PATH_TO_AVA_FRAMES_OF_15min_VIDEOS" #Optional, test data root path.
+      data_prefix: "data/ava/videos_15min" #Optional, test data root path.
       file_path: "./data/ava_test_v2.1.csv" #Mandotary, test data index file path.
       exclude_file: "./data/ava_test_excluded_timestamps_v2.1.csv"
       proposal_file: "./data/ava_dense_proposals_test.FAIR.recall_93.9.pkl"
