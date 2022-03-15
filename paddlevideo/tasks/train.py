@@ -335,11 +335,11 @@ def train_model(cfg,
                 if model_name == "AttentionLstm":
                     logger.info(
                         f"Already save the best model (hit_at_one){best}")
-                elif cfg.MODEL.framework == "FastRCNN":
+                elif cfg.MODEL.framework in ["FastRCNN"]:
                     logger.info(
                         f"Already save the best model (mAP@0.5IOU){int(best * 10000) / 10000}"
                     )
-                elif cfg.MODEL.framework == "DepthEstimator":
+                elif cfg.MODEL.framework in ["DepthEstimator", "Resolver2D"]:
                     logger.info(
                         f"Already save the best model (rmse){int(best * 10000) / 10000}"
                     )

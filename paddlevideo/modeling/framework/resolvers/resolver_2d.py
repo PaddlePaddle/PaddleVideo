@@ -52,13 +52,21 @@ class Resolver2D(BaseResolver):
         """
         imgs = data_batch[0]
         labels = data_batch[1]
-        out = self._forward_net_patch(imgs, self.runtime_cfg.val.scale,
-                                      self.runtime_cfg.val.patch_size)
+        if self.runtime_cfg.val.mode == 'full':
+            out = self._forward_net(imgs)
+        elif self.runtime_cfg.val.mode == 'patch':
+            out = self._forward_net_patch(imgs, self.runtime_cfg.val.scale,
+                                          self.runtime_cfg.val.patch_size)
+        else:
+            raise NotImplementedError(
+                f"self.runtime_cfg.val.mode must be 'full' or 'patch', but got {self.runtime_cfg.val.mode}"
+            )
         loss_metrics = self.head.loss(None,
                                       None,
                                       None,
                                       out,
                                       labels,
+                                      self.runtime_cfg.val.scale,
                                       valid_mode=True)
         return loss_metrics
 
@@ -127,7 +135,7 @@ class Resolver2D(BaseResolver):
                 out_patch = self._forward_net(im_input)
                 out_patch = out_patch.detach()
                 im_h_y = out_patch
-                im_h_y = out_patch * 255.0
+                im_h_y = im_h_y * 255.0
                 im_h_y = im_h_y.clip(0.0, 255.0)
                 im_h_y = im_h_y / 255.0
 
@@ -151,6 +159,7 @@ class Resolver2D(BaseResolver):
                 endy = w
             im_input = imgs[:, :, begx:endx, begy:endy]
             out_patch = self._forward_net(im_input)
+            out_patch = out_patch.detach()
             im_h_y = out_patch
             im_h_y = im_h_y * 255.0
             im_h_y = im_h_y.clip(0.0, 255.0)
@@ -175,6 +184,7 @@ class Resolver2D(BaseResolver):
                 endy = w
             im_input = imgs[:, :, begx:endx, begy:endy]
             out_patch = self._forward_net(im_input)
+            out_patch = out_patch.detach()
             im_h_y = out_patch
             im_h_y = im_h_y * 255.0
             im_h_y = im_h_y.clip(0.0, 255.0)
@@ -191,6 +201,7 @@ class Resolver2D(BaseResolver):
         endy = w
         im_input = imgs[:, :, begx:endx, begy:endy]
         out_patch = self._forward_net(im_input)
+        out_patch = out_patch.detach()
         im_h_y = out_patch
         im_h_y = im_h_y * 255.0
         im_h_y = im_h_y.clip(0.0, 255.0)

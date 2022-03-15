@@ -69,36 +69,26 @@ class WAFPHead(paddle.nn.Layer):
             loss5 = self.loss_func(out, target)
             losses['loss'] = loss5
 
-            im_h_y = out[0]  # [1,h,w]
-            im_h_y = im_h_y * 255.0  # [1,h,w]
-            im_h_y = im_h_y.clip(0.0, 255.0)  # [1,h,w]
-            im_h_y = im_h_y[0]  # [h,w]
-            im_h_y = im_h_y / 255.0  # [h,w]
-            target = target.squeeze()
+            height, width = out.shape[-2:]
+            shave_border = scale
 
-            rmse_predicted = self._compute_rmse(target,
-                                                im_h_y,
-                                                shave_border=scale)
+            # shave border
+            out = out[:, :, shave_border:height - shave_border,
+                      shave_border:width - shave_border]
+            target = target[:, :, shave_border:height - shave_border,
+                            shave_border:width - shave_border]
+
+            # mask
+            mask = (out != 0).astype('float32')
+            target = mask * target
+
+            rmse_predicted = self._compute_rmse(target, out)
             losses['rmse'] = rmse_predicted
         return losses
 
-    def _compute_rmse(self,
-                      pred: paddle.Tensor,
-                      gt: paddle.Tensor,
-                      shave_border: int = 0) -> paddle.Tensor:
+    def _compute_rmse(self, imgs1: paddle.Tensor,
+                      imgs2: paddle.Tensor) -> paddle.Tensor:
 
-        height, width = pred.shape[:2]
-
-        # shave border
-        pred = pred[shave_border:height - shave_border,
-                    shave_border:width - shave_border]
-        gt = gt[shave_border:height - shave_border,
-                shave_border:width - shave_border]
-
-        # mask
-        mask = (pred != 0).astype('float32')
-        gt = mask * gt
-
-        imdff = pred * 255.0 - gt * 255.0
+        imdff = imgs1 * 255.0 - imgs2 * 255.0
         rmse = paddle.sqrt(paddle.mean(imdff**2))
         return rmse
