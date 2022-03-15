@@ -67,7 +67,7 @@ For AVA v2.1, there is a simple introduction to some key files：
 ## Train
 
 * `-c`: config file path;
-* `-w`: weights of model;
+* `-w`: weights of model. The pretrained model can be downloaded from the table below;
 * `--validate`: evaluate model during training.
 
 ```
