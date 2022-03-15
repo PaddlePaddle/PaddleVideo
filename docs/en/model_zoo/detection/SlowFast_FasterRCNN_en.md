@@ -39,7 +39,20 @@ bash  download_videos.sh
 bash  download_annotations.sh
 ```
 
-### 3 Extrac Frames
+### 3 Download Proposals
+
+```
+bash  fetch_ava_proposals.sh
+```
+
+### 4 Cut Videos
+
+```
+bash  cut_videos.sh
+```
+
+### 5 Extract Frames
+
 ```
 bash  extract_rgb_frames.sh
 ```
