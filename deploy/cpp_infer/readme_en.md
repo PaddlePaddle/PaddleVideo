@@ -263,7 +263,6 @@ More parameters are as follows:
     | use_tensorrt | bool | false | Whether to use the tensorrt library |
     | precision | str | "fp32" | Use fp32/fp16/uint8 precision to predict |
     | benchmark | bool | true | Whether to enable benchmark during prediction, after enabling it, the configuration, model, time-consuming and other information will be output at the end. |
-    | save_log_path | str | "./log_output/" | Prediction result save directory |
 
 - Video recognition model related
 

@@ -262,7 +262,6 @@ export LD_LIBRARY_PATH=/path/to/TensorRT-x.x.x.x/lib:$LD_LIBRARY_PATH
     | use_tensorrt  | bool | false           | 是否使用tensorrt库                                           |
     | precision     | str  | "fp32"          | 使用fp32/fp16/uint8精度来预测                                |
     | benchmark     | bool | true            | 预测时是否开启benchmark，开启后会在最后输出配置、模型、耗时等信息。 |
-    | save_log_path | str  | "./log_output/" | 预测结果保存目录                                             |
 
 
 - 视频识别模型相关
