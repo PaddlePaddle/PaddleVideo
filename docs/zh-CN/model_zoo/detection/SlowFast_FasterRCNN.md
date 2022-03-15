@@ -39,7 +39,20 @@ bash  download_videos.sh
 bash  download_annotations.sh
 ```
 
-### 3 提取视频帧
+### 3 下载检测结果
+
+```
+bash  fetch_ava_proposals.sh
+```
+
+### 4 视频切割
+把下载的视频中第15分钟起后面的15分钟的片段切割出来：
+
+```
+bash  cut_videos.sh
+```
+
+### 5 提取视频帧
 ```
 bash  extract_rgb_frames.sh
 ```
