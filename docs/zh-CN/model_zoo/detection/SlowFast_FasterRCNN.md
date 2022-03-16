@@ -29,6 +29,8 @@ python -m pip install paddledet
 
 本项目利用[AVA数据集](https://research.google.com/ava/download.html)进行动作检测。AVA v2.2数据集包括430个视频，其中235个用于训练，64个用于验证，131个用于测试。对每个视频中15分钟的帧进行了标注，每秒标注一帧。标注文件格式为CSV。
 
+相关处理脚本在`data/ava/script`目录下。
+
 ### 1 下载视频
 ```
 bash  download_videos.sh
