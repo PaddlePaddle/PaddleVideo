@@ -5,7 +5,7 @@ gpu_list:0|0,1
 Global.use_gpu:null|null
 Global.auto_cast:null
 -o epochs:2
-null:null
+-o output_dir:null
 -o DATASET.batch_size:64
 null:null
 train_model_name:null
@@ -21,8 +21,8 @@ null:null
 null:null
 ##
 ===========================eval_params===========================
-eval:main.py --test -c configs/recognition/attention_lstm/attention_lstm_youtube8m.yaml
--w:output/AttentionLSTM/AttentionLSTM_best.pdparams
+eval:main.py --test -c configs/recognition/attention_lstm/attention_lstm_youtube8m.yaml --save_name inference
+-w:./test_tipc/output/AttentionLSTM/AttentionLSTM_epoch_00001.pdparams
 ##
 ===========================infer_params===========================
 -o:inference/AttentionLSTM
@@ -44,8 +44,10 @@ inference:tools/predict.py --config configs/recognition/attention_lstm/attention
 --batch_size:1|2
 --use_tensorrt:False|True
 --precision:fp32|fp16
---model_file:inference/AttentionLSTM/AttentionLSTM.pdmodel
+--model_file:inference.pdmodel
 --input_file:./data/example.pkl
 null:null
 --enable_benchmark:True
---params_file:inference/AttentionLSTM/AttentionLSTM.pdiparams
+--params_file:inference.pdiparams
+===========================infer_benchmark_params==========================
+random_infer_input:[{float32,[512, 1024]},{int32,[1]},{float32,[512, 1024]},{float32,[512, 128]},{int32,[1]},{float32,[512, 128]}]
