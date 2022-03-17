@@ -152,9 +152,9 @@ OPTIMIZER: #OPTIMIZER field
 
 METRIC:
     name: 'AVAMetric'
-    file_path: "data/ava_train.csv" #Mandotary, test data index file path.
+    file_path: "data/ava/annotations/ava_val_v2.1.csv" #Mandotary, test data index file path.
     exclude_file: "data/ava_val_excluded_timestamps_v2.1.csv"
-    label_file: "data/ava_action_list_v2.1_for_activitynet_2018.pbtxt"
+    label_file: "data/ava/annotations/ava_action_list_v2.1_for_activitynet_2018.pbtxt"
     custom_classes: 81
 
 INFERENCE:
