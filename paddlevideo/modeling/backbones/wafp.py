@@ -69,7 +69,7 @@ class Attention_net(nn.Layer):
         vc = self.Vc(x)
         qc = self.Qc(x)
 
-        numel_hw = paddle.shape(x)[-2] * paddle.shape(x)[-1]
+        numel_hw = x.shape[-2] * x.shape[-1]
         vc_reshape = vc.reshape([-1, x.shape[1], numel_hw])
         vc_reshape = vc_reshape.transpose([0, 2, 1])
         qc_reshape = qc.reshape([-1, x.shape[1], numel_hw])
@@ -107,8 +107,12 @@ class Attention_net(nn.Layer):
 
 @BACKBONES.register()
 class WAFPNet(nn.Layer):
-    def __init__(self, num_residual_layer: int = 9, num_refine_layer: int = 9):
+    def __init__(self,
+                 pretrained: str = None,
+                 num_residual_layer: int = 9,
+                 num_refine_layer: int = 9):
         super(WAFPNet, self).__init__()
+        self.pretrained = pretrained
 
         self.input1 = nn.Conv2D(in_channels=1,
                                 out_channels=64,

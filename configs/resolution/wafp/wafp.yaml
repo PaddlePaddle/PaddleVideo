@@ -28,15 +28,15 @@ DATASET: #DATASET field
     num_workers: 1 #Mandatory, XXX the number of subprocess on each GPU.
     train:
         format: "HDF5Dataset"
-        file_path: "./depth-superresolution/training_data/train_depth_x4_noise.h5"
+        file_path: "data/depthSR/train_depth_x4_noise.h5"
     valid:
         format: "MatDataset"
-        file_path: "data/sintel/val.list"
-        data_prefix: "data/sintel/val"
+        data_prefix: "data/depthSR/val"
+        file_path: "data/depthSR/val.list"
     test:
         format: "MatDataset"
-        file_path: "data/sintel/val.list"
-        data_prefix: "data/sintel/val"
+        data_prefix: "data/depthSR/val"
+        file_path: "data/depthSR/val.list"
 
 PIPELINE: #PIPELINE field
     train: #Mandotary, indicate the pipeline to deal with the training data, associate to the 'paddlevideo/loader/pipelines/'
@@ -72,7 +72,7 @@ INFERENCE:
     width: 440
 
 model_name: "WAFP"
-log_interval: 1 #Optional, the interal of logger, default:10
-save_interval: 5
+log_interval: 100 #Optional, the interal of logger, default:10
+save_interval: 10
 epochs: 80 #Mandatory, total epoch
 log_level: "INFO" #Optional, the logger level. default: "INFO"
