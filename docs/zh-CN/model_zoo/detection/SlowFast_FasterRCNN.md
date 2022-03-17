@@ -68,13 +68,19 @@ bash  extract_rgb_frames.sh
 
 ## 模型训练
 
+下载预训练模型：
+```
+wget https://videotag.bj.bcebos.com/PaddleVideo/SlowFast/SlowFast_8*8.pdparams
+```
+
+
 * `-c`后面的参数是配置文件的路径。
 * `-w`后面的参数是finetuning或者测试时的权重，本案例将在Kinetics 400上训练的SlowFast R50模型作为预训练权重，通过下面的表格可获取。
 * `--validate`参数表示在训练过程中进行模型评估。
 
 ```
 export CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7
-python -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=logdir.ava main.py --validate -w paddle.init_param.pdparams -c configs/detection/ava/ava.yaml
+python -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=logdir.ava main.py --validate -w SlowFast_8*8.pdparams -c configs/detection/ava/ava.yaml
 ```
 
 ## 模型测试
