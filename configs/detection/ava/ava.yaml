@@ -68,9 +68,9 @@ DATASET: #DATASET field
   test:
       format: "AVADataset" #Mandotary, indicate the type of test dataset, please refer to the 'paddlevideo/loader/dataset'.
       data_prefix: "data/ava/rawframes" #Optional, test data root path.
-      file_path: "./data/ava_test_v2.1.csv" #Mandotary, test data index file path.
+      file_path: "data/ava/annotations/ava_val_v2.1.csv" #Mandotary, test data index file path.
       exclude_file: "./data/ava_test_excluded_timestamps_v2.1.csv"
-      proposal_file: "./data/ava_dense_proposals_test.FAIR.recall_93.9.pkl"
+      proposal_file: "data/ava/annotations/ava_dense_proposals_val.FAIR.recall_93.9.pkl"
       label_file: "data/ava/annotations/ava_action_list_v2.1_for_activitynet_2018.pbtxt"
       suffix: "{:05}.jpg"
       person_det_score_thr: 0.9
