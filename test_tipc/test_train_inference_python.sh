@@ -41,8 +41,8 @@ fpgm_key=$(func_parser_key "${lines[17]}")
 fpgm_trainer=$(func_parser_value "${lines[17]}")
 distill_key=$(func_parser_key "${lines[18]}")
 distill_trainer=$(func_parser_value "${lines[18]}")
-trainer_key1=$(func_parser_key "${lines[19]}")
-trainer_value1=$(func_parser_value "${lines[19]}")
+amp_key=$(func_parser_key "${lines[19]}")
+amp_trainer=$(func_parser_value "${lines[19]}")
 trainer_key2=$(func_parser_key "${lines[20]}")
 trainer_value2=$(func_parser_value "${lines[20]}")
 
@@ -301,23 +301,23 @@ else
                 elif [ ${trainer} = "${distill_key}" ]; then
                     run_train=${distill_trainer}
                     run_export=${distill_export}
-                elif [ ${trainer} = ${trainer_key1} ]; then
-                    run_train=${trainer_value1}
-                    run_export=${export_value1}
+                elif [ ${trainer} = ${amp_key} ]; then
+                    run_train=${amp_trainer}
+                    run_export=${norm_export}
                 elif [[ ${trainer} = ${trainer_key2} ]]; then
                     run_train=${trainer_value2}
                     run_export=${export_value2}
                 else
                     run_train=${norm_trainer}
-                    if [[ ${MODE} != "benchmark_train" ]] && [[ ! ${MODE} =~ "whole_train" ]]; then
-                        # 训练参数末尾加上--max_iters=30和--log_interval=1，以便运行并输出足量数据
-                        run_train=${run_train}" --max_iters=30"
-                    fi
                     run_export=${norm_export}
                 fi
 
                 if [ ${run_train} = "null" ]; then
                     continue
+                fi
+                if [[ ${MODE} != "benchmark_train" ]] && [[ ! ${MODE} =~ "whole_train" ]]; then
+                    # 训练参数末尾加上--max_iters=30和--log_interval=1，以便运行并输出足量数据
+                    run_train=${run_train}" --max_iters=30"
                 fi
                 set_autocast=$(func_set_params "${autocast_key}" "${autocast}")
                 set_epoch=$(func_set_params "${epoch_key}" "${epoch_num}")
