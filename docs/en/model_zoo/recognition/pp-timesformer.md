@@ -18,9 +18,9 @@ We have improved the [TimeSformer model](./timesformer.md) and obtained a more a
 
 | Version | Top1 |
 | :------ | :----: |
-| Ours (distill+16frame) | 79.49 |
-| Ours (distill) | 78.82 |
-| Ours | **78.54** |
+| Ours ([swa](#refer-anchor-1)+distill+16frame) | 79.44 |
+| Ours ([swa](#refer-anchor-1)+distill)  | 78.87 |
+| Ours ([swa](#refer-anchor-1)) | **78.61** |
 | [mmaction2](https://github.com/open-mmlab/mmaction2/tree/master/configs/recognition/timesformer#kinetics-400) | 77.92 |
 
 
@@ -86,7 +86,17 @@ UCF101 data download and preparation please refer to [UCF-101 data preparation](
 - Because the sampling method of the PP-TimeSformer model test mode is a slightly slower but higher accuracy **UniformCrop**, which is different from the **RandomCrop** used in the verification mode during the training process, so the verification index recorded in the training log` topk Acc` does not represent the final test score, so after the training is completed, you can use the test mode to test the best model to obtain the final index. The command is as follows:
 
   ```bash
-  python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log_pptimesformer main.py --test -c configs/recognition/ pptimesformer/pptimesformer_k400_videos.yaml -w "output/ppTimeSformer/ppTimeSformer_best.pdparams"
+  # 8-frames testing script
+  python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=log_pptimesformer  main.py  --test -c configs/recognition/pptimesformer/pptimesformer_k400_videos.yaml -w "output/ppTimeSformer/ppTimeSformer_best.pdparams"
+
+  # 16-frames testing script
+  python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=log_pptimesformer main.py --test \
+  -c configs/recognition/pptimesformer/pptimesformer_k400_videos.yaml \
+  -o MODEL.backbone.num_seg=16 \
+  -o MODEL.runtime_cfg.test.num_seg=16 \
+  -o PIPELINE.test.decode.num_seg=16 \
+  -o PIPELINE.test.sample.num_seg=16 \
+  -w "data/ppTimeSformer_k400_16f_distill.pdparams"
   ```
 
 
@@ -94,9 +104,9 @@ UCF101 data download and preparation please refer to [UCF-101 data preparation](
 
    | backbone           | Sampling method | num_seg | target_size | Top-1 | checkpoints |
    | :----------------: | :-------------: | :-----: | :---------: | :---- | :----------------------------------------------------------: |
-   | Vision Transformer |   UniformCrop   |   8    |     224     | 78.54 | [ppTimeSformer_k400_8f.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ppTimeSformer_k400_8f.pdparams) |
-   | Vision Transformer | UniformCrop | 8 | 224 | 78.82 | [ppTimeSformer_k400_8f_distill.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ppTimeSformer_k400_8f_distill.pdparams) |
-   | Vision Transformer | UniformCrop | 16 | 224 | 79.49 | [ppTimeSformer_k400_16f_distill.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ppTimeSformer_k400_16f_distill.pdparams) |
+   | Vision Transformer |   UniformCrop   |   8    |     224     | 78.61 | [ppTimeSformer_k400_8f.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ppTimeSformer_k400_8f.pdparams) |
+   | Vision Transformer | UniformCrop | 8 | 224 | 78.87 | [ppTimeSformer_k400_8f_distill.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ppTimeSformer_k400_8f_distill.pdparams) |
+   | Vision Transformer | UniformCrop | 16 | 224 | 79.44 | [ppTimeSformer_k400_16f_distill.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ppTimeSformer_k400_16f_distill.pdparams) |
 
 
 - During the test, the PP-TimeSformer video sampling strategy is to use linspace sampling: in time sequence, from the first frame to the last frame of the video sequence to be sampled, `num_seg` sparse sampling points (including endpoints) are uniformly generated; spatially , Select 3 areas to sample at both ends of the long side and the middle position (left, middle, right or top, middle, and bottom). A total of 1 clip is sampled for 1 video.
@@ -140,5 +150,7 @@ It can be seen that using the ppTimeSformer model trained on Kinetics-400 to pre
 
 - [Is Space-TimeAttention All You Need for Video Understanding?](https://arxiv.org/pdf/2102.05095.pdf), Gedas Bertasius, Heng Wang, Lorenzo Torresani
 - [Distilling the Knowledge in a Neural Network](https://arxiv.org/abs/1503.02531), Geoffrey Hinton, Oriol Vinyals, Jeff Dean
+<div id="refer-anchor-1"></div>
+
 - [Averaging Weights Leads to Wider Optima and Better Generalization](https://arxiv.org/abs/1803.05407v3), Pavel Izmailov, Dmitrii Podoprikhin, Timur Garipov
 - [ImageNet-21K Pretraining for the Masses](https://arxiv.org/pdf/2104.10972v4.pdf), Tal Ridnik, Emanuel Ben-Baruch, Asaf Noy

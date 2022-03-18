@@ -261,6 +261,10 @@ def train_model(cfg,
                 rank = dist.get_rank()
             #single_gpu_test and multi_gpu_test
             for i, data in enumerate(valid_loader):
+                """Next two line of code only used in test_tipc,
+                ignore it most of the time"""
+                if max_iters is not None and i >= max_iters:
+                    break
                 outputs = model(data, mode='valid')
 
                 if cfg.MODEL.framework == "FastRCNN":
