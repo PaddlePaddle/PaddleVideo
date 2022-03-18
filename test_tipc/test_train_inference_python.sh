@@ -394,7 +394,7 @@ else
                 if [ ${run_export} != "null" ]; then
                     save_infer_path="${save_log}"
                     real_model_name=${model_name/PP-/pp}
-                    set_export_weight=$(func_set_params "${export_weight}" "${save_log}/${real_model_name}_best.pdparams")
+                    set_export_weight=$(func_set_params "${export_weight}" "${save_log}/${real_model_name}_epoch_00001.pdparams")
 
                     set_save_infer_key=$(func_set_params "${save_infer_key}" "${save_log}")
                     export_cmd="${python} ${run_export} ${set_export_weight} ${set_save_infer_key}"

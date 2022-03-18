@@ -188,8 +188,8 @@ def train_model(cfg,
             # 4.1 forward
             # AMP #
             if use_amp:
-                with paddle.paddle.auto_cast(custom_black_list={"reduce_mean"},
-                                             level=amp_level):
+                with paddle.amp.auto_cast(custom_black_list={"reduce_mean"},
+                                          level=amp_level):
                     outputs = model(data, mode='train')
                 avg_loss = outputs['loss']
                 if use_gradient_accumulation:
