@@ -14,13 +14,13 @@
 
 ## 模型简介
 
-我们对[TimeSformer模型](./timesformer.md)进行了改进，得到了更高精度的2D实用视频分类模型**PP-TimeSformer**。在不增加参数量和计算量的情况下，在UCF-101、Kinetics-400等数据集上精度显著超过原版，在Kinetics-400数据集上的精度如下表所示。
+我们对[TimeSformer模型](./timesformer.md)进行了改进和优化，得到了更高精度的2D实用视频分类模型**PP-TimeSformer**。在不增加参数量和计算量的情况下，在UCF-101、Kinetics-400等数据集上精度显著超过原版，在Kinetics-400数据集上的精度如下表所示。
 
 | Version | Top1 |
 | :------ | :----: |
-| Ours (distill+16frame) | 79.49 |
-| Ours (distill)  | 78.82 |
-| Ours | **78.54** |
+| Ours ([swa](#refer-anchor-1)+distill+16frame) | 79.44 |
+| Ours ([swa](#refer-anchor-1)+distill)  | 78.87 |
+| Ours ([swa](#refer-anchor-1)) | **78.61** |
 | [mmaction2](https://github.com/open-mmlab/mmaction2/tree/master/configs/recognition/timesformer#kinetics-400) | 77.92 |
 
 
@@ -86,7 +86,18 @@ UCF101数据下载及准备请参考[UCF-101数据准备](../../dataset/ucf101.m
 - 由于PP-TimeSformer模型测试模式的采样方式是速度稍慢但精度高一些的**UniformCrop**，与训练过程中验证模式采用的**RandomCrop**不同，所以训练日志中记录的验证指标`topk Acc`不代表最终的测试分数，因此在训练完成之后可以用测试模式对最好的模型进行测试获取最终的指标，命令如下：
 
   ```bash
+  # 8-frames 模型测试命令
   python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=log_pptimesformer  main.py  --test -c configs/recognition/pptimesformer/pptimesformer_k400_videos.yaml -w "output/ppTimeSformer/ppTimeSformer_best.pdparams"
+
+  # 16-frames模型测试命令
+  python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=log_pptimesformer main.py --test \
+  -c configs/recognition/pptimesformer/pptimesformer_k400_videos.yaml \
+  -o MODEL.backbone.num_seg=16 \
+  -o MODEL.runtime_cfg.test.num_seg=16 \
+  -o MODEL.runtime_cfg.test.avg_type='prob' \
+  -o PIPELINE.test.decode.num_seg=16 \
+  -o PIPELINE.test.sample.num_seg=16 \
+  -w "data/ppTimeSformer_k400_16f_distill.pdparams"
   ```
 
 
@@ -94,9 +105,9 @@ UCF101数据下载及准备请参考[UCF-101数据准备](../../dataset/ucf101.m
 
    | backbone           | Sampling method | num_seg | target_size | Top-1 | checkpoints |
    | :----------------: | :-------------: | :-----: | :---------: | :---- | :----------------------------------------------------------: |
-   | Vision Transformer |   UniformCrop   |   8    |     224     | 78.54 | [ppTimeSformer_k400_8f.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ppTimeSformer_k400_8f.pdparams) |
-   | Vision Transformer | UniformCrop | 8 | 224 | 78.82 | [ppTimeSformer_k400_8f_distill.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ppTimeSformer_k400_8f_distill.pdparams) |
-   | Vision Transformer | UniformCrop | 16 | 224 | 79.49 | [ppTimeSformer_k400_16f_distill.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ppTimeSformer_k400_16f_distill.pdparams) |
+   | Vision Transformer |   UniformCrop   |   8    |     224     | 78.61 | [ppTimeSformer_k400_8f.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ppTimeSformer_k400_8f.pdparams) |
+   | Vision Transformer | UniformCrop | 8 | 224 | 78.87 | [ppTimeSformer_k400_8f_distill.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ppTimeSformer_k400_8f_distill.pdparams) |
+   | Vision Transformer | UniformCrop | 16 | 224 | 79.44 | [ppTimeSformer_k400_16f_distill.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ppTimeSformer_k400_16f_distill.pdparams) |
 
 
 - 测试时，PP-TimeSformer视频采样策略为使用linspace采样：时序上，从待采样视频序列的第一帧到最后一帧区间内，均匀生成`num_seg`个稀疏采样点（包括端点）；空间上，选择长边两端及中间位置（左中右 或 上中下）3个区域采样。1个视频共采样1个clip。
@@ -140,5 +151,7 @@ Current video file: data/example.avi
 
 - [Is Space-Time Attention All You Need for Video Understanding?](https://arxiv.org/pdf/2102.05095.pdf), Gedas Bertasius, Heng Wang, Lorenzo Torresani
 - [Distilling the Knowledge in a Neural Network](https://arxiv.org/abs/1503.02531), Geoffrey Hinton, Oriol Vinyals, Jeff Dean
+<div id="refer-anchor-1"></div>
+
 - [Averaging Weights Leads to Wider Optima and Better Generalization](https://arxiv.org/abs/1803.05407v3), Pavel Izmailov, Dmitrii Podoprikhin, Timur Garipov
 - [ImageNet-21K Pretraining for the Masses](https://arxiv.org/pdf/2104.10972v4.pdf), Tal Ridnik, Emanuel Ben-Baruch, Asaf Noy

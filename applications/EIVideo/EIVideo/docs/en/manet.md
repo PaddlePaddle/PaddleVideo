@@ -1,4 +1,4 @@
-[简体中文](../../../zh-CN/model_zoo/partition/manet.md) | English
+[简体中文](../zh-CN/manet.md) | English
 
 # Ma-Net
 
@@ -14,8 +14,10 @@
 
 - [Inference](#Inference)
 
-
-
+Before getting started, you need to install additional dependencies as follows:
+```bash
+python -m pip install scikit-image
+```
 
 ## Introduction
 

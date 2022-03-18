@@ -13,11 +13,14 @@
 # limitations under the License.
 
 from .adds_head import AddsHead
+from .asrf_head import ASRFHead
 from .attention_lstm_head import AttentionLstmHead
 from .base import BaseHead
 from .bbox_head import BBoxHeadAVA
 from .cfbi_head import CollaborativeEnsemblerMS
 from .i3d_head import I3DHead
+from .movinet_head import MoViNetHead
+from .ms_tcn_head import MSTCNHead
 from .pptimesformer_head import ppTimeSformerHead
 from .pptsm_head import ppTSMHead
 from .pptsn_head import ppTSNHead
@@ -31,6 +34,7 @@ from .tsm_head import TSMHead
 from .tsn_head import TSNHead
 from .ms_tcn_head import MSTCNHead
 from .asrf_head import ASRFHead
+from .ctrgcn_head import CTRGCNHead
 from .movinet_head import MoViNetHead
 
 __all__ = [
@@ -38,5 +42,5 @@ __all__ = [
     'AttentionLstmHead', 'TimeSformerHead', 'STGCNHead', 'TransNetV2Head',
     'I3DHead', 'SingleRoIExtractor3D', 'AVARoIHead', 'BBoxHeadAVA', 'AddsHead',
     'ppTimeSformerHead', 'CollaborativeEnsemblerMS', 'MSTCNHead', 'ASRFHead',
-    'MoViNetHead'
+    'MoViNetHead', 'CTRGCNHead'
 ]

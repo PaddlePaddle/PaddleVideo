@@ -46,6 +46,13 @@ def parse_args():
                         default="./inference",
                         help='output path')
 
+    parser.add_argument('--save_name',
+                        type=str,
+                        default=None,
+                        help='specify the exported inference \
+                             files(pdiparams and pdmodel) name,\
+                             only used in TIPC')
+
     return parser.parse_args()
 
 
@@ -136,7 +143,7 @@ def get_input_spec(cfg, model_name):
                       dtype='float32',
                       name='fast_input'),
         ]]
-    elif model_name in ['STGCN', 'AGCN']:
+    elif model_name in ['STGCN', 'AGCN', 'CTRGCN']:
         input_spec = [[
             InputSpec(shape=[
                 None, cfg.num_channels, cfg.window_size, cfg.vertex_nums,
@@ -203,7 +210,10 @@ def main():
 
     input_spec = get_input_spec(cfg.INFERENCE, model_name)
     model = to_static(model, input_spec=input_spec)
-    paddle.jit.save(model, osp.join(args.output_path, model_name))
+    paddle.jit.save(
+        model,
+        osp.join(args.output_path,
+                 model_name if args.save_name is None else args.save_name))
     print(
         f"model ({model_name}) has been already saved in ({args.output_path}).")
 

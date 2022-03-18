@@ -6,6 +6,11 @@ This chapter introduces the C++ deployment method of the PaddleVideo model. For 
 C++ is better than python in terms of performance calculation. Therefore, in most CPU and GPU deployment scenarios, C++ deployment methods are mostly used. This section will introduce how to configure the C++ environment in the Linux (CPU/GPU) environment and complete it.
 PaddleVideo model deployment.
 
+Before getting started, you need to install additional dependencies as follows:
+```bash
+python -m pip install [paddledet](git+https://github.com/LDOUBLEV/AutoLog)
+```
+
 ## 1. Prepare the environment
 
 - For Linux environment, docker is recommended.
@@ -101,12 +106,12 @@ There are two ways to obtain the Paddle prediction library, which will be descri
 
 #### 1.2.1 Download and install directly
 
-* [Paddle prediction library official website](https://paddleinference.paddlepaddle.org.cn/v2.1/user_guides/download_lib.html) provides different cuda versions of Linux prediction libraries, you can Check and **select the appropriate prediction library version** on the official website (it is recommended to select the prediction library with paddle version>=2.0.1).
+* [Paddle prediction library official website](https://paddleinference.paddlepaddle.org.cn/v2.2/user_guides/download_lib.html) provides different cuda versions of Linux prediction libraries, you can Check and **select the appropriate prediction library version** on the official website (it is recommended to select the prediction library with paddle version>=2.0.1).
 
 * Download and get a `paddle_inference.tgz` compressed package, and then unzip it into a folder, the command is as follows (taking the machine environment as gcc8.2 as an example):
 
     ```bash
-    wget https://paddle-inference-lib.bj.bcebos.com/2.1.1-gpu-cuda10.1-cudnn7-mkl-gcc8.2/paddle_inference.tgz
+    wget https://paddle-inference-lib.bj.bcebos.com/2.2.2/cxx_c/Linux/GPU/x86-64_gcc8.2_avx_mkl_cuda10.1_cudnn7.6.5_trt6.0.1.5/paddle_inference.tgz
     tar -xf paddle_inference.tgz
     ```
 
@@ -118,7 +123,7 @@ There are two ways to obtain the Paddle prediction library, which will be descri
 
     ```shell
     git clone https://github.com/PaddlePaddle/Paddle.git
-    git checkout release/2.1
+    git checkout release/2.2
     ```
 
 * After entering the Paddle directory, the compilation method is as follows.
@@ -194,11 +199,11 @@ There are two ways to obtain the Paddle prediction library, which will be descri
     Take PP-TSM as an example, the above parameters are as follows (the xxx part is modified according to the user's own machine situation)
 
     ```bash
-    OPENCV_DIR=/xxx/xxx/xxx/xxx/xxx/xxx/opencv3
-    LIB_DIR=/xxx/xxx/xxx/xxx/xxx/paddle_inference
-    CUDA_LIB_DIR=/xxx/xxx/cuda-xxx/lib64
-    CUDNN_LIB_DIR=/xxx/xxx/cuda-xxx/lib64
-    TENSORRT_DIR=/xxx/xxx/TensorRT-7.0.0.11
+    OPENCV_DIR=/path/to/opencv3
+    LIB_DIR=/path/to/paddle_inference
+    CUDA_LIB_DIR=/path/to/cuda/lib64
+    CUDNN_LIB_DIR=/path/to/cuda/lib64
+    TENSORRT_DIR=/path/to/TensorRT-x.x.x.x
     ```
 
     Among them, `OPENCV_DIR` is the address where opencv is compiled and installed; `LIB_DIR` is the download (`paddle_inference` folder) or compiled Paddle prediction library address (`build/paddle_inference_install_dir` folder); `CUDA_LIB_DIR` is the cuda library file address , In docker, it is `/usr/local/cuda/lib64`; `CUDNN_LIB_DIR` is the address of the cudnn library file, in docker it is `/usr/lib/x86_64-linux-gnu/`. **Note: The above paths are written as absolute paths, do not write relative paths. **
@@ -217,7 +222,16 @@ Operation mode:
 
 Among them, `mode` is a required parameter, which means the selected function, and the value range is ['rec'], which means **video recognition** (more functions will be added in succession).
 
+Note: Note: If you want to enable the TensorRT optimization option during prediction, you need to run the following command to set the relevant path of TensorRT.
+```bash
+export PATH=$PATH:/path/to/cuda/bin
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/path/to/cuda/bin
+export LIBRARY_PATH=$LIBRARY_PATH:/path/to/cuda/bin
+export LD_LIBRARY_PATH=/path/to/TensorRT-x.x.x.x/lib:$LD_LIBRARY_PATH
+```
+
 ##### 1. Call video recognition:
+
 ```bash
 # run PP-TSM inference
 ./build/ppvideo rec \
@@ -291,4 +305,4 @@ I1125 08:10:45.834602 13955 autolog.h:67] preprocess_time(ms): 10.6524, inferenc
 
 ## 3 Attention
 
-* When using the Paddle prediction library, it is recommended to use the prediction library of version 2.1.0.
+* When using the Paddle prediction library, it is recommended to use the prediction library of version 2.2.2.

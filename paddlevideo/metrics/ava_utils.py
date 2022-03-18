@@ -31,6 +31,7 @@ import sys
 import numpy as np
 from pathlib import Path
 from datetime import datetime
+import paddle
 
 
 def det2csv(info, dataset_len, results, custom_classes):

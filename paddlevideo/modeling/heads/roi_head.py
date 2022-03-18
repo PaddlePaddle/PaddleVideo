@@ -57,7 +57,7 @@ def bbox2result(bboxes, labels, num_classes, img_shape, thr=0.01):
 
             result.append(
                 #对于step1中得分大于阈值的bbox(可能为空), 将bbox及在该类的score放入result列表.
-                paddle.concat((bboxes_select, scores_select), axis=1))
+                paddle.concat((bboxes_select, scores_select), axis=1).numpy())
 
         return result
 

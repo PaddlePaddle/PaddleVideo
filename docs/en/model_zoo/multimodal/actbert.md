@@ -1,4 +1,4 @@
-[简体中文](../../../zh-CN/model_zoo/recognition/actbert.md) | English
+[简体中文](../../../zh-CN/model_zoo/multimodal/actbert.md) | English
 
 # ActBERT
 
@@ -10,6 +10,12 @@
 - [Train](#Train)
 - [Test](#Test)
 - [Reference](#Reference)
+
+Before getting started, you need to install additional dependencies as follows:
+```bash
+python -m pip install paddlenlp
+python -m pip install lmdb
+```
 
 ## Introduction
 

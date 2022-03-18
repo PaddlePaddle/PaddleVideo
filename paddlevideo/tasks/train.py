@@ -69,8 +69,8 @@ def train_model(cfg,
 
         cur_global_batch_size = batch_size * num_gpus  # The number of batches calculated by all GPUs at one time
         assert global_batch_size % cur_global_batch_size == 0, \
-            f"The global batchsize must be divisible by cur_global_batch_size, but \
-                {global_batch_size} % {cur_global_batch_size} != 0"
+            "The global batchsize must be divisible by cur_global_batch_size, " \
+                f"but {global_batch_size} % {cur_global_batch_size} != 0"
 
         cfg.GRADIENT_ACCUMULATION[
             "num_iters"] = global_batch_size // cur_global_batch_size
@@ -261,6 +261,10 @@ def train_model(cfg,
                 rank = dist.get_rank()
             #single_gpu_test and multi_gpu_test
             for i, data in enumerate(valid_loader):
+                """Next two line of code only used in test_tipc,
+                ignore it most of the time"""
+                if max_iters is not None and i >= max_iters:
+                    break
                 outputs = model(data, mode='valid')
 
                 if cfg.MODEL.framework == "FastRCNN":

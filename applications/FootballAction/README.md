@@ -14,13 +14,16 @@
 
 
 ## 模型简介
-该代码库用于体育动作检测+识别, 基于paddle2.0版本开发，结合PaddleVideo中的ppTSM, BMN, attentionLSTM的多个视频模型进行视频时空二阶段检测算法。
+该代码库用于体育动作检测+识别, 基于paddle2.0版本开发，结合PaddleVideo中的PP-TSM, BMN, AttentionLSTM的多个视频模型进行视频时空二阶段检测算法。
 主要分为如下几步
  - 特征抽取
-    - 图像特性，ppTSM
-    - 音频特征，Vggsound
+    - 图像特性，PP-TSM
+    - 音频特征，VGGish
  - proposal提取，BMN
  - LSTM，动作分类 + 回归
+
+
+AIStudio项目： [基于PP-TSM+BMN+LSTM实现足球精彩时刻剪辑](https://aistudio.baidu.com/aistudio/projectdetail/3473391?channelType=0&channel=0)
 
 
 ## 数据准备
@@ -102,22 +105,20 @@ docker pull tmtalgo/paddleaction:action-detection-v2
             |--  features          # tsn和audio特征, image fps=5, audio 每秒(1024)
             |--  input_for_bmn     # bmn训练的输入数据，widows=40
             |--  input_for_lstm    # lstm训练的输入数据
-            |--  input_for_tsn     # tsn训练的数据数据
+            |--  input_for_pptsm     # tsn训练的数据数据
             |--  mp4               # 原始视频.mp4
             |--  frames            # 图像帧, fps=5, '.jpg'格式
             |--  pcm               # 音频pcm, 音频采样率16000，采用通道数1
             |--  url.list          # 视频列表
-            |--  label_train.json  # 训练集原始gts
-            |--  label_val.json    # 验证集原始gts
+            |--  label_cls8_train.json  # 训练集原始gts
+            |--  label_cls8_val.json    # 验证集原始gts
+            |--  label.json        # 动作label
         |--  script                # 数据集处理脚本
     |--  predict                   # 模型预测代码
     |--  extractor                 # 特征提取脚本
     |--  train_lstm                # lstm训练代码
     |--  train_proposal            # tsn、bmn训练代码，基本保持paddle-release-v1.8版本，数据接口部分稍有改动，参考官网
         |--  configs               # tsn and bmn football config file
-    |--  train_tsn.sh              # tsn训练启动脚本
-    |--  train_bmn.sh              # bmn训练启动脚本
-    |--  train_lstm.sh             # lstm训练启动脚本
 ```
 ## 模型推理
 可以通过如下命令直接进行推理，无需训练。
