@@ -162,9 +162,6 @@ function func_inference(){
                             _save_log_path="${_log_path}/python_infer_cpu_usemkldnn_${use_mkldnn}_threads_${threads}_precision_${precision}_batchsize_${batch_size}.log"
                             mkdir -p ${_log_path}
                             set_infer_data=$(func_set_params "${video_dir_key}" "${infer_video_dir}")
-                            if [[ $MODE =~ "lite_infer" ]]; then
-                                benchmark_value="False"
-                            fi
                             set_benchmark=$(func_set_params "${benchmark_key}" "${benchmark_value}")
                             set_batchsize=$(func_set_params "${batch_size_key}" "${batch_size}")
                             set_cpu_threads=$(func_set_params "${cpu_threads_key}" "${threads}")
@@ -195,9 +192,6 @@ function func_inference(){
                         _save_log_path="${_log_path}/python_infer_gpu_usetrt_${use_trt}_precision_${precision}_batchsize_${batch_size}.log"
                         set_infer_data=$(func_set_params "${video_dir_key}" "${infer_video_dir}")
 
-                        if [[ $MODE =~ "lite_infer" ]]; then
-                            benchmark_value="False"
-                        fi
                         set_benchmark=$(func_set_params "${benchmark_key}" "${benchmark_value}")
                         set_batchsize=$(func_set_params "${batch_size_key}" "${batch_size}")
                         set_tensorrt=$(func_set_params "${use_trt_key}" "${use_trt}")

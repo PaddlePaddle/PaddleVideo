@@ -17,7 +17,7 @@ norm_train:main.py --validate -c configs/recognition/pptsn/pptsn_k400_videos.yam
 pact_train:null
 fpgm_train:null
 distill_train:null
-amp_train:main.py --amp --amp_level='O2' --validate -c configs/recognition/pptsn/pptsn_k400_videos.yaml --seed 1234
+amp_train:main.py --amp --amp_level='O1' --validate -c configs/recognition/pptsn/pptsn_k400_videos.yaml --seed 1234
 null:null
 ##
 ===========================eval_params===========================
