@@ -42,8 +42,7 @@ DEFINE_int32(cpu_threads, 10, "Num of threads with CPU.");
 DEFINE_bool(enable_mkldnn, false, "Whether use mkldnn with CPU.");
 DEFINE_bool(use_tensorrt, false, "Whether use tensorrt.");
 DEFINE_string(precision, "fp32", "Precision be one of fp32/fp16/int8.");
-DEFINE_bool(benchmark, true, "Whether use benchmark.");
-DEFINE_string(save_log_path, "./log_output/", "Save benchmark log path.");
+DEFINE_bool(benchmark, true, "Whether to log and report benchmark information during inference.");
 
 
 // video recognition related
