@@ -61,6 +61,7 @@ test_tipc/
     ├── ...
     └── ...
 ├── prepare.sh                        # 完成test_*.sh运行所需要的数据和模型下载
+├── docs/                             # 详细的TIPC各种功能文档
 ├── test_train_inference_python.sh    # 测试python训练预测的主程序
 ├── test_inference_cpp.sh             # 测试C++预测的主程序
 ├── compare_results.py                # 用于对比log中的预测结果与results中的预存结果精度误差是否在限定范围内
@@ -115,4 +116,5 @@ bash test_tipc/test_train_inference_python.sh ./test_tipc/configs/PP-TSM/PP-TSM_
 ## 4. 开始测试
 各功能测试中涉及混合精度、裁剪、量化等训练相关，及mkldnn、Tensorrt等多种预测相关参数配置，请点击下方相应链接了解更多细节和使用教程：  
 - [test_train_inference_python 使用](docs/test_train_inference_python.md) ：测试基于Python的模型训练、评估、推理等基本功能。
+- [test_amp_train_inference_python 使用](docs/test_train_amp_inference_python.md) ：测试基于Python的模型训练、评估、推理等基本功能。
 - [test_inference_cpp 使用](docs/test_inference_cpp.md) ：测试基于C++的模型推理功能。
