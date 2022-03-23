@@ -139,7 +139,7 @@ class Resolver2D(BaseResolver):
                 im_h_y = im_h_y.clip(0.0, 255.0)
                 im_h_y = im_h_y / 255.0
 
-                sh, sw = im_h_y.shape[-2:]
+                sh, sw = paddle.shape(im_h_y)[-2:]
                 full_out[:, :, begx + scale:endx - scale, begy + scale:endy - scale] = \
                     im_h_y[:, :, scale:sh - scale, scale:sw - scale]
 
@@ -164,7 +164,7 @@ class Resolver2D(BaseResolver):
             im_h_y = im_h_y * 255.0
             im_h_y = im_h_y.clip(0.0, 255.0)
             im_h_y = im_h_y / 255.0
-            sh, sw = im_h_y.shape[-2:]
+            sh, sw = paddle.shape(im_h_y)[-2:]
             full_out[:, :, begx + scale:endx - scale, begy + scale:endy - scale] = \
                 im_h_y[:, :, scale:sh - scale, scale:sw - scale]
 
@@ -189,7 +189,7 @@ class Resolver2D(BaseResolver):
             im_h_y = im_h_y * 255.0
             im_h_y = im_h_y.clip(0.0, 255.0)
             im_h_y = im_h_y / 255.0
-            sh, sw = im_h_y.shape[-2:]
+            sh, sw = paddle.shape(im_h_y)[-2:]
             full_out[:, :, begx + scale:endx - scale, begy + scale:endy - scale] = \
                 im_h_y[:, :, scale:sh - scale, scale:sw - scale]
             im_input = im_input.detach()
@@ -206,7 +206,7 @@ class Resolver2D(BaseResolver):
         im_h_y = im_h_y * 255.0
         im_h_y = im_h_y.clip(0.0, 255.0)
         im_h_y = im_h_y / 255.0
-        sh, sw = im_h_y.shape[-2:]
+        sh, sw = paddle.shape(im_h_y)[-2:]
         full_out[:, :, begx + scale:endx - scale, begy + scale:endy - scale] = \
             im_h_y[:, :, scale:sh - scale, scale:sw - scale]
 

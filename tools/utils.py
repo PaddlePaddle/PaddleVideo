@@ -1270,31 +1270,12 @@ class WAFP_Inference_helper(Base_Inference_helper):
                 print("Current input image: {0}".format(self.input_file[i]))
                 file_name = os.path.basename(self.input_file[i]).split('.')[0]
                 save_path = os.path.join(save_dir,
-                                         file_name + "wafp_output" + ".png")
-                pred_color = self._convert_to_pseudo_color(pred)
-                pred_color.save(save_path)
+                                         file_name + "_wafp_output" + ".png")
+                pred_uint8 = (pred * 255.0).clip(0, 255).astype('uint8')
+                while pred_uint8.ndim >= 3 and pred_uint8.shape[0] == 1:
+                    pred_uint8 = np.squeeze(pred_uint8, axis=0)
+                cv2.imwrite(save_path, pred_uint8)
                 print(f"pred output image saved to: {save_path}")
-
-    def _convert_to_pseudo_color(self, image_numpy: np.ndarray) -> Image.Image:
-        """convert single-channel image to pseudo color image.
-
-        Args:
-            image_numpy (np.ndarray): single channel image, such as depth image, gray scale image.
-
-        Returns:
-            Image.Image: converted image in PIL format.
-        """
-        while image_numpy.ndim >= 3 and image_numpy.shape[0] == 1:
-            image_numpy = np.squeeze(image_numpy, axis=0)
-        disp_resized = image_numpy
-        disp_resized_np = disp_resized
-        vmax = np.percentile(disp_resized_np, 95)
-        normalizer = mpl.colors.Normalize(vmin=disp_resized_np.min(), vmax=vmax)
-        mapper = cm.ScalarMappable(norm=normalizer, cmap='magma')
-        colormapped_im = (mapper.to_rgba(disp_resized_np)[:, :, :3] *
-                          255).astype(np.uint8)
-        im = Image.fromarray(colormapped_im)
-        return im
 
 
 @INFERENCE.register()

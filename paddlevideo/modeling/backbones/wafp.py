@@ -99,7 +99,10 @@ class Attention_net(nn.Layer):
         Op = vector_p_reshape.reshape(
             [x.shape[0], x.shape[1], x.shape[2], x.shape[3]])
 
-        O = self.a * Oc + self.b * Op + x
+        # O = self.a * Oc + self.b * Op + x
+        O = paddle.add(
+            paddle.add(paddle.multiply(self.a, Oc), paddle.multiply(self.b,
+                                                                    Op)), x)
 
         out = self.local_weight(O)
         return out

@@ -108,7 +108,7 @@ PaddleVideo is a toolset for video tasks prepared for the industry and academia.
     <td colspan="5" style="font-weight:bold;">Super-resolution</td>
   </tr>
   <tr>
-    <td><a href="./docs/zh-CN/model_zoo/estimation/adds.md">WAFP</a> (Depth Super-Resolution')</td>
+    <td><a href="./docs/en/model_zoo/resolution/wafp.md">WAFP</a> (Supervised')</td>
     <td></td>
     <td></td>
     <td></td>

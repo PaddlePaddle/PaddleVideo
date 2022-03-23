@@ -19,31 +19,77 @@ python -m pip install h5py
 
 ## 模型简介
 
-本模型以百度机器人与自动驾驶实验室的**IEEE Transactions on Multimedia 2021论文 [WAFP-Net: Weighted Attention Fusion based Progressive Residual Learning for Depth Map Super-resolution](TODO)** 为参考，
+本模型以百度机器人与自动驾驶实验室的**IEEE Transactions on Multimedia 2021论文 [WAFP-Net: Weighted Attention Fusion based Progressive Residual Learning for Depth Map Super-resolution](https://ieeexplore.ieee.org/document/9563214/)** 为参考，
 复现了基于自适应融合注意力的深度图超分辨率模型，其针对真实场景存在的两种图像退化方式（间隔采样和带噪声的双三次采样），提出了一种自适应的融合注意力机制，在保持模型参数量优势的情况下，在多个数据集上取得了SOTA的精度。
 
 
 ## 数据准备
 
-TODO
+### 混合数据集
+本文档所使用的数据融合了Middlebury dataset/ MPI Sintel dataset 和 synthetic New Tsukuba dataset 共三个数据集
+1. 准备raw图片数据
 
+    下载2个压缩包：https://videotag.bj.bcebos.com/Data/WAFP_data.zip，https://videotag.bj.bcebos.com/Data/WAFP_test_data.zip
+    解压并将`data_all`文件夹（含133张深度图）和`test_data`文件夹（含4个测试数据）放置成以下位置：
+
+    ```shell
+    data/
+    └── depthSR/
+        ├── data_all/
+        │   ├── alley_1_1.png
+        │   ├── ...
+        │   └── ...
+        ├── test_data/
+        │   ├── cones_x4.mat
+        │   ├── teddy_x4.mat
+        │   ├── tskuba_x4.mat
+        │   └── venus_x4.mat
+        ├── val.list
+        ├── generate_train_noise.m
+        └── modcrop.m
+    ```
+
+2. 执行`generate_train_noise.m`脚本，生成训练数据`train_depth_x4_noise.h5`，并用`ls`命令生成`val.list`路径文件。
+    ```shell
+    cd data/depthSR/
+    generate_train_noise.m
+    ls test_data > test.list
+    cd ../../
+    ```
+
+3. 将`train_depth_x4_noise.h5`、`test_data`、`test.list`三者的路径填写到`wafp.yaml`的对应位置：
+    ```yaml
+    DATASET: #DATASET field
+    batch_size: 64 #Mandatory, bacth size
+    valid_batch_size: 1
+    test_batch_size: 1
+    num_workers: 1 #Mandatory, XXX the number of subprocess on each GPU.
+    train:
+        format: "HDF5Dataset"
+        file_path: "data/depthSR/train_depth_x4_noise.h5"  # path of train_depth_x4_noise.h5
+    valid:
+        format: "MatDataset"
+        data_prefix: "data/depthSR/test_data"  # path of test_data
+        file_path: "data/depthSR/test.list"  # path of test.list
+    test:
+        format: "MatDataset"
+        data_prefix: "data/sintel/test_data"  # path of test_data
+        file_path: "data/sintel/test.list"  # path of test.list
+    ```
 
 ## 模型训练
 
-### Oxford RobotCar dataset数据集训练
-
 #### 开始训练
 
-- Oxford RobotCar dataset数据集使用单卡训练，训练方式的启动命令如下：
+- 混合数据集使用单卡训练，训练方式的启动命令如下：
 
     ```bash
     python3.7 main.py -c configs/resolution/wafp/wafp.yaml --seed 42
     ```
 
-
 ## 模型测试
 
-- 训练好的模型下载地址：[WAFP.pdparams](TODO)
+- 训练好的模型下载地址：[WAFP.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.3/WAFP_best.pdparams)
 
 - 测试命令如下：
 
@@ -51,11 +97,11 @@ TODO
   python3.7 main.py --test -c configs/resolution/wafp/wafp.yaml -w "output/WAFP/WAFP_epoch_00080.pdparams"
   ```
 
-    在Oxford RobotCar dataset的validation数据集上的测试指标如下：
+    在我们给定的测试数据集上的测试指标如下：
 
   | version |  RMSE   |  SSIM   |
   | :------ | :-----: | :-----: |
-  | ours    |  2.5762 |  0.9813 |
+  | ours    |  2.5479 |  0.9808 |
 
 ## 模型推理
 
@@ -72,23 +118,23 @@ python3.7 tools/export_model.py -c configs/resolution/wafp/wafp.yaml -p data/WAF
 ### 使用预测引擎推理
 
 ```bash
-python3.7 tools/predict.py --input_file data/example.mat \
-                           --config configs/resolution/wafp/wafp.yaml \
-                           --model_file inference/WAFP/WAFP.pdmodel \
-                           --params_file inference/WAFP/WAFP.pdiparams \
-                           --use_gpu=True \
-                           --use_tensorrt=False
+python3.7 tools/predict.py --input_file data/depthSR/test_data/cones_x4.mat \
+--config configs/resolution/wafp/wafp.yaml \
+--model_file inference/WAFP/WAFP.pdmodel \
+--params_file inference/WAFP/WAFP.pdiparams \
+--use_gpu=True \
+--use_tensorrt=False
 ```
 
 推理结束会默认以伪彩的方式保存下模型输出得到的深度图。
 
-以下是样例图片和对应的预测深度图：
+以下是输入的深度图(example.mat)和预测的深度图：
 
-<img src="TODO" width = "512" height = "256" alt="image" align=center />
+<img src="../../../images/cones_x4_wafp_input.png" alt="input" align=center />
 
-<img src="TODO" width = "512" height = "256" alt="depth" align=center />
+<img src="../../../images/cones_x4_wafp_output.png" alt="output" align=center />
 
 
 ## 参考论文
 
-- [WAFP-Net: Weighted Attention Fusion based Progressive Residual Learning for Depth Map Super-resolution](TODO), Xibin Song, Dingfu Zhou, Wei Li∗, Yuchao Dai, Liu Liu, Hongdong Li, Ruigang Yang and Liangjun Zhang
+- [WAFP-Net: Weighted Attention Fusion based Progressive Residual Learning for Depth Map Super-resolution](https://ieeexplore.ieee.org/document/9563214/), Xibin Song, Dingfu Zhou, Wei Li∗, Yuchao Dai, Liu Liu, Hongdong Li, Ruigang Yang and Liangjun Zhang

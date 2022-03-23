@@ -48,7 +48,7 @@ class RMSEMetric(BaseMetric):
 
         self.rmses.append(rmse.numpy())
         self.ssims.append(ssim.numpy())
-        print(f"rmse = {self.rmses[-1]} ssim = {self.ssims[-1]}")
+
         # preds ensemble
         if batch_id % self.log_interval == 0:
             logger.info("[TEST] Processing batch {}/{} ...".format(

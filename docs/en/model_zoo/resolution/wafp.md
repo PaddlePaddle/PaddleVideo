@@ -20,22 +20,72 @@ python -m pip install h5py
 
 ## Introduction
 
-This model is based on the **IEEE Transactions on Multimedia 2021 paper of Baidu Robotics and Autonomous Driving Laboratory [WAFP-Net: Weighted Attention Fusion based Progressive Residual Learning for Depth Map Super-resolution](https://arxiv.org/abs/2108.07628 )** for reference.
+This model is based on the **IEEE Transactions on Multimedia 2021 paper of Baidu Robotics and Autonomous Driving Laboratory [WAFP-Net: Weighted Attention Fusion based Progressive Residual Learning for Depth Map Super-resolution](https://ieeexplore.ieee.org/document/9563214/)** for reference.
 A depth map super-resolution model based on adaptive fusion attention is reproduced, and an adaptive fusion attention is proposed for two image degradation methods (interval sampling and noisy bicubic sampling) existing in real scenes. This mechanism achieves state-of-the-art accuracy on multiple datasets while maintaining the superiority of model parameters.
 
 
 ## Data
 
-TODO
+### Mixed Dataset
 
+The data used in this document combines three datasets, Middlebury dataset/ MPI Sintel dataset and synthetic New Tsukuba dataset
+1. Prepare raw image data
+
+    Download these two compressed package: https://videotag.bj.bcebos.com/Data/WAFP_data.zip,https://videotag.bj.bcebos.com/Data/WAFP_test_data.zip
+    Unzip them, and place the `data_all` folder(containing 133 depth maps) and `test_data`(containing 4 test mat) in the following locations:
+
+    ```shell
+    data/
+    └── depthSR/
+        ├── data_all/
+        │   ├── alley_1_1.png
+        │   ├── ...
+        │   └── ...
+        ├── test_data/
+        │   ├── cones_x4.mat
+        │   ├── teddy_x4.mat
+        │   ├── tskuba_x4.mat
+        │   └── venus_x4.mat
+        ├── val.list
+        ├── generate_train_noise.m
+        └── modcrop.m
+    ```
+
+2. Execute the `generate_train_noise.m` script to generate the training data `train_depth_x4_noise.h5`, and use the `ls` command to generate the `val.list` path file.
+    ```shell
+    cd data/depthSR/
+    generate_train_noise.m
+    ls test_data > test.list
+    cd ../../
+    ```
+
+3. Fill in the paths of `train_depth_x4_noise.h5`, `test_data`, and `test.list` to the corresponding positions of `wafp.yaml`:
+    ```yaml
+    DATASET: #DATASET field
+    batch_size: 64 #Mandatory, bacth size
+    valid_batch_size: 1
+    test_batch_size: 1
+    num_workers: 1 #Mandatory, XXX the number of subprocess on each GPU.
+    train:
+        format: "HDF5Dataset"
+        file_path: "data/depthSR/train_depth_x4_noise.h5" # path of train_depth_x4_noise.h5
+    valid:
+        format: "MatDataset"
+        data_prefix: "data/depthSR/test_data" # path of test_data
+        file_path: "data/depthSR/test.list" # path of test.list
+    test:
+        format: "MatDataset"
+        data_prefix: "data/sintel/test_data" # path of test_data
+        file_path: "data/sintel/test.list" # path of test.list
+    ```
 
 ## Train
 
-### Oxford RobotCar dataset training
+### Mixed dataset training
 
 #### start training
 
-- The Oxford RobotCar dataset is trained with a single card. The start command of the training method is as follows:
+- The Mixed dataset is trained with a single card. The start command of the training method is as follows:
 
     ```bash
     python3.7 main.py -c configs/resolution/wafp/wafp.yaml --seed 42
@@ -44,7 +94,7 @@ TODO
 
 ## Test
 
-- Download address of the trained model: [WAFP.pdparams](TODO)
+- Download address of the trained model: [WAFP.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.3/WAFP_best.pdparams)
 
 - The test command is as follows:
 
@@ -56,7 +106,7 @@ TODO
 
   | version | RMSE    |  SSIM   |
   | :------ | :-----: | :-----: |
-  | ours    | 2.5762  |  0.9813 |
+  | ours    |  2.5479 |  0.9808 |
 
 ## Inference
 
@@ -74,22 +124,22 @@ For the meaning of each parameter in the above bash command, please refer to [Mo
 
 ```bash
 python3.7 tools/predict.py --input_file data/example.mat \
-                           --config configs/resolution/wafp/wafp.yaml \
-                           --model_file inference/WAFP/WAFP.pdmodel \
-                           --params_file inference/WAFP/WAFP.pdiparams \
-                           --use_gpu=True \
-                           --use_tensorrt=False
+--config configs/resolution/wafp/wafp.yaml \
+--model_file inference/WAFP/WAFP.pdmodel \
+--params_file inference/WAFP/WAFP.pdiparams \
+--use_gpu=True \
+--use_tensorrt=False
 ```
 
 At the end of the inference, the depth map output by the model will be saved in pseudo-color by default.
 
 The following are sample images and corresponding predicted depth maps:
 
-<img src="../../../images/oxford_image.png" width = "512" height = "256" alt="image" align=center />
+<img src="../../../images/cones_x4_wafp_input.png" alt="input" align=center />
 
-<img src="../../../images/oxford_image_depth.png" width = "512" height = "256" alt="depth" align=center />
+<img src="../../../images/cones_x4_wafp_output.png" alt="output" align=center />
 
 
 ## Reference
 
-- [WAFP-Net: Weighted Attention Fusion based Progressive Residual Learning for Depth Map Super-resolution](https://arxiv.org/abs/2108.07628), Xibin Song, Dingfu Zhou, Wei Li∗, Yuchao Dai, Liu Liu, Hongdong Li, Ruigang Yang and Liangjun Zhang
+- [WAFP-Net: Weighted Attention Fusion based Progressive Residual Learning for Depth Map Super-resolution](https://ieeexplore.ieee.org/document/9563214/), Xibin Song, Dingfu Zhou, Wei Li∗, Yuchao Dai, Liu Liu, Hongdong Li, Ruigang Yang and Liangjun Zhang

@@ -18,7 +18,7 @@ MODEL: #MODEL field
         infer:
             mode: patch
             scale: 4
-            patch_size: 61
+            patch_size: 122
 
 
 DATASET: #DATASET field
@@ -31,12 +31,12 @@ DATASET: #DATASET field
         file_path: "data/depthSR/train_depth_x4_noise.h5"
     valid:
         format: "MatDataset"
-        data_prefix: "data/depthSR/val"
-        file_path: "data/depthSR/val.list"
+        data_prefix: "data/depthSR/test_data"
+        file_path: "data/depthSR/test.list"
     test:
         format: "MatDataset"
-        data_prefix: "data/depthSR/val"
-        file_path: "data/depthSR/val.list"
+        data_prefix: "data/depthSR/test_data"
+        file_path: "data/depthSR/test.list"
 
 PIPELINE: #PIPELINE field
     train: #Mandotary, indicate the pipeline to deal with the training data, associate to the 'paddlevideo/loader/pipelines/'

@@ -22,7 +22,7 @@ We implemented action recgonition model and action localization model in this re
 | action detection| [BMN](./localization/bmn.md) | [bmn.yaml](../../../configs/localization/bmn.yaml) | [ActivityNet](../dataset/ActivityNet.md) |  AUC | 67.23 | [BMN.pdparams](https://videotag.bj.bcebos.com/PaddleVideo/BMN/BMN.pdparams) |
 | shot boundary detection | [TransNetV2](./partition/transnetv2.md) | [transnetv2.yaml](../../../configs/partitioners/transnetv2/transnetv2.yaml) | ClipShots | F1 scores | 76.1 |  |
 | monocular depth estimation | [ADDS](./estimation/adds.md) | [adds.yaml](../../../configs/estimation/adds/adds.yaml) | Oxford_RobotCar | Abs Rel | 0.209 | [ADDS_car.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ADDS_car.pdparams) |
-| monocular depth super-resolution | [WAFP](./resolution/wafp.md) | [adds.yaml](../../../configs/resolution/wafp/wafp.yaml) | TODO | RMSE | 2.5762 | [WAFP.pdparams](TODO) |
+| monocular depth super-resolution | [WAFP](./resolution/wafp.md) | [adds.yaml](../../../configs/resolution/wafp/wafp.yaml) | Mixed | RMSE | 2.5479 | [WAFP.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.3/WAFP_best.pdparams) |
 
 
 # Reference

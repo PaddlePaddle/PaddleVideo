@@ -1,6 +1,8 @@
 from abc import abstractmethod
-from ... import builder
+
 import paddle.nn as nn
+
+from ... import builder
 
 
 class BaseResolver(nn.Layer):
