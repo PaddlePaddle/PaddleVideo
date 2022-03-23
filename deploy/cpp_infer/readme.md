@@ -56,7 +56,7 @@ python -m pip install git+https://github.com/LDOUBLEV/AutoLog
     ```bash
     cd opencv-3.4.7
 
-    root_path=/xxx/xxx/xxx/xxx/opencv-3.4.7 # 填写为刚解压出来的opencv-3.4.7绝对路径
+    root_path=$PWD  # 当前所在路径即为opencv-3.4.7的绝对路径
     install_path=${root_path}/opencv3
 
     rm -rf build
@@ -90,13 +90,14 @@ python -m pip install git+https://github.com/LDOUBLEV/AutoLog
 
     最终会以安装路径`install_path`为指定路径，得到一个`opencv3`的文件夹，其文件结构如下所示。
 
-    ```
-    opencv3/
-    ├── bin/
-    ├── include/
-    ├── lib/
-    ├── lib64/
-    └── share/
+    ```shell
+    opencv-3.4.7/
+    ├── opencv3/  # 安装在opencv3目录下
+    │   ├── bin/
+    │   ├── include/
+    │   ├── lib/
+    │   ├── lib64/
+    │   └── share/
     ```
 
 ### 1.2 下载或者编译Paddle预测库
@@ -106,7 +107,7 @@ python -m pip install git+https://github.com/LDOUBLEV/AutoLog
 
 #### 1.2.1 直接下载安装
 
-* [Paddle预测库官网](https://paddleinference.paddlepaddle.org.cn/v2.2/user_guides/download_lib.html) 上提供了不同cuda版本的Linux预测库，可以在官网查看并**选择合适的预测库版本**（建议选择paddle版本>=2.0.1版本的预测库）。
+* [Paddle预测库官网](https://paddleinference.paddlepaddle.org.cn/v2.2/user_guides/download_lib.html) 上提供了不同cuda版本的Linux预测库，可以在官网查看并**选择合适的预测库版本**（建议选择paddle版本>=2.0.1版本的预测库，推荐使用2.2.2的预测库）。
 
 * 下载得到一个`paddle_inference.tgz`压缩包，然后将它解压成文件夹，命令如下(以机器环境为gcc8.2为例)：
 
@@ -152,11 +153,12 @@ python -m pip install git+https://github.com/LDOUBLEV/AutoLog
 * 编译完成之后，可以在`build/paddle_inference_install_dir/`文件下看到生成了以下文件及文件夹。
 
     ```bash
-    build/paddle_inference_install_dir/
-    ├── CMakeCache.txt
-    ├── paddle/
-    ├── third_party
-    └── version.txt
+    build/
+    └── paddle_inference_install_dir/
+        ├── CMakeCache.txt
+        ├── paddle/
+        ├── third_party/
+        └── version.txt
     ```
 
     其中`paddle`就是C++预测所需的Paddle库，`version.txt`中包含当前预测库的版本信息。
@@ -170,9 +172,9 @@ python -m pip install git+https://github.com/LDOUBLEV/AutoLog
     ```
     inference/
     └── ppTSM/
-    	├── ppTSM.pdiparams
-    	├── ppTSM.pdiparamsinfo
-    	└── ppTSM.pdmodel
+        ├── ppTSM.pdiparams
+        ├── ppTSM.pdiparamsinfo
+        └── ppTSM.pdmodel
     ```
 
 
@@ -186,27 +188,34 @@ python -m pip install git+https://github.com/LDOUBLEV/AutoLog
 
     `tools/build.sh`中的Paddle C++预测库、opencv等其他依赖库的地址需要换成自己机器上的实际地址。
 
-* 具体的，需要修改`tools/build.sh`中环境路径，相关内容如下：
+* 具体地，需要修改`tools/build.sh`中的环境路径，相关内容如下：
 
     ```shell
     OPENCV_DIR=your_opencv_dir
     LIB_DIR=your_paddle_inference_dir
     CUDA_LIB_DIR=your_cuda_lib_dir
     CUDNN_LIB_DIR=your_cudnn_lib_dir
-    TENSORRT_DIR=your_tensorRT_dir
     ```
 
-    以PP-TSM为例，上述参数如下(xxx部分根据用户自己机器情况对应修改)
+    上述参数如下(以下路径用户可根据自己机器的情况对应修改)
 
     ```bash
     OPENCV_DIR=/path/to/opencv3
     LIB_DIR=/path/to/paddle_inference
-    CUDA_LIB_DIR=/path/to/cuda/lib64
-    CUDNN_LIB_DIR=/path/to/cuda/lib64
-    TENSORRT_DIR=/path/to/TensorRT-x.x.x.x
+    CUDA_LIB_DIR=/usr/local/cuda/lib64
+    CUDNN_LIB_DIR=/usr/lib/x86_64-linux-gnu/
     ```
 
-    其中，`OPENCV_DIR`为opencv编译安装的地址；`LIB_DIR`为下载(`paddle_inference`文件夹)或者编译生成的Paddle预测库地址(`build/paddle_inference_install_dir`文件夹)；`CUDA_LIB_DIR`为cuda库文件地址，在docker中为`/usr/local/cuda/lib64`；`CUDNN_LIB_DIR`为cudnn库文件地址，在docker中为`/usr/lib/x86_64-linux-gnu/`。**注意：以上路径都写绝对路径，不要写相对路径。**
+    `OPENCV_DIR`为opencv编译安装的地址
+    `LIB_DIR`为下载(`paddle_inference`文件夹)或者编译生成的Paddle预测库地址(`build/paddle_inference_install_dir`文件夹)
+    `CUDA_LIB_DIR`为cuda库文件地址，在docker中为`/usr/local/cuda/lib64`
+    `CUDNN_LIB_DIR`为cudnn库文件地址，在docker中为`/usr/lib/x86_64-linux-gnu/`。
+    **如果希望预测时开启TensorRT加速功能，那么还需要修改`tools/build.sh`3处代码**
+    1. 设置`DWITH_GPU=ON`
+    2. 设置`DWITH_TENSORRT=ON`
+    3. 设置`TENSORRT_DIR=/path/to/TensorRT-x.x.x.x`
+
+    **以上路径都写绝对路径，不要写相对路径**
 
 
 * 编译完成之后，会在`cpp_infer/build`文件夹下生成一个名为`ppvideo`的可执行文件。
@@ -222,31 +231,24 @@ python -m pip install git+https://github.com/LDOUBLEV/AutoLog
 
 其中，`mode`为必选参数，表示选择的功能，取值范围['rec']，表示**视频识别**（更多功能会陆续加入）。
 
-注意：如果要在预测时开启TensorRT优化选项，需要先运行以下命令设置好TensorRT的相关路径。
-```bash
-export PATH=$PATH:/path/to/cuda/bin
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/path/to/cuda/bin
-export LIBRARY_PATH=$LIBRARY_PATH:/path/to/cuda/bin
-export LD_LIBRARY_PATH=/path/to/TensorRT-x.x.x.x/lib:$LD_LIBRARY_PATH
-```
 
 ##### 1. 调用视频识别：
 ```bash
 # 调用PP-TSM识别
 ./build/ppvideo rec \
-    --rec_model_dir=../../inference/ppTSM \
-    --inference_model_name=ppTSM \
-    --video_dir=./example_video_dir \
-    --num_seg=8 \
-    --seg_len=1
+--rec_model_dir=../../inference/ppTSM \
+--inference_model_name=ppTSM \
+--video_dir=./example_video_dir \
+--num_seg=8 \
+--seg_len=1
 
 # 调用PP-TSN识别
 ./build/ppvideo rec \
-    --rec_model_dir=../../inference/ppTSN \
-    --inference_model_name=ppTSN \
-    --video_dir=./example_video_dir \
-    --num_seg=25 \
-    --seg_len=1
+--rec_model_dir=../../inference/ppTSN \
+--inference_model_name=ppTSN \
+--video_dir=./example_video_dir \
+--num_seg=25 \
+--seg_len=1
 ```
 更多参数如下：
 
@@ -262,7 +264,6 @@ export LD_LIBRARY_PATH=/path/to/TensorRT-x.x.x.x/lib:$LD_LIBRARY_PATH
     | use_tensorrt  | bool | false           | 是否使用tensorrt库                                           |
     | precision     | str  | "fp32"          | 使用fp32/fp16/uint8精度来预测                                |
     | benchmark     | bool | true            | 预测时是否开启benchmark，开启后会在最后输出配置、模型、耗时等信息。 |
-    | save_log_path | str  | "./log_output/" | 预测结果保存目录                                             |
 
 
 - 视频识别模型相关
@@ -303,6 +304,21 @@ I1125 08:10:45.834594 13955 autolog.h:65] Total time spent(ms): 2739
 I1125 08:10:45.834602 13955 autolog.h:67] preprocess_time(ms): 10.6524, inference_time(ms): 1269.55, postprocess_time(ms): 0.009118
 ```
 
-### 3 注意
+### 3 FAQ
 
-* 在使用Paddle预测库时，推荐使用2.2.2版本的预测库。
+1. 编译demo过程中出现以下错误
+
+    ```shell
+    make[2]: *** No rule to make target '/usr/lib/x86_64-linux-gn/libcudnn.so', needed by 'ppvideo'.  Stop.
+    make[2]: *** Waiting for unfinished jobs....
+    [ 16%] Building CXX object CMakeFiles/ppvideo.dir/src/main.cpp.o
+    [ 50%] Building CXX object CMakeFiles/ppvideo.dir/src/preprocess_op.cpp.o
+    [ 50%] Building CXX object CMakeFiles/ppvideo.dir/src/postprocess_op.cpp.o
+    [ 83%] Building CXX object CMakeFiles/ppvideo.dir/src/utility.cpp.o
+    [ 83%] Building CXX object CMakeFiles/ppvideo.dir/src/video_rec.cpp.o
+    CMakeFiles/Makefile2:95: recipe for target 'CMakeFiles/ppvideo.dir/all' failed
+    make[1]: *** [CMakeFiles/ppvideo.dir/all] Error 2
+    Makefile:83: recipe for target 'all' failed
+    make: *** [all] Error 2
+    ```
+    可能是`CUDNN_LIB_DIR`设置的不对，导致找不到该目录下的`libcudnn.so`。

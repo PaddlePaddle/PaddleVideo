@@ -232,8 +232,8 @@ class Block(nn.Layer):
         num_spatial_tokens = (x.shape[1] - 1) // T
         H = num_spatial_tokens // W
         if self.attention_type in ['space_only', 'joint_space_time']:
-            x = x + self.drop_path(self.attn(self.norm1(x)))
-            x = x + self.drop_path(self.mlp(self.norm2(x)))
+            x = paddle.add(x, self.drop_path(self.attn(self.norm1(x))))
+            x = paddle.add(x, self.drop_path(self.mlp(self.norm2(x))))
             return x
         elif self.attention_type == 'divided_space_time':
             ########## Temporal ##########
@@ -248,7 +248,7 @@ class Block(nn.Layer):
             res_temporal = res_temporal.reshape([-1, _h * _w * _t, _m])
 
             res_temporal = self.temporal_fc(res_temporal)
-            xt = x[:, 1:, :] + res_temporal
+            xt = paddle.add(x[:, 1:, :], res_temporal)
 
             ########## Spatial ##########
             init_cls_token = x[:, 0, :].unsqueeze(1)
@@ -277,11 +277,10 @@ class Block(nn.Layer):
 
             res = res_spatial
             x = xt
-            x = paddle.concat((init_cls_token, x), axis=1) + paddle.concat(
-                (cls_token, res), axis=1)
-
+            x = paddle.add(paddle.concat((init_cls_token, x), axis=1),
+                           paddle.concat((cls_token, res), axis=1))
             # Mlp
-            x = x + self.drop_path(self.mlp(self.norm2(x)))
+            x = paddle.add(x, self.drop_path(self.mlp(self.norm2(x))))
             return x
         else:
             raise NotImplementedError
@@ -465,9 +464,9 @@ class VisionTransformer_tweaks(nn.Layer):
             new_pos_embed = new_pos_embed.transpose((0, 2, 1))
             new_pos_embed = paddle.concat((cls_pos_embed, new_pos_embed),
                                           axis=1)
-            x = x + new_pos_embed
+            x = paddle.add(x, new_pos_embed)
         else:
-            x = x + self.pos_embed
+            x = paddle.add(x, self.pos_embed)
 
         x = self.pos_drop(x)
 
@@ -488,9 +487,9 @@ class VisionTransformer_tweaks(nn.Layer):
                                                size=(T, x.shape[-1]),
                                                mode='nearest').squeeze(0)
                 new_time_embed = new_time_embed.transpose((0, 2, 1))
-                x = x + new_time_embed
+                x = paddle.add(x, new_time_embed)
             else:
-                x = x + self.time_embed
+                x = paddle.add(x, self.time_embed)
 
             x = self.time_drop(x)
             _, _t, _m = x.shape

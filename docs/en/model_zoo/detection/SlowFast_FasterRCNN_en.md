@@ -39,7 +39,20 @@ bash  download_videos.sh
 bash  download_annotations.sh
 ```
 
-### 3 Extrac Frames
+### 3 Download Proposals
+
+```
+bash  fetch_ava_proposals.sh
+```
+
+### 4 Cut Videos
+
+```
+bash  cut_videos.sh
+```
+
+### 5 Extract Frames
+
 ```
 bash  extract_rgb_frames.sh
 ```
@@ -54,7 +67,7 @@ For AVA v2.1, there is a simple introduction to some key files：
 ## Train
 
 * `-c`: config file path;
-* `-w`: weights of model;
+* `-w`: weights of model. The pretrained model can be downloaded from the table below;
 * `--validate`: evaluate model during training.
 
 ```

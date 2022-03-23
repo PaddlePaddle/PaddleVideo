@@ -26,7 +26,7 @@ bash download_features.sh
 
 ```
 ├── data
-|   ├── MSR-VTT
+|   ├── MSRVTT
 |   │   ├── raw-captions.pkl
 |   │   ├── train_list_jsfusion.txt
 |   │   ├── val_list_jsfusion.txt

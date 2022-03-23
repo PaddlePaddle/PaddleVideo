@@ -29,6 +29,8 @@ python -m pip install paddledet
 
 本项目利用[AVA数据集](https://research.google.com/ava/download.html)进行动作检测。AVA v2.2数据集包括430个视频，其中235个用于训练，64个用于验证，131个用于测试。对每个视频中15分钟的帧进行了标注，每秒标注一帧。标注文件格式为CSV。
 
+相关处理脚本在`data/ava/script`目录下。
+
 ### 1 下载视频
 ```
 bash  download_videos.sh
@@ -39,7 +41,20 @@ bash  download_videos.sh
 bash  download_annotations.sh
 ```
 
-### 3 提取视频帧
+### 3 下载检测结果
+
+```
+bash  fetch_ava_proposals.sh
+```
+
+### 4 视频切割
+把下载的视频中第15分钟起后面的15分钟的片段切割出来：
+
+```
+bash  cut_videos.sh
+```
+
+### 5 提取视频帧
 ```
 bash  extract_rgb_frames.sh
 ```
@@ -53,18 +68,24 @@ bash  extract_rgb_frames.sh
 
 ## 模型训练
 
+下载预训练模型：
+```
+wget https://videotag.bj.bcebos.com/PaddleVideo/SlowFast/SlowFast_8*8.pdparams
+```
+
+
 * `-c`后面的参数是配置文件的路径。
-* `-w`后面的参数是finetuning或者测试时的权重。
+* `-w`后面的参数是finetuning或者测试时的权重，本案例将在Kinetics 400上训练的SlowFast R50模型作为预训练权重，通过下面的表格可获取。
 * `--validate`参数表示在训练过程中进行模型评估。
 
 ```
 export CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7
-python -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=logdir.ava main.py --validate -w paddle.init_param.pdparams -c configs/detection/ava/ava.yaml
+python -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=logdir.ava main.py --validate -w SlowFast_8*8.pdparams -c configs/detection/ava/ava.yaml
 ```
 
-## 模型测试
+## 模型评估
 
-基于训练好的模型进行测试：
+基于训练好的模型进行评估：
 ```
 python main.py --test \
    -w output/AVA_SlowFast_FastRcnn/AVA_SlowFast_FastRcnn_best.pdparams \

@@ -15,6 +15,7 @@
 ```bash
 python -m pip install paddlenlp
 ```
+同时确保paddle版本为2.2.2。
 
 ## 模型简介
 
