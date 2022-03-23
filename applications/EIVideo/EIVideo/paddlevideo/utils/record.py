@@ -39,14 +39,14 @@ def build_record(cfg):
     elif 'FastRCNN' in framework_type:
         record_list.append(
             ("recall@thr=0.5", AverageMeter("recall@thr=0.5", '.5f')))
-        record_list.append(
-            ("prec@thr=0.5", AverageMeter("prec@thr=0.5", '.5f')))
+        record_list.append(("prec@thr=0.5", AverageMeter("prec@thr=0.5",
+                                                         '.5f')))
         record_list.append(("recall@top3", AverageMeter("recall@top3", '.5f')))
         record_list.append(("prec@top3", AverageMeter("prec@top3", '.5f')))
         record_list.append(("recall@top5", AverageMeter("recall@top5", '.5f')))
         record_list.append(("prec@top5", AverageMeter("prec@top5", '.5f')))
         record_list.append(("mAP@0.5IOU", AverageMeter("mAP@0.5IOU", '.5f')))
-    elif 'DepthEstimator' in cfg.framework:
+    elif 'Estimator2D' in cfg.framework:
         record_list.append(("abs_rel", AverageMeter("abs_rel", '.5f')))
         record_list.append(("sq_rel", AverageMeter("sq_rel", '.5f')))
         record_list.append(("rmse", AverageMeter("rmse", '.5f')))
@@ -55,8 +55,8 @@ def build_record(cfg):
         record_list.append(("a2", AverageMeter("a2", '.5f')))
         record_list.append(("a3", AverageMeter("a3", '.5f')))
         record_list.append(("losses_day", AverageMeter("losses_day", '.5f')))
-        record_list.append(
-            ("losses_night", AverageMeter("losses_night", '.5f')))
+        record_list.append(("losses_night", AverageMeter("losses_night",
+                                                         '.5f')))
 
     record_list.append(("batch_time", AverageMeter('batch_cost', '.5f')))
     record_list.append(("reader_time", AverageMeter('reader_cost', '.5f')))
@@ -134,8 +134,7 @@ def log_batch(metric_list,
     logger.info("{:s} {:s} {:s} {:s} {:s} {}".format(
         coloring(epoch_str, "HEADER") if batch_id == 0 else epoch_str,
         coloring(step_str, "PURPLE"), coloring(metric_str, 'OKGREEN'),
-        coloring(batch_cost, "OKGREEN"), coloring(reader_cost, 'OKGREEN'),
-        ips))
+        coloring(batch_cost, "OKGREEN"), coloring(reader_cost, 'OKGREEN'), ips))
 
 
 def log_epoch(metric_list, epoch, mode, ips):

@@ -45,7 +45,7 @@ def build_record(cfg):
         record_list.append(("recall@top5", AverageMeter("recall@top5", '.5f')))
         record_list.append(("prec@top5", AverageMeter("prec@top5", '.5f')))
         record_list.append(("mAP@0.5IOU", AverageMeter("mAP@0.5IOU", '.5f')))
-    elif 'DepthEstimator' in cfg.framework:
+    elif 'Estimator2D' in cfg.framework:
         record_list.append(("abs_rel", AverageMeter("abs_rel", '.5f')))
         record_list.append(("sq_rel", AverageMeter("sq_rel", '.5f')))
         record_list.append(("rmse", AverageMeter("rmse", '.5f')))

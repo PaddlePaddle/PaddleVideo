@@ -44,7 +44,7 @@ Oxford RobotCar dataset数据下载及准备请参考[Oxford RobotCar dataset数
 
     ```yaml
     MODEL: #MODEL field
-        framework: "DepthEstimator" #Mandatory, indicate the type of network, associate to the 'paddlevideo/modeling/framework/' .
+        framework: "Estimator2D" #Mandatory, indicate the type of network, associate to the 'paddlevideo/modeling/framework/' .
         backbone: #Mandatory, indicate the type of backbone, associate to the 'paddlevideo/modeling/backbones/' .
             name: 'ADDS_DepthNet'
             pretrained: 将路径填写到此处

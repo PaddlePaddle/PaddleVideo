@@ -343,7 +343,7 @@ def train_model(cfg,
                     logger.info(
                         f"Already save the best model (mAP@0.5IOU){int(best * 10000) / 10000}"
                     )
-                elif cfg.MODEL.framework in ["DepthEstimator", "Resolver2D"]:
+                elif cfg.MODEL.framework in ["Estimator2D", "Resolver2D"]:
                     logger.info(
                         f"Already save the best model (rmse){int(best * 10000) / 10000}"
                     )

@@ -44,7 +44,7 @@ For data download and preparation of Oxford RobotCar dataset, please refer to [O
 
     ```yaml
     MODEL: #MODEL field
-        framework: "DepthEstimator" #Mandatory, indicate the type of network, associate to the'paddlevideo/modeling/framework/'.
+        framework: "Estimator2D" #Mandatory, indicate the type of network, associate to the'paddlevideo/modeling/framework/'.
         backbone: #Mandatory, indicate the type of backbone, associate to the'paddlevideo/modeling/backbones/'.
             name: 'ADDS_DepthNet'
             pretrained: fill in the path here

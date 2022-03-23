@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .estimators import BaseEstimator, DepthEstimator
+from .estimators import BaseEstimator, Estimator2D
 from .localizers import BaseLocalizer, BMNLocalizer
 from .partitioners import BasePartitioner, TransNetV2Partitioner
 from .recognizers import BaseRecognizer, Recognizer2D
@@ -23,7 +23,7 @@ from .resolvers import BaseResolver, Resolver2D
 
 __all__ = [
     'BaseRecognizer', 'Recognizer2D', 'BaseLocalizer', 'BMNLocalizer',
-    'BasePartitioner', 'TransNetV2Partitioner', 'BaseEstimator',
-    'DepthEstimator', 'BaseMultimodal', 'ActBert', 'BaseSegment', 'CFBI',
-    'MSTCN', 'BaseResolver', 'Resolver2D'
+    'BasePartitioner', 'TransNetV2Partitioner', 'BaseEstimator', 'Estimator2D',
+    'BaseMultimodal', 'ActBert', 'BaseSegment', 'CFBI', 'MSTCN', 'BaseResolver',
+    'Resolver2D'
 ]

@@ -1,5 +1,5 @@
 MODEL: #MODEL field
-    framework: "DepthEstimator" #Mandatory, indicate the type of network, associate to the 'paddlevideo/modeling/framework/' .
+    framework: "Estimator2D" #Mandatory, indicate the type of network, associate to the 'paddlevideo/modeling/framework/' .
     backbone: #Mandatory, indicate the type of backbone, associate to the 'paddlevideo/modeling/backbones/' .
         name: 'ADDS_DepthNet'
         pretrained: "data/Resnet18_Imagenet.pdparams"
