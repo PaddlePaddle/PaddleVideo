@@ -1,4 +1,4 @@
-简体中文
+[English](../../../en/model_zoo/recognition/movinet.md) | 简体中文
 
 # MoViNet视频分类模型
 
@@ -8,6 +8,7 @@
 - [数据准备](#数据准备)
 - [模型训练](#模型训练)
 - [模型测试](#模型测试)
+- [模型推理](#模型推理)
 - [参考论文](#参考论文)
 
 
@@ -31,6 +32,12 @@ python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7" --log_dir=log
 
 ## 模型测试
 
+- MoViNet模型在训练时同步进行测试，您可以通过在训练日志中查找关键字`best`获取模型测试精度，日志示例如下:
+
+```txt
+Already save the best model (top1 acc)0.6489
+```
+
 - 若需单独运行测试代码，其启动命令如下：
 
 ```bash
@@ -38,6 +45,45 @@ python3.7 main.py --test -c configs/recognition/movinet/movinet_k400_frame.yaml 
 ```
 
 - 通过`-c`参数指定配置文件，通过`-w`指定权重存放路径进行模型测试。
+
+当测试配置采用如下参数时，在Kinetics-400的validation数据集上的评估精度如下：
+
+| config | Sampling method | num_seg | target_size | Top-1 | checkpoints |
+| :------: | :--------: | :-------: | :-------: | :-----: | :------: | :-------: |
+| A0 | Uniform | 50 | 172  | 64.89 | [MoViNetA0_k400.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.3/MoViNetA0_k400.pdparams)  |
+
+
+## 模型推理
+
+### 导出inference模型
+
+```bash
+python3.7 tools/export_model.py -c configs/recognition/movinet/movinet_k400_frame.yaml \
+                                -p data/MoViNetA0_k400.pdparams \
+                                -o inference/MoViNetA0
+```
+
+上述命令将生成预测所需的模型结构文件`MoViNetA0.pdmodel`和模型权重文件`MoViNetA0.pdiparams`。
+
+各参数含义可参考[模型推理方法](https://github.com/PaddlePaddle/PaddleVideo/blob/release/2.0/docs/zh-CN/start.md#2-%E6%A8%A1%E5%9E%8B%E6%8E%A8%E7%90%86)
+
+### 使用预测引擎推理
+
+```bash
+python3.7 tools/predict.py --input_file data/example.avi \
+                           --config configs/recognition/movinet/movinet_k400_frame.yaml \
+                           --model_file inference/MoViNetA0/MoViNet.pdmodel \
+                           --params_file inference/MoViNetA0/MoViNet.pdiparams \
+                           --use_gpu=True \
+                           --use_tensorrt=False
+```
+
+输出示例如下:
+```txt
+Current video file: data/example.avi
+        top-1 class: 5
+        top-1 score: 0.7667049765586853
+```
 
 ## 参考论文
 

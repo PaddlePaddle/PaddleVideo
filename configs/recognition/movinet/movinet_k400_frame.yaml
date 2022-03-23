@@ -109,6 +109,12 @@ METRIC:
   name: 'CenterCropMetric'
 
 
+INFERENCE:
+    name: 'ppTSM_Inference_helper'
+    num_seg: 50
+    short_size: 192
+    target_size: 172
+
 model_name: "MoViNet"
 log_interval: 1 #20 #Optional, the interal of logger, default:10
 save_interval: 10
