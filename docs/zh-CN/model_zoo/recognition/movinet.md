@@ -48,8 +48,8 @@ python3.7 main.py --test -c configs/recognition/movinet/movinet_k400_frame.yaml 
 
 当测试配置采用如下参数时，在Kinetics-400的validation数据集上的评估精度如下：
 
-| config | Sampling method | num_seg | target_size | Top-1 | checkpoints |
-| :------: | :--------: | :-------: | :-------: | :-----: |
+| Config | Sampling method | num_seg | target_size | Top-1 | checkpoints |
+| :------: | :--------: | :-------: | :-------: | :-----: | :-----: |
 | A0 | Uniform | 50 | 172  | 66.62 | [MoViNetA0_k400.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.3/MoViNetA0_k400.pdparams)  |
 
 
