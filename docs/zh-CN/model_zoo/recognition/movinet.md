@@ -50,7 +50,7 @@ python3.7 main.py --test -c configs/recognition/movinet/movinet_k400_frame.yaml 
 
 | config | Sampling method | num_seg | target_size | Top-1 | checkpoints |
 | :------: | :--------: | :-------: | :-------: | :-----: | :------: | :-------: |
-| A0 | Uniform | 50 | 172  | 64.89 | [MoViNetA0_k400.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.3/MoViNetA0_k400.pdparams)  |
+| A0 | Uniform | 50 | 172  | 66.62 | [MoViNetA0_k400.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.3/MoViNetA0_k400.pdparams)  |
 
 
 ## 模型推理
