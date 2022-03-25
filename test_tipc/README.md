@@ -15,7 +15,7 @@
 
 **字段说明：**
 - 基础训练预测：包括模型训练、Paddle Inference Python预测。
-- 更多训练方式(TODO)：包括多机多卡、混合精度。
+- 更多训练方式：包括多机多卡(TODO)、混合精度。
 - 模型压缩(TODO)：包括裁剪、离线/在线量化、蒸馏。
 - 其他预测部署：包括Paddle Inference C++预测、Paddle Serving部署(TODO)、Paddle-Lite部署(TODO)等。
 
@@ -42,24 +42,26 @@
 ```shell
 test_tipc/
 ├── configs/  # 配置文件目录
-    ├── PP-TSM/
-        ├── PP-TSM_train_infer_python.txt # PP-TSM在Linux上进行python训练预测（基础训练预测）的配置文件
-    ├── PP-TSN/
-        ├── PP-TSN_train_infer_python.txt # PP-TSN在Linux上进行python训练预测（基础训练预测）的配置文件
-    ├── ...
-    └── ...  
+│   ├── PP-TSM/
+│   │   ├── train_infer_python.txt # PP-TSM在Linux上进行python训练预测（基础训练预测）的配置文件
+│   │   └── train_amp_infer_python.txt # PP-TSM在Linux上进行python训练预测（混合精度训练预测）的配置文件
+│   ├── PP-TSN/
+│   │   ├── train_infer_python.txt # PP-TSN在Linux上进行python训练预测（基础训练预测）的配置文件
+│   │   └── train_amp_infer_python.txt # PP-TSN在Linux上进行python训练预测（混合精度训练预测）的配置文件
+│   ├── ...
+│   └── ...
 ├── results/   # 预先保存的预测结果，用于和实际预测结果进行精度比对
-    ├── PP-TSM/
-    	├── python_ppvideo_PP-TSM_results_fp16.txt # 预存的PP-TSM识别识别模型python预测fp16精度的结果
-    	└── python_ppvideo_PP-TSM_results_fp32.txt # 预存的PP-TSM识别识别模型python预测fp32精度的结果
-    ├── PP-TSN/
-    	├── python_ppvideo_PP-TSN_results_fp32.txt # 预存的PP-TSN识别识别模型python预测fp16精度的结果
-    	└── python_ppvideo_PP-TSN_results_fp32.txt # 预存的PP-TSN识别识别模型python预测fp32精度的结果
-    ├── PP-TSN_CPP/
-    	├── python_ppvideo_PP-TSN_results_fp32.txt # 预存的PP-TSN识别识别模型C++预测fp16精度的结果
-    	└── python_ppvideo_PP-TSN_results_fp32.txt # 预存的PP-TSN识别识别模型C++预测fp32精度的结果
-    ├── ...
-    └── ...
+│   ├── PP-TSM/
+│   │	├── python_ppvideo_PP-TSM_results_fp16.txt # 预存的PP-TSM识别识别模型python预测fp16精度的结果
+│   │	└── python_ppvideo_PP-TSM_results_fp32.txt # 预存的PP-TSM识别识别模型python预测fp32精度的结果
+│   ├── PP-TSN/
+│   │	├── python_ppvideo_PP-TSN_results_fp32.txt # 预存的PP-TSN识别识别模型python预测fp16精度的结果
+│   │	└── python_ppvideo_PP-TSN_results_fp32.txt # 预存的PP-TSN识别识别模型python预测fp32精度的结果
+│   ├── PP-TSN_CPP/
+│   │	├── python_ppvideo_PP-TSN_results_fp32.txt # 预存的PP-TSN识别识别模型C++预测fp16精度的结果
+│   │	└── python_ppvideo_PP-TSN_results_fp32.txt # 预存的PP-TSN识别识别模型C++预测fp32精度的结果
+│   ├── ...
+│   └── ...
 ├── prepare.sh                        # 完成test_*.sh运行所需要的数据和模型下载
 ├── docs/                             # 详细的TIPC各种功能文档
 ├── test_train_inference_python.sh    # 测试python训练预测的主程序
@@ -94,9 +96,9 @@ bash test_tipc/test_train_inference_python.sh configs/[model_name]/[params_file_
 例如，测试基本训练预测功能的`lite_train_lite_infer`模式，运行：
 ```shell
 # 准备数据
-bash test_tipc/prepare.sh ./test_tipc/configs/PP-TSM/PP-TSM_train_infer_python.txt 'lite_train_lite_infer'
+bash test_tipc/prepare.sh ./test_tipc/configs/PP-TSM/train_infer_python.txt 'lite_train_lite_infer'
 # 运行测试
-bash test_tipc/test_train_inference_python.sh ./test_tipc/configs/PP-TSM/PP-TSM_train_infer_python.txt 'lite_train_lite_infer'
+bash test_tipc/test_train_inference_python.sh ./test_tipc/configs/PP-TSM/train_infer_python.txt 'lite_train_lite_infer'
 ```
 关于本示例命令的更多信息可查看[基础训练预测使用文档](./docs/test_train_inference_python.md)。
 
@@ -114,7 +116,7 @@ bash test_tipc/test_train_inference_python.sh ./test_tipc/configs/PP-TSM/PP-TSM_
 <a name="more"></a>
 
 ## 4. 开始测试
-各功能测试中涉及混合精度、裁剪、量化等训练相关，及mkldnn、Tensorrt等多种预测相关参数配置，请点击下方相应链接了解更多细节和使用教程：  
+各功能测试中涉及混合精度、裁剪、量化等训练相关，及mkldnn、Tensorrt等多种预测相关参数配置，请点击下方相应链接了解更多细节和使用教程：
 - [test_train_inference_python 使用](docs/test_train_inference_python.md) ：测试基于Python的模型训练、评估、推理等基本功能。
-- [test_amp_train_inference_python 使用](docs/test_train_amp_inference_python.md) ：测试基于Python的模型训练、评估、推理等基本功能。
+- [test_amp_train_inference_python 使用](docs/test_train_amp_inference_python.md) ：测试基于Python的**混合精度**模型训练、评估、推理等基本功能。
 - [test_inference_cpp 使用](docs/test_inference_cpp.md) ：测试基于C++的模型推理功能。

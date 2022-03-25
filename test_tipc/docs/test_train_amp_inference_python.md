@@ -66,7 +66,7 @@ Linux GPU/CPU 混合精度训练推理测试的主程序为`test_train_inference
 bash test_tipc/test_train_inference_python.sh ${your_params_file_path} lite_train_lite_infer
 ```
 
-以`PP-TSM`的`Linux GPU/CPU 混合精度训练推理测试`为例，命令如下所示。
+以`PP-TSM`的`Linux GPU/CPU 混合精度(默认优化等级为O2)训练推理测试`为例，命令如下所示。
 
 ```bash
 bash test_tipc/prepare.sh test_tipc/configs/PP-TSM/train_amp_infer_python.txt lite_train_lite_infer

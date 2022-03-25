@@ -17,7 +17,7 @@ norm_train:main.py --validate -c configs/recognition/attention_lstm/attention_ls
 pact_train:null
 fpgm_train:null
 distill_train:null
-amp_train:main.py --amp --amp_level='O1' --validate -c configs/recognition/attention_lstm/attention_lstm_youtube8m.yaml --seed 1234
+amp_train:main.py --amp --amp_level='O2' --validate -c configs/recognition/attention_lstm/attention_lstm_youtube8m.yaml --seed 1234
 null:null
 ##
 ===========================eval_params===========================
