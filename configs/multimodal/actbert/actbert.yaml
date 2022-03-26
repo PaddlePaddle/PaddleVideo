@@ -12,7 +12,7 @@ DATASET: #DATASET field
     batch_size: 8
     train:
         format: "ActBertDataset"
-        file_path: "data/howto100m/my_data.npy"
+        file_path: "data/howto100m/actbert_train_data.npy"
     valid:
         format: "ActBertDataset"
         file_path: "data/howto100m/my_data.npy"
