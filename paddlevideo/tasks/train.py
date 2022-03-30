@@ -167,7 +167,7 @@ def train_model(cfg,
     for epoch in range(0, cfg.epochs):
         if epoch < resume_epoch:
             logger.info(
-                f"| epoch: [{epoch+1}] <= resume_epoch: [{ resume_epoch}], continue..."
+                f"| epoch: [{epoch + 1}] <= resume_epoch: [{resume_epoch}], continue..."
             )
             continue
         model.train()

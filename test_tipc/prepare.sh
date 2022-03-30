@@ -374,7 +374,7 @@ elif [ ${MODE} = "whole_infer" ];then
 fi
 
 if [ ${MODE} = "benchmark_train" ];then
-    ${python} -m pip install -r requirements.txt  # TODO(hesensen): 之后改回pip
+    ${python} -m pip install -r requirements.txt
     if [ ${model_name} == "PP-TSM" ]; then
         echo "Not added into TIPC yet."
     elif [ ${model_name} == "PP-TSN" ]; then
