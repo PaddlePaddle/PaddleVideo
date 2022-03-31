@@ -155,9 +155,12 @@ def train_model(cfg,
         scaler = paddle.amp.GradScaler(init_loss_scaling=2.0**16,
                                        incr_every_n_steps=2000,
                                        decr_every_n_nan_or_inf=1)
-        assert amp_level in [
-            'O1', 'O2'
-        ], f"amp_level must be 'O1' or 'O2' when amp enabled, but got {amp_level}."
+        if amp_level is None:
+            amp_level = 'O1'
+        else:
+            assert amp_level in [
+                'O1', 'O2'
+            ], f"amp_level must be 'O1' or 'O2' when amp enabled, but got {amp_level}."
         logger.info(f"Training in amp mode, amp_level={amp_level}.")
     else:
         assert amp_level is None, f"amp_level must be None when training in fp32 mode."
