@@ -15,18 +15,16 @@ MODE=$2
 
 dataline=$(cat ${FILENAME})
 
-pip install unrar
-
-git clone https://github.com/LDOUBLEV/AutoLog
-cd AutoLog
-pip install -r requirements.txt
-python setup.py bdist_wheel
-pip install ./dist/auto_log*.whl
-cd ..
-
 # parser params
 IFS=$'\n'
 lines=(${dataline})
+
+# determine python interpreter version
+python=$(func_parser_value "${lines[2]}")
+
+# install auto-log package.
+${python} -m pip install unrar
+${python} -m pip install https://paddleocr.bj.bcebos.com/libs/auto_log-1.2.0-py3-none-any.whl
 
 # The training params
 model_name=$(func_parser_value "${lines[1]}")
@@ -94,13 +92,13 @@ if [ ${MODE} = "lite_train_lite_infer" ];then
         ## download & decompression training data
         wget -nc https://videotag.bj.bcebos.com/Data/yt8m_rawframe_small.tar
         tar -xf yt8m_rawframe_small.tar
-        pip install tensorflow-gpu==1.14.0 -i https://pypi.tuna.tsinghua.edu.cn/simple
-        python3.7 tf2pkl.py ./frame ./pkl_frame/
+        ${python} -m pip install tensorflow-gpu==1.14.0 -i https://pypi.tuna.tsinghua.edu.cn/simple
+        ${python} tf2pkl.py ./frame ./pkl_frame/
         ls pkl_frame/train*.pkl > train_small.list # 将train*.pkl的路径写入train_small.list
         ls pkl_frame/validate*.pkl > val_small.list # 将validate*.pkl的路径写入val_small.list
 
-        python3.7 split_yt8m.py train_small.list # 拆分每个train*.pkl变成多个train*_split*.pkl
-        python3.7 split_yt8m.py val_small.list # 拆分每个validate*.pkl变成多个validate*_split*.pkl
+        ${python} split_yt8m.py train_small.list # 拆分每个train*.pkl变成多个train*_split*.pkl
+        ${python} split_yt8m.py val_small.list # 拆分每个validate*.pkl变成多个validate*_split*.pkl
 
         ls pkl_frame/train*_split*.pkl > train_small.list # 将train*_split*.pkl的路径重新写入train_small.list
         ls pkl_frame/validate*_split*.pkl > val_small.list # 将validate*_split*.pkl的路径重新写入val_small.list
@@ -133,7 +131,7 @@ elif [ ${MODE} = "whole_train_whole_infer" ];then
         wget -nc https://ai-rank.bj.bcebos.com/Kinetics400/val_link.list
         bash download_k400_data.sh train_link.list
         bash download_k400_data.sh val_link.list
-        python3.7 extract_rawframes.py ./videos/ ./rawframes/ --level 2 --ext mp4 # extract frames from video file
+        ${python} extract_rawframes.py ./videos/ ./rawframes/ --level 2 --ext mp4 # extract frames from video file
         # download annotations
         wget -nc https://videotag.bj.bcebos.com/PaddleVideo/Data/Kinetic400/train_frames.list
         wget -nc https://videotag.bj.bcebos.com/PaddleVideo/Data/Kinetic400/val_frames.list
@@ -172,7 +170,7 @@ elif [ ${MODE} = "whole_train_whole_infer" ];then
         wget -nc https://ai-rank.bj.bcebos.com/Kinetics400/val_link.list
         bash download_k400_data.sh train_link.list
         bash download_k400_data.sh val_link.list
-        python3.7 extract_rawframes.py ./videos/ ./rawframes/ --level 2 --ext mp4 # extract frames from video file
+        ${python} extract_rawframes.py ./videos/ ./rawframes/ --level 2 --ext mp4 # extract frames from video file
         # download annotations
         wget -nc https://videotag.bj.bcebos.com/PaddleVideo/Data/Kinetic400/train_frames.list
         wget -nc https://videotag.bj.bcebos.com/PaddleVideo/Data/Kinetic400/val_frames.list
@@ -186,7 +184,7 @@ elif [ ${MODE} = "whole_train_whole_infer" ];then
         wget -nc https://ai-rank.bj.bcebos.com/Kinetics400/val_link.list
         bash download_k400_data.sh train_link.list
         bash download_k400_data.sh val_link.list
-        python3.7 extract_rawframes.py ./videos/ ./rawframes/ --level 2 --ext mp4 # extract frames from video file
+        ${python} extract_rawframes.py ./videos/ ./rawframes/ --level 2 --ext mp4 # extract frames from video file
         # download annotations
         wget -nc https://videotag.bj.bcebos.com/PaddleVideo/Data/Kinetic400/train_frames.list
         wget -nc https://videotag.bj.bcebos.com/PaddleVideo/Data/Kinetic400/val_frames.list
@@ -214,14 +212,14 @@ elif [ ${MODE} = "whole_train_whole_infer" ];then
         ## download & decompression training data
         curl data.yt8m.org/download.py | partition=2/frame/train mirror=asia python
         curl data.yt8m.org/download.py | partition=2/frame/validate mirror=asia python
-        pip install tensorflow-gpu==1.14.0 -i https://pypi.tuna.tsinghua.edu.cn/simple
+        ${python} -m pip install tensorflow-gpu==1.14.0 -i https://pypi.tuna.tsinghua.edu.cn/simple
         cd ..
-        python3.7 tf2pkl.py ./frame ./pkl_frame/
+        ${python} tf2pkl.py ./frame ./pkl_frame/
         ls pkl_frame/train*.pkl > train.list # 将train*.pkl的路径写入train.list
         ls pkl_frame/validate*.pkl > val.list # 将validate*.pkl的路径写入val.list
 
-        python3.7 split_yt8m.py train.list # 拆分每个train*.pkl变成多个train*_split*.pkl
-        python3.7 split_yt8m.py val.list # 拆分每个validate*.pkl变成多个validate*_split*.pkl
+        ${python} split_yt8m.py train.list # 拆分每个train*.pkl变成多个train*_split*.pkl
+        ${python} split_yt8m.py val.list # 拆分每个validate*.pkl变成多个validate*_split*.pkl
 
         ls pkl_frame/train*_split*.pkl > train.list # 将train*_split*.pkl的路径重新写入train.list
         ls pkl_frame/validate*_split*.pkl > val.list # 将validate*_split*.pkl的路径重新写入val.list
@@ -309,13 +307,13 @@ elif [ ${MODE} = "lite_train_whole_infer" ];then
         ## download & decompression training data
         wget -nc https://videotag.bj.bcebos.com/Data/yt8m_rawframe_small.tar
         tar -xf yt8m_rawframe_small.tar
-        pip install tensorflow-gpu==1.14.0 -i https://pypi.tuna.tsinghua.edu.cn/simple
-        python3.7 tf2pkl.py ./frame ./pkl_frame/
+        ${python} -m pip install tensorflow-gpu==1.14.0 -i https://pypi.tuna.tsinghua.edu.cn/simple
+        ${python} tf2pkl.py ./frame ./pkl_frame/
         ls pkl_frame/train*.pkl > train_small.list # 将train*.pkl的路径写入train_small.list
         ls pkl_frame/validate*.pkl > val_small.list # 将validate*.pkl的路径写入val_small.list
 
-        python3.7 split_yt8m.py train_small.list # 拆分每个train*.pkl变成多个train*_split*.pkl
-        python3.7 split_yt8m.py val_small.list # 拆分每个validate*.pkl变成多个validate*_split*.pkl
+        ${python} split_yt8m.py train_small.list # 拆分每个train*.pkl变成多个train*_split*.pkl
+        ${python} split_yt8m.py val_small.list # 拆分每个validate*.pkl变成多个validate*_split*.pkl
 
         ls pkl_frame/train*_split*.pkl > train_small.list # 将train*_split*.pkl的路径重新写入train_small.list
         ls pkl_frame/validate*_split*.pkl > val_small.list # 将validate*_split*.pkl的路径重新写入val_small.list
@@ -376,7 +374,7 @@ elif [ ${MODE} = "whole_infer" ];then
 fi
 
 if [ ${MODE} = "benchmark_train" ];then
-    pip install -r requirements.txt  # TODO(hesensen): 之后改回pip
+    ${python} -m pip install -r requirements.txt
     if [ ${model_name} == "PP-TSM" ]; then
         echo "Not added into TIPC yet."
     elif [ ${model_name} == "PP-TSN" ]; then
@@ -451,12 +449,12 @@ if [ ${MODE} = "cpp_infer" ];then
         # download pretrained weights
         wget -nc -P data/ https://videotag.bj.bcebos.com/PaddleVideo-release2.1/PPTSM/ppTSM_k400_uniform.pdparams --no-check-certificate
         # export inference model
-        python3.7 tools/export_model.py -c configs/recognition/pptsm/pptsm_k400_frames_uniform.yaml -p data/ppTSM_k400_uniform.pdparams -o ./inference/ppTSM
+        ${python} tools/export_model.py -c configs/recognition/pptsm/pptsm_k400_frames_uniform.yaml -p data/ppTSM_k400_uniform.pdparams -o ./inference/ppTSM
     elif [ ${model_name} = "PP-TSN" ]; then
         # download pretrained weights
         wget -nc -P data/ https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ppTSN_k400.pdparams --no-check-certificate
         # export inference model
-        python3.7 tools/export_model.py -c configs/recognition/pptsn/pptsn_k400_videos.yaml -p data/ppTSN_k400.pdparams -o ./inference/ppTSN
+        ${python} tools/export_model.py -c configs/recognition/pptsn/pptsn_k400_videos.yaml -p data/ppTSN_k400.pdparams -o ./inference/ppTSN
     else
         echo "Not added into TIPC now."
     fi

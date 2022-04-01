@@ -9,7 +9,7 @@
 
 ```shell
 # 运行格式：bash test_tipc/prepare.sh  train_benchmark.txt  mode
-bash test_tipc/prepare.sh test_tipc/configs/TSM/TSM_train_infer_python.txt benchmark_train
+bash test_tipc/prepare.sh test_tipc/configs/TSM/train_infer_python.txt benchmark_train
 ```
 
 ## 1.2 功能测试
@@ -17,7 +17,7 @@ bash test_tipc/prepare.sh test_tipc/configs/TSM/TSM_train_infer_python.txt bench
 
 ```shell
 # 运行格式：bash test_tipc/benchmark_train.sh train_benchmark.txt mode
-bash test_tipc/benchmark_train.sh test_tipc/configs/TSM/TSM_train_infer_python.txt benchmark_train
+bash test_tipc/benchmark_train.sh test_tipc/configs/TSM/train_infer_python.txt benchmark_train
 
 ```
 
@@ -25,9 +25,9 @@ bash test_tipc/benchmark_train.sh test_tipc/configs/TSM/TSM_train_infer_python.t
 ```shell
 # 运行格式：bash test_tipc/benchmark_train.sh train_benchmark.txt mode config_pram
 ## 动态图, batchsize=30, fp32, 数据并行模式, 单机单卡训练配置
-bash test_tipc/benchmark_train.sh test_tipc/configs/TSM/TSM_train_infer_python.txt benchmark_train dynamic_bs30_fp32_DP_N1C1
+bash test_tipc/benchmark_train.sh test_tipc/configs/TSM/train_infer_python.txt benchmark_train dynamic_bs30_fp32_DP_N1C1
 ## 动态图, batchsize=30, fp16, 数据并行模式, 单机4卡训练配置
-bash test_tipc/benchmark_train.sh test_tipc/configs/TSM/TSM_train_infer_python.txt benchmark_train dynamic_bs30_fp16_DP_N1C4
+bash test_tipc/benchmark_train.sh test_tipc/configs/TSM/train_infer_python.txt benchmark_train dynamic_bs30_fp16_DP_N1C4
 ```
 dynamic_bs30_fp16_DP_N1C4/benchmark_train.sh传入的参数，格式如下：
 
