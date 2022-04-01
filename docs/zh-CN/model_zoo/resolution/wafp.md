@@ -29,7 +29,7 @@ python -m pip install h5py
 本文档所使用的数据融合了Middlebury dataset/ MPI Sintel dataset 和 synthetic New Tsukuba dataset 共三个数据集
 1. 准备raw图片数据
 
-    下载2个压缩包：https://videotag.bj.bcebos.com/Data/WAFP_data.zip，https://videotag.bj.bcebos.com/Data/WAFP_test_data.zip
+    下载2个数据集压缩包：[WAFP_data.zip](https://videotag.bj.bcebos.com/Data/WAFP_data.zip)，[WAFP_test_data.zip](https://videotag.bj.bcebos.com/Data/WAFP_test_data.zip)
     解压并将`data_all`文件夹（含133张深度图）和`test_data`文件夹（含4个测试数据）放置成以下位置：
 
     ```shell

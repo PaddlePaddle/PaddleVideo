@@ -31,7 +31,7 @@ A depth map super-resolution model based on adaptive fusion attention is reprodu
 The data used in this document combines three datasets, Middlebury dataset/ MPI Sintel dataset and synthetic New Tsukuba dataset
 1. Prepare raw image data
 
-    Download these two compressed package: https://videotag.bj.bcebos.com/Data/WAFP_data.zip,https://videotag.bj.bcebos.com/Data/WAFP_test_data.zip
+    Download these two compressed package: [WAFP_data.zip](https://videotag.bj.bcebos.com/Data/WAFP_data.zip)，[WAFP_test_data.zip](https://videotag.bj.bcebos.com/Data/WAFP_test_data.zip)
     Unzip them, and place the `data_all` folder(containing 133 depth maps) and `test_data`(containing 4 test mat) in the following locations:
 
     ```shell
