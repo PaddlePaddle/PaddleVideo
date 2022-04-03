@@ -96,19 +96,37 @@ def train_model(cfg,
 
     # 1. Construct model
     model = build_model(cfg.MODEL)
+
+    # 2. Construct scalar and convert parameters for automatic mixed precision
+    if use_amp:
+        if amp_level is None:
+            amp_level = 'O1'  # set defaualt amp_level to 'O1'
+        else:
+            assert amp_level in [
+                'O1', 'O2'
+            ], f"amp_level must be 'O1' or 'O2' when amp enabled, but got {amp_level}."
+        scaler = paddle.amp.GradScaler(init_loss_scaling=2.0**16,
+                                       incr_every_n_steps=2000,
+                                       decr_every_n_nan_or_inf=1)
+        logger.info(f"Training in amp mode, amp_level={amp_level}.")
+        # convert model parameters to fp32/fp16 accoording to amp_level
+        model = paddle.amp.decorate(models=model, level=amp_level)
+    else:
+        assert amp_level is None, f"amp_level must be None when training in fp32 mode, but got {amp_level}."
+        logger.info("Training in fp32 mode.")
+
     if parallel:
         model = paddle.DataParallel(model)
 
     if use_fleet:
         model = fleet.distributed_model(model)
 
-    # 2. Construct dataset and dataloader
+    # 3. Construct dataset and dataloader for training and evaluation
     train_dataset = build_dataset((cfg.DATASET.train, cfg.PIPELINE.train))
     train_dataloader_setting = dict(batch_size=batch_size,
                                     num_workers=num_workers,
                                     collate_fn_cfg=cfg.get('MIX', None),
                                     places=places)
-
     train_loader = build_dataloader(train_dataset, **train_dataloader_setting)
 
     if validate:
@@ -120,18 +138,18 @@ def train_model(cfg,
             drop_last=False,
             shuffle=cfg.DATASET.get(
                 'shuffle_valid',
-                False)  # NOTE: attention lstm need shuffle valid data.
+                False)  # NOTE: attention_LSTM needs to shuffle valid data.
         )
         valid_loader = build_dataloader(valid_dataset,
                                         **validate_dataloader_setting)
 
-    # 3. Construct solver.
+    # 4. Construct learning rate scheduler(lr) and optimizer
     lr = build_lr(cfg.OPTIMIZER.learning_rate, len(train_loader))
     optimizer = build_optimizer(cfg.OPTIMIZER, lr, model=model)
     if use_fleet:
         optimizer = fleet.distributed_optimizer(optimizer)
 
-    # Resume
+    # 5. Resume(optional)
     resume_epoch = cfg.get("resume_epoch", 0)
     if resume_epoch:
         filename = osp.join(output_dir,
@@ -142,30 +160,14 @@ def train_model(cfg,
         optimizer.set_state_dict(resume_opt_dict)
         logger.info("Resume from checkpoint: {}".format(filename))
 
-    # Finetune:
+    # 6. Finetune(optional)
     if weights:
         assert resume_epoch == 0, f"Conflict occurs when finetuning, please switch resume function off by setting resume_epoch to 0 or not indicating it."
         model_dict = load(weights)
         model.set_state_dict(model_dict)
         logger.info("Finetune from checkpoint: {}".format(weights))
 
-    # 4. Train Model
-    ###AMP###
-    if use_amp:
-        scaler = paddle.amp.GradScaler(init_loss_scaling=2.0**16,
-                                       incr_every_n_steps=2000,
-                                       decr_every_n_nan_or_inf=1)
-        if amp_level is None:
-            amp_level = 'O1'
-        else:
-            assert amp_level in [
-                'O1', 'O2'
-            ], f"amp_level must be 'O1' or 'O2' when amp enabled, but got {amp_level}."
-        logger.info(f"Training in amp mode, amp_level={amp_level}.")
-    else:
-        assert amp_level is None, f"amp_level must be None when training in fp32 mode."
-        logger.info("Training in fp32 mode.")
-
+    # 7. Train Model
     best = 0.0
     for epoch in range(0, cfg.epochs):
         if epoch < resume_epoch:
