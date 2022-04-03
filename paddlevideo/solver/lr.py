@@ -12,23 +12,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import copy
-import paddle
+from typing import Dict
+
+from paddle.optimizer.lr import LRScheduler
+
 from . import custom_lr
 
 
-def build_lr(cfg, num_iters):
-    """
-    Build a learning rate scheduler accroding to ```OPTIMIZER``` configuration, and it always pass into the optimizer.
+def build_lr(cfg: Dict, num_iters: int) -> LRScheduler:
+    """Build a learning rate scheduler accroding to ```OPTIMIZER``` configuration, and it always pass into the optimizer.
     In configuration:
     learning_rate:
         name: 'PiecewiseDecay'
         boundaries: [20, 60]
         values: [0.00025, 0.000025, 0.0000025]
 
+    Args:
+        cfg (Dict): learning rate configuration.
+        num_iters (int): The number of iterations that may be used when calculating the learning rate
 
     Returns:
-        A paddle.optimizer.lr instance.
+        LRScheduler: learning rate scheduler.
     """
 
     cfg_copy = cfg.copy()

@@ -101,6 +101,15 @@ def main():
         np.random.seed(seed)
         paddle.seed(seed)
 
+    # set amp_level if amp is enabled
+    if args.amp:
+        if args.amp_level is None:
+            args.amp_level = 'O1'  # set defaualt amp_level to 'O1'
+        else:
+            assert args.amp_level in [
+                'O1', 'O2'
+            ], f"amp_level must be 'O1' or 'O2' when amp enabled, but got {args.amp_level}."
+
     _, world_size = get_dist_info()
     parallel = world_size != 1
     if parallel:
