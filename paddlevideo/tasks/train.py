@@ -16,6 +16,7 @@ import os.path as osp
 import time
 
 import paddle
+import paddle.amp as amp
 import paddle.distributed as dist
 import paddle.distributed.fleet as fleet
 from paddlevideo.utils import (add_profiler_step, build_record, get_logger,
@@ -58,6 +59,7 @@ def train_model(cfg,
     batch_size = cfg.DATASET.get('batch_size', 8)
     valid_batch_size = cfg.DATASET.get('valid_batch_size', batch_size)
 
+    # gradient accumulation settings
     use_gradient_accumulation = cfg.get('GRADIENT_ACCUMULATION', None)
     if use_gradient_accumulation and dist.get_world_size() >= 1:
         global_batch_size = cfg.GRADIENT_ACCUMULATION.get(
@@ -96,19 +98,13 @@ def train_model(cfg,
 
     # 1. Construct model
     model = build_model(cfg.MODEL)
-    if parallel:
-        model = paddle.DataParallel(model)
 
-    if use_fleet:
-        model = fleet.distributed_model(model)
-
-    # 2. Construct dataset and dataloader
+    # 2. Construct dataset and dataloader for training and evaluation
     train_dataset = build_dataset((cfg.DATASET.train, cfg.PIPELINE.train))
     train_dataloader_setting = dict(batch_size=batch_size,
                                     num_workers=num_workers,
                                     collate_fn_cfg=cfg.get('MIX', None),
                                     places=places)
-
     train_loader = build_dataloader(train_dataset, **train_dataloader_setting)
 
     if validate:
@@ -120,18 +116,36 @@ def train_model(cfg,
             drop_last=False,
             shuffle=cfg.DATASET.get(
                 'shuffle_valid',
-                False)  # NOTE: attention lstm need shuffle valid data.
+                False)  # NOTE: attention_LSTM needs to shuffle valid data.
         )
         valid_loader = build_dataloader(valid_dataset,
                                         **validate_dataloader_setting)
 
-    # 3. Construct solver.
+    # 3. Construct learning rate scheduler(lr) and optimizer
     lr = build_lr(cfg.OPTIMIZER.learning_rate, len(train_loader))
-    optimizer = build_optimizer(cfg.OPTIMIZER, lr, model=model)
-    if use_fleet:
-        optimizer = fleet.distributed_optimizer(optimizer)
+    optimizer = build_optimizer(cfg.OPTIMIZER,
+                                lr,
+                                model=model,
+                                use_amp=use_amp,
+                                amp_level=amp_level)
 
-    # Resume
+    # 4. Construct scalar and convert parameters for amp.
+    if use_amp:
+        scaler = amp.GradScaler(init_loss_scaling=2.0**16,
+                                incr_every_n_steps=2000,
+                                decr_every_n_nan_or_inf=1)
+        # convert model parameters to fp16 when amp_level is O2(pure fp16)
+        model, optimizer = amp.decorate(models=model,
+                                        optimizers=optimizer,
+                                        level=amp_level,
+                                        save_dtype='float32')
+        # NOTE: save_dtype is set to float32 now.
+        logger.info(f"Training in amp mode, amp_level={amp_level}.")
+    else:
+        assert amp_level is None, f"amp_level must be None when training in fp32 mode, but got {amp_level}."
+        logger.info("Training in fp32 mode.")
+
+    # 5. Resume(optional)
     resume_epoch = cfg.get("resume_epoch", 0)
     if resume_epoch:
         filename = osp.join(output_dir,
@@ -142,27 +156,22 @@ def train_model(cfg,
         optimizer.set_state_dict(resume_opt_dict)
         logger.info("Resume from checkpoint: {}".format(filename))
 
-    # Finetune:
+    # 6. Finetune(optional)
     if weights:
         assert resume_epoch == 0, f"Conflict occurs when finetuning, please switch resume function off by setting resume_epoch to 0 or not indicating it."
         model_dict = load(weights)
         model.set_state_dict(model_dict)
         logger.info("Finetune from checkpoint: {}".format(weights))
 
-    # 4. Train Model
-    ###AMP###
-    if use_amp:
-        scaler = paddle.amp.GradScaler(init_loss_scaling=2.0**16,
-                                       incr_every_n_steps=2000,
-                                       decr_every_n_nan_or_inf=1)
-        assert amp_level in [
-            'O1', 'O2'
-        ], f"amp_level must be 'O1' or 'O2' when amp enabled, but got {amp_level}."
-        logger.info(f"Training in amp mode, amp_level={amp_level}.")
-    else:
-        assert amp_level is None, f"amp_level must be None when training in fp32 mode."
-        logger.info("Training in fp32 mode.")
+    # 7. Parallelize(optional)
+    if parallel:
+        model = paddle.DataParallel(model)
 
+    if use_fleet:
+        model = fleet.distributed_model(model)
+        optimizer = fleet.distributed_optimizer(optimizer)
+
+    # 8. Train Model
     best = 0.0
     for epoch in range(0, cfg.epochs):
         if epoch < resume_epoch:
@@ -185,11 +194,11 @@ def train_model(cfg,
             # Collect performance information when profiler_options is activate
             add_profiler_step(profiler_options)
 
-            # 4.1 forward
+            # 8.1 forward
             # AMP #
             if use_amp:
-                with paddle.amp.auto_cast(custom_black_list={"reduce_mean"},
-                                          level=amp_level):
+                with amp.auto_cast(custom_black_list={"reduce_mean"},
+                                   level=amp_level):
                     outputs = model(data, mode='train')
                 avg_loss = outputs['loss']
                 if use_gradient_accumulation:
@@ -200,18 +209,18 @@ def train_model(cfg,
                     avg_loss /= cfg.GRADIENT_ACCUMULATION.num_iters
                     # Loss scaling
                     scaled = scaler.scale(avg_loss)
-                    # 4.2 backward
+                    # 8.2 backward
                     scaled.backward()
-                    # 4.3 minimize
+                    # 8.3 minimize
                     if (i + 1) % cfg.GRADIENT_ACCUMULATION.num_iters == 0:
                         scaler.minimize(optimizer, scaled)
                         optimizer.clear_grad()
                 else:  # general case
                     # Loss scaling
                     scaled = scaler.scale(avg_loss)
-                    # 4.2 backward
+                    # 8.2 backward
                     scaled.backward()
-                    # 4.3 minimize
+                    # 8.3 minimize
                     scaler.minimize(optimizer, scaled)
                     optimizer.clear_grad()
             else:
@@ -223,16 +232,16 @@ def train_model(cfg,
                         optimizer.clear_grad()
                     # Loss normalization
                     avg_loss /= cfg.GRADIENT_ACCUMULATION.num_iters
-                    # 4.2 backward
+                    # 8.2 backward
                     avg_loss.backward()
-                    # 4.3 minimize
+                    # 8.3 minimize
                     if (i + 1) % cfg.GRADIENT_ACCUMULATION.num_iters == 0:
                         optimizer.step()
                         optimizer.clear_grad()
                 else:  # general case
-                    # 4.2 backward
+                    # 8.2 backward
                     avg_loss.backward()
-                    # 4.3 minimize
+                    # 8.3 minimize
                     optimizer.step()
                     optimizer.clear_grad()
 
@@ -277,7 +286,13 @@ def train_model(cfg,
                 ignore it most of the time"""
                 if max_iters is not None and i >= max_iters:
                     break
-                outputs = model(data, mode='valid')
+
+                if use_amp:
+                    with amp.auto_cast(custom_black_list={"reduce_mean"},
+                                       level=amp_level):
+                        outputs = model(data, mode='valid')
+                else:
+                    outputs = model(data, mode='valid')
 
                 if cfg.MODEL.framework == "FastRCNN":
                     results.extend(outputs)
@@ -335,9 +350,10 @@ def train_model(cfg,
                                      == 0 or epoch == cfg.epochs - 1):
             do_preciseBN(
                 model, train_loader, parallel,
-                min(cfg.PRECISEBN.num_iters_preciseBN, len(train_loader)))
+                min(cfg.PRECISEBN.num_iters_preciseBN, len(train_loader)),
+                use_amp, amp_level)
 
-        # 5. Validation
+        # 9. Validation
         if validate and (epoch % cfg.get("val_interval", 1) == 0
                          or epoch == cfg.epochs - 1):
             with paddle.no_grad():

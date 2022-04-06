@@ -12,13 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import inspect
+from typing import Dict
+
 import paddle
+from paddle.optimizer.lr import LRScheduler
 from paddle.regularizer import L1Decay, L2Decay
+from paddlevideo.utils import get_logger
 
 
-def build_optimizer(cfg, lr_scheduler, model=None):
-    """
-    Build an optimizer and learning rate scheduler to optimize parameters accroding to ```OPTIMIZER``` field in configuration .
+def build_optimizer(cfg: Dict,
+                    lr_scheduler: LRScheduler,
+                    model: paddle.nn.Layer,
+                    use_amp: bool = False,
+                    amp_level: str = None) -> paddle.optimizer.Optimizer:
+    """Build an optimizer and learning rate scheduler to optimize parameters accroding to ```OPTIMIZER``` field in configuration.
 
     In configuration:
     OPTIMIZER:
@@ -47,17 +55,19 @@ def build_optimizer(cfg, lr_scheduler, model=None):
     Refer to ```https://www.paddlepaddle.org.cn/documentation/docs/en/develop/api/paddle/regularizer/L2Decay_en.html``` for more details.
 
     Args:
-        cfg (dict): optimizer configuration.
-        lr_schduler: learning rate scheduler.
-        parameter_list (list): parameters to be optimized.
+        cfg (Dict): optimizer configuration.
+        lr_scheduler (LRScheduler): learning rate scheduler.
+        model (paddle.nn.Layer, optional): model which contains parameters to be optimized. Defaults to None.
+        use_amp (bool, optional): Whether use amp. Defaults to False.
+        amp_level (str, optional): amp level when amp is enabled. Defaults to None.
+
 
     Returns:
-        optimizer (paddle.optimizer): paddle optimizer.
-
+        paddle.optimizer.Optimizer: an optimizer for the input model.
     """
-
+    logger = get_logger("paddlevideo")
     cfg_copy = cfg.copy()
-    #XXX check none and illegal cfg!!!
+    # NOTE: check none and illegal cfg!!!
     opt_name = cfg_copy.pop('name')
     # deal with weight decay
     if cfg_copy.get('weight_decay'):
@@ -98,10 +108,25 @@ def build_optimizer(cfg, lr_scheduler, model=None):
 
         _apply_decay_param_fun = lambda name: name not in no_weight_decay_param_list
         cfg_copy['apply_decay_param_fun'] = _apply_decay_param_fun
-        print(f"No weight Decay list :({len(no_weight_decay_param_list)})",
-              no_weight_decay_param_list)
+        logger.info(
+            f"No weight Decay list :({len(no_weight_decay_param_list)})",
+            no_weight_decay_param_list)
 
     cfg_copy.pop('learning_rate')
-    return getattr(paddle.optimizer, opt_name)(lr_scheduler,
-                                               parameters=model.parameters(),
-                                               **cfg_copy)
+
+    # set multi_precision
+    optimizer_setting = {
+        'learning_rate': lr_scheduler,
+        'parameters': model.parameters(),
+        **cfg_copy
+    }
+    optimizer_init_args = inspect.getargspec(
+        getattr(paddle.optimizer, opt_name).__init__).args
+    if use_amp and amp_level == "O2" and "multi_precision" in optimizer_init_args:
+        # support "multi_precision" arg in optimizer's __init__ function.
+        optimizer_setting.update({"multi_precision": True})
+        logger.info(
+            "Set multi_precision=True for optimizer when use_amp=True and amp_level='O2'"
+        )
+
+    return getattr(paddle.optimizer, opt_name)(**optimizer_setting)

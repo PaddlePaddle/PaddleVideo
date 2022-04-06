@@ -116,9 +116,7 @@ def build_trainer(cfg, places, parallel, validate, precise_bn,
                          )
 
     lr = build_lr(cfg.OPTIMIZER.learning_rate, len(train_loader))
-    optimizer = build_optimizer(cfg.OPTIMIZER,
-                                lr,
-                                parameter_list=model.parameters())
+    optimizer = build_optimizer(cfg.OPTIMIZER, lr, model=model)
 
     return (
         model,
@@ -156,7 +154,7 @@ def train_model_multigrid(cfg, world_size=1, validate=True):
         places = paddle.set_device('npu')
     else:
         places = paddle.set_device('gpu')
-    
+
     model_name = cfg.model_name
     output_dir = cfg.get("output_dir", f"./output/{model_name}")
     mkdir(output_dir)
