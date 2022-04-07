@@ -129,7 +129,7 @@ def train_model(cfg,
                                 use_amp=use_amp,
                                 amp_level=amp_level)
 
-    # 4. Construct scalar and convert parameters for amp.
+    # 4. Construct scalar and convert parameters for amp(optional)
     if use_amp:
         scaler = amp.GradScaler(init_loss_scaling=2.0**16,
                                 incr_every_n_steps=2000,
@@ -384,7 +384,7 @@ def train_model(cfg,
                         f"Already save the best model (top1 acc){int(best * 10000) / 10000}"
                     )
 
-        # 6. Save model and optimizer
+        # 10. Save model and optimizer
         if epoch % cfg.get("save_interval", 1) == 0 or epoch == cfg.epochs - 1:
             save(
                 optimizer.state_dict(),
