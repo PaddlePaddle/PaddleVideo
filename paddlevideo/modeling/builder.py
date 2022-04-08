@@ -16,7 +16,8 @@ from .registry import BACKBONES, HEADS, LOSSES, RECOGNIZERS, LOCALIZERS, ROI_EXT
 from ..utils import build
 from .registry import (BACKBONES, BBOX_ASSIGNERS, BBOX_CODERS, BBOX_SAMPLERS,
                        DETECTORS, ESTIMATORS, HEADS, LOCALIZERS, LOSSES,
-                       MULTIMODAL, PARTITIONERS, RECOGNIZERS, ROI_EXTRACTORS)
+                       MULTIMODAL, PARTITIONERS, RECOGNIZERS, ROI_EXTRACTORS,
+                       GENERATORS)
 
 
 def build_backbone(cfg):
@@ -104,6 +105,11 @@ def build_segment(cfg):
     return build(cfg, SEGMENT, key='framework')
 
 
+def build_generator(cfg):
+    """Build recognizer."""
+    return build(cfg, GENERATORS, key='framework')
+
+
 def build_model(cfg):
     cfg_copy = cfg.copy()
     framework_type = cfg_copy.get('framework')
@@ -123,5 +129,7 @@ def build_model(cfg):
         return build_segmenter(cfg)
     elif framework_type in SEGMENT:
         return build_segment(cfg)
+    elif framework_type in GENERATORS:
+        return build_generator(cfg)
     else:
         raise NotImplementedError
