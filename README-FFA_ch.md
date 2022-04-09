@@ -7,14 +7,14 @@
 by Xu Qin, Zhilin Wang et al.    Peking University and Beijing University of Aeronautics & Astronautics.
 
 ## 目录
-
 [TOC]
+
 
 ## 1、简介
 
-**论文：**FFA-Net: Feature Fusion Attention Network for Single Image Dehazing
+**论文：** FFA-Net: Feature Fusion Attention Network for Single Image Dehazing
 
-**参考repo:**https://github.com/zhilin007/FFA-Net
+**参考repo:** https://github.com/zhilin007/FFA-Net
 
 在此非常感谢：[zhilin007](https://github.com/zhilin007)贡献的FFA-NET repo，提高了本repo复现论文的效率。
 
@@ -44,9 +44,7 @@ by Xu Qin, Zhilin Wang et al.    Peking University and Beijing University of Aer
 <p align='center'>
 <img src='figs/0099_0.9_0.16.jpg' height="606px" width='413px'>
 <img src='figs/0099_0_FFA.png' height="606px" width='413px' >
-
 </div>
-
 
 
 ## 2、数据集说明及复现精度
@@ -72,8 +70,8 @@ by Xu Qin, Zhilin Wang et al.    Peking University and Beijing University of Aer
 
 链接：https://pan.baidu.com/s/1Q9RQI5bC35FUF2dhIqKamg   提取码：gzao
 
-<details>
-<summary> 文件结构 </summary>
+**文件结构**
+
 
 ```
     PaddleVideo/data/FFA
@@ -86,6 +84,8 @@ by Xu Qin, Zhilin Wang et al.    Peking University and Beijing University of Aer
             |-- step 1-48000.ipynb                 #1-48000step复现训练的notebook文件
             |-- step 48000-400000.ipynb            #48000-400000step复现训练的notebook文件
 ```
+
+
 
 
 
@@ -113,8 +113,8 @@ by Xu Qin, Zhilin Wang et al.    Peking University and Beijing University of Aer
 
 数据集网址:[RESIDE](https://sites.google.com/view/reside-dehaze-datasets/) (请选用网址中的 [RESIDE-Standard数据集](https://sites.google.com/view/reside-dehaze-datasets/reside-standard))，相关信息见文档第二部分。数据集下载后按如下相对路径存放，并根据自己数据集存放的位置，修改配置文件 configs/FFA-cfg.yaml 中的数据集路径参数。
 
-<details>
-<summary> 文件结构 </summary>
+**文件结构**
+
 
 ```
     PaddleVideo-develop\data\FFA
@@ -226,8 +226,8 @@ python main.py -c configs/FFA_cfg.yaml --validate -o resume_epoch=6
 
 ## 5、代码结构说明
 
-<details>
-<summary> 代码结构 </summary>
+**代码结构**
+
 
 ```
     PaddleVideo

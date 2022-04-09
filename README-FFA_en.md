@@ -7,9 +7,9 @@ by Xu Qin, Zhilin Wang et al.    Peking University and Beijing University of Aer
 
 ## 1、 Introduction
 
-**paper：**FFA-Net: Feature Fusion Attention Network for Single Image Dehazing
+**paper：** FFA-Net: Feature Fusion Attention Network for Single Image Dehazing
 
-**Reference repo:**https://github.com/zhilin007/FFA-Net
+**Reference repo:** https://github.com/zhilin007/FFA-Net
 
 I would like to thank: [zhilin007](https://github.com/zhilin007) for the contribution of the FFA-NET repo, which improves the efficiency of this repo to reproduce the paper.
 
@@ -23,7 +23,7 @@ The authors use two attention blocks for two different purposes. One is the chan
 
 Combining these two blocks with the convolution operation results in a basic unit of the model, Block. Adding multiple blocks and adding a convolutional layer at the end forms a larger unit group in the model. After the initial convolution of the model input, after three groups and concat the outputs of the three groups, an important intermediate output is obtained. Among them, each group used by the author contains 19 blocks, but for the model , the number of Group and Block are adjustable parameters. The intermediate output is then passed through the channel attention block, the pixel attention block, and the two-layer convolution to obtain the corrected value, which is added to the total input to obtain the dehazed image. The general framework of the model is shown in the figure below.
 
-![img](images/wps4.jpg)
+![img](figs/wps4.jpg)
 
 **Samples**
 
@@ -67,9 +67,7 @@ Combining these two blocks with the convolution operation results in a basic uni
 
 Link：https://pan.baidu.com/s/1Q9RQI5bC35FUF2dhIqKamg   Code：gzao
 
-<details>
-<summary> file structure </summary>
-
+file structure：
 
 ```
     PaddleVideo/data/FFA
@@ -109,9 +107,7 @@ Note: This model can be run normally if paddleVideo can run normally
 
 Dataset URL: [RESIDE](https://sites.google.com/view/reside-dehaze-datasets/) (Please select the [RESIDE-Standard dataset](https://sites.google.com /view/reside-dehaze-datasets/reside-standard)), see the second part of the document for related information. After the data set is downloaded, it is stored in the following relative path, and the data set path parameters in the configuration file configs/FFA-cfg.yaml are modified according to the location where the data set is stored.
 
-<details>
-<summary> FILE STRUCTURE </summary>
-
+file structure：
 
 ```
     PaddleVideo-develop\data\FFA
@@ -224,9 +220,7 @@ After the data set and model are successfully prepared, use the first command of
 
 ## 5、Code structure description
 
-<details>
-<summary> code structure </summary>
-
+code structure：
 
 ```
     PaddleVideo
