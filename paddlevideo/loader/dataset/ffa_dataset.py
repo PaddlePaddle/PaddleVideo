@@ -1,3 +1,18 @@
+#encoding=utf8
+# Copyright (c) 2021 PaddlePaddle Authors. All Rights Reserved.
+
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#     http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import os
 import random
 from PIL import Image
@@ -42,8 +57,7 @@ class RESIDEDataset(BaseDataset):
                 index = random.randint(0, len(self.haze_imgs))
                 haze = Image.open(self.haze_imgs[index])
                 path = self.haze_imgs[index]
-        id = path.split('\\')[-1].split('_')[
-            0]  ##################################
+        id = path.split('\\')[-1].split('_')[0]
         clear_name = id + self.suffix
         clear = Image.open(os.path.join(self.clear_dir, clear_name))
         clear = CenterCrop(haze.size[::-1])(clear)
@@ -60,8 +74,7 @@ class RESIDEDataset(BaseDataset):
                 index = random.randint(0, len(self.haze_imgs))
                 haze = Image.open(self.haze_imgs[index])
                 path = self.haze_imgs[index]
-        id = path.split('\\')[-1].split('_')[
-            0]  ##################################
+        id = path.split('\\')[-1].split('_')[0]
         clear_name = id + self.suffix
         clear = Image.open(os.path.join(self.clear_dir, clear_name))
         clear = CenterCrop(haze.size[::-1])(clear)

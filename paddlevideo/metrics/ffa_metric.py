@@ -16,8 +16,13 @@
 import math
 import numpy as np
 import paddle
+from paddle.vision.transforms import RandomHorizontalFlip, rotate, ToTensor, Normalize, CenterCrop, RandomCrop, crop
 from scipy.signal import convolve2d
+from .registry import METRIC
+from .base import BaseMetric
 from paddlevideo.utils import get_logger
+
+logger = get_logger("paddlevideo")
 
 
 def matlab_style_gauss2D(shape=(3, 3), sigma=0.5):
@@ -85,3 +90,43 @@ def psnr(pred, gt):
     if rmse == 0:
         return 100
     return 20 * math.log10(1.0 / rmse)
+
+
+@METRIC.register
+class FFANetMetric(BaseMetric):
+
+    def __init__(self, data_size, batch_size, log_interval=20):
+        """prepare for metrics
+        """
+        super().__init__(data_size, batch_size, log_interval)
+        self.ssims = []
+        self.psnrs = []
+
+    def update(self, batch_id, data, outputs):
+        """update metrics during each iter
+        """
+        clear = data[1]
+        pred = outputs['preds']
+        ssim_eval = 0
+        for j in range(3):
+            ssim_eval += compute_ssim(
+                np.transpose(np.squeeze(pred.cpu().numpy(), 0), (1, 2, 0))[:, :,
+                                                                           j],
+                np.transpose(np.squeeze(clear.cpu().numpy(), 0),
+                             (1, 2, 0))[:, :, j]).item()
+        ssim_eval /= 3
+        psnr_eval = psnr(pred, clear)
+
+        self.ssims.append(ssim_eval)
+        self.psnrs.append(psnr_eval)
+        # preds ensemble
+        if batch_id % self.log_interval == 0:
+            logger.info(
+                f"[TEST] Processing batch {batch_id}/{self.data_size // (self.batch_size * self.world_size)} ..."
+            )
+
+    def accumulate(self):
+        """accumulate metrics when finished all iters.
+        """
+        logger.info('[TEST] finished, ssim= {}, psnr= {} '.format(
+            np.mean(np.array(self.ssims)), np.mean(np.array(self.psnrs))))

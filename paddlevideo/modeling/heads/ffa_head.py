@@ -1,3 +1,18 @@
+#encoding=utf8
+# Copyright (c) 2021 PaddlePaddle Authors. All Rights Reserved.
+
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#     http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import paddle
 import paddle.nn as nn
 import paddle.nn.functional as F
@@ -40,23 +55,21 @@ class FFANetHead(BaseHead):
 
     def __init__(self, perloss=True):
         super().__init__()
-        self.l1_loss = nn.L1Loss(reduction='mean')
+        self.l1_loss = nn.L1Loss(reduction='mean')  #添加L1 loss
         self.perloss = perloss
         if self.perloss:
             vgg_model = paddle.vision.models.vgg16(pretrained=False)
             # 加载pytorch-VGG16-pretrained的初始化参数
             path_state_dict = 'data/FFA/vgg16_pretrained_weight.pdparams'
             load_state_dict = paddle.load(path_state_dict)
-            # net.load_dict(load_state_dict)
             vgg_model.load_dict({
                 k.replace('module.', ''): v
                 for k, v in load_state_dict.items()
             })
-            self.loss2 = LossNetwork(vgg_model.features[:16])
+            self.loss2 = LossNetwork(vgg_model.features[:16])  #定义perloss
 
     def loss(self, x1, x2):
         """model forward """
-        #print('x1.shape={}'.format(x1.shape))
         loss = self.l1_loss(x1, x2)
         if self.perloss:
             loss += 0.04 * self.loss2(x1, x2)

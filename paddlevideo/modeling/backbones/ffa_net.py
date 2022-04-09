@@ -1,3 +1,18 @@
+#encoding=utf8
+# Copyright (c) 2021 PaddlePaddle Authors. All Rights Reserved.
+
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#     http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import paddle
 from paddle.nn import Conv2D, ReLU, AdaptiveAvgPool2D
 from paddle import nn
@@ -6,6 +21,7 @@ from paddle.nn.initializer import Uniform
 import math
 from ..registry import BACKBONES
 
+#定义参数初始化规则
 weight_ins = paddle.ParamAttr(initializer=paddle.nn.initializer.Normal(
     0., 0.02),
                               trainable=True)
@@ -27,7 +43,7 @@ def default_conv(in_channels, out_channels, kernel_size, bias=True):
 
 
 @BACKBONES.register()
-class PALayer(nn.Layer):
+class PALayer(nn.Layer):  #像素注意力块
 
     def __init__(self, channel):
         super(PALayer, self).__init__()
@@ -59,7 +75,7 @@ class PALayer(nn.Layer):
 
 
 @BACKBONES.register()
-class CALayer(nn.Layer):
+class CALayer(nn.Layer):  #通道注意力块
 
     def __init__(self, channel):
         super(CALayer, self).__init__()

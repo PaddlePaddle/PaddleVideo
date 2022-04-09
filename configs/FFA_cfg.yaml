@@ -1,4 +1,5 @@
 # PaddleVieo Example Configuration, please refer to "docs/en/config.md" for more information.
+###commands###
 #python main.py --test -c configs/FFA_cfg.yaml -w data/FFA/ITS_3_19_article_pretrained.pdparams
 #python main.py -c configs/FFA_cfg.yaml
 #python main.py -c configs/FFA_cfg.yaml --validate
@@ -11,17 +12,17 @@ MODEL: #MODEL field
         name: "FFA" #Optional, indicate the type of backbone, please refer to the 'paddlevideo/modeling/backbones/'.
         #pretrained: "data/FFA/ITS_2_3_19_article_pretrained.pdparams" #Optional, pretrained backbone params path. pass "" or " " without loading from files.
         #pretrained: "data/FFA/OTS_3_19_article_pretrained.pdparams"
-        gps: 3 #Optional, the depth of backbone architecture.
+        gps: 3      #Optional, the depth of backbone architecture.
         blocks: 19
     head:
         name: "FFANetHead" #Mandatory, indicate the type of head, please refer to the 'paddlevideo/modeling/heads'
-        perloss: True
+        perloss: False
 
-DATASET: #DATASET field
-    batch_size: 2 #Mandatory, batch size per gpu.
+DATASET:                #DATASET field
+    batch_size: 2       #Mandatory, batch size per gpu.
     valid_batch_size: 1 #Optional, valid batch size per gpu.
-    test_batch_size: 1 #Optional, test batch size per gpu.
-    num_workers: 0 #Mandatory, the number of subprocess on each GPU.
+    test_batch_size: 1  #Optional, test batch size per gpu.
+    num_workers: 0      #Mandatory, the number of subprocess on each GPU.
     train:
         format: "RESIDEDataset" #Mandatory, indicate the type of train dataset, please refer to the 'paddlevidel/loader/dateset'.
         file_path: "../../FFA-data/ITS2/train" #Mandatory, train data index file path
@@ -66,16 +67,9 @@ OPTIMIZER: #OPTIMIZER field
         warmup_start_lr: 0.0001
         verbose: False
 
-METRIC:
-    name: 'FFANetMetric'
-
-#INFERENCE:
-#    name: 'ppTSM_Inference_helper'
-#    num_seg: 8
-#    target_size: 224
 
 model_name: "FFA-NET" #Mandatory, model name.
 log_interval: 500 #Optional, the interval of logger.
 val_interval: 1
-epochs: 10 #Mandatory, total epoch
+epochs: 80 #Mandatory, total epoch
 log_level: "DEBUG" #Optional, the logger level.
