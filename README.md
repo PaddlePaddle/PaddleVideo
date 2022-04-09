@@ -1,234 +1,287 @@
-[English](README_en.md) | 中文
+## 论文名称
 
-# PaddleVideo
+##  [FFA-Net: Feature Fusion Attention Network for Single Image Dehazing](https://arxiv.org/abs/1911.07559) (AAAI 2020)
 
-## 近期活动
+---
 
-🌟  **1月17号-21号《产业级视频技术与应用案例》** 🌟
-- 【1月17号20:15-21:30】视频技术导论及医疗行业典型案例
-- 【1月18号20:15-21:30】视频内容智能分析和生产解决方案
-- 【1月19号20:15-21:30】体育+安全防范行业中的行为识别
-- 【1月20号20:15-21:30】顶会冠军视频分割算法深度解密
-- 【1月21号20:15-21:30】多模态学习和检索方法
+by Xu Qin, Zhilin Wang et al.    Peking University and Beijing University of Aeronautics & Astronautics.
 
-👀 **报名链接**: https://paddleqiyeban.wjx.cn/vj/QIValIZ.aspx?udsid=419689
-**课程回放链接**:  https://aistudio.baidu.com/aistudio/course/introduce/6742
-
-​																	  💖 **欢迎大家扫码入群讨论** 💖
-<div align="center">
-  <img src="docs/images/user_group.png" width=250/></div>
-
-- 添加成功后回复【视频】加入交流群
-
-## 简介
-
-![python version](https://img.shields.io/badge/python-3.7+-orange.svg) ![paddle version](https://img.shields.io/badge/PaddlePaddle-2.0-blue)
+## 目录
+[TOC]
 
 
-PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_github)出品的视频模型开发套件，旨在帮助开发者更好的进行视频领域的学术研究和产业实践。
+## 1、简介
 
-<div align="center">
-  <img src="docs/images/home.gif" width="450px"/><br>
+**论文：** FFA-Net: Feature Fusion Attention Network for Single Image Dehazing
+
+**参考repo:** https://github.com/zhilin007/FFA-Net
+
+在此非常感谢：[zhilin007](https://github.com/zhilin007)贡献的FFA-NET repo，提高了本repo复现论文的效率。
+
+
+
+该模型是图像去雾领域的一个顶尖模型之一。该模型要实现的目标是图像去雾，最大的特点就是基于注意力块的大型卷积块结构。注意力块的结构如下图所示：
+
+![img](figs/wps1.jpg)
+
+作者使用了两种注意力块，达到两种不同的目的。一种是通道注意力块，如图1左上所示，假设该注意力块输入特征层尺寸为(1,64,256,256)，经过层池化、卷积等操作，最后进行Sigmoid激活，输出一个尺寸为(1,64,1,1)的中间结果，之后与输入相乘，得到该注意力块的输出，这样就对每个通道乘以了不同的权重(0-1之间)，产生了注意力效果。另一种是像素注意力块，假设该注意力块输入特征层尺寸为(1,64,256,256)，与通道注意力块不同，没有经过层池化，并且输中间结果的通道数为1，(1,1,256,256)，之后与输入相乘，得到该注意力块的输出，这样就对输入的每一个像素乘以不同的权重，产生了注意力效果。
+
+将这两个块与卷积操作组合，就得到了模型的一个基本单元Block。添加多个Block，并在最后添加一个卷积层，就组合成了模型中一个较大的单元Group。模型输入经过初步卷积后，经过三个group，并将三个group的输出都Concat起来，就得到了重要的中间输出，其中，作者使用的每个group包含19个Block，但是对于模型来说，Group和Block的个数都是可调参数。中间输出再经过通道注意力块、像素注意力块、两层卷积，得到修正值，与总的输入相加就得到了去雾后的图像。模型总的框架如下图所示。
+
+![img](figs/wps4.jpg)
+
+**示例**
+
+<p align='center'>
+<img src="figs/1400_2.png" height="306px" width='413px'>
+<img src='figs/1400_2_FFA.png' height="306px" width='413px' >
+
+
+
+
+</div>
+
+<p align='center'>
+<img src='figs/0099_0.9_0.16.jpg' height="606px" width='413px'>
+<img src='figs/0099_0_FFA.png' height="606px" width='413px' >
 </div>
 
 
-## 模型案例库
+## 2、数据集说明及复现精度
 
-### 模型
+**数据集网址:**[RESIDE](https://sites.google.com/view/reside-dehaze-datasets/) (请选用网址中的 [RESIDE-Standard数据集](https://sites.google.com/view/reside-dehaze-datasets/reside-standard))，数据集及复现精度具体情况如下表所示，由于我训练的轮次只有作者论文里提到的4/5所以评估指标上有些许差距。
 
-- 模型库使用前请参考[安装说明](docs/zh-CN/install.md)、[使用指南](docs/zh-CN/usage.md)。
+|         | train dataset : amount | val dataset: amount | ssim/psnr(paper) | ssim/psnr(repo) |
+| ------- | ---------------------- | ------------------- | ---------------- | --------------- |
+| indoor  | ITS: 13990             | SOTS/indoor: 500    | 0.9886/36.39     | 0.9885/35.42    |
+| outdoor | OTS: 313960            | SOTS/outdoor: 1000  | 0.9840/33.57     |                 |
 
-<table style="margin-left:auto;margin-right:auto;font-size:1.3vw;padding:3px 5px;text-align:center;vertical-align:center;">
-  <tr>
-    <td colspan="5" style="font-weight:bold;">行为识别方法</td>
-  </tr>
-  <tr>
-    <td><a href="./docs/zh-CN/model_zoo/recognition/pp-tsm.md">PP-TSM</a> (PP series)</td>
-    <td><a href="./docs/zh-CN/model_zoo/recognition/pp-tsn.md">PP-TSN</a> (PP series)</td>
-    <td><a href="./docs/zh-CN/model_zoo/recognition/pp-timesformer.md">PP-TimeSformer</a> (PP series)</td>
-    <td><a href="./docs/zh-CN/model_zoo/recognition/tsn.md">TSN</a> (2D’)</td>
-    <td><a href="./docs/zh-CN/model_zoo/recognition/tsm.md">TSM</a> (2D‘)</td>
-  <tr>
-    <td><a href="./docs/zh-CN/model_zoo/recognition/slowfast.md">SlowFast</a> (3D’)</td>
-    <td><a href="./docs/zh-CN/model_zoo/recognition/timesformer.md">TimeSformer</a> (Transformer‘)</td>
-    <td><a href="./docs/zh-CN/model_zoo/recognition/videoswin.md">VideoSwin</a> (Transformer’)</td>
-    <td><a href="./docs/zh-CN/model_zoo/recognition/attention_lstm.md">AttentionLSTM</a> (RNN‘)</td>
-    <td></td>
-  </tr>
-  <tr>
-    <td colspan="5" style="font-weight:bold;">基于骨骼点的动作识别方法</td>
-  </tr>
-  <tr>
-    <td><a href="./docs/zh-CN/model_zoo/recognition/stgcn.md">ST-GCN</a> (Custom’)</td>
-    <td><a href="./docs/zh-CN/model_zoo/recognition/agcn.md">AGCN</a> (Adaptive‘)</td>
-    <td></td>
-    <td></td>
-    <td></td>
-  </tr>
-  <tr>
-    <td colspan="5" style="font-weight:bold;">时序动作检测方法</td>
-  </tr>
-  <tr>
-    <td><a href="./docs/zh-CN/model_zoo/localization/bmn.md">BMN</a> (One-stage‘)</td>
-    <td></td>
-    <td></td>
-    <td></td>
-    <td></td>
-  </tr>
-  <tr>
-    <td colspan="5" style="font-weight:bold;">时空动作检测方法</td>
-  </tr>
-  <tr>
-    <td><a href="docs/zh-CN/model_zoo/detection/SlowFast_FasterRCNN.md">SlowFast+Fast R-CNN</a>
-    <td></td>
-    <td></td>
-    <td></td>
-    <td></td>
-  </tr>
-  <tr>
-    <td colspan="5" style="font-weight:bold;">多模态</td>
-  </tr>
-  <tr>
-    <td><a href="./docs/zh-CN/model_zoo/multimodal/actbert.md">ActBERT</a> (Learning‘)</td>
-    <td><a href="./applications/T2VLAD/README.md">T2VLAD</a> (Retrieval‘)</td>
-    <td></td>
-    <td></td>
-    <td></td>
-  </tr>
-  <tr>
-    <td colspan="5" style="font-weight:bold;">视频目标分割</td>
-  </tr>
-  <tr>
-    <td><a href="./docs/zh-CN/model_zoo/segmentation/cfbi.md">CFBI</a> (Semi‘)</td>
-    <td><a href="./applications/EIVideo/EIVideo/docs/zh-CN/manet.md">MA-Net</a> (Supervised‘)</td>
-    <td></td>
-    <td></td>
-    <td></td>
-  </tr>
-  <tr>
-    <td colspan="5" style="font-weight:bold;">单目深度估计</td>
-  </tr>
-  <tr>
-    <td><a href="./docs/zh-CN/model_zoo/estimation/adds.md">ADDS</a> (Unsupervised‘)</td>
-    <td></td>
-    <td></td>
-    <td></td>
-    <td></td>
-  </tr>
-</table>
+**数据集下载地址：**
+
+**ITS (Indoor Training Set)：**http://tinyurl.com/yaohd3yv                                    **Passward**:  g0s6
+
+**OTS：**  https://pan.baidu.com/s/1c2rW4hi                                                             **Passward**:  5vss
+
+**SOTS ：** https://pan.baidu.com/share/init?surl=SSVzR058DX5ar5WL5oBTLg  **Passward**:  s6tu
 
 
-### 数据集
 
-<table>
-  <tbody><tr>
-    <td colspan="4">动作识别</td>
-  </tr>
-  <tr>
-    <td><a href="docs/zh-CN/dataset/k400.md">Kinetics-400</a> (<a href="https://deepmind.com/research/open-source/kinetics/" rel="nofollow">Homepage</a>) (CVPR'2017)</td>
-    <td><a href="docs/zh-CN/dataset/ucf101.md">UCF101</a> (<a href="https://www.crcv.ucf.edu/research/data-sets/ucf101/" rel="nofollow">Homepage</a>) (CRCV-IR-12-01)</td>
-    <td><a href="docs/zh-CN/dataset/ActivityNet.md">ActivityNet</a> (<a href="http://activity-net.org/" rel="nofollow">Homepage</a>) (CVPR'2015)</td>
-    <td><a href="docs/zh-CN/dataset/youtube8m.md">YouTube-8M</a> (<a href="https://research.google.com/youtube8m/" rel="nofollow">Homepage</a>) (CVPR'2017)</td>
-  </tr>
-  <tr>
-    <td colspan="4">动作定位</td>
-  </tr>
-  <tr>
-    <td><a href="docs/zh-CN/dataset/ActivityNet.md">ActivityNet</a> (<a href="http://activity-net.org/" rel="nofollow">Homepage</a>) (CVPR'2015)</td>
-    <td></td>
-    <td></td>
-    <td></td>
-  </tr>
-  <tr>
-    <td colspan="4">时空动作检测</td>
-  </tr>
-  <tr>
-    <td><a href="docs/zh-CN/dataset/AVA.md">AVA</a> (<a href="https://research.google.com/ava/index.html" rel="nofollow">Homepage</a>) (CVPR'2018)</td>
-    <td></td>
-    <td></td>
-    <td></td>
-  </tr>
-  <tr>
-    <td colspan="4">基于骨架的动作识别</td>
-  </tr>
-  <tr>
-    <td><a href="docs/zh-CN/dataset/ntu-rgbd.md">NTURGB+D</a> (<a href="https://rose1.ntu.edu.sg/dataset/actionRecognition/" rel="nofollow">Homepage</a>) (IEEE CS'2016)</td>
-    <td><a href="docs/zh-CN/dataset/fsd.md">FSD</a> (<a href="https://aistudio.baidu.com/aistudio/competition/detail/115/0/introduction" rel="nofollow">Homepage</a>)</td>
-    <td></td>
-    <td></td>
-  </tr>
-  <tr>
-    <td colspan="4">单目深度估计</td>
-  </tr>
-  <tr>
-    <td><a href="docs/zh-CN/dataset/Oxford_RobotCar.md">Oxford-RobotCar</a> (<a href="https://robotcar-dataset.robots.ox.ac.uk/" rel="nofollow">Homepage</a>) (IJRR'2017)</td>
-    <td></td>
-    <td></td>
-    <td></td>
-  </tr>
-  <tr>
-    <td colspan="4">文本视频检索</td>
-  </tr>
-  <tr>
-    <td><a href="docs/zh-CN/dataset/msrvtt.md">MSR-VTT</a> (<a href="https://www.microsoft.com/en-us/research/publication/msr-vtt-a-large-video-description-dataset-for-bridging-video-and-language/" rel="nofollow">Homepage</a>) (CVPR'2016)</td>
-    <td></td>
-    <td></td>
-    <td></td>
-  </tr>
-  <tr>
-    <td colspan="4">文本视频预训练</td>
-  </tr>
-  <tr>
-    <td><a href="docs/zh-CN/dataset/howto100m.md">HowTo100M</a> (<a href="https://www.di.ens.fr/willow/research/howto100m/" rel="nofollow">Homepage</a>) (ICCV'2019)</td>
-    <td></td>
-    <td></td>
-    <td></td>
-  </tr>
+**模型参数文件及训练日志下载地址：**
 
-</tbody>
-</table>
+链接：https://pan.baidu.com/s/1Q9RQI5bC35FUF2dhIqKamg   提取码：gzao
+
+**文件结构**
 
 
-### 应用案例
-
-| Applications | Descriptions |
-| :--------------- | :-------- |
-| [FootballAction](https://github.com/PaddlePaddle/PaddleVideo/tree/application/FootballAction) | 足球动作检测方案|
-| [BasketballAction](applications/BasketballAction) | 篮球动作检测方案 |
-| [TableTennis](applications/TableTennis) | 乒乓球动作识别方案|
-| [FigureSkating](applications/FigureSkating) | 花样滑冰动作识别方案|
-| [VideoTag](applications/VideoTag) | 3000类大规模视频分类方案 |
-| [MultimodalVideoTag](applications/MultimodalVideoTag) | 多模态视频分类方案|
-| [VideoQualityAssessment](applications/VideoQualityAssessment) | 视频质量评估方案|
-| [PP-Care](applications/PP-Care) | 3DMRI医疗图像识别方案 |
-| [EIVideo](applications/EIVideo) | 视频交互式分割工具|
-| [Anti-UAV](applications/Anti-UAV) |无人机检测方案|
-| [AbnormalActionDetection](applications/AbnormalActionDetection) |异常行为检测方案|
+```
+    PaddleVideo/data/FFA
+        |-- vgg16_pretrained_weight.pdparams       #模型损失函数使用perloss时需用到的VGG16预训练模型的参数文件
+        |-- ITS2_3_19_400000_transform.pdparams    #复现的模型经过400000step训练后得到的室内去雾模型的参数文件
+        |-- ITS_3_19_article_pretrained.pdparams   #作者提供的室内去雾模型的参数文件
+        |-- OTS_3_19_article_pretrained.pdparams   #作者提供的室外去雾模型的参数文件
+        |-- logs                                   #训练日志文件夹
+        	|-- train.log                          #完整的训练日志文件
+            |-- step 1-48000.ipynb                 #1-48000step复现训练的notebook文件
+            |-- step 48000-400000.ipynb            #48000-400000step复现训练的notebook文件
+```
 
 
-## 文档教程
-- AI-Studio教程
-    - [【官方】Paddle 2.1实现视频理解优化模型 -- PP-TSM](https://aistudio.baidu.com/aistudio/projectdetail/3399656?contributionType=1)
-    - [【官方】Paddle 2.1实现视频理解优化模型 -- PP-TSN](https://aistudio.baidu.com/aistudio/projectdetail/2879980?contributionType=1)
-    - [【官方】Paddle 2.1实现视频理解经典模型 -- TSN](https://aistudio.baidu.com/aistudio/projectdetail/2250682)
-    - [【官方】Paddle 2.1实现视频理解经典模型 -- TSM](https://aistudio.baidu.com/aistudio/projectdetail/2310889)
-    - [BMN视频动作定位](https://aistudio.baidu.com/aistudio/projectdetail/2250674)
-    - [花样滑冰选手骨骼点动作识别ST-GCN教程](https://aistudio.baidu.com/aistudio/projectdetail/2417717)
-    - [【实践】CV领域的Transformer模型TimeSformer实现视频理解](https://aistudio.baidu.com/aistudio/projectdetail/3413254?contributionType=1)
-- 贡献代码
-    - [如何添加新算法](./docs/zh-CN/contribute/add_new_algorithm.md)
-    - [配置系统设计解析](./docs/en/tutorials/config.md)
-    - [如何提pr](./docs/zh-CN/contribute/how_to_contribute.md)
 
 
-## 赛事支持
 
-- [基于飞桨实现花样滑冰选手骨骼点动作识别大赛](https://aistudio.baidu.com/aistudio/competition/detail/115/0/introduction), [AI Studio项目](https://aistudio.baidu.com/aistudio/projectdetail/2417717), [视频教程](https://www.bilibili.com/video/BV1w3411172G)
-- [基于飞桨实现乒乓球时序动作定位大赛](https://aistudio.baidu.com/aistudio/competition/detail/127/0/introduction)
-- [CCKS 2021：知识增强的视频语义理解](https://www.biendata.xyz/competition/ccks_2021_videounderstanding/)
+## 3、准备数据与环境
 
-## 许可证书
-本项目的发布受[Apache 2.0 license](LICENSE)许可认证。
+### 3.1 准备环境
 
-## 致谢
-- 非常感谢 [mohui37](https://github.com/mohui37)、[zephyr-fun](https://github.com/zephyr-fun)、[voipchina](https://github.com/voipchina) 贡献相关代码
+* python3
+
+* Paddle
+
+* NVIDIA GPU+CUDA
+
+  （该模型需要的显存很大，batchsize为1的情况下也需要6-7GB的显存，对算力的需求也很大，建议用GPU来训练）
+
+* numpy
+
+* matplotlib
+
+  注：能正常运行paddleVideo即可正常运行本模型
+
+
+
+### 3.2 准备数据
+
+数据集网址:[RESIDE](https://sites.google.com/view/reside-dehaze-datasets/) (请选用网址中的 [RESIDE-Standard数据集](https://sites.google.com/view/reside-dehaze-datasets/reside-standard))，相关信息见文档第二部分。数据集下载后按如下相对路径存放，并根据自己数据集存放的位置，修改配置文件 configs/FFA-cfg.yaml 中的数据集路径参数。
+
+**文件结构**
+
+
+```
+    PaddleVideo-develop\data\FFA
+    	|-- README_FFA.md
+    	|-- data
+            |-- FFA-data
+                |-- ITS
+                    |-- hazy
+                        |-- *.png
+                    |-- clear
+                        |-- *.png
+                |-- OTS
+                    |-- hazy
+                        |-- *.jpg
+                    |-- clear
+                        |-- *.jpg
+                |-- SOTS
+                    |-- indoor
+                        |-- hazy
+                            |-- *.png
+                        |-- clear
+                            |-- *.png
+                    |-- outdoor
+                        |-- hazy
+                            |-- *.jpg
+                        |-- clear
+                            |-- *.png
+```
+
+
+
+### 3.3 准备模型
+
+从第二部分的链接下载预训练模型的模型参数，和vgg16预训练模型的模型参数，并放到项目根目录下的data文件夹下，这样data下有个FFA文件夹，FFA文件夹下包含四个模型参数文件.
+
+
+
+## 4、开始使用
+
+### 4.1 数据集
+
+从 [RESIDE](https://sites.google.com/view/reside-dehaze-datasets/) 下载数据集(室内数据集需下载 [RESIDE-Standard](https://sites.google.com/view/reside-dehaze-datasets/reside-standard) ) ,并改变配置文件configs/FFA-cfg.yaml 中的文件路径为你的文件路径。
+
+
+
+### 4.2 模型训练
+
+在 `ITS` 数据集上训练时，在控制台输入以下代码：
+
+ ```shell
+ python main.py -c configs/FFA_cfg.yaml --validate
+ ```
+
+
+如果你想要在 `OTS` 数据集上训练网络，在 configs/FFA-cfg.yaml 中修改数据集的路径，同时要注意 suffix 参数与你的数据集图片**后缀**是否一致，不一致要相应修改。
+
+如果要修改模型的参数，修改configs/FFA-cfg.yaml中MODEL下的参数。
+
+如果要改变训练的epochs，需要同时改变configs/FFA-cfg.yaml中OPTIMIZER下的**max_epoch**参数，**max_epoch**需与**epochs**一致。为了训练出更好的结果，请至少训练80个epoch。
+
+该模型训练时所需的显存过大，不要尝试增加**batchsize**。如显存不足可以调小**batchsize**和PIPELINE/train/decode/**crop_size**。
+
+configs/FFA-cfg.yaml 中 backbone 下的 **gps** 和 **blocks**参数与模型深度相关。
+
+configs/FFA-cfg.yaml 中 head 下的 **perloss** 与模型的loss有关，默认为False，如要改为True则需要下载的上面链接中的vgg16预训练模型参数文件到相应位置，为了获得更好的训练结果，建议下载相应文件，并将该参数改为True。如果选择False，则表示仅使用生成图像和清晰图像之间的 l1 loss作为loss值。
+
+- `--validate` 参数指定训练时运行validation
+- `-c` 参数指定配置文件路径
+- `-o`: 指定重写参数，例如： `-o DATASET.batch_size=16` 用于重写train时batch size大小
+
+
+
+### 4.3 恢复训练
+
+该模型所需训练时间较长，单卡情况下可能要合计训练10天左右才能达到论文提到的精度。如果中途训练任务终止，可以加载断点权重文件(优化器-学习率参数，断点文件)继续训练。 需要指定`-o resume_epoch`参数，该参数表示从`resume_epoch`轮开始继续训练。 需要指定`-w `参数，该参数表示从该路径加载模型参数开始继续训练。
+
+```python
+python main.py -c configs/FFA_cfg.yaml --validate -o resume_epoch=6
+```
+
+想要了解更多使用方法，请查看paddle[官方文档](https://github.com/PaddlePaddle/PaddleVideo/blob/develop/docs/zh-CN/usage.md#1)。
+
+
+
+### 4.4 模型评估
+
+对模型进行评估时，在控制台输入以下代码，下面代码中使用上面提到的下载的模型参数：
+
+ ```shell
+ ###对作者提供的模型进行评估###
+ python main.py --test -c configs/FFA_cfg.yaml -w data/FFA/ITS_3_19_article_pretrained.pdparams
+
+ ###对我复现的模型进行评估###
+ python main.py --test -c configs/FFA_cfg.yaml -w data/FFA/ITS2_3_19_400000_transform.pdparams
+ ```
+
+
+如果要测试你自己准备的图像，请更改 configs/FFA-cfg.yaml 中 DATASET/test 的 file_path参数 ,  同时注意文件后缀是否一致与 suffix 参数一致。
+
+如果要在自己提供的模型上进行测试，请将模型的路径放在 -w 后面。
+
+论文作者提供的室内模型在 data/FFA/ITS_3_19_article_pretrained.pdparams，室外模型在data/FFA/OTS_3_19_article_pretrained.pdparams。
+
+数据集、模型成功准备后，用以上示例第一条命令进行评估，正确评估后结果应如下图所示，模型进行完整的评估可能会花费较长的时间：
+
+![image-20220409164858962](figs/image-20220409164858962.png)
+
+
+
+## 5、代码结构说明
+
+**代码结构**
+
+
+```
+    PaddleVideo
+    	|-- figs #存放说明文档中用到的图片
+    	|-- README_FFA_ch.md #复现模型的中文说明文档
+    	|-- README_FFA_ch.md #复现模型的英文说明文档
+    	|-- cofigs/FFA_cfg.yaml #复现模型的配置文件
+        |-- paddlevideo
+            |-- loader
+                |-- dataset
+                	|-- __init__.py      #添加了与ffa_dataset.py的关联
+                	|-- ffa_dataset.py   #数据集加载模块
+                |-- pipelines
+                	|-- __init__.py      #添加了与ffa_pipelines.py的关联
+                	|-- ffa_pipelines.py #数据集加载模块中用到的图片预处理模块
+            |-- metrics
+                |-- __init__.py      #添加了与ffa_metric.py的关联
+                |-- ffa_metric.py    #测试时用到的评估模块
+            |-- utils
+            	|-- record.py		 #新增了验证过程中对framework名为FFANet的ssim和psnr指标的检测
+            |-- modeling
+                |-- backbones
+                	|-- __init__.py 	 #添加了与ffa_net.py的关联
+                    |-- ffa_net.py       #定义了FFA-NET模型的结构
+                |-- framework
+                    |-- generator
+                    	|-- __init__.py        #建立套件与ffa_metrics.py和ffanet_framwork.py的关联
+                    	|-- ffa_metrics.py     #定义了验证和测试评估时用到的指标的计算方法
+                    	|-- ffanet_framwork.py #定义了模型如何传播，训练、验证、测试时的步骤怎么进行
+                    |-- __init__.py      #添加了与generator中文件的关联
+                |-- heads
+                	|-- __init__.py      #添加了与ffa_head.py的关联
+                	|-- ffa_head.py      #计算损失函数的模块
+                |-- builder.py           #添加了与modeling文件夹下新增文件的关联
+                |-- registry.py          #添加了与modeling文件夹下新增文件的关联
+
+```
+
+
+
+## 6. LICENSE
+
+本项目的发布受[Apache 2.0 license](https://github.com/PaddlePaddle/models/blob/release/2.2/community/repo_template/LICENSE)许可认证。
+
+
+
+## 7、参考文献与链接
+
+论文地址：https://arxiv.org/abs/1911.07559
+
+参考repo FFA-NET Github：https://github.com/zhilin007/FFA-Net
+
+论文复现指南-CV方向：https://github.com/PaddlePaddle/models/blob/release%2F2.2/tutorials/article-implementation/ArticleReproduction_CV.md
+
+如何将代码集成到paddlevideo：https://github.com/PaddlePaddle/PaddleVideo/blob/develop/docs/zh-CN/contribute/add_new_algorithm.md
+
+readme文档模板：https://github.com/PaddlePaddle/models/blob/release/2.2/community/repo_template/README.md

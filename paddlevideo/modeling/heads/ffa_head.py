@@ -1,0 +1,76 @@
+#encoding=utf8
+# Copyright (c) 2021 PaddlePaddle Authors. All Rights Reserved.
+
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#     http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import paddle
+import paddle.nn as nn
+import paddle.nn.functional as F
+from ..registry import HEADS
+from .base import BaseHead
+
+
+class LossNetwork(paddle.nn.Layer):
+
+    def __init__(self, vgg_model):
+        super(LossNetwork, self).__init__()
+        self.vgg_layers = vgg_model
+        self.layer_name_mapping = {
+            '3': "relu1_2",
+            '8': "relu2_2",
+            '15': "relu3_3"
+        }
+
+    def output_features(self, x):
+        output = {}
+        for name in range(len(self.vgg_layers)):
+            x = self.vgg_layers[name](x)
+            if str(name) in self.layer_name_mapping:
+                output[self.layer_name_mapping[str(name)]] = x
+        return list(output.values())
+
+    def forward(self, dehaze, gt):
+        loss = []
+        dehaze_features = self.output_features(dehaze)
+        gt_features = self.output_features(gt)
+        for dehaze_feature, gt_feature in zip(dehaze_features, gt_features):
+            loss.append(F.mse_loss(dehaze_feature, gt_feature))
+
+        return sum(loss) / len(loss)
+
+
+@HEADS.register()
+class FFANetHead(BaseHead):
+    """ FFANet Head """
+
+    def __init__(self, perloss=True):
+        super().__init__()
+        self.l1_loss = nn.L1Loss(reduction='mean')  #添加L1 loss
+        self.perloss = perloss
+        if self.perloss:
+            vgg_model = paddle.vision.models.vgg16(pretrained=False)
+            # 加载pytorch-VGG16-pretrained的初始化参数
+            path_state_dict = 'data/FFA/vgg16_pretrained_weight.pdparams'
+            load_state_dict = paddle.load(path_state_dict)
+            vgg_model.load_dict({
+                k.replace('module.', ''): v
+                for k, v in load_state_dict.items()
+            })
+            self.loss2 = LossNetwork(vgg_model.features[:16])  #定义perloss
+
+    def loss(self, x1, x2):
+        """model forward """
+        loss = self.l1_loss(x1, x2)
+        if self.perloss:
+            loss += 0.04 * self.loss2(x1, x2)
+        return loss

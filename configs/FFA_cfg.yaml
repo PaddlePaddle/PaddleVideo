@@ -1,0 +1,77 @@
+# PaddleVieo Example Configuration, please refer to "docs/en/config.md" for more information.
+###commands###
+#python main.py --test -c configs/FFA_cfg.yaml -w data/FFA/ITS_3_19_article_pretrained.pdparams
+#python main.py -c configs/FFA_cfg.yaml
+#python main.py -c configs/FFA_cfg.yaml --validate
+#python -m paddle.distributed.launch --gpus='0,1' main.py --validate -c configs/FFA_cfg.yaml
+#python main.py -c configs/FFA_cfg.yaml --validate -o resume_epoch=5
+
+MODEL: #MODEL field
+    framework: "FFANet" #Mandatory ["Recognizer1D", "Recognizer2D", "Recognizer3D", "BMNLocalizer"], indicate the type of network, please refer to the 'paddlevideo/modeling/framework/'.
+    backbone:
+        name: "FFA" #Optional, indicate the type of backbone, please refer to the 'paddlevideo/modeling/backbones/'.
+        #pretrained: "data/FFA/ITS_2_3_19_article_pretrained.pdparams" #Optional, pretrained backbone params path. pass "" or " " without loading from files.
+        #pretrained: "data/FFA/OTS_3_19_article_pretrained.pdparams"
+        gps: 3      #Optional, the depth of backbone architecture.
+        blocks: 19
+    head:
+        name: "FFANetHead" #Mandatory, indicate the type of head, please refer to the 'paddlevideo/modeling/heads'
+        perloss: False
+
+DATASET:                #DATASET field
+    batch_size: 2       #Mandatory, batch size per gpu.
+    valid_batch_size: 1 #Optional, valid batch size per gpu.
+    test_batch_size: 1  #Optional, test batch size per gpu.
+    num_workers: 0      #Mandatory, the number of subprocess on each GPU.
+    train:
+        format: "RESIDEDataset" #Mandatory, indicate the type of train dataset, please refer to the 'paddlevidel/loader/dateset'.
+        file_path: "../../FFA-data/ITS2/train" #Mandatory, train data index file path
+        crop_size: 240
+        suffix: ".png"
+    valid:
+        format: "RESIDEDataset" #Mandatory, indicate the type of valid dataset, please refer to the 'paddlevidel/loader/dateset'
+        file_path: "../../FFA-data/SOTS/indoor" #Mandatory, valid data index file path
+        crop_size: 'whole'
+        suffix: ".png"
+    test:
+        format: "RESIDEDataset" #Mandotary, indicate the type of test dataset, please refer to the 'paddlevideo/loader/dataset'.
+        file_path: "../../FFA-data/SOTS/indoor" #Mandotary, test data index file path.
+        crop_size: 'whole'
+        suffix: ".png"
+
+PIPELINE: #PIPELINE field
+    train: #Mandotary, indicate the pipeline to deal with the training data, please refer to the 'paddlevideo/loader/pipelines/'
+        decode:
+            name: "FFANetDecode" #Decoder type.
+            crop_size: 240
+            test_mode: False
+    valid: #Mandatory, indicate the pipeline to deal with the validing data. please refer to the 'paddlevideo/loader/pipelines/'
+        decode:
+            name: "FFANetDecode" #Decoder type.
+            crop_size: "whole"
+            test_mode: True
+    test: #Mandatory, indicate the pipeline to deal with the validing data. please refer to the 'paddlevideo/loader/pipelines/'
+        decode:
+            name: "FFANetDecode" #Decoder type.
+            crop_size: "whole"
+            test_mode: True
+
+OPTIMIZER: #OPTIMIZER field
+    name: 'Adam'
+    learning_rate:
+        iter_step: True
+        name: 'CustomWarmupCosineDecay'   # LR class name
+        cosine_base_lr: 0.0001
+        max_epoch: 10                     # max_epoch should same to the epochs
+        warmup_epochs: 0              # init args
+        warmup_start_lr: 0.0001
+        verbose: False
+
+METRIC:
+    name: 'FFANetMetric'
+
+model_name: "FFA-NET" #Mandatory, model name.
+log_interval: 500 #Optional, the interval of logger.
+val_interval: 1
+epochs: 80 #Mandatory, total epoch
+log_level: "DEBUG" #Optional, the logger level.
