@@ -67,6 +67,8 @@ OPTIMIZER: #OPTIMIZER field
         warmup_start_lr: 0.0001
         verbose: False
 
+METRIC:
+    name: 'FFANetMetric'
 
 model_name: "FFA-NET" #Mandatory, model name.
 log_interval: 500 #Optional, the interval of logger.
