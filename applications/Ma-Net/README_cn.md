@@ -28,11 +28,14 @@ DAVIS数据下载及准备请参考[DAVIS2017数据准备](dataloaders/DAVIS2017
 
 
 ## 模型训练与测试
-
+- 您可以下载[paddle版本的stage1预训练模型](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/DeeplabV3_coco.pdparams) 解压缩它以用于训练的第一阶段。
+  
+- 您可以下载[stage1训练结果模型](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/MaNet_davis2017_stage1.pdparams) 解压缩它以直接训练的第二阶段跳过第一阶段的训练。
+  
   ```bash
-  sh run_local.sh
+  sh run.sh
   ```
-
+  
 - 您可以下载[我们的模型](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/MANet_davis2017.pdparams) 解压缩它以用于测试。
 
 
