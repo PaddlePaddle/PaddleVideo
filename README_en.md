@@ -2,6 +2,12 @@
 
 # PaddleVideo
 
+Update:
+
+- release skeleton-base action recognition model [CTR-GCN](./docs/en/model_zoo/recognition/ctrgcn.md).
+- release lite action recognition model [MoViNet](./docs/zh-CN/model_zoo/recognition/movinet.md).
+- release temporal segment model [MS-TCN](./docs/zh-CN/model_zoo/segmentation/mstcn.md), [ASRF](./docs/zh-CN/model_zoo/segmentation/asrf.md).
+
 ​ 💖 **Welcome to scan the code and join the group discussion** 💖
 
 <div align="center">
@@ -42,7 +48,7 @@ PaddleVideo is a toolset for video tasks prepared for the industry and academia.
     <td><a href="./docs/en/model_zoo/recognition/timesformer.md">TimeSformer</a> (Transformer')</td>
     <td><a href="./docs/en/model_zoo/recognition/videoswin.md">VideoSwin</a> (Transformer’)</td>
     <td><a href="./docs/en/model_zoo/recognition/attention_lstm.md">AttentionLSTM</a> (RNN')</td>
-    <td></td>
+    <td><a href="./docs/en/model_zoo/recognition/movinet.md">MoViNet</a> (Lite‘)</td>
   </tr>
   <tr>
     <td colspan="5" style="font-weight:bold;">Skeleton based action recognition</td>
@@ -50,7 +56,7 @@ PaddleVideo is a toolset for video tasks prepared for the industry and academia.
   <tr>
     <td><a href="./docs/en/model_zoo/recognition/stgcn.md">ST-GCN</a> (Custom’)</td>
     <td><a href="./docs/en/model_zoo/recognition/agcn.md">AGCN</a> (Adaptive')</td>
-    <td></td>
+    <td><a href="./docs/en/model_zoo/recognition/ctrgcn.md">CTR-GCN</a> (GCN‘)</td>
     <td></td>
     <td></td>
   </tr>
@@ -60,6 +66,16 @@ PaddleVideo is a toolset for video tasks prepared for the industry and academia.
   <tr>
     <td><a href="./docs/en/model_zoo/localization/bmn.md">BMN</a> (One-stage')</td>
     <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td colspan="5" style="font-weight:bold;">temporal segment</td>
+  </tr>
+  <tr>
+    <td><a href="./docs/en/model_zoo/segmentation/mstcn.md">MS-TCN</a> </td>
+    <td><a href="./docs/en/model_zoo/segmentation/asrf.md">ASRF</a> </td>
     <td></td>
     <td></td>
     <td></td>
