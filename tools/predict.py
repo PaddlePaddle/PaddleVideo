@@ -195,8 +195,8 @@ def main():
             InferenceHelper.postprocess(outputs)
     else:
         if args.enable_benchmark:
-            test_video_num = 50
-            num_warmup = 10
+            test_video_num = 12
+            num_warmup = 3
 
             # instantiate auto log
             try:
