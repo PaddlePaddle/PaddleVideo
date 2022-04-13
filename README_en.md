@@ -4,9 +4,9 @@
 
 Update:
 
-- release skeleton-base action recognition model [CTR-GCN](./docs/en/model_zoo/recognition/ctrgcn.md).
-- release lite action recognition model [MoViNet](./docs/zh-CN/model_zoo/recognition/movinet.md).
-- release temporal segment model [MS-TCN](./docs/zh-CN/model_zoo/segmentation/mstcn.md), [ASRF](./docs/zh-CN/model_zoo/segmentation/asrf.md).
+- add skeleton-base action recognition model [CTR-GCN](./docs/en/model_zoo/recognition/ctrgcn.md).
+- add lite action recognition model [MoViNet](./docs/zh-CN/model_zoo/recognition/movinet.md).
+- add temporal segment model [MS-TCN](./docs/zh-CN/model_zoo/segmentation/mstcn.md), [ASRF](./docs/zh-CN/model_zoo/segmentation/asrf.md).
 
 ​ 💖 **Welcome to scan the code and join the group discussion** 💖
 
