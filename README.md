@@ -72,7 +72,7 @@ PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_githu
     <td></td>
     <td></td>
   </tr>
-    <tr>
+  <tr>
     <td colspan="5" style="font-weight:bold;">视频时序分割</td>
   </tr>
   <tr>
