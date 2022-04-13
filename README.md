@@ -4,9 +4,9 @@
 
 ## 近期更新
 
-- 新增骨骼点行为识别模型[CTR-GCN](https://github.com/PaddlePaddle/PaddleVideo/blob/develop/docs/zh-CN/model_zoo/recognition/ctrgcn.md).
-- 新增轻量化行为识别模型[MoViNet](https://github.com/PaddlePaddle/PaddleVideo/blob/develop/docs/zh-CN/model_zoo/recognition/movinet.md).
-- 新增视频时序分割模型[MS-TCN](https://github.com/PaddlePaddle/PaddleVideo/blob/develop/docs/zh-CN/model_zoo/segmentation/mstcn.md)、[ASRF](https://github.com/PaddlePaddle/PaddleVideo/blob/develop/docs/zh-CN/model_zoo/segmentation/asrf.md).
+- 新增骨骼点行为识别模型[CTR-GCN](./docs/zh-CN/model_zoo/recognition/ctrgcn.md).
+- 新增轻量化行为识别模型[MoViNet](./docs/zh-CN/model_zoo/recognition/movinet.md).
+- 新增视频时序分割模型[MS-TCN](./docs/zh-CN/model_zoo/segmentation/mstcn.md)、[ASRF](./docs/zh-CN/model_zoo/segmentation/asrf.md).
 
 
 👀 🌟  **《产业级视频技术与应用案例》系列课程回放链接**:  https://aistudio.baidu.com/aistudio/course/introduce/6742 🌟
