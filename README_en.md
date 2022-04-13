@@ -2,7 +2,7 @@
 
 # PaddleVideo
 
-Update:
+## Update:
 
 - add skeleton-base action recognition model [CTR-GCN](./docs/en/model_zoo/recognition/ctrgcn.md).
 - add lite action recognition model [MoViNet](./docs/zh-CN/model_zoo/recognition/movinet.md).
