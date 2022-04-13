@@ -4,9 +4,9 @@
 
 ## 近期更新
 
-- 新增骨骼点行为识别模型[CTR-GCN](https://github.com/PaddlePaddle/PaddleVideo/blob/develop/docs/zh-CN/model_zoo/recognition/ctrgcn.md)
-- 新增轻量化行为识别模型[MoViNet](https://github.com/PaddlePaddle/PaddleVideo/blob/develop/docs/zh-CN/model_zoo/recognition/movinet.md)
-- 新增视频时序分割模型[MS-TCN](https://github.com/PaddlePaddle/PaddleVideo/blob/develop/docs/zh-CN/model_zoo/segmentation/mstcn.md)、[ASRF](https://github.com/PaddlePaddle/PaddleVideo/blob/develop/docs/zh-CN/model_zoo/segmentation/asrf.md)
+- 新增骨骼点行为识别模型[CTR-GCN](https://github.com/PaddlePaddle/PaddleVideo/blob/develop/docs/zh-CN/model_zoo/recognition/ctrgcn.md).
+- 新增轻量化行为识别模型[MoViNet](https://github.com/PaddlePaddle/PaddleVideo/blob/develop/docs/zh-CN/model_zoo/recognition/movinet.md).
+- 新增视频时序分割模型[MS-TCN](https://github.com/PaddlePaddle/PaddleVideo/blob/develop/docs/zh-CN/model_zoo/segmentation/mstcn.md)、[ASRF](https://github.com/PaddlePaddle/PaddleVideo/blob/develop/docs/zh-CN/model_zoo/segmentation/asrf.md).
 
 
 👀 🌟  **《产业级视频技术与应用案例》系列课程回放链接**:  https://aistudio.baidu.com/aistudio/course/introduce/6742 🌟
@@ -50,15 +50,15 @@ PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_githu
     <td><a href="./docs/zh-CN/model_zoo/recognition/timesformer.md">TimeSformer</a> (Transformer‘)</td>
     <td><a href="./docs/zh-CN/model_zoo/recognition/videoswin.md">VideoSwin</a> (Transformer’)</td>
     <td><a href="./docs/zh-CN/model_zoo/recognition/attention_lstm.md">AttentionLSTM</a> (RNN‘)</td>
-    <td></td>
+    <td><a href="./docs/zh-CN/model_zoo/recognition/movinet.md">MoViNet</a> (Lite‘)</td>
   </tr>
   <tr>
     <td colspan="5" style="font-weight:bold;">基于骨骼点的动作识别方法</td>
   </tr>
   <tr>
-    <td><a href="./docs/zh-CN/model_zoo/recognition/stgcn.md">ST-GCN</a> (Custom’)</td>
-    <td><a href="./docs/zh-CN/model_zoo/recognition/agcn.md">AGCN</a> (Adaptive‘)</td>
-    <td></td>
+    <td><a href="./docs/zh-CN/model_zoo/recognition/stgcn.md">ST-GCN</a> (GCN’)</td>
+    <td><a href="./docs/zh-CN/model_zoo/recognition/agcn.md">AGCN</a> (GCN‘)</td>
+    <td><a href="./docs/zh-CN/model_zoo/recognition/ctrgcn.md">CTR-GCN</a> (GCN‘)</td>
     <td></td>
     <td></td>
   </tr>
@@ -68,6 +68,16 @@ PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_githu
   <tr>
     <td><a href="./docs/zh-CN/model_zoo/localization/bmn.md">BMN</a> (One-stage‘)</td>
     <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+    <tr>
+    <td colspan="5" style="font-weight:bold;">视频时序分割</td>
+  </tr>
+  <tr>
+    <td><a href="./docs/zh-CN/model_zoo/segmentation/mstcn.md">MS-TCN</a> </td>
+    <td><a href="./docs/zh-CN/model_zoo/segmentation/asrf.md">ASRF</a> </td>
     <td></td>
     <td></td>
     <td></td>
