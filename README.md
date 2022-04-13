@@ -2,17 +2,14 @@
 
 # PaddleVideo
 
-## 近期活动
+## 近期更新
 
-🌟  **1月17号-21号《产业级视频技术与应用案例》** 🌟
-- 【1月17号20:15-21:30】视频技术导论及医疗行业典型案例
-- 【1月18号20:15-21:30】视频内容智能分析和生产解决方案
-- 【1月19号20:15-21:30】体育+安全防范行业中的行为识别
-- 【1月20号20:15-21:30】顶会冠军视频分割算法深度解密
-- 【1月21号20:15-21:30】多模态学习和检索方法
+- 新增骨骼点行为识别模型[CTR-GCN](https://github.com/PaddlePaddle/PaddleVideo/blob/develop/docs/zh-CN/model_zoo/recognition/ctrgcn.md)
+- 新增轻量化行为识别模型[MoViNet](https://github.com/PaddlePaddle/PaddleVideo/blob/develop/docs/zh-CN/model_zoo/recognition/movinet.md)
+- 新增视频时序分割模型[MS-TCN](https://github.com/PaddlePaddle/PaddleVideo/blob/develop/docs/zh-CN/model_zoo/segmentation/mstcn.md)、[ASRF](https://github.com/PaddlePaddle/PaddleVideo/blob/develop/docs/zh-CN/model_zoo/segmentation/asrf.md)
 
-👀 **报名链接**: https://paddleqiyeban.wjx.cn/vj/QIValIZ.aspx?udsid=419689
-**课程回放链接**:  https://aistudio.baidu.com/aistudio/course/introduce/6742
+
+👀 🌟  **《产业级视频技术与应用案例》系列课程回放链接**:  https://aistudio.baidu.com/aistudio/course/introduce/6742 🌟
 
 ​																	  💖 **欢迎大家扫码入群讨论** 💖
 <div align="center">
