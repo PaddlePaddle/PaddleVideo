@@ -21,6 +21,21 @@ logger = get_logger("paddlevideo")
 class RecognizerGCN(BaseRecognizer):
     """GCN Recognizer model framework.
     """
+
+    def __init__(self,
+                 backbone=None,
+                 head=None,
+                 runtime_cfg=None,
+                 if_top5=True):
+        """
+        Args:
+            backbone (dict): Backbone modules to extract feature.
+            head (dict): Classification head to process feature.
+            is_top5 (bool): Whether to display top-5 accuracy during training/validation steps.
+        """
+        super(RecognizerGCN, self).__init__(backbone, head, runtime_cfg)
+        self.if_top5 = if_top5
+
     def forward_net(self, data):
         """Define how the model is going to run, from input to output.
         """
@@ -36,7 +51,7 @@ class RecognizerGCN(BaseRecognizer):
 
         # call forward
         cls_score = self.forward_net(data)
-        loss_metrics = self.head.loss(cls_score, label)
+        loss_metrics = self.head.loss(cls_score, label, if_top5=self.if_top5)
         return loss_metrics
 
     def val_step(self, data_batch):
@@ -47,7 +62,10 @@ class RecognizerGCN(BaseRecognizer):
 
         # call forward
         cls_score = self.forward_net(data)
-        loss_metrics = self.head.loss(cls_score, label, valid_mode=True)
+        loss_metrics = self.head.loss(cls_score,
+                                      label,
+                                      valid_mode=True,
+                                      if_top5=self.if_top5)
         return loss_metrics
 
     def test_step(self, data_batch):

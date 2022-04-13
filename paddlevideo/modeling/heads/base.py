@@ -155,7 +155,7 @@ class BaseHead(nn.Layer):
     def get_acc(self, scores, labels, valid_mode, if_top5=True):
         if if_top5:
             top1 = paddle.metric.accuracy(input=scores, label=labels, k=1)
-            top5 = paddle.metric.accuracy(input=scores, label=labels, k=2)
+            top5 = paddle.metric.accuracy(input=scores, label=labels, k=5)
             _, world_size = get_dist_info()
             #NOTE(shipping): deal with multi cards validate
             if world_size > 1 and valid_mode:  #reduce sum when valid

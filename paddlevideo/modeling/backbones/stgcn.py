@@ -68,6 +68,7 @@ def normalize_digraph(A):
 
 
 class Graph():
+
     def __init__(self,
                  layout='openpose',
                  strategy='uniform',
@@ -109,16 +110,15 @@ class Graph():
             neighbor_link = [(i - 1, j - 1) for (i, j) in neighbor_1base]
             self.edge = self_link + neighbor_link
             self.center = 21 - 1
-        elif layout == 'ntu-rgb+d_fall':
+        elif layout == 'coco_keypoint':
             self.num_node = 17
             self_link = [(i, i) for i in range(self.num_node)]
-            neighbor_1base = [(0, 1), (0, 2), (1, 3), (2, 4), (3, 5), (4, 6), (5, 7), (6, 8),
-                 (7, 9), (8, 10), (5, 11), (6, 12), (11, 13), (12, 14),
-                 (13, 15), (14, 16), (11, 12)]
+            neighbor_1base = [(0, 1), (0, 2), (1, 3), (2, 4), (3, 5), (4, 6),
+                              (5, 7), (6, 8), (7, 9), (8, 10), (5, 11), (6, 12),
+                              (11, 13), (12, 14), (13, 15), (14, 16), (11, 12)]
             neighbor_link = [(i, j) for (i, j) in neighbor_1base]
             self.edge = self_link + neighbor_link
             self.center = 11
-
         else:
             raise ValueError("Do Not Exist This Layout.")
 
@@ -158,6 +158,7 @@ class Graph():
 
 
 class ConvTemporalGraphical(nn.Layer):
+
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -188,6 +189,7 @@ class ConvTemporalGraphical(nn.Layer):
 
 
 class st_gcn_block(nn.Layer):
+
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -252,6 +254,7 @@ class STGCN(nn.Layer):
         edge_importance_weighting: bool, whether to use edge attention. Default True.
         data_bn: bool, whether to use data BatchNorm. Default True.
     """
+
     def __init__(self,
                  in_channels=2,
                  edge_importance_weighting=True,
