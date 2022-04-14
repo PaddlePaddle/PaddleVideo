@@ -39,7 +39,7 @@ infer_export:tools/export_model.py -c configs/recognition/slowfast/slowfast.yaml
 infer_quant:False
 inference:tools/predict.py --config configs/recognition/slowfast/slowfast.yaml
 --use_gpu:True|False
---enable_mkldnn:True|False
+--enable_mkldnn:False
 --cpu_threads:1|6
 --batch_size:1|2
 --use_tensorrt:False|True
