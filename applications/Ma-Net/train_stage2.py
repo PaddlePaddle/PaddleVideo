@@ -535,9 +535,9 @@ class Manager(object):
             for k, v in pretrained_dict.items() if k in model_dict
         }
         # 2. overwrite entries in the existing state dict
-        for k in model_dict:
-            if k not in pretrained_dict:
-                print(k, 'not in loaded weights.')
+        # for k in model_dict:
+        #     if k not in pretrained_dict:
+        #         print(k, 'not in loaded weights.')
 
         model_dict.update(pretrained_dict)
         net.set_state_dict(model_dict)
