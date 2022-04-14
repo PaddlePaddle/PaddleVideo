@@ -44,7 +44,7 @@ STGCN是一个基于骨骼点坐标序列进行预测的模型。在PaddleVideo�
 #### 示例：基于UR Fall Detection Dataset的摔倒数据处理
 [UR Fall Detection Dataset](http://fenix.univ.rzeszow.pl/~mkepski/ds/uf.html)是一个包含了不同摄像机视角及不同传感器下的摔倒检测数据集。数据集本身并不包含关键点坐标标注，在这里我们使用平视视角（camera 0）的RGB图像数据，介绍如何依照上面展示的步骤完成数据准备工作。
 
-#####（1）使用[PaddleDetection关键点模型](https://github.com/PaddlePaddle/PaddleDetection/tree/release/2.4/configs/keypoint)完成关键点坐标的检测
+（1）使用[PaddleDetection关键点模型](https://github.com/PaddlePaddle/PaddleDetection/tree/release/2.4/configs/keypoint)完成关键点坐标的检测
 ```bash
 # current path is under root of PaddleDetection
 
@@ -70,7 +70,9 @@ mkdir {root of PaddleVideo}/applications/PPHuman/datasets/annotations
 mv det_keypoint_unite_image_results.json {root of PaddleVideo}/applications/PPHuman/datasets/annotations/det_keypoint_unite_image_results_{video_id}_{camera_id}.json
 ```
 
-#####（2）将关键点坐标转化为训练数据
+（2）将关键点坐标转化为训练数据
+
+
 在完成上述步骤后，我们得到的骨骼点数据形式如下：
 ```
 annotations/

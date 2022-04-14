@@ -9,7 +9,7 @@ import pickle
 
 
 def self_norm(kpt, bbox):
-    #2, T, 17, 1,  bbox: (T, 4)
+    # kpt: (2, T, 17, 1),  bbox: (T, 4)
     tl = bbox[:, 0:2]
     wh = bbox[:, 2:]
     tl = np.expand_dims(np.transpose(tl, (1, 0)), (2, 3))
@@ -20,7 +20,7 @@ def self_norm(kpt, bbox):
     return res
 
 
-def convert_to_ppvideo_norm(all_kpts, all_scores, all_bbox):
+def convert_to_ppvideo(all_kpts, all_scores, all_bbox):
     # shape of all_kpts is (T, 17, 2)
     keypoint = np.expand_dims(np.transpose(all_kpts, [2, 0, 1]),
                               -1)  #(2, T, 17, 1)
@@ -74,8 +74,8 @@ def decode_json_path(json_path):
     all_kpts_np = np.array(all_kpts)
     all_score_np = np.array(all_score)
     all_bbox_np = np.array(all_bbox)
-    video_anno, scores = convert_to_ppvideo_norm(all_kpts_np, all_score_np,
-                                                 all_bbox_np)
+    video_anno, scores = convert_to_ppvideo(all_kpts_np, all_score_np,
+                                            all_bbox_np)
 
     return video_anno, scores
 
