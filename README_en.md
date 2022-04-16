@@ -8,7 +8,7 @@
 - add lite action recognition model [MoViNet](./docs/zh-CN/model_zoo/recognition/movinet.md).
 - add temporal segment model [MS-TCN](./docs/zh-CN/model_zoo/segmentation/mstcn.md), [ASRF](./docs/zh-CN/model_zoo/segmentation/asrf.md).
 
-​ 💖 **Welcome to scan the code and join the group discussion** 💖
+ 💖 **Welcome to scan the code and join the group discussion** 💖
 
 <div align="center">
   <img src="docs/images/user_group.png" width=250/></div>
@@ -115,6 +115,16 @@ PaddleVideo is a toolset for video tasks prepared for the industry and academia.
   </tr>
   <tr>
     <td><a href="./docs/en/model_zoo/estimation/adds.md">ADDS</a> (Unsupervised‘)</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td colspan="5" style="font-weight:bold;">Image Dehaze</td>
+  </tr>
+  <tr>
+    <td><a href="./docs/en/model_zoo/estimation/ffa_en.md">FFA-Net</a> (AttentionMechanism‘)</td>
     <td></td>
     <td></td>
     <td></td>

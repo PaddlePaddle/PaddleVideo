@@ -1,0 +1,74 @@
+MODEL:
+    framework: "FFANet"
+    backbone:
+        name: "FFA"
+        gps: 3
+        blocks: 19
+    head:
+        name: "FFANetHead"
+        perloss: False
+
+DATASET:
+    batch_size: 2
+    valid_batch_size: 1
+    test_batch_size: 1
+    num_workers: 0
+    train:
+        format: "RESIDEDataset"
+        file_path: "./data/ITS/train"
+        crop_size: 240
+        suffix: ".png"
+    valid:
+        format: "RESIDEDataset"
+        file_path: "./data/SOTS/indoor"
+        crop_size: 'whole'
+        suffix: ".png"
+    test:
+        format: "RESIDEDataset"
+        file_path: "./data/SOTS/indoor"
+        crop_size: 'whole'
+        suffix: ".png"
+
+PIPELINE:
+    train:
+        decode:
+            name: "FFANetDecode"
+            crop_size: 240
+            test_mode: False
+    valid:
+        decode:
+            name: "FFANetDecode"
+            crop_size: "whole"
+            test_mode: True
+    test:
+        decode:
+            name: "FFANetDecode"
+            crop_size: "whole"
+            test_mode: True
+
+OPTIMIZER:
+    name: 'Adam'
+    learning_rate:
+        iter_step: True
+        name: 'CustomWarmupCosineDecay'
+        cosine_base_lr: 0.0001
+        max_epoch: 10                 # max_epoch should same to the epochs
+        warmup_epochs: 0
+        warmup_start_lr: 0.0001
+        verbose: False
+
+METRIC:
+    name: 'FFANetMetric'
+
+INFERENCE:
+    name: 'FFA_Inference_helper'
+    img_ext: ".png"
+    height: 460
+    width: 620
+    num_channels: 3
+
+model_name: "FFA"
+log_interval: 500
+val_interval: 1
+epochs: 80
+log_level: "DEBUG"
