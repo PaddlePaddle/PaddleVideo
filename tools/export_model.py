@@ -187,6 +187,11 @@ def get_input_spec(cfg, model_name):
             InputSpec(shape=[None, None, 4], dtype='float32', name='proposals'),
             InputSpec(shape=[None, 2], dtype='float32', name='img_shape')
         ]]
+    elif model_name in ['FFA']:
+        input_spec = [[
+            InputSpec(shape=[None, cfg.num_channels, None, None],
+                      dtype='float32'),
+        ]]
     return input_spec
 
 

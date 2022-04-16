@@ -2,7 +2,7 @@
 
 # PaddleVideo
 
-​ 💖 **Welcome to scan the code and join the group discussion** 💖
+ 💖 **Welcome to scan the code and join the group discussion** 💖
 
 <div align="center">
   <img src="docs/images/user_group.png" width=250/></div>
@@ -104,7 +104,18 @@ PaddleVideo is a toolset for video tasks prepared for the industry and academia.
     <td></td>
     <td></td>
   </tr>
+  <tr>
+    <td colspan="5" style="font-weight:bold;">Image Dehaze</td>
+  </tr>
+  <tr>
+    <td><a href="./docs/en/model_zoo/estimation/ffa_en.md">FFA-Net</a> (AttentionMechanism‘)</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
 </table>
+
 
 
 ### Dataset
