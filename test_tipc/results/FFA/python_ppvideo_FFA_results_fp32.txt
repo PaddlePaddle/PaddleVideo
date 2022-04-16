@@ -1,0 +1,4 @@
+Current input image: 1440_6.png
+pred dehazed image saved to: data/FFA/1440_6_dehazed.png
+        ssim: 0.9845477233316967
+        psnr: 33.88653046111545

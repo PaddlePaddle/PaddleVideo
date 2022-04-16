@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import json
+import math
 import os
 import shutil
 import sys
@@ -36,6 +37,7 @@ import paddle
 import paddle.nn.functional as F
 import pandas
 from PIL import Image
+from scipy.signal import convolve2d
 
 __dir__ = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.abspath(os.path.join(__dir__, '../')))
@@ -1136,6 +1138,149 @@ class TransNetV2_Inference_helper():
                 image_file = os.path.join(self.output_path,
                                           self.filename + "_vis.png")
                 pil_image.save(image_file)
+
+
+@INFERENCE.register()
+class FFA_Inference_helper(Base_Inference_helper):
+
+    def __init__(self, height=240, width=240, num_channels=3, img_ext=".png"):
+
+        self.height = height
+        self.width = width
+        self.num_channels = num_channels
+        self.img_ext = img_ext
+        self.result_haze = None
+        self.result_clear = None
+
+    def preprocess(self, input_file):
+        """
+        input_file: str, file path
+        return: list
+        """
+        assert os.path.isfile(input_file) is not None, "{0} not exists".format(
+            input_file)
+        haze_imgs_dir = os.listdir(os.path.join(input_file, 'hazy'))
+        self.input_file = haze_imgs_dir
+        haze_imgs = [
+            os.path.join(input_file, 'hazy', img) for img in haze_imgs_dir
+        ]
+
+        clear_dir = os.path.join(input_file, 'clear')
+        idx = 0
+        path = haze_imgs[idx]
+        haze = Image.open(path)
+        id = path.split('\\')[-1].split('_')[0]
+        clear_name = id + '.png'
+        clear = Image.open(os.path.join(clear_dir, clear_name))
+        clear = paddle.vision.transforms.CenterCrop(haze.size[::-1])(clear)
+
+        haze = haze.convert("RGB")
+        clear = clear.convert("RGB")
+
+        haze = paddle.vision.transforms.to_tensor(haze)
+        haze = paddle.vision.transforms.Normalize(mean=[0.64, 0.6, 0.58],
+                                                  std=[0.14, 0.15, 0.152])(haze)
+        clear = paddle.vision.transforms.to_tensor(clear)
+
+        self.result_haze = np.asarray(paddle.unsqueeze(haze, axis=0).cpu())
+        self.result_clear = np.asarray(paddle.unsqueeze(clear, axis=0).cpu())
+        return [self.result_haze]
+
+    def postprocess(self, output, print_output=True, save_dir='data/FFA/'):
+        """
+        output: list[list]
+        """
+        N = len(self.input_file)
+        for i in range(N):
+            pred = output[i][0]  # [H, W]
+            if print_output:
+                print("Current input image: {0}".format(self.input_file[i]))
+                file_name = os.path.basename(self.input_file[i]).split('.')[0]
+                save_path = os.path.join(save_dir,
+                                         file_name + "_dehazed" + ".png")
+                pred_depth_color = self._convertPNG(pred)
+                pred_depth_color.save(save_path)
+                print(f"pred dehazed image saved to: {save_path}")
+                psnr_eval = self.psnr(paddle.to_tensor(pred),
+                                      paddle.to_tensor(self.result_clear[i]))
+                ssim_eval = 0
+                for j in range(3):
+                    ssim_eval += self.compute_ssim(
+                        np.transpose(np.squeeze(pred, 0), (1, 2, 0))[:, :, j],
+                        np.transpose(self.result_clear[i],
+                                     (1, 2, 0))[:, :, j]).item()
+                ssim_eval /= 3
+                print("\tssim: {0}".format(ssim_eval))
+                print("\tpsnr: {0}".format(psnr_eval))
+
+    def _convertPNG(self, image_numpy):
+        image_numpy = np.transpose(np.squeeze(image_numpy, 0), (1, 2, 0))
+        image_numpy = image_numpy * 255
+        im = Image.fromarray(np.uint8(image_numpy))
+        return im
+
+    def psnr(self, pred, gt):
+        pred = paddle.clip(pred, min=0, max=1)
+        gt = paddle.clip(gt, min=0, max=1)
+        imdff = np.asarray(pred - gt)
+        rmse = math.sqrt(np.mean(imdff**2))
+        if rmse == 0:
+            return 100
+        return 20 * math.log10(1.0 / rmse)
+
+    def matlab_style_gauss2D(self, shape=(3, 3), sigma=0.5):
+        """
+        2D gaussian mask - should give the same result as MATLAB's
+        fspecial('gaussian',[shape],[sigma])
+        """
+        m, n = [(ss - 1.) / 2. for ss in shape]
+        y, x = np.ogrid[-m:m + 1, -n:n + 1]
+        h = np.exp(-(x * x + y * y) / (2. * sigma * sigma))
+        h[h < np.finfo(h.dtype).eps * h.max()] = 0
+        sumh = h.sum()
+        if sumh != 0:
+            h /= sumh
+        return h
+
+    def filter2(self, x, kernel, mode='same'):
+        return convolve2d(x, np.rot90(kernel, 2), mode=mode)
+
+    def compute_ssim(self, im1, im2, k1=0.01, k2=0.03, win_size=11, L=1):
+        if not im1.shape == im2.shape:
+            raise ValueError("Input Imagees must have the same dimensions")
+        if len(im1.shape) > 2:
+            raise ValueError("Please input the images with 1 channel")
+
+        im1 = np.clip(im1, 0, 1)
+        im2 = np.clip(im2, 0, 1)
+
+        im1 = np.around(im1, decimals=4)
+        im2 = np.around(im2, decimals=4)
+        M, N = im1.shape
+        C1 = (k1 * L)**2
+        C2 = (k2 * L)**2
+        window = self.matlab_style_gauss2D(shape=(win_size, win_size),
+                                           sigma=1.5)
+        window = window / np.sum(np.sum(window))
+
+        if im1.dtype == np.uint8:
+            im1 = np.double(im1)
+        if im2.dtype == np.uint8:
+            im2 = np.double(im2)
+
+        mu1 = self.filter2(im1, window, 'same')
+        mu2 = self.filter2(im2, window, 'same')
+        mu1_sq = mu1 * mu1
+        mu2_sq = mu2 * mu2
+        mu1_mu2 = mu1 * mu2
+
+        sigma1_sq = self.filter2(im1 * im1, window, 'same') - mu1_sq
+        sigma2_sq = self.filter2(im2 * im2, window, 'same') - mu2_sq
+        sigmal2 = self.filter2(im1 * im2, window, 'same') - mu1_mu2
+        ssim_map = ((2 * mu1_mu2 + C1) *
+                    (2 * sigmal2 + C2)) / ((mu1_sq + mu2_sq + C1) *
+                                           (sigma1_sq + sigma2_sq + C2))
+        return np.mean(ssim_map)
 
 
 @INFERENCE.register()
