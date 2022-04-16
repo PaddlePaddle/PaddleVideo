@@ -32,6 +32,7 @@ from .skeleton_pipeline import AutoPadding, Iden, SkeletonNorm
 from .skeleton_pipeline import SketeonCropSample, SketeonModalityTransform, RandomRotation
 from .decode_sampler_MRI import SFMRI_DecodeSampler
 from .segmentation_pipline import SegmentationSampler
+from .ffa_pipelines import FFANetDecode
 
 __all__ = [
     'ImageDecoder', 'RandomMask', 'UniformCrop', 'SkeletonNorm', 'Tokenize',
@@ -43,5 +44,6 @@ __all__ = [
     'ToArray', 'FeaturePadding', 'GetMatchMap', 'GroupRandomFlip', 'MultiCrop',
     'SFMRI_DecodeSampler', 'MultiRestrictSize', 'MultiNorm',
     'RandomResizedCrop', 'SamplerPkl', 'SegmentationSampler',
-    'SketeonCropSample', 'SketeonModalityTransform', 'RandomRotation'
+    'SketeonCropSample', 'SketeonModalityTransform', 'RandomRotation',
+    'FFANetDecode'
 ]

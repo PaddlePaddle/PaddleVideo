@@ -115,7 +115,18 @@ PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_githu
     <td></td>
     <td></td>
   </tr>
+  <tr>
+    <td colspan="5" style="font-weight:bold;">图像去雾</td>
+  </tr>
+  <tr>
+    <td><a href="./docs/zh-CN/model_zoo/estimation/ffa_ch.md">FFA-Net</a> (AttentionMechanism‘)</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
 </table>
+
 
 
 ### 数据集
@@ -185,8 +196,6 @@ PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_githu
     <td></td>
   </tr>
 
-</tbody>
-</table>
 
 
 ### 应用案例
