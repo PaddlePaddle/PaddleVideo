@@ -85,7 +85,7 @@ annotations/
 ├── det_keypoint_unite_image_results_fall-29-cam0-rgb.json
 └── det_keypoint_unite_image_results_fall-30-cam0-rgb.json
 ```
-这里使用我们提供的脚本直接将数据转化为训练数据, 得到数据文件`train_data_ur_fall_50.npy`, 标签文件`train_label_ur_fall_50.pkl`。该脚本执行的内容包括解析json文件内容、前述步骤中介绍的整理训练数据及保存数据文件。
+这里使用我们提供的脚本直接将数据转化为训练数据, 得到数据文件`train_data.npy`, 标签文件`train_label.pkl`。该脚本执行的内容包括解析json文件内容、前述步骤中介绍的整理训练数据及保存数据文件。
 ```bash
 # current path is {root of PaddleVideo}/applications/PPHuman/datasets/
 
@@ -123,11 +123,20 @@ python tools/export_model.py -c applications/PPHuman/configs/stgcn_pphuman.yaml 
                                 -o output_inference/STGCN
 
 cp applications/PPHuman/configs/infer_cfg.yml output_inference/STGCN
+
+# 为模型增加软链接
+cd output_inference/STGCN
+ln -s STGCN.pdiparams model.pdiparams
+ln -s STGCN.pdiparams.info model.pdiparams.info
+ln -s STGCN.pdmodel model.pdmodel
 ```
 完成后的导出模型目录结构如下：
 ```
 STGCN
 ├── infer_cfg.yml
+├── model.pdiparams -> STGCN.pdiparams
+├── model.pdiparams.info -> STGCN.pdiparams.info
+├── model.pdmodel -> STGCN.pdmodel
 ├── STGCN.pdiparams
 ├── STGCN.pdiparams.info
 └── STGCN.pdmodel
