@@ -15,7 +15,7 @@
 from paddlevideo.modeling.framework.recognizers.base import BaseRecognizer
 import paddle
 from ...registry import GENERATORS
-from .ffa_metrics import psnr, compute_ssim
+from ....metrics.ffa_metric import psnr, compute_ssim
 import numpy as np
 
 

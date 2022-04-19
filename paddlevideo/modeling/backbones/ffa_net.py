@@ -24,7 +24,6 @@ weight_ins = paddle.ParamAttr(initializer=nn.initializer.Normal(0., 0.02),
                               trainable=True)
 
 
-@BACKBONES.register()
 def default_conv(in_channels, out_channels, kernel_size, bias=True):
     bias_ins = ParamAttr(
         initializer=Uniform(-1 / math.sqrt(in_channels * (kernel_size**1)), 1 /
@@ -37,7 +36,6 @@ def default_conv(in_channels, out_channels, kernel_size, bias=True):
                      bias_attr=bias_ins)
 
 
-@BACKBONES.register()
 class PALayer(nn.Layer):  #pixel attention block
 
     def __init__(self, channel):
@@ -70,7 +68,6 @@ class PALayer(nn.Layer):  #pixel attention block
         return x * y
 
 
-@BACKBONES.register()
 class CALayer(nn.Layer):  #channel attention block
 
     def __init__(self, channel):
@@ -105,7 +102,6 @@ class CALayer(nn.Layer):  #channel attention block
         return x * y
 
 
-@BACKBONES.register()
 class Block(nn.Layer):
 
     def __init__(self, conv, dim, kernel_size):
@@ -126,7 +122,6 @@ class Block(nn.Layer):
         return res
 
 
-@BACKBONES.register()
 class Group(nn.Layer):
 
     def __init__(self, conv, dim, kernel_size, blocks):
