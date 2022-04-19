@@ -31,11 +31,13 @@ class SkeletonMetric(BaseMetric):
     Args:
         out_file: str, file to save test results.
     """
+
     def __init__(self,
                  data_size,
                  batch_size,
                  out_file='submission.csv',
-                 log_interval=1):
+                 log_interval=1,
+                 top_k=5):
         """prepare for metrics
         """
         super().__init__(data_size, batch_size, log_interval)
@@ -43,6 +45,7 @@ class SkeletonMetric(BaseMetric):
         self.top5 = []
         self.values = []
         self.out_file = out_file
+        self.k = top_k
 
     def update(self, batch_id, data, outputs):
         """update metrics during each iter
@@ -50,7 +53,7 @@ class SkeletonMetric(BaseMetric):
         if len(data) == 2:  # data with label
             labels = data[1]
             top1 = paddle.metric.accuracy(input=outputs, label=labels, k=1)
-            top5 = paddle.metric.accuracy(input=outputs, label=labels, k=5)
+            top5 = paddle.metric.accuracy(input=outputs, label=labels, k=self.k)
             if self.world_size > 1:
                 top1 = paddle.distributed.all_reduce(
                     top1, op=paddle.distributed.ReduceOp.SUM) / self.world_size

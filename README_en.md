@@ -208,6 +208,7 @@ PaddleVideo is a toolset for video tasks prepared for the industry and academia.
 | [EIVideo](applications/EIVideo) | Interactive video segmentation tool|
 | [Anti-UAV](applications/Anti-UAV) |UAV detection solution|
 | [AbnormalActionDetection](applications/AbnormalActionDetection) |Abnormal action detection solution|
+| [PP-Human](applications/PPHuman) | Action recognition solution for pedestrian analysis scene |
 
 
 ## Documentation tutorial
