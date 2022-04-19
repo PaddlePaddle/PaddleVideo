@@ -211,6 +211,7 @@ PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_githu
 | [EIVideo](applications/EIVideo) | 视频交互式分割工具|
 | [Anti-UAV](applications/Anti-UAV) |无人机检测方案|
 | [AbnormalActionDetection](applications/AbnormalActionDetection) |异常行为检测方案|
+| [PP-Human](applications/PPHuman) | 行人分析场景动作识别方案 |
 
 
 ## 文档教程

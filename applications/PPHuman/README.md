@@ -1,4 +1,4 @@
-# PPHuman 行为识别模型
+# PP-Human 行为识别模型
 
 实时行人分析工具[PP-Human](https://github.com/PaddlePaddle/PaddleDetection/tree/release/2.4/deploy/pphuman)中集成了基于骨骼点的行为识别模块。本文档介绍如何基于[PaddleVideo](https://github.com/PaddlePaddle/PaddleVideo/)，完成行为识别模型的训练流程。
 
@@ -25,7 +25,7 @@ STGCN是一个基于骨骼点坐标序列进行预测的模型。在PaddleVideo�
 在完成骨骼点坐标的获取后，建议根据各人物的检测框进行归一化处理，以消除人物位置、尺度的差异给网络带来的收敛难度，这一步可以参考[这里](https://github.com/PaddlePaddle/PaddleDetection/blob/release/2.4/deploy/pphuman/pipe_utils.py#L352-L363)。
 
 #### 2. 统一序列的时序长度
-由于实际数据中每个动作的长度不一，首先需要根据您的数据和实际场景预定时序长度（在PPHuman中我们采用50帧为一个动作序列），并对数据做以下处理：
+由于实际数据中每个动作的长度不一，首先需要根据您的数据和实际场景预定时序长度（在PP-Human中我们采用50帧为一个动作序列），并对数据做以下处理：
 - 实际长度超过预定长度的数据，随机截取一个50帧的片段
 - 实际长度不足预定长度的数据：补0，直到满足50帧
 - 恰好等于预定长度的数据： 无需处理
@@ -56,6 +56,7 @@ unzip -d output_inference/ dark_hrnet_w32_256x192.zip
 
 # Step 2: Get the keypoint coordinarys
 
+# if your data is image sequence
 python deploy/python/det_keypoint_unite_infer.py --det_model_dir=output_inference/mot_ppyoloe_l_36e_pipeline/ --keypoint_model_dir=output_inference/dark_hrnet_w32_256x192 --image_dir={your image directory path} --device=GPU --save_res=True
 
 # if your data is video
@@ -116,7 +117,7 @@ python main.py --test -c applications/PPHuman/configs/stgcn_pphuman.yaml  -w out
 ### 导出模型推理
 
 - 在PaddleVideo中，通过以下命令实现模型的导出，得到模型结构文件`STGCN.pdmodel`和模型权重文件`STGCN.pdiparams`，并增加配置文件：
-```python
+```bash
 # current path is under root of PaddleVideo
 python tools/export_model.py -c applications/PPHuman/configs/stgcn_pphuman.yaml \
                                 -p output/STGCN/STGCN_best.pdparams \
@@ -124,22 +125,19 @@ python tools/export_model.py -c applications/PPHuman/configs/stgcn_pphuman.yaml 
 
 cp applications/PPHuman/configs/infer_cfg.yml output_inference/STGCN
 
-# 为模型增加软链接
+# 重命名模型文件，适配PP-Human的调用
 cd output_inference/STGCN
-ln -s STGCN.pdiparams model.pdiparams
-ln -s STGCN.pdiparams.info model.pdiparams.info
-ln -s STGCN.pdmodel model.pdmodel
+mv STGCN.pdiparams model.pdiparams
+mv STGCN.pdiparams.info model.pdiparams.info
+mv STGCN.pdmodel model.pdmodel
 ```
 完成后的导出模型目录结构如下：
 ```
 STGCN
 ├── infer_cfg.yml
-├── model.pdiparams -> STGCN.pdiparams
-├── model.pdiparams.info -> STGCN.pdiparams.info
-├── model.pdmodel -> STGCN.pdmodel
-├── STGCN.pdiparams
-├── STGCN.pdiparams.info
-└── STGCN.pdmodel
+├── model.pdiparams
+├── model.pdiparams.info
+├── model.pdmodel
 ```
 
 至此，就可以使用[PP-Human](https://github.com/PaddlePaddle/PaddleDetection/tree/release/2.4/deploy/pphuman)进行行为识别的推理了。
