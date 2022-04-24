@@ -27,11 +27,10 @@ class BMNLoss(BaseWeightedLoss):
         tscale (int): sequence length, default 100.
         dscale (int): max duration length, default 100.
     """
-    def __init__(self, dscale, tscale, datatype='float32'):
+    def __init__(self, dscale, tscale):
         super().__init__()
         self.dscale = dscale
         self.tscale = tscale
-        self.datatype = datatype
 
     def _get_mask(self, dscale, tscale):
         bm_mask = []
@@ -39,7 +38,7 @@ class BMNLoss(BaseWeightedLoss):
             mask_vector = [1 for i in range(tscale - idx)
                            ] + [0 for i in range(idx)]
             bm_mask.append(mask_vector)
-        bm_mask = np.array(bm_mask, dtype=np.float32)
+        bm_mask = np.array(bm_mask, dtype='float32')
         bm_mask = paddle.to_tensor(bm_mask)
         bm_mask.stop_gradient = True
         return bm_mask
@@ -56,7 +55,6 @@ class BMNLoss(BaseWeightedLoss):
             coef_0 = 0.5 * ratio / (ratio - 1)
             coef_1 = 0.5 * ratio
             epsilon = 0.000001
-            temp = paddle.log(pred_score + epsilon)
             loss_pos = paddle.multiply(paddle.log(pred_score + epsilon), pmask)
             loss_pos = coef_1 * paddle.mean(loss_pos)
             loss_neg = paddle.multiply(paddle.log(1.0 - pred_score + epsilon),
@@ -65,43 +63,44 @@ class BMNLoss(BaseWeightedLoss):
             loss = -1 * (loss_pos + loss_neg)
             return loss
 
-        loss_start = bi_loss(pred_start, gt_start, self.datatype)
-        loss_end = bi_loss(pred_end, gt_end, self.datatype)
+        loss_start = bi_loss(pred_start, gt_start, pred_start.dtype)
+        loss_end = bi_loss(pred_end, gt_end, pred_start.dtype)
         loss = loss_start + loss_end
         return loss
 
     def pem_reg_loss_func(self, pred_score, gt_iou_map, mask):
-
         gt_iou_map = paddle.multiply(gt_iou_map, mask)
 
-        u_hmask = paddle.cast(x=gt_iou_map > 0.7, dtype=self.datatype)
+        u_hmask = paddle.cast(x=gt_iou_map > 0.7, dtype=pred_score.dtype)
         u_mmask = paddle.logical_and(gt_iou_map <= 0.7, gt_iou_map > 0.3)
-        u_mmask = paddle.cast(x=u_mmask, dtype=self.datatype)
+        u_mmask = paddle.cast(x=u_mmask, dtype=pred_score.dtype)
         u_lmask = paddle.logical_and(gt_iou_map <= 0.3, gt_iou_map >= 0.)
-        u_lmask = paddle.cast(x=u_lmask, dtype=self.datatype)
+        u_lmask = paddle.cast(x=u_lmask, dtype=pred_score.dtype)
         u_lmask = paddle.multiply(u_lmask, mask)
 
-        num_h = paddle.cast(paddle.sum(u_hmask), dtype=self.datatype)
-        num_m = paddle.cast(paddle.sum(u_mmask), dtype=self.datatype)
-        num_l = paddle.cast(paddle.sum(u_lmask), dtype=self.datatype)
+        num_h = paddle.cast(paddle.sum(u_hmask), dtype=pred_score.dtype)
+        num_m = paddle.cast(paddle.sum(u_mmask), dtype=pred_score.dtype)
+        num_l = paddle.cast(paddle.sum(u_lmask), dtype=pred_score.dtype)
 
         r_m = num_h / num_m
-        u_smmask = paddle.uniform(
-            shape=[gt_iou_map.shape[1], gt_iou_map.shape[2]],
-            dtype=self.datatype,
-            min=0.0,
-            max=1.0)
+        u_smmask = paddle.uniform(shape=[
+            gt_iou_map.shape[1], gt_iou_map.shape[2]
+        ],
+                                  min=0.0,
+                                  max=1.0).astype(pred_score.dtype)
         u_smmask = paddle.multiply(u_mmask, u_smmask)
-        u_smmask = paddle.cast(x=(u_smmask > (1. - r_m)), dtype=self.datatype)
+        u_smmask = paddle.cast(x=(u_smmask > (1. - r_m)),
+                               dtype=pred_score.dtype)
 
         r_l = num_h / num_l
-        u_slmask = paddle.uniform(
-            shape=[gt_iou_map.shape[1], gt_iou_map.shape[2]],
-            dtype=self.datatype,
-            min=0.0,
-            max=1.0)
+        u_slmask = paddle.uniform(shape=[
+            gt_iou_map.shape[1], gt_iou_map.shape[2]
+        ],
+                                  min=0.0,
+                                  max=1.0).astype(pred_score.dtype)
         u_slmask = paddle.multiply(u_lmask, u_slmask)
-        u_slmask = paddle.cast(x=(u_slmask > (1. - r_l)), dtype=self.datatype)
+        u_slmask = paddle.cast(x=(u_slmask > (1. - r_l)),
+                               dtype=pred_score.dtype)
 
         weights = u_hmask + u_smmask + u_slmask
         weights.stop_gradient = True
@@ -114,8 +113,8 @@ class BMNLoss(BaseWeightedLoss):
     def pem_cls_loss_func(self, pred_score, gt_iou_map, mask):
         gt_iou_map = paddle.multiply(gt_iou_map, mask)
         gt_iou_map.stop_gradient = True
-        pmask = paddle.cast(x=(gt_iou_map > 0.9), dtype=self.datatype)
-        nmask = paddle.cast(x=(gt_iou_map <= 0.9), dtype=self.datatype)
+        pmask = paddle.cast(x=(gt_iou_map > 0.9), dtype=pred_score.dtype)
+        nmask = paddle.cast(x=(gt_iou_map <= 0.9), dtype=pred_score.dtype)
         nmask = paddle.multiply(nmask, mask)
 
         num_positive = paddle.sum(pmask)

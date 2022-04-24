@@ -41,8 +41,8 @@ fpgm_key=$(func_parser_key "${lines[17]}")
 fpgm_trainer=$(func_parser_value "${lines[17]}")
 distill_key=$(func_parser_key "${lines[18]}")
 distill_trainer=$(func_parser_value "${lines[18]}")
-trainer_key1=$(func_parser_key "${lines[19]}")
-trainer_value1=$(func_parser_value "${lines[19]}")
+amp_key=$(func_parser_key "${lines[19]}")
+amp_trainer=$(func_parser_value "${lines[19]}")
 trainer_key2=$(func_parser_key "${lines[20]}")
 trainer_value2=$(func_parser_value "${lines[20]}")
 
@@ -162,9 +162,6 @@ function func_inference(){
                             _save_log_path="${_log_path}/python_infer_cpu_usemkldnn_${use_mkldnn}_threads_${threads}_precision_${precision}_batchsize_${batch_size}.log"
                             mkdir -p ${_log_path}
                             set_infer_data=$(func_set_params "${video_dir_key}" "${infer_video_dir}")
-                            if [[ $MODE =~ "lite_infer" ]]; then
-                                benchmark_value="False"
-                            fi
                             set_benchmark=$(func_set_params "${benchmark_key}" "${benchmark_value}")
                             set_batchsize=$(func_set_params "${batch_size_key}" "${batch_size}")
                             set_cpu_threads=$(func_set_params "${cpu_threads_key}" "${threads}")
@@ -195,9 +192,6 @@ function func_inference(){
                         _save_log_path="${_log_path}/python_infer_gpu_usetrt_${use_trt}_precision_${precision}_batchsize_${batch_size}.log"
                         set_infer_data=$(func_set_params "${video_dir_key}" "${infer_video_dir}")
 
-                        if [[ $MODE =~ "lite_infer" ]]; then
-                            benchmark_value="False"
-                        fi
                         set_benchmark=$(func_set_params "${benchmark_key}" "${benchmark_value}")
                         set_batchsize=$(func_set_params "${batch_size_key}" "${batch_size}")
                         set_tensorrt=$(func_set_params "${use_trt_key}" "${use_trt}")
@@ -301,23 +295,23 @@ else
                 elif [ ${trainer} = "${distill_key}" ]; then
                     run_train=${distill_trainer}
                     run_export=${distill_export}
-                elif [ ${trainer} = ${trainer_key1} ]; then
-                    run_train=${trainer_value1}
-                    run_export=${export_value1}
+                elif [ ${trainer} = ${amp_key} ]; then
+                    run_train=${amp_trainer}
+                    run_export=${norm_export}
                 elif [[ ${trainer} = ${trainer_key2} ]]; then
                     run_train=${trainer_value2}
                     run_export=${export_value2}
                 else
                     run_train=${norm_trainer}
-                    if [[ ${MODE} != "benchmark_train" ]] && [[ ! ${MODE} =~ "whole_train" ]]; then
-                        # 训练参数末尾加上--max_iters=30和--log_interval=1，以便运行并输出足量数据
-                        run_train=${run_train}" --max_iters=30"
-                    fi
                     run_export=${norm_export}
                 fi
 
                 if [ ${run_train} = "null" ]; then
                     continue
+                fi
+                if [[ ${MODE} != "benchmark_train" ]] && [[ ! ${MODE} =~ "whole_train" ]]; then
+                    # 训练参数末尾加上--max_iters=30和--log_interval=1，以便运行并输出足量数据
+                    run_train=${run_train}" --max_iters=30"
                 fi
                 set_autocast=$(func_set_params "${autocast_key}" "${autocast}")
                 set_epoch=$(func_set_params "${epoch_key}" "${epoch_num}")
@@ -361,11 +355,11 @@ else
 
                 set_save_model=$(func_set_params "${save_model_key}" "${save_log}")
                 if [ ${#gpu} -le 2 ];then  # train with cpu or single gpu
-                    cmd="${python} ${run_train} ${set_use_gpu}  ${set_save_model} ${set_epoch} ${set_pretrain} ${set_batchsize} ${set_train_params1} ${set_train_params2} ${set_amp_config} "
+                    cmd="${python} ${run_train} ${set_amp_config} ${set_use_gpu}  ${set_save_model} ${set_epoch} ${set_pretrain} ${set_batchsize} ${set_train_params1} ${set_train_params2}  "
                 elif [ ${#ips} -le 26 ];then  # train with multi-gpu
-                    cmd="${python} -B -m paddle.distributed.launch --gpus=\"${gpu}\" ${run_train} ${set_use_gpu} ${set_save_model} ${set_epoch} ${set_pretrain} ${set_batchsize} ${set_train_params1} ${set_train_params2} ${set_amp_config}"
+                    cmd="${python} -B -m paddle.distributed.launch --gpus=\"${gpu}\" ${run_train} ${set_amp_config} ${set_use_gpu} ${set_save_model} ${set_epoch} ${set_pretrain} ${set_batchsize} ${set_train_params1} ${set_train_params2} "
                 else     # train with multi-machine
-                    cmd="${python} -B -m paddle.distributed.launch --ips=${ips} --gpus=\"${gpu}\" ${run_train} ${set_use_gpu} ${set_save_model} ${set_pretrain} ${set_epoch} ${set_batchsize} ${set_train_params1} ${set_train_params2} ${set_amp_config}"
+                    cmd="${python} -B -m paddle.distributed.launch --ips=${ips} --gpus=\"${gpu}\" ${run_train} ${set_amp_config} ${set_use_gpu} ${set_save_model} ${set_pretrain} ${set_epoch} ${set_batchsize} ${set_train_params1} ${set_train_params2} "
                 fi
 
                 # run train
@@ -394,7 +388,7 @@ else
                 if [ ${run_export} != "null" ]; then
                     save_infer_path="${save_log}"
                     real_model_name=${model_name/PP-/pp}
-                    set_export_weight=$(func_set_params "${export_weight}" "${save_log}/${real_model_name}_best.pdparams")
+                    set_export_weight=$(func_set_params "${export_weight}" "${save_log}/${real_model_name}_epoch_00001.pdparams")
 
                     set_save_infer_key=$(func_set_params "${save_infer_key}" "${save_log}")
                     export_cmd="${python} ${run_export} ${set_export_weight} ${set_save_infer_key}"

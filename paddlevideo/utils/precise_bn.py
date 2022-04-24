@@ -23,7 +23,12 @@ Implement precise bn, which is useful for improving accuracy.
 
 
 @paddle.no_grad()  # speed up and save CUDA memory
-def do_preciseBN(model, data_loader, parallel, num_iters=200):
+def do_preciseBN(model,
+                 data_loader,
+                 parallel,
+                 num_iters=200,
+                 use_amp=False,
+                 amp_level=None):
     """
     Recompute and update the batch norm stats to make them more precise. During
     training both BN stats and the weight are changing after every iteration, so
@@ -56,16 +61,27 @@ def do_preciseBN(model, data_loader, parallel, num_iters=200):
         bn._momentum = 0.
 
     running_mean = [paddle.zeros_like(bn._mean)
-                    for bn in bn_layers_list]  #pre-ignore
+                    for bn in bn_layers_list]  # pre-ignore
     running_var = [paddle.zeros_like(bn._variance) for bn in bn_layers_list]
 
     ind = -1
     for ind, data in enumerate(itertools.islice(data_loader, num_iters)):
         logger.info("doing precise BN {} / {}...".format(ind + 1, num_iters))
+
         if parallel:
-            model._layers.train_step(data)
+            if use_amp:
+                with paddle.amp.auto_cast(custom_black_list={"reduce_mean"},
+                                          level=amp_level):
+                    model._layers.train_step(data)
+            else:
+                model._layers.train_step(data)
         else:
-            model.train_step(data)
+            if use_amp:
+                with paddle.amp.auto_cast(custom_black_list={"reduce_mean"},
+                                          level=amp_level):
+                    model.train_step(data)
+            else:
+                model.train_step(data)
 
         for i, bn in enumerate(bn_layers_list):
             # Accumulates the bn stats.

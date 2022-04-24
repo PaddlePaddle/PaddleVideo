@@ -1,3 +1,5 @@
+Cython==0.29.15
+numpy==1.21.4
 astor==0.8.1
 certifi==2021.10.8
 charset-normalizer==2.0.7
@@ -6,7 +8,6 @@ idna==3.3
 mkl-fft==1.3.1
 opencv-python==4.2.0.32
 mkl-service==2.4.0
-numpy==1.21.4
 
 # paddlepaddle-gpu==2.2.0
 Pillow==8.4.0
@@ -15,5 +16,5 @@ requests==2.26.0
 
 urllib3==1.26.7
 
-cython==0.29.15
+
 davisinteractive==1.0.2

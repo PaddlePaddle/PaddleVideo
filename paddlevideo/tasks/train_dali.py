@@ -55,9 +55,7 @@ def train_dali(cfg, weights=None, parallel=True):
 
     # 3. Construct solver.
     lr = build_lr(cfg.OPTIMIZER.learning_rate, None)
-    optimizer = build_optimizer(cfg.OPTIMIZER,
-                                lr,
-                                parameter_list=model.parameters())
+    optimizer = build_optimizer(cfg.OPTIMIZER, lr, model=model)
 
     # Resume
     resume_epoch = cfg.get("resume_epoch", 0)

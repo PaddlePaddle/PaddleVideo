@@ -54,6 +54,11 @@ def parse_args():
                         action='store_true',
                         help='whether to open amp training.')
     parser.add_argument(
+        '--amp_level',
+        type=str,
+        default=None,
+        help="optimize level when open amp training, can only be 'O1' or 'O2'.")
+    parser.add_argument(
         '--validate',
         action='store_true',
         help='whether to evaluate the checkpoint during training')
@@ -66,7 +71,7 @@ def parse_args():
         '--max_iters',
         type=int,
         default=None,
-        help='max iterations when training(this argonly used in test_tipc)')
+        help='max iterations when training(this arg only used in test_tipc)')
     parser.add_argument(
         '-p',
         '--profiler_options',
@@ -96,6 +101,15 @@ def main():
         np.random.seed(seed)
         paddle.seed(seed)
 
+    # set amp_level if amp is enabled
+    if args.amp:
+        if args.amp_level is None:
+            args.amp_level = 'O1'  # set defaualt amp_level to 'O1'
+        else:
+            assert args.amp_level in [
+                'O1', 'O2'
+            ], f"amp_level must be 'O1' or 'O2' when amp enabled, but got {args.amp_level}."
+
     _, world_size = get_dist_info()
     parallel = world_size != 1
     if parallel:
@@ -115,7 +129,8 @@ def main():
                     parallel=parallel,
                     validate=args.validate,
                     use_fleet=args.fleet,
-                    amp=args.amp,
+                    use_amp=args.amp,
+                    amp_level=args.amp_level,
                     max_iters=args.max_iters,
                     profiler_options=args.profiler_options)
 

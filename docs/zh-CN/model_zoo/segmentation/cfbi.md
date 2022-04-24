@@ -22,7 +22,7 @@ CFBI是百度在ECCV 2020提出的视频目标分割模型，该模型基于前�
 
 ## 数据准备
 
-DAVIS数据下载及准备请参考[DAVIS数据准备](../../dataset/davis.md)
+DAVIS数据下载及准备请参考[DAVIS数据准备](../../../../applications/Ma-Net/dataloaders/DAVIS2017_cn.md)
 
 
 ## 模型测试

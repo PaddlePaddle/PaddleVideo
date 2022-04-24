@@ -28,7 +28,10 @@ This code currently supports model test and model training on DAVIS  dataset,  a
 Please refer to DAVIS data download and preparation doc [DAVIS-data](dataloaders/DAVIS2017.md)
 
 ## Train and Test
-
+- You can download [pertained model for stage1](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/DeeplabV3_coco.pdparams) decompress it for stage1 training。
+  
+- You can download [trained model of stage1](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/MaNet_davis2017_stage1.pdparams) decompress it for stage2 training directly skipping stage1 training。
+  
 ```
 sh run_local.sh
 ```

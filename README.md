@@ -2,17 +2,14 @@
 
 # PaddleVideo
 
-## 近期活动
+## 近期更新
 
-🌟  **1月17号-21号《产业级视频技术与应用案例》** 🌟
-- 【1月17号20:15-21:30】视频技术导论及医疗行业典型案例
-- 【1月18号20:15-21:30】视频内容智能分析和生产解决方案
-- 【1月19号20:15-21:30】体育+安全防范行业中的行为识别
-- 【1月20号20:15-21:30】顶会冠军视频分割算法深度解密
-- 【1月21号20:15-21:30】多模态学习和检索方法
+- 新增骨骼点行为识别模型[CTR-GCN](./docs/zh-CN/model_zoo/recognition/ctrgcn.md).
+- 新增轻量化行为识别模型[MoViNet](./docs/zh-CN/model_zoo/recognition/movinet.md).
+- 新增视频时序分割模型[MS-TCN](./docs/zh-CN/model_zoo/segmentation/mstcn.md)、[ASRF](./docs/zh-CN/model_zoo/segmentation/asrf.md).
 
-👀 **报名链接**: https://paddleqiyeban.wjx.cn/vj/QIValIZ.aspx?udsid=419689
-**课程回放链接**:  https://aistudio.baidu.com/aistudio/course/introduce/6742
+
+👀 🌟  **《产业级视频技术与应用案例》系列课程回放链接**:  https://aistudio.baidu.com/aistudio/course/introduce/6742 🌟
 
 ​																	  💖 **欢迎大家扫码入群讨论** 💖
 <div align="center">
@@ -53,15 +50,15 @@ PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_githu
     <td><a href="./docs/zh-CN/model_zoo/recognition/timesformer.md">TimeSformer</a> (Transformer‘)</td>
     <td><a href="./docs/zh-CN/model_zoo/recognition/videoswin.md">VideoSwin</a> (Transformer’)</td>
     <td><a href="./docs/zh-CN/model_zoo/recognition/attention_lstm.md">AttentionLSTM</a> (RNN‘)</td>
-    <td></td>
+    <td><a href="./docs/zh-CN/model_zoo/recognition/movinet.md">MoViNet</a> (Lite‘)</td>
   </tr>
   <tr>
     <td colspan="5" style="font-weight:bold;">基于骨骼点的动作识别方法</td>
   </tr>
   <tr>
-    <td><a href="./docs/zh-CN/model_zoo/recognition/stgcn.md">ST-GCN</a> (Custom’)</td>
-    <td><a href="./docs/zh-CN/model_zoo/recognition/agcn.md">AGCN</a> (Adaptive‘)</td>
-    <td></td>
+    <td><a href="./docs/zh-CN/model_zoo/recognition/stgcn.md">ST-GCN</a> (GCN’)</td>
+    <td><a href="./docs/zh-CN/model_zoo/recognition/agcn.md">AGCN</a> (GCN‘)</td>
+    <td><a href="./docs/zh-CN/model_zoo/recognition/ctrgcn.md">CTR-GCN</a> (GCN‘)</td>
     <td></td>
     <td></td>
   </tr>
@@ -71,6 +68,16 @@ PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_githu
   <tr>
     <td><a href="./docs/zh-CN/model_zoo/localization/bmn.md">BMN</a> (One-stage‘)</td>
     <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td colspan="5" style="font-weight:bold;">视频时序分割</td>
+  </tr>
+  <tr>
+    <td><a href="./docs/zh-CN/model_zoo/segmentation/mstcn.md">MS-TCN</a> </td>
+    <td><a href="./docs/zh-CN/model_zoo/segmentation/asrf.md">ASRF</a> </td>
     <td></td>
     <td></td>
     <td></td>
@@ -204,6 +211,7 @@ PaddleVideo是[飞桨官方](https://www.paddlepaddle.org.cn/?fr=paddleEdu_githu
 | [EIVideo](applications/EIVideo) | 视频交互式分割工具|
 | [Anti-UAV](applications/Anti-UAV) |无人机检测方案|
 | [AbnormalActionDetection](applications/AbnormalActionDetection) |异常行为检测方案|
+| [PP-Human](applications/PPHuman) | 行人分析场景动作识别方案 |
 
 
 ## 文档教程
