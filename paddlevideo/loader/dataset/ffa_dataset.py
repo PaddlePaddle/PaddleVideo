@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import os
+import sys
 import random
 from PIL import Image
 from paddle.vision.transforms import CenterCrop
@@ -55,7 +56,10 @@ class RESIDEDataset(BaseDataset):
                 index = random.randint(0, len(self.haze_imgs))
                 haze = Image.open(self.haze_imgs[index])
                 path = self.haze_imgs[index]
-        id = path.split('\\')[-1].split('_')[0]
+        if sys.platform == 'win32':
+            id = path.split('\\')[-1].split('_')[0]
+        else:
+            id = path.split('/')[-1].split('_')[0]
         clear_name = id + self.suffix
         clear = Image.open(os.path.join(self.clear_dir, clear_name))
         clear = CenterCrop(haze.size[::-1])(clear)
@@ -72,7 +76,10 @@ class RESIDEDataset(BaseDataset):
                 index = random.randint(0, len(self.haze_imgs))
                 haze = Image.open(self.haze_imgs[index])
                 path = self.haze_imgs[index]
-        id = path.split('\\')[-1].split('_')[0]
+        if sys.platform == 'win32':
+            id = path.split('\\')[-1].split('_')[0]
+        else:
+            id = path.split('/')[-1].split('_')[0]
         clear_name = id + self.suffix
         clear = Image.open(os.path.join(self.clear_dir, clear_name))
         clear = CenterCrop(haze.size[::-1])(clear)

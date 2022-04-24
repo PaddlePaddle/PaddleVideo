@@ -1169,7 +1169,10 @@ class FFA_Inference_helper(Base_Inference_helper):
         idx = 0
         path = haze_imgs[idx]
         haze = Image.open(path)
-        id = path.split('\\')[-1].split('_')[0]
+        if sys.platform == 'win32':
+            id = path.split('\\')[-1].split('_')[0]
+        else:
+            id = path.split('/')[-1].split('_')[0]
         clear_name = id + '.png'
         clear = Image.open(os.path.join(clear_dir, clear_name))
         clear = paddle.vision.transforms.CenterCrop(haze.size[::-1])(clear)

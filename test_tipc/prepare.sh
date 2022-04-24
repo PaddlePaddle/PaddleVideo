@@ -66,11 +66,11 @@ if [ ${MODE} = "lite_train_lite_infer" ];then
     elif [ ${model_name} == "FFA" ]; then
         # pretrain lite train data
         pushd ./data/FFA
-        wget -nc https://bj.bcebos.com/v1/ai-studio-online/09f35dbfd54542e6b28d9fd5f2deefe589c6a01600964acfa4083ab73219fea5?responseContentDisposition=attachment%3B%20filename%3DFFA_lite_data.tar&authorization=bce-auth-v1%2F0ef6765c1e494918bc0d4c3ca3e5c6d1%2F2022-04-15T14%3A59%3A40Z%2F-1%2F%2Fee1b727775ab6c3ada007c95434436bd1bb657e5421f63fdd38d0719916e159e
-        tar -xf FFA_lite_data.tar
+        wget -nc https://videotag.bj.bcebos.com/PaddleVideo-release2.3/FFA_lite_data.tar
+		tar -xf FFA_lite_data.tar
         popd
         # download pretrained weights
-        wget -nc -P ./data/FFA https://bj.bcebos.com/v1/ai-studio-online/3f8a315108334b29958f5f9dbf25445c944b707e6df549368fa7d84f56a13bed?responseContentDisposition=attachment%3B%20filename%3DITS2_3_19_400000_transform.pdparams&authorization=bce-auth-v1%2F0ef6765c1e494918bc0d4c3ca3e5c6d1%2F2022-04-15T14%3A43%3A48Z%2F-1%2F%2Fdef12053ddedcfd91c190f8e3c42aec893516c083483d6db506b028c11ff2420 --no-check-certificate
+        wget -nc -P https://videotag.bj.bcebos.com/PaddleVideo-release2.3/ITS2_3_19_400000_transform.pdparams
     elif [ ${model_name} == "TSM" ]; then
         # pretrain lite train data
         pushd ./data/k400
