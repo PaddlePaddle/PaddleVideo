@@ -24,7 +24,7 @@ op:
             device_type: 1
 
             #计算硬件ID，当devices为""或不写时为CPU预测；当devices为"0", "0,1,2"时为GPU预测，表示使用的GPU卡
-            devices: "3" # "0,1"
+            devices: "0" # "0,1"
 
             #client类型，包括brpc, grpc和local_predictor.local_predictor不启动Serving服务，进程内预测
             client_type: local_predictor

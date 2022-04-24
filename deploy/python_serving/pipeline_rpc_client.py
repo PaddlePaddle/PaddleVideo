@@ -16,13 +16,13 @@ try:
 except ImportError:
     from paddle_serving_server.pipeline import PipelineClient
 
+import argparse
 import base64
+import os
+import os.path as osp
 
 import cv2
 import numpy as np
-
-client = PipelineClient()
-client.connect(['127.0.0.1:9993'])
 
 
 def numpy_to_base64(array: np.ndarray) -> str:
@@ -61,20 +61,64 @@ def video_to_numpy(file_path: str) -> np.ndarray:
     return decoded_frames
 
 
+def parse_file_paths(input_path: str) -> list:
+    assert osp.exists(input_path), \
+        f"{input_path} did not exists!"
+    if osp.isfile(input_path):
+        files = [
+            input_path,
+        ]
+    else:
+        files = os.listdir(input_path)
+        files = [
+            file for file in files
+            if (file.endswith(".avi") or file.endswith(".mp4"))
+        ]
+        files = [osp.join(input_path, file) for file in files]
+    return files
+
+
+def parse_args():
+    # general params
+    parser = argparse.ArgumentParser("PaddleVideo Web Serving model script")
+    parser.add_argument('-c',
+                        '--config',
+                        type=str,
+                        default='configs/PP-TSM.yaml',
+                        help='serving config file path')
+    parser.add_argument('-ptn',
+                        '--port_number',
+                        type=int,
+                        default=9993,
+                        help='rpc port number')
+    parser.add_argument('-i',
+                        '--input_file',
+                        type=str,
+                        help='input file path or directory path')
+
+    return parser.parse_args()
+
+
 if __name__ == "__main__":
-    video_path = '../../data/example.avi'
+    args = parse_args()
+    client = PipelineClient()
+    client.connect([f'127.0.0.1:{args.port_number}'])
 
-    # decoding video and get stacked frames as ndarray
-    decoded_frames = video_to_numpy(file_path=video_path)
+    files_list = parse_file_paths(args.input_file)
 
-    # encode ndarray to base64 string for transportation.
-    decoded_frames_base64 = numpy_to_base64(decoded_frames)
+    for file_path in files_list:
+        # decoding video and get stacked frames as ndarray
+        decoded_frames = video_to_numpy(file_path=file_path)
 
-    # transport to server & get get results.
-    for i in range(1):
+        # encode ndarray to base64 string for transportation.
+        decoded_frames_base64 = numpy_to_base64(decoded_frames)
+
+        # transport to server & get get results.
         ret = client.predict(feed_dict={
             "frames": decoded_frames_base64,
             "frames_shape": str(decoded_frames.shape)
         },
                              fetch=["label", "prob"])
+
+        # print result
         print(ret)

@@ -24,21 +24,21 @@ docker exec -it test bash
 
 进入 docker 后，需要安装 Serving 相关的 python 包。
 ```bash
-pip3 install paddle-serving-client==0.7.0
-pip3 install paddle-serving-app==0.7.0
-pip3 install faiss-cpu==1.7.1post2
+python3.7 -m pip install paddle-serving-client==0.7.0
+python3.7 -m pip install paddle-serving-app==0.7.0
+python3.7 -m pip install faiss-cpu==1.7.1post2
 
 #若为CPU部署环境:
-pip3 install paddle-serving-server==0.7.0  # CPU
-pip3 install paddlepaddle==2.2.0           # CPU
+python3.7 -m pip install paddle-serving-server==0.7.0  # CPU
+python3.7 -m pip install paddlepaddle==2.2.0           # CPU
 
 #若为GPU部署环境
-pip3 install paddle-serving-server-gpu==0.7.0.post102  # GPU with CUDA10.2 + TensorRT6
-pip3 install paddlepaddle-gpu==2.2.0                   # GPU with CUDA10.2
+python3.7 -m pip install paddle-serving-server-gpu==0.7.0.post102  # GPU with CUDA10.2 + TensorRT6
+python3.7 -m pip install paddlepaddle-gpu==2.2.0                   # GPU with CUDA10.2
 
 #其他GPU环境需要确认环境再选择执行哪一条
-pip3 install paddle-serving-server-gpu==0.7.0.post101  # GPU with CUDA10.1 + TensorRT6
-pip3 install paddle-serving-server-gpu==0.7.0.post112  # GPU with CUDA11.2 + TensorRT8
+python3.7 -m pip install paddle-serving-server-gpu==0.7.0.post101  # GPU with CUDA10.1 + TensorRT6
+python3.7 -m pip install paddle-serving-server-gpu==0.7.0.post112  # GPU with CUDA11.2 + TensorRT8
 ```
 
 * 如果安装速度太慢，可以通过 `-i https://pypi.tuna.tsinghua.edu.cn/simple` 更换源，加速安装过程。
@@ -46,36 +46,48 @@ pip3 install paddle-serving-server-gpu==0.7.0.post112  # GPU with CUDA11.2 + Ten
 ## 动作识别服务部署
 ### 模型转换
 使用 PaddleServing 做服务化部署时，需要将保存的 inference 模型转换为 Serving 模型。下面以 PP-TSM 模型为例，介绍如何部署图像分类服务。
-- 下载训练好的 PP-TSM 的模型，并转化为inference模型：
-```bash
-wget -P data/ https://videotag.bj.bcebos.com/PaddleVideo-release2.1/PPTSM/ppTSM_k400_uniform.pdparams
+- 下载训练好的 PP-TSM 的模型，并转化为推理模型：
+  ```bash
+  wget -P data/ https://videotag.bj.bcebos.com/PaddleVideo-release2.1/PPTSM/ppTSM_k400_uniform.pdparams
 
-python3.7 tools/export_model.py \
--c configs/recognition/pptsm/pptsm_k400_frames_uniform.yaml \
--p data/ppTSM_k400_uniform.pdparams \
--o inference/ppTSM
-```
+  python3.7 tools/export_model.py \
+  -c configs/recognition/pptsm/pptsm_k400_frames_uniform.yaml \
+  -p data/ppTSM_k400_uniform.pdparams \
+  -o inference/ppTSM
+  ```
+
+- 我们也提供了转换好的推理模型，按以下命令下载并解压
+  ```bash
+  mkdir ./inference
+  wget -nc -P ./inference https://videotag.bj.bcebos.com/PaddleVideo-release2.3/ppTSM.zip --no-check-certificate
+  pushd ./inference
+  unzip ppTSM.zip
+  popd
+  ```
+
+- 我们提供了转换好的[PP-TSM推理模型](https://videotag.bj.bcebos.com/PaddleVideo-release2.3/ppTSM.zip)
 - 用 paddle_serving_client 把下载的 inference 模型转换成易于 Server 部署的模型格式：
-```bash
-python3.7 -m paddle_serving_client.convert \
---dirname inference/ppTSM \
---model_filename ppTSM.pdmodel \
---params_filename ppTSM.pdiparams \
---serving_server ./ppTSM_serving/ \
---serving_client ./ppTSM_client/
-```
+  ```bash
+  python3.7 -m paddle_serving_client.convert \
+  --dirname inference/ppTSM \
+  --model_filename ppTSM.pdmodel \
+  --params_filename ppTSM.pdiparams \
+  --serving_server ./ppTSM_serving/ \
+  --serving_client ./ppTSM_client/
+  ```
+
 PP-TSM 推理模型转换完成后，会在当前文件夹多出 `ppTSM_serving` 和 `ppTSM_client` 的文件夹，具备如下格式：
-```bash
-PaddleVideo
-├── ppTSM_serving
-    ├── ppTSM.pdiparams
-    ├── ppTSM.pdmodel
-    ├── serving_server_conf.prototxt
-    └── serving_server_conf.stream.prototxt
-├── ppTSM_client
-    ├── serving_client_conf.prototxt
-    └── serving_client_conf.stream.prototxt
-```
+  ```bash
+  PaddleVideo
+  ├── ppTSM_serving
+      ├── ppTSM.pdiparams
+      ├── ppTSM.pdmodel
+      ├── serving_server_conf.prototxt
+      └── serving_server_conf.stream.prototxt
+  ├── ppTSM_client
+      ├── serving_client_conf.prototxt
+      └── serving_client_conf.stream.prototxt
+  ```
 得到模型文件之后，需要分别修改 `ppTSM_serving` 和 `ppTSM_client` 下的文件 `serving_server_conf.prototxt`，将 两份文件中`fetch_var` 下的 `alias_name` 均改为 `outputs`
 
 **备注**:  Serving 为了兼容不同模型的部署，提供了输入输出重命名的功能。这样，不同的模型在推理部署时，只需要修改配置文件的`alias_name`即可，无需修改代码即可完成推理部署。
@@ -115,6 +127,7 @@ recognition_web_service.py  # 启动pipeline服务端的python脚本
 ```bash
 cd deploy/paddleserving
 ```
+
 - 启动服务：
 ```bash
 # 在当前命令行窗口启动并保持在前端
@@ -155,5 +168,9 @@ value: "[0.9907388687133789]"
 unset https_proxy
 unset http_proxy
 ```
+
+**Q2**： 服务端启动后没有反应，一直停在`start proxy service`不动
+
+**A2**： 很可能是启动过程中遇到了问题，可以在`./deploy/python_serving/PipelineServingLogs/pipeline.log`日志文件中查看详细报错信息
 
 更多的服务部署类型，如 `RPC 预测服务` 等，可以参考 Serving 的[github 官网](https://github.com/PaddlePaddle/Serving/tree/v0.7.0/examples)

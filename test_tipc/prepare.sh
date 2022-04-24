@@ -461,7 +461,20 @@ if [ ${MODE} = "cpp_infer" ];then
 fi
 
 if [ ${MODE} = "serving_infer" ];then
-    echo "Not added into TIPC now."
+    if [[ ${model_name} == "PP-TSM" ]];then
+        # prepare lite infer data for serving
+        pushd ./data
+        mkdir python_serving_infer_video_dir
+        cp ./example.avi python_serving_infer_video_dir/
+        popd
+        # prepare inference model
+        mkdir ./inference
+        pushd ./inference
+        wget -nc https://videotag.bj.bcebos.com/PaddleVideo-release2.3/ppTSM.zip --no-check-certificate
+        unzip ppTSM.zip
+        popd
+
+    fi
 fi
 
 if [ ${MODE} = "paddle2onnx_infer" ];then

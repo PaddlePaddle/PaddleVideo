@@ -23,23 +23,22 @@ docker exec -it test bash
 ```
 
 After entering docker, you need to install Serving-related python packages.
-
 ```bash
-pip3 install paddle-serving-client==0.7.0
-pip3 install paddle-serving-app==0.7.0
-pip3 install faiss-cpu==1.7.1post2
+python3.7 -m pip install paddle-serving-client==0.7.0
+python3.7 -m pip install paddle-serving-app==0.7.0
+python3.7 -m pip install faiss-cpu==1.7.1post2
 
 #If it is a CPU deployment environment:
-pip3 install paddle-serving-server==0.7.0  #CPU
-pip3 install paddlepaddle==2.2.0  #CPU
+python3.7 -m pip install paddle-serving-server==0.7.0 #CPU
+python3.7 -m pip install paddlepaddle==2.2.0 # CPU
 
 #If it is a GPU deployment environment
-pip3 install paddle-serving-server-gpu==0.7.0.post102  # GPU with CUDA10.2 + TensorRT6
-pip3 install paddlepaddle-gpu==2.2.0  # GPU with CUDA10.2
+python3.7 -m pip install paddle-serving-server-gpu==0.7.0.post102 # GPU with CUDA10.2 + TensorRT6
+python3.7 -m pip install paddlepaddle-gpu==2.2.0 # GPU with CUDA10.2
 
 #Other GPU environments need to confirm the environment and then choose which one to execute
-pip3 install paddle-serving-server-gpu==0.7.0.post101  # GPU with CUDA10.1 + TensorRT6
-pip3 install paddle-serving-server-gpu==0.7.0.post112  # GPU with CUDA11.2 + TensorRT8
+python3.7 -m pip install paddle-serving-server-gpu==0.7.0.post101 # GPU with CUDA10.1 + TensorRT6
+python3.7 -m pip install paddle-serving-server-gpu==0.7.0.post112 # GPU with CUDA11.2 + TensorRT8
 ```
 
 * If the installation speed is too slow, you can change the source through `-i https://pypi.tuna.tsinghua.edu.cn/simple` to speed up the installation process.
@@ -47,41 +46,49 @@ pip3 install paddle-serving-server-gpu==0.7.0.post112  # GPU with CUDA11.2 + Ten
 ## Action recognition service deployment
 ### Model conversion
 When using PaddleServing for service deployment, you need to convert the saved inference model into a Serving model. The following takes the PP-TSM model as an example to introduce how to deploy the image classification service.
+- Download the trained PP-TSM model and convert it into an inference model:
+  ```bash
+  wget -P data/ https://videotag.bj.bcebos.com/PaddleVideo-release2.1/PPTSM/ppTSM_k400_uniform.pdparams
 
-- Download the trained PP-TSM model and convert it to an inference model:
-```bash
-wget -P data/ https://videotag.bj.bcebos.com/PaddleVideo-release2.1/PPTSM/ppTSM_k400_uniform.pdparams
+  python3.7 tools/export_model.py \
+  -c configs/recognition/pptsm/pptsm_k400_frames_uniform.yaml \
+  -p data/ppTSM_k400_uniform.pdparams \
+  -o inference/ppTSM
+  ```
 
-python3.7 tools/export_model.py \
--c configs/recognition/pptsm/pptsm_k400_frames_uniform.yaml \
--p data/ppTSM_k400_uniform.pdparams \
--o inference/ppTSM
-```
+- We also provide the converted inference model, download and unzip by the following command
+  ```bash
+  mkdir ./inference
+  wget -nc -P ./inference https://videotag.bj.bcebos.com/PaddleVideo-release2.3/ppTSM.zip --no-check-certificate
+  pushd ./inference
+  unzip ppTSM.zip
+  popd
+  ```
 
+- We provide the converted [PP-TSM inference model](https://videotag.bj.bcebos.com/PaddleVideo-release2.3/ppTSM.zip)
 - Use paddle_serving_client to convert the downloaded inference model into a model format that is easy for server deployment:
-```bash
-python3.7 -m paddle_serving_client.convert \
---dirname inference/ppTSM \
---model_filename ppTSM.pdmodel \
---params_filename ppTSM.pdiparams \
---serving_server ./ppTSM_serving/ \
---serving_client ./ppTSM_client/
-```
+  ```bash
+  python3.7 -m paddle_serving_client.convert \
+  --dirname inference/ppTSM \
+  --model_filename ppTSM.pdmodel \
+  --params_filename ppTSM.pdiparams \
+  --serving_server ./ppTSM_serving/ \
+  --serving_client ./ppTSM_client/
+  ```
 
 After the PP-TSM inference model conversion is completed, there will be additional `ppTSM_serving` and `ppTSM_client` folders in the current folder, with the following formats:
-```bash
-PaddleVideo
-├── ppTSM_serving
-    ├── ppTSM.pdiparams
-    ├── ppTSM.pdmodel
-    ├── serving_server_conf.prototxt
-    └── serving_server_conf.stream.prototxt
-├── ppTSM_client
-    ├── serving_client_conf.prototxt
-    └── serving_client_conf.stream.prototxt
-```
-
-After getting the model file, you need to modify the files `serving_server_conf.prototxt` under `ppTSM_serving` and `ppTSM_client` respectively, and change `alias_name` under `fetch_var` in both files to `outputs`
+  ```bash
+  PaddleVideo
+  ├── ppTSM_serving
+      ├── ppTSM.pdiparams
+      ├── ppTSM.pdmodel
+      ├── serving_server_conf.prototxt
+      └── serving_server_conf.stream.prototxt
+  ├── ppTSM_client
+      ├── serving_client_conf.prototxt
+      └── serving_client_conf.stream.prototxt
+  ```
+After getting the model files, you need to modify the files `serving_server_conf.prototxt` under `ppTSM_serving` and `ppTSM_client` respectively, and change `alias_name` under `fetch_var` in both files to `outputs`
 
 **Remarks**: In order to be compatible with the deployment of different models, Serving provides the function of input and output renaming. In this way, when different models are inferred and deployed, they only need to modify the `alias_name` of the configuration file, and the inference deployment can be completed without modifying the code.
 The modified `serving_server_conf.prototxt` looks like this:
@@ -106,21 +113,21 @@ fetch_var {
 }
 
 ```
-
 ### Service deployment and requests
 The paddleserving directory contains the code for starting the pipeline service, C++ serving service (TODO) and sending prediction requests, including:
 ```bash
 __init__.py
-configs/xxx.yaml            # start the configuration file of the pipeline service
-pipeline_http_client.py     # python script for sending pipeline prediction request via http
-pipeline_rpc_client.py      # python script for sending pipeline prediction request in rpc mode
-recognition_web_service.py  # python script to start the pipeline server
+configs/xxx.yaml # start the configuration file of the pipeline service
+pipeline_http_client.py # python script for sending pipeline prediction request via http
+pipeline_rpc_client.py # python script for sending pipeline prediction request in rpc mode
+recognition_web_service.py # python script that starts the pipeline server
 ```
 #### Python Serving
 - Go to the working directory:
 ```bash
 cd deploy/paddleserving
 ```
+
 - Start the service:
 ```bash
 # Start in the current command line window and stay in front
@@ -162,4 +169,8 @@ unset https_proxy
 unset http_proxy
 ```
 
-For more service deployment types, such as `RPC prediction service`, you can refer to Serving's [github official website](https://github.com/PaddlePaddle/Serving/tree/v0.7.0/examples)
+**Q2**: There is no response after the server is started, and it has been stopped at `start proxy service`
+
+**A2**: It is likely that a problem was encountered during the startup process. You can view the detailed error message in the `./deploy/python_serving/PipelineServingLogs/pipeline.log` log file
+
+More service deployment types, such as `RPC prediction service`, etc., can refer to Test Serving's [github official website](https://github.com/PaddlePaddle/Serving/tree/v0.7.0/examples)
