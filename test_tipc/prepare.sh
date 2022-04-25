@@ -70,7 +70,7 @@ if [ ${MODE} = "lite_train_lite_infer" ];then
 		tar -xf FFA_lite_data.tar
         popd
         # download pretrained weights
-        wget -nc -P https://videotag.bj.bcebos.com/PaddleVideo-release2.3/ITS2_3_19_400000_transform.pdparams
+        wget -nc -P ./data https://videotag.bj.bcebos.com/PaddleVideo-release2.3/ITS2_3_19_400000_transform.pdparams
     elif [ ${model_name} == "TSM" ]; then
         # pretrain lite train data
         pushd ./data/k400
