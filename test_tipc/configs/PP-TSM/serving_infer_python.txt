@@ -8,6 +8,12 @@ trans_model:-m paddle_serving_client.convert
 --serving_server:./deploy/python_serving/serving_server/
 --serving_client:./deploy/python_serving/serving_client/
 serving_dir:./deploy/python_serving
-web_service:recognition_web_service.py
+web_service:recognition_web_service.py --config=configs/PP-TSM.yaml
 pipline:pipeline_http_client.py
 --input_file:../../data/
+op.rec.local_service_conf.devices:null|0
+op.rec.local_service_conf.use_mkldnn:True|False
+op.rec.local_service_conf.thread_num:1|6
+op.rec.local_service_conf.use_trt:False|True
+op.rec.local_service_conf.precision:fp32|fp16|int8
+pipline:pipeline_rpc_client.py|pipeline_http_client.py

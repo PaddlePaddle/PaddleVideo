@@ -40,26 +40,35 @@ function func_serving(){
     _python=$1
     _script=$2
     _model_dir=$3
-    # pdserving
+
+    # python serving code
     set_dirname=$(func_set_params "${infer_model_dir_key}" "${infer_model_dir_value}")
     set_model_filename=$(func_set_params "${model_filename_key}" "${model_filename_value}")
     set_params_filename=$(func_set_params "${params_filename_key}" "${params_filename_value}")
     set_serving_server=$(func_set_params "${serving_server_key}" "${serving_server_value}")
+
     set_serving_client=$(func_set_params "${serving_client_key}" "${serving_client_value}")
     python_list=(${python_list})
     python=${python_list[0]}
     trans_model_cmd="${python} ${trans_model_py} ${set_dirname} ${set_model_filename} ${set_params_filename} ${set_serving_server} ${set_serving_client}"
 
     eval ${trans_model_cmd}
+
+    # modify the alias name of fetch_var to "outputs"
+    server_fetch_var_line_cmd="sed -i '/fetch_var/,/is_lod_tensor/s/alias_name: .*/alias_name: \"outputs\"/' $serving_server_value/serving_server_conf.prototxt"
+    eval ${server_fetch_var_line_cmd}
+    client_fetch_var_line_cmd="sed -i '/fetch_var/,/is_lod_tensor/s/alias_name: .*/alias_name: \"outputs\"/' $serving_client_value/serving_client_conf.prototxt"
+    eval ${client_fetch_var_line_cmd}
+
     cd ${serving_dir_value}
-    echo 'PWD=: '$PWD
+    echo 'PWD= '$PWD
     unset https_proxy
     unset http_proxy
 
     web_service_cmd="${python} ${web_service_py} &"
 
     eval $web_service_cmd
-    sleep 2s
+    sleep 30s # not too short is ok
     _save_log_path="../../log/${model_name}/${MODE}/server_infer_gpu_batchsize_1.log"
     set_image_dir=$(func_set_params "${image_dir_key}" "${image_dir_value}")
     pipeline_cmd="${python} ${pipeline_py} ${set_image_dir} > ${_save_log_path} 2>&1 "

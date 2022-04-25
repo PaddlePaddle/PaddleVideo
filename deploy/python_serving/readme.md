@@ -66,7 +66,8 @@ python3.7 -m pip install paddle-serving-server-gpu==0.7.0.post112  # GPU with CU
   ```
 
 - 我们提供了转换好的[PP-TSM推理模型](https://videotag.bj.bcebos.com/PaddleVideo-release2.3/ppTSM.zip)
-- 用 paddle_serving_client 把下载的 inference 模型转换成易于 Server 部署的模型格式：
+
+- 用 paddle_serving_client 把下载的推理模型转换成易于 Server 部署的模型格式：
   ```bash
   python3.7 -m paddle_serving_client.convert \
   --dirname inference/ppTSM \

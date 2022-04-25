@@ -23,9 +23,9 @@ import numpy as np
 __dir__ = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.abspath(os.path.join(__dir__, '../../')))
 
+from paddle_serving_app.reader import Sequential
 from paddlevideo.loader.pipelines import (CenterCrop, Image2Array,
                                           Normalization, Sampler, Scale)
-from paddle_serving_app.reader import Sequential
 
 try:
     from paddle_serving_server_gpu.web_service import Op, WebService
