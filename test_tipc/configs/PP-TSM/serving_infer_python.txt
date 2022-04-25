@@ -11,9 +11,3 @@ serving_dir:./deploy/python_serving
 web_service:recognition_web_service.py --config=configs/PP-TSM.yaml
 pipline:pipeline_http_client.py
 --input_file:../../data/
-op.rec.local_service_conf.devices:null|0
-op.rec.local_service_conf.use_mkldnn:True|False
-op.rec.local_service_conf.thread_num:1|6
-op.rec.local_service_conf.use_trt:False|True
-op.rec.local_service_conf.precision:fp32|fp16|int8
-pipline:pipeline_rpc_client.py|pipeline_http_client.py
