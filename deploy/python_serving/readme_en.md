@@ -65,8 +65,7 @@ When using PaddleServing for service deployment, you need to convert the saved i
   popd
   ```
 
-- We provide the converted [PP-TSM inference model](https://videotag.bj.bcebos.com/PaddleVideo-release2.3/ppTSM.zip)
-- Use paddle_serving_client to convert the downloaded inference model into a model format that is easy for server deployment:
+- Use paddle_serving_client to convert the converted inference model into a model format that is easy for server deployment:
   ```bash
   python3.7 -m paddle_serving_client.convert \
   --dirname inference/ppTSM \
