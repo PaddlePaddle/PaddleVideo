@@ -38,7 +38,7 @@ def parse_args():
     parser.add_argument("--model_file", type=str)
     parser.add_argument("--params_file", type=str)
 
-    # params for predict
+    # params for paddle predict
     parser.add_argument("-b", "--batch_size", type=int, default=1)
     parser.add_argument("--use_gpu", type=str2bool, default=True)
     parser.add_argument("--precision", type=str, default="fp32")
@@ -48,6 +48,11 @@ def parse_args():
     parser.add_argument("--enable_benchmark", type=str2bool, default=False)
     parser.add_argument("--enable_mkldnn", type=str2bool, default=False)
     parser.add_argument("--cpu_threads", type=int, default=None)
+
+    # params for onnx predict
+    parser.add_argument("--use_onnx", type=str2bool, default=False)
+    parser.add_argument("--onnx_model_file", type=str, default=None)
+
     # parser.add_argument("--hubserving", type=str2bool, default=False)  #TODO
 
     return parser.parse_args()
@@ -113,6 +118,27 @@ def create_paddle_predictor(args, cfg):
     return config, predictor
 
 
+def create_onnx_predictor(args, cfg=None):
+    import onnxruntime as ort
+    model_file = args.onnx_model_file
+    config = ort.SessionOptions()
+    if args.use_gpu:
+        raise ValueError(
+            "onnx inference now only supports cpu! please set `use_gpu` to False."
+        )
+    else:
+        config.intra_op_num_threads = args.cpu_threads
+        if config.intra_op_num_threads is None:
+            config.intra_op_num_threads = 4
+            print(
+                f"intra_op_num_threads is set to 4 by default when args.cpu_threads is None"
+            )
+        if args.ir_optim:
+            config.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL
+    predictor = ort.InferenceSession(model_file, sess_options=config)
+    return config, predictor
+
+
 def parse_file_paths(input_path: str) -> list:
     if osp.isfile(input_path):
         files = [
@@ -128,8 +154,7 @@ def parse_file_paths(input_path: str) -> list:
     return files
 
 
-def main():
-    args = parse_args()
+def paddle_predict(args):
     cfg = get_config(args.config, show=False)
 
     model_name = cfg.model_name
@@ -148,6 +173,7 @@ def main():
     for item in output_names:
         output_tensor_list.append(predictor.get_output_handle(item))
 
+    # TODO: clean code for MSTCN and ASRF
     # get the absolute file path(s) to be processed
     if model_name in ["MSTCN", "ASRF"]:
         files = InferenceHelper.get_process_file(args.input_file)
@@ -242,11 +268,14 @@ def main():
             if args.enable_benchmark:
                 autolog.times.stamp()
 
-            # run inference
+            # copy input data from cpu
             for i in range(len(input_tensor_list)):
                 input_tensor_list[i].copy_from_cpu(batched_inputs[i])
+
+            # run inference
             predictor.run()
 
+            # copy outputs to cpu
             batched_outputs = []
             for j in range(len(output_tensor_list)):
                 batched_outputs.append(output_tensor_list[j].copy_to_cpu())
@@ -255,6 +284,7 @@ def main():
             if args.enable_benchmark:
                 autolog.times.stamp()
 
+            # post process for outputs
             InferenceHelper.postprocess(batched_outputs,
                                         not args.enable_benchmark)
 
@@ -267,6 +297,97 @@ def main():
     # report benchmark log if enabled
     if args.enable_benchmark:
         autolog.report()
+
+
+def onnx_predict(args):
+    cfg = get_config(args.config, show=False)
+
+    model_name = cfg.model_name
+
+    print(f"Inference model({model_name})...")
+    InferenceHelper = build_inference_helper(cfg.INFERENCE)
+
+    inference_config, predictor = create_onnx_predictor(args)
+
+    # get input_tensor and output_tensor
+    input_names = predictor.get_inputs()[0].name
+    output_names = predictor.get_outputs()[0].name
+
+    # TODO: clean code for MSTCN and ASRF
+    # get the absolute file path(s) to be processed
+    if model_name in ["MSTCN", "ASRF"]:
+        files = InferenceHelper.get_process_file(args.input_file)
+    else:
+        files = parse_file_paths(args.input_file)
+    if args.enable_benchmark:
+        test_video_num = 12
+        num_warmup = 3
+        # instantiate auto log
+        try:
+            import auto_log
+        except ImportError as e:
+            print(f"{e}, [git+https://github.com/LDOUBLEV/AutoLog] "
+                  f"package and it's dependencies is required for "
+                  f"python-inference when enable_benchmark=True.")
+        pid = os.getpid()
+        autolog = auto_log.AutoLogger(
+            model_name=cfg.model_name,
+            model_precision=args.precision,
+            batch_size=args.batch_size,
+            data_shape="dynamic",
+            save_path="./output/auto_log.lpg",
+            inference_config=inference_config,
+            pids=pid,
+            process_name=None,
+            gpu_ids=0 if args.use_gpu else None,
+            time_keys=['preprocess_time', 'inference_time', 'postprocess_time'],
+            warmup=num_warmup)
+        files = [args.input_file for _ in range(test_video_num + num_warmup)]
+
+    # Inferencing process
+    batch_num = args.batch_size
+    for st_idx in range(0, len(files), batch_num):
+        ed_idx = min(st_idx + batch_num, len(files))
+
+        # auto log start
+        if args.enable_benchmark:
+            autolog.times.start()
+
+        # Pre process batched input
+        batched_inputs = InferenceHelper.preprocess_batch(files[st_idx:ed_idx])
+
+        # get pre process time cost
+        if args.enable_benchmark:
+            autolog.times.stamp()
+
+        # run inference
+        batched_outputs = predictor.run(
+            output_names=[output_names],
+            input_feed={input_names: batched_inputs[0]})
+
+        # get inference process time cost
+        if args.enable_benchmark:
+            autolog.times.stamp()
+
+        InferenceHelper.postprocess(batched_outputs, not args.enable_benchmark)
+
+        # get post process time cost
+        if args.enable_benchmark:
+            autolog.times.end(stamp=True)
+
+        # time.sleep(0.01)  # sleep for T4 GPU
+
+    # report benchmark log if enabled
+    if args.enable_benchmark:
+        autolog.report()
+
+
+def main():
+    args = parse_args()
+    if args.use_onnx:
+        onnx_predict(args)
+    else:
+        paddle_predict(args)
 
 
 if __name__ == "__main__":
