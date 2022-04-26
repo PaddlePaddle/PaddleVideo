@@ -28,7 +28,7 @@ Model compression mainly includes five steps:
 
 ```bash
 python3.7 -m pip install paddleslim -i https://pypi.tuna.tsinghua.edu.cn/simple
-````
+```
 
 * If you get the latest features of PaddleSlim, you can install it from source.
 
@@ -36,7 +36,7 @@ python3.7 -m pip install paddleslim -i https://pypi.tuna.tsinghua.edu.cn/simple
 git clone https://github.com/PaddlePaddle/PaddleSlim.git
 cd Paddleslim
 python3.7 setup.py install
-````
+```
 
 ### 2. Prepare the trained model
 
@@ -48,7 +48,7 @@ Go to PaddleVideo root directory
 
 ```bash
 cd PaddleVideo
-````
+```
 
 The offline quantization code is located in `deploy/slim/quant_post_static.py`.
 
@@ -68,14 +68,20 @@ Generally speaking, the offline quantization loss model has more accuracy.
 Taking the PP-TSM model as an example, after generating the `inference model`, the offline quantization operation is as follows
 
 ```bash
-# First enter the deploy/slim directory
+# download a small amount of data for calibration
+pushd ./data/k400
+wget -nc https://videotag.bj.bcebos.com/Data/k400_rawframes_small.tar
+tar -xf k400_rawframes_small.tar
+popd
+
+# then switch to deploy/slim
 cd deploy/slim
 
-# Then execute the offline quantization command
+# execute quantization script
 python3.7 quant_post_static.py \
 -c ../../configs/recognition/pptsm/pptsm_k400_frames_uniform_quantization.yaml \
 --use_gpu=True
-````
+```
 
 All quantization environment parameters except `use_gpu` are configured in `pptsm_k400_frames_uniform_quantization.yaml` file
 Where `inference_model_dir` represents the directory path of the `inference model` exported in the previous step, and `quant_output_dir` represents the output directory path of the quantization model
@@ -96,14 +102,14 @@ python3.7 tools/predict.py \
 --params_file ./inference/ppTSM/quant_model/__params__ \
 --use_gpu=True \
 --use_tensorrt=False
-````
+```
 
 The output is as follows:
 ```bash
 Current video file: data/example.avi
         top-1 class: 5
         top-1 score: 0.9997928738594055
-````
+```
 #### 3.2 Model pruning
 TODO
 

@@ -69,10 +69,16 @@ TODO
 以PP-TSM模型为例，生成`inference model`后，离线量化运行方式如下
 
 ```bash
-# 首先进入deploy/slim目录下
+# 下载并解压出少量数据用于离线量化的校准
+pushd ./data/k400
+wget -nc https://videotag.bj.bcebos.com/Data/k400_rawframes_small.tar
+tar -xf k400_rawframes_small.tar
+popd
+
+# 然后进入deploy/slim目录下
 cd deploy/slim
 
-# 然后执行离线量化命令
+# 执行离线量化命令
 python3.7 quant_post_static.py \
 -c ../../configs/recognition/pptsm/pptsm_k400_frames_uniform_quantization.yaml \
 --use_gpu=True
