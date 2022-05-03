@@ -47,7 +47,7 @@ from paddlevideo.loader.pipelines import (
     GroupResize, Image2Array, ImageDecoder, JitterScale, MultiCrop,
     Normalization, PackOutput, Sampler, SamplerPkl, Scale, SkeletonNorm,
     TenCrop, ToArray, UniformCrop, VideoDecoder, SegmentationSampler,
-    SketeonCropSample)
+    SketeonCropSample, MultiCenterCrop)
 from paddlevideo.metrics.ava_utils import read_labelmap
 from paddlevideo.metrics.bmn_metric import boundary_choose, soft_nms
 from paddlevideo.utils import Registry, build, get_config
@@ -350,6 +350,50 @@ class BMN_Inference_helper(Base_Inference_helper):
             os.path.join(self.result_path, "bmn_results_inference.json"), "w")
 
         json.dump(result_dict, outfile)
+
+@INFERENCE.register()
+class TokenShift_Inference_helper(Base_Inference_helper):
+
+    def __init__(self,
+                 num_seg=8,
+                 seg_len=1,
+                 short_size=256,
+                 target_size=256,
+                 top_k=1,
+                 mean=[0.5, 0.5, 0.5],
+                 std=[0.5, 0.5, 0.5]):
+        self.num_seg = num_seg
+        self.seg_len = seg_len
+        self.short_size = short_size
+        self.target_size = target_size
+        self.top_k = top_k
+        self.mean = mean
+        self.std = std
+
+    def preprocess(self, input_file):
+        """
+        input_file: str, file path
+        return: list
+        """
+        assert os.path.isfile(input_file) is not None, "{0} not exists".format(
+            input_file)
+        results = {'filename': input_file}
+        ops = [
+            VideoDecoder(backend='pyav', mode='test', num_seg=self.num_seg),
+            Sampler(self.num_seg,
+                    self.seg_len,
+                    valid_mode=True),
+            Normalization(self.mean, self.std, tensor_shape=[1, 1, 1, 3]),
+            Image2Array(data_format='cthw'),
+            JitterScale(self.short_size, self.short_size),
+            MultiCenterCrop(self.target_size)
+        ]
+        for op in ops:
+            results = op(results)
+
+        # [N,C,Tx3,H,W]
+        res = np.expand_dims(results['imgs'], axis=0).copy()
+        return [res]
 
 
 @INFERENCE.register()
