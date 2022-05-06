@@ -14,10 +14,13 @@
 
 import argparse
 import os
+import sys
 from os import path as osp
 
-from utils import build_inference_helper
-from paddlevideo.utils import get_config
+__dir__ = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.abspath(os.path.join(__dir__, '../../tools')))
+
+from utils import build_inference_helper, get_config
 
 
 def parse_args():

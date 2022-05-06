@@ -16,7 +16,7 @@ python3.7 -m pip install paddle2onnx
 
 - 安装 ONNXRuntime
 ```bash
-建议安装 1.9.0 版本，可根据环境更换版本号
+# 建议安装 1.9.0 版本，可根据环境更换版本号
 python3.7 -m pip install onnxruntime==1.9.0
 ```
 
@@ -55,7 +55,7 @@ python3.7 -m pip install onnxruntime==1.9.0
 接下来就可以用 ONNX 格式模型进行预测，其用法与paddle 预测模型类似
 执行如下命令：
 ```bash
-python3.7 tools/predict_onnx.py \
+python3.7 deploy/paddle2onnx/predict_onnx.py \
 --input_file data/example.avi \
 --config configs/recognition/pptsn/pptsn_k400_videos.yaml \
 --model_file=./inference/ppTSN/ppTSN.onnx
