@@ -148,8 +148,4 @@ Run successfully with command - python3.7 ./tools/predict.py --use_gpu=False --c
  Run successfully with command - python3.7 ./tools/predict.py --use_gpu=False --config=./configs/recognition/pptsm/pptsm_k400_frames_uniform.yaml --model_file=./inference/ppTSM/quant_model/__model__ --params_file=./inference/ppTSM/quant_model/__params__ --batch_size=1 --input_file=./data/example.avi --enable_benchmark=True > ./log/PP-TSM/klquant_whole_infer/python_infer_cpu_batchsize_1.log 2>&1 !
 ```
 
-
-
-
 如果运行失败，也会在终端中输出运行失败的日志信息以及对应的运行命令。可以基于该命令，分析运行失败的原因。
-
