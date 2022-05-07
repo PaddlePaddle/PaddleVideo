@@ -15,7 +15,7 @@ Linux GPU/CPU PACT离线量化训练推理测试的主程序为`test_train_infer
 
 | 算法名称 | 模型名称 | device_CPU | device_GPU | batchsize |
 |  :----:   |  :----: |   :----:   |  :----:  |   :----:   |
-|  PP-TSM   |  pptsm_k400_frames_uniform |  支持 | 支持 | 1/2 |
+|  PP-TSM   |  pptsm_k400_frames_uniform |  支持 | 支持 | 1 |
 
 
 ## 2. 测试流程
