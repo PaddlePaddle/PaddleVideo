@@ -29,7 +29,7 @@ UCF-101 data download and preparation please refer to [UCF-101 data preparation]
 
 ## Train
 
-### Kinetics-400 data set training
+### UCF-101 data set training
 
 #### Download and add pre-trained models
 
