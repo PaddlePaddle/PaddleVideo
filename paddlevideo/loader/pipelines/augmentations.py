@@ -77,7 +77,7 @@ class Scale(object):
                 ow = self.short_size
                 if self.fixed_ratio:
                     oh = int(self.short_size * 4.0 / 3.0)
-                elif not self.keep_ratio:  # no
+                elif self.keep_ratio is False:
                     oh = self.short_size
                 else:
                     scale_factor = self.short_size / w
@@ -85,19 +85,17 @@ class Scale(object):
                              0.5) if self.do_round else int(h *
                                                             self.short_size / w)
                     ow = int(w * float(scale_factor) +
-                             0.5) if self.do_round else int(w *
-                                                            self.short_size / h)
+                             0.5) if self.do_round else self.short_size
             else:
                 oh = self.short_size
                 if self.fixed_ratio:
                     ow = int(self.short_size * 4.0 / 3.0)
-                elif not self.keep_ratio:  # no
+                elif self.keep_ratio is False:
                     ow = self.short_size
                 else:
                     scale_factor = self.short_size / h
                     oh = int(h * float(scale_factor) +
-                             0.5) if self.do_round else int(h *
-                                                            self.short_size / w)
+                             0.5) if self.do_round else self.short_size
                     ow = int(w * float(scale_factor) +
                              0.5) if self.do_round else int(w *
                                                             self.short_size / h)
