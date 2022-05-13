@@ -1,6 +1,6 @@
 [简体中文](../../../zh-CN/model_zoo/recognition/tokenshift_transformer.md) | English
 
-# TimeSformer
+# Token Shift Transformer
 
 ## Content
 
@@ -45,7 +45,7 @@ UCF-101 data download and preparation please refer to [UCF-101 data preparation]
     MODEL:
         framework: "RecognizerTransformer"
         backbone:
-            name: "VisionTransformer"
+            name: "TokenShiftVisionTransformer"
             pretrained: fill in the path here
     ```
 
@@ -75,7 +75,7 @@ python3 main.py --amp -c configs/recognition/token_transformer/tokShift_transfor
   Already save the best model (top1 acc)0.9201
   ```
 
-- Since the sampling method of the Token Shift Transformer model test mode is **uniform** sampling, which is different from the **dense** sampling used in the verification mode during the training process, so the verification index recorded in the training log is `topk Acc `Does not represent the final test score, so after the training is completed, you can use the test mode to test the best model to obtain the final index, the command is as follows:
+- Since the sampling method of the Token Shift Transformer model test mode is **uniform** sampling, which is different from the **dense** sampling used in the verification mode during the training process, so the verification index recorded in the training log, called `topk Acc `, does not represent the final test score, so after the training is completed, you can use the test mode to test the best model to obtain the final index, the command is as follows:
 
   ```bash
   python3 main.py --amp -c configs/recognition/token_transformer/tokShift_transformer_ucf101_256_videos.yaml --test --seed=1234 -w 'output/TokenShiftVisionTransformer/TokenShiftVisionTransformer_best.pdparams'
@@ -118,7 +118,7 @@ Current video file: data/BrushingTeeth.avi
 	top-1 score: 0.9959074258804321
 ```
 
-It can be seen that using the TimeSformer model trained on Kinetics-400 to predict `data/BrushingTeeth.avi`, the output top1 category id is `19`, and the confidence is 0.99. By consulting the category id and name correspondence table, it can be seen that the predicted category name is `brushing_teeth`.
+It can be seen that using the Token Shift Transformer model trained on UCF-101 to predict `data/BrushingTeeth.avi`, the output top1 category id is `19`, and the confidence is 0.99. By consulting the category id and name correspondence table, it can be seen that the predicted category name is `brushing_teeth`.
 
 ## Reference
 
