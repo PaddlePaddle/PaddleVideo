@@ -38,7 +38,7 @@ class Scale(object):
     def __init__(self,
                  short_size,
                  fixed_ratio=True,
-                 keep_ratio=None,
+                 keep_ratio=False,
                  do_round=False,
                  backend='pillow'):
         self.short_size = short_size
