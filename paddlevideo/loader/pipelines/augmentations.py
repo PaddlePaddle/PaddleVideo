@@ -553,21 +553,6 @@ class RandomHue(object):
         return results
 
 
-def adust_gamma(img, gamma, gain=1.0):
-    flag = False
-    if isinstance(img, np.ndarray):
-        flag = True
-        img = Image.fromarray(img)
-    input_mode = img.mode
-    img = img.convert("RGB")
-    gamma_map = [int((255 + 1 - 1e-3) * gain * pow(ele / 255.0, gamma)) for ele in range(256)] * 3
-    img = img.point(gamma_map)  # use PIL's point-function to accelerate this part
-    img = img.convert(input_mode)
-    if flag:
-        img = np.array(img)
-    return img
-
-
 @PIPELINES.register()
 class RandomGamma(object):
     """
@@ -584,6 +569,20 @@ class RandomGamma(object):
         self.value = [1 - gamma, 1 + gamma]
         self.value[0] = max(self.value[0], 0)
 
+    def _adust_gamma(self, img, gamma, gain=1.0):
+        flag = False
+        if isinstance(img, np.ndarray):
+            flag = True
+            img = Image.fromarray(img)
+        input_mode = img.mode
+        img = img.convert("RGB")
+        gamma_map = [int((255 + 1 - 1e-3) * gain * pow(ele / 255.0, gamma)) for ele in range(256)] * 3
+        img = img.point(gamma_map)  # use PIL's point-function to accelerate this part
+        img = img.convert(input_mode)
+        if flag:
+            img = np.array(img)
+        return img
+
     def __call__(self, results):
         """
         Performs random gamma operations.
@@ -599,7 +598,7 @@ class RandomGamma(object):
         if v < self.p:
             gamma = random.uniform(self.value[0], self.value[1])
             results['imgs'] = [
-                adust_gamma(img, gamma) for img in imgs
+                self._adust_gamma(img, gamma) for img in imgs
             ]
         else:
             results['imgs'] = imgs

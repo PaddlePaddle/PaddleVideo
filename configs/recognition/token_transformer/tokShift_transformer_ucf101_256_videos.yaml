@@ -163,4 +163,3 @@ log_interval: 20 #Optional, the interal of logger, default:10
 save_interval: 5
 epochs: 25 #Mandatory, total epoch
 log_level: "INFO" #Optional, the logger level. default: "INFO"
-resume_epoch: 0
