@@ -63,29 +63,29 @@ tar -xf test_images/lite_data.tar
  测试方法如下所示，希望测试不同的模型文件，只需更换为自己的参数配置文件，即可完成对应模型的测试。
 
 ```bash
-bash test_tipc/test_serving_infer_python.sh ${your_params_file} lite_train_lite_infer
+bash test_tipc/test_serving_infer_python.sh ${your_params_file} serving_infer_python
 ```
 
 以`PP-TSM`的`Linux GPU PYTHON 服务化部署测试`为例，命令如下所示。
 
 ```bash
-bash test_tipc/prepare.sh test_tipc/configs/PP-TSM/serving_infer_python.txt serving_infer
+bash test_tipc/prepare.sh test_tipc/configs/PP-TSM/serving_infer_python.txt serving_infer_python
 ```
 
 ```bash
-bash test_tipc/test_serving_infer_python.sh test_tipc/configs/PP-TSM/serving_infer_python.txt serving_infer
+bash test_tipc/test_serving_infer_python.sh test_tipc/configs/PP-TSM/serving_infer_python.txt
 ```
 
 输出结果如下，表示命令运行成功。
 
 ```bash
-[33m Run successfully with command - python3.7 pipeline_http_client.py --input_file=../../data/ > ../../log/PP-TSM/serving_infer/server_infer_gpu_batchsize_1.log 2>&1 !  [0m
+Run successfully with command - python3.7 pipeline_http_client.py --input_file=../../data/ > ../.././test_tipc/output/log/PP-TSM/serving_infer_python/server_infer_python_gpu_batchsize_1.log 2>&1 !
 ```
 
-预测结果会自动保存在 `./log/PP-TSM/serving_infer/server_infer_gpu_batchsize_1.log` ，可以看到 PaddleServing 对样例输入的预测结果，并且预测的标签与概率与PP-TSM python inference的结果完全一致：
+预测结果会自动保存在 `./test_tipc/output/log/PP-TSM/serving_infer_python/server_infer_python_gpu_batchsize_1.log` ，可以看到 PaddleServing 对样例输入的预测结果，并且预测的标签与概率与PP-TSM python inference的结果完全一致：
 
 ```bash
-{'err_no': 0, 'err_msg': '', 'key': ['label', 'prob'], 'value': ["['archery']", '[0.9907387495040894]'], 'tensors': []}
+{'err_no': 0, 'err_msg': '', 'key': ['label', 'prob'], 'value': ["['archery']", '[0.9907388687133789]'], 'tensors': []}
 ```
 
 如果运行失败，也会在终端中输出运行失败的日志信息以及对应的运行命令。可以基于该命令，分析运行失败的原因。

@@ -460,7 +460,7 @@ if [ ${MODE} = "cpp_infer" ];then
     fi
 fi
 
-if [ ${MODE} = "serving_infer" ];then
+if [ ${MODE} = "serving_infer_python" ];then
     if [[ ${model_name} == "PP-TSM" ]];then
         # prepare lite infer data for serving
         pushd ./data
@@ -473,7 +473,20 @@ if [ ${MODE} = "serving_infer" ];then
         wget -nc https://videotag.bj.bcebos.com/PaddleVideo-release2.3/ppTSM.zip --no-check-certificate
         unzip ppTSM.zip
         popd
-
+    elif [[ ${model_name} == "PP-TSN" ]];then
+        # prepare lite infer data for serving
+        pushd ./data
+        mkdir python_serving_infer_video_dir
+        cp ./example.avi python_serving_infer_video_dir/
+        popd
+        # prepare inference model
+        mkdir ./inference
+        pushd ./inference
+        wget -nc https://videotag.bj.bcebos.com/PaddleVideo-release2.3/ppTSN.zip --no-check-certificate
+        unzip ppTSN.zip
+        popd
+    else
+        echo "Not added into TIPC now."
     fi
 fi
 

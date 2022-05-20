@@ -70,23 +70,23 @@ python3.7 -m pip install paddle-serving-server-gpu==0.7.0.post112  # GPU with CU
   --dirname inference/ppTSM \
   --model_filename ppTSM.pdmodel \
   --params_filename ppTSM.pdiparams \
-  --serving_server ./ppTSM_serving/ \
-  --serving_client ./ppTSM_client/
+  --serving_server ./deploy/python_serving/ppTSM_serving_server/ \
+  --serving_client ./deploy/python_serving/ppTSM_client_client/
   ```
 
-PP-TSM 推理模型转换完成后，会在当前文件夹多出 `ppTSM_serving` 和 `ppTSM_client` 的文件夹，具备如下格式：
+PP-TSM 推理模型转换完成后，会在当前文件夹多出 `ppTSM_serving_server` 和 `ppTSM_client_client` 的文件夹，具备如下格式：
   ```bash
   PaddleVideo
-  ├── ppTSM_serving
+  ├── ppTSM_serving_server
       ├── ppTSM.pdiparams
       ├── ppTSM.pdmodel
       ├── serving_server_conf.prototxt
       └── serving_server_conf.stream.prototxt
-  ├── ppTSM_client
+  ├── ppTSM_client_client
       ├── serving_client_conf.prototxt
       └── serving_client_conf.stream.prototxt
   ```
-得到模型文件之后，需要分别修改 `ppTSM_serving` 和 `ppTSM_client` 下的文件 `serving_server_conf.prototxt`，将 两份文件中`fetch_var` 下的 `alias_name` 均改为 `outputs`
+得到模型文件之后，需要分别修改 `ppTSM_serving_server` 和 `ppTSM_client_client` 下的文件 `serving_server_conf.prototxt`，将 两份文件中`fetch_var` 下的 `alias_name` 均改为 `outputs`
 
 **备注**:  Serving 为了兼容不同模型的部署，提供了输入输出重命名的功能。这样，不同的模型在推理部署时，只需要修改配置文件的`alias_name`即可，无需修改代码即可完成推理部署。
 修改后的`serving_server_conf.prototxt`如下所示:
@@ -129,9 +129,9 @@ cd deploy/paddleserving
 - 启动服务：
 ```bash
 # 在当前命令行窗口启动并保持在前端
-python3.7 recognition_web_service.py -c configs/PP-TSM.yaml
+python3.7 recognition_web_service.py -n PPTSM -c configs/PP-TSM.yaml
 # 在后台启动，过程中打印输出的日志会重定向保存到log.txt中
-python3.7 recognition_web_service.py -c configs/PP-TSM.yaml &>log.txt &
+python3.7 recognition_web_service.py -n PPTSM -c configs/PP-TSM.yaml &>log.txt &
 ```
 
 - 发送请求：

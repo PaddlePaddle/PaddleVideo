@@ -44,7 +44,7 @@ test_tipc/
 ├── configs/  # 配置文件目录
 │   ├── PP-TSM/
 │   │   ├── train_infer_python.txt # PP-TSM在Linux上进行python训练预测（基础训练预测）的配置文件
-│   │   ├── serving_infer_python.txt # PP-TSM在Linux上进行serving预测的配置文件
+│   │   ├── serving_infer_python.txt # PP-TSM在Linux上进行python serving预测的配置文件
 │   │   └── train_amp_infer_python.txt # PP-TSM在Linux上进行python训练预测（混合精度训练预测）的配置文件
 │   ├── PP-TSN/
 │   │   ├── train_infer_python.txt # PP-TSN在Linux上进行python训练预测（基础训练预测）的配置文件
@@ -121,4 +121,4 @@ bash test_tipc/test_train_inference_python.sh ./test_tipc/configs/PP-TSM/train_i
 - [test_train_inference_python 使用](docs/test_train_inference_python.md) ：测试基于Python的模型训练、评估、推理等基本功能。
 - [test_amp_train_inference_python 使用](docs/test_train_amp_inference_python.md) ：测试基于Python的**混合精度**模型训练、评估、推理等基本功能。
 - [test_inference_cpp 使用](docs/test_inference_cpp.md) ：测试基于C++的模型推理功能。
-- [test_serving 使用](docs/test_serving_infer_python.md) ：测试基于Paddle Serving的服务化部署功能。
+- [test_serving_infer_python 使用](docs/test_serving_infer_python.md) ：测试基于Paddle Serving的服务化部署功能。

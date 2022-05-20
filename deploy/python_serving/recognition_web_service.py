@@ -16,7 +16,7 @@ import argparse
 import base64
 import os
 import sys
-from typing import Dict
+from typing import Callable, Dict, List
 
 import numpy as np
 
@@ -25,12 +25,46 @@ sys.path.append(os.path.abspath(os.path.join(__dir__, '../../')))
 
 from paddle_serving_app.reader import Sequential
 from paddlevideo.loader.pipelines import (CenterCrop, Image2Array,
-                                          Normalization, Sampler, Scale)
+                                          Normalization, Sampler, Scale,
+                                          TenCrop)
 
 try:
     from paddle_serving_server_gpu.web_service import Op, WebService
 except ImportError:
     from paddle_serving_server.web_service import Op, WebService
+
+VALID_MODELS = ["PPTSM", "PPTSN"]
+
+
+def get_preprocess_seq(model_name: str) -> List[Callable]:
+    """get preprocess sequence by model name
+
+    Args:
+        model_name (str): model name for web serving, such as 'PPTSM', 'PPTSN'
+
+    Returns:
+        List[Callable]: preprocess operators in list.
+    """
+    if model_name == 'PPTSM':
+        preprocess_seq = [
+            Sampler(8, 1, valid_mode=True),
+            Scale(256),
+            CenterCrop(224),
+            Image2Array(),
+            Normalization([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+        ]
+    elif model_name == 'PPTSN':
+        preprocess_seq = [
+            Sampler(25, 1, valid_mode=True, select_left=True),
+            Scale(256, fixed_ratio=True, do_round=True, backend='cv2'),
+            TenCrop(224),
+            Image2Array(),
+            Normalization([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+        ]
+    else:
+        raise ValueError(
+            f"model_name must in {VALID_MODELS}, but got {model_name}")
+    return preprocess_seq
 
 
 def np_softmax(x: np.ndarray, axis=0) -> np.ndarray:
@@ -51,13 +85,7 @@ class VideoOp(Op):
     def init_op(self):
         """init_op
         """
-        self.seq = Sequential([
-            Sampler(8, 1, valid_mode=True),
-            Scale(256),
-            CenterCrop(224),
-            Image2Array(),
-            Normalization([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-        ])
+        self.seq = Sequential(get_preprocess_seq(args.name))
 
         self.label_dict = {}
         with open("../../data/k400/Kinetics-400_label_list.txt", "r") as fin:
@@ -152,6 +180,13 @@ class VideoService(WebService):
 def parse_args():
     # general params
     parser = argparse.ArgumentParser("PaddleVideo Web Serving model script")
+    parser.add_argument(
+        '-n',
+        '--name',
+        type=str,
+        default='PPTSM',
+        help='model name used in web serving, such as PPTSM, PPTSN...')
+
     parser.add_argument('-c',
                         '--config',
                         type=str,

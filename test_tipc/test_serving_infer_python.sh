@@ -3,7 +3,7 @@ source test_tipc/common_func.sh
 
 FILENAME=$1
 dataline=$(awk 'NR==1, NR==18{print}'  $FILENAME)
-MODE=$2
+# MODE=$2
 
 # parser params
 IFS=$'\n'
@@ -26,11 +26,11 @@ serving_client_value=$(func_parser_value "${lines[8]}")
 serving_dir_value=$(func_parser_value "${lines[9]}")
 web_service_py=$(func_parser_value "${lines[10]}")
 pipeline_py=$(func_parser_value "${lines[11]}")
-image_dir_key=$(func_parser_key "${lines[12]}")
-image_dir_value=$(func_parser_value "${lines[12]}")
+video_dir_key=$(func_parser_key "${lines[12]}")
+video_dir_value=$(func_parser_value "${lines[12]}")
 
 
-LOG_PATH="./log/${model_name}/${MODE}"
+LOG_PATH="./test_tipc/output/log/${model_name}/serving_infer_python"
 mkdir -p ${LOG_PATH}
 status_log="${LOG_PATH}/results_serving.log"
 
@@ -69,9 +69,10 @@ function func_serving(){
 
     eval $web_service_cmd
     sleep 30s # not too short is ok
-    _save_log_path="../../log/${model_name}/${MODE}/server_infer_gpu_batchsize_1.log"
-    set_image_dir=$(func_set_params "${image_dir_key}" "${image_dir_value}")
-    pipeline_cmd="${python} ${pipeline_py} ${set_image_dir} > ${_save_log_path} 2>&1 "
+
+    _save_log_path="../../${LOG_PATH}/server_infer_python_gpu_batchsize_1.log"
+    set_video_dir=$(func_set_params "${video_dir_key}" "${video_dir_value}")
+    pipeline_cmd="${python} ${pipeline_py} ${set_video_dir} > ${_save_log_path} 2>&1 "
 
     eval $pipeline_cmd
     last_status=${PIPESTATUS[0]}
