@@ -460,7 +460,27 @@ if [ ${MODE} = "cpp_infer" ];then
     fi
 fi
 
-if [ ${MODE} = "serving_infer" ];then
+if [ ${MODE} = "serving_infer_cpp" ];then
+    if [ ${model_name} = "PP-TSM" ]; then
+        # download inference model
+        mkdir ./inference
+        pushd ./inference
+        wget  https://videotag.bj.bcebos.com/PaddleVideo-release2.3/ppTSM.zip
+        unzip ppTSM.zip
+        popd
+    elif [ ${model_name} = "PP-TSN" ]; then
+        # download inference model
+        mkdir ./inference
+        pushd ./inference
+        wget  https://videotag.bj.bcebos.com/PaddleVideo-release2.3/ppTSN.zip
+        unzip ppTSN.zip
+        popd
+    else
+        echo "Not added into TIPC now."
+    fi
+fi
+
+if [ ${MODE} = "serving_infer_python" ];then
     echo "Not added into TIPC now."
 fi
 
