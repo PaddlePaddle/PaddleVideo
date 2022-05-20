@@ -71,23 +71,23 @@ When using PaddleServing for service deployment, you need to convert the saved i
   --dirname inference/ppTSM \
   --model_filename ppTSM.pdmodel \
   --params_filename ppTSM.pdiparams \
-  --serving_server ./ppTSM_serving/ \
-  --serving_client ./ppTSM_client/
+  --serving_server ./deploy/python_serving/ppTSM_serving_server/ \
+  --serving_client ./deploy/python_serving/ppTSM_serving_client/
   ```
 
-After the PP-TSM inference model conversion is completed, there will be additional `ppTSM_serving` and `ppTSM_client` folders in the current folder, with the following formats:
+After the PP-TSM inference model conversion is completed, there will be additional `ppTSM_serving_server` and `ppTSM_serving_client` folders in the current folder, with the following formats:
   ```bash
   PaddleVideo
-  ├── ppTSM_serving
+  ├── ppTSM_serving_server
       ├── ppTSM.pdiparams
       ├── ppTSM.pdmodel
       ├── serving_server_conf.prototxt
       └── serving_server_conf.stream.prototxt
-  ├── ppTSM_client
+  ├── ppTSM_serving_client
       ├── serving_client_conf.prototxt
       └── serving_client_conf.stream.prototxt
   ```
-After getting the model files, you need to modify the files `serving_server_conf.prototxt` under `ppTSM_serving` and `ppTSM_client` respectively, and change `alias_name` under `fetch_var` in both files to `outputs`
+After getting the model files, you need to modify the files `serving_server_conf.prototxt` under `ppTSM_serving_server` and `ppTSM_serving_client` respectively, and change `alias_name` under `fetch_var` in both files to `outputs`
 
 **Remarks**: In order to be compatible with the deployment of different models, Serving provides the function of input and output renaming. In this way, when different models are inferred and deployed, they only need to modify the `alias_name` of the configuration file, and the inference deployment can be completed without modifying the code.
 The modified `serving_server_conf.prototxt` looks like this:
@@ -130,9 +130,9 @@ cd deploy/paddleserving
 - Start the service:
 ```bash
 # Start in the current command line window and stay in front
-python3.7 recognition_web_service.py -c configs/PP-TSM.yaml
+python3.7 recognition_web_service.py -n PPTSM -c configs/PP-TSM.yaml
 # Start in the background, the logs printed during the process will be redirected and saved to log.txt
-python3.7 recognition_web_service.py -c configs/PP-TSM.yaml &>log.txt &
+python3.7 recognition_web_service.py -n PPTSM -c configs/PP-TSM.yaml &>log.txt &
 ```
 
 - send request:
