@@ -116,13 +116,14 @@ cpp_serving 目录包含了启动 pipeline 服务、C++ serving服务和发送�
 
 - 启动服务：
   ```bash
-  # 在后台启动，过程中打印输出的日志会重定向保存到nohup.txt中
+  # 在后台启动，过程中打印输出的日志会重定向保存到nohup.txt中，可以使用tailf nohup.txt查看输出
   bash run_cpp_serving.sh
   ```
 
 - 发送请求并获取结果：
   ```bash
   python3.7 serving_client.py \
+  -n PPTSM \
   -c ./ppTSM_serving_client/serving_client_conf.prototxt \
   --input_file=../../data/example.avi
   ```

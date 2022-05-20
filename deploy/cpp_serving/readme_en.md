@@ -128,6 +128,7 @@ bash paddle_env_install.sh
 - Send the request and get the result:
 ```bash
 python3.7 serving_client.py \
+-n PPTSM \
 -c ./ppTSM_serving_client/serving_client_conf.prototxt \
 --input_file=../../data/example.avi
 ```

@@ -12,61 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import argparse
-import os
-import sys
+from typing import Any, Dict
 
 import numpy as np
-
-__dir__ = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.abspath(os.path.join(__dir__, "../../")))
-
 from paddle_serving_client import Client
-from preprocess_ops import Compose
-from paddlevideo.loader.pipelines import (CenterCrop, Image2Array,
-                                          Normalization, Sampler, Scale,
-                                          VideoDecoder)
-from typing import Any, Dict, Tuple, List
 
-
-def preprocess(video_path: str) -> Tuple[Dict[str, np.ndarray], List]:
-    """preprocess
-
-    Args:
-        video_path (str): input video path
-
-    Returns:
-        Tuple[Dict[str, np.ndarray], List]: feed and fetch
-    """
-    seq = Compose([
-        VideoDecoder(),
-        Sampler(8, 1, valid_mode=True),
-        Scale(256),
-        CenterCrop(224),
-        Image2Array(),
-        Normalization([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-    ])
-    results = {"filename": video_path}
-    results = seq(results)
-    tmp_inp = np.expand_dims(results["imgs"], axis=0)  # [b,t,c,h,w]
-    tmp_inp = np.expand_dims(tmp_inp, axis=0)  # [1,b,t,c,h,w]
-    feed = {"data_batch_0": tmp_inp}
-    fetch = ["outputs"]
-    return feed, fetch
-
-
-def np_softmax(x: np.ndarray, axis=-1) -> np.ndarray:
-    """softmax function
-
-    Args:
-        x (np.ndarray): logits
-        axis (int): axis
-
-    Returns:
-        np.ndarray: probs
-    """
-    x -= np.max(x, axis=axis, keepdims=True)
-    x = np.exp(x) / np.sum(np.exp(x), axis=axis, keepdims=True)
-    return x
+from preprocess_ops import get_preprocess_func, np_softmax
 
 
 def postprocess(fetch_map: Dict[str, np.ndarray]) -> Dict[str, Any]:
@@ -95,6 +46,11 @@ def postprocess(fetch_map: Dict[str, np.ndarray]) -> Dict[str, Any]:
 def parse_args():
     # general params
     parser = argparse.ArgumentParser("PaddleVideo CPP Serving model script")
+    parser.add_argument("-n",
+                        "--name",
+                        type=str,
+                        default="PPTSM",
+                        help="model's name, such as PPTSM, PPTSN...")
     parser.add_argument(
         "-c",
         "--config",
@@ -118,6 +74,10 @@ if __name__ == "__main__":
     url = args.url
     logid = args.logid
     input_file_path = args.input_file
+    model_name = args.name
+
+    # get preprocess by model name
+    preprocess = get_preprocess_func(model_name)
 
     # initialize client object & connect
     client = Client()
