@@ -1,3 +1,4 @@
+repos:
 -   repo: local
     hooks:
     -   id: yapf
@@ -8,7 +9,7 @@
         files: \.py$
 
 -   repo: https://github.com/pre-commit/pre-commit-hooks
-    sha: a11d9314b22d8f8c7556443875b731ef05965464
+    rev: a11d9314b22d8f8c7556443875b731ef05965464
     hooks:
     -   id: check-merge-conflict
     -   id: check-symlinks
@@ -39,3 +40,8 @@
         language: system
         files: \.(c|cc|cxx|cpp|cu|h|hpp|hxx|proto|py)$
         exclude: (?!.*third_party)^.*$
+
+-   repo: https://gitee.com/irving512/mirrors-yapf
+    rev: v0.30.0
+    hooks:
+    -   id: yapf

@@ -14,10 +14,13 @@
 
 import copy
 import json
+import numpy as np
+import random
 
 from ..registry import DATASETS
 from .base import BaseDataset
 from ...utils import get_logger
+
 logger = get_logger("paddlevideo")
 
 
@@ -25,6 +28,7 @@ logger = get_logger("paddlevideo")
 class BMNDataset(BaseDataset):
     """Video dataset for action localization.
     """
+
     def __init__(
         self,
         file_path,
@@ -59,8 +63,22 @@ class BMNDataset(BaseDataset):
 
     def prepare_train(self, idx):
         """TRAIN & VALID: Prepare data for training/valid given the index."""
+        # feature dim: [channel, tscale], eg [2048, 300]
+        # You can add data aug in there
+
         results = copy.deepcopy(self.info[idx])
         results = self.pipeline(results)
+
+        multiply_noise = np.random.normal(loc=1.0, scale=0.05,
+                                          size=(2048, 300)).astype(np.float32)
+        adding_noise = np.random.normal(loc=0.0,
+                                        scale=0.1 * 0.05,
+                                        size=(2048, 300)).astype(np.float32)
+
+        if random.random() < 0.2:
+            results['video_feat'] = multiply_noise * results[
+                'video_feat'] + adding_noise
+
         return results['video_feat'], results['gt_iou_map'], results['gt_start'],\
                results['gt_end']
 

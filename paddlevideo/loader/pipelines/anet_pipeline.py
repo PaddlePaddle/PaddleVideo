@@ -21,6 +21,7 @@ from ..registry import PIPELINES
 
 @PIPELINES.register()
 class LoadFeat(object):
+
     def __init__(self, feat_path):
         self.feat_path = feat_path
 
@@ -38,6 +39,7 @@ class LoadFeat(object):
 
 @PIPELINES.register()
 class GetMatchMap(object):
+
     def __init__(self, tscale):
         self.tscale = tscale
         self.tgap = 1. / self.tscale
@@ -47,7 +49,8 @@ class GetMatchMap(object):
         for idx in range(self.tscale):
             tmp_match_window = []
             xmin = self.tgap * idx
-            for jdx in range(1, self.tscale + 1):
+            # for jdx in range(1, self.tscale + 1):
+            for jdx in range(1, 50 + 1):
                 xmax = xmin + self.tgap * jdx
                 tmp_match_window.append([xmin, xmax])
             match_map.append(tmp_match_window)
@@ -66,6 +69,7 @@ class GetMatchMap(object):
 
 @PIPELINES.register()
 class GetVideoLabel(object):
+
     def __init__(self, tscale, dscale, datatype="float32"):
         self.tscale = tscale
         self.dscale = dscale
