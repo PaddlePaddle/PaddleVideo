@@ -1,0 +1,126 @@
+MODEL: #MODEL field
+    framework: "BMNLocalizer"
+    backbone:
+        name: "TCANetpp"
+        tscale: 300
+        dscale: 50
+        prop_boundary_ratio: 0.5
+        num_sample: 32
+        num_sample_perbin: 3
+        feat_dim: 2048
+    loss:
+        name: "BMNLoss"
+        tscale: 300
+        dscale: 50
+
+DATASET: #DATASET field
+    batch_size: 4 #single card bacth size
+    test_batch_size: 1
+    num_workers: 8
+    train:
+        format: "BMNDataset"
+        file_path: "/home/aistudio/data/new_label_cls14_train.json"
+        subset: "train"
+    valid:
+        format: "BMNDataset"
+        file_path: "/home/aistudio/data/new_label_cls14_train.json"
+        subset: "validation"
+    test:
+        format: "BMNDataset"
+        test_mode: True
+        file_path: "/home/aistudio/data/new_label_cls14_train.json"
+        subset: "validation"
+
+PIPELINE: #PIPELINE field
+    train: #Mandotary, indicate the pipeline to deal with the training data, associate to the 'paddlevideo/loader/pipelines/'
+        load_feat:
+            name: "LoadFeat"
+            feat_path: "/home/aistudio/data/Features_competition_train/npy"
+        transform: #Mandotary, image transfrom operator
+        - GetMatchMap:
+            tscale: 300
+        - GetVideoLabel:
+            tscale: 300
+            dscale: 50
+
+    valid: #Mandotary, indicate the pipeline to deal with the training data, associate to the 'paddlevideo/loader/pipelines/'
+        load_feat:
+            name: "LoadFeat"
+            feat_path: "/home/aistudio/data/Features_competition_train/npy"
+        transform: #Mandotary, image transfrom operator
+        - GetMatchMap:
+            tscale: 300
+        - GetVideoLabel:
+            tscale: 300
+            dscale: 50
+
+    test: #Mandatory, indicate the pipeline to deal with the validing data. associate to the 'paddlevideo/loader/pipelines/'
+        load_feat:
+            name: "LoadFeat"
+            feat_path: "/home/aistudio/data/Features_competition_train/npy"
+        transform: #Mandotary, image transfrom operator
+        - GetMatchMap:
+            tscale: 300
+        - GetVideoLabel:
+            tscale: 300
+            dscale: 50
+
+OPTIMIZER: #OPTIMIZER field
+    name: 'Adam'
+    learning_rate:
+        iter_step: True
+        name: 'CustomPiecewiseDecay'
+        boundaries: [32800]
+        values: [0.0008, 0.00008]
+    weight_decay:
+        name: 'L2'
+        value: 1e-4
+
+# OPTIMIZER: #OPTIMIZER field
+#     name: 'Adam'
+#     learning_rate:
+#         iter_step: True
+#         name: 'CustomPiecewiseDecay'
+#         boundaries: [13800]
+#         values: [0.00008, 0.00004]
+#     weight_decay:
+#         name: 'L2'
+#         value: 1e-4
+
+# OPTIMIZER: #OPTIMIZER field
+#     name: 'Adam'
+#     learning_rate:
+#         iter_step: True
+#         name: 'CustomWarmupCosineDecay'
+#         max_epoch: 5
+#         warmup_epochs: 1
+#         warmup_start_lr: 0.00006
+#         cosine_base_lr: 0.00008
+#     weight_decay:
+#         name: 'L2'
+#         value: 1e-4
+
+
+METRIC:
+    name: 'BMNMetric'
+    tscale: 300
+    dscale: 50
+    file_path: "data/bmn_data/activitynet_1.3_annotations.json"
+    ground_truth_filename: "data/bmn_data/activity_net_1_3_new.json"
+    subset: "validation"
+    output_path: "data/bmn/BMN_Test_output"
+    result_path: "data/bmn/BMN_Test_results"
+
+
+INFERENCE:
+    name: 'BMN_Inference_helper'
+    feat_dim: 2048
+    dscale: 50
+    tscale: 300
+    result_path: "data/bmn/BMN_INFERENCE_results"
+
+
+model_name: TCANetpp
+epochs: 13 #Mandatory, total epoch
+log_level: "INFO"
+resume_from: "" #checkpoint path.
