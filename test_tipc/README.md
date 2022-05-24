@@ -47,6 +47,7 @@ test_tipc/
 │   │   └── train_amp_infer_python.txt # PP-TSM在Linux上进行python训练预测（混合精度训练预测）的配置文件
 │   ├── PP-TSN/
 │   │   ├── train_infer_python.txt # PP-TSN在Linux上进行python训练预测（基础训练预测）的配置文件
+│   │   ├── paddle2onnx_infer_python.txt # PP-TSN在Linux上进行Paddle2ONNX预测（基础训练预测）的配置文件
 │   │   └── train_amp_infer_python.txt # PP-TSN在Linux上进行python训练预测（混合精度训练预测）的配置文件
 │   ├── ...
 │   └── ...
@@ -66,6 +67,7 @@ test_tipc/
 ├── docs/                             # 详细的TIPC各种功能文档
 ├── test_train_inference_python.sh    # 测试python训练预测的主程序
 ├── test_inference_cpp.sh             # 测试C++预测的主程序
+├── test_paddle2onnx.sh               # 测试paddle2onnx转换与推理的主程序
 ├── compare_results.py                # 用于对比log中的预测结果与results中的预存结果精度误差是否在限定范围内
 └── README.md                         # 介绍文档
 ```
@@ -120,3 +122,4 @@ bash test_tipc/test_train_inference_python.sh ./test_tipc/configs/PP-TSM/train_i
 - [test_train_inference_python 使用](docs/test_train_inference_python.md) ：测试基于Python的模型训练、评估、推理等基本功能。
 - [test_amp_train_inference_python 使用](docs/test_train_amp_inference_python.md) ：测试基于Python的**混合精度**模型训练、评估、推理等基本功能。
 - [test_inference_cpp 使用](docs/test_inference_cpp.md) ：测试基于C++的模型推理功能。
+- [test_paddle2onnx 使用](docs/test_paddle2onnx.md) ：测试基于python2onnx模型的推理功能。
