@@ -35,7 +35,7 @@ def parse_args():
                         default='configs/example.yaml',
                         help='config file path')
     parser.add_argument("-i", "--input_file", type=str, help="input file path")
-    parser.add_argument("--model_file", type=str, help="onnx model file path")
+    parser.add_argument("--onnx_file", type=str, help="onnx model file path")
 
     # params for onnx predict
     parser.add_argument("-b", "--batch_size", type=int, default=1)
@@ -56,7 +56,7 @@ def parse_args():
 
 def create_onnx_predictor(args, cfg=None):
     import onnxruntime as ort
-    model_file = args.model_file
+    onnx_file = args.onnx_file
     config = ort.SessionOptions()
     if args.use_gpu:
         raise ValueError(
@@ -66,7 +66,7 @@ def create_onnx_predictor(args, cfg=None):
         config.intra_op_num_threads = args.cpu_threads
         if args.ir_optim:
             config.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL
-    predictor = ort.InferenceSession(model_file, sess_options=config)
+    predictor = ort.InferenceSession(onnx_file, sess_options=config)
     return config, predictor
 
 

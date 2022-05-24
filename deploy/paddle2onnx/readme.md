@@ -58,7 +58,7 @@ python3.7 -m pip install onnxruntime==1.9.0
 python3.7 deploy/paddle2onnx/predict_onnx.py \
 --input_file data/example.avi \
 --config configs/recognition/pptsn/pptsn_k400_videos.yaml \
---model_file=./inference/ppTSN/ppTSN.onnx
+--onnx_file=./inference/ppTSN/ppTSN.onnx
 ```
 
 结果如下：

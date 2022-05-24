@@ -58,7 +58,7 @@ Execute the following command:
 python3.7 deploy/paddle2onnx/predict_onnx.py \
 --input_file data/example.avi \
 --config configs/recognition/pptsn/pptsn_k400_videos.yaml \
---model_file=./inference/ppTSN/ppTSN.onnx
+--onnx_file=./inference/ppTSN/ppTSN.onnx
 ```
 
 The result is as follows:
