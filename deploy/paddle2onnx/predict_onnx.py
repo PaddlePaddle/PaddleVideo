@@ -102,12 +102,8 @@ def main():
     input_names = predictor.get_inputs()[0].name
     output_names = predictor.get_outputs()[0].name
 
-    # TODO: clean code for MSTCN and ASRF
     # get the absolute file path(s) to be processed
-    if model_name in ["MSTCN", "ASRF"]:
-        files = InferenceHelper.get_process_file(args.input_file)
-    else:
-        files = parse_file_paths(args.input_file)
+    files = parse_file_paths(args.input_file)
     if args.enable_benchmark:
         test_video_num = 12
         num_warmup = 3

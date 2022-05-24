@@ -126,11 +126,11 @@ def build_inference_helper(cfg):
 
 class Base_Inference_helper():
     def __init__(self,
-                 num_seg: int = 8,
-                 seg_len: int = 1,
-                 short_size: int = 256,
-                 target_size: int = 224,
-                 top_k: int = 1):
+                 num_seg=8,
+                 seg_len=1,
+                 short_size=256,
+                 target_size=224,
+                 top_k=1):
         """Base_Inference_helper
 
         Args:
