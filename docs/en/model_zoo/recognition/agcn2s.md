@@ -103,6 +103,10 @@ python3.7 tools/predict.py --input_file data/example_NTU-RGB-D_sketeton.npy \
                            --use_tensorrt=False
 ```
 
+### infer result
+![预测引擎推理结果图](../../../images/agcn2s_result.png)
+
+
 ## Reference
 
 - [Two-Stream Adaptive Graph Convolutional Networks for Skeleton-Based Action Recognition](https://openaccess.thecvf.com/content_CVPR_2019/papers/Shi_Two-Stream_Adaptive_Graph_Convolutional_Networks_for_Skeleton-Based_Action_Recognition_CVPR_2019_paper.pdf), Lei Shi and Yifan Zhang and Jian Cheng and Hanqing Lu

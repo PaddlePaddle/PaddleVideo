@@ -85,8 +85,9 @@ INFERENCE:
   num_channels: 3
   vertex_nums: 25
   person_nums: 2
+  window_size: 300
 
-model_name: "AGCN2s_cs_joint"
+model_name: "AGCN2s"
 log_interval: 10 #Optional, the interal of logger, default:10
 epochs: 50 #Mandatory, total epoch
 save_interval: 10

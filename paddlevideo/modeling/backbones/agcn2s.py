@@ -26,9 +26,9 @@ def import_class(name):
     return mod
 
 
-class unit_tcn(nn.Layer):
+class UnitTcn(nn.Layer):
     def __init__(self, in_channels, out_channels, kernel_size=9, stride=1):
-        super(unit_tcn, self).__init__()
+        super(UnitTcn, self).__init__()
         pad = int((kernel_size - 1) / 2)
         self.conv = nn.Conv2D(in_channels,
                               out_channels,
@@ -45,14 +45,14 @@ class unit_tcn(nn.Layer):
         return x
 
 
-class unit_gcn(nn.Layer):
+class UnitGcn(nn.Layer):
     def __init__(self,
                  in_channels,
                  out_channels,
                  A,
                  coff_embedding=4,
                  num_subset=3):
-        super(unit_gcn, self).__init__()
+        super(UnitGcn, self).__init__()
         inter_channels = out_channels // coff_embedding
         self.inter_c = inter_channels
         self.PA = pp.static.create_parameter(shape=A.shape, dtype='float32')
@@ -98,11 +98,11 @@ class unit_gcn(nn.Layer):
         return self.relu(y)
 
 
-class TCN_GCN_unit(nn.Layer):
+class TcnGcnUnit(nn.Layer):
     def __init__(self, in_channels, out_channels, A, stride=1, residual=True):
-        super(TCN_GCN_unit, self).__init__()
-        self.gcn1 = unit_gcn(in_channels, out_channels, A)
-        self.tcn1 = unit_tcn(out_channels, out_channels, stride=stride)
+        super(TcnGcnUnit, self).__init__()
+        self.gcn1 = UnitGcn(in_channels, out_channels, A)
+        self.tcn1 = UnitTcn(out_channels, out_channels, stride=stride)
         self.relu = nn.ReLU()
         if not residual:
             self.residual = lambda x: 0
@@ -111,17 +111,18 @@ class TCN_GCN_unit(nn.Layer):
             self.residual = lambda x: x
 
         else:
-            self.residual = unit_tcn(in_channels,
-                                     out_channels,
-                                     kernel_size=1,
-                                     stride=stride)
+            self.residual = UnitTcn(in_channels,
+                                    out_channels,
+                                    kernel_size=1,
+                                    stride=stride)
 
     def forward(self, x):
         x = self.tcn1(self.gcn1(x)) + self.residual(x)
         return self.relu(x)
 
 
-class NTUDGraph:
+# 这个Graph结构针对NTURGB+D数据集，如果使用自定义数据集，修改num_node以及相应得图邻接结构
+class Graph:
     def __init__(self, labeling_mode='spatial'):
         num_node = 25
         self_link = [(i, i) for i in range(num_node)]
@@ -186,23 +187,23 @@ class AGCN2s(nn.Layer):
         super(AGCN2s, self).__init__()
 
         if graph == 'ntu_rgb_d':
-            self.graph = NTUDGraph(**graph_args)
+            self.graph = Graph(**graph_args)
         else:
             raise ValueError()
 
         A = self.graph.A
         self.data_bn = nn.BatchNorm1D(num_person * in_channels * num_point)
 
-        self.l1 = TCN_GCN_unit(3, 64, A, residual=False)
-        self.l2 = TCN_GCN_unit(64, 64, A)
-        self.l3 = TCN_GCN_unit(64, 64, A)
-        self.l4 = TCN_GCN_unit(64, 64, A)
-        self.l5 = TCN_GCN_unit(64, 128, A, stride=2)
-        self.l6 = TCN_GCN_unit(128, 128, A)
-        self.l7 = TCN_GCN_unit(128, 128, A)
-        self.l8 = TCN_GCN_unit(128, 256, A, stride=2)
-        self.l9 = TCN_GCN_unit(256, 256, A)
-        self.l10 = TCN_GCN_unit(256, 256, A)
+        self.l1 = TcnGcnUnit(3, 64, A, residual=False)
+        self.l2 = TcnGcnUnit(64, 64, A)
+        self.l3 = TcnGcnUnit(64, 64, A)
+        self.l4 = TcnGcnUnit(64, 64, A)
+        self.l5 = TcnGcnUnit(64, 128, A, stride=2)
+        self.l6 = TcnGcnUnit(128, 128, A)
+        self.l7 = TcnGcnUnit(128, 128, A)
+        self.l8 = TcnGcnUnit(128, 256, A, stride=2)
+        self.l9 = TcnGcnUnit(256, 256, A)
+        self.l10 = TcnGcnUnit(256, 256, A)
 
     def forward(self, x):
         N, C, T, V, M = x.shape

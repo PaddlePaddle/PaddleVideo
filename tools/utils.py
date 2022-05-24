@@ -743,7 +743,13 @@ class CTRGCN_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class AGCN2s_Inference_helper(Base_Inference_helper):
-    def __init__(self, num_channels=3, vertex_nums=25, person_nums=2, top_k=1):
+    def __init__(self,
+                 window_size=300,
+                 num_channels=3,
+                 vertex_nums=25,
+                 person_nums=2,
+                 top_k=1):
+        self.window_size = window_size
         self.num_channels = num_channels
         self.vertex_nums = vertex_nums
         self.person_nums = person_nums

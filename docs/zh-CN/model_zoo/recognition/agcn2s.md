@@ -79,7 +79,7 @@ VisualDL可视化日志：[VDL](https://github.com/ELKYang/2s-AGCN-paddle/tree/m
 ### 导出inference模型（以cs_joint为例）
 
 ```bash
-python3.7 tools/export_model.py -c configs/recognition/agcn2s/2sagcn_ntucs_joint.yaml \
+python3.7 tools/export_model.py -c configs/recognition/agcn2s/agcn2s_ntucs_joint.yaml \
                                 -p data/AGCN2s_ntucs_joint.pdparams \
                                 -o inference/AGCN2s_ntucs_joint
 ```
@@ -99,6 +99,8 @@ python3.7 tools/predict.py --input_file data/example_NTU-RGB-D_sketeton.npy \
                            --use_tensorrt=False
 ```
 
+### 预测引擎推理结果
+![预测引擎推理结果图](../../../images/agcn2s_result.png)
 
 ## 参考论文
 
