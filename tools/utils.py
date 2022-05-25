@@ -16,6 +16,7 @@ import json
 import os
 import shutil
 import sys
+from typing import List
 
 import cv2
 try:
@@ -130,6 +131,15 @@ class Base_Inference_helper():
                  short_size=256,
                  target_size=224,
                  top_k=1):
+        """Base_Inference_helper
+
+        Args:
+            num_seg (int, optional): number of segmentations of an sliced input video. Defaults to 8.
+            seg_len (int, optional): length of each segmentation. Defaults to 1.
+            short_size (int, optional): short size of input video. Defaults to 256.
+            target_size (int, optional): size of cropped video. Defaults to 224.
+            top_k (int, optional): select topk result in outputs. Defaults to 1.
+        """
         self.num_seg = num_seg
         self.seg_len = seg_len
         self.short_size = short_size
@@ -137,10 +147,23 @@ class Base_Inference_helper():
         self.top_k = top_k
 
     @abstractmethod
-    def preprocess(self, input_file):
+    def preprocess(self, input_file: str):
+        """preprocess abstractmethod
+
+        Args:
+            input_file (str): input file path.
+        """
         pass
 
-    def preprocess_batch(self, file_list):
+    def preprocess_batch(self, file_list: List[str]) -> List[np.ndarray]:
+        """preprocess for file list
+
+        Args:
+            file_list (List[str]): file pathes in an list, [path1, path2, ...].
+
+        Returns:
+            List[np.ndarray]: batched inputs data, [data_batch[0], data_batch[1], ...].
+        """
         batched_inputs = []
         for file in file_list:
             inputs = self.preprocess(file)
@@ -152,9 +175,14 @@ class Base_Inference_helper():
         self.input_file = file_list
         return batched_inputs
 
-    def postprocess(self, output, print_output=True):
-        """
-        output: list
+    def postprocess(self,
+                    output: np.ndarray,
+                    print_output: bool = True) -> None:
+        """postprocess
+
+        Args:
+            output (np.ndarray): batched output scores, shape of (batch_size, class_num).
+            print_output (bool, optional): whether to print result. Defaults to True.
         """
         if not isinstance(self.input_file, list):
             self.input_file = [
