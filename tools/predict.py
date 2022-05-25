@@ -38,7 +38,7 @@ def parse_args():
     parser.add_argument("--model_file", type=str)
     parser.add_argument("--params_file", type=str)
 
-    # params for predict
+    # params for paddle predict
     parser.add_argument("-b", "--batch_size", type=int, default=1)
     parser.add_argument("--use_gpu", type=str2bool, default=True)
     parser.add_argument("--precision", type=str, default="fp32")
@@ -131,6 +131,8 @@ def parse_file_paths(input_path: str) -> list:
 
 
 def main():
+    """predict using paddle inference model
+    """
     args = parse_args()
     cfg = get_config(args.config, show=False)
 

@@ -16,6 +16,7 @@ import json
 import os
 import shutil
 import sys
+from typing import List
 
 import cv2
 try:
@@ -124,13 +125,21 @@ def build_inference_helper(cfg):
 
 
 class Base_Inference_helper():
-
     def __init__(self,
                  num_seg=8,
                  seg_len=1,
                  short_size=256,
                  target_size=224,
                  top_k=1):
+        """Base_Inference_helper
+
+        Args:
+            num_seg (int, optional): number of segmentations of an sliced input video. Defaults to 8.
+            seg_len (int, optional): length of each segmentation. Defaults to 1.
+            short_size (int, optional): short size of input video. Defaults to 256.
+            target_size (int, optional): size of cropped video. Defaults to 224.
+            top_k (int, optional): select topk result in outputs. Defaults to 1.
+        """
         self.num_seg = num_seg
         self.seg_len = seg_len
         self.short_size = short_size
@@ -138,10 +147,23 @@ class Base_Inference_helper():
         self.top_k = top_k
 
     @abstractmethod
-    def preprocess(self, input_file):
+    def preprocess(self, input_file: str):
+        """preprocess abstractmethod
+
+        Args:
+            input_file (str): input file path.
+        """
         pass
 
-    def preprocess_batch(self, file_list):
+    def preprocess_batch(self, file_list: List[str]) -> List[np.ndarray]:
+        """preprocess for file list
+
+        Args:
+            file_list (List[str]): file pathes in an list, [path1, path2, ...].
+
+        Returns:
+            List[np.ndarray]: batched inputs data, [data_batch[0], data_batch[1], ...].
+        """
         batched_inputs = []
         for file in file_list:
             inputs = self.preprocess(file)
@@ -153,9 +175,14 @@ class Base_Inference_helper():
         self.input_file = file_list
         return batched_inputs
 
-    def postprocess(self, output, print_output=True):
-        """
-        output: list
+    def postprocess(self,
+                    output: np.ndarray,
+                    print_output: bool = True) -> None:
+        """postprocess
+
+        Args:
+            output (np.ndarray): batched output scores, shape of (batch_size, class_num).
+            print_output (bool, optional): whether to print result. Defaults to True.
         """
         if not isinstance(self.input_file, list):
             self.input_file = [
@@ -181,7 +208,6 @@ class Base_Inference_helper():
 
 @INFERENCE.register()
 class ppTSM_Inference_helper(Base_Inference_helper):
-
     def __init__(self,
                  num_seg=8,
                  seg_len=1,
@@ -221,7 +247,6 @@ class ppTSM_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class ppTSN_Inference_helper(Base_Inference_helper):
-
     def __init__(self,
                  num_seg=25,
                  seg_len=1,
@@ -267,7 +292,6 @@ class ppTSN_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class BMN_Inference_helper(Base_Inference_helper):
-
     def __init__(self, feat_dim, dscale, tscale, result_path):
         self.feat_dim = feat_dim
         self.dscale = dscale
@@ -398,7 +422,6 @@ class TokenShift_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class TimeSformer_Inference_helper(Base_Inference_helper):
-
     def __init__(self,
                  num_seg=8,
                  seg_len=1,
@@ -444,7 +467,6 @@ class TimeSformer_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class VideoSwin_Inference_helper(Base_Inference_helper):
-
     def __init__(self,
                  num_seg=4,
                  seg_len=32,
@@ -525,7 +547,6 @@ class VideoSwin_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class VideoSwin_TableTennis_Inference_helper(Base_Inference_helper):
-
     def __init__(self,
                  num_seg=1,
                  seg_len=32,
@@ -654,7 +675,6 @@ class VideoSwin_TableTennis_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class SlowFast_Inference_helper(Base_Inference_helper):
-
     def __init__(self,
                  num_frames=32,
                  sampling_rate=2,
@@ -728,7 +748,6 @@ class SlowFast_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class STGCN_Inference_helper(Base_Inference_helper):
-
     def __init__(self,
                  num_channels,
                  window_size,
@@ -760,7 +779,6 @@ class STGCN_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class CTRGCN_Inference_helper(Base_Inference_helper):
-
     def __init__(self,
                  num_channels=3,
                  vertex_nums=25,
@@ -797,7 +815,6 @@ class CTRGCN_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class MSTCN_Inference_helper(Base_Inference_helper):
-
     def __init__(self, num_channels, actions_map_file_path, feature_path=None):
         self.num_channels = num_channels
         file_ptr = open(actions_map_file_path, 'r')
@@ -873,7 +890,6 @@ class MSTCN_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class ASRF_Inference_helper(Base_Inference_helper):
-
     def __init__(self,
                  num_channels,
                  actions_map_file_path,
@@ -965,7 +981,6 @@ class ASRF_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class AttentionLSTM_Inference_helper(Base_Inference_helper):
-
     def __init__(
             self,
             num_classes,  #Optional, the number of classes to be classified.
@@ -1006,7 +1021,6 @@ class AttentionLSTM_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class TransNetV2_Inference_helper():
-
     def __init__(self,
                  num_frames,
                  height,
@@ -1184,7 +1198,6 @@ class TransNetV2_Inference_helper():
 
 @INFERENCE.register()
 class ADDS_Inference_helper(Base_Inference_helper):
-
     def __init__(self,
                  frame_idxs=[0],
                  num_scales=4,
@@ -1282,7 +1295,6 @@ class ADDS_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class AVA_SlowFast_FastRCNN_Inference_helper(Base_Inference_helper):
-
     def __init__(self,
                  detection_model_name,
                  detection_model_weights,
