@@ -41,13 +41,17 @@ python3.7 -m pip install paddle-serving-server-gpu==0.7.0.post101  # GPU with CU
 python3.7 -m pip install paddle-serving-server-gpu==0.7.0.post112  # GPU with CUDA11.2 + TensorRT8
 ```
 
-* 如果安装速度太慢，可以通过 `-i https://pypi.tuna.tsinghua.edu.cn/simple` 更换源，加速安装过程。
+* 如果安装速度太慢，可以通过 `-i https://pypi.tuna.tsinghua.edu.cn/simple` 更换源，加速安装过程
+* 更多环境和对应的安装包详见：https://github.com/PaddlePaddle/Serving/blob/v0.9.0/doc/Install_Linux_Env_CN.md
 
-## 动作识别服务部署
+## 行为识别服务部署
 ### 模型转换
-使用 PaddleServing 做服务化部署时，需要将保存的 inference 模型转换为 Serving 模型。下面以 PP-TSM 模型为例，介绍如何部署图像分类服务。
+使用 PaddleServing 做服务化部署时，需要将保存的 inference 模型转换为 Serving 模型。下面以 PP-TSM 模型为例，介绍如何部署行为识别服务。
 - 下载训练好的 PP-TSM 的模型，并转化为推理模型：
   ```bash
+  # 进入PaddleVideo目录
+  cd PaddleVideo
+
   wget -P data/ https://videotag.bj.bcebos.com/PaddleVideo-release2.1/PPTSM/ppTSM_k400_uniform.pdparams
 
   python3.7 tools/export_model.py \
@@ -73,10 +77,17 @@ python3.7 -m pip install paddle-serving-server-gpu==0.7.0.post112  # GPU with CU
   --serving_server ./deploy/python_serving/ppTSM_serving_server/ \
   --serving_client ./deploy/python_serving/ppTSM_serving_client/
   ```
+  | 参数              | 类型 | 默认值             | 描述                                                         |
+  | ----------------- | ---- | ------------------ | ------------------------------------------------------------ |
+  | `dirname`         | str  | -                  | 需要转换的模型文件存储路径，Program结构文件和参数文件均保存在此目录。 |
+  | `model_filename`  | str  | None               | 存储需要转换的模型Inference Program结构的文件名称。如果设置为None，则使用 `__model__` 作为默认的文件名 |
+  | `params_filename` | str  | None               | 存储需要转换的模型所有参数的文件名称。当且仅当所有模型参数被保>存在一个单独的二进制文件中，它才需要被指定。如果模型参数是存储在各自分离的文件中，设置它的值为None |
+  | `serving_server`  | str  | `"serving_server"` | 转换后的模型文件和配置文件的存储路径。默认值为serving_server |
+  | `serving_client`  | str  | `"serving_client"` | 转换后的客户端配置文件存储路径。默认值为serving_client       |
 
 PP-TSM 推理模型转换完成后，会在当前文件夹多出 `ppTSM_serving_server` 和 `ppTSM_serving_client` 的文件夹，具备如下格式：
   ```bash
-  PaddleVideo
+  PaddleVideo/deploy/python_serving
   ├── ppTSM_serving_server
       ├── ppTSM.pdiparams
       ├── ppTSM.pdmodel
@@ -157,7 +168,6 @@ value: "[\'archery\']"
 value: "[0.9907388687133789]"
 ```
 
-#### C++ Serving(TODO)
 ## FAQ
 **Q1**： 发送请求后没有结果返回或者提示输出解码报错
 

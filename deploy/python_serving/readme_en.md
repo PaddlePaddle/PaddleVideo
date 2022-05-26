@@ -41,13 +41,17 @@ python3.7 -m pip install paddle-serving-server-gpu==0.7.0.post101 # GPU with CUD
 python3.7 -m pip install paddle-serving-server-gpu==0.7.0.post112 # GPU with CUDA11.2 + TensorRT8
 ```
 
-* If the installation speed is too slow, you can change the source through `-i https://pypi.tuna.tsinghua.edu.cn/simple` to speed up the installation process.
+* If the installation speed is too slow, you can change the source through `-i https://pypi.tuna.tsinghua.edu.cn/simple` to speed up the installation process
+* For more environment and corresponding installation packages, see: https://github.com/PaddlePaddle/Serving/blob/v0.9.0/doc/Install_Linux_Env_CN.md
 
-## Action recognition service deployment
+## Behavior recognition service deployment
 ### Model conversion
-When using PaddleServing for service deployment, you need to convert the saved inference model into a Serving model. The following takes the PP-TSM model as an example to introduce how to deploy the image classification service.
+When using PaddleServing for service deployment, you need to convert the saved inference model into a Serving model. The following uses the PP-TSM model as an example to introduce how to deploy the behavior recognition service.
 - Download the trained PP-TSM model and convert it into an inference model:
   ```bash
+  # Enter PaddleVideo directory
+  cd PaddleVideo
+
   wget -P data/ https://videotag.bj.bcebos.com/PaddleVideo-release2.1/PPTSM/ppTSM_k400_uniform.pdparams
 
   python3.7 tools/export_model.py \
@@ -64,7 +68,6 @@ When using PaddleServing for service deployment, you need to convert the saved i
   unzip ppTSM.zip
   popd
   ```
-
 - Use paddle_serving_client to convert the converted inference model into a model format that is easy for server deployment:
   ```bash
   python3.7 -m paddle_serving_client.convert \
@@ -74,10 +77,17 @@ When using PaddleServing for service deployment, you need to convert the saved i
   --serving_server ./deploy/python_serving/ppTSM_serving_server/ \
   --serving_client ./deploy/python_serving/ppTSM_serving_client/
   ```
+  | parameter | type | default value | description |
+  | ----------------- | ---- | ------------------ | ------- -------------------------------------------------- --- |
+  | `dirname` | str | - | The storage path of the model file to be converted. The program structure file and parameter file are saved in this directory. |
+  | `model_filename` | str | None | The name of the file storing the model Inference Program structure that needs to be converted. If set to None, use `__model__` as the default filename |
+  | `params_filename` | str | None | File name where all parameters of the model to be converted are stored. It needs to be specified if and only if all model parameters are stored in a single binary file. If the model parameters are stored in separate files, set it to None |
+  | `serving_server` | str | `"serving_server"` | The storage path of the converted model files and configuration files. Default is serving_server |
+  | `serving_client` | str | `"serving_client"` | The converted client configuration file storage path. Default is serving_client |
 
-After the PP-TSM inference model conversion is completed, there will be additional `ppTSM_serving_server` and `ppTSM_serving_client` folders in the current folder, with the following formats:
+After the PP-TSM inference model is converted, there will be additional folders of `ppTSM_serving_server` and `ppTSM_serving_client` in the current folder, with the following formats:
   ```bash
-  PaddleVideo
+  PaddleVideo/deploy/python_serving
   ├── ppTSM_serving_server
       ├── ppTSM.pdiparams
       ├── ppTSM.pdmodel
@@ -131,45 +141,4 @@ cd deploy/paddleserving
 ```bash
 # Start in the current command line window and stay in front
 python3.7 recognition_web_service.py -n PPTSM -c configs/PP-TSM.yaml
-# Start in the background, the logs printed during the process will be redirected and saved to log.txt
-python3.7 recognition_web_service.py -n PPTSM -c configs/PP-TSM.yaml &>log.txt &
-```
-
-- send request:
-```bash
-# Send a prediction request in http and receive the result
-python3.7 pipeline_http_client.py
-
-# Send a prediction request in rpc and receive the result
-python3.7 pipeline_rpc_client.py
-```
-After a successful run, the results of the model prediction will be printed in the cmd window, and the results are as follows:
-
-```bash
-# http method print result
-{'err_no': 0, 'err_msg': '', 'key': ['label', 'prob'], 'value': ["['archery']", '[0.9907388687133789]'], 'tensors ': []}
-
-# The result of printing in rpc mode
-PipelineClient::predict pack_data time:1645631086.764019
-PipelineClient::predict before time:1645631086.8485317
-key: "label"
-key: "prob"
-value: "[\'archery\']"
-value: "[0.9907388687133789]"
-```
-
-#### C++ Serving (TODO)
-## FAQ
-**Q1**: No result is returned after the request is sent or an output decoding error is prompted
-
-**A1**: Do not set the proxy when starting the service and sending the request. You can close the proxy before starting the service and sending the request. The command to close the proxy is:
-```
-unset https_proxy
-unset http_proxy
-```
-
-**Q2**: There is no response after the server is started, and it has been stopped at `start proxy service`
-
-**A2**: It is likely that a problem was encountered during the startup process. You can view the detailed error message in the `./deploy/python_serving/PipelineServingLogs/pipeline.log` log file
-
-More service deployment types, such as `RPC prediction service`, etc., can refer to Test Serving's [github official website](https://github.com/PaddlePaddle/Serving/tree/v0.7.0/examples)
+# Start in the background, the logs printed during the process will be redirected and saved to lo

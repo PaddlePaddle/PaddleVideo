@@ -77,7 +77,7 @@ def np_softmax(x: np.ndarray, axis=0) -> np.ndarray:
         np.ndarray: probs.
     """
     x -= np.max(x, axis=axis, keepdims=True)
-    x = np.exp(x) / np.sum(np.exp(x), axis=0, keepdims=True)
+    x = np.exp(x) / np.sum(np.exp(x), axis=axis, keepdims=True)
     return x
 
 
@@ -130,6 +130,8 @@ class VideoOp(Op):
         }
         results = self.seq(results)
         tmp_inp = np.expand_dims(results['imgs'], axis=0)  # [b,t,c,h,w]
+
+        # The input for the network is input_data[0], so need to add 1 dimension at the beginning
         tmp_inp = np.expand_dims(tmp_inp, axis=0).copy()  # [1,b,t,c,h,w]
         return {"data_batch_0": tmp_inp}, False, None, ""
 
