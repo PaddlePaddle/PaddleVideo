@@ -123,22 +123,63 @@ fetch_var {
 
 ```
 ### Service deployment and requests
-The paddleserving directory contains the code for starting the pipeline service, C++ serving service (TODO) and sending prediction requests, including:
+The `python_serving` directory contains the code for starting the pipeline service, C++ serving service (TODO) and sending prediction requests, including:
 ```bash
 __init__.py
-configs/xxx.yaml # start the configuration file of the pipeline service
-pipeline_http_client.py # python script for sending pipeline prediction request via http
-pipeline_rpc_client.py # python script for sending pipeline prediction request in rpc mode
-recognition_web_service.py # python script that starts the pipeline server
+configs/xxx.yaml            # start the configuration file of the pipeline service
+pipeline_http_client.py     # python script for sending pipeline prediction request via http
+pipeline_rpc_client.py      # python script for sending pipeline prediction request in rpc mode
+recognition_web_service.py  # python script that starts the pipeline server
+utils.py                    # common functions used in inference, such as parse_file_paths, numpy_to_base64, video_to_numpy
 ```
 #### Python Serving
 - Go to the working directory:
 ```bash
-cd deploy/paddleserving
+cd deploy/python_serving
 ```
 
 - Start the service:
 ```bash
 # Start in the current command line window and stay in front
 python3.7 recognition_web_service.py -n PPTSM -c configs/PP-TSM.yaml
-# Start in the background, the logs printed during the process will be redirected and saved to lo
+# Start in the background, the logs printed during the process will be redirected and saved to log.txt
+python3.7 recognition_web_service.py -n PPTSM -c configs/PP-TSM.yaml &>log.txt &
+```
+
+- send request:
+```bash
+# Send a prediction request in http and receive the result
+python3.7 pipeline_http_client.py -i ../../data/example.avi
+
+# Send a prediction request in rpc and receive the result
+python3.7 pipeline_rpc_client.py -i ../../data/example.avi
+```
+After a successful run, the results of the model prediction will be printed in the cmd window, and the results are as follows:
+
+```bash
+# http method print result
+{'err_no': 0, 'err_msg': '', 'key': ['label', 'prob'], 'value': ["['archery']", '[0.9907388687133789]'], 'tensors ': []}
+
+# The result of printing in rpc mode
+PipelineClient::predict pack_data time:1645631086.764019
+PipelineClient::predict before time:1645631086.8485317
+key: "label"
+key: "prob"
+value: "[\'archery\']"
+value: "[0.9907388687133789]"
+```
+
+## FAQ
+**Q1**: No result is returned after the request is sent or an output decoding error is prompted
+
+**A1**: Do not set the proxy when starting the service and sending the request. You can close the proxy before starting the service and sending the request. The command to close the proxy is:
+```
+unset https_proxy
+unset http_proxy
+```
+
+**Q2**: There is no response after the server is started, and it has been stopped at `start proxy service`
+
+**A2**: It is likely that a problem was encountered during the startup process. You can view the detailed error message in the `./deploy/python_serving/PipelineServingLogs/pipeline.log` log file
+
+For more service deployment types, such as `RPC prediction service`, you can refer to Serving's [github official website](https://github.com/PaddlePaddle/Serving/tree/v0.7.0/examples)

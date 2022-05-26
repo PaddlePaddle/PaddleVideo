@@ -123,18 +123,19 @@ fetch_var {
 
 ```
 ### 服务部署和请求
-paddleserving 目录包含了启动 pipeline 服务、C++ serving服务(TODO)和发送预测请求的代码，具体包括：
+`python_serving` 目录包含了启动 pipeline 服务、C++ serving服务(TODO)和发送预测请求的代码，具体包括：
 ```bash
 __init__.py
 configs/xxx.yaml            # 启动pipeline服务的配置文件
 pipeline_http_client.py     # http方式发送pipeline预测请求的python脚本
 pipeline_rpc_client.py      # rpc方式发送pipeline预测请求的python脚本
 recognition_web_service.py  # 启动pipeline服务端的python脚本
+utils.py                    # 储存预测过程中常用的函数，如parse_file_paths, numpy_to_base64, video_to_numpy
 ```
 #### Python Serving
 - 进入工作目录：
 ```bash
-cd deploy/paddleserving
+cd deploy/python_serving
 ```
 
 - 启动服务：
@@ -148,10 +149,10 @@ python3.7 recognition_web_service.py -n PPTSM -c configs/PP-TSM.yaml &>log.txt &
 - 发送请求：
 ```bash
 # 以http方式的发送预测请求并接受结果
-python3.7 pipeline_http_client.py
+python3.7 pipeline_http_client.py -i ../../data/example.avi
 
 # 以rpc方式的发送预测请求并接受结果
-python3.7 pipeline_rpc_client.py
+python3.7 pipeline_rpc_client.py -i ../../data/example.avi
 ```
 成功运行后，模型预测的结果会打印在 cmd 窗口中，结果如下：
 
