@@ -17,7 +17,7 @@ import json
 
 import requests
 
-from .utils import numpy_to_base64, parse_file_paths, video_to_numpy
+from utils import numpy_to_base64, parse_file_paths, video_to_numpy
 
 
 def parse_args():
