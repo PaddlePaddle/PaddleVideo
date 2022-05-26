@@ -376,13 +376,6 @@ class BoundingBoxes:
                 image = add_bb_into_image(image, bb, color=(255, 0, 0))  # red
         return image
 
-    # def drawAllBoundingBoxes(self, image):
-    #     for gt in self.getBoundingBoxesByType(BBType.GroundTruth):
-    #         image = add_bb_into_image(image, gt ,color=(0,255,0))
-    #     for det in self.getBoundingBoxesByType(BBType.Detected):
-    #         image = add_bb_into_image(image, det ,color=(255,0,0))
-    #     return image
-
 
 ###########################################################################################
 #                                                                                         #
@@ -398,7 +391,6 @@ import os
 import sys
 from collections import Counter
 
-import matplotlib.pyplot as plt
 import numpy as np
 
 
@@ -526,99 +518,6 @@ class Evaluator:
             }
             ret.append(r)
         return ret
-
-    def PlotPrecisionRecallCurve(self,
-                                 boundingBoxes,
-                                 IOUThreshold=0.5,
-                                 method=None,
-                                 showAP=False,
-                                 showInterpolatedPrecision=False,
-                                 savePath=None,
-                                 showGraphic=True):
-        """PlotPrecisionRecallCurve
-        Plot the Precision x Recall curve for a given class.
-        Args:
-            boundingBoxes: Object of the class BoundingBoxes representing ground truth and detected
-            bounding boxes;
-            IOUThreshold (optional): IOU threshold indicating which detections will be considered
-            TP or FP (default value = 0.5);
-            method (default = EveryPointInterpolation): It can be calculated as the implementation
-            in the official PASCAL VOC toolkit (EveryPointInterpolation), or applying the 11-point
-            interpolatio as described in the paper "The PASCAL Visual Object Classes(VOC) Challenge"
-            or EveryPointInterpolation"  (ElevenPointInterpolation).
-            showAP (optional): if True, the average precision value will be shown in the title of
-            the graph (default = False);
-            showInterpolatedPrecision (optional): if True, it will show in the plot the interpolated
-             precision (default = False);
-            savePath (optional): if informed, the plot will be saved as an image in this path
-            (ex: /home/mywork/ap.png) (default = None);
-            showGraphic (optional): if True, the plot will be shown (default = True)
-        Returns:
-            A list of dictionaries. Each dictionary contains information and metrics of each class.
-            The keys of each dictionary are:
-            dict['class']: class representing the current dictionary;
-            dict['precision']: array with the precision values;
-            dict['recall']: array with the recall values;
-            dict['AP']: average precision;
-            dict['interpolated precision']: interpolated precision values;
-            dict['interpolated recall']: interpolated recall values;
-            dict['total positives']: total number of ground truth positives;
-            dict['total TP']: total number of True Positive detections;
-            dict['total FP']: total number of False Negative detections;
-        """
-        results = self.GetPascalVOCMetrics(boundingBoxes, IOUThreshold,
-                                           method=MethodAveragePrecision.EveryPointInterpolation)
-        result = None
-        # Each resut represents a class
-        for result in results:
-            if result is None:
-                raise IOError('Error: Class %d could not be found.' % classId)
-
-            classId = result['class']
-            precision = result['precision']
-            recall = result['recall']
-            average_precision = result['AP']
-            mpre = result['interpolated precision']
-            mrec = result['interpolated recall']
-            npos = result['total positives']
-            total_tp = result['total TP']
-            total_fp = result['total FP']
-
-            plt.close()
-            if showInterpolatedPrecision:
-                if method == MethodAveragePrecision.EveryPointInterpolation:
-                    plt.plot(mrec, mpre, '--r', label='Interpolated precision (every point)')
-                elif method == MethodAveragePrecision.ElevenPointInterpolation:
-                    # Uncomment the line below if you want to plot the area
-                    # plt.plot(mrec, mpre, 'or', label='11-point interpolated precision')
-                    # Remove duplicates, getting only the highest precision of each recall value
-                    nrec = []
-                    nprec = []
-                    for idx in range(len(mrec)):
-                        r = mrec[idx]
-                        if r not in nrec:
-                            idxEq = np.argwhere(mrec == r)
-                            nrec.append(r)
-                            nprec.append(max([mpre[int(id)] for id in idxEq]))
-                    plt.plot(nrec, nprec, 'or', label='11-point interpolated precision')
-            plt.plot(recall, precision, label='Precision')
-            plt.xlabel('recall')
-            plt.ylabel('precision')
-            if showAP:
-                ap_str = "{0:.2f}%".format(average_precision * 100)
-                # ap_str = "{0:.4f}%".format(average_precision * 100)
-                plt.title('Precision x Recall curve \nClass: %s, AP: %s' % (str(classId), ap_str))
-            else:
-                plt.title('Precision x Recall curve \nClass: %s' % str(classId))
-            plt.legend(shadow=True)
-            plt.grid()
-            if savePath is not None:
-                plt.savefig(os.path.join(savePath, classId + '.png'))
-            if showGraphic is True:
-                plt.show()
-                # plt.waitforbuttonpress()
-                plt.pause(0.05)
-        return results
 
     @staticmethod
     def CalculateAveragePrecision(rec, prec):
@@ -929,14 +828,9 @@ def get_mAP(gtFolder, detFolder, threshold=0.5, savePath=None):
     validClasses = 0
 
     # Plot Precision x Recall curve
-    detections = evaluator.PlotPrecisionRecallCurve(
-        allBoundingBoxes,  # Object containing all bounding boxes (ground truths and detections)
-        IOUThreshold=iouThreshold,  # IOU threshold
-        method=MethodAveragePrecision.EveryPointInterpolation,
-        showAP=True,  # Show Average Precision in the title of the plot
-        showInterpolatedPrecision=False,  # Don't plot the interpolated precision curve
-        savePath=savePath,
-        showGraphic=False)
+    detections = evaluator.GetPascalVOCMetrics(allBoundingBoxes, iouThreshold,
+                                           method=MethodAveragePrecision.EveryPointInterpolation)
+
 
     # each detection is a class and store AP and mAP results in AP_res list
     AP_res = []
