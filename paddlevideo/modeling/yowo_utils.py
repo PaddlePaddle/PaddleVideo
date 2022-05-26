@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import math
-import time
 import paddle
 import paddle.nn as nn
 import numpy as np
@@ -43,7 +42,6 @@ def nms(boxes, nms_thresh):
             for j in range(i + 1, len(boxes)):
                 box_j = boxes[sortIds[j]]
                 if bbox_iou(box_i, box_j, x1y1x2y2=False) > nms_thresh:
-                    # print(box_i, box_j, bbox_iou(box_i, box_j, x1y1x2y2=False))
                     box_j[4] = 0
     return out_boxes
 
@@ -68,7 +66,6 @@ def get_region_boxes(output, conf_thresh=0.005, num_classes=24,
     assert (output.shape[1] == (5 + num_classes) * num_anchors)
     h = output.shape[2]
     w = output.shape[3]
-    t0 = time.time()
     all_boxes = []
     output = paddle.reshape(output, [batch * num_anchors, 5 + num_classes, h * w])
     output = paddle.transpose(output, (1, 0, 2))
@@ -120,7 +117,6 @@ def get_region_boxes(output, conf_thresh=0.005, num_classes=24,
     cls_max_confs = paddle.reshape(cls_max_confs, [-1])
     cls_max_ids = paddle.reshape(cls_max_ids, [-1])
 
-    t1 = time.time()
 
     sz_hw = h * w
     sz_hwa = sz_hw * num_anchors
@@ -134,7 +130,6 @@ def get_region_boxes(output, conf_thresh=0.005, num_classes=24,
     hs = convert2cpu(hs)
     if validation:
         cls_confs = convert2cpu(cls_confs.reshape([-1, num_classes]))
-    t2 = time.time()
     for b in range(batch):
         boxes = []
         for cy in range(h):
@@ -163,7 +158,6 @@ def get_region_boxes(output, conf_thresh=0.005, num_classes=24,
                                     box.append(c)
                         boxes.append(box)
         all_boxes.append(boxes)
-    t3 = time.time()
     return all_boxes
 
 
@@ -192,7 +186,7 @@ def bbox_iou(box1, box2, x1y1x2y2=True):
     ch = h1 + h2 - uh
     carea = 0
     if cw <= 0 or ch <= 0:
-        return 0.0
+        return paddle.to_tensor(0.0)
 
     area1 = w1 * h1
     area2 = w2 * h2
@@ -335,7 +329,6 @@ def build_targets(pred_boxes, target, anchors, num_anchors, num_classes, nH, nW,
             th[b, best_n, gj, gi] = math.log(gh / anchors[anchor_step * best_n + 1])
             iou = bbox_iou(gt_box, pred_box, x1y1x2y2=False)  # best_iou
             # confidence equals to iou of the corresponding anchor
-            # print('iou',iou)
             tconf[b, best_n, gj, gi] = paddle.cast(iou, dtype='float32')
             tcls[b, best_n, gj, gi] = paddle.cast(target[b][t * 5], dtype='float32')
             # if ious larger than 0.5, we justify it as a correct prediction

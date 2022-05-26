@@ -19,8 +19,9 @@ from .depth_loss import ADDSLoss
 from .transnetv2_loss import TransNetV2Loss
 from .actbert_loss import ActBertLoss
 from .asrf_loss import ASRFLoss
+from .yowo_loss import RegionLoss
 
 __all__ = [
     'CrossEntropyLoss', 'BMNLoss', 'TransNetV2Loss', 'ActBertLoss', 'ADDSLoss',
-    'BaseWeightedLoss', 'ASRFLoss'
+    'BaseWeightedLoss', 'ASRFLoss', 'RegionLoss'
 ]
