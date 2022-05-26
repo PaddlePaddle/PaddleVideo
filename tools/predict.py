@@ -38,7 +38,7 @@ def parse_args():
     parser.add_argument("--model_file", type=str)
     parser.add_argument("--params_file", type=str)
 
-    # params for paddle predict
+    # params for predict
     parser.add_argument("-b", "--batch_size", type=int, default=1)
     parser.add_argument("--use_gpu", type=str2bool, default=True)
     parser.add_argument("--precision", type=str, default="fp32")
@@ -129,8 +129,6 @@ def parse_file_paths(input_path: str) -> list:
 
 
 def main():
-    """predict using paddle inference model
-    """
     args = parse_args()
     cfg = get_config(args.config, show=False)
 
@@ -195,6 +193,30 @@ def main():
 
             # Post process output
             InferenceHelper.postprocess(outputs)
+    elif model_name == 'YOWO':
+        for file in files:  # for videos
+            (_, filename) = os.path.split(file)
+            (filename, _) = os.path.splitext(filename)
+            save_dir = osp.join('inference', 'YOWO_infer')
+            if not osp.exists('inference'):
+                os.mkdir('inference')
+            if not osp.exists(save_dir):
+                os.mkdir(save_dir)
+            save_path = osp.join(save_dir, filename)
+            if not osp.exists(save_path):
+                os.mkdir(save_path)
+            inputs, frames = InferenceHelper.preprocess(file)
+            for idx, input in enumerate(inputs):
+                # Run inference
+                outputs = []
+                input_len = len(input_tensor_list)
+                for i in range(input_len):
+                    input_tensor_list[i].copy_from_cpu(input[i])
+                predictor.run()
+                for j in range(len(output_tensor_list)):
+                    outputs.append(output_tensor_list[j].copy_to_cpu())
+                # Post process output
+                InferenceHelper.postprocess(outputs, frames[idx], osp.join(save_path, str(idx).zfill(3)))
     else:
         if args.enable_benchmark:
             test_video_num = 12

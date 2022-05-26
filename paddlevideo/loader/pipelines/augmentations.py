@@ -1024,3 +1024,176 @@ class ToArray(object):
 
         results['imgs'] = imgs
         return results
+
+
+@PIPELINES.register()
+class YowoAug(object):
+    def __init__(self, target_size=224, jitter=0.2, hue=0.1, saturation=1.5, exposure=1.5, valid_mode=False):
+        self.shape = (target_size, target_size)
+        self.jitter = jitter
+        self.hue = hue
+        self.saturation = saturation
+        self.exposure = exposure
+        self.valid_mode = valid_mode
+
+    def _rand_scale(self, s):
+        scale = random.uniform(1, s)
+        if (random.randint(1, 10000) % 2):
+            return scale
+        return 1. / scale
+
+    def _distort_image(self, im, hue, sat, val):
+        im = im.convert('HSV')
+        cs = list(im.split())
+        cs[1] = cs[1].point(lambda i: i * sat)
+        cs[2] = cs[2].point(lambda i: i * val)
+
+        def _change_hue(x):
+            x += hue * 255
+            if x > 255:
+                x -= 255
+            if x < 0:
+                x += 255
+            return x
+
+        cs[0] = cs[0].point(_change_hue)
+        im = Image.merge(im.mode, tuple(cs))
+
+        im = im.convert('RGB')
+        # constrain_image(im)
+        return im
+
+    def _random_distort_image(self, im, dhue, dsat, dexp):
+        res = self._distort_image(im, dhue, dsat, dexp)
+        return res
+
+    def _read_truths_args(self, lab_path, min_box_scale):
+        truths = np.loadtxt(lab_path)
+        truths = np.reshape(truths, (truths.size // 5, 5))
+        new_truths = []
+        for i in range(truths.shape[0]):
+            cx = (truths[i][1] + truths[i][3]) / (2 * 320)
+            cy = (truths[i][2] + truths[i][4]) / (2 * 240)
+            imgw = (truths[i][3] - truths[i][1]) / 320
+            imgh = (truths[i][4] - truths[i][2]) / 240
+            truths[i][0] = truths[i][0] - 1
+            truths[i][1] = cx
+            truths[i][2] = cy
+            truths[i][3] = imgw
+            truths[i][4] = imgh
+
+            if truths[i][3] < min_box_scale:
+                continue
+            new_truths.append([truths[i][0], truths[i][1], truths[i][2], truths[i][3], truths[i][4]])
+        return np.array(new_truths)
+
+    def _fill_truth_detection(self, labpath, flip, dx, dy, sx, sy):
+        max_boxes = 50
+        label = np.zeros((max_boxes, 5))
+        bs = np.loadtxt(labpath)
+        bs = np.reshape(bs, (-1, 5))
+
+        for i in range(bs.shape[0]):
+            cx = (bs[i][1] + bs[i][3]) / (2 * 320)
+            cy = (bs[i][2] + bs[i][4]) / (2 * 240)
+            imgw = (bs[i][3] - bs[i][1]) / 320
+            imgh = (bs[i][4] - bs[i][2]) / 240
+            bs[i][0] = bs[i][0] - 1
+            bs[i][1] = cx
+            bs[i][2] = cy
+            bs[i][3] = imgw
+            bs[i][4] = imgh
+
+        cc = 0
+        for i in range(bs.shape[0]):
+            x1 = bs[i][1] - bs[i][3] / 2
+            y1 = bs[i][2] - bs[i][4] / 2
+            x2 = bs[i][1] + bs[i][3] / 2
+            y2 = bs[i][2] + bs[i][4] / 2
+
+            x1 = min(0.999, max(0, x1 * sx - dx))
+            y1 = min(0.999, max(0, y1 * sy - dy))
+            x2 = min(0.999, max(0, x2 * sx - dx))
+            y2 = min(0.999, max(0, y2 * sy - dy))
+
+            bs[i][1] = (x1 + x2) / 2
+            bs[i][2] = (y1 + y2) / 2
+            bs[i][3] = (x2 - x1)
+            bs[i][4] = (y2 - y1)
+
+            if flip:
+                bs[i][1] = 0.999 - bs[i][1]
+
+            if bs[i][3] < 0.001 or bs[i][4] < 0.001:
+                continue
+            label[cc] = bs[i]
+            cc += 1
+            if cc >= 50:
+                break
+
+        label = np.reshape(label, (-1))
+        return label
+
+    def __call__(self, results):
+        clip = results['imgs']
+        frame_num = len(clip)
+        oh = clip[0].height
+        ow = clip[0].width
+        labpath = results['filename'].replace('jpg', 'txt').replace('rgb-images', 'labels')
+        if not self.valid_mode:
+            dw = int(ow * self.jitter)
+            dh = int(oh * self.jitter)
+
+            pleft = random.randint(-dw, dw)
+            pright = random.randint(-dw, dw)
+            ptop = random.randint(-dh, dh)
+            pbot = random.randint(-dh, dh)
+
+            swidth = ow - pleft - pright
+            sheight = oh - ptop - pbot
+
+            sx = float(swidth) / ow
+            sy = float(sheight) / oh
+
+            dx = (float(pleft) / ow) / sx
+            dy = (float(ptop) / oh) / sy
+
+            flip = random.randint(1, 10000) % 2
+
+            dhue = random.uniform(-self.hue, self.hue)
+            dsat = self._rand_scale(self.saturation)
+            dexp = self._rand_scale(self.exposure)
+
+            # Augment
+            cropped = [img.crop((pleft, ptop, pleft + swidth - 1, ptop + sheight - 1)) for img in clip]
+
+            sized = [img.resize(self.shape) for img in cropped]
+
+            if flip:
+                sized = [img.transpose(Image.FLIP_LEFT_RIGHT) for img in sized]
+
+            clip = [self._random_distort_image(img, dhue, dsat, dexp) for img in sized]
+
+            label = self._fill_truth_detection(labpath, flip, dx, dy, 1. / sx, 1. / sy)
+
+        else:
+            label = paddle.zeros([50 * 5])
+            tmp = paddle.to_tensor(self._read_truths_args(labpath, 8.0 / clip[0].width).astype('float32'))
+            tmp = paddle.reshape(tmp, [-1])
+            tsz = paddle.numel(tmp)
+            if tsz > 50 * 5:
+                label = tmp[0:50 * 5]
+            elif tsz > 0:
+                label[0:tsz] = tmp
+            clip = [img.resize(self.shape) for img in clip]
+
+        import paddle.vision.transforms as T
+        transform = T.ToTensor()
+        clip = [transform(img) for img in clip]
+
+        # (self.duration, -1) + self.shape = (8, -1, 224, 224)
+        clip = paddle.concat(clip, 0).reshape([frame_num, -1, 224, 224])
+        clip = paddle.transpose(clip, [1, 0, 2, 3])
+        results['imgs'] = clip
+        results['labels'] = label
+        return results

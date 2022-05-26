@@ -332,6 +332,13 @@ def train_model(cfg,
                     best_flag = True
                 return best, best_flag
 
+            if cfg.MODEL.framework == "YOWOLocalizer" and (not parallel or
+                                                           (parallel and rank == 0)):
+                if record_list["fscore"].avg > best:
+                    best = record_list["fscore"].avg
+                    best_flag = True
+                return best, best_flag
+
             # forbest2, cfg.MODEL.framework != "FastRCNN":
             for top_flag in ['hit_at_one', 'top1', 'rmse', "F1@0.50"]:
                 if record_list.get(top_flag):
@@ -378,6 +385,10 @@ def train_model(cfg,
                 elif cfg.MODEL.framework in ['MSTCN', 'ASRF']:
                     logger.info(
                         f"Already save the best model (F1@0.50){int(best * 10000) / 10000}"
+                    )
+                elif cfg.MODEL.framework in ['YOWOLocalizer']:
+                    logger.info(
+                        f"Already save the best model (fsocre){int(best * 10000) / 10000}"
                     )
                 else:
                     logger.info(

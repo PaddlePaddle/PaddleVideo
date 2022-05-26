@@ -187,6 +187,13 @@ def get_input_spec(cfg, model_name):
             InputSpec(shape=[None, None, 4], dtype='float32', name='proposals'),
             InputSpec(shape=[None, 2], dtype='float32', name='img_shape')
         ]]
+    elif model_name in ['YOWO']:
+        input_spec = [[
+            InputSpec(shape=[
+                1, 3, cfg.num_seg, cfg.target_size, cfg.target_size
+            ],
+                      dtype='float32'),
+        ]]
     return input_spec
 
 

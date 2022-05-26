@@ -16,9 +16,9 @@ import json
 import os
 import shutil
 import sys
-from typing import List
 
 import cv2
+
 try:
     import imageio
 except ImportError as e:
@@ -57,6 +57,7 @@ from paddlevideo.modeling.framework.segmenters.utils import ASRFPostProcessing
 from ava_predict import (detection_inference, frame_extraction,
                          get_detection_result, get_timestep_result, pack_result,
                          visualize)
+from paddlevideo.modeling.yowo_utils import nms, get_region_boxes
 
 INFERENCE = Registry('inference')
 
@@ -125,21 +126,13 @@ def build_inference_helper(cfg):
 
 
 class Base_Inference_helper():
+
     def __init__(self,
                  num_seg=8,
                  seg_len=1,
                  short_size=256,
                  target_size=224,
                  top_k=1):
-        """Base_Inference_helper
-
-        Args:
-            num_seg (int, optional): number of segmentations of an sliced input video. Defaults to 8.
-            seg_len (int, optional): length of each segmentation. Defaults to 1.
-            short_size (int, optional): short size of input video. Defaults to 256.
-            target_size (int, optional): size of cropped video. Defaults to 224.
-            top_k (int, optional): select topk result in outputs. Defaults to 1.
-        """
         self.num_seg = num_seg
         self.seg_len = seg_len
         self.short_size = short_size
@@ -147,23 +140,10 @@ class Base_Inference_helper():
         self.top_k = top_k
 
     @abstractmethod
-    def preprocess(self, input_file: str):
-        """preprocess abstractmethod
-
-        Args:
-            input_file (str): input file path.
-        """
+    def preprocess(self, input_file):
         pass
 
-    def preprocess_batch(self, file_list: List[str]) -> List[np.ndarray]:
-        """preprocess for file list
-
-        Args:
-            file_list (List[str]): file pathes in an list, [path1, path2, ...].
-
-        Returns:
-            List[np.ndarray]: batched inputs data, [data_batch[0], data_batch[1], ...].
-        """
+    def preprocess_batch(self, file_list):
         batched_inputs = []
         for file in file_list:
             inputs = self.preprocess(file)
@@ -175,14 +155,9 @@ class Base_Inference_helper():
         self.input_file = file_list
         return batched_inputs
 
-    def postprocess(self,
-                    output: np.ndarray,
-                    print_output: bool = True) -> None:
-        """postprocess
-
-        Args:
-            output (np.ndarray): batched output scores, shape of (batch_size, class_num).
-            print_output (bool, optional): whether to print result. Defaults to True.
+    def postprocess(self, output, print_output=True):
+        """
+        output: list
         """
         if not isinstance(self.input_file, list):
             self.input_file = [
@@ -208,6 +183,7 @@ class Base_Inference_helper():
 
 @INFERENCE.register()
 class ppTSM_Inference_helper(Base_Inference_helper):
+
     def __init__(self,
                  num_seg=8,
                  seg_len=1,
@@ -247,6 +223,7 @@ class ppTSM_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class ppTSN_Inference_helper(Base_Inference_helper):
+
     def __init__(self,
                  num_seg=25,
                  seg_len=1,
@@ -292,6 +269,7 @@ class ppTSN_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class BMN_Inference_helper(Base_Inference_helper):
+
     def __init__(self, feat_dim, dscale, tscale, result_path):
         self.feat_dim = feat_dim
         self.dscale = dscale
@@ -339,7 +317,7 @@ class BMN_Inference_helper(Base_Inference_helper):
                 start_index = jdx
                 end_index = start_index + idx
                 if end_index < self.tscale and start_mask[
-                        start_index] == 1 and end_mask[end_index] == 1:
+                    start_index] == 1 and end_mask[end_index] == 1:
                     xmin = snippet_xmins[start_index]
                     xmax = snippet_xmaxs[end_index]
                     xmin_score = pred_start[start_index]
@@ -356,9 +334,9 @@ class BMN_Inference_helper(Base_Inference_helper):
         proposal_list = []
         df = soft_nms(df, alpha=0.4, t1=0.55, t2=0.9)
         for idx in range(min(100, len(df))):
-            tmp_prop={"score":df.score.values[idx], \
-                      "segment":[max(0,df.xmin.values[idx])*self.video_duration, \
-                                 min(1,df.xmax.values[idx])*self.video_duration]}
+            tmp_prop = {"score": df.score.values[idx], \
+                        "segment": [max(0, df.xmin.values[idx]) * self.video_duration, \
+                                    min(1, df.xmax.values[idx]) * self.video_duration]}
             proposal_list.append(tmp_prop)
 
         result_dict[self.feat_path] = proposal_list
@@ -378,6 +356,7 @@ class BMN_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class TimeSformer_Inference_helper(Base_Inference_helper):
+
     def __init__(self,
                  num_seg=8,
                  seg_len=1,
@@ -423,6 +402,7 @@ class TimeSformer_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class VideoSwin_Inference_helper(Base_Inference_helper):
+
     def __init__(self,
                  num_seg=4,
                  seg_len=32,
@@ -503,6 +483,7 @@ class VideoSwin_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class VideoSwin_TableTennis_Inference_helper(Base_Inference_helper):
+
     def __init__(self,
                  num_seg=1,
                  seg_len=32,
@@ -631,6 +612,7 @@ class VideoSwin_TableTennis_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class SlowFast_Inference_helper(Base_Inference_helper):
+
     def __init__(self,
                  num_frames=32,
                  sampling_rate=2,
@@ -704,6 +686,7 @@ class SlowFast_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class STGCN_Inference_helper(Base_Inference_helper):
+
     def __init__(self,
                  num_channels,
                  window_size,
@@ -735,6 +718,7 @@ class STGCN_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class CTRGCN_Inference_helper(Base_Inference_helper):
+
     def __init__(self,
                  num_channels=3,
                  vertex_nums=25,
@@ -771,6 +755,7 @@ class CTRGCN_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class MSTCN_Inference_helper(Base_Inference_helper):
+
     def __init__(self, num_channels, actions_map_file_path, feature_path=None):
         self.num_channels = num_channels
         file_ptr = open(actions_map_file_path, 'r')
@@ -846,6 +831,7 @@ class MSTCN_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class ASRF_Inference_helper(Base_Inference_helper):
+
     def __init__(self,
                  num_channels,
                  actions_map_file_path,
@@ -937,9 +923,10 @@ class ASRF_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class AttentionLSTM_Inference_helper(Base_Inference_helper):
+
     def __init__(
             self,
-            num_classes,  #Optional, the number of classes to be classified.
+            num_classes,  # Optional, the number of classes to be classified.
             feature_num,
             feature_dims,
             embedding_size,
@@ -977,6 +964,7 @@ class AttentionLSTM_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class TransNetV2_Inference_helper():
+
     def __init__(self,
                  num_frames,
                  height,
@@ -1079,7 +1067,7 @@ class TransNetV2_Inference_helper():
         img = frames.reshape([height, width, ih + 1, iw + len(predictions), ic])
         img = np.concatenate(np.split(
             np.concatenate(np.split(img, height), axis=2)[0], width),
-                             axis=2)[0, :-1]
+            axis=2)[0, :-1]
 
         img = Image.fromarray(img)
         draw = ImageDraw.Draw(img)
@@ -1118,11 +1106,11 @@ class TransNetV2_Inference_helper():
             [all_ for single_, all_ in predictions])
         single_frame_predictions, all_frame_predictions = single_frame_pred[:
                                                                             self
-                                                                            .
-                                                                            len_frames], all_frames_pred[:
-                                                                                                         self
-                                                                                                         .
-                                                                                                         len_frames]
+                                                                                .
+                                                                                len_frames], all_frames_pred[:
+                                                                                                             self
+                                                                                                                 .
+                                                                                                                 len_frames]
 
         scenes = self.predictions_to_scenes(single_frame_predictions)
 
@@ -1154,6 +1142,7 @@ class TransNetV2_Inference_helper():
 
 @INFERENCE.register()
 class ADDS_Inference_helper(Base_Inference_helper):
+
     def __init__(self,
                  frame_idxs=[0],
                  num_scales=4,
@@ -1251,6 +1240,7 @@ class ADDS_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class AVA_SlowFast_FastRCNN_Inference_helper(Base_Inference_helper):
+
     def __init__(self,
                  detection_model_name,
                  detection_model_weights,
@@ -1266,7 +1256,7 @@ class AVA_SlowFast_FastRCNN_Inference_helper(Base_Inference_helper):
         self.detection_model_weights = detection_model_weights
 
         self.config = get_config(config_file_path,
-                                 show=False)  #parse config file
+                                 show=False)  # parse config file
         self.predict_stepsize = predict_stepsize
         self.output_stepsize = output_stepsize
         self.output_fps = output_fps
@@ -1282,7 +1272,7 @@ class AVA_SlowFast_FastRCNN_Inference_helper(Base_Inference_helper):
 
         frame_dir = 'tmp_frames'
         self.frame_paths, frames, FPS = frame_extraction(input_file, frame_dir)
-        num_frame = len(self.frame_paths)  #视频秒数*FPS
+        num_frame = len(self.frame_paths)  # 视频秒数*FPS
         assert num_frame != 0
 
         # 帧图像高度和宽度
@@ -1290,7 +1280,7 @@ class AVA_SlowFast_FastRCNN_Inference_helper(Base_Inference_helper):
 
         # Get clip_len, frame_interval and calculate center index of each clip
         data_process_pipeline = build_pipeline(
-            self.config.PIPELINE.test)  #测试时输出处理流水配置
+            self.config.PIPELINE.test)  # 测试时输出处理流水配置
 
         clip_len = self.config.PIPELINE.test.sample['clip_len']
         assert clip_len % 2 == 0, 'We would like to have an even clip_len'
@@ -1341,7 +1331,7 @@ class AVA_SlowFast_FastRCNN_Inference_helper(Base_Inference_helper):
                 (float)(self.config.DATASET.test['person_det_score_thr']))
 
             if proposals.shape[0] == 0:
-                #person_num_list.append(0)
+                # person_num_list.append(0)
                 human_detections.append(None)
                 continue
 
@@ -1398,8 +1388,8 @@ class AVA_SlowFast_FastRCNN_Inference_helper(Base_Inference_helper):
 
         assert len(self.person_num_list) == len(outputs)
 
-        #print("***  self.human_detections",len( self.human_detections))
-        #print("***  outputs",len( outputs))
+        # print("***  self.human_detections",len( self.human_detections))
+        # print("***  outputs",len( outputs))
 
         index = 0
         for t_index in range(len(self.timestamps)):
@@ -1410,7 +1400,7 @@ class AVA_SlowFast_FastRCNN_Inference_helper(Base_Inference_helper):
             human_detection = self.human_detections[t_index]
 
             output = outputs[index]
-            result = output  #长度为类别个数，不包含背景
+            result = output  # 长度为类别个数，不包含背景
 
             person_num = self.person_num_list[index]
 
@@ -1450,7 +1440,7 @@ class AVA_SlowFast_FastRCNN_Inference_helper(Base_Inference_helper):
                 len(timestamps) * n) * old_frame_interval / n + start
             return new_frame_inds.astype(np.int)
 
-        dense_n = int(self.predict_stepsize / self.output_stepsize)  #30
+        dense_n = int(self.predict_stepsize / self.output_stepsize)  # 30
         frames = [
             cv2.imread(self.frame_paths[i - 1])
             for i in dense_timestamps(self.timestamps, dense_n)
@@ -1471,3 +1461,115 @@ class AVA_SlowFast_FastRCNN_Inference_helper(Base_Inference_helper):
         # delete tmp files and dirs
         shutil.rmtree(self.frame_dir)
         shutil.rmtree(self.detection_result_dir)
+
+
+@INFERENCE.register()
+class YOWO_Inference_helper(Base_Inference_helper):
+
+    def __init__(self,
+                 num_seg=16,
+                 target_size=224,
+                 nms_thresh=0.5,
+                 conf_thresh_valid=0.5,
+                 mean=[0.4345, 0.4051, 0.3775],
+                 std=[0.2768, 0.2713, 0.2737]):
+        self.num_seg = num_seg
+        self.target_size = target_size
+        self.nms_thresh = nms_thresh
+        self.conf_thresh_valid = conf_thresh_valid
+        self.mean = mean
+        self.std = std
+
+    def preprocess(self, input_file):
+        """
+        input_file: str, file path
+        return: list
+        """
+        assert os.path.isfile(input_file) is not None, "{0} not exists".format(
+            input_file)
+        cap = cv2.VideoCapture(input_file)
+        queue = []
+        inputs = []
+        frames = []
+        while (cap.isOpened()):
+            ret, frame = cap.read()
+            if ret == False:
+                break
+            if len(queue) <= 0:  # At initialization, populate queue with initial frame
+                for i in range(self.num_seg):
+                    queue.append(frame)
+
+            # Add the read frame to last and pop out the oldest one
+            queue.append(frame)
+            queue.pop(0)
+
+            # Resize images
+            imgs = [cv2.resize(img, (self.target_size, self.target_size), interpolation=cv2.INTER_LINEAR) for img in
+                    queue]
+
+            # Convert image to CHW keeping BGR order.
+            imgs = [img.transpose([2, 0, 1]) for img in imgs]
+
+            # Image [0, 255] -> [0, 1].
+            imgs = [img / 255.0 for img in imgs]
+
+            imgs = [
+                np.ascontiguousarray(
+                    img.reshape((3, imgs[0].shape[1], imgs[0].shape[2]))
+                ).astype(np.float32)
+                for img in imgs
+            ]
+
+            # Concat list of images to single ndarray.
+            imgs = np.concatenate(
+                [np.expand_dims(img, axis=1) for img in imgs], axis=1
+            )
+
+            imgs = np.ascontiguousarray(imgs)
+            imgs = np.expand_dims(imgs, axis=0)
+            imgs = np.expand_dims(imgs, axis=0)
+            inputs.append(imgs)
+            frames.append(queue[-1])
+
+        return inputs, frames
+
+    def postprocess(self, outputs, frame, filename, save_img=True):
+        """
+        outputs: list
+        frames: list
+        """
+        labels = [
+            "Basketball", "BasketballDunk", "Biking", "CliffDiving", "CricketBowling",
+            "Diving", "Fencing", "FloorGymnastics", "GolfSwing", "HorseRiding",
+            "IceDancing", "LongJump", "PoleVault", "RopeClimbing", "SalsaSpin",
+            "SkateBoarding", "Skiing", "Skijet", "SoccerJuggling", "Surfing",
+            "TennisSwing", "TrampolineJumping", "VolleyballSpiking", "WalkingWithDog"]
+        nms_thresh = 0.5
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        for out in outputs:
+            out = paddle.to_tensor(out)
+            preds = []
+            all_boxes = get_region_boxes(out)
+            for i in range(out.shape[0]):
+                boxes = all_boxes[i]
+                boxes = nms(boxes, nms_thresh)
+
+                for box in boxes:
+                    x1 = round(float(box[0] - box[2] / 2.0) * 320.0)
+                    y1 = round(float(box[1] - box[3] / 2.0) * 240.0)
+                    x2 = round(float(box[0] + box[2] / 2.0) * 320.0)
+                    y2 = round(float(box[1] + box[3] / 2.0) * 240.0)
+
+                    det_conf = float(box[4])
+                    for j in range((len(box) - 5) // 2):
+                        cls_conf = float(box[5 + 2 * j].item())
+                        prob = det_conf * cls_conf
+                    preds.append([[x1, y1, x2, y2], prob, labels[int(box[6])]])
+
+            for _, dets in enumerate(preds):
+                if dets[1] < 0.4:
+                    break
+                text = dets[2] + ' ' + '{:.2f}'.format(dets[1])
+                cv2.rectangle(frame, (dets[0][0], dets[0][1]), (dets[0][2], dets[0][3]), (0, 255, 0), 2)
+                cv2.putText(frame, text, (dets[0][0] + 3, dets[0][1] - 5 - 10 * _), font, 0.5, (0, 255, 0), 2)
+            cv2.imwrite('{}.jpg'.format(filename), frame)
