@@ -48,13 +48,15 @@ def preprocess(video_path: str) -> Tuple[Dict[str, np.ndarray], List]:
     results = {"filename": video_path}
     results = seq(results)
     tmp_inp = np.expand_dims(results["imgs"], axis=0)  # [b,t,c,h,w]
+
+    # The input for the network is input_data[0], so need to add 1 dimension at the beginning
     tmp_inp = np.expand_dims(tmp_inp, axis=0)  # [1,b,t,c,h,w]
     feed = {"data_batch_0": tmp_inp}
     fetch = ["outputs"]
     return feed, fetch
 
 
-def np_softmax(x: np.ndarray, axis=-1) -> np.ndarray:
+def np_softmax(x: np.ndarray, axis=0) -> np.ndarray:
     """softmax function
 
     Args:

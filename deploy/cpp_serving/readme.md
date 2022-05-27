@@ -41,12 +41,16 @@ python3.7 -m pip install paddle-serving-server-gpu==0.7.0.post112  # GPU with CU
 ```
 
 * 如果安装速度太慢，可以通过 `-i https://pypi.tuna.tsinghua.edu.cn/simple` 更换源，加速安装过程。
+* 更多环境和对应的安装包详见：https://github.com/PaddlePaddle/Serving/blob/v0.9.0/doc/Install_Linux_Env_CN.md
 
-## 动作分类服务部署
+## 行为识别服务部署
 ### 模型转换
-使用 PaddleServing 做服务化部署时，需要将保存的 inference 模型转换为 Serving 模型。下面以 PP-TSM 模型为例，介绍如何部署动作分类服务。
+使用 PaddleServing 做服务化部署时，需要将保存的 inference 模型转换为 Serving 模型。下面以 PP-TSM 模型为例，介绍如何部署行为识别服务。
 - 下载 PP-TSM 推理模型并转换为 Serving 模型：
   ```bash
+  # 进入PaddleVideo目录
+  cd PaddleVideo
+
   # 下载推理模型并解压到./inference下
   mkdir ./inference
   pushd ./inference
@@ -65,18 +69,25 @@ python3.7 -m pip install paddle-serving-server-gpu==0.7.0.post112  # GPU with CU
   popd
   ```
 
-- 推理模型转换完成后，会在`deploy/cpp_serving`文件夹多出 `ppTSM_serving_client` 和 `ppTSM_serving_server` 两个文件夹，具备如下格式：
+  | 参数              | 类型 | 默认值             | 描述                                                         |
+  | ----------------- | ---- | ------------------ | ------------------------------------------------------------ |
+  | `dirname`         | str  | -                  | 需要转换的模型文件存储路径，Program结构文件和参数文件均保存在此目录。 |
+  | `model_filename`  | str  | None               | 存储需要转换的模型Inference Program结构的文件名称。如果设置为None，则使用 `__model__` 作为默认的文件名 |
+  | `params_filename` | str  | None               | 存储需要转换的模型所有参数的文件名称。当且仅当所有模型参数被保>存在一个单独的二进制文件中，它才需要被指定。如果模型参数是存储在各自分离的文件中，设置它的值为None |
+  | `serving_server`  | str  | `"serving_server"` | 转换后的模型文件和配置文件的存储路径。默认值为serving_server |
+  | `serving_client`  | str  | `"serving_client"` | 转换后的客户端配置文件存储路径。默认值为serving_client       |
+
+- 推理模型转换完成后，会在`deploy/cpp_serving`文件夹下生成 `ppTSM_serving_client` 和 `ppTSM_serving_server` 两个文件夹，具备如下格式：
   ```bash
-  PaddleVideo
-  └── deploy
-      ├── ppTSM_serving_client
-      │    ├── serving_client_conf.prototxt
-      │    └── serving_client_conf.stream.prototxt
-      └── ppTSM_serving_server
-          ├── ppTSM.pdiparams
-          ├── ppTSM.pdmodel
-          ├── serving_server_conf.prototxt
-          └── serving_server_conf.stream.prototxt
+  PaddleVideo/deploy/cpp_serving
+  ├── ppTSM_serving_client
+  │   ├── serving_client_conf.prototxt
+  │   └── serving_client_conf.stream.prototxt
+  └── ppTSM_serving_server
+      ├── ppTSM.pdiparams
+      ├── ppTSM.pdmodel
+      ├── serving_server_conf.prototxt
+      └── serving_server_conf.stream.prototxt
   ```
   得到模型文件之后，需要分别修改 `ppTSM_serving_client` 下的 `serving_client_conf.prototxt` 和 `ppTSM_serving_server` 下的 `serving_server_conf.prototxt`，将两份文件中`fetch_var` 下的 `alias_name` 均改为 `outputs`
 
@@ -103,10 +114,12 @@ python3.7 -m pip install paddle-serving-server-gpu==0.7.0.post112  # GPU with CU
   }
   ```
 ### 服务部署和请求
-cpp_serving 目录包含了启动 pipeline 服务、C++ serving服务和发送预测请求的代码，具体包括：
+`cpp_serving` 目录包含了启动 pipeline 服务、C++ serving服务和发送预测请求的代码，具体包括：
   ```bash
   run_cpp_serving.sh          # 启动C++ serving server端的脚本
   pipeline_http_client.py     # client端发送数据并获取预测结果的脚本
+  paddle_env_install.sh       # 安装C++ serving环境脚本
+  preprocess_ops.py           # 存放预处理函数的文件
   ```
 #### C++ Serving
 - 进入工作目录：
