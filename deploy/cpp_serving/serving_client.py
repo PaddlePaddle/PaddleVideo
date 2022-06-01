@@ -20,6 +20,7 @@ from paddle_serving_client import Client
 from preprocess_ops import get_preprocess_func, np_softmax
 
 
+
 def postprocess(fetch_map: Dict[str, np.ndarray]) -> Dict[str, Any]:
     """postprocess
 

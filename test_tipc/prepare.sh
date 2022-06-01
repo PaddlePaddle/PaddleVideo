@@ -431,7 +431,21 @@ if [ ${MODE} = "benchmark_train" ];then
 fi
 
 if [ ${MODE} = "klquant_whole_infer" ]; then
-    echo "Not added into TIPC now."
+    if [ ${model_name} = "PP-TSM" ]; then
+        # download lite data
+        pushd ./data/k400
+        wget -nc https://videotag.bj.bcebos.com/Data/k400_rawframes_small.tar
+        tar -xf k400_rawframes_small.tar
+        popd
+        # download inference model
+        mkdir ./inference
+        pushd ./inference
+        wget -nc https://videotag.bj.bcebos.com/PaddleVideo-release2.3/ppTSM.zip --no-check-certificate
+        unzip ppTSM.zip
+        popd
+    else
+        echo "Not added into TIPC yet."
+    fi
 fi
 
 if [ ${MODE} = "cpp_infer" ];then
@@ -460,8 +474,34 @@ if [ ${MODE} = "cpp_infer" ];then
     fi
 fi
 
-if [ ${MODE} = "serving_infer" ];then
-    echo "Not added into TIPC now."
+if [ ${MODE} = "serving_infer_python" ];then
+    if [[ ${model_name} == "PP-TSM" ]];then
+        # prepare lite infer data for serving
+        pushd ./data
+        mkdir python_serving_infer_video_dir
+        cp ./example.avi python_serving_infer_video_dir/
+        popd
+        # prepare inference model
+        mkdir ./inference
+        pushd ./inference
+        wget -nc https://videotag.bj.bcebos.com/PaddleVideo-release2.3/ppTSM.zip --no-check-certificate
+        unzip ppTSM.zip
+        popd
+    elif [[ ${model_name} == "PP-TSN" ]];then
+        # prepare lite infer data for serving
+        pushd ./data
+        mkdir python_serving_infer_video_dir
+        cp ./example.avi python_serving_infer_video_dir/
+        popd
+        # prepare inference model
+        mkdir ./inference
+        pushd ./inference
+        wget -nc https://videotag.bj.bcebos.com/PaddleVideo-release2.3/ppTSN.zip --no-check-certificate
+        unzip ppTSN.zip
+        popd
+    else
+        echo "Not added into TIPC now."
+    fi
 fi
 
 if [ ${MODE} = "paddle2onnx_infer" ];then
