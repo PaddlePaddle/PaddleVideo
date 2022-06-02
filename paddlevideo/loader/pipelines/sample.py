@@ -117,8 +117,9 @@ class Sampler(object):
                 imgs = []
                 frames = np.array(results['frames'])
                 for idx in frames_idx:
-                    imgbuf = frames[idx - 1]  
-                    # imgbuf = frames[idx]   # A bug. when we use, this will cause index out of bounds.
+                    if self.dense_sample:
+                        idx = idx - 1
+                    imgbuf = frames[idx]
                     imgs.append(imgbuf)
                 imgs = np.stack(imgs)  # thwc
             else:
