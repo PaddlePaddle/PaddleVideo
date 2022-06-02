@@ -36,7 +36,7 @@ class Compose:
         return img
 
       
-def np_softmax(x: np.ndarray, axis: int = -1) -> np.ndarray:
+def np_softmax(x: np.ndarray, axis: int = 0) -> np.ndarray:
     """softmax function
 
     Args:
