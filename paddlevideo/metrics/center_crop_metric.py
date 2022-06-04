@@ -36,9 +36,9 @@ class CenterCropMetric(BaseMetric):
         """update metrics during each iter
 
         Args:
-            batch_id (int): batch id
-            data (List): batch data
-            outputs (paddle.Tensor): batch outputs from model
+            batch_id (int): iter id of current batch.
+            data (List): list of batched data, such as [inputs, labels]
+            outputs (paddle.Tensor): batched outputs from model
         """
         labels = data[1]
         if self.world_size > 1:
