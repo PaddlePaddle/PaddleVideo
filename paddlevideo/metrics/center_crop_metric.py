@@ -10,41 +10,53 @@
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 
-import numpy as np
-import paddle
-from paddle.hapi.model import _all_gather
+from typing import List
 
-from .registry import METRIC
-from .base import BaseMetric
+import paddle
 from paddlevideo.utils import get_logger
+
+from .base import BaseMetric
+from .registry import METRIC
+
 logger = get_logger("paddlevideo")
 
 
 @METRIC.register
 class CenterCropMetric(BaseMetric):
-    def __init__(self, data_size, batch_size, log_interval=1):
+    def __init__(self, data_size, batch_size, log_interval=1, **kwargs):
         """prepare for metrics
         """
-        super().__init__(data_size, batch_size, log_interval)
-        self.top1 = []
-        self.top5 = []
+        super().__init__(data_size, batch_size, log_interval, **kwargs)
+        self.rest_data_size = data_size  # Number of samples remaining to be tested
+        self.all_outputs = []
+        self.all_labels = []
+        self.topk = kwargs.get("topk", [1, 5])
 
-    def update(self, batch_id, data, outputs):
+    def update(self, batch_id: int, data: List, outputs: paddle.Tensor) -> None:
         """update metrics during each iter
+
+        Args:
+            batch_id (int): batch id
+            data (List): batch data
+            outputs (paddle.Tensor): batch outputs from model
         """
         labels = data[1]
-
-        top1 = paddle.metric.accuracy(input=outputs, label=labels, k=1)
-        top5 = paddle.metric.accuracy(input=outputs, label=labels, k=5)
-        #NOTE(shipping): deal with multi cards validate
         if self.world_size > 1:
-            top1 = paddle.distributed.all_reduce(
-                top1, op=paddle.distributed.ReduceOp.SUM) / self.world_size
-            top5 = paddle.distributed.all_reduce(
-                top5, op=paddle.distributed.ReduceOp.SUM) / self.world_size
+            labels_gathered = self.gather_from_gpu(labels, concat_axis=0)
+            outpus_gathered = self.gather_from_gpu(outputs, concat_axis=0)
+        else:
+            labels_gathered = labels
+            outpus_gathered = outputs
 
-        self.top1.append(top1.numpy())
-        self.top5.append(top5.numpy())
+        # Avoid resampling effects when testing with multiple cards
+        labels_gathered = labels_gathered[0:min(len(labels_gathered), self.
+                                                rest_data_size)]
+        outpus_gathered = outpus_gathered[0:min(len(outpus_gathered), self.
+                                                rest_data_size)]
+        self.all_labels.append(labels_gathered)
+        self.all_outputs.append(outpus_gathered)
+        self.rest_data_size -= outpus_gathered.shape[0]
+
         # preds ensemble
         if batch_id % self.log_interval == 0:
             logger.info("[TEST] Processing batch {}/{} ...".format(
@@ -52,7 +64,16 @@ class CenterCropMetric(BaseMetric):
                 self.data_size // (self.batch_size * self.world_size)))
 
     def accumulate(self):
-        """accumulate metrics when finished all iters.
+        """accumulate, compute, and show metrics when finished all iters.
         """
-        logger.info('[TEST] finished, avg_acc1= {}, avg_acc5= {} '.format(
-            np.mean(np.array(self.top1)), np.mean(np.array(self.top5))))
+        self.all_outputs = paddle.concat(self.all_outputs, axis=0)
+        self.all_labels = paddle.concat(self.all_labels, axis=0)
+
+        result_str = []
+        for _k in self.topk:
+            topk_val = paddle.metric.accuracy(input=self.all_outputs,
+                                              label=self.all_labels,
+                                              k=_k).item()
+            result_str.append(f"avg_acc{_k}={topk_val}")
+        result_str = ", ".join(result_str)
+        logger.info(f"[TEST] finished, {result_str}")
