@@ -13,11 +13,10 @@
 # limitations under the License.
 
 from .anet_pipeline import GetMatchMap, GetVideoLabel, LoadFeat
-from .augmentations import (CenterCrop, ColorJitter, GroupRandomFlip,
-                            GroupResize, Image2Array, JitterScale, MultiCrop,
-                            Normalization, PackOutput, RandomCrop, RandomFlip,
-                            RandomResizedCrop, Scale, TenCrop, ToArray,
-                            UniformCrop)
+from .augmentations import (
+    CenterCrop, ColorJitter, GroupRandomFlip, GroupResize, Image2Array,
+    JitterScale, MultiCrop, Normalization, PackOutput, RandomCrop, RandomFlip,
+    RandomResizedCrop, Scale, TenCrop, ToArray, UniformCrop)
 from .augmentations_ava import *
 from .compose import Compose
 from .decode import FeatureDecoder, FrameDecoder, VideoDecoder
@@ -30,6 +29,9 @@ from .sample_ava import *
 from .segmentation import MultiNorm, MultiRestrictSize
 from .skeleton_pipeline import AutoPadding, Iden, SkeletonNorm
 from .skeleton_pipeline import SketeonCropSample, SketeonModalityTransform, RandomRotation
+from .skeleton_pipeline import (UniformSampleFrames, PoseDecode, PoseCompact,
+                                RandomResizedCrop_V2, Flip_V2, CenterCrop_V2,
+                                GeneratePoseTarget, FormatShape, Collect)
 from .decode_sampler_MRI import SFMRI_DecodeSampler
 from .segmentation_pipline import SegmentationSampler
 
@@ -43,5 +45,8 @@ __all__ = [
     'ToArray', 'FeaturePadding', 'GetMatchMap', 'GroupRandomFlip', 'MultiCrop',
     'SFMRI_DecodeSampler', 'MultiRestrictSize', 'MultiNorm',
     'RandomResizedCrop', 'SamplerPkl', 'SegmentationSampler',
-    'SketeonCropSample', 'SketeonModalityTransform', 'RandomRotation'
+    'SketeonCropSample', 'SketeonModalityTransform', 'RandomRotation',
+    'UniformSampleFrames', 'PoseDecode', 'PoseCompact', 'Resize',
+    'RandomResizedCrop_V2', 'Flip_V2', 'GeneratePoseTarget', 'FormatShape',
+    'Collect'
 ]

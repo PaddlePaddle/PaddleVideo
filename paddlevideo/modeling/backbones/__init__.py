@@ -41,11 +41,12 @@ from .resnet_slowfast_MRI import ResNetSlowFast_MRI
 from .cfbi import CFBI
 from .ctrgcn import CTRGCN
 from .movinet import MoViNet
+from .resnet3d_slowonly import ResNet3dSlowOnly
 
 __all__ = [
     'ResNet', 'ResNetTSM', 'ResNetTweaksTSM', 'ResNetSlowFast', 'BMN',
     'ResNetTweaksTSN', 'VisionTransformer', 'STGCN', 'AGCN', 'TransNetV2',
     'ADDS_DepthNet', 'VisionTransformer_tweaks', 'BertForMultiModalPreTraining',
     'ResNetTSN_MRI', 'ResNetTSM_MRI', 'ResNetSlowFast_MRI', 'CFBI', 'MSTCN',
-    'ASRF', 'MoViNet', 'SwinTransformer3D', 'CTRGCN'
+    'ASRF', 'MoViNet', 'SwinTransformer3D', 'CTRGCN', 'ResNet3dSlowOnly'
 ]

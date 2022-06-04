@@ -17,6 +17,7 @@ import os
 import shutil
 import sys
 from typing import List
+import pickle
 
 import cv2
 try:
@@ -48,7 +49,8 @@ from paddlevideo.loader.pipelines import (
     GroupResize, Image2Array, ImageDecoder, JitterScale, MultiCrop,
     Normalization, PackOutput, Sampler, SamplerPkl, Scale, SkeletonNorm,
     TenCrop, ToArray, UniformCrop, VideoDecoder, SegmentationSampler,
-    SketeonCropSample)
+    SketeonCropSample, UniformSampleFrames, PoseDecode, PoseCompact, Resize,
+    CenterCrop_V2, GeneratePoseTarget, FormatShape, Collect)
 from paddlevideo.metrics.ava_utils import read_labelmap
 from paddlevideo.metrics.bmn_metric import boundary_choose, soft_nms
 from paddlevideo.utils import Registry, build, get_config
@@ -175,8 +177,7 @@ class Base_Inference_helper():
         self.input_file = file_list
         return batched_inputs
 
-    def postprocess(self,
-                    output: np.ndarray,
+    def postprocess(self, output: np.ndarray,
                     print_output: bool = True) -> None:
         """postprocess
 
@@ -191,8 +192,8 @@ class Base_Inference_helper():
         output = output[0]  # [B, num_cls]
         N = len(self.input_file)
         if output.shape[0] != N:
-            output = output.reshape([N] + [output.shape[0] // N] +
-                                    list(output.shape[1:]))  # [N, T, C]
+            output = output.reshape([N] + [output.shape[0] // N] + list(
+                output.shape[1:]))  # [N, T, C]
             output = output.mean(axis=1)  # [N, C]
         output = F.softmax(paddle.to_tensor(output), axis=-1).numpy()
         for i in range(N):
@@ -271,14 +272,11 @@ class ppTSN_Inference_helper(Base_Inference_helper):
         img_std = [0.229, 0.224, 0.225]
         ops = [
             VideoDecoder(),
-            Sampler(self.num_seg,
-                    self.seg_len,
-                    valid_mode=True,
-                    select_left=True),
-            Scale(self.short_size,
-                  fixed_ratio=True,
-                  do_round=True,
-                  backend='cv2'),
+            Sampler(
+                self.num_seg, self.seg_len, valid_mode=True, select_left=True),
+            Scale(
+                self.short_size, fixed_ratio=True, do_round=True,
+                backend='cv2'),
             TenCrop(self.target_size),
             Image2Array(),
             Normalization(img_mean, img_std)
@@ -404,10 +402,11 @@ class TimeSformer_Inference_helper(Base_Inference_helper):
         results = {'filename': input_file}
         ops = [
             VideoDecoder(backend='pyav', mode='test', num_seg=self.num_seg),
-            Sampler(self.num_seg,
-                    self.seg_len,
-                    valid_mode=True,
-                    linspace_sample=True),
+            Sampler(
+                self.num_seg,
+                self.seg_len,
+                valid_mode=True,
+                linspace_sample=True),
             Normalization(self.mean, self.std, tensor_shape=[1, 1, 1, 3]),
             Image2Array(data_format='cthw'),
             JitterScale(self.short_size, self.short_size),
@@ -453,21 +452,24 @@ class VideoSwin_Inference_helper(Base_Inference_helper):
         results = {'filename': input_file}
         ops = [
             VideoDecoder(backend='decord', mode='valid'),
-            Sampler(num_seg=self.num_seg,
-                    frame_interval=self.frame_interval,
-                    seg_len=self.seg_len,
-                    valid_mode=True,
-                    use_pil=False),
-            Scale(short_size=self.short_size,
-                  fixed_ratio=False,
-                  keep_ratio=True,
-                  backend='cv2',
-                  do_round=True),
+            Sampler(
+                num_seg=self.num_seg,
+                frame_interval=self.frame_interval,
+                seg_len=self.seg_len,
+                valid_mode=True,
+                use_pil=False),
+            Scale(
+                short_size=self.short_size,
+                fixed_ratio=False,
+                keep_ratio=True,
+                backend='cv2',
+                do_round=True),
             CenterCrop(target_size=224, backend='cv2'),
-            Normalization(mean=self.mean,
-                          std=self.std,
-                          tensor_shape=[3, 1, 1, 1],
-                          inplace=True),
+            Normalization(
+                mean=self.mean,
+                std=self.std,
+                tensor_shape=[3, 1, 1, 1],
+                inplace=True),
             Image2Array(data_format='cthw')
         ]
         for op in ops:
@@ -487,8 +489,8 @@ class VideoSwin_Inference_helper(Base_Inference_helper):
         output = output[0]  # [B, num_cls]
         N = len(self.input_file)
         if output.shape[0] != N:
-            output = output.reshape([N] + [output.shape[0] // N] +
-                                    list(output.shape[1:]))  # [N, T, C]
+            output = output.reshape([N] + [output.shape[0] // N] + list(
+                output.shape[1:]))  # [N, T, C]
             output = output.mean(axis=1)  # [N, C]
         for i in range(N):
             classes = np.argpartition(output[i], -self.top_k)[-self.top_k:]
@@ -527,20 +529,23 @@ class VideoSwin_TableTennis_Inference_helper(Base_Inference_helper):
         img_std = [58.395, 57.12, 57.375]
         ops = [
             FrameDecoder(),
-            SamplerPkl(num_seg=self.num_seg,
-                       seg_len=self.seg_len,
-                       backend='cv2',
-                       valid_mode=True),
-            Scale(short_size=self.short_size,
-                  fixed_ratio=False,
-                  keep_ratio=True,
-                  backend='cv2',
-                  do_round=True),
+            SamplerPkl(
+                num_seg=self.num_seg,
+                seg_len=self.seg_len,
+                backend='cv2',
+                valid_mode=True),
+            Scale(
+                short_size=self.short_size,
+                fixed_ratio=False,
+                keep_ratio=True,
+                backend='cv2',
+                do_round=True),
             UniformCrop(target_size=self.target_size, backend='cv2'),
-            Normalization(mean=img_mean,
-                          std=img_std,
-                          tensor_shape=[3, 1, 1, 1],
-                          inplace=True),
+            Normalization(
+                mean=img_mean,
+                std=img_std,
+                tensor_shape=[3, 1, 1, 1],
+                inplace=True),
             Image2Array(data_format='cthw')
         ]
         for op in ops:
@@ -595,10 +600,11 @@ class VideoSwin_TableTennis_Inference_helper(Base_Inference_helper):
         cv2.destroyAllWindows()
         output_filename = os.path.basename(video_path)
         output_filename = output_filename.split('.')[0] + '.gif'
-        imageio.mimsave(f'{output_dir}/{output_filename}',
-                        frames_rgb_list,
-                        'GIF',
-                        duration=0.00085)
+        imageio.mimsave(
+            f'{output_dir}/{output_filename}',
+            frames_rgb_list,
+            'GIF',
+            duration=0.00085)
 
     def postprocess(self, output, print_output=True, save_gif=True):
         """
@@ -611,8 +617,8 @@ class VideoSwin_TableTennis_Inference_helper(Base_Inference_helper):
         output = output[0]  # [B, num_cls]
         N = len(self.input_file)
         if output.shape[0] != N:
-            output = output.reshape([N] + [output.shape[0] // N] +
-                                    list(output.shape[1:]))  # [N, T, C]
+            output = output.reshape([N] + [output.shape[0] // N] + list(
+                output.shape[1:]))  # [N, T, C]
             output = output.mean(axis=1)  # [N, C]
         for i in range(N):
             classes = np.argpartition(output[i], -self.top_k)[-self.top_k:]
@@ -687,8 +693,8 @@ class SlowFast_Inference_helper(Base_Inference_helper):
 
         N = len(self.input_file)
         if output.shape[0] != N:
-            output = output.reshape([N] + [output.shape[0] // N] +
-                                    list(output.shape[1:]))  # [N, T, C]
+            output = output.reshape([N] + [output.shape[0] // N] + list(
+                output.shape[1:]))  # [N, T, C]
             output = output.mean(axis=1)  # [N, C]
         # output = F.softmax(paddle.to_tensor(output), axis=-1).numpy() # done in it's head
         for i in range(N):
@@ -759,8 +765,8 @@ class CTRGCN_Inference_helper(Base_Inference_helper):
         data = np.load(input_file)
         results = {'data': data}
         ops = [
-            SketeonCropSample(window_size=self.window_size,
-                              p_interval=self.p_interval)
+            SketeonCropSample(
+                window_size=self.window_size, p_interval=self.p_interval)
         ]
         for op in ops:
             results = op(results)
@@ -1000,9 +1006,9 @@ class TransNetV2_Inference_helper():
 
         start_frame = np.expand_dims(frames[0], 0)
         end_frame = np.expand_dims(frames[-1], 0)
-        padded_inputs = np.concatenate([start_frame] * no_padded_frames_start +
-                                       [frames] +
-                                       [end_frame] * no_padded_frames_end, 0)
+        padded_inputs = np.concatenate(
+            [start_frame] * no_padded_frames_start + [frames] +
+            [end_frame] * no_padded_frames_end, 0)
 
         ptr = 0
         while ptr + 100 <= len(padded_inputs):
@@ -1026,12 +1032,9 @@ class TransNetV2_Inference_helper():
             input_file)
         self.input_file = input_file
         self.filename = os.path.splitext(os.path.split(self.input_file)[1])[0]
-        video_stream, err = ffmpeg.input(
-            self.input_file).output("pipe:",
-                                    format="rawvideo",
-                                    pix_fmt="rgb24",
-                                    s="48x27").run(capture_stdout=True,
-                                                   capture_stderr=True)
+        video_stream, err = ffmpeg.input(self.input_file).output(
+            "pipe:", format="rawvideo", pix_fmt="rgb24", s="48x27").run(
+                capture_stdout=True, capture_stderr=True)
         self.frames = np.frombuffer(video_stream,
                                     np.uint8).reshape([-1, 27, 48, 3])
         self.len_frames = len(self.frames)
@@ -1077,9 +1080,9 @@ class TransNetV2_Inference_helper():
         height = len(frames) // width
 
         img = frames.reshape([height, width, ih + 1, iw + len(predictions), ic])
-        img = np.concatenate(np.split(
-            np.concatenate(np.split(img, height), axis=2)[0], width),
-                             axis=2)[0, :-1]
+        img = np.concatenate(
+            np.split(np.concatenate(np.split(img, height), axis=2)[0], width),
+            axis=2)[0, :-1]
 
         img = Image.fromarray(img)
         draw = ImageDraw.Draw(img)
@@ -1243,8 +1246,8 @@ class ADDS_Inference_helper(Base_Inference_helper):
         vmax = np.percentile(disp_resized_np, 95)
         normalizer = mpl.colors.Normalize(vmin=disp_resized_np.min(), vmax=vmax)
         mapper = cm.ScalarMappable(norm=normalizer, cmap='magma')
-        colormapped_im = (mapper.to_rgba(disp_resized_np)[:, :, :3] *
-                          255).astype(np.uint8)
+        colormapped_im = (
+            mapper.to_rgba(disp_resized_np)[:, :, :3] * 255).astype(np.uint8)
         im = Image.fromarray(colormapped_im)
         return im
 
@@ -1265,8 +1268,8 @@ class AVA_SlowFast_FastRCNN_Inference_helper(Base_Inference_helper):
         self.detection_model_name = detection_model_name
         self.detection_model_weights = detection_model_weights
 
-        self.config = get_config(config_file_path,
-                                 show=False)  #parse config file
+        self.config = get_config(
+            config_file_path, show=False)  #parse config file
         self.predict_stepsize = predict_stepsize
         self.output_stepsize = output_stepsize
         self.output_fps = output_fps
@@ -1324,10 +1327,9 @@ class AVA_SlowFast_FastRCNN_Inference_helper(Base_Inference_helper):
         detection_result_dir = 'tmp_detection'
         detection_model_name = self.detection_model_name
         detection_model_weights = self.detection_model_weights
-        detection_txt_list = detection_inference(selected_frame_list,
-                                                 detection_result_dir,
-                                                 detection_model_name,
-                                                 detection_model_weights)
+        detection_txt_list = detection_inference(
+            selected_frame_list, detection_result_dir, detection_model_name,
+            detection_model_weights)
         assert len(detection_txt_list) == len(timestamps)
 
         human_detections = []
@@ -1337,8 +1339,8 @@ class AVA_SlowFast_FastRCNN_Inference_helper(Base_Inference_helper):
         for timestamp, detection_txt_path in zip(timestamps,
                                                  detection_txt_list):
             proposals, scores = get_detection_result(
-                detection_txt_path, h, w,
-                (float)(self.config.DATASET.test['person_det_score_thr']))
+                detection_txt_path, h, w, (float)(
+                    self.config.DATASET.test['person_det_score_thr']))
 
             if proposals.shape[0] == 0:
                 #person_num_list.append(0)
@@ -1347,11 +1349,8 @@ class AVA_SlowFast_FastRCNN_Inference_helper(Base_Inference_helper):
 
             human_detections.append(proposals)
 
-            result = get_timestep_result(frame_dir,
-                                         timestamp,
-                                         clip_len,
-                                         frame_interval,
-                                         FPS=FPS)
+            result = get_timestep_result(
+                frame_dir, timestamp, clip_len, frame_interval, FPS=FPS)
             result["proposals"] = proposals
             result["scores"] = scores
 
@@ -1471,3 +1470,63 @@ class AVA_SlowFast_FastRCNN_Inference_helper(Base_Inference_helper):
         # delete tmp files and dirs
         shutil.rmtree(self.frame_dir)
         shutil.rmtree(self.detection_result_dir)
+
+
+@INFERENCE.register()
+class PoseC3D_Inference_helper(Base_Inference_helper):
+    def __init__(self, top_k=1):
+        self.top_k = top_k
+
+    def preprocess(self, input_file):
+        """
+        input_file: str, file path
+        return: list
+        """
+        assert os.path.isfile(input_file) is not None, "{0} not exists".format(
+            input_file)
+        with open(input_file, 'rb') as f:
+            data = pickle.load(f)
+        self.input_file = input_file
+
+        left_kp = [1, 3, 5, 7, 9, 11, 13, 15]
+        right_kp = [2, 4, 6, 8, 10, 12, 14, 16]
+        ops = [
+            UniformSampleFrames(clip_len=48, num_clips=10, test_mode=True),
+            PoseDecode(),
+            PoseCompact(hw_ratio=1., allow_imgpad=True),
+            Resize(scale=(-1, 56)),
+            CenterCrop_V2(crop_size=56),
+            GeneratePoseTarget(
+                sigma=0.6,
+                use_score=True,
+                with_kp=True,
+                with_limb=False,
+                double=True,
+                left_kp=left_kp,
+                right_kp=right_kp),
+            FormatShape(input_format='NCTHW'),
+            Collect(keys=['imgs', 'label'], meta_keys=[])
+        ]
+
+        for op in ops:
+            results = op(data)
+        results = [results[0][np.newaxis, :, :, :, :, :]]
+        self.num_segs = results[0].shape[1]
+        return results
+
+    def postprocess(self, outputs, print_output=True):
+        batch_size = outputs[0].shape[0]
+        cls_score = outputs[0].reshape(
+            [batch_size // self.num_segs, self.num_segs, outputs[0].shape[-1]])
+        output = F.softmax(
+            paddle.to_tensor(cls_score), axis=2).mean(axis=1).numpy()
+        N = len(self.input_file)
+        for i in range(N):
+            classes = np.argpartition(output[i], -self.top_k)[-self.top_k:]
+            classes = classes[np.argsort(-output[i, classes])]
+            scores = output[i, classes]
+            if print_output:
+                print("Current video file: {0}".format(self.input_file[i]))
+                for j in range(self.top_k):
+                    print("\ttop-{0} class: {1}".format(j + 1, classes[j]))
+                    print("\ttop-{0} score: {1}".format(j + 1, scores[j]))
