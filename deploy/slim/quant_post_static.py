@@ -65,6 +65,7 @@ def post_training_quantization(cfg, use_gpu: bool = True):
     place = paddle.CUDAPlace(0) if use_gpu else paddle.CPUPlace()
 
     # get defined params
+    batch_nums = cfg.DATASET.pop('batch_nums')
     batch_size = cfg.DATASET.get('batch_size', 1)
     num_workers = cfg.DATASET.get('num_workers', 0)
     inference_file_name = cfg.get('model_name', 'inference')
@@ -72,7 +73,6 @@ def post_training_quantization(cfg, use_gpu: bool = True):
                                   f'./inference/{inference_file_name}')
     quant_output_dir = cfg.get('quant_output_dir',
                                osp.join(inference_model_dir, 'quant_model'))
-    batch_nums = cfg.get('batch_nums', 10)
 
     # build dataloader for quantization, lite data is enough
     slim_dataset = build_dataset((cfg.DATASET.quant, cfg.PIPELINE.quant))
