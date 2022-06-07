@@ -1,0 +1,59 @@
+===========================train_params===========================
+model_name:TokenShiftVisionTransformer
+python:python
+gpu_list:0
+Global.use_gpu:null
+Global.auto_cast:null
+-o epochs:1
+-o output_dir:null
+-o DATASET.batch_size:8
+-o MODEL.backbone.pretrained:'data/ViT_base_patch16_224_pretrained.pdparams'
+train_model_name:null
+train_infer_video_dir:null
+-o model_name=TokenShiftVisionTransformer -o DATASET.train.file_path:'data/ucf101/ucf101_train_split_small_videos.txt' -o DATASET.valid.file_path='data/ucf101/ucf101_val_split_small_videos.txt' -o DATASET.test.file_path='data/ucf101/ucf101_val_split_small_videos.txt'
+##
+trainer:amp_train
+norm_train:main.py -c configs/recognition/token_transformer/tokShift_transformer_ucf101_256_videos.yaml --validate --seed=1234
+pact_train:null
+fpgm_train:null
+distill_train:null
+amp_train:main.py --amp -c configs/recognition/token_transformer/tokShift_transformer_ucf101_256_videos.yaml --validate --seed=1234
+null:null
+##
+===========================eval_params===========================
+eval:main.py --amp -c configs/recognition/token_transformer/tokShift_transformer_ucf101_256_videos.yaml --test --seed=1234 -w 'test_tipc/output/TokenShiftVisionTransformer/amp_train_gpus_0_autocast_null/TokenShiftVisionTransformer_epoch_00001.pdopt'
+null:null
+##
+===========================infer_params===========================
+-o:inference/TokenShift
+-p:null
+norm_export:tools/export_model.py -c configs/recognition/token_transformer/tokShift_transformer_ucf101_256_videos.yaml --save_name inference
+quant_export:null
+fpgm_export:null
+distill_export:null
+export1:null
+export2:null
+inference_dir:null
+infer_model:./inference/TokenShiftVisionTransformer.pdiparams
+infer_export:tools/export_model.py -c configs/recognition/token_transformer/tokShift_transformer_ucf101_256_videos.yaml
+infer_quant:False
+inference:tools/predict.py --config configs/recognition/token_transformer/tokShift_transformer_ucf101_256_videos.yaml
+--use_gpu:True
+--enable_mkldnn:True
+--cpu_threads:2
+--batch_size:2
+--use_tensorrt:False
+--precision:fp32|fp16
+--model_file:inference.pdmodel
+--input_file:./data/BrushingTeeth.avi
+null:null
+--enable_benchmark:True
+--params_file:inference.pdiparams
+===========================train_benchmark_params==========================
+batch_size:2
+fp_items:fp32
+epoch:1
+--profiler_options:batch_range=[10,20];state=GPU;tracer_option=Default;profile_path=model.profile
+flags:FLAGS_conv_workspace_size_limit=800
+===========================infer_benchmark_params==========================
+random_infer_input:[{float32,[3, 24, 224, 224]}]

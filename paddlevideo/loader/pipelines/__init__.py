@@ -17,7 +17,8 @@ from .augmentations import (CenterCrop, ColorJitter, GroupRandomFlip,
                             GroupResize, Image2Array, JitterScale, MultiCrop,
                             Normalization, PackOutput, RandomCrop, RandomFlip,
                             RandomResizedCrop, Scale, TenCrop, ToArray,
-                            UniformCrop, YowoAug)
+                            UniformCrop, RandomGamma, MultiCenterCrop, RandomBrightness,
+                            RandomHue, RandomSaturation, YowoAug)
 from .augmentations_ava import *
 from .compose import Compose
 from .decode import FeatureDecoder, FrameDecoder, VideoDecoder
@@ -45,5 +46,6 @@ __all__ = [
     'SFMRI_DecodeSampler', 'MultiRestrictSize', 'MultiNorm',
     'RandomResizedCrop', 'SamplerPkl', 'SegmentationSampler',
     'SketeonCropSample', 'SketeonModalityTransform', 'RandomRotation',
+    'RandomGamma', 'MultiCenterCrop', 'RandomBrightness', 'RandomHue', 'RandomSaturation',
     'SamplerUCF24', 'YowoAug'
 ]

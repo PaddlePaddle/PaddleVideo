@@ -97,6 +97,8 @@ def create_paddle_predictor(args, cfg):
                 num_views = 3  # UniformCrop
             elif 'videoswin' in cfg.model_name.lower():
                 num_views = 3  # UniformCrop
+            elif 'tokenshift' in cfg.model_name.lower():
+                num_views = 3  # UniformCrop
             max_batch_size = args.batch_size * num_views * num_seg * seg_len
         config.enable_tensorrt_engine(precision_mode=precision,
                                       max_batch_size=max_batch_size)
