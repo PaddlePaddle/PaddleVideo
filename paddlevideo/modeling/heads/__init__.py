@@ -36,11 +36,12 @@ from .ms_tcn_head import MSTCNHead
 from .asrf_head import ASRFHead
 from .ctrgcn_head import CTRGCNHead
 from .movinet_head import MoViNetHead
+from .token_shift_head import TokenShiftHead
 
 __all__ = [
     'BaseHead', 'TSNHead', 'TSMHead', 'ppTSMHead', 'ppTSNHead', 'SlowFastHead',
     'AttentionLstmHead', 'TimeSformerHead', 'STGCNHead', 'TransNetV2Head',
     'I3DHead', 'SingleRoIExtractor3D', 'AVARoIHead', 'BBoxHeadAVA', 'AddsHead',
     'ppTimeSformerHead', 'CollaborativeEnsemblerMS', 'MSTCNHead', 'ASRFHead',
-    'MoViNetHead', 'CTRGCNHead'
+    'MoViNetHead', 'CTRGCNHead', 'TokenShiftHead'
 ]

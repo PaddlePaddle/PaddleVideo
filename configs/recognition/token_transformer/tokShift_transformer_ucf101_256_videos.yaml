@@ -1,0 +1,165 @@
+MODEL: #MODEL field
+    framework: "RecognizerTransformer" #Mandatory, indicate the type of network, associate to the 'paddlevideo/modeling/framework/' .
+    backbone: #Mandatory, indicate the type of backbone, associate to the 'paddlevideo/modeling/backbones/' .
+        name: "TokenShiftVisionTransformer" #Mandatory, The name of backbone.
+        pretrained: "data/ViT_base_patch16_224_pretrained.pdparams" #Optional, pretrained model path.
+        img_size: 256
+        patch_size: 16
+        in_channels: 3
+        embed_dim: 768
+        depth: 12
+        num_heads: 12
+        mlp_ratio: 4
+        qkv_bias: True
+        drop_rate: 0.
+        epsilon: 1e-6
+        num_seg: 8
+        attention_type: 'space_only'
+    head:
+        name: "TokenShiftHead" #Mandatory, indicate the type of head, associate to the 'paddlevideo/ 
+        num_classes: 101 #Optional, the number of classes to be classified.
+        in_channels: 768 #input channel of the extracted feature.
+        ls_eps: 0.01
+        std: 0.02 #std value in params initializationn    
+    runtime_cfg: # configuration used when the model is train or test.
+        test: # test config
+            num_seg: 8
+            avg_type: 'score' # 'score' or 'prob
+
+DATASET: #DATASET field
+    batch_size: 16 #Mandatory, bacth size
+    num_workers: 4 #Mandatory, XXX the number of subprocess on each GPU.
+    valid_batch_size: 4
+    valid_num_workers: 4
+    test_batch_size: 4
+    train:
+        format: "VideoDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
+        data_prefix: "" #Mandatory, train data root path
+        file_path: "data/ucf101/ucf101_train_split_1_videos.txt" #Mandatory, train data index file path
+        suffix: '.avi'
+    valid:
+        format: "VideoDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
+        data_prefix: "" #Mandatory, valid data root path
+        file_path: "data/ucf101/ucf101_val_split_1_videos.txt" #Mandatory, valid data index file path
+        suffix: '.avi'
+    test:
+        format: "VideoDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
+        data_prefix: "" #Mandatory, valid data root path
+        file_path: "data/ucf101/ucf101_val_split_1_videos.txt" #Mandatory, valid data index file path
+        suffix: '.avi'
+
+PIPELINE: #PIPELINE field
+    train: #Mandotary, indicate the pipeline to deal with the training data, associate to the 'paddlevideo/loader/pipelines/'
+        decode:
+            name: "VideoDecoder"
+            backend: 'pyav'
+            mode: 'train'
+            num_seg: 8
+        sample:
+            name: "Sampler"
+            num_seg: 8
+            seg_len: 1
+            valid_mode: False
+            dense_sample: True
+        transform: #Mandotary, image transform operator.
+            - RandomFlip:
+                p: 0.5
+            - RandomBrightness:
+                p: 0.1
+            - RandomSaturation:
+                p: 0.1
+            - RandomGamma:
+                p: 0.1
+            - RandomHue:
+                p: 0.1
+            - Normalization:
+                mean: [0.5, 0.5, 0.5]
+                std: [0.5, 0.5, 0.5]
+                tensor_shape: [1, 1, 1, 3]
+            - Image2Array:
+                data_format: 'cthw'
+            - JitterScale:
+                min_size: 256
+                max_size: 380
+            - RandomCrop:
+                target_size: 256
+
+    valid: #Mandatory, indicate the pipeline to deal with the validing data. associate to the 'paddlevideo/loader/pipelines/'
+        decode:
+            name: "VideoDecoder"
+            backend: 'pyav'
+            mode: 'valid'
+            num_seg: 8
+        sample:
+            name: "Sampler"
+            num_seg: 8
+            seg_len: 1
+            valid_mode: True
+        transform:
+            - Normalization:
+                mean: [0.5, 0.5, 0.5]
+                std: [0.5, 0.5, 0.5]
+                tensor_shape: [1, 1, 1, 3]
+            - Image2Array:
+                data_format: 'cthw'
+            - JitterScale:
+                  min_size: 256
+                  max_size: 256
+            - RandomCrop:
+                target_size: 256
+    test:
+        decode:
+            name: "VideoDecoder"
+            backend: 'pyav'
+            mode: 'test'
+            num_seg: 8
+        sample:
+            name: "Sampler"
+            num_seg: 8
+            seg_len: 1
+            valid_mode: True
+        transform:
+            - Normalization:
+                mean: [0.5, 0.5, 0.5]
+                std: [0.5, 0.5, 0.5]
+                tensor_shape: [1, 1, 1, 3]
+            - Image2Array:
+                data_format: 'cthw'
+            - JitterScale:
+                  min_size: 256
+                  max_size: 256
+            - MultiCenterCrop:
+                target_size: 256
+
+OPTIMIZER: #OPTIMIZER field
+    name: 'Momentum' #Mandatory, the type of optimizer, associate to the 'paddlevideo/solver/'
+    momentum: 0.9
+    learning_rate: #Mandatory, the type of learning rate scheduler, associate to the 'paddlevideo/solver/'
+        learning_rate: 0.0609 # Applicable when global batch size=64
+        name: 'MultiStepDecay'
+        milestones: [10, 20]
+        gamma: 0.1
+    weight_decay:
+        name: 'L2'
+        value: 0.0 #0.0001
+    grad_clip:
+        name: 'ClipGradByGlobalNorm'
+        value: 1.0
+    use_nesterov: True
+
+GRADIENT_ACCUMULATION:
+    global_batch_size: 256 # Specify the sum of batches to be calculated by all GPUs
+
+METRIC:
+    name: 'CenterCropMetric'
+
+INFERENCE:
+    name: 'TokenShift_Inference_helper'
+    num_seg: 8
+    target_size: 256
+
+model_name: "TokenShiftVisionTransformer"
+log_interval: 20 #Optional, the interal of logger, default:10
+save_interval: 5
+epochs: 25 #Mandatory, total epoch
+log_level: "INFO" #Optional, the logger level. default: "INFO"
