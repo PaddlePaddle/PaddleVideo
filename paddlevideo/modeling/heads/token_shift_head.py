@@ -22,25 +22,29 @@ from .base import BaseHead
 
 @HEADS.register()
 class TokenShiftHead(BaseHead):
-    """TimeSformerHead Head.
+    """TokenShift Transformer Head.
 
     Args:
         num_classes (int): The number of classes to be classified.
         in_channels (int): The number of channles in input feature.
+        num_seg(int): The number of segments. Default: 8. 
         loss_cfg (dict): Config for building config. Default: dict(name='CrossEntropyLoss').
-        std(float): Std(Scale) value in normal initilizar. Default: 0.01.
+        ls_eps (float): Label smoothing epsilon. Default: 0.01.
+        std (float): Std(Scale) Value in normal initilizar. Default: 0.02.
         kwargs (dict, optional): Any keyword argument to initialize.
 
     """
     def __init__(self,
                  num_classes,
                  in_channels,
+                 num_seg=8,
                  loss_cfg=dict(name='CrossEntropyLoss'),
                  ls_eps=0.01,
                  std=0.02,
                  **kwargs):
 
         super().__init__(num_classes, in_channels, loss_cfg, ls_eps)
+        self.num_seg = num_seg
         self.std = std
         self.fc = Linear(self.in_channels, self.num_classes)
 
@@ -68,7 +72,7 @@ class TokenShiftHead(BaseHead):
         score = self.fc(x)
         # [N*T, num_class]
         _, _m = score.shape
-        _t = 8
+        _t = self.num_seg
         score = score.reshape([-1, _t, _m])
         score = paddle.mean(score, 1)  # averaging predictions for every frame
         score = paddle.squeeze(score, axis=1)
