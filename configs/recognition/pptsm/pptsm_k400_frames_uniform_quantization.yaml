@@ -1,5 +1,6 @@
 DATASET:
     batch_size: 1
+    batch_nums: 10
     num_workers: 0
     quant:
         format: "FrameDataset"

@@ -1,0 +1,13 @@
+===========================serving_params===========================
+model_name:PP-TSM
+python:python3.7
+trans_model:-m paddle_serving_client.convert
+--dirname:./inference/ppTSM/
+--model_filename:ppTSM.pdmodel
+--params_filename:ppTSM.pdiparams
+--serving_server:./deploy/python_serving/ppTSM_serving_server/
+--serving_client:./deploy/python_serving/ppTSM_serving_client/
+serving_dir:./deploy/python_serving
+web_service:recognition_web_service.py --config=configs/PP-TSM.yaml --name PPTSM
+pipline:pipeline_http_client.py
+--input_file:../../data/
