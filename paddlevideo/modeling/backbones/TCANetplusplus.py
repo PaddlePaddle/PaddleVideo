@@ -243,8 +243,7 @@ class GlobalLocalAttention(paddle.nn.Layer):
 
 @BACKBONES.register()
 class ppTCANet(paddle.nn.Layer):
-    """BMN model from
-    `"BMN: Boundary-Matching Network for Temporal Action Proposal Generation" <https://arxiv.org/abs/1907.09702>`_
+    """ppTCANet model
     Args:
         tscale (int): sequence length, default 100.
         dscale (int): max duration length, default 100.
