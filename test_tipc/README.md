@@ -124,3 +124,4 @@ bash test_tipc/test_train_inference_python.sh ./test_tipc/configs/PP-TSM/train_i
 - [test_inference_cpp 使用](docs/test_inference_cpp.md) ：测试基于C++的模型推理功能。
 - [test_ptq_inference_python 使用](docs/test_train_ptq_inference_python.md) ：测试离线量化训练推理功能。
 - [test_serving_infer_python 使用](docs/test_serving_infer_python.md) ：测试基于Paddle Serving的服务化部署功能。
+- [test_train_fleet_inference_python 使用](./docs/test_train_fleet_inference_python.md)：测试基于Python的多机多卡训练与推理等基本功能。
