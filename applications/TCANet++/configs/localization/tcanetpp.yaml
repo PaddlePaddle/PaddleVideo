@@ -76,31 +76,6 @@ OPTIMIZER: #OPTIMIZER field
         name: 'L2'
         value: 1e-4
 
-# OPTIMIZER: #OPTIMIZER field
-#     name: 'Adam'
-#     learning_rate:
-#         iter_step: True
-#         name: 'CustomPiecewiseDecay'
-#         boundaries: [13800]
-#         values: [0.00008, 0.00004]
-#     weight_decay:
-#         name: 'L2'
-#         value: 1e-4
-
-# OPTIMIZER: #OPTIMIZER field
-#     name: 'Adam'
-#     learning_rate:
-#         iter_step: True
-#         name: 'CustomWarmupCosineDecay'
-#         max_epoch: 5
-#         warmup_epochs: 1
-#         warmup_start_lr: 0.00006
-#         cosine_base_lr: 0.00008
-#     weight_decay:
-#         name: 'L2'
-#         value: 1e-4
-
-
 METRIC:
     name: 'BMNMetric'
     tscale: 300
