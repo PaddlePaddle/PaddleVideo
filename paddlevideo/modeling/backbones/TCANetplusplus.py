@@ -242,7 +242,7 @@ class GlobalLocalAttention(paddle.nn.Layer):
 
 
 @BACKBONES.register()
-class TCANetpp(paddle.nn.Layer):
+class ppTCANet(paddle.nn.Layer):
     """BMN model from
     `"BMN: Boundary-Matching Network for Temporal Action Proposal Generation" <https://arxiv.org/abs/1907.09702>`_
     Args:
