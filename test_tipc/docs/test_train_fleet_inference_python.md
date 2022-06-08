@@ -24,7 +24,7 @@ Linux GPU/CPU 多机多卡训练推理测试的主程序为`test_train_inference
 
 运行环境配置请参考[文档](./install.md)的内容配置TIPC的运行环境。
 
-**下面以 PPLCNet_x1_0 模型为例，介绍测试流程**
+**下面以 PP-TSM 模型为例，介绍测试流程**
 
 ### 2.1 功能测试
 
