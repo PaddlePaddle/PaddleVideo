@@ -13,10 +13,13 @@
 # limitations under the License.
 
 from .anet_pipeline import GetMatchMap, GetVideoLabel, LoadFeat
-from .augmentations import (
-    CenterCrop, ColorJitter, GroupRandomFlip, GroupResize, Image2Array,
-    JitterScale, MultiCrop, Normalization, PackOutput, RandomCrop, RandomFlip,
-    RandomResizedCrop, Scale, TenCrop, ToArray, UniformCrop)
+from .augmentations import (CenterCrop, ColorJitter, GroupRandomFlip,
+                            GroupResize, Image2Array, JitterScale, MultiCrop,
+                            Normalization, PackOutput, RandomCrop, RandomFlip,
+                            RandomResizedCrop, Scale, TenCrop, ToArray,
+                            UniformCrop, RandomGamma, MultiCenterCrop, RandomBrightness,
+                            RandomHue, RandomSaturation)
+
 from .augmentations_ava import *
 from .compose import Compose
 from .decode import FeatureDecoder, FrameDecoder, VideoDecoder
@@ -46,6 +49,7 @@ __all__ = [
     'SFMRI_DecodeSampler', 'MultiRestrictSize', 'MultiNorm',
     'RandomResizedCrop', 'SamplerPkl', 'SegmentationSampler',
     'SketeonCropSample', 'SketeonModalityTransform', 'RandomRotation',
+    'RandomGamma', 'MultiCenterCrop', 'RandomBrightness', 'RandomHue', 'RandomSaturation',
     'UniformSampleFrames', 'PoseDecode', 'PoseCompact', 'Resize',
     'RandomResizedCrop_V2', 'Flip_V2', 'GeneratePoseTarget', 'FormatShape',
     'Collect'

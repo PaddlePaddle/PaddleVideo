@@ -119,6 +119,9 @@ if [ ${MODE} = "lite_train_lite_infer" ];then
         wget -nc https://paddlemodels.bj.bcebos.com/video_detection/activitynet_1.3_annotations.json
         wget -nc https://paddlemodels.bj.bcebos.com/video_detection/activity_net_1_3_new.json
         popd
+    elif [ ${model_name} == "TokenShiftVisionTransformer" ]; then
+        # download pretrained weights
+        wget -nc -P ./data https://paddle-imagenet-models-name.bj.bcebos.com/dygraph/ViT_base_patch16_224_pretrained.pdparams --no-check-certificate
     else
         echo "Not added into TIPC yet."
     fi

@@ -42,11 +42,13 @@ from .cfbi import CFBI
 from .ctrgcn import CTRGCN
 from .movinet import MoViNet
 from .resnet3d_slowonly import ResNet3dSlowOnly
+from .toshift_vit import TokenShiftVisionTransformer
+
 
 __all__ = [
     'ResNet', 'ResNetTSM', 'ResNetTweaksTSM', 'ResNetSlowFast', 'BMN',
     'ResNetTweaksTSN', 'VisionTransformer', 'STGCN', 'AGCN', 'TransNetV2',
     'ADDS_DepthNet', 'VisionTransformer_tweaks', 'BertForMultiModalPreTraining',
     'ResNetTSN_MRI', 'ResNetTSM_MRI', 'ResNetSlowFast_MRI', 'CFBI', 'MSTCN',
-    'ASRF', 'MoViNet', 'SwinTransformer3D', 'CTRGCN', 'ResNet3dSlowOnly'
+    'ASRF', 'MoViNet', 'SwinTransformer3D', 'CTRGCN', 'TokenShiftVisionTransformer','ResNet3dSlowOnly'
 ]
