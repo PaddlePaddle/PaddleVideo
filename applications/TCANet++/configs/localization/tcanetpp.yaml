@@ -1,7 +1,7 @@
 MODEL: #MODEL field
     framework: "BMNLocalizer"
     backbone:
-        name: "TCANetpp"
+        name: "ppTCVNet"
         tscale: 300
         dscale: 50
         prop_boundary_ratio: 0.5
