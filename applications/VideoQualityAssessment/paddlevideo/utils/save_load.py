@@ -49,10 +49,12 @@ def load_ckpt(model, weight_path):
               bar_format='{desc}',
               desc="Loading weights") as desc:
         #for item in tqdm(model.state_dict(), total=total_len, position=0):
-        for i, item in enumerate(tqdm(model.state_dict(), total=total_len, position=0)):
+        for i, item in enumerate(
+                tqdm(model.state_dict(), total=total_len, position=0)):
             name = item
             desc.set_description('Loading %s' % name)
-            print("model name is {}, correspoding local name is {}".format(name, localkeyname[i]))
+            print("model name is {}, correspoding local name is {}".format(
+                name, localkeyname[i]))
             #tmp[name] = state_dicts[name]
             tmp[name] = state_dicts[localkeyname[i]]
             time.sleep(0.01)
@@ -70,38 +72,6 @@ def mkdir(dir):
             os.makedirs(dir)
         except:
             pass
-
-
-"""
-def save(state_dicts, file_name):
-    def convert(state_dict):
-        model_dict = {}
-
-        for k, v in state_dict.items():
-            if isinstance(
-                    v,
-                (paddle.fluid.framework.Variable, paddle.fluid.core.VarBase)):
-                model_dict[k] = v.numpy()
-            else:
-                model_dict[k] = v
-
-        return model_dict
-
-    final_dict = {}
-    for k, v in state_dicts.items():
-        if isinstance(
-                v,
-            (paddle.fluid.framework.Variable, paddle.fluid.core.VarBase)):
-            final_dict = convert(state_dicts)
-            break
-        elif isinstance(v, dict):
-            final_dict[k] = convert(v)
-        else:
-            final_dict[k] = v
-
-    with open(file_name, 'wb') as f:
-        pickle.dump(final_dict, f, protocol=2)
-"""
 
 
 @main_only

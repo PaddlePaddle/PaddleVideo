@@ -15,10 +15,11 @@
 import random
 import math
 
+import paddle
 from paddle.distributed import ParallelEnv
 import paddle.distributed as dist
-from paddle.fluid.dygraph import to_variable
 from paddlevideo.utils import get_logger
+
 logger = get_logger("paddlevideo")
 
 try:
@@ -34,7 +35,8 @@ except:
 
 
 def get_input_data(data):
-    return to_variable(data[0]['image']), to_variable(data[0]['label'])
+    return paddle.to_tensor(data[0]['image']), paddle.to_tensor(
+        data[0]['label'])
 
 
 class TSN_Dali_loader(object):
