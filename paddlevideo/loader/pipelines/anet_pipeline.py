@@ -40,8 +40,9 @@ class LoadFeat(object):
 @PIPELINES.register()
 class GetMatchMap(object):
 
-    def __init__(self, tscale):
+    def __init__(self, tscale, dscale):
         self.tscale = tscale
+        self.dscale = dscale
         self.tgap = 1. / self.tscale
 
     def __call__(self, results):
@@ -49,8 +50,7 @@ class GetMatchMap(object):
         for idx in range(self.tscale):
             tmp_match_window = []
             xmin = self.tgap * idx
-            # for jdx in range(1, self.tscale + 1):
-            for jdx in range(1, 50 + 1):
+            for jdx in range(1, self.dscale + 1):
                 xmax = xmin + self.tgap * jdx
                 tmp_match_window.append([xmin, xmax])
             match_map.append(tmp_match_window)
