@@ -1,7 +1,7 @@
 MODEL: #MODEL field
     framework: "BMNLocalizer"
     backbone:
-        name: "ppTCVNet"
+        name: "ppTCANet"
         tscale: 300
         dscale: 50
         prop_boundary_ratio: 0.5
@@ -14,19 +14,19 @@ MODEL: #MODEL field
         dscale: 50
 
 DATASET: #DATASET field
-    batch_size: 4 #single card bacth size
+    batch_size: 4 
     test_batch_size: 1
     num_workers: 8
     train:
-        format: "BMNDataset"
+        format: "ppTCANetDataset"
         file_path: "/home/aistudio/data/new_label_cls14_train.json"
         subset: "train"
     valid:
-        format: "BMNDataset"
+        format: "ppTCANetDataset"
         file_path: "/home/aistudio/data/new_label_cls14_train.json"
         subset: "validation"
     test:
-        format: "BMNDataset"
+        format: "ppTCANetDataset"
         test_mode: True
         file_path: "/home/aistudio/data/new_label_cls14_train.json"
         subset: "validation"
@@ -95,7 +95,7 @@ INFERENCE:
     result_path: "data/bmn/BMN_INFERENCE_results"
 
 
-model_name: TCANetpp
+model_name: ppTCANet
 epochs: 13 #Mandatory, total epoch
 log_level: "INFO"
 resume_from: "" #checkpoint path.
