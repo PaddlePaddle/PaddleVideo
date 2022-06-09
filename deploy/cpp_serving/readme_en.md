@@ -1,4 +1,5 @@
-Simplified Chinese | [English](./readme_en.md)
+English | [简体中文](./readme.md)
+
 # Model service deployment
 
 ## Introduction
@@ -41,6 +42,7 @@ python3.7 -m pip install paddle-serving-server-gpu==0.7.0.post112 # GPU with CUD
 ```
 
 * If the installation speed is too slow, you can change the source through `-i https://pypi.tuna.tsinghua.edu.cn/simple` to speed up the installation process.
+
 * For more environment and corresponding installation packages, see: https://github.com/PaddlePaddle/Serving/blob/v0.9.0/doc/Install_Linux_Env_CN.md
 
 ## Action recognition service deployment

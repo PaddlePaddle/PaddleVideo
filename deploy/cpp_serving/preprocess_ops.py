@@ -12,6 +12,19 @@ from typing import Dict, Tuple, List, Callable
 
 VALID_MODELS = ["PPTSM", "PPTSN"]
 
+import os
+import sys
+
+__dir__ = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.abspath(os.path.join(__dir__, "../../")))
+
+from paddlevideo.loader.pipelines import (CenterCrop, Image2Array,
+                                          Normalization, Sampler, Scale,
+                                          VideoDecoder, TenCrop)
+import numpy as np
+from typing import Dict, Tuple, List, Callable
+
+VALID_MODELS = ["PPTSM", "PPTSN"]
 
 class Compose:
     def __init__(self, transforms):
@@ -23,7 +36,7 @@ class Compose:
         return img
 
 
-def np_softmax(x: np.ndarray, axis: int = -1) -> np.ndarray:
+def np_softmax(x: np.ndarray, axis: int = 0) -> np.ndarray:
     """softmax function
 
     Args:
