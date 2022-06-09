@@ -13,7 +13,7 @@
 from ...registry import RECOGNIZERS
 from .base import BaseRecognizer
 import paddle
-from paddlevideo.utils import get_logger
+from paddlevideo.utils import get_logger, get_dist_info
 
 logger = get_logger("paddlevideo")
 
@@ -39,7 +39,7 @@ class Recognizer2D(BaseRecognizer):
 
         return cls_score
 
-    def train_step(self, data_batch):
+    def train_step(self, data_batch, **kwargs):
         """Define how the model is going to train, from input to output.
         """
         imgs = data_batch[0]
@@ -48,21 +48,42 @@ class Recognizer2D(BaseRecognizer):
         loss_metrics = self.head.loss(cls_score, labels)
         return loss_metrics
 
-    def val_step(self, data_batch):
+    def val_step(self, data_batch, **kwargs):
         imgs = data_batch[0]
         labels = data_batch[1:]
         cls_score = self.forward_net(imgs)
-        loss_metrics = self.head.loss(cls_score, labels, valid_mode=True)
+
+        # gather from all gpus
+        _, world_size = get_dist_info()
+        if world_size > 1:
+            cls_score_gathered = self._gather_from_gpu(cls_score)
+            labels_gathered = self._gather_from_gpu(labels)
+        else:
+            cls_score_gathered = cls_score
+            labels_gathered = labels
+
+        # Remove redundant data caused by resample
+        rest_data_size = kwargs.get("rest_data_size", None)
+        selected_data_size = len(
+            cls_score_gathered) if rest_data_size is None else min(
+                len(cls_score_gathered), rest_data_size)
+        cls_score_gathered = cls_score_gathered[0:selected_data_size]
+        labels_gathered = labels_gathered[0:selected_data_size]
+
+        loss_metrics = self.head.loss(cls_score_gathered,
+                                      labels_gathered,
+                                      valid_mode=True)
+        loss_metrics["selected_data_size"] = selected_data_size
         return loss_metrics
 
-    def test_step(self, data_batch):
+    def test_step(self, data_batch, **kwargs):
         """Define how the model is going to test, from input to output."""
         # NOTE: (shipping) when testing, the net won't call head.loss, we deal with the test processing in /paddlevideo/metrics
         imgs = data_batch[0]
         cls_score = self.forward_net(imgs)
         return cls_score
 
-    def infer_step(self, data_batch):
+    def infer_step(self, data_batch, **kwargs):
         """Define how the model is going to test, from input to output."""
         imgs = data_batch[0]
         cls_score = self.forward_net(imgs)

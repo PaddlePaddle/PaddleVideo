@@ -278,6 +278,7 @@ def train_model(cfg,
             record_list = build_record(cfg.MODEL)
             record_list.pop('lr')
             tic = time.time()
+            rest_data_size = len(valid_loader.dataset)
             if parallel:
                 rank = dist.get_rank()
             # single_gpu_test and multi_gpu_test
@@ -290,9 +291,15 @@ def train_model(cfg,
                 if use_amp:
                     with amp.auto_cast(custom_black_list={"reduce_mean"},
                                        level=amp_level):
-                        outputs = model(data, mode='valid')
+                        outputs = model(data,
+                                        mode='valid',
+                                        rest_data_size=rest_data_size)
                 else:
-                    outputs = model(data, mode='valid')
+                    outputs = model(data,
+                                    mode='valid',
+                                    rest_data_size=rest_data_size)
+                rest_data_size -= outputs.get("selected_data_size",
+                                              valid_batch_size)
 
                 if cfg.MODEL.framework == "FastRCNN":
                     results.extend(outputs)
@@ -301,7 +308,10 @@ def train_model(cfg,
                 if cfg.MODEL.framework != "FastRCNN":
                     for name, value in outputs.items():
                         if name in record_list:
-                            record_list[name].update(value, batch_size)
+                            record_list[name].update(
+                                value,
+                                outputs.get("selected_data_size",
+                                            valid_batch_size))
 
                 record_list['batch_time'].update(time.time() - tic)
                 tic = time.time()
