@@ -119,6 +119,9 @@ if [ ${MODE} = "lite_train_lite_infer" ];then
         wget -nc https://paddlemodels.bj.bcebos.com/video_detection/activitynet_1.3_annotations.json
         wget -nc https://paddlemodels.bj.bcebos.com/video_detection/activity_net_1_3_new.json
         popd
+    elif [ ${model_name} == "TokenShiftVisionTransformer" ]; then
+        # download pretrained weights
+        wget -nc -P ./data https://paddle-imagenet-models-name.bj.bcebos.com/dygraph/ViT_base_patch16_224_pretrained.pdparams --no-check-certificate
     else
         echo "Not added into TIPC yet."
     fi
@@ -431,7 +434,21 @@ if [ ${MODE} = "benchmark_train" ];then
 fi
 
 if [ ${MODE} = "klquant_whole_infer" ]; then
-    echo "Not added into TIPC now."
+    if [ ${model_name} = "PP-TSM" ]; then
+        # download lite data
+        pushd ./data/k400
+        wget -nc https://videotag.bj.bcebos.com/Data/k400_rawframes_small.tar
+        tar -xf k400_rawframes_small.tar
+        popd
+        # download inference model
+        mkdir ./inference
+        pushd ./inference
+        wget -nc https://videotag.bj.bcebos.com/PaddleVideo-release2.3/ppTSM.zip --no-check-certificate
+        unzip ppTSM.zip
+        popd
+    else
+        echo "Not added into TIPC yet."
+    fi
 fi
 
 if [ ${MODE} = "cpp_infer" ];then
@@ -460,28 +477,34 @@ if [ ${MODE} = "cpp_infer" ];then
     fi
 fi
 
-if [ ${MODE} = "serving_infer_cpp" ];then
-    if [ ${model_name} = "PP-TSM" ]; then
-        # download inference model
+if [ ${MODE} = "serving_infer_python" ];then
+    if [[ ${model_name} == "PP-TSM" ]];then
+        # prepare lite infer data for serving
+        pushd ./data
+        mkdir python_serving_infer_video_dir
+        cp ./example.avi python_serving_infer_video_dir/
+        popd
+        # prepare inference model
         mkdir ./inference
         pushd ./inference
-        wget  https://videotag.bj.bcebos.com/PaddleVideo-release2.3/ppTSM.zip
+        wget -nc https://videotag.bj.bcebos.com/PaddleVideo-release2.3/ppTSM.zip --no-check-certificate
         unzip ppTSM.zip
         popd
-    elif [ ${model_name} = "PP-TSN" ]; then
-        # download inference model
+    elif [[ ${model_name} == "PP-TSN" ]];then
+        # prepare lite infer data for serving
+        pushd ./data
+        mkdir python_serving_infer_video_dir
+        cp ./example.avi python_serving_infer_video_dir/
+        popd
+        # prepare inference model
         mkdir ./inference
         pushd ./inference
-        wget  https://videotag.bj.bcebos.com/PaddleVideo-release2.3/ppTSN.zip
+        wget -nc https://videotag.bj.bcebos.com/PaddleVideo-release2.3/ppTSN.zip --no-check-certificate
         unzip ppTSN.zip
         popd
     else
         echo "Not added into TIPC now."
     fi
-fi
-
-if [ ${MODE} = "serving_infer_python" ];then
-    echo "Not added into TIPC now."
 fi
 
 if [ ${MODE} = "paddle2onnx_infer" ];then

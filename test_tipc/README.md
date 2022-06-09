@@ -16,14 +16,14 @@
 **字段说明：**
 - 基础训练预测：包括模型训练、Paddle Inference Python预测。
 - 更多训练方式：包括多机多卡(TODO)、混合精度。
-- 模型压缩(TODO)：包括裁剪、离线/在线量化、蒸馏。
-- 其他预测部署：包括Paddle Inference C++预测、Paddle Serving部署(TODO)、Paddle-Lite部署(TODO)等。
+- 模型压缩：包括裁剪、离线/在线量化(TODO)、蒸馏(TODO)。
+- 其他预测部署：包括Paddle Inference C++预测、Paddle Serving部署、Paddle-Lite部署(TODO)等。
 
 更详细的mkldnn、Tensorrt等预测加速相关功能的支持情况可以查看各测试工具的[更多教程](#more)。
 
 | 算法名称 | 模型名称 | 模型类型 | 基础<br>训练预测 | 更多<br>训练方式 | 模型压缩 |  其他预测部署  |
 | :--- | :--- |  :----:  | :--------: |  :----  |   :----  |   :----  |
-| PP-TSM     |pptsm_k400_frames_uniform | 动作识别 | 支持 | 混合精度 | - | Paddle Inference: C++ |
+| PP-TSM     |pptsm_k400_frames_uniform | 动作识别 | 支持 | 混合精度 | 离线量化 | Paddle Inference: C++ |
 | PP-TSN |pptsn_k400_videos | 动作识别 | 支持 | 混合精度 | - | Paddle Inference: C++ |
 | AGCN |agcn_fsd	 | 动作识别 | 支持 | 混合精度 | - | - |
 | STGCN |stgcn_fsd | 动作识别 | 支持 | 混合精度 | - | - |
@@ -45,7 +45,9 @@ test_tipc/
 │   ├── PP-TSM/
 │   │   ├── train_infer_python.txt # PP-TSM在Linux上进行python训练预测（基础训练预测）的配置文件
 │   │   ├── serving_infer_cpp.txt  # PP-TSM在Linux上进行cpp serving测试的配置文件
-│   │   └── train_amp_infer_python.txt # PP-TSM在Linux上进行python训练预测（混合精度训练预测）的配置文件
+│   │   ├── train_amp_infer_python.txt # PP-TSM在Linux上进行python训练预测（混合精度训练预测）的配置文件
+│   │   ├── serving_infer_python.txt # PP-TSM在Linux上进行python serving预测的配置文件
+│   │   └── train_ptq_infer_python.txt # PP-TSM在Linux上进行离线量化推理测试的配置文件
 │   ├── PP-TSN/
 │   │   ├── train_infer_python.txt # PP-TSN在Linux上进行python训练预测（基础训练预测）的配置文件
 │   │   ├── serving_infer_cpp.txt  # PP-TSN在Linux上进行cpp serving测试的配置文件
@@ -122,5 +124,6 @@ bash test_tipc/test_train_inference_python.sh ./test_tipc/configs/PP-TSM/train_i
 - [test_train_inference_python 使用](docs/test_train_inference_python.md) ：测试基于Python的模型训练、评估、推理等基本功能。
 - [test_amp_train_inference_python 使用](docs/test_train_amp_inference_python.md) ：测试基于Python的**混合精度**模型训练、评估、推理等基本功能。
 - [test_inference_cpp 使用](docs/test_inference_cpp.md) ：测试基于C++的模型推理功能。
+- [test_serving_infer_python 使用](docs/test_serving_infer_python.md) ：测试基于Paddle Serving的服务化部署功能。
 - [test_serving_infer_cpp 使用](docs/test_serving_infer_cpp.md) ：测试基于C++的模型推理功能。
-
+- [test_ptq_inference_python 使用](docs/test_train_ptq_inference_python.md) ：测试离线量化训练推理功能。
