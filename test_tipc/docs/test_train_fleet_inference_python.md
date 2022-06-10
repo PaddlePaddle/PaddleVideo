@@ -30,7 +30,7 @@ Linux GPU/CPU 多机多卡训练推理测试的主程序为`test_train_inference
 
 #### 2.1.1 修改配置文件
 
-首先，修改配置文件`./test_tipc/configs/PP-TSM/train_fleet_infer_python.txt`中的`gpu_list`设置：假设两台机器的`ip`地址分别为`192.168.0.1`和`192.168.0.2`，则对应的配置文件`gpu_list`字段需要修改为`gpu_list:192.168.0.1,192.168.0.2;0,1`。
+首先，修改配置文件`./test_tipc/configs/PP-TSM/train_linux_gpu_fleet_normal_infer_python_linux_gpu_cpu.txt.txt`中的`gpu_list`设置：假设两台机器的`ip`地址分别为`192.168.0.1`和`192.168.0.2`，则对应的配置文件`gpu_list`字段需要修改为`gpu_list:192.168.0.1,192.168.0.2;0,1`。
 
 **`ip`地址查看命令为`ifconfig`，在`inet addr:`字段后的即为ip地址**。
 
@@ -40,7 +40,7 @@ Linux GPU/CPU 多机多卡训练推理测试的主程序为`test_train_inference
 运行`prepare.sh`准备数据和模型，数据准备命令如下所示。
 
 ```shell
-bash test_tipc/prepare.sh ./test_tipc/configs/PP-TSM/train_fleet_infer_python.txt lite_train_lite_infer
+bash test_tipc/prepare.sh ./test_tipc/configs/PP-TSM/train_linux_gpu_fleet_normal_infer_python_linux_gpu_cpu.txt.txt lite_train_lite_infer
 ```
 
 **注意：** 由于是多机训练，这里需要在所有节点上都运行一次启动上述命令来准备数据。
@@ -56,7 +56,7 @@ export FLAGS_START_PORT=17000
 
 接下来就可以开始执行测试，命令如下所示。
 ```shell
-bash test_tipc/test_train_inference_python.sh  ./test_tipc/configs/PP-TSM/train_fleet_infer_python.txt
+bash test_tipc/test_train_inference_python.sh  ./test_tipc/configs/PP-TSM/train_linux_gpu_fleet_normal_infer_python_linux_gpu_cpu.txt.txt
 ```
 
 **注意：** 由于是多机训练，这里需要在所有的节点上均运行启动上述命令进行测试。
