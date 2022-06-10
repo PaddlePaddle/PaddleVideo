@@ -14,8 +14,7 @@
 import signal
 import os
 import paddle
-from paddle.fluid.dataloader import BatchSampler
-from paddle.io import DataLoader, DistributedBatchSampler
+from paddle.io import BatchSampler, DataLoader, DistributedBatchSampler
 
 from .pipelines.compose import Compose
 from .registry import DATASETS, PIPELINES, DATALOADERS, BATCH_SAMPLERS, SAMPLERS
@@ -95,9 +94,9 @@ def build_dataloader(dataset,
 
     if not kwargs.get('sampler'):
         batch_sampler = DistributedBatchSampler(dataset,
-                                                    batch_size=batch_size,
-                                                    shuffle=shuffle,
-                                                    drop_last=drop_last)
+                                                batch_size=batch_size,
+                                                shuffle=shuffle,
+                                                drop_last=drop_last)
     else:
         sampler = build_sampler(kwargs['sampler'])
         batch_sampler = BatchSampler(dataset,

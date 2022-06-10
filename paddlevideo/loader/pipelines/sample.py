@@ -117,6 +117,8 @@ class Sampler(object):
                 imgs = []
                 frames = np.array(results['frames'])
                 for idx in frames_idx:
+                    if self.dense_sample:
+                        idx = idx - 1
                     imgbuf = frames[idx]
                     imgs.append(imgbuf)
                 imgs = np.stack(imgs)  # thwc

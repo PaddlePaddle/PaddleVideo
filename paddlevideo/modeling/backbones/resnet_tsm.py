@@ -124,27 +124,40 @@ class BottleneckBlock(nn.Layer):
         self.num_seg = num_seg
 
     def forward(self, inputs):
-        if paddle.fluid.core.is_compiled_with_npu():
+        if paddle.device.is_compiled_with_npu():
             x = inputs
             seg_num = self.num_seg
             shift_ratio = 1.0 / self.num_seg
 
-            shape = x.shape #[N*T, C, H, W]
-            reshape_x = x.reshape((-1, seg_num, shape[1], shape[2], shape[3])) #[N, T, C, H, W]
-            pad_x = paddle.fluid.layers.pad(reshape_x, [0,0,1,1,0,0,0,0,0,0,]) #[N, T+2, C, H, W]
+            shape = x.shape  #[N*T, C, H, W]
+            reshape_x = x.reshape(
+                (-1, seg_num, shape[1], shape[2], shape[3]))  #[N, T, C, H, W]
+            pad_x = F.pad(reshape_x, [
+                0,
+                0,
+                1,
+                1,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+            ])  #[N, T+2, C, H, W]
             c1 = int(shape[1] * shift_ratio)
             c2 = int(shape[1] * 2 * shift_ratio)
             slice1 = pad_x[:, :seg_num, :c1, :, :]
-            slice2 = pad_x[:, 2:seg_num+2, c1:c2, :, :]
-            slice3 = pad_x[:, 1:seg_num+1, c2:, :, :]
-            concat_x = paddle.concat([slice1, slice2, slice3], axis=2) #[N, T, C, H, W]
+            slice2 = pad_x[:, 2:seg_num + 2, c1:c2, :, :]
+            slice3 = pad_x[:, 1:seg_num + 1, c2:, :, :]
+            concat_x = paddle.concat([slice1, slice2, slice3],
+                                     axis=2)  #[N, T, C, H, W]
             shifts = concat_x.reshape(shape)
         else:
             shifts = F.temporal_shift(inputs,
-                                    self.num_seg,
-                                    1.0 / self.num_seg,
-                                    data_format=self.data_format)
-        
+                                      self.num_seg,
+                                      1.0 / self.num_seg,
+                                      data_format=self.data_format)
+
         y = self.conv0(shifts)
         conv1 = self.conv1(y)
         conv2 = self.conv2(conv1)
