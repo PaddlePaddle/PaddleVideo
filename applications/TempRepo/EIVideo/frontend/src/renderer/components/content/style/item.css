@@ -1,0 +1,51 @@
+.el-input__inner {
+  @apply bg-transparent shadow-inner rounded-lg w-24 text-base w-full border-slate-50 !important;
+}
+
+.el-textarea__inner {
+  @apply bg-transparent shadow-inner rounded-lg w-24 text-base w-full border-slate-50 !important;
+}
+
+.el-divider__text {
+  @apply text-xs text-center text-gray-500 !important;
+}
+.el-dialog{
+  @apply shadow rounded-2xl  !important;
+}
+.el-card__body,.el-card{
+  @apply items-center leading-3 text-gray-500 text-sm text-left shadow-none rounded-xl  !important;
+}
+.jv-button,.el-dialog__close{
+  @apply text-indigo-400  !important;
+}
+.jv-button,.el-dialog__close{
+  @apply hover:text-indigo-600  !important;
+}
+.el-dialog__title{
+  @apply text-left font-bold leading-none text-gray-600 text-3xl !important;
+}
+.el-dialog__header{
+  @apply pt-16 !important;
+}
+.el-dialog__body{
+  @apply pt-4 px-6 !important;
+}
+.dialog-footer .el-button--default{
+  @apply hover:text-indigo-500 hover:bg-indigo-100 bg-opacity-90 shadow rounded-md border-0 !important;
+}
+.dialog-footer .el-button--primary{
+  @apply hover:shadow-indigo-500/50 hover:text-white hover:shadow-md hover:bg-indigo-600 bg-indigo-600 bg-opacity-90 shadow rounded-md border-0 !important;
+}
+.el-dropdown-menu__item{
+  @apply hover:text-indigo-600  hover:bg-indigo-50 !important;
+}
+.el-popper{
+  @apply rounded-md shadow-md border-0 !important;
+}
+/*.el-dialog__footer{*/
+/*  @apply top-0 !important;*/
+/*}*/
+/*container: 'inline-flex flex-col space-y-2 items-start justify-center p-2.5 rounded-xl min-w-fit absoulute browser-video-popup',*/
+/*title: ' font-bold leading-none text-gray-900 text-sm',*/
+/*body: 'space-x-0.5  items-center leading-3 text-gray-500 text-sm space-y-1 text-left'*/
+/*<div class="w-80 h-12 bg-gray-50 shadow-inner rounded-full"/>*/

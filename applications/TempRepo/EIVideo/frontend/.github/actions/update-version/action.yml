@@ -1,0 +1,15 @@
+name: Update Version and Write Changelog
+description: Update the version and write changelog
+inputs:
+  version:
+    description: The version to write
+    default: ''
+    required: false
+  changelog:
+    description: The changelog to write
+    default: ''
+    required: false
+runs:
+  using: 'node12'
+  main: index.js
+  

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="ie=edge" http-equiv="X-UA-Compatible">
+    <title>demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+        }
+
+        .container {
+            width: 100%;
+            height: 100%;
+        }
+
+        .box {
+            width: 200px;
+            height: 200px;
+            border: 1px dashed #ccc;
+            left: 50px;
+            top: 50px;
+        }
+
+        .content {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 28px;
+        }
+
+        .dragHandle {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: #000;
+            position: absolute;
+            left: 0;
+            top: -15px
+        }
+
+        .resizeHandle {
+            display: block;
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-right: 2px solid #b2b2b2;
+            border-bottom: 2px solid #b2b2b2;
+            right: 0px;
+            bottom: 0px;
+            overflow: hidden;
+            cursor: nw-resize;
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+    <div class="box">
+        <div class="content">
+            Candy
+        </div>
+        <div class="dragHandle">
+
+        </div>
+        <div class="resizeHandle">
+
+        </div>
+    </div>
+</div>
+
+</body>
+
+</html>
+<script src="drag.js">
+
+</script>
+<script>
+    let container = document.querySelector(".container");
+    let elem = document.querySelector(".box")
+    let dragHandle = document.querySelector(".dragHandle")
+    let resizeHandle = document.querySelector(".resizeHandle")
+    new Draggable(container, elem, dragHandle, resizeHandle, true, (dragStyle) => {
+        console.log("Location of the current element after dragging(当前元素拖拽后的位置)", dragStyle)
+    }, (resizeStyle) => {
+        console.log("The size of the current element after dragging(当前元素拖拽后的大小)", resizeStyle)
+    });
+</script>

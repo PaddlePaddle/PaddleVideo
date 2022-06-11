@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>右键菜单</title>
+    <link href="css/style.css" rel="stylesheet">
+    <script src="js/script.js"></script>
+    <link href='https://unpkg.com/boxicons@2.0.7/css/boxicons.min.css' rel='stylesheet'>
+</head>
+
+<body oncontextmenu="openMenu(event)">
+<div class="menu">
+    <ul class="menu-list">
+
+        <li class="menu-item">
+            <i class='bx bx-message-alt-edit'></i>
+            <span>标注</span>
+        </li>
+        <li class="menu-item">
+            <i class='bx bx-star'></i>
+            <span>收藏</span>
+        </li>
+
+        <li class="menu-item">
+            <i class='bx bx-share-alt'></i>
+            <span>分享</span>
+        </li>
+        <li class="menu-item-divider"></li>
+        <li class="menu-item">
+            <i class='bx bx-movie-play'></i>
+            <span>添加</span>
+        </li>
+        <li class="menu-item">
+            <i class='bx bx-folder-plus'></i>
+            <span>新建文件夹</span>
+        </li>
+        <li class="menu-item">
+            <i class='bx bx-add-to-queue'></i>
+            <span>新建项目</span>
+        </li>
+        <li class="menu-item-divider"></li>
+        <li class="menu-item menu-item-danger">
+            <i class='bx bx-trash'></i>
+            <span>删除</span>
+        </li>
+    </ul>
+</div>
+<div class="container">
+    <div class="box">
+        <div class="img">
+            <img src="./images/文件夹.png"/>
+        </div>
+        <p>智能标注助手</p>
+        <span>智能标注助手</span>
+    </div>
+    <div class="box">
+        <div class="img">
+            <img src="./images/文件夹.png"/>
+        </div>
+        <p>篮球动作标注</p>
+        <span>篮球动作标注</span>
+    </div>
+    <div class="box">
+        <div class="img">
+            <img src="./images/文件夹.png"/>
+        </div>
+        <p>PaddleVideo模型库</p>
+        <span>PaddleVideo模型库</span>
+    </div>
+</div>
+
+</body>
+
+</html>

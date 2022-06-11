@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <!-- import CSS -->
+    <script src="util.js"></script>
+    <link href="https://unpkg.com/element-ui/lib/theme-chalk/index.css" rel="stylesheet">
+</head>
+
+<body>
+<style>
+    html,
+    body {
+        margin: 0;
+        padding: 0;
+    }
+
+    .analysisContent .el-tabs__nav-wrap::after {
+        display: none;
+    }
+
+    .analysisContent .el-tabs__active-bar {
+        background: #5BC3BC;
+        border-radius: .04rem;
+        width: .86rem !important;
+        /*transform: translateX(3.34rem)!important;*/
+    }
+
+    .tabs-item .el-tabs--bottom .el-tabs__item.is-bottom:nth-child(2),
+    .el-tabs--bottom .el-tabs__item.is-top:nth-child(2),
+    .el-tabs--top .el-tabs__item.is-bottom:nth-child(2),
+    .el-tabs--top .el-tabs__item.is-top:nth-child(2) {
+        padding-right: 2.1rem;
+    }
+
+    .tabs-item .el-tabs--bottom .el-tabs__item.is-bottom:last-child,
+    .el-tabs--bottom .el-tabs__item.is-top:last-child,
+    .el-tabs--top .el-tabs__item.is-bottom:last-child,
+    .el-tabs--top .el-tabs__item.is-top:last-child {
+        width: 1.1rem;
+        text-align: center;
+    }
+
+    .analysisContent .el-tabs__item.is-active {
+        color: #364857;
+    }
+
+    .analysisContent .el-tabs__item:hover {
+        color: #364857;
+    }
+
+    .analysisContent .el-tabs__header {
+        width: 4.2rem;
+        margin: 0 auto;
+    }
+
+    .analysisContent .el-tabs__item {
+        line-height: .7rem;
+        height: .7rem;
+        color: #9B9B9B;
+    }
+
+    .box {
+        width: 100%;
+        z-index: 2;
+    }
+
+    .banner {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        height: .9rem;
+        background: #334252;
+        box-shadow: 0 8px 28px 0 rgba(72, 89, 102, 0.10);
+    }
+
+    .login {
+        font-size: .26rem;
+        color: #fff;
+    }
+
+    .logo {
+        width: .5rem;
+        height: .5rem;
+        position: absolute;
+        left: .4rem;
+        top: .2rem;
+    }
+
+    .headshot {
+        width: .5rem;
+        height: .5rem;
+        position: absolute;
+        top: .2rem;
+        right: 1.3rem;
+    }
+
+    .line1 {
+        background: #F1F1F1;
+        height: .02rem;
+        position: absolute;
+        width: 7.36rem;
+        top: 1.58rem;
+    }
+
+    .videoPlay {
+        float: left;
+        margin-left: .5rem;
+    }
+
+    .analysisContent {
+        float: right;
+        width: 7.36rem;
+        min-height: 9.9rem;
+        border-left: .02rem solid #F1F1F1;
+    }
+
+    .videoBox {
+        width: 10.35rem;
+        height: 5.96rem;
+        border-radius: .1rem;
+        margin-top: .4rem;
+        overflow: hidden;
+    }
+
+    .video {
+        object-fit: fill;
+        width: 100%;
+        height: 100%;
+        border-radius: .1rem;
+    }
+
+    .videoName {
+        font-size: .22rem;
+        color: #364857;
+        margin-top: .36rem;
+        margin-bottom: .22rem;
+    }
+
+    .other {
+        display: flex;
+        align-items: center;
+    }
+
+    .status {
+        font-size: .16rem;
+        display: inline-block;
+        background: #5BC3BC;
+        border-radius: .06rem;
+        width: .6rem;
+        height: .3rem;
+        line-height: .3rem;
+        margin-right: .27rem;
+        text-align: center;
+        color: #ffffff;
+        vertical-align: middle;
+    }
+
+    .creator {
+        font-size: .16rem;
+        color: #9B9B9B;
+        display: inline-block;
+        margin-right: .14rem;
+    }
+
+    .time {
+        font-size: .16rem;
+        color: #9B9B9B;
+        display: inline-block;
+    }
+
+    .title1 {
+        display: flex;
+        align-items: center;
+    }
+
+    .line {
+        display: inline-block;
+        background: #F75940;
+        border-radius: .04rem;
+        height: .3rem;
+        width: .04rem;
+        margin-right: .2rem;
+    }
+
+    .title {
+        line-height: .3rem;
+        display: inline-block;
+        font-size: .22rem;
+        color: #364857;
+        margin-right: .2rem;
+    }
+
+    .num {
+        line-height: .3rem;
+        font-size: .16rem;
+        color: #9B9B9B;
+        display: inline-block;
+    }
+
+    .text {
+        line-height: .3rem;
+        font-size: .16rem;
+        color: #9B9B9B;
+        display: inline-block;
+    }
+
+
+    .keyContent1 {
+        font-size: .16rem;
+        background: #ffffff;
+        border-radius: .15rem;
+        border: 1px solid #334252;
+        display: inline-block;
+        margin-left: .2rem;
+        padding: 0 .25rem;
+        height: .3rem;
+        line-height: .3rem;
+        cursor: pointer;
+    }
+
+    .progressbar {
+        width: 6.92rem;
+        height: .16rem;
+        margin: .2rem .22rem;
+        background: #F1F1F1;
+    }
+
+    .keyItemBox {
+        height: .16rem;
+        width: .03rem;
+        background: #5BC3BC;
+        display: inline-block;
+        margin: 0;
+        position: absolute;
+        cursor: pointer;
+    }
+
+    .changeKey {
+        height: .2rem;
+        margin-bottom: .3rem;
+        overflow: hidden;
+    }
+
+    .changeKeyText {
+        display: inline-block;
+        font-size: .16rem;
+        color: #334252;
+        vertical-align: middle;
+    }
+
+    .icon {
+        width: .2rem;
+        margin: 0 .12rem 0 .2rem;
+        display: inline-block;
+        vertical-align: middle;
+    }
+
+    .icon1 {
+        width: .2rem;
+        margin: 0 .2rem 0 .12rem;
+        display: inline-block;
+        vertical-align: middle;
+    }
+
+    .one {
+        float: left;
+        cursor: pointer;
+    }
+
+    .two {
+        float: right;
+        cursor: pointer;
+    }
+
+    .keyContent2,
+    .keyContent3 {
+        width: 1.58rem;
+        height: 1.06rem;
+        margin-left: .16rem;
+        margin-top: .16rem;
+        cursor: pointer;
+        filter: brightness(0.6);
+        background-size: 100%;
+        display: inline-block;
+    }
+
+    .keyContent3 {
+        margin-left: .28rem;
+    }
+
+    .keyContent2 {
+        margin-left: .16rem;
+    }
+
+    .keyContent3:hover,
+    .keyContent2:hover {
+        filter: brightness(1);
+    }
+
+    .keyContentTime {
+        display: none;
+    }
+
+    .keyContent3:hover .keyContentTime,
+    .keyContent2:hover .keyContentTime,
+    .keyItemBox:hover .keyContentTime {
+        display: inline-block;
+        background: #F75940;
+        border-radius: .02rem;
+        width: .6rem;
+        height: .21rem;
+        position: absolute;
+        left: .49rem;
+        top: .42rem;
+    }
+
+    .keyItemBox:hover .keyContentTime {
+        position: absolute;
+        display: inline-block;
+        left: -.28rem;
+        top: -.35rem;
+    }
+
+    .triangle {
+        display: none;
+    }
+
+    .keyContent3:hover .triangle,
+    .keyContent2:hover .triangle,
+    .keyItemBox:hover .triangle1 {
+        position: absolute;
+        display: inline-block;
+        width: 0;
+        height: 0;
+        border-left: .08rem solid transparent;
+        border-right: .08rem solid transparent;
+        border-top: .06rem solid #F75940;
+        bottom: .39rem;
+        left: .71rem;
+    }
+
+    .keyItemBox:hover .triangle1 {
+        bottom: .24rem;
+        left: -.07rem;
+    }
+
+    .keyContentTime .time {
+        font-size: .12rem;
+        color: #fff;
+        line-height: .21rem;
+        margin: 0 .06rem;
+    }
+
+    .timeLine {
+        margin: .22rem .31rem .7rem 0;
+    }
+
+    .mainContent {
+        display: flex;
+        align-items: center;
+        margin-bottom: .24rem;
+        cursor: pointer;
+    }
+
+    .timeItem {
+        display: inline-block;
+        background: #b1b1b1;
+        color: #ffffff;
+        font-size: .12rem;
+        margin-left: .18rem;
+        padding: .02rem .06rem;
+        border-radius: .02rem;
+        vertical-align: top;
+        margin-right: .18rem;
+    }
+
+    .contentItem {
+        width: 5.7rem;
+        display: inline-block;
+        font-size: .14rem;
+        color: #364857;
+    }
+</style>
+<div class="box" id="app">
+    <!--        <div class="banner">-->
+    <!--            &lt;!&ndash;logo&ndash;&gt;-->
+    <!--            &lt;!&ndash; <img src="../../../static/imgs/homepage_icon_account.png" alt="" class="logo"> &ndash;&gt;-->
+
+    <!--            &lt;!&ndash;已登录，显示用户名&ndash;&gt;-->
+    <!--            &lt;!&ndash; <div class="login" v-if="this.$store.state.isLogin">{{ this.$store.state.userName }}</div> &ndash;&gt;-->
+
+    <!--            &lt;!&ndash;未登录，显示&ndash;&gt;-->
+    <!--            &lt;!&ndash; <div class="login" v-if="!this.$store.state.isLogin" @click="showLogin">注册/登录</div> &ndash;&gt;-->
+    <!--&lt;!&ndash;            <div class="login">仿VideoIndexer演示</div>&ndash;&gt;-->
+
+    <!--            &lt;!&ndash; <login v-show="loginShow" :isShow="loginShow" @closeMyself="showLogin"></login> &ndash;&gt;-->
+
+    <!--            &lt;!&ndash;用户头像&ndash;&gt;-->
+    <!--            &lt;!&ndash; <img src="../../../static/imgs/homepage_icon_account.png" alt="" class="headshot" @click="jumpHome"> &ndash;&gt;-->
+    <!--            &lt;!&ndash;-->
+    <!--                <img :src="{{this.$store.state.///}}" alt="" class="headshot" @click="jumpHome">-->
+    <!--                用户头像-->
+    <!--                &ndash;&gt;-->
+    <!--        </div>-->
+    <div class="videoPlay">
+        <div class="videoBox">
+            <video :src="videoAddress" class="video" controls="controls" id="video">
+            </video>
+        </div>
+        <p class="videoName">{{ videoInfo.videoName }}</p>
+        <div class="other">
+            <div class="status">
+                {{ videoInfo.videoPrivacy }}
+            </div>
+            <p class="creator">标注员：{{ videoInfo.videoCreator }}</p>
+            <p class="time">{{ videoInfo.createTime }}</p>
+        </div>
+    </div>
+    <div class="analysisContent">
+        <div class="line1"></div>
+        <el-tabs value="first">
+            <el-tab-pane class="tabs-item" label="视频解析" name="first">
+                <div class="key">
+                    <div class="title1">
+                        <div class="line"></div>
+                        <p class="title">关键词</p>
+                        <p class="num">{{ videoAnalysis.key.length}}</p>
+                        <p class="text">个</p>
+                    </div>
+                    <div class="content1" style="margin-top: 10px">
+                        <div style="display: flex;">
+                            <div :key="index" @click="changeKey(index)" class="keyContent1"
+                                 id="keyContent" v-for="(item,index) of videoAnalysis.key">
+                                {{item.value}}
+                            </div>
+                        </div>
+
+
+                        <!--关键词-->
+                        <!--采用时间点的方式可视化-->
+                        <div class="progressbar">
+                            <div :key="_index" v-for="(item,_index) of videoAnalysis.key">
+                                <div :key="__index" :style="getStyle(_index, __index)"
+                                     @click="changeVideoTime(item)" class="keyItemBox"
+                                     v-for="(item, __index) of videoAnalysis.key[_index].time"
+                                     v-show="keyStatus[_index].status">
+                                        <span class="keyContentTime">
+                                            <span class="time">{{item}}</span>
+                                        </span>
+                                    <span class="triangle1"></span>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <!--未完成，播放上一个什么？-->
+                        <!-- <div class="changeKey">
+                            <div class="one" @click="jumpLastKey">
+                                <img class="icon" src="./video_icon_previous.png" alt="">
+                                <p class="changeKeyText">播放上一个</p>
+                            </div>
+                            <div class="two" @click="jumpNextKey">
+                                <p class="changeKeyText">播放下一个</p>
+                                <img class="icon1" src="./video_icon_next.png" alt="">
+                            </div>
+                        </div> -->
+                    </div>
+                </div>
+                <div class="shortcut">
+                    <div class="title1">
+                        <div class="line"></div>
+                        <p class="title">关键帧</p>
+                        <p class="num">{{ videoAnalysis.shortcut.length}}</p>
+                        <p class="text">个</p>
+                    </div>
+                    <div :key="index"
+                         :style="{backgroundImage:'url('+ item.value +')'}"
+                         @click="changeVideoTime(item.time)"
+                         style="background-repeat: no-repeat"
+                         v-bind:class="[index%4==0 ? 'keyContent3' : 'keyContent2']"
+                         v-for="(item,index) of videoAnalysis.shortcut">
+                            <span class="keyContentTime">
+                                <span class="time">{{item.time}}</span>
+                            </span>
+                        <span class="triangle"></span>
+                    </div>
+
+                </div>
+
+            </el-tab-pane>
+
+            <el-tab-pane class="tabs-item" label="时间线" name="second">
+                <div class="timeLine">
+                    <div :key="index" @click="changeVideoTime(item.time)" class="mainContent"
+                         v-for="(item,index) of videoAnalysis.timeLine">
+                        <div class="timeItem">
+                            {{item.time}}
+                        </div>
+                        <div class="contentItem">
+                            {{item.content}}
+                        </div>
+                    </div>
+
+                </div>
+
+            </el-tab-pane>
+        </el-tabs>
+    </div>
+</div>
+</body>
+<!-- import Vue before Element -->
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+<!--<script src="https://unpkg.com/vue/dist/vue.js"></script>-->
+<!-- import JavaScript -->
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script>
+    new Vue({
+        el: '#app',
+        data() {
+            return {
+                keyStatus: [],
+                keyX: [],//关键词时间坐标
+                videoAddress: "./8_15488489004728.mp4",
+                videoInfo: {
+                    videoName: '标注编号：001',
+                    videoPrivacy: '未校验',
+                    videoCreator: '小度',
+                    createTime: '2021-02-09',
+                    videoTotalTime: '00:09:54', //视频总时长
+                },
+                videoAnalysis: {
+                    //关键词
+                    key: [
+                        {
+                            value: "接球",
+                            time: [
+                                '00:00:01',
+                                '00:05:52',
+                                '00:01:12',
+                                '00:02:32'
+                            ]
+                        },
+                        {
+                            value: "切球",
+                            time: [
+                                '00:02:02',
+                                '00:03:52',
+                                '00:07:12',
+                                '00:04:52',
+                                '00:04:12',
+                                '00:06:32',
+                                '00:01:32'
+                            ]
+                        },
+                        {
+                            value: "搓球",
+                            time: [
+                                '00:01:03',
+                                '00:00:52',
+                                '00:05:53',
+                                '00:05:54',
+                                '00:05:55',
+                                '00:05:56',
+                                '00:08:12',
+                                '00:01:32',
+                            ]
+                        },
+                        {
+                            value: "挑",
+                            time: [
+                                '00:00:10',
+                                '00:05:00',
+                                '00:04:12',
+                                '00:10:00'
+                            ]
+                        },
+                    ],
+                    //关键帧
+                    shortcut: [
+                        {
+                            time: '00:00:12',
+                            value: './video_img_key.png'
+                        },
+                        {
+                            time: '00:00:40',
+                            value: './video_img_key.png'
+                        },
+                        {
+                            time: '00:01:05',
+                            value: './video_img_key.png'
+                        },
+                        {
+                            time: '00:04:12',
+                            value: './video_img_key.png'
+                        }
+                    ],
+                    //时间线
+                    timeLine: [
+                        {
+                            time: '00:00:00',
+                            content: '同学们大家好，今天课程内容。。。'
+                        },
+                        {
+                            time: '00:00:12',
+                            content: 'Please welcome such a Nadella Good morning, and welcome to build 2018. Welcome to Seattle, it \'s fantastic to see you all back here.'
+                        },
+                        {
+                            time: '00:00:24',
+                            content: 'Opportunity & Responsibility'
+                        },
+                        {
+                            time: '00:00:36',
+                            content: 'Being so far, amplified is unimaginable. In fact, for the first time here last year is when I started talking about the.'
+                        },
+                        {
+                            time: '00:00:48',
+                            content: 'Intelligent edge.'
+                        },
+                    ]
+                }
+            }
+        },
+        methods: {
+            //点击改变视频播放时间
+            changeVideoTime(time) {
+                var timeSecond = time.split(":");
+                var videoTotalTime = 3600 * parseInt(timeSecond[0]) + 60 * parseInt(timeSecond[1]) + parseInt(timeSecond[2]);
+                var thisVideo = document.getElementById("video");
+                thisVideo.currentTime = videoTotalTime;
+            },
+            jumpLastKey() {
+                //播放上一个关键词
+            },
+            jumpNextKey() {
+                //播放下一个关键词
+            },
+            //点击切换关键词
+            changeKey(index) {
+                for (var i = 0; i < this.keyStatus.length; i++) {
+                    this.keyStatus[i].status = false
+                }
+                this.keyStatus[index].status = true
+                console.log(this.keyStatus)
+            },
+            //根据时间点在视频整个时间所占的比例实现时间点可视化
+            getStyle(_index, __index) {
+                var value = this.keyX[_index][__index]
+                return 'transform: translateX(' + value + 'px)';
+            }
+        },
+        created() {
+            //计算视频总时长
+            var videoTotalTime = this.videoInfo.videoTotalTime.split(":");
+            var videototaltime = 3600 * parseInt(videoTotalTime[0]) + 60 * parseInt(videoTotalTime[1]) + parseInt(videoTotalTime[2]);
+            var key = this.videoAnalysis.key
+            for (var i = 0; i < key.length; i++) {
+                //var obj = { status: false }
+                this.keyStatus.push({status: false})
+                var width = 500 //视频进度条像素宽度
+                var time = key[i].time
+                var array = []
+                for (var j = 0; j < time.length; j++) {
+                    var keyTime = time[j].split(":");
+                    var keytime = 3600 * parseInt(keyTime[0]) + 60 * parseInt(keyTime[1]) + parseInt(keyTime[2]);
+                    var bi = keytime / videototaltime //时间所位置比例
+                    var x = bi * width
+                    array.push(x.toFixed(2)) //保留两位小数
+                    this.keyX[i] = array
+                }
+            }
+            this.keyStatus[0].status = true
+
+        }
+    })
+</script>
+
+</html>

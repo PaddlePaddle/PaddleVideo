@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html dir="ltr" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title> EIVideo </title>
+    <link href="style.css" rel="stylesheet">
+    <!-- Boxiocns CDN Link -->
+    <link href='https://unpkg.com/boxicons@2.0.7/css/boxicons.min.css' rel='stylesheet'>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+</head>
+<body>
+<div class="sidebar">
+    <div class="logo-details">
+        <div class=logo-content">
+            <img alt="profile" src="image/pp.jpg">
+        </div>
+        <!--      <i class="paddlepaddle"></i>-->
+        <span class="logo_name">EIVideo</span>
+    </div>
+    <ul class="nav-links">
+        <li>
+            <a href="#">
+                <i class='bx bx-grid-alt'></i>
+                <span class="link_name">标注</span>
+            </a>
+            <ul class="sub-menu blank">
+                <li><a class="link_name" href="#">标注</a></li>
+            </ul>
+        </li>
+        <li>
+            <div class="iocn-link">
+                <a href="#">
+                    <i class='bx bx-collection'></i>
+                    <span class="link_name">项目</span>
+                </a>
+                <i class='bx bxs-chevron-down arrow'></i>
+            </div>
+            <ul class="sub-menu">
+                <li><a class="link_name" href="#">项目</a></li>
+                <li><a href="#">智能标注助手</a></li>
+                <li><a href="#">篮球动作标注</a></li>
+                <li><a href="#">PaddleVideo模型库</a></li>
+            </ul>
+        </li>
+        <li>
+            <a href="#">
+                <i class='bx bx-line-chart'></i>
+                <span class="link_name">评审</span>
+            </a>
+            <ul class="sub-menu blank">
+                <li><a class="link_name" href="#">评审</a></li>
+            </ul>
+        </li>
+        <li>
+            <a href="#">
+                <i class='bx bxs-group'></i>
+                <span class="link_name">协同</span>
+            </a>
+            <ul class="sub-menu blank">
+                <li><a class="link_name" href="#">协同</a></li>
+            </ul>
+        </li>
+        <li>
+            <a href="#">
+                <i class='bx bx-history'></i>
+                <span class="link_name">历史</span>
+            </a>
+            <ul class="sub-menu blank">
+                <li><a class="link_name" href="#">历史</a></li>
+            </ul>
+        </li>
+        <li>
+            <a href="#">
+                <i class='bx bx-user'></i>
+                <span class="link_name">账号</span>
+            </a>
+            <ul class="sub-menu blank">
+                <li><a class="link_name" href="#">账号</a></li>
+            </ul>
+        </li>
+        <li>
+            <div class="profile-details">
+                <div class="profile-content">
+                    <img alt="profile" src="image/profile.jpg">
+                </div>
+                <div class="name-job">
+                    <div class="profile_name">小度</div>
+                    <div class="job">AI Annotator</div>
+                </div>
+                <i class='bx bx-log-out'></i>
+            </div>
+        </li>
+        <li>
+            <div class="iocn-link">
+                <a href="#">
+                    <i class='bx bx-cog'></i>
+                    <span class="link_name">配置</span>
+                </a>
+                <i class='bx bxs-chevron-down arrow'></i>
+            </div>
+            <ul class="sub-menu">
+                <li><a class="link_name" href="#">配置</a></li>
+                <li><a href="#">通用</a></li>
+                <li><a href="#">模型</a></li>
+                <li><a href="#">账号</a></li>
+                <li><a href="#">团队</a></li>
+            </ul>
+        </li>
+    </ul>
+</div>
+<!--<section class="home-section" style="background-image: url('image/标注.png');background-repeat: no-repeat; background-size: cover;">-->
+<section class="home-section">
+    <div class="home-content">
+        <i class='bx bx-menu'></i>
+        <!--      <span class="text">Drop Down Sidebar</span>-->
+    </div>
+</section>
+
+<script>
+
+    let arrow = document.querySelectorAll(".arrow");
+    for (var i = 0; i < arrow.length; i++) {
+        arrow[i].addEventListener("click", (e) => {
+            let arrowParent = e.target.parentElement.parentElement;
+            arrowParent.classList.toggle("showMenu");
+        });
+    }
+
+    let sidebar = document.querySelector(".sidebar");
+    let sidebarBtn = document.querySelector(".bx-menu");
+    console.log(sidebarBtn);
+    sidebarBtn.addEventListener("click", () => {
+        sidebar.classList.toggle("close");
+    });
+</script>
+
+</body>
+</html>

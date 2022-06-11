@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>empty</title>
+    <link href="css/empty.css" rel="stylesheet">
+
+    <link href='https://unpkg.com/boxicons@2.0.7/css/boxicons.min.css' rel='stylesheet'>
+</head>
+<body>
+<div class="drag-area">
+    <i class='bx bxs-cloud-upload'></i>
+    <p>拖放来新建 <br>或者</p>
+    <div class="upload">
+
+        <div class="upload-button">
+            <p>浏览文件</p>
+        </div>
+        <div class="upload-button">
+            <svg class="arrow" height="40" viewBox="0 0 40 40" width="40">
+                <!-- 进度 -->
+                <circle
+                        cx="50%"
+                        cy="50%"
+                        fill="none"
+                        r="19"
+                        stroke="#205cf6"
+                        stroke-width="2"
+                ></circle>
+                <!-- 箭头 -->
+                <!-- 左边的线 -->
+                <!-- points="6,20 20,6 34,20" -->
+                <!-- points="8,20 18,30 30, 12" -->
+                <polyline
+                        class="arrow-top"
+                        fill="none"
+                        points="6,20 20,6 34,20"
+                        stroke="#205cf6"
+                        stroke-width="2"
+                ></polyline>
+                <polyline
+                        class="checkmark"
+                        fill="none"
+                        points="8,20 18,30 30,12"
+                        stroke="#205cf6"
+                        stroke-width="2"
+                ></polyline>
+                <!-- 中间的线 -->
+                <line
+                        class="middle-line"
+                        stroke="#205cf6"
+                        stroke-width="2"
+                        x1="50%"
+                        x2="50%"
+                        y1="7"
+                        y2="34"
+                ></line>
+            </svg>
+            <div class="progress-bar"></div>
+        </div>
+    </div>
+    <input type="file">
+    <script src="js/empty.js"></script>
+</div>
+</body>
+</html>

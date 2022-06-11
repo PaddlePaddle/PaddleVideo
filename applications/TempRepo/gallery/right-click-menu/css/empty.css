@@ -1,0 +1,220 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+:root {
+    --main-light: #f7f8fb;
+    --background-light: #fafafc;
+    --primary-color: #205cf6;
+    --secondary-color: #4942f5;
+    --darkblue-color: #302d77;
+    --middleblue-color: #bdccf9;
+    --lightblue-color: #edf2ff;
+    --red-color: #e25673;
+    --hover-dark: rgba(255, 255, 255, 0.7);
+    --text-color-lightest: #f7f4fd;
+    --text-color-dark: #3c3c3c;
+}
+
+body {
+    /*cursor: pointer;*/
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    position: absolute;
+    /*align-items: center;*/
+}
+
+.drag-area {
+    position: relative;
+    top: 30%;
+    height: 240px;
+    width: 280px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    flex-wrap: wrap;
+    color: var(--text-color-dark);
+    box-shadow: 18px 18px 30px rgba(0, 0, 125, 0.1),
+    -18px -18px 30px rgba(255, 255, 255, 1);
+    transition: box-shadow .2s ease-out;
+}
+
+.drag-area i {
+    font-size: 70px;
+    transition: width 0.2s ease-out;
+    position: absolute;
+    top: 0px;
+}
+
+.drag-area p {
+    margin: 10px;
+    font-size: 19px;
+    text-align: center;
+    color: var(--text-color-dark);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    align-items: center;
+}
+
+body.active .drag-area p {
+    color: var(--primary-color);
+}
+
+
+body.active {
+    box-shadow: 0px 0px 0px rgba(0, 0, 0, 0.2),
+    0px 0px 0px rgba(255, 255, 255, 0.8),
+    inset 18px 18px 20px rgba(0, 0, 255, 0.1),
+    inset -18px -18px 30px rgba(255, 255, 255, 1);
+    transition: box-shadow .2s ease-out;
+}
+
+body.active .drag-area i {
+    color: var(--primary-color);
+    width: 58px;
+    transition: width 0.2s ease-out;
+}
+
+body.active .drag-area {
+    box-shadow: 0 0px 0px #ccc;
+}
+
+input {
+    visibility: hidden;
+}
+
+.upload-button {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    /* 样式 */
+    width: 180px;
+    height: 60px;
+    background: linear-gradient(145deg, #ffffff, #e6e6e6);
+    box-shadow: 21px 21px 38px #bfbfbf,
+    -21px -21px 38px #ffffff;
+    /*background-image: linear-gradient(160deg, #0093e9, #80d0c7);*/
+    border-radius: 8px;
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    float: left;
+}
+
+.upload {
+    position: relative;
+    margin-top: 20px;
+    left: -30%;
+}
+
+.upload-button:nth-child(2) {
+    opacity: 0;
+}
+
+/* 对勾，默认隐藏 */
+.upload-button .checkmark {
+    opacity: 0;
+}
+
+/* 进度条样式 */
+.upload-button .progress-bar {
+    position: absolute;
+    height: 2px;
+    bottom: 0;
+    left: 0;
+    border-radius: 4px;
+    background-image: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+}
+
+/* 上传时，箭头中间线的动画，虚线上行 */
+.upload-button.uploading .middle-line {
+    stroke-dasharray: 4 3;
+    animation: 0.8s linear dashLoop infinite;
+}
+
+/* 上传图标圆形闪烁 */
+.upload-button.uploading circle {
+    animation: 1.5s linear blink infinite;
+}
+
+/* 上传完成后箭头上半部分动画, 画线擦除动画, 最后透明度设置为0 */
+.upload-button.uploaded .arrow-top {
+    animation: 1s linear arrowTransform forwards;
+}
+
+/* 上传完成后对勾动画，画线效果 */
+.upload-button.uploaded .checkmark {
+    opacity: 1;
+    stroke-dasharray: 100 100;
+    stroke-dashoffset: 100;
+    animation: 1s linear checkmarkTransform forwards 0.5s;
+}
+
+/* 上传完成后，隐藏箭头中间的线 */
+.upload-button.uploaded .middle-line {
+    transition: 0.3s linear;
+    opacity: 0;
+}
+
+/* 箭头中间线虚线上行动画 */
+@keyframes dashLoop {
+    from {
+        stroke-dashoffset: 0;
+    }
+    to {
+        stroke-dashoffset: 7;
+    }
+}
+
+/* 圆形闪烁动画 */
+@keyframes blink {
+    from {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* 箭头变形动画 */
+@keyframes arrowTransform {
+    from {
+        stroke-dasharray: 100 100;
+        stroke-dashoffset: 0;
+    }
+
+    to {
+        stroke-dasharray: 100 100;
+        stroke-dashoffset: -100;
+    }
+}
+
+/* 对勾动画 */
+@keyframes checkmarkTransform {
+    from {
+        stroke-dasharray: 100 100;
+        stroke-dashoffset: 100;
+    }
+    to {
+        stroke-dasharray: 100 100;
+        stroke-dashoffset: 0;
+    }
+}
+
+

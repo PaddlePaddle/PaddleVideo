@@ -1,0 +1,199 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+:root {
+    --main-light: #f7f8fb;
+    --background-light: #fafafc;
+    --primary-color: #205cf6;
+    --secondary-color: #4942f5;
+    --darkblue-color: #302d77;
+    --middleblue-color: #bdccf9;
+    --lightblue-color: #edf2ff;
+    --red-color: #e25673;
+    --hover-dark: rgba(255, 255, 255, 0.7);
+    --text-color-lightest: #f7f4fd;
+    --text-color-dark: #3c3c3c;
+}
+
+body {
+    /*cursor: pointer;*/
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    position: absolute;
+    /*align-items: center;*/
+}
+
+.container {
+    width: 100%;
+    height: 600px;
+    display: flex;
+    /*justify-content: space-around;*/
+    flex-wrap: wrap;
+    /*align-items: center;*/
+    padding: 20px;
+}
+
+.container .box {
+    position: relative;
+    display: flex;
+    justify-content: space-around;
+    flex-direction: column;
+    align-items: center;
+    align-content: center;
+    width: 100px;
+    height: 140px;
+    margin: 15px;
+}
+
+.container .box .img {
+    width: 90px;
+    height: 90px;
+    box-shadow: 18px 18px 60px rgba(0, 0, 125, 0.1),
+    -18px -18px 30px rgba(255, 255, 255, 1);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /*background-color: #efeeee;*/
+    transition: box-shadow .2s ease-out;
+    position: relative;
+}
+
+.container .box .img img {
+    width: 60px;
+    transition: width 0.2s ease-out;
+}
+
+.container .box p {
+    position: relative;
+    width: 100px;
+    color: var(--text-color-dark);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.container .box span {
+    position: absolute;
+    top: 45%;
+    left: 50%;
+    padding: 10px;
+    box-sizing: border-box;
+    white-space: nowrap;
+    visibility: hidden;
+    opacity: 0;
+    z-index: 99;
+    box-shadow: 0 1px 4px rgba(28, 28, 32, .04), 0 8px 24px rgba(28, 28, 32, .12);
+    border-radius: 10px;
+    overflow: hidden;
+    color: var(--text-color-dark);
+    transition: opacity .2s ease, height .3s ease, visibility .3s ease;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+@keyframes ani {
+    0% {
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-100px);
+    }
+    100% {
+        opacity: 1;
+
+        visibility: visible;
+        transform: translateY(0);
+    }
+}
+
+.container .box p:hover + span {
+    animation: ani 0.5s forwards;
+}
+
+.container .box:hover {
+    cursor: pointer;
+}
+
+.container .box .img:hover {
+    box-shadow: 0px 0px 0px rgba(0, 0, 0, 0.2),
+    0px 0px 0px rgba(255, 255, 255, 0.8),
+    inset 18px 18px 20px rgba(0, 0, 255, 0.1),
+    inset -18px -18px 30px rgba(255, 255, 255, 1);
+    transition: box-shadow .2s ease-out;
+}
+
+.container .box .img:hover img {
+    width: 58px;
+    transition: width 0.2s ease-out;
+}
+
+.menu {
+    z-index: 99;
+    position: absolute;
+    width: 152px;
+    padding: 4px;
+    box-shadow: 0 1px 4px rgba(28, 28, 32, .04), 0 8px 24px rgba(28, 28, 32, .12);
+    border-radius: 10px;
+    opacity: 0;
+    visibility: hidden;
+    overflow: hidden;
+    transition: opacity .2s ease, height .3s ease, visibility .3s ease;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.is-active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.menu-list {
+    list-style: none;
+}
+
+.menu-item {
+    line-height: 22px;
+    color: #25262b;
+    font-size: 14px;
+    border-radius: 5px;
+    padding: 8px;
+    cursor: pointer;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    transition: background .3s ease;
+}
+
+.menu-item:hover {
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    color: var(--primary-color);
+}
+
+.menu-item svg {
+    margin-right: 8px;
+}
+
+.menu-item i {
+    margin-right: 8px;
+    font-size: 20px;
+    padding-bottom: 5px;
+}
+
+.menu-item-divider {
+    height: 1px;
+    margin: 4px 8px;
+    background: #f5f5f6;
+}
+
+.menu-item-danger:hover {
+    background: #fdd9d8;
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+}
