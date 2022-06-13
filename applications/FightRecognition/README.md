@@ -1,0 +1,170 @@
+# 打架识别模型
+
+实时行人分析工具[PP-Human](https://github.com/PaddlePaddle/PaddleDetection/tree/release/2.4/deploy/pphuman)中集成了视频分类的打架识别模块。本文档介绍如何基于[PaddleVideo](https://github.com/PaddlePaddle/PaddleVideo/)，完成打架识别模型的训练流程。
+
+## 打架识别模型训练
+目前打架识别模型使用的是[PP-TSM](https://github.com/PaddlePaddle/PaddleVideo/blob/63c88a435e98c6fcaf353429d2df6cc24b8113ba/docs/zh-CN/model_zoo/recognition/pp-tsm.md)，并在PP-TSM视频分类模型训练流程的基础上修改适配，完成模型训练。
+
+### 准备训练数据
+PP-TSM是一个基于视频片段进行预测的模型。在PaddleVideo中，训练数据为`.mp4`、`.avi`等格式视频或者是抽帧后的视频帧序列，标签则可以是`.txt`格式存储的文件。
+
+#### 1. 数据集下载
+
+本项目基于6个公开的打架、暴力行为相关数据集合并后的数据进行模型训练。公开数据集具体信息如下：
+
+| 数据集 | 下载连接 | 简介 | 标注 | 数量 | 时长 |
+| ---- | ---- | ---------- | ---- | ---- | ---------- |
+|  Surveillance Camera Fight Dataset| https://github.com/sayibet/fight-detection-surv-dataset | 裁剪视频，监控视角 | 视频级别 | 打架：150；非打架：150 | 2s |
+| A Dataset for Automatic Violence Detection in Videos | https://github.com/airtlab/A-Dataset-for-Automatic-Violence-Detection-in-Videos | 裁剪视频，室内自行录制 | 视频级别 | 暴力行为：115个场景，2个机位，共230 ；非暴力行为：60个场景，2个机位，共120 | 几秒钟 |
+| Hockey Fight Detection Dataset | https://www.kaggle.com/datasets/yassershrief/hockey-fight-vidoes?resource=download | 裁剪视频，非真实场景 | 视频级别 | 打架：500；非打架：500 | 2s |
+| Video Fight Detection Dataset | https://www.kaggle.com/datasets/naveenk903/movies-fight-detection-dataset | 裁剪视频，非真实场景 | 视频级别 | 打架：100；非打架：101 | 2s |
+| Real Life Violence Situations Dataset | https://www.kaggle.com/datasets/mohamedmustafa/real-life-violence-situations-dataset | 裁剪视频，非真实场景 | 视频级别 | 暴力行为：1000；非暴力行为：1000 | 几秒钟 |
+| UBI Abnormal Event Detection Dataset| http://socia-lab.di.ubi.pt/EventDetection/ | 未裁剪视频，监控视角 | 帧级别 | 打架：216；非打架：784；裁剪后二次标注：打架1976，非打架1630 | 原视频几秒到几分钟不等，裁剪后2s |
+
+打架（暴力行为）视频3956个，非打架（非暴力行为）视频3501个，共7457个视频，每个视频几秒钟。
+
+
+
+#### 2. 视频抽帧
+
+为了加快训练速度，将视频进行抽帧。
+
+```bash
+python data/ucf101/extract_rawframes.py dataset/ rawframes/ --level 2 --ext mp4
+```
+其中，视频存放在`dataset`目录下，打架（暴力）视频存放在`dataset/fight`中；非打架（非暴力）视频存放在`dataset/nofight`中。`rawframes`目录存放抽取的视频帧。
+
+#### 3. 训练集和验证集划分
+
+本项目验证集1500条，来自Surveillance Camera Fight Dataset、A Dataset for Automatic Violence Detection in Videos、UBI Abnormal Event Detection Dataset三个数据集。
+
+也可根据下面的代码将数据按照0.8:0.2的比例划分成训练集和测试集：
+
+```python
+import os
+import glob
+import random
+import fnmatch
+import re
+
+class_id = {
+    "nofight":0,
+    "fight":1
+}
+
+def get_list(path,key_func=lambda x: x[-11:], rgb_prefix='img_', level=1):
+    if level == 1:
+        frame_folders = glob.glob(os.path.join(path, '*'))
+    elif level == 2:
+        frame_folders = glob.glob(os.path.join(path, '*', '*'))
+    else:
+        raise ValueError('level can be only 1 or 2')
+
+    def count_files(directory):
+        lst = os.listdir(directory)
+        cnt = len(fnmatch.filter(lst, rgb_prefix + '*'))
+        return cnt
+
+    # check RGB
+    video_dict = {}
+    for f in frame_folders:
+        cnt = count_files(f)
+        k = key_func(f)
+        if level==2:
+            k = k.split("/")[0]
+
+        video_dict[f]=str(cnt)+" "+str(class_id[k])
+
+    return video_dict
+
+def fight_splits(video_dict, train_percent=0.8):
+    videos = list(video_dict.keys())
+
+    train_num = int(len(videos)*train_percent)
+
+    train_list = []
+    val_list = []
+
+    random.shuffle(videos)
+
+    for i in range(train_num):
+        train_list.append(videos[i]+" "+str(video_dict[videos[i]]))
+    for i in range(train_num,len(videos)):
+        val_list.append(videos[i]+" "+str(video_dict[videos[i]]))
+
+    print("train:",len(train_list),",val:",len(val_list))
+
+    with open("fight_train_list.txt","w") as f:
+        for item in train_list:
+            f.write(item+"\n")
+
+    with open("fight_val_list.txt","w") as f:
+        for item in val_list:
+            f.write(item+"\n")
+
+frame_dir = "rawframes"
+level = 2
+train_percent = 0.8
+
+if level == 2:
+    def key_func(x):
+        return '/'.join(x.split('/')[-2:])
+else:
+    def key_func(x):
+        return x.split('/')[-1]
+
+video_dict = get_list(frame_dir, key_func=key_func, level=level)  
+print("number:",len(video_dict))
+
+fight_splits(video_dict, train_percent)
+```
+
+最终生成fight_train_list.txt和fight_val_list.txt两个文件。打架的标签为1，非打架的标签为0。
+
+### 训练与评估
+下载预训练模型：
+```bash
+wget https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_vd_ssld_v2_pretrained.pdparams
+```
+
+模型训练：
+```bash
+# 单卡训练
+python main.py --validate -c pptsm_fight_frames_dense.yaml
+```
+
+```bash
+# 多卡训练
+export CUDA_VISIBLE_DEVICES=0,1,2,3
+python -B -m paddle.distributed.launch --gpus=“0,1,2,3” \
+   --log_dir=log_pptsm_dense  main.py  --validate \
+   -c pptsm_fight_frames_dense.yaml
+```
+
+模型评估：
+```bash
+python main.py --test -c pptsm_fight_frames_dense.yaml \
+   -w ppTSM_fight_best.pdparams
+```
+
+其中`ppTSM_fight_best.pdparams`为训练好的模型。
+
+### 模型推理
+
+导出inference模型：
+
+```bash
+python tools/export_model.py -c pptsm_fight_frames_dense.yaml \
+                                -p ppTSM_fight_best.pdparams \
+                                -o inference/ppTSM
+```
+
+使用预测引擎推理：
+```
+python tools/predict.py --input_file fight.avi \
+                           --config pptsm_fight_frames_dense.yaml \
+                           --model_file inference/ppTSM/ppTSM.pdmodel \
+                           --params_file inference/ppTSM/ppTSM.pdiparams \
+                           --use_gpu=True \
+                           --use_tensorrt=False
+```
