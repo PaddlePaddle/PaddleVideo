@@ -141,7 +141,7 @@ python -B -m paddle.distributed.launch --gpus=“0,1,2,3” \
    -c pptsm_fight_frames_dense.yaml
 ```
 
-训练好的模型下载：https://videotag.bj.bcebos.com/PaddleVideo-release2.3/ppTSM_fight.pdparams
+训练好的模型下载：[https://videotag.bj.bcebos.com/PaddleVideo-release2.3/ppTSM_fight.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.3/ppTSM_fight.pdparams)
 
 模型评估：
 ```bash
