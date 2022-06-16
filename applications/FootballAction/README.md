@@ -164,7 +164,7 @@ cd ${FootballAction_root}/predict && python predict.py
 - image 采样频率fps=5，如果有些动作时间较短，可以适当提高采样频率
 - BMN windows=200，即40s，所以测试自己的数据时，视频时长需大于40s
 
-请先参考[使用说明](../../docs/zh-CN/contribute/usage.md)了解PaddleVideo模型库的使用。
+请先参考[使用说明](../../docs/zh-CN/usage.md)了解PaddleVideo模型库的使用。
 
 #### step1 PP-TSM训练
 
