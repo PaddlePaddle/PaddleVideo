@@ -2,36 +2,54 @@
 
 
 ## 内容
-- [模型简介](#模型简介)
-- [数据准备](#数据准备)
-- [模型推理](#模型推理)
-- [模型训练](#模型训练)
-- [使用训练模型推理](#使用训练模型推理)
-- [模型评估](#模型评估)
-- [模型优化](#模型优化)
-- [模型部署](#模型部署)
-- [参考论文](#参考论文)
+- [1. 模型简介](#1-模型简介)
+- [2. 环境准备](#2-环境准备)
+- [3. 数据准备](#3-数据准备)
+    - [3.1 数据集简介](#31-数据集简介)
+    - [3.2 数据集下载](#32-数据集下载)
+    - [3.3 数据预处理](#33-数据预处理)
+- [4. 快速体验](#4-快速体验)
+- [5. 进阶使用](#5-进阶使用)
+    - [5.1 模型训练](#61-模型训练)
+    - [5.2 模型推理](#52-模型推理)
+    - [5.3 模型评估](#53-模型评估)
+    - [5.4 模型优化](#54-模型优化)
+    - [5.5 模型部署](#55-模型部署)
+- [6. 参考论文](#7-参考论文)
 
+<a name="模型简介"></a>
+## 1. 模型简介
 
-## 模型简介
-该代码库用于体育动作检测+识别, 基于paddle2.0版本开发，结合PaddleVideo中的PP-TSM, BMN, AttentionLSTM的多个视频模型进行视频时空二阶段检测算法。
-主要分为如下几步
+FootballAction是基于PaddleVideo实现的足球动作检测算法，用于从足球比赛视频中定位出精彩动作片段发生的起止时间和对应的动作类别。可以定位的足球动作类型包括8种，分别为：
+```txt
+背景、进球、角球、任意球、黄牌、红牌、换人、界外球
+```
+
+我们提出的方案结合PP-TSM、BMN和AttentionLSTM三个模型，图像和音频两种模态进行动作检测，算法整体流程如上图所示，共分为以下三步：
  - 特征抽取
-    - 图像特性，PP-TSM
-    - 音频特征，VGGish
- - proposal提取，BMN
- - LSTM，动作分类 + 回归
+    - 图像特性：PP-TSM
+    - 音频特征：VGGish
+ - proposal提取：BMN
+ - 动作分类 + 回归：AttentionLSTM
 
 
-AIStudio项目： [基于PP-TSM+BMN+LSTM实现足球精彩时刻剪辑](https://aistudio.baidu.com/aistudio/projectdetail/3473391?channelType=0&channel=0)
+AIStudio项目： [基于PP-TSM+BMN+AttentionLSTM实现足球精彩时刻剪辑](https://aistudio.baidu.com/aistudio/projectdetail/3473391?channelType=0&channel=0)
 
+<a name="环境准备"></a>
+## 2. 环境准备
 
-## 数据准备
+- PaddleVideo模型库依赖安装请参考 [安装说明](../../docs/zh-CN/install.md)
+
+<a name="数据准备"></a>
+## 3. 数据准备
+
+<a name="数据集简介"></a>
+### 3.1 数据集简介
+
+数据集来自欧洲杯2016，共49个足球视频，其中训练集44个，验证集5个。
+
 - 数据集label格式
 ```
-数据集来自欧洲杯2016，共49个足球视频，其中训练集44个，验证集5个
-数据集地址: datasets/EuroCup2016/dataset_url.list
-数据集label格式
 {
     "0": "背景",
     "1": "进球",
@@ -42,13 +60,12 @@ AIStudio项目： [基于PP-TSM+BMN+LSTM实现足球精彩时刻剪辑](https://
     "6": "换人",
     "7": "界外球",
 }
-数据集标注文件:
+```
+
+- 数据集标注文件:
+```txt
 datasets/EuroCup2016/label_cls8_train.json
 datasets/EuroCup2016/label_cls8_val.json
-```
-下载数据集：
-```
-cd datasets/EuroCup2016 && sh download_dataset.sh
 ```
 
 - 数据集gts处理, 将原始标注数据处理成如下json格式
@@ -74,42 +91,42 @@ cd datasets/EuroCup2016 && sh download_dataset.sh
 }
 ```
 
+<a name="数据集下载"></a>
+### 3.2 数据集下载
+
+数据集下载链接: [dataset_url.list](./datasets/EuroCup2016/dataset_url.list)
+
+可使用如下脚本下载：
+```
+cd datasets/EuroCup2016 && sh download_dataset.sh
+```
+
+<a name="数据预处理"></a>
+### 3.3 数据预处理
+
 - 数据集抽帧, 由mp4, 得到frames和pcm, 这里需要添加ffmpeg环境
 ```
 cd datasets/script && python get_frames_pcm.py
 ```
-- 数据预处理后保存格式如下
-```
-   |--  datasets                   # 训练数据集和处理脚本
-        |--  EuroCup2016            # xx数据集
-            |--  mp4               # 原始视频.mp4
-            |--  frames            # 图像帧, fps=5, '.jpg'格式
-            |--  pcm               # 音频pcm, 音频采样率16000，采用通道数1
-            |--  url.list          # 视频列表
-            |--  label_train.json  # 训练集原始gts
-            |--  label_val.json    # 验证集原始gts
-```
 
-### 基础镜像
-```bash
-docker pull tmtalgo/paddleaction:action-detection-v2
-```
 
-### 代码结构
+经过以上步骤，得到的代码结构如下所示：
+
 ```
-|-- root_dir
-   |--  checkpoints                # 保存训练后的模型和log
-   |--  datasets                   # 训练数据集和处理脚本
-        |--  EuroCup2016           # xx数据集
+|-- FootballAction
+   |--  checkpoints                # 模型存放路径
+   |--  datasets                   # 数据集和数据处理脚本
+        |--  EuroCup2016           # 数据存放路径
             |--  feature_bmn       # bmn提取到的proposal
-            |--  features          # tsn和audio特征, image fps=5, audio 每秒(1024)
+            |--  features          # image和audio特征, image fps=5, audio 每秒(1024)
             |--  input_for_bmn     # bmn训练的输入数据，widows=40
             |--  input_for_lstm    # lstm训练的输入数据
-            |--  input_for_pptsm     # tsn训练的数据数据
+            |--  input_for_pptsm    # pptsm训练的数据数据
             |--  mp4               # 原始视频.mp4
             |--  frames            # 图像帧, fps=5, '.jpg'格式
             |--  pcm               # 音频pcm, 音频采样率16000，采用通道数1
             |--  url.list          # 视频列表
+            |--  url_val.list          # 视频列表
             |--  label_cls8_train.json  # 训练集原始gts
             |--  label_cls8_val.json    # 验证集原始gts
             |--  label.json        # 动作label
@@ -117,11 +134,12 @@ docker pull tmtalgo/paddleaction:action-detection-v2
     |--  predict                   # 模型预测代码
     |--  extractor                 # 特征提取脚本
     |--  train_lstm                # lstm训练代码
-    |--  train_proposal            # tsn、bmn训练代码，基本保持paddle-release-v1.8版本，数据接口部分稍有改动，参考官网
-        |--  configs               # tsn and bmn football config file
+    |--  train_proposal            # pptsm、bmn训练代码
+        |--  configs               # pptsm、bmn配置文件
 ```
-## 模型推理
-可以通过如下命令直接进行推理，无需训练。
+
+<a name="快速体验"></a>
+## 4. 快速体验
 
 首先，通过以下命令，下载训练好的模型文件：
 ```bash
@@ -129,62 +147,74 @@ cd checkpoints
 sh  download.sh
 ```
 
-进行预测前需要修改 `predict/configs/configs.yaml` 文件，修改模型路径。运行预测代码：
+运行预测代码：
 ```
-cd predict && python predict.py
+cd ${FootballAction_root}/predict && python predict.py
 ```
 产出文件：results.json
 
 
-## 模型训练
+<a name="进阶使用"></a>
+## 5. 进阶使用
+
+<a name="模型训练"></a>
+### 5.1 模型训练
+
 采样方式：
 - image 采样频率fps=5，如果有些动作时间较短，可以适当提高采样频率
 - BMN windows=200，即40s，所以测试自己的数据时，视频时长需大于40s
 
-### step1 PP-TSM训练
+请先参考[使用说明](../../docs/zh-CN/contribute/config.md)了解PaddleVideo模型库的使用。
 
-#### step1.1  PP-TSM 训练数据处理
-由frames结合gts生成训练所需要的正负样本。注意按照实际路径更新python文件中的 `data_dir`
-```
+#### step1 PP-TSM训练
+
+PP-TSM模型使用文档参考[PP-TSM](../../docs/zh-CN/model_zoo/recognition/pp-tsm.md)
+
+##### step1.1  PP-TSM 训练数据处理
+
+使用如下命令结合frames和gts生成训练所需要的正负样本:
+```bash
 cd datasets/script && python get_instance_for_pptsm.py
-
-# 文件名按照如下格式
-'{}_{}_{}_{}'.format(video_basename, start_id, end_id, label)
 ```
+
 完成该步骤后，数据存储位置
 ```
-   |--  datasets                   # 训练数据集和处理脚本
-        |--  EuroCup2016           # xx数据集
-            |--  input_for_pptsm     # pptsm训练的数据
+   |--  datasets                   # 数据集和数据处理脚本
+        |--  EuroCup2016           # 数据存放路径
+            |--  input_for_pptsm   # pptsm训练的数据
 ```
 
-#### step1.2 PP-TSM模型训练
-我们提供了足球数据训练的模型，参考checkpoints
-如果需要在自己的数据上训练，可参考
-https://github.com/PaddlePaddle/PaddleVideo/tree/release/2.0
-config.yaml参考configs文件夹下pptsm_football_v2.0.yaml
-注意更换config文件中的file_path
+文件按照如下格式命名：
 ```
-# https://github.com/PaddlePaddle/PaddleVideo/tree/release/2.0
-cd ${PaddleVideo}
+'{}_{}_{}_{}'.format(video_basename, start_id, end_id, label)
+```
+
+##### step1.2 PP-TSM模型训练
+训练启动命令如下：
+```bash
+cd ${FootballAction_root}
+cd ../..  #进入PaddleVideo目录下
+
 python -B -m paddle.distributed.launch \
     --gpus="0,1,2,3" \
-    --log_dir=$save_dir/logs \
+    --log_dir=./football/logs_pptsm \
     main.py  \
     --validate \
-    -c ${FootballAcation}/train_proposal/configs/pptsm_football_v2.0.yaml \
-    -o output_dir=$save_dir
+    -c applications/FootballAction/train_proposal/configs/pptsm_football_v2.0.yaml  \
+    -o output_dir=./football/pptsm
 ```
 
-#### step1.3 PP-TSM模型转为预测模式
+我们也提供了训练好的PP-TSM模型，下载链接已在快速体验章节中给出。
+
+##### step1.3 导出PP-TSM推理模型
 在转为预测模式前，需要修改 `PaddleVideo/paddlevideo/modeling/framework/recognizers/recognizer2d.py` 文件，将 init 和 infer_step 函数分别更新为如下代码：
 
 ```python
-def __init__(self, backbone=None, head=None):
+    def __init__(self, backbone=None, head=None):
         super().__init__(backbone=backbone, head=head)
         self.avgpool2d = paddle.nn.AdaptiveAvgPool2D((1, 1), data_format='NCHW')
 
-def infer_step(self, data_batch):
+    def infer_step(self, data_batch):
         """Define how the model is going to test, from input to output."""
         imgs = data_batch[0]
         imgs = paddle.reshape_(imgs, [-1] + list(imgs.shape[2:]))
@@ -194,16 +224,16 @@ def infer_step(self, data_batch):
 ```
 再执行如下命令：
 
-```
-cd ${PaddleVideo}
-python tools/export_model.py -c ${FootballAcation}/train_proposal/configs/pptsm_football_v2.0.yaml \
-                               -p ${pptsm_train_dir}/checkpoints/ppTSM_best.pdparams \
-                               -o {FootballAcation}/checkpoints/ppTSM
+```bash
+cd ${PaddleVideo_root}
+python tools/export_model.py -c applications/FootballAction/train_proposal/configs/pptsm_football_v2.0.yaml \
+                             -p ./football/pptsm/ppTSM_best.pdparams \
+                             -o ./football/inference_model
 ```
 
-####  step1.4  基于PP-TSM的视频特征提取
+#####  step1.4  基于PP-TSM的视频特征提取
 
-将 `predict/action_detect/models/pptsm_infer.py` 文件中的
+将 `PaddleVideo/applications/FootballAction/predict/action_detect/models/pptsm_infer.py` 文件中41行的
 ```python
 self.output_tensor = self.predictor.get_output_handle(output_names[1])
 ```
@@ -212,32 +242,51 @@ self.output_tensor = self.predictor.get_output_handle(output_names[1])
 self.output_tensor = self.predictor.get_output_handle(output_names[0])
 ```
 
-image and audio特征提取，保存到datasets features文件夹下。注意更改python文件中 dataset_dir 的路径，以及configs.yaml文件下的模型路径。
 
-```
+使用如下命令进行image和audio特征的提取，默认使用下载的模型进行特征提取，如果使用自己数据训练的模型，请注意修改配置文件中模型的文件路径:
+```bash
 cd ${FootballAcation}
 cd extractor && python extract_feat.py
-# 特征维度, image(2048) + audio(1024)
-# 特征保存格式如下，将如下dict保存在pkl格式，用于接下来的BMN训练
-video_features = {'image_feature': np_image_features,
-                  'audio_feature': np_audio_features}
 ```
+
 完成该步骤后，数据存储位置
 ```
    |--  datasets                   # 训练数据集和处理脚本
-        |--  EuroCup2016            # xx数据集
+        |--  EuroCup2016            # 数据集
             |--  features          # 视频的图像+音频特征
 ```
 
-### step2 BMN训练
-BMN训练代码为：https://github.com/PaddlePaddle/PaddleVideo/tree/release/2.0
-BMN文档参考：https://github.com/PaddlePaddle/PaddleVideo/blob/develop/docs/zh-CN/model_zoo/localization/bmn.md
 
-#### step2.1 BMN训练数据处理
-用于提取二分类的proposal，windows=40，根据gts和特征得到BMN训练所需要的数据集
+推理特征以pkl文件保存，格式如下：
+```txt
+# 特征维度, image(2048) + audio(1024)
+video_features = {'image_feature': np_image_features,
+                  'audio_feature': np_audio_features}
 ```
-cd datasets/script && python get_instance_for_bmn.py
-# 数据格式
+此特征接下来会用于BMN模型的训练。
+
+
+#### step2 BMN训练
+
+BMN模型使用文档参考[BMN](../../docs/zh-CN/model_zoo/localization/bmn.md)
+
+##### step2.1 BMN训练数据处理
+使用如下命令得到BMN训练所需要的数据集，默认使用windows=40，根据gts和特征得到训练所需的proposal：
+```bash
+cd FootballAction/datasets/script && python get_instance_for_bmn.py
+```
+
+完成该步骤后，数据存储位置
+```
+   |--  datasets                   # 训练数据集和处理脚本
+        |--  EuroCup2016            # 数据集
+            |--  input_for_bmn     # bmn训练的proposal
+                |--  feature
+                |--  label.json  
+```
+
+特征文件保存在`label.json`文件中，数据格式如下：
+```txt
 {
     "719b0a4bcb1f461eabb152298406b861_753_793": {
         "duration_second": 40.0,
@@ -258,45 +307,45 @@ cd datasets/script && python get_instance_for_bmn.py
     ...
 }
 ```
+
+##### step2.2  BMN模型训练
+训练启动命令如下：
+```bash
+python -B -m paddle.distributed.launch \
+     --gpus="0,1" \
+     --log_dir=./football/logs_bmn \
+     main.py  \
+     --validate \
+     -c applications/FootballAction/train_proposal/configs/bmn_football_v2.0.yaml \
+     -o output_dir=./football/bmn
+```
+
+我们也提供了训练好的BMN模型，下载链接已在快速体验章节中给出。
+
+##### step2.3 导出BMN推理模型
+模型导出命令如下:
+```bash
+python tools/export_model.py -c applications/FootballAction/train_proposal/configs/bmn_football_v2.0.yaml \
+                              -p ./football/bmn/BMN_epoch_00016.pdparams \
+                               -o ./football/inference_model
+```
+
+##### step2.4  BMN模型预测
+使用如下命令进行预测，得到动作proposal信息： start_id, end_id, score。如果使用自己数据训练的模型，请注意修改配置文件中模型的文件路径:
+```
+cd extractor && python extract_bmn.py
+```
+
 完成该步骤后，数据存储位置
 ```
    |--  datasets                   # 训练数据集和处理脚本
-        |--  EuroCup2016            # xx数据集
-            |--  input_for_bmn     # bmn训练的proposal         
+        |--  EuroCup2016            # 数据集
+            |--  feature_bmn
+                 |--  prop.json    # bmn 预测结果
 ```
 
-#### step2.2  BMN模型训练
-我们同样提供了足球数据训练的模型，参考checkpoints
-如果要在自己的数据上训练，步骤与step1.2 ppTSM 训练相似，可参考
-https://github.com/PaddlePaddle/PaddleVideo/tree/release/2.0
-config.yaml参考configs文件夹下bmn_football_v2.0.yaml。训练前需更改config文件，配置好路径及其他参数。
-```
-# https://github.com/PaddlePaddle/PaddleVideo/tree/release/2.0
-cd ${PaddleVideo}
-python -B -m paddle.distributed.launch \
-     --gpus="0,1" \
-     --log_dir=$out_dir/logs \
-     main.py  \
-     --validate \
-     -c ${FootballAcation}/train_proposal/configs/bmn_football_v2.0.yaml \
-     -o output_dir=$out_dir
-```
-
-#### step2.3 BMN模型转为预测模式
-同step1.3
-```
-# https://github.com/PaddlePaddle/PaddleVideo/tree/release/2.0
-$cd {PaddleVideo}
-python tools/export_model.py -c ${FootballAcation}/train_proposal/configs/bmn_football_v2.0.yaml \
-                               -p ${bmn_train_dir}/checkpoints/models_bmn/bmn_epoch16.pdparams \
-                               -o {FootballAcation}/checkpoints/BMN
-```
-
-#### step2.4  BMN模型预测
-得到动作proposal信息： start_id, end_id, score。预测前需先修改文件中的dataset_dir 以及configs.yaml文件下的模型路径。
-```
-cd extractor && python extract_bmn.py
-# 数据格式
+预测结果数据格式如下：
+```txt
 [
     {
         "video_name": "c9516c903de3416c97dae91a59e968d7",
@@ -318,21 +367,34 @@ cd extractor && python extract_bmn.py
     ...
 ]
 ```
-完成该步骤后，数据存储位置
-```
-   |--  datasets                   # 训练数据集和处理脚本
-        |--  EuroCup2016            # xx数据集
-            |--  feature_bmn
-                 |--  prop.json    # bmn 预测结果
-```
 
-### step3 LSTM训练
+#### step3 LSTM训练
 
-#### step3.1  LSTM训练数据处理
+AttentionLSTM模型使用文档参考[AttentionLSTM](../../docs/zh-CN/model_zoo/localization/bmn.md)，此处我们对原始对AttentionLSTM模型进行了改进，包括：
+
+1. 不同模态特征在LSTM中使用不同的hiddne_size
+2. 加入了一个回归分支用于回归iou
+3. 模型中加入了BN层抑制过拟合
+
+
+##### step3.1  LSTM训练数据处理
 将BMN得到的proposal截断并处理成LSTM训练所需数据集。同理，注意数据集文件修改路径。
 ```
 cd datasets/script && python get_instance_for_lstm.py
-# 数据格式1，label_info
+```
+
+完成该步骤后，数据存储位置
+```
+   |--  datasets                    # 训练数据集和处理脚本
+        |--  EuroCup2016            # 数据集
+            |--  input_for_lstm     # lstm训练的proposal
+                ├── feature         # 特征
+                ├── label_info.json # 标签信息
+                ├── train.txt       # 训练文件列表
+                └── val.txt         # 测试文件列表
+```
+
+- `label_info.json`数据格式如下：
 {
     "fps": 5,
     "results": [
@@ -368,34 +430,45 @@ cd datasets/script && python get_instance_for_lstm.py
         },
         ...
 }
-# 数据格式2，LSTM训练所需要的feature
+
+- LSTM训练所需要的feature数据格式如下:
 {
-    'features': np.array(feature_hit, dtype=np.float32),    # TSN and audio 特征
+    'features': np.array(feature_hit, dtype=np.float32),    # iamge和audio 特征
     'feature_fps': 5,                                       # fps = 5
     'label_info': {'norm_iou': 0.5, 'label': 3, ...},       # 数据格式1中的'proposal_actions'
     'video_name': 'c9516c903de3416c97dae91a59e968d7'        # video_name
 }
-# 数据格式3，LSTM训练所需label.txt
+
+- LSTM训练所需文件列表数据格式如下：
 '{} {}'.format(filename, label)
 ```
 
-#### step3.2  LSTM训练
-```
-python -u scenario_lib/train.py  \
-    --model_name=ActionNet \
-    --config=conf/conf.txt \
-    --save_dir=$save_dir
-    --log_interval=5 \
-    --valid_interval=1
+##### step3.2  LSTM训练
+
+训练启动命令如下:
+
+```bash
+python -B -m paddle.distributed.launch \
+     --gpus="0,1,2,3" \
+     --log_dir=./football/logs_lstm \
+     main.py  \
+     --validate \
+     -c applications/FootballAction/train_proposal/configs/lstm_football.yaml \
+     -o output_dir=./football/lstm
 ```
 
-#### step3.3 LSTM模型转为预测模式
-```
-${FootballAction}/train_lstm
-python inference_model.py --config=conf/conf.yaml --weights=$weight_path/LSTM.pdparams --save_dir=$save_dir
+##### step3.3 导出LSTM推理模型
+
+模型导出命令如下:
+```bash
+python tools/export_model.py -c applications/FootballAction/train_proposal/configs/lstm_football.yaml \
+                              -p ./football/lstm/AttentionLSTM_best.pdparams  \
+                               -o ./football/inference_model
 ```
 
-## 使用训练模型推理
+<a name="模型推理"></a>
+### 5.2 模型推理
+
 运行预测代码
 ```
 cd predict && python predict.py
@@ -403,14 +476,17 @@ cd predict && python predict.py
 产出文件：results.json
 
 
-## 模型评估
+<a name="模型评估"></a>
+### 5.3 模型评估
+
 ```
 # 包括bmn proposal 评估和最终action评估
 cd predict && python eval.py results.json
 ```
 
+<a name="模型优化"></a>
+### 5.4 模型优化
 
-## 模型优化
 - 基础特征模型（图像）替换为PP-TSM，准确率由84%提升到94%
 - 基础特征模型（音频）没变动
 - BMN，请使用paddlevideo最新版
@@ -419,11 +495,15 @@ cd predict && python eval.py results.json
 - 准确率提升，precision和recall均有大幅提升，F1-score从0.57提升到0.82
 
 
-## 模型部署
+<a name="模型部署"></a>
+### 5.4 模型部署
+
 本代码解决方案在动作的检测和召回指标F1-score=82%
 
 
-## 参考论文
+<a name="参考论文"></a>
+### 6. 参考论文
+
 - [TSM: Temporal Shift Module for Efficient Video Understanding](https://arxiv.org/pdf/1811.08383.pdf), Ji Lin, Chuang Gan, Song Han
 - [BMN: Boundary-Matching Network for Temporal Action Proposal Generation](https://arxiv.org/abs/1907.09702), Tianwei Lin, Xiao Liu, Xin Li, Errui Ding, Shilei Wen.
 - [Attention Clusters: Purely Attention Based Local Feature Integration for Video Classification](https://arxiv.org/abs/1711.09550), Xiang Long, Chuang Gan, Gerard de Melo, Jiajun Wu, Xiao Liu, Shilei Wen

@@ -1,0 +1,70 @@
+MODEL: #MODEL field
+    framework: "RecognizerAction"
+    head:
+        name: "ActionAttentionLstmHead"
+        num_classes: 8
+        feature_num: 2
+        feature_dims: [2048, 1024]
+        embedding_size: 512
+
+DATASET: #DATASET field
+    batch_size: 100
+    num_workers: 4
+    shuffle_valid: True
+    train:
+        format: "FeatureDataset"
+        file_path: "FootballAction/datasets/EuroCup2016/input_for_lstm/train.txt" #Mandatory, train data index file path
+    valid:
+        format: "FeatureDataset"
+        file_path: "FootballAction/datasets/EuroCup2016/input_for_lstm/val.txt" #Mandatory, train data index file path
+    test:
+        format: "FeatureDataset"
+        file_path: "FootballAction/datasets/EuroCup2016/input_for_lstm/val.txt" #Mandatory, train data index file path
+
+
+PIPELINE: #PIPELINE field
+    train:
+        decode:
+            name: "ActionFeatureDecoder"
+            max_len: 300
+            num_classes: 8
+    valid:
+        decode:
+            name: "ActionFeatureDecoder"
+            max_len: 300
+            num_classes: 8
+    test:
+        decode:
+            name: "ActionFeatureDecoder"
+            max_len: 300
+            num_classes: 8
+
+OPTIMIZER: #OPTIMIZER field
+    name: 'RMSProp'
+    centered: True
+    learning_rate:
+        name: 'PiecewiseDecay'
+        boundaries: [5, 10, 15]
+        values: [0.00047, 0.000094, 0.0000188]
+    weight_decay:
+        name: 'L2'
+        value: 8e-4
+
+METRIC:
+    name: 'HitOneMetric'
+    num_class: 8
+    top_k: 5
+
+INFERENCE:
+    name: 'AttentionLSTM_Inference_helper'
+    num_classes: 8
+    feature_num: 2
+    feature_dims: [1024, 128]
+    embedding_size: 512
+    lstm_size: 1024
+
+model_name: "AttentionLSTM"
+log_interval: 20 #Optional, the interal of logger, default:10
+epochs: 20 #Mandatory, total epoch
+save_interval: 2
+log_level: "INFO"
