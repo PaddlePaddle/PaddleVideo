@@ -15,7 +15,7 @@
     - [5.3 模型评估](#53-模型评估)
     - [5.4 模型优化](#54-模型优化)
     - [5.5 模型部署](#55-模型部署)
-- [6. 参考论文](#7-参考论文)
+- [6. 参考论文](#6-参考论文)
 
 <a name="模型简介"></a>
 ## 1. 模型简介
@@ -25,7 +25,7 @@ FootballAction是基于PaddleVideo实现的足球动作检测算法，用于从�
 背景、进球、角球、任意球、黄牌、红牌、换人、界外球
 ```
 
-我们提出的方案结合PP-TSM、BMN和AttentionLSTM三个模型，图像和音频两种模态进行动作检测，算法整体流程如上图所示，共分为以下三步：
+我们提出的方案结合PP-TSM、BMN和AttentionLSTM三个模型，图像和音频两种模态进行动作检测，算法整体流程共分为以下三步：
  - 特征抽取
     - 图像特性：PP-TSM
     - 音频特征：VGGish
@@ -164,7 +164,7 @@ cd ${FootballAction_root}/predict && python predict.py
 - image 采样频率fps=5，如果有些动作时间较短，可以适当提高采样频率
 - BMN windows=200，即40s，所以测试自己的数据时，视频时长需大于40s
 
-请先参考[使用说明](../../docs/zh-CN/contribute/config.md)了解PaddleVideo模型库的使用。
+请先参考[使用说明](../../docs/zh-CN/contribute/usage.md)了解PaddleVideo模型库的使用。
 
 #### step1 PP-TSM训练
 
@@ -395,6 +395,7 @@ cd datasets/script && python get_instance_for_lstm.py
 ```
 
 - `label_info.json`数据格式如下：
+```
 {
     "fps": 5,
     "results": [
@@ -430,16 +431,20 @@ cd datasets/script && python get_instance_for_lstm.py
         },
         ...
 }
+```
 
 - LSTM训练所需要的feature数据格式如下:
+```
 {
     'features': np.array(feature_hit, dtype=np.float32),    # iamge和audio 特征
     'feature_fps': 5,                                       # fps = 5
     'label_info': {'norm_iou': 0.5, 'label': 3, ...},       # 数据格式1中的'proposal_actions'
     'video_name': 'c9516c903de3416c97dae91a59e968d7'        # video_name
 }
+```
 
 - LSTM训练所需文件列表数据格式如下：
+```
 '{} {}'.format(filename, label)
 ```
 
@@ -473,7 +478,8 @@ python tools/export_model.py -c applications/FootballAction/train_proposal/confi
 ```
 cd predict && python predict.py
 ```
-产出文件：results.json
+- 默认使用我们提供的于训练文件进行预测，如使用个人训练的模型文件，请对应修改[配置文件](./predict/configs/configs.yaml)中的参数路径
+- 产出文件：results.json
 
 
 <a name="模型评估"></a>
@@ -489,14 +495,11 @@ cd predict && python eval.py results.json
 
 - 基础特征模型（图像）替换为PP-TSM，准确率由84%提升到94%
 - 基础特征模型（音频）没变动
-- BMN，请使用paddlevideo最新版
-- LSTM，暂时提供v1.8训练代码（后续升级为v2.0），也可自行尝试使用paddlevideo-2.0中的attentation lstm
-- 为兼容paddle-v1.8和paddle-v2.0，将模型预测改为inference model，训练代码可以使用v1.8或v2.0，只要export为inference model即可进行预测
 - 准确率提升，precision和recall均有大幅提升，F1-score从0.57提升到0.82
 
 
 <a name="模型部署"></a>
-### 5.4 模型部署
+### 5.5 模型部署
 
 本代码解决方案在动作的检测和召回指标F1-score=82%
 

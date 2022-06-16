@@ -1,7 +1,6 @@
 COMMON:
     fps: 5
     use_gpu: True
-#    label_dic: '/workspace/PaddleVideo/applications/FootballAction/predict/configs/index_label_football_8.json'
     label_dic: './configs/index_label_football_8.json'
     # debug
     PCM_ONLY: False

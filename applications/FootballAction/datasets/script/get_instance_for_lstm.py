@@ -106,7 +106,6 @@ def save_feature(label_info, out_dir):
     fps = label_info['fps']
     out_feature_dir = out_dir + '/feature'
     out_feature_dir = os.path.abspath(out_feature_dir)
-    print(out_feature_dir)
     if not os.path.exists(out_feature_dir):
         os.mkdir(out_feature_dir)
     fid_train = open(out_dir + '/train.txt', 'w')

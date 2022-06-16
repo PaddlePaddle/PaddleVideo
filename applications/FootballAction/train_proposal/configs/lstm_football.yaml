@@ -13,13 +13,13 @@ DATASET: #DATASET field
     shuffle_valid: True
     train:
         format: "FeatureDataset"
-        file_path: "FootballAction/datasets/EuroCup2016/input_for_lstm/train.txt" #Mandatory, train data index file path
+        file_path: "./applications/FootballAction/datasets/EuroCup2016/input_for_lstm/train.txt" #Mandatory, train data index file path
     valid:
         format: "FeatureDataset"
-        file_path: "FootballAction/datasets/EuroCup2016/input_for_lstm/val.txt" #Mandatory, train data index file path
+        file_path: "./applications/FootballAction/datasets/EuroCup2016/input_for_lstm/val.txt" #Mandatory, train data index file path
     test:
         format: "FeatureDataset"
-        file_path: "FootballAction/datasets/EuroCup2016/input_for_lstm/val.txt" #Mandatory, train data index file path
+        file_path: "./applications/FootballAction/datasets/EuroCup2016/input_for_lstm/val.txt" #Mandatory, train data index file path
 
 
 PIPELINE: #PIPELINE field
