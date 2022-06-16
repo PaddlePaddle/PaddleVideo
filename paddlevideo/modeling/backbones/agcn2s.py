@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import paddle as pp
+import paddle
 import paddle.nn as nn
 import numpy as np
 from ..registry import BACKBONES
@@ -26,9 +26,9 @@ def import_class(name):
     return mod
 
 
-class UnitTcn(nn.Layer):
+class UnitTCN(nn.Layer):
     def __init__(self, in_channels, out_channels, kernel_size=9, stride=1):
-        super(UnitTcn, self).__init__()
+        super(UnitTCN, self).__init__()
         pad = int((kernel_size - 1) / 2)
         self.conv = nn.Conv2D(in_channels,
                               out_channels,
@@ -45,18 +45,18 @@ class UnitTcn(nn.Layer):
         return x
 
 
-class UnitGcn(nn.Layer):
+class UnitGCN(nn.Layer):
     def __init__(self,
                  in_channels,
                  out_channels,
                  A,
                  coff_embedding=4,
                  num_subset=3):
-        super(UnitGcn, self).__init__()
+        super(UnitGCN, self).__init__()
         inter_channels = out_channels // coff_embedding
         self.inter_c = inter_channels
-        self.PA = pp.static.create_parameter(shape=A.shape, dtype='float32')
-        self.A = pp.to_tensor(A.astype(np.float32))
+        self.PA = paddle.static.create_parameter(shape=A.shape, dtype='float32')
+        self.A = paddle.to_tensor(A.astype(np.float32))
         self.num_subset = num_subset
 
         self.conv_a = nn.LayerList()
@@ -83,14 +83,14 @@ class UnitGcn(nn.Layer):
 
         y = None
         for i in range(self.num_subset):
-            A1 = pp.transpose(self.conv_a[i](x),
-                              perm=[0, 3, 1,
-                                    2]).reshape([N, V, self.inter_c * T])
+            A1 = paddle.transpose(self.conv_a[i](x),
+                                  perm=[0, 3, 1,
+                                        2]).reshape([N, V, self.inter_c * T])
             A2 = self.conv_b[i](x).reshape([N, self.inter_c * T, V])
-            A1 = self.soft(pp.matmul(A1, A2) / A1.shape[-1])
+            A1 = self.soft(paddle.matmul(A1, A2) / A1.shape[-1])
             A1 = A1 + A[i]
             A2 = x.reshape([N, C * T, V])
-            z = self.conv_d[i](pp.matmul(A2, A1).reshape([N, C, T, V]))
+            z = self.conv_d[i](paddle.matmul(A2, A1).reshape([N, C, T, V]))
             y = z + y if y is not None else z
 
         y = self.bn(y)
@@ -98,11 +98,11 @@ class UnitGcn(nn.Layer):
         return self.relu(y)
 
 
-class TcnGcnUnit(nn.Layer):
+class Block(nn.Layer):
     def __init__(self, in_channels, out_channels, A, stride=1, residual=True):
-        super(TcnGcnUnit, self).__init__()
-        self.gcn1 = UnitGcn(in_channels, out_channels, A)
-        self.tcn1 = UnitTcn(out_channels, out_channels, stride=stride)
+        super(Block, self).__init__()
+        self.gcn1 = UnitGCN(in_channels, out_channels, A)
+        self.tcn1 = UnitTCN(out_channels, out_channels, stride=stride)
         self.relu = nn.ReLU()
         if not residual:
             self.residual = lambda x: 0
@@ -111,7 +111,7 @@ class TcnGcnUnit(nn.Layer):
             self.residual = lambda x: x
 
         else:
-            self.residual = UnitTcn(in_channels,
+            self.residual = UnitTCN(in_channels,
                                     out_channels,
                                     kernel_size=1,
                                     stride=stride)
@@ -121,7 +121,7 @@ class TcnGcnUnit(nn.Layer):
         return self.relu(x)
 
 
-# 这个Graph结构针对NTURGB+D数据集，如果使用自定义数据集，修改num_node以及相应得图邻接结构
+# This Graph structure is for the NTURGB+D dataset. If you use a custom dataset, modify num_node and the corresponding graph adjacency structure.
 class Graph:
     def __init__(self, labeling_mode='spatial'):
         num_node = 25
@@ -194,16 +194,16 @@ class AGCN2s(nn.Layer):
         A = self.graph.A
         self.data_bn = nn.BatchNorm1D(num_person * in_channels * num_point)
 
-        self.l1 = TcnGcnUnit(3, 64, A, residual=False)
-        self.l2 = TcnGcnUnit(64, 64, A)
-        self.l3 = TcnGcnUnit(64, 64, A)
-        self.l4 = TcnGcnUnit(64, 64, A)
-        self.l5 = TcnGcnUnit(64, 128, A, stride=2)
-        self.l6 = TcnGcnUnit(128, 128, A)
-        self.l7 = TcnGcnUnit(128, 128, A)
-        self.l8 = TcnGcnUnit(128, 256, A, stride=2)
-        self.l9 = TcnGcnUnit(256, 256, A)
-        self.l10 = TcnGcnUnit(256, 256, A)
+        self.l1 = Block(3, 64, A, residual=False)
+        self.l2 = Block(64, 64, A)
+        self.l3 = Block(64, 64, A)
+        self.l4 = Block(64, 64, A)
+        self.l5 = Block(64, 128, A, stride=2)
+        self.l6 = Block(128, 128, A)
+        self.l7 = Block(128, 128, A)
+        self.l8 = Block(128, 256, A, stride=2)
+        self.l9 = Block(256, 256, A)
+        self.l10 = Block(256, 256, A)
 
     def forward(self, x):
         N, C, T, V, M = x.shape
