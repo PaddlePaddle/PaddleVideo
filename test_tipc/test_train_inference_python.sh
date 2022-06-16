@@ -337,10 +337,13 @@ else
                 fi
                 set_train_params2=$(func_set_params "${train_param_key2}" "${train_param_value2}")
                 set_use_gpu=$(func_set_params "${train_use_gpu_key}" "${train_use_gpu}")
-                if [ ${#ips} -le 26 ];then
+                if [ ${#ips} -le 15 ];then
+                    # len(ips)<=15, single machine
                     save_log="${LOG_PATH}/${trainer}_gpus_${gpu}_autocast_${autocast}"
                     nodes=1
                 else
+                    # if length of ips > 15, then it is seen as multi-machine
+                    # 15 is the min length of ips info for multi-machine: 0.0.0.0,0.0.0.0
                     IFS=","
                     ips_array=(${ips})
                     IFS="|"
@@ -356,7 +359,7 @@ else
                 set_save_model=$(func_set_params "${save_model_key}" "${save_log}")
                 if [ ${#gpu} -le 2 ];then  # train with cpu or single gpu
                     cmd="${python} ${run_train} ${set_amp_config} ${set_use_gpu}  ${set_save_model} ${set_epoch} ${set_pretrain} ${set_batchsize} ${set_train_params1} ${set_train_params2}  "
-                elif [ ${#ips} -le 26 ];then  # train with multi-gpu
+                elif [ ${#ips} -le 15 ];then  # train with multi-gpu
                     cmd="${python} -B -m paddle.distributed.launch --gpus=\"${gpu}\" ${run_train} ${set_amp_config} ${set_use_gpu} ${set_save_model} ${set_epoch} ${set_pretrain} ${set_batchsize} ${set_train_params1} ${set_train_params2} "
                 else     # train with multi-machine
                     cmd="${python} -B -m paddle.distributed.launch --ips=${ips} --gpus=\"${gpu}\" ${run_train} ${set_amp_config} ${set_use_gpu} ${set_save_model} ${set_pretrain} ${set_epoch} ${set_batchsize} ${set_train_params1} ${set_train_params2} "

@@ -13,7 +13,12 @@
 # limitations under the License.
 
 import numpy as np
-import av
+try:
+    import av
+except ImportError as e:
+    print(
+        f"{e}, [av] package and it's dependencies is required for TimeSformer and other models."
+    )
 import cv2
 import pickle
 import decord as de

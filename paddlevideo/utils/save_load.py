@@ -19,6 +19,8 @@ import paddle
 import paddle.nn.functional as F
 from paddlevideo.utils import get_logger, main_only
 from tqdm import tqdm
+import numpy as np
+from scipy import ndimage
 
 
 def pretrain_swin_param_trans(model, state_dicts):
@@ -105,17 +107,18 @@ def pretrain_vit_param_trans(model, state_dicts, num_patches, num_seg,
         del state_dicts['head' + '.bias']
 
     total_len = len(model.state_dict())
-    if num_patches + 1 != state_dicts['pos_embed'].shape[1]:
+    if num_patches + 1 != state_dicts['pos_embed'].shape[1]:  # when
         pos_embed = state_dicts['pos_embed']
-        cls_pos_embed = pos_embed[0, 0, :].unsqueeze(0).unsqueeze(1)
-        other_pos_embed = pos_embed[0,
-                                    1:, :].unsqueeze(0).unsqueeze(1).transpose(
-                                        (0, 1, 3, 2))
-        new_pos_embed = F.interpolate(other_pos_embed,
-                                      size=(other_pos_embed.shape[-2],
-                                            num_patches),
-                                      mode='nearest')
-        new_pos_embed = new_pos_embed.squeeze(0).transpose((0, 2, 1))
+        cls_pos_embed = paddle.to_tensor(
+            pos_embed[0, 0, :]).unsqueeze(0).unsqueeze(1)
+        other_pos_embed = paddle.to_tensor(pos_embed[0, 1:, :])
+        gs_new = int(np.sqrt(num_patches))
+        gs_old = int(np.sqrt(other_pos_embed.shape[0]))
+        zoom = (gs_new / gs_old, gs_new / gs_old, 1)
+        other_pos_embed = paddle.reshape(other_pos_embed, [gs_old, gs_old, -1])
+        other_pos_embed = ndimage.zoom(other_pos_embed, zoom, order=1)
+        other_pos_embed = paddle.to_tensor(other_pos_embed)
+        new_pos_embed = paddle.reshape(other_pos_embed, [1, num_patches, -1])
         new_pos_embed = paddle.concat((cls_pos_embed, new_pos_embed), axis=1)
         state_dicts['pos_embed'] = new_pos_embed
         time.sleep(0.01)
@@ -151,6 +154,9 @@ def pretrain_vit_param_trans(model, state_dicts, num_patches, num_seg,
                     else:
                         new_state_dicts[new_key] = state_dicts[new_key]
                 time.sleep(0.01)
+        elif attention_type == 'space_only':  # tokenshift raw vit
+            new_state_dicts = state_dicts.copy()
+
     ret_str = "loading {:<20d} weights completed.".format(
         len(model.state_dict()))
     desc.set_description(ret_str)
@@ -257,38 +263,6 @@ def mkdir(dir):
             os.makedirs(dir)
         except:
             pass
-
-
-"""
-def save(state_dicts, file_name):
-    def convert(state_dict):
-        model_dict = {}
-
-        for k, v in state_dict.items():
-            if isinstance(
-                    v,
-                (paddle.fluid.framework.Variable, paddle.fluid.core.VarBase)):
-                model_dict[k] = v.numpy()
-            else:
-                model_dict[k] = v
-
-        return model_dict
-
-    final_dict = {}
-    for k, v in state_dicts.items():
-        if isinstance(
-                v,
-            (paddle.fluid.framework.Variable, paddle.fluid.core.VarBase)):
-            final_dict = convert(state_dicts)
-            break
-        elif isinstance(v, dict):
-            final_dict[k] = convert(v)
-        else:
-            final_dict[k] = v
-
-    with open(file_name, 'wb') as f:
-        pickle.dump(final_dict, f, protocol=2)
-"""
 
 
 @main_only
