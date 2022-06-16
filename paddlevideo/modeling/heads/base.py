@@ -41,7 +41,6 @@ class BaseHead(nn.Layer):
         ls_eps (float): label smoothing epsilon. Default: 0. .
 
     """
-
     def __init__(
         self,
         num_classes=None,
@@ -135,7 +134,7 @@ class BaseHead(nn.Layer):
         Returns:
             paddle.Tensor: [1,]
         """
-        if paddle.fluid.core.is_compiled_with_npu():
+        if paddle.device.is_compiled_with_npu():
             """
             Designed for the lack of temporary operators of NPU,
             main idea is to split smooth loss into uniform distribution loss
