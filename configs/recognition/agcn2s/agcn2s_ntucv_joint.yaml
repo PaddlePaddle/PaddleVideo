@@ -11,7 +11,8 @@ MODEL: #MODEL field
   head:
     name: "AGCN2sHead" #Mandatory, indicate the type of head, associate to the 'paddlevideo/modeling/heads'
     num_classes: 60  #Optional, the number of classes to be classified.
-    in_channels: 64
+    in_channels: 64  #output the number of classes.
+    M: 2  #number of people.
 
 DATASET: #DATASET field
   batch_size: 1 #Mandatory, bacth size

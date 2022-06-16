@@ -28,31 +28,24 @@ class AGCN2sHead(BaseHead):
     Args:
         in_channels: int, input feature channels. Default: 64.
         num_classes: int, output the number of classes.
+        M: int, number of people.
         drop_out: float, dropout ratio of layer. Default: 0.
     """
-    def __init__(self, in_channels=64, num_classes=10, **kwargs):
+    def __init__(self, in_channels=64, num_classes=10, M=2, **kwargs):
         super().__init__(num_classes, in_channels, **kwargs)
         self.in_channels = in_channels
-
+        self.M = M
         self.fc = nn.Linear(self.in_channels * 4, self.num_classes)
 
-    def init_weights(self):
-        """Initiate the parameters.
-        """
-        for layer in self.sublayers():
-            if isinstance(layer, nn.Conv2D):
-                weight_init_(layer.weight,
-                             'Normal',
-                             mean=0.0,
-                             std=math.sqrt(2. / self.num_classes))
-
-    def forward(self, output_patch):
+    def forward(self, x):
         """Define how the head is going to run.
         """
+        assert x.shape[
+            0] % self.M == 0, f'The first dimension of the output must be an integer multiple of the number of people M, but recieved shape[0]={x.shape[0]}, M={self.M}'
         # N*M,C,T,V
-        x, N, M = output_patch
+        N = x.shape[0] // self.M
         c_new = x.shape[1]
-        x = x.reshape([N, M, c_new, -1])
+        x = x.reshape([N, self.M, c_new, -1])
         x = x.mean(3).mean(1)
 
         return self.fc(x)

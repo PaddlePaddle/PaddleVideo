@@ -225,4 +225,4 @@ class AGCN2s(nn.Layer):
         x = self.l9(x)
         x = self.l10(x)
 
-        return x, N, M
+        return x
