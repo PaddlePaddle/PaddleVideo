@@ -2,7 +2,7 @@ MODEL:                                              #MODEL field
   framework: "BMNLocalizer"
   backbone:
     name: "BMN"
-    feat_dim: 2688
+    feat_dim: 2048 #train bmn with image feature. If add audio feature, set to 2688
     tscale: 200
     dscale: 200
     prop_boundary_ratio: 0.5
@@ -19,23 +19,23 @@ DATASET:                                            #DATASET field
   num_workers: 8
   train:
     format: "BMNDataset"
-    file_path: "/home/work/PaddleVideo/applications/FootballAction/datasets/train_list/football_bmn_label.json"
+    file_path: "./applications/FootballAction/datasets/EuroCup2016/input_for_bmn/label.json"
     subset: "train"
   valid:
     format: "BMNDataset"
-    file_path: "/home/work/PaddleVideo/applications/FootballAction/datasets/train_list/football_bmn_label.json"
+    file_path: "./applications/FootballAction/datasets/EuroCup2016/input_for_bmn/label.json"
     subset: "validation"
   test:
     format: "BMNDataset"
     test_mode: True
-    file_path: "/home/work/PaddleVideo/applications/FootballAction/datasets/train_list/football_bmn_label.json"
+    file_path: "./applications/FootballAction/datasets/EuroCup2016/input_for_bmn/label.json"
     subset: "validation"
 
 PIPELINE:                                           #PIPELINE field
   train:                                            #Mandotary, indicate the pipeline to deal with the training data
     load_feat:
       name: "LoadFeat"
-      feat_path: "/home/work/PaddleVideo/applications/FootballAction/datasets"
+      feat_path: "./applications/FootballAction/datasets/EuroCup2016/input_for_bmn/feature"
     transform:                                      #Mandotary, image transfrom operator
       - GetMatchMap:
           tscale: 200
@@ -46,7 +46,7 @@ PIPELINE:                                           #PIPELINE field
   valid:                                            #Mandotary, indicate the pipeline to deal with the training data
     load_feat:
       name: "LoadFeat"
-      feat_path: "/home/work/PaddleVideo/applications/FootballAction/datasets"
+      feat_path: "./applications/FootballAction/datasets/EuroCup2016/input_for_bmn/feature"
     transform:                                      #Mandotary, image transfrom operator
       - GetMatchMap:
           tscale: 200
@@ -57,7 +57,7 @@ PIPELINE:                                           #PIPELINE field
   test:                                             #Mandatory, indicate the pipeline to deal with the validing data
     load_feat:
       name: "LoadFeat"
-      feat_path: "/home/work/PaddleVideo/applications/FootballAction/datasets"
+      feat_path: "./applications/FootballAction/datasets/EuroCup2016/input_for_bmn/feature"
     transform:                                      #Mandotary, image transfrom operator
       - GetMatchMap:
           tscale: 200
@@ -81,7 +81,7 @@ INFERENCE:
     feat_dim: 2688
     dscale: 100
     tscale: 100
-    result_path: "/workspace/PaddleVideo/applications/FootballAction/BMN_INFERENCE_results"
+    result_path: "./football/BMN_INFERENCE_results"
 
 model_name: BMN
 epochs: 20                                          #Mandatory, total epoch
