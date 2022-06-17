@@ -43,7 +43,7 @@ PP-TSM是一个基于视频片段进行预测的模型。在PaddleVideo中，训
 打架（暴力行为）视频3956个，非打架（非暴力行为）视频3501个，共7457个视频，每个视频几秒钟。
 
 
-<a name="2. 视频抽帧"></a>
+<a name="视频抽帧"></a>
 #### 2. 视频抽帧
 
 为了加快训练速度，将视频进行抽帧。
@@ -54,7 +54,7 @@ python data/ucf101/extract_rawframes.py dataset/ rawframes/ --level 2 --ext mp4
 ```
 其中，视频存放在`dataset`目录下，打架（暴力）视频存放在`dataset/fight`中；非打架（非暴力）视频存放在`dataset/nofight`中。`rawframes`目录存放抽取的视频帧。
 
-<a name="3. 训练集和验证集划分"></a>
+<a name="训练集和验证集划分"></a>
 #### 3. 训练集和验证集划分
 
 本项目验证集1500条，来自Surveillance Camera Fight Dataset、A Dataset for Automatic Violence Detection in Videos、UBI Abnormal Event Detection Dataset三个数据集。
