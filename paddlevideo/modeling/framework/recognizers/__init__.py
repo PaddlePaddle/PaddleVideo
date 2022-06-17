@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 
 from .base import BaseRecognizer
-from .recognizer1d import Recognizer1D
+from .recognizer1d import Recognizer1D, RecognizerAction
 from .recognizer2d import Recognizer2D
 from .recognizer3d import Recognizer3D
 from .recognizer_transformer import RecognizerTransformer
@@ -24,5 +24,6 @@ from .recognizer_movinet_frame import MoViNetRecognizerFrame
 __all__ = [
     'BaseRecognizer', 'Recognizer1D', 'Recognizer2D', 'Recognizer3D',
     'RecognizerTransformer', 'RecognizerGCN', 'RecognizerMRI',
-    'Recognizer3DMRI', 'RecognizerTransformer_MRI', 'MoViNetRecognizerFrame'
+    'Recognizer3DMRI', 'RecognizerTransformer_MRI', 'MoViNetRecognizerFrame',
+    'RecognizerAction'
 ]
