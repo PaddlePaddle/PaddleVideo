@@ -35,7 +35,15 @@ class AGCN2sHead(BaseHead):
         super().__init__(num_classes, in_channels, **kwargs)
         self.in_channels = in_channels
         self.M = M
-        self.fc = nn.Linear(self.in_channels * 4, self.num_classes)
+        weight_attr = paddle.framework.ParamAttr(
+            name="linear_weight",
+            initializer=paddle.nn.initializer.Normal(mean=0.0,
+                                                     std=math.sqrt(
+                                                         2. / num_classes)))
+
+        self.fc = nn.Linear(self.in_channels * 4,
+                            self.num_classes,
+                            weight_attr=weight_attr)
 
     def forward(self, x):
         """Define how the head is going to run.
