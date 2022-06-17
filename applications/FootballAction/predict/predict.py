@@ -1,4 +1,3 @@
-
 import os
 import sys
 import json
@@ -7,8 +6,9 @@ sys.path.append('action_detect')
 from action import ActionDetection
 
 if __name__ == '__main__':
-    dataset_dir = "/workspace/PaddleVideo/applications/FootballAction/datasets/EuroCup2016"
-    
+    #dataset_dir = "/workspace/PaddleVideo/applications/FootballAction/datasets/EuroCup2016"
+    dataset_dir = "../datasets/EuroCup2016"
+
     model_predict = ActionDetection(cfg_file="./configs/configs.yaml")
     model_predict.load_model()
 
@@ -26,10 +26,12 @@ if __name__ == '__main__':
         pcm_path = video_name.replace(".mp4", ".pcm").replace("mp4", "pcm")
 
         bmn_results, action_results = model_predict.infer(imgs_path, pcm_path)
-        results.append({'video_name': line,
-                        'bmn_results': bmn_results, 
-                        'action_results': action_results})
+        results.append({
+            'video_name': line,
+            'bmn_results': bmn_results,
+            'action_results': action_results
+        })
 
     with open('results.json', 'w', encoding='utf-8') as f:
-       data = json.dumps(results, indent=4, ensure_ascii=False)
-       f.write(data) 
+        data = json.dumps(results, indent=4, ensure_ascii=False)
+        f.write(data)

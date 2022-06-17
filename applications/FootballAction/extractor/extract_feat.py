@@ -22,6 +22,7 @@ from utils.config_utils import parse_config, print_configs
 import utils.config_utils as config_utils
 
 import logger
+
 logger = logger.Logger()
 
 
@@ -64,23 +65,27 @@ def video_classify(video_name):
     np_pcm_features = np.array(pcm_features, dtype=np.float32)
     t1 = time.time()
 
-    logger.info('{} {} {}'.format(np_image_features.shape, 
+    logger.info('{} {} {}'.format(np_image_features.shape,
                                   np_audio_features.shape,
                                   np_pcm_features.shape))
-    logger.info("step1: feature extract time: {} min".format((t1 - t0) * 1.0 / 60))
-    video_features = {'image_feature': np_image_features,
-                      'audio_feature': np_audio_features,
-                      'pcm_feature': np_pcm_features}
-    
+    logger.info("step1: feature extract time: {} min".format(
+        (t1 - t0) * 1.0 / 60))
+    video_features = {
+        'image_feature': np_image_features,
+        'audio_feature': np_audio_features,
+        'pcm_feature': np_pcm_features
+    }
+
     # save feature
     feature_path = video_name.replace(".mp4", ".pkl").replace("mp4", "features")
-    feat_pkl_str = pickle.dumps(video_features, protocol=pickle.HIGHEST_PROTOCOL)
+    feat_pkl_str = pickle.dumps(video_features,
+                                protocol=pickle.HIGHEST_PROTOCOL)
     with open(feature_path, 'wb') as fout:
         fout.write(feat_pkl_str)
 
 
 if __name__ == '__main__':
-    dataset_dir = "/home/work/PaddleVideo/applications/FootballAction/datasets/EuroCup2016"
+    dataset_dir = "../datasets/EuroCup2016"
     if not os.path.exists(dataset_dir + '/features'):
         os.mkdir(dataset_dir + '/features')
 

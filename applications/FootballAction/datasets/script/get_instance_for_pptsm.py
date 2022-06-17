@@ -88,8 +88,10 @@ if __name__ == "__main__":
         gen_instance_pkl(label_data, save_folder)
 
     # gen train val list
-    data_dir = '/home/work/PaddleVideo/applications/FootballAction/datasets/EuroCup2016/input_for_pptsm/'
-    os.system('find ' + data_dir + 'train -name "*.pkl" > ' + data_dir +
-              'train.list')
-    os.system('find ' + data_dir + 'val -name "*.pkl" > ' + data_dir +
-              'val.list')
+    #data_dir = '../EuroCup2016/input_for_pptsm/'
+    data_dir = os.path.abspath(os.path.join(dataset, 'input_for_pptsm'))
+
+    os.system('find ' + data_dir + '/train -name "*.pkl" > ' + data_dir +
+              '/train.list')
+    os.system('find ' + data_dir + '/val -name "*.pkl" > ' + data_dir +
+              '/val.list')
