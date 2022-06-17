@@ -3,9 +3,10 @@
 ## 内容
 - [打架识别模型训练](#打架识别模型训练)
     - [准备训练数据](#准备训练数据)
-        - 1. 数据集下载
-        - 2. 视频抽帧
-        - 3. 训练集和验证集划分
+        - [1. 数据集下载](#数据集下载)
+        - [2. 视频抽帧](#视频抽帧)
+        - [3. 训练集和验证集划分](#训练集和验证集划分)
+        - [4. 视频裁剪](#视频裁剪)
     - [训练与评估](#训练与评估)
 - [模型推理](#模型推理)
 
@@ -140,6 +141,45 @@ fight_splits(video_dict, train_percent)
 ```
 
 最终生成fight_train_list.txt和fight_val_list.txt两个文件。打架的标签为1，非打架的标签为0。
+
+<a name="视频裁剪"></a>
+#### 4. 视频裁剪
+对于未裁剪的视频，需要先进行裁剪才能用于模型训练，这个给出视频裁剪的函数`cut_video`，输入为视频路径，裁剪的起始帧和结束帧以及裁剪后的视频保存路径。
+
+```python
+
+import cv2
+
+def cut_video(video_path, frameToStart, frametoStop, saved_video_path):
+    cap = cv2.VideoCapture(video_path)
+    FPS = cap.get(cv2.CAP_PROP_FPS)
+    #print("FPS:",FPS)
+
+    TOTAL_FRAME = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))  # 获取视频总帧数
+    #print("TOTAL_FRAME:",TOTAL_FRAME)
+    size = (cap.get(cv2.CAP_PROP_FRAME_WIDTH), cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    #print("size:",size)
+    videoWriter =cv2.VideoWriter(saved_video_path,apiPreference = 0,fourcc = cv2.VideoWriter_fourcc(*'mp4v'),fps=FPS,
+            frameSize=(int(size[0]),int(size[1])))
+
+    COUNT = 0
+    while True:
+            success, frame = cap.read()
+            if success:
+                COUNT += 1
+                if COUNT <= frametoStop and COUNT > frameToStart:  # 选取起始帧
+                    videoWriter.write(frame)
+            else:
+                print("cap.read failed!")
+                break
+            if COUNT > frametoStop:
+                break
+
+    cap.release()
+    videoWriter.release()
+
+    print(saved_video_path)
+```
 
 <a name="训练与评估"></a>
 ### 训练与评估
