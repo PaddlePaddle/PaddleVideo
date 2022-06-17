@@ -30,7 +30,10 @@ def flatten(l):
 
 
 def calculate_hit_at_one(predictions, actuals):
-    """Performs a local (numpy) calculation of the hit at one.
+    """
+    Hit@k: indicates the fraction of test samples that contain at least
+    one of the ground truth labels in the top k predictions,
+    i.e topk.
 
     Args:
         predictions: Matrix containing the outputs of the model.
@@ -47,7 +50,10 @@ def calculate_hit_at_one(predictions, actuals):
 
 
 def calculate_precision_at_equal_recall_rate(predictions, actuals):
-    """Performs a local (numpy) calculation of the PERR.
+    """
+    PERR: measures the video-level annotation precision when we retrieve the same number
+     of entities per video as there are in the ground-truth.
+    More details please refer to:  https://arxiv.org/abs/1609.08675
 
     Args:
         predictions: Matrix containing the outputs of the model.
@@ -75,7 +81,8 @@ def calculate_precision_at_equal_recall_rate(predictions, actuals):
 
 
 def calculate_gap(predictions, actuals, top_k=20):
-    """Performs a local (numpy) calculation of the global average precision.
+    """
+    GAP: the global average precision.
 
     Only the top_k predictions are taken for each of the videos.
 

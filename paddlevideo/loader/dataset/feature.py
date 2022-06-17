@@ -40,7 +40,7 @@ class FeatureDataset(BaseDataset):
         info = []
         with open(self.file_path, 'r') as fin:
             for line in fin:
-                filename = line.strip()
+                filename = line.strip().split()[0]
                 if self.data_prefix is not None:
                     filename = osp.join(self.data_prefix, filename)
                 if self.suffix is not None:
@@ -54,15 +54,27 @@ class FeatureDataset(BaseDataset):
         results = copy.deepcopy(self.info[idx])
         results = self.pipeline(results)
 
-        return results['rgb_data'], results['rgb_len'], results[
-            'rgb_mask'], results['audio_data'], results['audio_len'], results[
-                'audio_mask'], results['labels']
+        if 'iou_norm' in results:
+            return results['rgb_data'], results['rgb_len'], results[
+                'rgb_mask'], results['audio_data'], results[
+                    'audio_len'], results['audio_mask'], results[
+                        'labels'], results['iou_norm']
+        else:
+            return results['rgb_data'], results['rgb_len'], results[
+                'rgb_mask'], results['audio_data'], results[
+                    'audio_len'], results['audio_mask'], results['labels']
 
     def prepare_test(self, idx):
         """TEST. Prepare the data for testing given the index."""
         results = copy.deepcopy(self.info[idx])
         results = self.pipeline(results)
 
-        return results['rgb_data'], results['rgb_len'], results[
-            'rgb_mask'], results['audio_data'], results['audio_len'], results[
-                'audio_mask'], results['labels']
+        if 'iou_norm' in results:
+            return results['rgb_data'], results['rgb_len'], results[
+                'rgb_mask'], results['audio_data'], results[
+                    'audio_len'], results['audio_mask'], results[
+                        'labels'], results['iou_norm']
+        else:
+            return results['rgb_data'], results['rgb_len'], results[
+                'rgb_mask'], results['audio_data'], results[
+                    'audio_len'], results['audio_mask'], results['labels']
