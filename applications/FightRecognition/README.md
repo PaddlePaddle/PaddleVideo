@@ -1,13 +1,25 @@
 # 打架识别模型
 
+## 内容
+- [打架识别模型训练](#打架识别模型训练)
+    - [准备训练数据](#准备训练数据)
+        - [1. 数据集下载](#1. 数据集下载)
+        - [2. 视频抽帧](#2. 视频抽帧)
+        - [3. 训练集和验证集划分](#3. 训练集和验证集划分)
+    - [训练与评估](#训练与评估)
+    - [模型推理](#模型推理)
+
 实时行人分析工具[PP-Human](https://github.com/PaddlePaddle/PaddleDetection/tree/release/2.4/deploy/pphuman)中集成了视频分类的打架识别模块。本文档介绍如何基于[PaddleVideo](https://github.com/PaddlePaddle/PaddleVideo/)，完成打架识别模型的训练流程。
 
+<a name="打架识别模型训练"></a>
 ## 打架识别模型训练
 目前打架识别模型使用的是[PP-TSM](https://github.com/PaddlePaddle/PaddleVideo/blob/63c88a435e98c6fcaf353429d2df6cc24b8113ba/docs/zh-CN/model_zoo/recognition/pp-tsm.md)，并在PP-TSM视频分类模型训练流程的基础上修改适配，完成模型训练。
 
+<a name="准备训练数据"></a>
 ### 准备训练数据
 PP-TSM是一个基于视频片段进行预测的模型。在PaddleVideo中，训练数据为`.mp4`、`.avi`等格式视频或者是抽帧后的视频帧序列，标签则可以是`.txt`格式存储的文件。
 
+<a name="1. 数据集下载"></a>
 #### 1. 数据集下载
 
 本项目基于6个公开的打架、暴力行为相关数据集合并后的数据进行模型训练。公开数据集具体信息如下：
@@ -24,7 +36,7 @@ PP-TSM是一个基于视频片段进行预测的模型。在PaddleVideo中，训
 打架（暴力行为）视频3956个，非打架（非暴力行为）视频3501个，共7457个视频，每个视频几秒钟。
 
 
-
+<a name="2. 视频抽帧"></a>
 #### 2. 视频抽帧
 
 为了加快训练速度，将视频进行抽帧。
@@ -34,6 +46,7 @@ python data/ucf101/extract_rawframes.py dataset/ rawframes/ --level 2 --ext mp4
 ```
 其中，视频存放在`dataset`目录下，打架（暴力）视频存放在`dataset/fight`中；非打架（非暴力）视频存放在`dataset/nofight`中。`rawframes`目录存放抽取的视频帧。
 
+<a name="3. 训练集和验证集划分"></a>
 #### 3. 训练集和验证集划分
 
 本项目验证集1500条，来自Surveillance Camera Fight Dataset、A Dataset for Automatic Violence Detection in Videos、UBI Abnormal Event Detection Dataset三个数据集。
@@ -121,6 +134,7 @@ fight_splits(video_dict, train_percent)
 
 最终生成fight_train_list.txt和fight_val_list.txt两个文件。打架的标签为1，非打架的标签为0。
 
+<a name="训练与评估"></a>
 ### 训练与评估
 下载预训练模型：
 ```bash
@@ -151,6 +165,7 @@ python main.py --test -c pptsm_fight_frames_dense.yaml \
 
 其中`ppTSM_fight_best.pdparams`为训练好的模型。
 
+<a name="模型推理"></a>
 ### 模型推理
 
 导出inference模型：
