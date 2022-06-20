@@ -158,6 +158,15 @@ def get_input_spec(cfg, model_name):
             ],
                       dtype='float32'),
         ]]
+    # 由于在模型运行过程中涉及到第一维乘human个数(N*M), 所以这里用1作为shape
+    elif model_name in ['AGCN2s']:
+        input_spec = [[
+            InputSpec(shape=[
+                1, cfg.num_channels, cfg.window_size, cfg.vertex_nums,
+                cfg.person_nums
+            ],
+                      dtype='float32'),
+        ]]
     elif model_name in ['TransNetV2']:
         input_spec = [[
             InputSpec(shape=[

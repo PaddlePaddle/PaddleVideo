@@ -1,0 +1,94 @@
+MODEL: #MODEL field
+  framework: "RecognizerGCN" #Mandatory, indicate the type of network, associate to the 'paddlevideo/modeling/framework/' .
+  backbone: #Mandatory, indicate the type of backbone, associate to the 'paddlevideo/modeling/backbones/' .
+    name: "AGCN2s" #Mandatory, The name of backbone.
+    num_point: 25
+    num_person: 2
+    graph: "ntu_rgb_d"
+    graph_args:
+      labeling_mode: "spatial"
+    in_channels: 3
+  head:
+    name: "AGCN2sHead" #Mandatory, indicate the type of head, associate to the 'paddlevideo/modeling/heads'
+    num_classes: 60  #Optional, the number of classes to be classified.
+    in_channels: 64  #output the number of classes.
+    M: 2  #number of people.
+
+DATASET: #DATASET field
+  batch_size: 1 #Mandatory, bacth size
+  num_workers: 0 #Mandatory, the number of subprocess on each GPU.
+  test_batch_size: 1
+  test_num_workers: 0
+  train:
+    format: "SkeletonDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
+    file_path: "./data/ntu-rgb-d/xview/train_data.npy" #Mandatory, train data index file path
+    label_path: "./data/ntu-rgb-d/xview/train_label.pkl"
+  valid:
+    format: "SkeletonDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
+    file_path: "./data/ntu-rgb-d/xview/val_data.npy" #Mandatory, valid data index file path
+    label_path: "./data/ntu-rgb-d/xview/val_label.pkl"
+    test_mode: True
+  test:
+    format: "SkeletonDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
+    file_path: "./data/ntu-rgb-d/xview/val_data.npy" #Mandatory, valid data index file path
+    label_path: "./data/ntu-rgb-d/xview/val_label.pkl"
+    test_mode: True
+
+PIPELINE: #PIPELINE field
+  train: #Mandotary, indicate the pipeline to deal with the training data, associate to the 'paddlevideo/loader/pipelines/'
+    sample:
+      - Iden:
+    transform: #Mandotary, image transfrom operator
+      - SketeonModalityTransform:
+          joint: True
+          bone: False
+          motion: False
+          graph: 'ntu_rgb_d'
+  valid: #Mandotary, indicate the pipeline to deal with the training data, associate to the 'paddlevideo/loader/pipelines/'
+    sample:
+      - Iden:
+    transform: #Mandotary, image transfrom operator
+      - SketeonModalityTransform:
+          joint: True
+          bone: False
+          motion: False
+          graph: 'ntu_rgb_d'
+  test: #Mandotary, indicate the pipeline to deal with the training data, associate to the 'paddlevideo/loader/pipelines/'
+    sample:
+      - Iden:
+    transform: #Mandotary, image transfrom operator
+      - SketeonModalityTransform:
+          joint: True
+          bone: False
+          motion: False
+          graph: 'ntu_rgb_d'
+
+OPTIMIZER: #OPTIMIZER field
+  name: 'Momentum'
+  momentum: 0.9
+  learning_rate:
+    name: 'CustomWarmupAdjustDecay'
+    step_base_lr: 0.1
+    warmup_epochs: 5
+    lr_decay_rate: 0.1
+    boundaries: [ 30, 40 ]
+  weight_decay:
+    name: 'L2'
+    value: 1e-4
+  use_nesterov: True
+
+
+METRIC:
+  name: 'SkeletonMetric'
+
+INFERENCE:
+  name: 'AGCN2s_Inference_helper'
+  num_channels: 3
+  vertex_nums: 25
+  person_nums: 2
+  window_size: 300
+
+model_name: "AGCN2s_cv_joint"
+log_interval: 10 #Optional, the interal of logger, default:10
+epochs: 50 #Mandatory, total epoch
+save_interval: 10

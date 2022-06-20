@@ -814,6 +814,34 @@ class CTRGCN_Inference_helper(Base_Inference_helper):
 
 
 @INFERENCE.register()
+class AGCN2s_Inference_helper(Base_Inference_helper):
+    def __init__(self,
+                 window_size=300,
+                 num_channels=3,
+                 vertex_nums=25,
+                 person_nums=2,
+                 top_k=1):
+        self.window_size = window_size
+        self.num_channels = num_channels
+        self.vertex_nums = vertex_nums
+        self.person_nums = person_nums
+        self.top_k = top_k
+
+    def preprocess(self, input_file):
+        """
+        input_file: str, file path
+        return: list
+        """
+        assert os.path.isfile(input_file) is not None, "{0} not exists".format(
+            input_file)
+        data = np.load(input_file)
+        results = {'data': data}
+
+        res = np.expand_dims(results['data'], axis=0).copy()
+        return [res]
+
+
+@INFERENCE.register()
 class MSTCN_Inference_helper(Base_Inference_helper):
     def __init__(self, num_channels, actions_map_file_path, feature_path=None):
         self.num_channels = num_channels
