@@ -35,7 +35,7 @@ class AGCN2sHead(BaseHead):
         super().__init__(num_classes, in_channels, **kwargs)
         self.in_channels = in_channels
         self.M = M
-        weight_attr = paddle.framework.ParamAttr(
+        weight_attr = paddle.ParamAttr(
             name="linear_weight",
             initializer=paddle.nn.initializer.Normal(mean=0.0,
                                                      std=math.sqrt(
