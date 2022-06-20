@@ -4,7 +4,8 @@
 
 ## 近期更新
 
-- 新增骨骼点行为识别模型[CTR-GCN](./docs/zh-CN/model_zoo/recognition/ctrgcn.md).
+- 新增基于transformer的行为识别模型[TokenShift](https://github.com/PaddlePaddle/PaddleVideo/blob/develop/docs/zh-CN/model_zoo/recognition/tokenshift_transformer.md).
+- 新增基于骨骼点的行为识别模型[2s-ACGN](https://github.com/PaddlePaddle/PaddleVideo/blob/develop/docs/zh-CN/model_zoo/recognition/agcn2s.md), [CTR-GCN](./docs/zh-CN/model_zoo/recognition/ctrgcn.md).
 - 新增轻量化行为识别模型[MoViNet](./docs/zh-CN/model_zoo/recognition/movinet.md).
 - 新增视频时序分割模型[MS-TCN](./docs/zh-CN/model_zoo/segmentation/mstcn.md)、[ASRF](./docs/zh-CN/model_zoo/segmentation/asrf.md).
 
