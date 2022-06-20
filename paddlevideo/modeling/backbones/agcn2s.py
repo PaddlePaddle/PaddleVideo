@@ -55,7 +55,8 @@ class UnitGCN(nn.Layer):
         super(UnitGCN, self).__init__()
         inter_channels = out_channels // coff_embedding
         self.inter_c = inter_channels
-        self.PA = paddle.static.create_parameter(shape=A.shape, dtype='float32')
+        PA = self.create_parameter(shape=A.shape, dtype='float32')
+        self.PA = PA
         self.A = paddle.to_tensor(A.astype(np.float32))
         self.num_subset = num_subset
 
