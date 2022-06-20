@@ -1,0 +1,69 @@
+# Setting
+gpus: [0, ]
+seed: 1
+debug: False
+pretrained_path:
+work_dir: ./workdir
+no_progress_bar: False
+# Visualization
+# visualization_class: 0
+# visualization_sample: 0
+# visualization_frames: []
+
+# Data Loader
+# ntu-xsub, ntu-xview, ntu-xsub120, ntu-xset120
+dataset: ntu-xsub
+dataset_args:
+  ntu:
+    train_batch_size: 16
+    eval_batch_size: 16
+    num_frame: 288
+    inputs: JVB
+    transform: False
+    root_folder: ./data/ntu/tiny_dataset
+    ntu60_path: ./data/nturgb+d_skeletons60
+    ntu120_path: ./data/nturgb+d_skeletons120
+
+# Model
+model_type: EfficientGCN-B0
+model_args:
+  stem_channel: 64
+  block_args: [[48,1,0.5],[24,1,0.5],[64,2,1],[128,2,1]]
+  fusion_stage: 2
+  act_type: swish
+  att_type: stja
+  layer_type: SG
+  drop_prob: 0.25
+  kernel_size: [5,2]
+  scale_args: [1.2,1.35]
+  expand_ratio: 0
+  reduct_ratio: 2
+  bias: True
+  edge: True
+
+# Optimizer
+# SGD, Adam
+optimizer: Momentum
+optimizer_args:
+  Momentum:
+    learning_rate: 0.1
+    momentum: 0.9
+    use_nesterov: True
+    weight_decay: 0.0001
+  Adam:
+    learning_rate: 0.1
+    beta1: 0.9
+    beta2: 0.99
+    weight_decay: 0.0001
+
+# Scheduler
+# step, cosine
+lr_scheduler: cosine
+scheduler_args:
+  step:
+    max_epoch: 1
+    warm_up: 10
+    step_lr: [20,50]
+  cosine:
+    max_epoch: 1
+    warm_up: 10

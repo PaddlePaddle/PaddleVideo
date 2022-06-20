@@ -1,139 +1,82 @@
-# copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-import argparse
-import random
+import os, yaml, argparse
+from time import sleep
 
-import numpy as np
-import paddle
-
-from paddlevideo.tasks import (test_model, train_dali, train_model,
-                               train_model_multigrid)
-from paddlevideo.utils import get_config, get_dist_info
-
-
-def parse_args():
-    parser = argparse.ArgumentParser("PaddleVideo train script")
-    parser.add_argument('-c',
-                        '--config',
-                        type=str,
-                        default='configs/example.yaml',
-                        help='config file path')
-    parser.add_argument('-o',
-                        '--override',
-                        action='append',
-                        default=[],
-                        help='config options to be overridden')
-    parser.add_argument('--test',
-                        action='store_true',
-                        help='whether to test a model')
-    parser.add_argument('--train_dali',
-                        action='store_true',
-                        help='whether to use dali to speed up training')
-    parser.add_argument('--multigrid',
-                        action='store_true',
-                        help='whether to use multigrid training')
-    parser.add_argument('-w',
-                        '--weights',
-                        type=str,
-                        help='weights for finetuning or testing')
-    parser.add_argument('--fleet',
-                        action='store_true',
-                        help='whether to use fleet run distributed training')
-    parser.add_argument('--amp',
-                        action='store_true',
-                        help='whether to open amp training.')
-    parser.add_argument(
-        '--amp_level',
-        type=str,
-        default=None,
-        help="optimize level when open amp training, can only be 'O1' or 'O2'.")
-    parser.add_argument(
-        '--validate',
-        action='store_true',
-        help='whether to evaluate the checkpoint during training')
-    parser.add_argument(
-        '--seed',
-        type=int,
-        default=1234,
-        help='fixed all random seeds when the program is running')
-    parser.add_argument(
-        '--max_iters',
-        type=int,
-        default=None,
-        help='max iterations when training(this arg only used in test_tipc)')
-    parser.add_argument(
-        '-p',
-        '--profiler_options',
-        type=str,
-        default=None,
-        help='The option of profiler, which should be in format '
-        '\"key1=value1;key2=value2;key3=value3\".')
-    parser.add_argument('--use_npu',
-                        type=bool,
-                        default=False,
-                        help='whether use npu.')
-
-    args = parser.parse_args()
-    return args
-
+from generator import Generator
+from processor import Proccessor
 
 def main():
-    args = parse_args()
-    cfg = get_config(args.config, overrides=args.override)
+    parser = init_parser()
+    args = parser.parse_args()
+    args = update_parameters(parser, args)
 
-    # set seed if specified
-    seed = args.seed
-    if seed is not None:
-        assert isinstance(
-            seed, int), f"seed must be a integer when specified, but got {seed}"
-        random.seed(seed)
-        np.random.seed(seed)
-        paddle.seed(seed)
+    sleep(args.delay_hours * 3600)
 
-    # set amp_level if amp is enabled
-    if args.amp:
-        if args.amp_level is None:
-            args.amp_level = 'O1'  # set defaualt amp_level to 'O1'
-        else:
-            assert args.amp_level in [
-                'O1', 'O2'
-            ], f"amp_level must be 'O1' or 'O2' when amp enabled, but got {args.amp_level}."
-
-    _, world_size = get_dist_info()
-    parallel = world_size != 1
-    if parallel:
-        paddle.distributed.init_parallel_env()
-
-    if args.test:
-        test_model(cfg, weights=args.weights, parallel=parallel)
-    elif args.train_dali:
-        train_dali(cfg, weights=args.weights, parallel=parallel)
-    elif args.multigrid:
-        train_model_multigrid(cfg,
-                              world_size=world_size,
-                              validate=args.validate)
+    if args.generate_data:
+        g = Generator(args)
+        g.start()
+    elif args.extract:
+        p = Proccessor(args)
+        p.extract()
     else:
-        train_model(cfg,
-                    weights=args.weights,
-                    parallel=parallel,
-                    validate=args.validate,
-                    use_fleet=args.fleet,
-                    use_amp=args.amp,
-                    amp_level=args.amp_level,
-                    max_iters=args.max_iters,
-                    profiler_options=args.profiler_options)
+        p = Proccessor(args)
+        p.start()
+def init_parser():
+    parser = argparse.ArgumentParser(description='Method for Skeleton-based Action Recognition')
 
+    # Setting
+    parser.add_argument('--config', '-c', type=str, default='', help='ID of the using config', required=True)
+    parser.add_argument('--gpus', '-g', type=int, nargs='+', default=[], help='Using GPUs')
+    parser.add_argument('--seed', '-s', type=int, default=1, help='Random seed')
+    parser.add_argument('--pretrained_path', '-pp', type=str, default='', help='Path to pretrained models')
+    parser.add_argument('--work_dir', '-w', type=str, default='', help='Work dir')
+    parser.add_argument('--no_progress_bar', '-np', default=False, action='store_true', help='Do not show progress bar')
+    parser.add_argument('--delay_hours', '-dh', type=float, default=0, help='Delay to run')
+
+    # Processing
+    parser.add_argument('--debug', '-db', default=False, action='store_true', help='Debug')
+    parser.add_argument('--static', '-st', default=False, action='store_true', help='Debug')
+    parser.add_argument('--resume', '-r', default=False, action='store_true', help='Resume from checkpoint')
+    parser.add_argument('--evaluate', '-e', default=False, action='store_true', help='Evaluate')
+    parser.add_argument('--extract', '-ex', default=False, action='store_true', help='Extract')
+    parser.add_argument('--visualize', '-v', default=False, action='store_true', help='Visualization')
+    parser.add_argument('--generate_data', '-gd', default=False, action='store_true', help='Generate skeleton data')
+
+    # Dataloader
+    parser.add_argument('--dataset', '-d', type=str, default='', help='Select dataset')
+    parser.add_argument('--dataset_args', default=dict(), help='Args for creating dataset')
+
+    # Model
+    parser.add_argument('--model_type', '-mt', type=str, default='', help='Args for creating model')
+    parser.add_argument('--model_args', default=dict(), help='Args for creating model')
+    
+    # Optimizer
+    parser.add_argument('--optimizer', '-o', type=str, default='', help='Initial optimizer')
+    parser.add_argument('--optimizer_args', default=dict(), help='Args for optimizer')
+
+    # LR_Scheduler
+    parser.add_argument('--lr_scheduler', '-ls', type=str, default='', help='Initial learning rate scheduler')
+    parser.add_argument('--scheduler_args', default=dict(), help='Args for scheduler')
+
+    return parser
+
+def update_parameters(parser, args):
+    if os.path.exists('./configs/{}.yaml'.format(args.config)):
+        with open('./configs/{}.yaml'.format(args.config), 'r') as f:
+            try:
+                yaml_arg = yaml.safe_load(f, Loader=yaml.FullLoader)
+            except:
+                yaml_arg = yaml.safe_load(f)
+            default_arg = vars(args)
+            for k in yaml_arg.keys():
+                if k not in default_arg.keys():
+                    raise ValueError('Do NOT exist this parameter {}'.format(k))
+            parser.set_defaults(**yaml_arg)
+    else:
+        raise ValueError('Do NOT exist this file in \'configs\' folder: {}.yaml!'.format(args.config))
+    return parser.parse_args()
 
 if __name__ == '__main__':
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
     main()
+
+
