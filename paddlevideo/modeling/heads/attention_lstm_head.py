@@ -16,6 +16,7 @@ import paddle
 from paddle import ParamAttr
 from paddle.nn.initializer import Normal
 from paddle.regularizer import L2Decay
+import paddle.nn.functional as F
 
 from ...metrics.youtube8m import eval_util as youtube8m_metrics
 from ..registry import HEADS
@@ -154,3 +155,134 @@ class AttentionLstmHead(BaseHead):
             pred, label)
         gap = youtube8m_metrics.calculate_gap(pred, label)
         return hit_at_one, perr, gap
+
+
+@HEADS.register()
+class ActionAttentionLstmHead(BaseHead):
+    """AttentionLstmHead for FootballAction
+    Args: TODO
+    """
+    def __init__(self,
+                 num_classes=8,
+                 feature_num=2,
+                 feature_dims=[2048, 1024],
+                 embedding_size=512,
+                 lstm_size=1024,
+                 in_channels=2048,
+                 loss_cfg=dict(name='CrossEntropyLoss')):
+        super(ActionAttentionLstmHead, self).__init__(num_classes, in_channels,
+                                                      loss_cfg)
+        self.num_classes = num_classes
+        self.feature_dims = feature_dims
+        self.embedding_size = embedding_size
+        self.lstm_size = lstm_size
+        self.feature_num = len(self.feature_dims)
+        for i in range(self.feature_num):  # 0:rgb, 1:audio
+            bi_lstm = paddle.nn.LSTM(input_size=self.feature_dims[i],
+                                     hidden_size=self.feature_dims[i],
+                                     direction="bidirectional")
+            self.add_sublayer("bi_lstm{}".format(i), bi_lstm)
+
+            drop_rate = 0.5
+            self.dropout = paddle.nn.Dropout(drop_rate)
+
+            att_fc = paddle.nn.Linear(in_features=self.feature_dims[i] * 2,
+                                      out_features=1)
+            self.add_sublayer("att_fc{}".format(i), att_fc)
+            self.softmax = paddle.nn.Softmax()
+
+        self.fc1 = paddle.nn.Linear(in_features=2 * sum(self.feature_dims),
+                                    out_features=8192,
+                                    bias_attr=ParamAttr(
+                                        regularizer=L2Decay(0.0),
+                                        initializer=Normal()))
+        self.bn1 = paddle.nn.BatchNorm(num_channels=8192)
+        self.dropout1 = paddle.nn.Dropout(0.5)
+        self.fc2 = paddle.nn.Linear(in_features=8192,
+                                    out_features=4096,
+                                    bias_attr=ParamAttr(
+                                        regularizer=L2Decay(0.0),
+                                        initializer=Normal()))
+        self.bn2 = paddle.nn.BatchNorm(num_channels=4096)
+        self.dropout2 = paddle.nn.Dropout(0.5)
+        self.fc3 = paddle.nn.Linear(
+            in_features=4096,
+            out_features=self.num_classes,
+        )
+        self.fc4 = paddle.nn.Linear(
+            in_features=4096,
+            out_features=1,
+        )
+
+    def init_weights(self):
+        pass
+
+    def forward(self, inputs):
+        # inputs = [(rgb_data, rgb_len, rgb_mask), (audio_data, audio_len, audio_mask)]
+        # deal with features with different length
+        # 1. padding to same lenght, make a tensor
+        # 2. make a mask tensor with the same shpae with 1
+        # 3. compute output using mask tensor, s.t. output is nothing todo with padding
+        assert (len(inputs) == self.feature_num
+                ), "Input tensor does not contain {} features".format(
+                    self.feature_num)
+        att_outs = []
+        for i in range(len(inputs)):
+            m = getattr(self, "bi_lstm{}".format(i))
+            lstm_out, _ = m(inputs=inputs[i][0], sequence_length=inputs[i][1])
+
+            lstm_dropout = self.dropout(lstm_out)
+
+            # 3. att_fc
+            m = getattr(self, "att_fc{}".format(i))
+            lstm_weight = m(lstm_dropout)
+
+            # 4. softmax replace start, for it's relevant to sum in time step
+            lstm_exp = paddle.exp(lstm_weight)
+            lstm_mask = paddle.mean(inputs[i][2], axis=2)
+            lstm_mask = paddle.unsqueeze(lstm_mask, axis=2)
+            lstm_exp_with_mask = paddle.multiply(x=lstm_exp, y=lstm_mask)
+            lstm_sum_with_mask = paddle.sum(lstm_exp_with_mask, axis=1)
+            exponent = -1
+            lstm_denominator = paddle.pow(lstm_sum_with_mask, exponent)
+            lstm_denominator = paddle.unsqueeze(lstm_denominator, axis=2)
+            lstm_softmax = paddle.multiply(x=lstm_exp, y=lstm_denominator)
+            lstm_weight = lstm_softmax
+            # softmax replace end
+
+            lstm_scale = paddle.multiply(x=lstm_dropout, y=lstm_weight)
+
+            # 5. sequence_pool's replace start, for it's relevant to sum in time step
+            lstm_scale_with_mask = paddle.multiply(x=lstm_scale, y=lstm_mask)
+            # fea_lens = inputs[i][1]
+            # fea_len = int(fea_lens[0])
+            lstm_pool = paddle.sum(lstm_scale_with_mask, axis=1)
+            # sequence_pool's replace end
+            att_outs.append(lstm_pool)
+        att_out = paddle.concat(att_outs, axis=1)
+        y = self.fc1(att_out)
+        y = self.bn1(y)
+        y = F.relu(y)
+        y = self.dropout1(y)
+        y = self.fc2(y)
+        y = self.bn2(y)
+        y = F.relu(y)
+        y = self.dropout2(y)
+        out1 = self.fc3(y)
+        out1 = F.softmax(out1)
+        out2 = self.fc4(y)
+        out2 = F.sigmoid(out2)
+        return out1, out2
+
+    def loss(self, logits, iou, labels, labels_iou, **kwargs):
+        alpha = 10
+        softmax_loss = F.cross_entropy(logits, labels)
+        labels_iou = labels_iou.astype('float32')
+        mse_loss = paddle.sum(F.square_error_cost(iou, labels_iou), axis=-1)
+        sum_loss = softmax_loss + alpha * mse_loss
+        return sum_loss
+
+    def metric(self, scores, labels):
+        top1 = paddle.metric.accuracy(input=scores, label=labels, k=1)
+        top5 = paddle.metric.accuracy(input=scores, label=labels, k=5)
+        return top1, top5
