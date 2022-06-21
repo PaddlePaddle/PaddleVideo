@@ -28,8 +28,8 @@ This is an unofficial code based on PaddlePaddle of IEEE 2022 paper:
  训练日志和模型权重：  https://github.com/small-whirlwind/EfficientGCN_paddle/tree/main/workdir_pad
 
  aistudio的实现方式：  
- 在./tasks/文件夹内运行CUDA_VISIBLE_DEVICES=0 python3 main.py --gpus 0 -c 2001 -e  
- 在./tasks/文件夹内运行CUDA_VISIBLE_DEVICES=0 python3 main.py --gpus 0 -c 2002 -e  
+ 在./tasks/文件夹内运行CUDA_VISIBLE_DEVICES=0 python ./PaddleVideo-develop/paddlevideo/tasks/main.py --gpus 0 -c 2001 -e 
+ 在./tasks/文件夹内运行CUDA_VISIBLE_DEVICES=0 python ./PaddleVideo-develop/paddlevideo/tasks/main.py --gpus 0 -c 2002 -e
  选择要测试的模型即可  
 
 
@@ -47,7 +47,9 @@ This is an unofficial code based on PaddlePaddle of IEEE 2022 paper:
 - 直接使用项目pretrained文件夹中转换好的ckpy  
 - 通过本项目中的transferForPth.py文件进行模型转换，将.pth文件转换为适配paddle的.pdparams文件。
 
-依次运行如下命令以解压：
+特别地，如果不想进行数据预处理，下载aistudio中的笔者上传的数据集可节省三小时左右的时间，
+
+在aistudio上依次运行如下命令以解压：
 
 
 ```
