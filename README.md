@@ -350,3 +350,16 @@ W0621 06:39:36.050431  6296 device_context.cc:465] device: 0, cuDNN Version: 7.6
 [ 2022-06-21 06:42:41,749 ] Finish evaluating!
 
 ```
+
+## 7 附录
+
+ 信息| 描述
+ ---- | ----- 
+ 作者  | small-whirlwind 
+ 日期  | 2022年6月
+ 框架版本 | PaddlePaddle-gpu==2.2.0
+ 应用场景 | 骨架动作识别
+ 硬件支持 | GPU
+ Aistudio |[Efficient_paddle](https://aistudio.baidu.com/aistudio/projectdetail/4167040?_=1655386061207&contributionType=1)
+ 
+ 感谢百度飞桨团队提供的技术支持！
