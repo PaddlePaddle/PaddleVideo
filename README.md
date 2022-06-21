@@ -71,24 +71,25 @@ python scripts/modify_configs.py --root_folder <path/to/save/numpy/data> --ntu60
 示例：
 进入/home/aistudio/EfficientGCN_paddle文件夹，运行
 ```
-python EfficientGCN_paddle-main/modify_configs.py --root_folder /home/aistudio/dataset/data/npy_dataset --ntu60-path /home/aistudio/dataset/nturgbd_skeletons_s001_to_s017 --ntu120_path /share/NTU-RGB-D120 --pretrained_path /home/aistudio/EfficientGCN_paddle-main/pretrained  --work_dir /home/aistudio/EfficientGCN_paddle-main/workdir_pad
+python .\PaddleVideo-develop\paddlevideo\utils/modify_configs.py --root_folder .\PaddleVideo-develop\data\ntu\npy_dataset\ --ntu60-path .\PaddleVideo-develop\data\ntu\nturgbd_skeletons_s001_to_s017\ --ntu120_path /share/NTU-RGB-D120 --pretrained_path .\PaddleVideo-develop\pretrained  --work_dir .\PaddleVideo-develop\workdir_pad --gpus 0
 ```
 ### 5.2 数据预处理
 进入/home/aistudio/EfficientGCN_paddle/tasks/文件夹
 (由于我们提供的数据集中已经包含了预处理之后的文件，故而可以不执行此步，直接解压original.zip，transformed.zip, xsub.zip，xview.zip，而无需下载、解压作为raw data的nturgbd_skeletons_s001_to_s017.tar)
 
 ```
-python EfficientGCN_paddle-main/tasks/main.py -c 2001 -gd -np
-python EfficientGCN_paddle-main/tasks/main.py -c 2002 -gd -np
+python ./PaddleVideo-develop/paddlevideo/tasks/main.py -c 2001 -gd -np
+
+python ./PaddleVideo-develop/paddlevideo/tasks/main.py -c 2002 -gd -np
 ```
 最终，经过预处理后的数据集文件夹格式如下所示：
 ```
-/home/aistudio/dataset |-xview
-                       |-xsub
-                       |-data
-                             |-npy_datatset |-transformed
-                                            |-original
-                       |-nturgbd_skeletons_s001_to_s017
+.\PaddleVideo-develop\data\ntu
+                               |-xview
+                               |-xsub
+                               |-npy_datatset |-transformed
+                                              |-original
+                               |-nturgbd_skeletons_s001_to_s017
 
 
 ```
@@ -102,13 +103,13 @@ python main.py -c <config>
 x-sub(2001)
 ```
 export CUDA_VISIBLE_DEVICES=0
-python EfficientGCN_paddle-main/tasks/main.py --gpus 0 -c 2001
+python ./PaddleVideo-develop/paddlevideo/tasks/main.py --gpus 0 -c 2001
 ```
 对于x-view(2002)
 
 ```
 export CUDA_VISIBLE_DEVICES=0
-python EfficientGCN_paddle-main/tasks/main.py --gpus 0 -c 2002
+python ./PaddleVideo-develop/paddlevideo/tasks/main.py --gpus 0 -c 2002
 ```
 
 
@@ -256,7 +257,7 @@ python main.py -c <config> -e
 
 ```
 export CUDA_VISIBLE_DEVICES=0
-python EfficientGCN_paddle-main/tasks/main.py --gpus 0 -c 2001 -e
+python ./PaddleVideo-develop/paddlevideo/tasks/main.py --gpus 0 -c 2001 -e
 ```
 
 注意，输入以上命令后需要选择测试的模型，作者训练好的达标模型标注为1号，输入数字1+回车即可
@@ -304,7 +305,7 @@ x-view(2002)
 
 ```
 export CUDA_VISIBLE_DEVICES=0
-python EfficientGCN_paddle-main/tasks/main.py --gpus 0 -c 2002 -e
+python ./PaddleVideo-develop/paddlevideo/tasks/main.py --gpus 0 -c 2002 -e
 ```
 
 同理，输入以上命令后需要选择测试的模型，作者训练好的达标模型标注为1号，输入数字1+回车即可
