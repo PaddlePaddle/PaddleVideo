@@ -1,9 +1,0 @@
-mode: fluid
-use_dynamic_shape: false
-arch: STGCN
-min_subgraph_size: 3
-Preprocess:
-- window_size: 50
-  type: AutoPadding
-label_list:
-- keypoint

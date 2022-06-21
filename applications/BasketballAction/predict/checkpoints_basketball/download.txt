@@ -1,1 +1,0 @@
-https://bj.bcebos.com/v1/acg-algo/PaddleVideo_application/basketball/checkpoints_basketball.tar.gz
