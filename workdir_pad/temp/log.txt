@@ -1,0 +1,24 @@
+[ 2022-06-21 11:39:29,798 ] Saving folder path: /home/aistudio/PaddleVideo-develop/workdir_pad/temp
+[ 2022-06-21 11:39:29,798 ] 
+[ 2022-06-21 11:39:29,799 ] Starting preparing ...
+[ 2022-06-21 11:39:29,799 ] Saving model name: 2001_EfficientGCN-B0_ntu-xsub
+[ 2022-06-21 11:39:29,807 ] GPU-0 used: 2.75MB
+[ 2022-06-21 11:39:29,826 ] Dataset: ntu-xsub
+[ 2022-06-21 11:39:29,826 ] Batch size: train-16, eval-16
+[ 2022-06-21 11:39:29,826 ] Data shape (branch, channel, frame, joint, person): [3, 6, 288, 25, 2]
+[ 2022-06-21 11:39:29,826 ] Number of action classes: 60
+[ 2022-06-21 11:39:32,726 ] Model: EfficientGCN-B0 {'stem_channel': 64, 'block_args': [[48, 1, 0.5], [24, 1, 0.5], [64, 2, 1], [128, 2, 1]], 'fusion_stage': 2, 'act_type': 'swish', 'att_type': 'stja', 'layer_type': 'SG', 'drop_prob': 0.25, 'kernel_size': [5, 2], 'scale_args': [1.2, 1.35], 'expand_ratio': 0, 'reduct_ratio': 2, 'bias': True, 'edge': True}
+[ 2022-06-21 11:39:32,754 ] Pretrained model: /home/aistudio/PaddleVideo-develop/pretrained/2001_EfficientGCN-B0_ntu-xsub.pdparams.tar
+[ 2022-06-21 11:39:32,754 ] LR_Scheduler: cosine {'max_epoch': 70, 'warm_up': 10}
+[ 2022-06-21 11:39:32,755 ] Optimizer: SGD {'momentum': 0.9, 'weight_decay': 0.0001, 'learning_rate': <paddle.optimizer.lr.LambdaDecay object at 0x7fa966fdf410>, 'use_nesterov': True}
+[ 2022-06-21 11:39:32,756 ] Loss function: CrossEntropyLoss
+[ 2022-06-21 11:39:32,756 ] Successful!
+[ 2022-06-21 11:39:32,756 ] 
+[ 2022-06-21 11:39:32,756 ] Loading evaluating model ...
+[ 2022-06-21 11:39:32,756 ] Please choose the evaluating model from the following models.
+[ 2022-06-21 11:39:32,756 ] Default is the initial or pretrained model.
+[ 2022-06-21 11:39:32,756 ] (1) accuracy: 90.20% | training time: 2022-06-13 09-55-23
+[ 2022-06-21 11:39:32,756 ] Your choice (number of the model, q for quit): 
+[ 2022-06-21 11:39:32,806 ] Successful!
+[ 2022-06-21 11:39:32,806 ] 
+[ 2022-06-21 11:39:32,806 ] Starting evaluating ...

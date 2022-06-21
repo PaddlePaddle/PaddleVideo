@@ -1,0 +1,309 @@
+EfficientGCN(
+  (input_branches): LayerList(
+    (0): EfficientGCN_Blocks(
+      (init_bn): BatchNorm2D(num_features=6, momentum=0.1, epsilon=1e-05)
+      (stem_scn): Spatial_Graph_Layer(
+        (conv): SpatialGraphConv(
+          (gcn): Conv2D(6, 192, kernel_size=[1, 1], data_format=NCHW)
+        )
+        (bn): BatchNorm2D(num_features=64, momentum=0.1, epsilon=1e-05)
+        (residual): Sequential(
+          (0): Conv2D(6, 64, kernel_size=[1, 1], data_format=NCHW)
+          (1): BatchNorm2D(num_features=64, momentum=0.1, epsilon=1e-05)
+        )
+        (act): Swish()
+      )
+      (stem_tcn): Temporal_Basic_Layer(
+        (conv): Conv2D(64, 64, kernel_size=[5, 1], padding=(2, 0), data_format=NCHW)
+        (bn): BatchNorm2D(num_features=64, momentum=0.1, epsilon=1e-05)
+        (residual): Identity()
+        (act): Swish()
+      )
+      (block-0_scn): Spatial_Graph_Layer(
+        (conv): SpatialGraphConv(
+          (gcn): Conv2D(64, 144, kernel_size=[1, 1], data_format=NCHW)
+        )
+        (bn): BatchNorm2D(num_features=48, momentum=0.1, epsilon=1e-05)
+        (residual): Sequential(
+          (0): Conv2D(64, 48, kernel_size=[1, 1], data_format=NCHW)
+          (1): BatchNorm2D(num_features=48, momentum=0.1, epsilon=1e-05)
+        )
+        (act): Swish()
+      )
+      (block-0_att): Attention_Layer(
+        (att): ST_Joint_Att(
+          (fcn): Sequential(
+            (0): Conv2D(48, 24, kernel_size=[1, 1], data_format=NCHW)
+            (1): BatchNorm2D(num_features=24, momentum=0.1, epsilon=1e-05)
+            (2): Hardswish()
+          )
+          (conv_t): Conv2D(24, 48, kernel_size=[1, 1], data_format=NCHW)
+          (conv_v): Conv2D(24, 48, kernel_size=[1, 1], data_format=NCHW)
+        )
+        (bn): BatchNorm2D(num_features=48, momentum=0.1, epsilon=1e-05)
+        (act): Swish()
+      )
+      (block-1_scn): Spatial_Graph_Layer(
+        (conv): SpatialGraphConv(
+          (gcn): Conv2D(48, 96, kernel_size=[1, 1], data_format=NCHW)
+        )
+        (bn): BatchNorm2D(num_features=32, momentum=0.1, epsilon=1e-05)
+        (residual): Sequential(
+          (0): Conv2D(48, 32, kernel_size=[1, 1], data_format=NCHW)
+          (1): BatchNorm2D(num_features=32, momentum=0.1, epsilon=1e-05)
+        )
+        (act): Swish()
+      )
+      (block-1_att): Attention_Layer(
+        (att): ST_Joint_Att(
+          (fcn): Sequential(
+            (0): Conv2D(32, 16, kernel_size=[1, 1], data_format=NCHW)
+            (1): BatchNorm2D(num_features=16, momentum=0.1, epsilon=1e-05)
+            (2): Hardswish()
+          )
+          (conv_t): Conv2D(16, 32, kernel_size=[1, 1], data_format=NCHW)
+          (conv_v): Conv2D(16, 32, kernel_size=[1, 1], data_format=NCHW)
+        )
+        (bn): BatchNorm2D(num_features=32, momentum=0.1, epsilon=1e-05)
+        (act): Swish()
+      )
+    )
+    (1): EfficientGCN_Blocks(
+      (init_bn): BatchNorm2D(num_features=6, momentum=0.1, epsilon=1e-05)
+      (stem_scn): Spatial_Graph_Layer(
+        (conv): SpatialGraphConv(
+          (gcn): Conv2D(6, 192, kernel_size=[1, 1], data_format=NCHW)
+        )
+        (bn): BatchNorm2D(num_features=64, momentum=0.1, epsilon=1e-05)
+        (residual): Sequential(
+          (0): Conv2D(6, 64, kernel_size=[1, 1], data_format=NCHW)
+          (1): BatchNorm2D(num_features=64, momentum=0.1, epsilon=1e-05)
+        )
+        (act): Swish()
+      )
+      (stem_tcn): Temporal_Basic_Layer(
+        (conv): Conv2D(64, 64, kernel_size=[5, 1], padding=(2, 0), data_format=NCHW)
+        (bn): BatchNorm2D(num_features=64, momentum=0.1, epsilon=1e-05)
+        (residual): Identity()
+        (act): Swish()
+      )
+      (block-0_scn): Spatial_Graph_Layer(
+        (conv): SpatialGraphConv(
+          (gcn): Conv2D(64, 144, kernel_size=[1, 1], data_format=NCHW)
+        )
+        (bn): BatchNorm2D(num_features=48, momentum=0.1, epsilon=1e-05)
+        (residual): Sequential(
+          (0): Conv2D(64, 48, kernel_size=[1, 1], data_format=NCHW)
+          (1): BatchNorm2D(num_features=48, momentum=0.1, epsilon=1e-05)
+        )
+        (act): Swish()
+      )
+      (block-0_att): Attention_Layer(
+        (att): ST_Joint_Att(
+          (fcn): Sequential(
+            (0): Conv2D(48, 24, kernel_size=[1, 1], data_format=NCHW)
+            (1): BatchNorm2D(num_features=24, momentum=0.1, epsilon=1e-05)
+            (2): Hardswish()
+          )
+          (conv_t): Conv2D(24, 48, kernel_size=[1, 1], data_format=NCHW)
+          (conv_v): Conv2D(24, 48, kernel_size=[1, 1], data_format=NCHW)
+        )
+        (bn): BatchNorm2D(num_features=48, momentum=0.1, epsilon=1e-05)
+        (act): Swish()
+      )
+      (block-1_scn): Spatial_Graph_Layer(
+        (conv): SpatialGraphConv(
+          (gcn): Conv2D(48, 96, kernel_size=[1, 1], data_format=NCHW)
+        )
+        (bn): BatchNorm2D(num_features=32, momentum=0.1, epsilon=1e-05)
+        (residual): Sequential(
+          (0): Conv2D(48, 32, kernel_size=[1, 1], data_format=NCHW)
+          (1): BatchNorm2D(num_features=32, momentum=0.1, epsilon=1e-05)
+        )
+        (act): Swish()
+      )
+      (block-1_att): Attention_Layer(
+        (att): ST_Joint_Att(
+          (fcn): Sequential(
+            (0): Conv2D(32, 16, kernel_size=[1, 1], data_format=NCHW)
+            (1): BatchNorm2D(num_features=16, momentum=0.1, epsilon=1e-05)
+            (2): Hardswish()
+          )
+          (conv_t): Conv2D(16, 32, kernel_size=[1, 1], data_format=NCHW)
+          (conv_v): Conv2D(16, 32, kernel_size=[1, 1], data_format=NCHW)
+        )
+        (bn): BatchNorm2D(num_features=32, momentum=0.1, epsilon=1e-05)
+        (act): Swish()
+      )
+    )
+    (2): EfficientGCN_Blocks(
+      (init_bn): BatchNorm2D(num_features=6, momentum=0.1, epsilon=1e-05)
+      (stem_scn): Spatial_Graph_Layer(
+        (conv): SpatialGraphConv(
+          (gcn): Conv2D(6, 192, kernel_size=[1, 1], data_format=NCHW)
+        )
+        (bn): BatchNorm2D(num_features=64, momentum=0.1, epsilon=1e-05)
+        (residual): Sequential(
+          (0): Conv2D(6, 64, kernel_size=[1, 1], data_format=NCHW)
+          (1): BatchNorm2D(num_features=64, momentum=0.1, epsilon=1e-05)
+        )
+        (act): Swish()
+      )
+      (stem_tcn): Temporal_Basic_Layer(
+        (conv): Conv2D(64, 64, kernel_size=[5, 1], padding=(2, 0), data_format=NCHW)
+        (bn): BatchNorm2D(num_features=64, momentum=0.1, epsilon=1e-05)
+        (residual): Identity()
+        (act): Swish()
+      )
+      (block-0_scn): Spatial_Graph_Layer(
+        (conv): SpatialGraphConv(
+          (gcn): Conv2D(64, 144, kernel_size=[1, 1], data_format=NCHW)
+        )
+        (bn): BatchNorm2D(num_features=48, momentum=0.1, epsilon=1e-05)
+        (residual): Sequential(
+          (0): Conv2D(64, 48, kernel_size=[1, 1], data_format=NCHW)
+          (1): BatchNorm2D(num_features=48, momentum=0.1, epsilon=1e-05)
+        )
+        (act): Swish()
+      )
+      (block-0_att): Attention_Layer(
+        (att): ST_Joint_Att(
+          (fcn): Sequential(
+            (0): Conv2D(48, 24, kernel_size=[1, 1], data_format=NCHW)
+            (1): BatchNorm2D(num_features=24, momentum=0.1, epsilon=1e-05)
+            (2): Hardswish()
+          )
+          (conv_t): Conv2D(24, 48, kernel_size=[1, 1], data_format=NCHW)
+          (conv_v): Conv2D(24, 48, kernel_size=[1, 1], data_format=NCHW)
+        )
+        (bn): BatchNorm2D(num_features=48, momentum=0.1, epsilon=1e-05)
+        (act): Swish()
+      )
+      (block-1_scn): Spatial_Graph_Layer(
+        (conv): SpatialGraphConv(
+          (gcn): Conv2D(48, 96, kernel_size=[1, 1], data_format=NCHW)
+        )
+        (bn): BatchNorm2D(num_features=32, momentum=0.1, epsilon=1e-05)
+        (residual): Sequential(
+          (0): Conv2D(48, 32, kernel_size=[1, 1], data_format=NCHW)
+          (1): BatchNorm2D(num_features=32, momentum=0.1, epsilon=1e-05)
+        )
+        (act): Swish()
+      )
+      (block-1_att): Attention_Layer(
+        (att): ST_Joint_Att(
+          (fcn): Sequential(
+            (0): Conv2D(32, 16, kernel_size=[1, 1], data_format=NCHW)
+            (1): BatchNorm2D(num_features=16, momentum=0.1, epsilon=1e-05)
+            (2): Hardswish()
+          )
+          (conv_t): Conv2D(16, 32, kernel_size=[1, 1], data_format=NCHW)
+          (conv_v): Conv2D(16, 32, kernel_size=[1, 1], data_format=NCHW)
+        )
+        (bn): BatchNorm2D(num_features=32, momentum=0.1, epsilon=1e-05)
+        (act): Swish()
+      )
+    )
+  )
+  (main_stream): EfficientGCN_Blocks(
+    (block-0_scn): Spatial_Graph_Layer(
+      (conv): SpatialGraphConv(
+        (gcn): Conv2D(96, 192, kernel_size=[1, 1], data_format=NCHW)
+      )
+      (bn): BatchNorm2D(num_features=64, momentum=0.1, epsilon=1e-05)
+      (residual): Sequential(
+        (0): Conv2D(96, 64, kernel_size=[1, 1], data_format=NCHW)
+        (1): BatchNorm2D(num_features=64, momentum=0.1, epsilon=1e-05)
+      )
+      (act): Swish()
+    )
+    (block-0_tcn-0): Temporal_SG_Layer(
+      (act): Swish()
+      (depth_conv1): Sequential(
+        (0): Conv2D(64, 64, kernel_size=[5, 1], padding=(2, 0), groups=64, data_format=NCHW)
+        (1): BatchNorm2D(num_features=64, momentum=0.1, epsilon=1e-05)
+      )
+      (point_conv1): Sequential(
+        (0): Conv2D(64, 32, kernel_size=[1, 1], data_format=NCHW)
+        (1): BatchNorm2D(num_features=32, momentum=0.1, epsilon=1e-05)
+      )
+      (point_conv2): Sequential(
+        (0): Conv2D(32, 64, kernel_size=[1, 1], data_format=NCHW)
+        (1): BatchNorm2D(num_features=64, momentum=0.1, epsilon=1e-05)
+      )
+      (depth_conv2): Sequential(
+        (0): Conv2D(64, 64, kernel_size=[5, 1], stride=[2, 1], padding=(2, 0), groups=64, data_format=NCHW)
+        (1): BatchNorm2D(num_features=64, momentum=0.1, epsilon=1e-05)
+      )
+      (residual): Sequential(
+        (0): Conv2D(64, 64, kernel_size=[1, 1], stride=[2, 1], data_format=NCHW)
+        (1): BatchNorm2D(num_features=64, momentum=0.1, epsilon=1e-05)
+      )
+    )
+    (block-0_att): Attention_Layer(
+      (att): ST_Joint_Att(
+        (fcn): Sequential(
+          (0): Conv2D(64, 32, kernel_size=[1, 1], data_format=NCHW)
+          (1): BatchNorm2D(num_features=32, momentum=0.1, epsilon=1e-05)
+          (2): Hardswish()
+        )
+        (conv_t): Conv2D(32, 64, kernel_size=[1, 1], data_format=NCHW)
+        (conv_v): Conv2D(32, 64, kernel_size=[1, 1], data_format=NCHW)
+      )
+      (bn): BatchNorm2D(num_features=64, momentum=0.1, epsilon=1e-05)
+      (act): Swish()
+    )
+    (block-1_scn): Spatial_Graph_Layer(
+      (conv): SpatialGraphConv(
+        (gcn): Conv2D(64, 384, kernel_size=[1, 1], data_format=NCHW)
+      )
+      (bn): BatchNorm2D(num_features=128, momentum=0.1, epsilon=1e-05)
+      (residual): Sequential(
+        (0): Conv2D(64, 128, kernel_size=[1, 1], data_format=NCHW)
+        (1): BatchNorm2D(num_features=128, momentum=0.1, epsilon=1e-05)
+      )
+      (act): Swish()
+    )
+    (block-1_tcn-0): Temporal_SG_Layer(
+      (act): Swish()
+      (depth_conv1): Sequential(
+        (0): Conv2D(128, 128, kernel_size=[5, 1], padding=(2, 0), groups=128, data_format=NCHW)
+        (1): BatchNorm2D(num_features=128, momentum=0.1, epsilon=1e-05)
+      )
+      (point_conv1): Sequential(
+        (0): Conv2D(128, 64, kernel_size=[1, 1], data_format=NCHW)
+        (1): BatchNorm2D(num_features=64, momentum=0.1, epsilon=1e-05)
+      )
+      (point_conv2): Sequential(
+        (0): Conv2D(64, 128, kernel_size=[1, 1], data_format=NCHW)
+        (1): BatchNorm2D(num_features=128, momentum=0.1, epsilon=1e-05)
+      )
+      (depth_conv2): Sequential(
+        (0): Conv2D(128, 128, kernel_size=[5, 1], stride=[2, 1], padding=(2, 0), groups=128, data_format=NCHW)
+        (1): BatchNorm2D(num_features=128, momentum=0.1, epsilon=1e-05)
+      )
+      (residual): Sequential(
+        (0): Conv2D(128, 128, kernel_size=[1, 1], stride=[2, 1], data_format=NCHW)
+        (1): BatchNorm2D(num_features=128, momentum=0.1, epsilon=1e-05)
+      )
+    )
+    (block-1_att): Attention_Layer(
+      (att): ST_Joint_Att(
+        (fcn): Sequential(
+          (0): Conv2D(128, 64, kernel_size=[1, 1], data_format=NCHW)
+          (1): BatchNorm2D(num_features=64, momentum=0.1, epsilon=1e-05)
+          (2): Hardswish()
+        )
+        (conv_t): Conv2D(64, 128, kernel_size=[1, 1], data_format=NCHW)
+        (conv_v): Conv2D(64, 128, kernel_size=[1, 1], data_format=NCHW)
+      )
+      (bn): BatchNorm2D(num_features=128, momentum=0.1, epsilon=1e-05)
+      (act): Swish()
+    )
+  )
+  (classifier): EfficientGCN_Classifier(
+    (gap): AdaptiveAvgPool3D(output_size=1)
+    (dropout): Dropout(p=0.25, axis=None, mode=upscale_in_train)
+    (fc): Conv3D(128, 60, kernel_size=[1, 1, 1], data_format=NCDHW)
+  )
+)
