@@ -1,1 +1,0 @@
-./deploy/cpp_infer/example_video_dir/example01.avi      class: 5 archery       score: 0.999323

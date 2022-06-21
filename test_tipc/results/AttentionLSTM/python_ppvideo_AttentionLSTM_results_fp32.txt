@@ -1,3 +1,0 @@
-Current video file: data/example.pkl
-        top-1 class: 11
-        top-1 score: 0.9841002225875854
