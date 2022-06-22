@@ -1,1 +1,0 @@
-https://bj.bcebos.com/acg-algo/PaddleVideo_application/VideoQualityAssessment/ppTSM.pdparams
