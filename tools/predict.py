@@ -38,7 +38,7 @@ def parse_args():
     parser.add_argument("--model_file", type=str)
     parser.add_argument("--params_file", type=str)
 
-    # params for paddle predict
+    # params for predict
     parser.add_argument("-b", "--batch_size", type=int, default=1)
     parser.add_argument("--use_gpu", type=str2bool, default=True)
     parser.add_argument("--precision", type=str, default="fp32")
@@ -97,8 +97,6 @@ def create_paddle_predictor(args, cfg):
                 num_views = 3  # UniformCrop
             elif 'videoswin' in cfg.model_name.lower():
                 num_views = 3  # UniformCrop
-            elif 'tokenshift' in cfg.model_name.lower():
-                num_views = 3  # UniformCrop
             max_batch_size = args.batch_size * num_views * num_seg * seg_len
         config.enable_tensorrt_engine(precision_mode=precision,
                                       max_batch_size=max_batch_size)
@@ -131,8 +129,6 @@ def parse_file_paths(input_path: str) -> list:
 
 
 def main():
-    """predict using paddle inference model
-    """
     args = parse_args()
     cfg = get_config(args.config, show=False)
 
@@ -199,7 +195,6 @@ def main():
             InferenceHelper.postprocess(outputs)
     else:
         if args.enable_benchmark:
-            test_video_num = 12
             num_warmup = 3
 
             # instantiate auto log
@@ -225,9 +220,15 @@ def main():
                                               'postprocess_time'
                                           ],
                                           warmup=num_warmup)
-            files = [
-                args.input_file for _ in range(test_video_num + num_warmup)
-            ]
+            if args.input_file.endswith('avi') or args.input_file.endswith(
+                    'mp4'):
+                test_video_num = 15
+                files = [args.input_file for _ in range(test_video_num)]
+            else:
+                f_input = open(args.input_file, 'r')
+                files = [i.strip() for i in f_input.readlines()]
+                test_video_num = len(files)
+                f_input.close()
 
         # Inferencing process
         batch_num = args.batch_size
