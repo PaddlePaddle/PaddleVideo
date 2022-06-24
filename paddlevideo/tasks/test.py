@@ -79,7 +79,7 @@ def test_model(cfg, weights, parallel=True):
     for batch_id, data in enumerate(data_loader):
         if cfg.model_name in [
                 'CFBI'
-        ]:  #for VOS task, dataset for video and dataloader for frames in each video
+        ]:  # for VOS task, dataset for video and dataloader for frames in each video
             Metric.update(batch_id, data, model)
         else:
             outputs = model(data, mode='test')

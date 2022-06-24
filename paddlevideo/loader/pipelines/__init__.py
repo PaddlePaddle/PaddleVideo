@@ -17,12 +17,11 @@ from .augmentations import (CenterCrop, ColorJitter, GroupRandomFlip,
                             GroupResize, Image2Array, JitterScale, MultiCrop,
                             Normalization, PackOutput, RandomCrop, RandomFlip,
                             RandomResizedCrop, Scale, TenCrop, ToArray,
-                            UniformCrop, RandomGamma, MultiCenterCrop, RandomBrightness,
-                            RandomHue, RandomSaturation)
-
+                            UniformCrop, RandomGamma, MultiCenterCrop,
+                            RandomBrightness, RandomHue, RandomSaturation)
 from .augmentations_ava import *
 from .compose import Compose
-from .decode import FeatureDecoder, FrameDecoder, VideoDecoder
+from .decode import FeatureDecoder, FrameDecoder, VideoDecoder, ActionFeatureDecoder
 from .decode_image import ImageDecoder
 from .decode_sampler import DecodeSampler
 from .mix import Cutmix, Mixup, VideoMix
@@ -43,14 +42,14 @@ __all__ = [
     'Sampler', 'FeatureDecoder', 'DecodeSampler', 'TenCrop', 'Compose',
     'AutoPadding', 'Normalization', 'Mixup', 'Image2Array', 'Scale',
     'GroupResize', 'VideoDecoder', 'FrameDecoder', 'PackOutput',
-    'GetVideoLabel', 'Cutmix', 'CenterCrop', 'RandomCrop', 'LoadFeat',
-    'RandomCap', 'JitterScale', 'Iden', 'VideoMix', 'ColorJitter', 'RandomFlip',
-    'ToArray', 'FeaturePadding', 'GetMatchMap', 'GroupRandomFlip', 'MultiCrop',
-    'SFMRI_DecodeSampler', 'MultiRestrictSize', 'MultiNorm',
-    'RandomResizedCrop', 'SamplerPkl', 'SegmentationSampler',
+    'ActionFeatureDecoder', 'GetVideoLabel', 'Cutmix', 'CenterCrop',
+    'RandomCrop', 'LoadFeat', 'RandomCap', 'JitterScale', 'Iden', 'VideoMix',
+    'ColorJitter', 'RandomFlip', 'ToArray', 'FeaturePadding', 'GetMatchMap',
+    'GroupRandomFlip', 'MultiCrop', 'SFMRI_DecodeSampler', 'MultiRestrictSize',
+    'MultiNorm', 'RandomResizedCrop', 'SamplerPkl', 'SegmentationSampler',
     'SketeonCropSample', 'SketeonModalityTransform', 'RandomRotation',
-    'RandomGamma', 'MultiCenterCrop', 'RandomBrightness', 'RandomHue', 'RandomSaturation',
-    'UniformSampleFrames', 'PoseDecode', 'PoseCompact', 'Resize',
-    'RandomResizedCrop_V2', 'Flip_V2', 'GeneratePoseTarget', 'FormatShape',
-    'Collect'
+    'RandomGamma', 'MultiCenterCrop', 'RandomBrightness', 'RandomHue',
+    'RandomSaturation', 'UniformSampleFrames', 'PoseDecode', 'PoseCompact',
+    'Resize', 'RandomResizedCrop_V2', 'Flip_V2', 'GeneratePoseTarget',
+    'FormatShape', 'Collect'
 ]

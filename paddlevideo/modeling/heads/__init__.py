@@ -14,7 +14,7 @@
 
 from .adds_head import AddsHead
 from .asrf_head import ASRFHead
-from .attention_lstm_head import AttentionLstmHead
+from .attention_lstm_head import AttentionLstmHead, ActionAttentionLstmHead
 from .base import BaseHead
 from .bbox_head import BBoxHeadAVA
 from .cfbi_head import CollaborativeEnsemblerMS
@@ -36,6 +36,7 @@ from .ms_tcn_head import MSTCNHead
 from .asrf_head import ASRFHead
 from .ctrgcn_head import CTRGCNHead
 from .movinet_head import MoViNetHead
+from .agcn2s_head import AGCN2sHead
 from .token_shift_head import TokenShiftHead
 
 __all__ = [
@@ -43,5 +44,6 @@ __all__ = [
     'AttentionLstmHead', 'TimeSformerHead', 'STGCNHead', 'TransNetV2Head',
     'I3DHead', 'SingleRoIExtractor3D', 'AVARoIHead', 'BBoxHeadAVA', 'AddsHead',
     'ppTimeSformerHead', 'CollaborativeEnsemblerMS', 'MSTCNHead', 'ASRFHead',
-    'MoViNetHead', 'CTRGCNHead', 'TokenShiftHead'
+    'MoViNetHead', 'CTRGCNHead', 'TokenShiftHead', 'ActionAttentionLstmHead',
+    'AGCN2sHead'
 ]

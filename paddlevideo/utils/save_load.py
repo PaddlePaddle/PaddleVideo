@@ -107,9 +107,10 @@ def pretrain_vit_param_trans(model, state_dicts, num_patches, num_seg,
         del state_dicts['head' + '.bias']
 
     total_len = len(model.state_dict())
-    if num_patches + 1 != state_dicts['pos_embed'].shape[1]:  # when 
+    if num_patches + 1 != state_dicts['pos_embed'].shape[1]:  # when
         pos_embed = state_dicts['pos_embed']
-        cls_pos_embed = paddle.to_tensor(pos_embed[0, 0, :]).unsqueeze(0).unsqueeze(1)
+        cls_pos_embed = paddle.to_tensor(
+            pos_embed[0, 0, :]).unsqueeze(0).unsqueeze(1)
         other_pos_embed = paddle.to_tensor(pos_embed[0, 1:, :])
         gs_new = int(np.sqrt(num_patches))
         gs_old = int(np.sqrt(other_pos_embed.shape[0]))
@@ -117,7 +118,7 @@ def pretrain_vit_param_trans(model, state_dicts, num_patches, num_seg,
         other_pos_embed = paddle.reshape(other_pos_embed, [gs_old, gs_old, -1])
         other_pos_embed = ndimage.zoom(other_pos_embed, zoom, order=1)
         other_pos_embed = paddle.to_tensor(other_pos_embed)
-        new_pos_embed= paddle.reshape(other_pos_embed, [1, num_patches, -1])
+        new_pos_embed = paddle.reshape(other_pos_embed, [1, num_patches, -1])
         new_pos_embed = paddle.concat((cls_pos_embed, new_pos_embed), axis=1)
         state_dicts['pos_embed'] = new_pos_embed
         time.sleep(0.01)
@@ -262,38 +263,6 @@ def mkdir(dir):
             os.makedirs(dir)
         except:
             pass
-
-
-"""
-def save(state_dicts, file_name):
-    def convert(state_dict):
-        model_dict = {}
-
-        for k, v in state_dict.items():
-            if isinstance(
-                    v,
-                (paddle.fluid.framework.Variable, paddle.fluid.core.VarBase)):
-                model_dict[k] = v.numpy()
-            else:
-                model_dict[k] = v
-
-        return model_dict
-
-    final_dict = {}
-    for k, v in state_dicts.items():
-        if isinstance(
-                v,
-            (paddle.fluid.framework.Variable, paddle.fluid.core.VarBase)):
-            final_dict = convert(state_dicts)
-            break
-        elif isinstance(v, dict):
-            final_dict[k] = convert(v)
-        else:
-            final_dict[k] = v
-
-    with open(file_name, 'wb') as f:
-        pickle.dump(final_dict, f, protocol=2)
-"""
 
 
 @main_only

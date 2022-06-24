@@ -25,11 +25,12 @@ from ..solver import build_lr, build_optimizer
 from ..metrics import build_metric
 from ..utils import do_preciseBN
 from paddlevideo.utils import get_logger, coloring
-from paddlevideo.utils import (AverageMeter, build_rec_record, log_batch, log_epoch,
-                               save, load, mkdir)
+from paddlevideo.utils import (AverageMeter, build_rec_record, log_batch,
+                               log_epoch, save, load, mkdir)
 #from paddlevideo.metrics import QualityMetric
 import numpy as np
 from scipy import stats
+
 
 def train_model(cfg,
                 weights=None,
@@ -133,8 +134,7 @@ def train_model(cfg,
         tic = time.time()
         train_output = []
         train_label = []
-        
-         
+
         for i, data in enumerate(train_loader):
             record_list['reader_time'].update(time.time() - tic)
 
@@ -153,7 +153,7 @@ def train_model(cfg,
 
                 train_output.extend(outputs['output'])
                 train_label.extend(outputs['label'])
-                    
+
                 avg_loss = outputs['loss']
                 scaled = scaler.scale(avg_loss)
                 scaled.backward()
@@ -169,7 +169,7 @@ def train_model(cfg,
                         list(model._find_varbase(outputs)))
                 else:
                     outputs = model.train_step(data)
-                
+
                 train_output.extend(outputs['output'])
                 train_label.extend(outputs['label'])
                 # 4.2 backward
@@ -178,7 +178,7 @@ def train_model(cfg,
                 # 4.3 minimize
                 optimizer.step()
                 optimizer.clear_grad()
-            
+
             # log record
             record_list['lr'].update(optimizer._global_learning_rate(),
                                      batch_size)
@@ -202,8 +202,9 @@ def train_model(cfg,
         # learning rate epoch step
         if not cfg.OPTIMIZER.learning_rate.get("iter_step"):
             lr.step()
-        
-        train_PLCC, train_SROCC = Metric.accumulate_train(train_output, train_label)
+
+        train_PLCC, train_SROCC = Metric.accumulate_train(
+            train_output, train_label)
         logger.info("train_SROCC={}".format(train_SROCC))
         logger.info("train_PLCC={}".format(train_PLCC))
 
@@ -214,13 +215,14 @@ def train_model(cfg,
 
         eval_output = []
         eval_label = []
+
         def evaluate(best, max_SROCC, max_PLCC):
             """evaluate"""
             model.eval()
             record_list = build_rec_record(cfg.MODEL)
             record_list.pop('lr')
             tic = time.time()
-            
+
             for i, data in enumerate(valid_loader):
 
                 if parallel:
@@ -243,11 +245,12 @@ def train_model(cfg,
                     ips = "ips: {:.5f} instance/sec.".format(
                         batch_size / record_list["batch_time"].val)
                     log_batch(record_list, i, epoch + 1, cfg.epochs, "val", ips)
-            
-            eval_PLCC, eval_SROCC = Metric.accumulate_train(eval_output, eval_label)
+
+            eval_PLCC, eval_SROCC = Metric.accumulate_train(
+                eval_output, eval_label)
             logger.info("val_SROCC={}".format(eval_SROCC))
             logger.info("val_PLCC={}".format(eval_PLCC))
-                  
+
             if max_SROCC <= eval_SROCC and max_PLCC <= eval_PLCC:
                 max_SROCC = eval_SROCC
                 max_PLCC = eval_PLCC
@@ -257,7 +260,7 @@ def train_model(cfg,
                      osp.join(output_dir, model_name + "_best.pdopt"))
                 save(model.state_dict(),
                      osp.join(output_dir, model_name + "_best.pdparams"))
-            
+
             ips = "ips: {:.5f} instance/sec.".format(
                 batch_size * record_list["batch_time"].count /
                 record_list["batch_time"].sum)
@@ -275,15 +278,18 @@ def train_model(cfg,
         # 5. Validation
         if validate and (epoch % cfg.get("val_interval", 1) == 0
                          or epoch == cfg.epochs - 1):
-            with paddle.fluid.dygraph.no_grad():
+            with paddle.no_grad():
                 best, max_SROCC, max_PLCC = evaluate(best, max_SROCC, max_PLCC)
 
         # 6. Save model
         if epoch % cfg.get("save_interval", 1) == 0 or epoch == cfg.epochs - 1:
-            save(optimizer.state_dict(), osp.join(output_dir, model_name + "_epoch_{}.pdopt".format(epoch)))
-            save(model.state_dict(), osp.join(output_dir, model_name + "_epoch_{}.pdparams".format(epoch)))
-
-
-
+            save(
+                optimizer.state_dict(),
+                osp.join(output_dir,
+                         model_name + "_epoch_{}.pdopt".format(epoch)))
+            save(
+                model.state_dict(),
+                osp.join(output_dir,
+                         model_name + "_epoch_{}.pdparams".format(epoch)))
 
     logger.info('training {model_name} finished')

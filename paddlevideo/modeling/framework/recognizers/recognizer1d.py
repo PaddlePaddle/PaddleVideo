@@ -61,3 +61,51 @@ class Recognizer1D(BaseRecognizer):
         # call forward
         lstm_logit, _ = self.forward_net(imgs)
         return lstm_logit
+
+
+@RECOGNIZERS.register()
+class RecognizerAction(BaseRecognizer):
+    """1D recognizer model framework."""
+    def forward_net(self, imgs):
+        """Define how the model is going to train, from input to output.
+        """
+        lstm_logit, lstm_output = self.head(imgs)
+        return lstm_logit, lstm_output
+
+    def train_step(self, data_batch):
+        """Training step.
+        """
+        rgb_data, rgb_len, rgb_mask, audio_data, audio_len, audio_mask, labels, labels_iou = data_batch
+        imgs = [(rgb_data, rgb_len, rgb_mask),
+                (audio_data, audio_len, audio_mask)]
+
+        # call forward
+        output_logit, output_iou = self.forward_net(imgs)
+        loss = self.head.loss(output_logit, output_iou, labels, labels_iou)
+        top1, top5 = self.head.metric(output_logit, labels)
+        loss_metrics = dict()
+        loss_metrics['loss'] = loss
+        loss_metrics['top1'] = top1
+        loss_metrics['top5'] = top5
+
+        return loss_metrics
+
+    def val_step(self, data_batch):
+        """Validating setp.
+        """
+        return self.train_step(data_batch)
+
+    def test_step(self, data_batch):
+        """Testing setp.
+        """
+        return self.train_step(data_batch)
+
+    def infer_step(self, data_batch):
+        """Infering setp.
+        """
+        rgb_data, rgb_len, rgb_mask, audio_data, audio_len, audio_mask = data_batch
+        imgs = [(rgb_data, rgb_len, rgb_mask),
+                (audio_data, audio_len, audio_mask)]
+        # call forward
+        output_logit, output_iou = self.forward_net(imgs)
+        return output_logit, output_iou
