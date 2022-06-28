@@ -1,0 +1,24 @@
+Usefull Temporal Action Detection Papers. 
+
+    Rethinking the Faster R-CNN Architecture for Temporal Action Localization - Yu-Wei Chao et al., CVPR2018
+    Weakly Supervised Action Localization by Sparse Temporal Pooling Network - Phuc Nguyen et al., CVPR 2018
+    Temporal Deformable Residual Networks for Action Segmentation in Videos - P. Lei and S. Todrovic., CVPR2018.
+    End-to-End, Single-Stream Temporal Action Detection in Untrimmed Videos - Shayamal Buch et al., BMVC 2017
+    Cascaded Boundary Regression for Temporal Action Detection - Jiyang Gao et al., BMVC 2017
+    Temporal Tessellation: A Unified Approach for Video Analysis - Kaufman et al., ICCV2017. 
+    Temporal Action Detection with Structured Segment Networks - Y. Zhao et al., ICCV2017. 
+    Temporal Context Network for Activity Localization in Videos - X. Dai et al., ICCV2017.
+    Detecting the Moment of Completion: Temporal Models for Localising Action Completion - F. Heidarivincheh et al., arXiv2017.
+    CDC: Convolutional-De-Convolutional Networks for Precise Temporal Action Localization in Untrimmed Videos - Z. Shou et al, CVPR2017.
+    SST: Single-Stream Temporal Action Proposals - S. Buch et al, CVPR2017.
+    R-C3D: Region Convolutional 3D Network for Temporal Activity Detection - H. Xu et al, arXiv2017. [code] [project web] [PyTorch]
+    DAPs: Deep Action Proposals for Action Understanding - V. Escorcia et al, ECCV2016. 
+    Online Action Detection using Joint Classification-Regression Recurrent Neural Networks - Y. Li et al, ECCV2016. 
+    Temporal Action Localization in Untrimmed Videos via Multi-stage CNNs - Z. Shou et al, CVPR2016. 
+    Fast Temporal Activity Proposals for Efficient Detection of Human Actions in Untrimmed Videos - F. Heilbron et al, CVPR2016. 
+    Actionness Estimation Using Hybrid Fully Convolutional Networks - L. Wang et al, CVPR2016. 
+    Learning Activity Progression in LSTMs for Activity Detection and Early Detection - S. Ma et al, CVPR2016.
+    End-to-end Learning of Action Detection from Frame Glimpses in Videos - S. Yeung et al, CVPR2016. 
+    Fast Action Proposals for Human Action Detection and Search - G. Yu and J. Yuan, CVPR2015. 
+    Bag-of-fragments: Selecting and encoding video fragments for event detection and recounting - P. Mettes et al, ICMR2015.
+    Action localization in videos through context walk - K. Soomro et al, ICCV2015.

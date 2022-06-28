@@ -1,0 +1,8 @@
+some useful demo todo.  
+
+1、single-class action recognition， tsn/tsm/slowfast  
+2、multi-class action recognition，lstm  
+3、action localization，bmn  
+4、spatio temporal action detection，todo  
+5、3000-class tagging application(videotag)：tsn+lstm  
+6、Highlights detection application：bmn+tsn+lstm  
