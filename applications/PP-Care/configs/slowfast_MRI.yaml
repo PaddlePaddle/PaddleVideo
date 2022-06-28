@@ -1,0 +1,93 @@
+
+MODEL:
+    framework: "Recognizer3DMRI"
+    backbone:
+        name: "ResNetSlowFast_MRI"
+        depth: 50
+        alpha: 8
+        beta: 8
+        width_per_group: 64
+        fusion_kernel_sz: 5
+    head:
+        name: "SlowFastHead"
+        width_per_group: 64
+        alpha: 8
+        beta: 8
+        num_classes: 2
+        num_frames: 32
+        crop_size: 224
+        dropout_rate: 0.5
+
+
+DATASET:
+    batch_size: 16
+    test_batch_size: 16
+    num_workers: 0
+    train:
+        format: "SFMRIDataset"
+        data_prefix: ""
+        file_path: "/home/aistudio/train.txt"
+
+    valid:
+        format: "SFMRIDataset"
+        data_prefix: ""
+        file_path: "/home/aistudio/test.txt"
+
+    test:
+        format: "SFMRIDataset"
+        data_prefix: ""
+        file_path: "/home/aistudio/test.txt"
+
+
+PIPELINE:
+    train:
+        decode_sampler_MRI:
+            name: "SFMRI_DecodeSampler"
+            num_seg: [4,32]
+            seg_len: 1
+            valid_mode: False
+            select_left: True
+
+    valid:
+        decode_sampler_MRI:
+            name: "SFMRI_DecodeSampler"
+            num_seg: [4,32]
+            seg_len: 1
+            valid_mode: True
+            select_left: True
+    test:
+        decode_sampler_MRI:
+            name: "SFMRI_DecodeSampler"
+            num_seg: [4,32]
+            seg_len: 1
+            valid_mode: True
+            select_left: True
+
+OPTIMIZER:
+    name: 'Momentum'
+    momentum: 0.9
+    learning_rate:
+        iter_step: True
+        name: 'CustomWarmupCosineDecay'
+        max_epoch: 196
+        warmup_epochs: 34
+        warmup_start_lr: 0.01
+        cosine_base_lr: 0.1
+    weight_decay:
+        name: 'L2'
+        value: 1e-4
+    use_nesterov: True
+
+METRIC:
+    name: 'CenterCropMetric_MRI'
+    if_slowfast: 1
+
+PRECISEBN:
+    preciseBN_interval: 10
+    num_iters_preciseBN: 200
+
+model_name: SlowFast_MRI
+save_interval: 10
+val_interval: 10
+epochs: 50 #Mandatory, total epoch
+log_level: "INFO"
