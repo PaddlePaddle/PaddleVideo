@@ -1,0 +1,153 @@
+{
+    "n_gpu": 1,
+    "seed": 0,
+    "log_name": "info.json",
+    "experts": {
+        "drop_feats": "",
+        "text_feat": "openai",
+        "text_agg": "vlad",
+        "text_dim": 768,
+        "modalities": [],
+        "ce_shared_dim": 768
+    },
+    "arch": {
+        "type": "CENet",
+        "args": {
+            "use_mish": 1,
+            "vlad_clusters": {
+                "features_audio": 16,
+                "features_speech": 16,
+                "features_face": 16,
+                "features_scene": 16,
+                "features_s3d": 16,
+                "features_rgb": 16,
+                "features_ocr": 16,
+                "features_flow": 16,
+                "text": 16
+            },
+            "ghost_clusters": {
+                "text": 0
+            },
+            "mimic_ce_dims": 0
+        }
+    },
+
+    "data_loader": {
+        "type": "ExpertDataLoader",
+        "args": {
+            "batch_size": 32,
+            "num_workers": 8,
+            "root_feat_folder": "",
+            "feat_aggregation": {
+                "features_audio": {
+                    "model": "mmt",
+                    "flaky": true,
+                    "temporal": "vlad",
+                    "type": "embed",
+                    "binarise": false,
+                    "feat_dims": {
+                        "embed": 128
+                    }
+                },
+                "features_speech": {
+                    "model": "mmt",
+                    "flaky": true,
+                    "temporal": "vlad",
+                    "type": "embed",
+                    "binarise": false,
+                    "feat_dims": {
+                        "embed": 300
+                    }
+                },
+                "features_face": {
+                    "model": "mmt",
+                    "flaky": true,
+                    "temporal": "vlad",
+                    "type": "embed",
+                    "binarise": false,
+                    "feat_dims": {
+                        "embed": 512
+                    }
+                },
+                "features_ocr": {
+                    "model": "mmt",
+                    "flaky": true,
+                    "temporal": "vlad",
+                    "type": "embed",
+                    "binarise": false,
+                    "feat_dims": {
+                        "embed": 300
+                    }
+                },
+                "features_rgb": {
+                    "model": "mmt",
+                    "temporal": "vlad",
+                    "type": "embed",
+                    "binarise": false,
+                    "feat_dims": {
+                        "embed": 2048
+                    }
+                },
+                "features_flow": {
+                    "model": "mmt",
+                    "temporal": "vlad",
+                    "type": "embed",
+                    "binarise": false,
+                    "feat_dims": {
+                        "embed": 1024
+                    }
+                },
+                "features_s3d": {
+                    "model": "mmt",
+                    "temporal": "vlad",
+                    "type": "embed",
+                    "binarise": false,
+                    "feat_dims": {
+                        "embed": 1024
+                    }
+                },
+                "features_scene": {
+                    "model": "mmt",
+                    "temporal": "vlad",
+                    "type": "embed",
+                    "binarise": false,
+                    "feat_dims": {
+                        "embed": 2208
+                    }
+                }
+            }
+        }
+    },
+    "optimizer": {
+        "type": "Ranger",
+        "args":{
+            "lr": 0.1,
+            "weight_decay": 1e-3
+        }
+    },
+    "loss": {
+        "type": "MaxMarginRankingLoss",
+        "args": {
+            "margin": 0.09381161988446174
+        }
+    },
+    "metrics": [
+        "t2v_metrics",
+        "v2t_metrics"
+    ],
+    "lr_scheduler": {
+        "type": "StepLR",
+        "args": {
+            "step_size": 1,
+            "gamma": 0.95
+        }
+    },
+    "trainer": {
+        "save_only_best": true,
+        "save_dir": "data/saved/",
+        "save_period": 5,
+        "val_freq": 5,
+        "verbosity": 2,
+        "monitor": "max val_t2v_metrics_geometric_mean_R1-R5-R10"
+    }
+}
