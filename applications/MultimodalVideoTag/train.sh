@@ -1,0 +1,13 @@
+export CUDA_VISIBLE_DEVICES=0,1
+export FLAGS_eager_delete_tensor_gb=0.0
+export FLAGS_sync_nccl_allreduce=1
+export FLAGS_fast_eager_deletion_mode=1
+export FLAGS_fraction_of_gpu_memory_to_use=0.5
+export FLAGS_reallocate_gpu_memory_in_mb=0
+export FLAGS_memory_fraction_of_eager_deletion=1
+python scenario_lib/train.py --model_name=AttentionLstmErnie \
+--config=./conf/conf.txt \
+--log_interval=20 \
+--valid_interval=1 \
+--save_dir=checkpoints_save_new/ \
+--pretrain=checkpoints_save/
