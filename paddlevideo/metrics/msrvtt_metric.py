@@ -13,7 +13,6 @@
 import numpy as np
 import paddle
 import paddle.nn.functional as F
-from paddle.hapi.model import _all_gather
 
 from .registry import METRIC
 from .base import BaseMetric
