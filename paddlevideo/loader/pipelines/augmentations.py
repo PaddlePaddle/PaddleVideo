@@ -458,7 +458,6 @@ class RandomBrightness(object):
     Args:
         p(float): Random brightness images with the probability p.
     """
-
     def __init__(self, p=0.1, brightness=1):
         self.p = p
         self.brightness = brightness
@@ -477,9 +476,7 @@ class RandomBrightness(object):
 
         if v < self.p:
             transform = ColorJitter(brightness=self.brightness)
-            results['imgs'] = [
-                transform(img) for img in imgs
-            ]
+            results['imgs'] = [transform(img) for img in imgs]
         else:
             results['imgs'] = imgs
         return results
@@ -492,7 +489,6 @@ class RandomSaturation(object):
     Args:
         p(float): Random saturation images with the probability p.
     """
-
     def __init__(self, p=0.1, saturation=2):
         self.p = p
         self.saturation = saturation
@@ -511,9 +507,7 @@ class RandomSaturation(object):
 
         if v < self.p:
             transform = ColorJitter(saturation=self.saturation)
-            results['imgs'] = [
-                transform(img) for img in imgs
-            ]
+            results['imgs'] = [transform(img) for img in imgs]
         else:
             results['imgs'] = imgs
         return results
@@ -526,7 +520,6 @@ class RandomHue(object):
     Args:
         p(float): Random hue images with the probability p.
     """
-
     def __init__(self, p=0.1, hue=0.5):
         self.p = p
         self.hue = hue
@@ -545,9 +538,7 @@ class RandomHue(object):
 
         if v < self.p:
             transform = ColorJitter(hue=self.hue)
-            results['imgs'] = [
-                transform(img) for img in imgs
-            ]
+            results['imgs'] = [transform(img) for img in imgs]
         else:
             results['imgs'] = imgs
         return results
@@ -559,11 +550,10 @@ class RandomGamma(object):
     Random Gamma images.
     Args:
         p(float): Random gamma images with the probability p.
-        gamma (float): Non negative real number, same as `\gamma` in the equation.
+        gamma (float): Non negative real number, same as `\\gamma` in the equation.
                        gamma larger than 1 make the shadows darker,
                       while gamma smaller than 1 make dark regions lighter.
     """
-
     def __init__(self, p=0.1, gamma=0.2):
         self.p = p
         self.value = [1 - gamma, 1 + gamma]
@@ -576,8 +566,12 @@ class RandomGamma(object):
             img = Image.fromarray(img)
         input_mode = img.mode
         img = img.convert("RGB")
-        gamma_map = [int((255 + 1 - 1e-3) * gain * pow(ele / 255.0, gamma)) for ele in range(256)] * 3
-        img = img.point(gamma_map)  # use PIL's point-function to accelerate this part
+        gamma_map = [
+            int((255 + 1 - 1e-3) * gain * pow(ele / 255.0, gamma))
+            for ele in range(256)
+        ] * 3
+        img = img.point(
+            gamma_map)  # use PIL's point-function to accelerate this part
         img = img.convert(input_mode)
         if flag:
             img = np.array(img)
@@ -597,9 +591,7 @@ class RandomGamma(object):
 
         if v < self.p:
             gamma = random.uniform(self.value[0], self.value[1])
-            results['imgs'] = [
-                self._adust_gamma(img, gamma) for img in imgs
-            ]
+            results['imgs'] = [self._adust_gamma(img, gamma) for img in imgs]
         else:
             results['imgs'] = imgs
         return results
@@ -782,7 +774,6 @@ class MultiCenterCrop(object):
     Args:
         target_size(int): Random crop a square with the target_size from an image.
     """
-
     def __init__(self, target_size):
         self.target_size = target_size
 
@@ -814,35 +805,37 @@ class MultiCenterCrop(object):
         if 'backend' in results and results['backend'] == 'pyav':
             #center_corp
             x1 = 0
-            if w>self.target_size:
-                x1 = int((w-self.target_size)/2.0)
+            if w > self.target_size:
+                x1 = int((w - self.target_size) / 2.0)
             y1 = 0
-            if h>self.target_size:
-                y1 = int((h-self.target_size)/2.0)
-            crop_imgs_center = imgs[:, :, y1:y1 + th, x1:x1 + tw].numpy()  # [C, T, th, tw]
+            if h > self.target_size:
+                y1 = int((h - self.target_size) / 2.0)
+            crop_imgs_center = imgs[:, :, y1:y1 + th,
+                                    x1:x1 + tw].numpy()  # [C, T, th, tw]
             #left_crop
             x1 = 0
             y1 = 0
-            if h>self.target_size:
-                y1 = int((h-self.target_size)/2.0)
+            if h > self.target_size:
+                y1 = int((h - self.target_size) / 2.0)
             crop_imgs_left = imgs[:, :, y1:y1 + th, x1:x1 + tw].numpy()
             #right_crop
             x1 = 0
             y1 = 0
-            if w>self.target_size:
-                x1 = w-self.target_size
-            if h>self.target_size:
-                y1 = int((h-self.target_size)/2.0)
+            if w > self.target_size:
+                x1 = w - self.target_size
+            if h > self.target_size:
+                y1 = int((h - self.target_size) / 2.0)
             crop_imgs_right = imgs[:, :, y1:y1 + th, x1:x1 + tw].numpy()
-            crop_imgs = np.concatenate((crop_imgs_center, crop_imgs_left, crop_imgs_right), axis = 1)
+            crop_imgs = np.concatenate(
+                (crop_imgs_center, crop_imgs_left, crop_imgs_right), axis=1)
             crop_images = paddle.to_tensor(crop_imgs)
 
         else:
             x1 = 0
-            if w>self.target_size:
+            if w > self.target_size:
                 x1 = random.randint(0, w - tw)
             y1 = 0
-            if h>self.target_size:
+            if h > self.target_size:
                 y1 = random.randint(0, h - th)
             for img in imgs:
                 if w == tw and h == th:
