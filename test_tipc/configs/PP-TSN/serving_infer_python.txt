@@ -1,0 +1,13 @@
+===========================serving_params===========================
+model_name:PP-TSN
+python:python3.7
+trans_model:-m paddle_serving_client.convert
+--dirname:./inference/ppTSN/
+--model_filename:ppTSN.pdmodel
+--params_filename:ppTSN.pdiparams
+--serving_server:./deploy/python_serving/ppTSN_serving_server/
+--serving_client:./deploy/python_serving/ppTSN_serving_client/
+serving_dir:./deploy/python_serving
+web_service:recognition_web_service.py --config=configs/PP-TSN.yaml --name PPTSN
+pipline:pipeline_http_client.py
+--input_file:../../data/

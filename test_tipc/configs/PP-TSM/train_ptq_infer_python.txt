@@ -1,0 +1,24 @@
+===========================ptq_params===========================
+model_name:PP-TSM
+python:python3.7
+--use_gpu:True
+--config:./configs/recognition/pptsm/pptsm_k400_frames_uniform_quantization.yaml
+-o inference_model_dir:./inference/ppTSM
+-o quant_output_dir:./inference/ppTSM/quant_model
+-o DATASET.quant.data_prefix:./data/k400/rawframes
+-o DATASET.quant.file_path:./data/k400/val_small_frames.list
+-o DATASET.batch_nums:2
+-o DATASET.batch_size:2
+##
+trainer:ptq_train
+ptq_train:deploy/slim/quant_post_static.py
+##
+===========================infer_params===========================
+inference:./tools/predict.py
+--use_gpu:True|False
+--config:./configs/recognition/pptsm/pptsm_k400_frames_uniform.yaml
+--batch_size:1
+--model_file:./inference/ppTSM/quant_model/__model__
+--params_file:./inference/ppTSM/quant_model/__params__
+--input_file:./data/example.avi
+--enable_benchmark:True
