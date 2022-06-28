@@ -10,7 +10,7 @@ MODEL: #MODEL field
         in_channels: 2048 #input channel of the extracted feature.
         drop_ratio: 0.5 #the ratio of dropout
         std: 0.01 #std value in params initialization
-        ls_eps: 0.1
+        ls_eps: 0.1 # label smooth factor
 
 DATASET: #DATASET field
     batch_size: 16  #Mandatory, bacth size
