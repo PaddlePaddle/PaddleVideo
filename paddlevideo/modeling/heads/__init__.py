@@ -1,1 +1,0 @@
-from .effgcn_cla import EfficientGCN_Classifier
