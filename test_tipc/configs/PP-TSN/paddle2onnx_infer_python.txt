@@ -1,0 +1,14 @@
+===========================paddle2onnx_params===========================
+model_name:PP-TSN
+python:python3.7
+2onnx: paddle2onnx
+--model_dir:./inference/ppTSN/
+--model_filename:ppTSN.pdmodel
+--params_filename:ppTSN.pdiparams
+--save_file:./inference/ppTSN/ppTSN.onnx
+--opset_version:10
+--enable_onnx_checker:True
+inference:./deploy/paddle2onnx/predict_onnx.py
+--config:./configs/recognition/pptsn/pptsn_k400_videos.yaml
+--onnx_file:./inference/ppTSN/ppTSN.onnx
+--input_file:./data/example.avi
