@@ -37,7 +37,7 @@ python3.7 main.py -c configs/recognition/agcn/agcn_fsd.yaml
 
 - 由于赛事未提供验证集数据，因此训练时不做valid。
 
-- 您可以自定义修改参数配置，以达到在不同的数据集上进行训练/测试的目的，参数用法请参考[config](../../tutorials/config.md)。
+- 您可以自定义修改参数配置，以达到在不同的数据集上进行训练/测试的目的，参数用法请参考[config](../../contribute/config.md)。
 
 ### NTU-RGBD数据集训练
 

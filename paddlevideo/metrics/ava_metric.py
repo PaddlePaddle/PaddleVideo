@@ -12,7 +12,6 @@
 
 import numpy as np
 import paddle
-from paddle.hapi.model import _all_gather
 from collections import OrderedDict
 from paddlevideo.utils import get_logger, load, log_batch, AverageMeter
 from .registry import METRIC
@@ -29,7 +28,6 @@ logger = get_logger("paddlevideo")
 
 @METRIC.register
 class AVAMetric(BaseMetric):
-
     def __init__(self,
                  data_size,
                  batch_size,

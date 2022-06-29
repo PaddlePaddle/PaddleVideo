@@ -452,6 +452,152 @@ class RandomFlip(object):
 
 
 @PIPELINES.register()
+class RandomBrightness(object):
+    """
+    Random Brightness images.
+    Args:
+        p(float): Random brightness images with the probability p.
+    """
+    def __init__(self, p=0.1, brightness=1):
+        self.p = p
+        self.brightness = brightness
+
+    def __call__(self, results):
+        """
+        Performs random brightness operations.
+        Args:
+            imgs: List where each item is a PIL.Image.
+            For example, [PIL.Image0, PIL.Image1, PIL.Image2, ...]
+        return:
+            brightness_imgs: List where each item is a PIL.Image after random brightness.
+        """
+        imgs = results['imgs']
+        v = random.random()
+
+        if v < self.p:
+            transform = ColorJitter(brightness=self.brightness)
+            results['imgs'] = [transform(img) for img in imgs]
+        else:
+            results['imgs'] = imgs
+        return results
+
+
+@PIPELINES.register()
+class RandomSaturation(object):
+    """
+    Random Saturation images.
+    Args:
+        p(float): Random saturation images with the probability p.
+    """
+    def __init__(self, p=0.1, saturation=2):
+        self.p = p
+        self.saturation = saturation
+
+    def __call__(self, results):
+        """
+        Performs random saturation operations.
+        Args:
+            imgs: List where each item is a PIL.Image.
+            For example, [PIL.Image0, PIL.Image1, PIL.Image2, ...]
+        return:
+            saturation_imgs: List where each item is a PIL.Image after random saturation.
+        """
+        imgs = results['imgs']
+        v = random.random()
+
+        if v < self.p:
+            transform = ColorJitter(saturation=self.saturation)
+            results['imgs'] = [transform(img) for img in imgs]
+        else:
+            results['imgs'] = imgs
+        return results
+
+
+@PIPELINES.register()
+class RandomHue(object):
+    """
+    Random Hue images.
+    Args:
+        p(float): Random hue images with the probability p.
+    """
+    def __init__(self, p=0.1, hue=0.5):
+        self.p = p
+        self.hue = hue
+
+    def __call__(self, results):
+        """
+        Performs random hue operations.
+        Args:
+            imgs: List where each item is a PIL.Image.
+            For example, [PIL.Image0, PIL.Image1, PIL.Image2, ...]
+        return:
+            hue_imgs: List where each item is a PIL.Image after random hue.
+        """
+        imgs = results['imgs']
+        v = random.random()
+
+        if v < self.p:
+            transform = ColorJitter(hue=self.hue)
+            results['imgs'] = [transform(img) for img in imgs]
+        else:
+            results['imgs'] = imgs
+        return results
+
+
+@PIPELINES.register()
+class RandomGamma(object):
+    """
+    Random Gamma images.
+    Args:
+        p(float): Random gamma images with the probability p.
+        gamma (float): Non negative real number, same as `\\gamma` in the equation.
+                       gamma larger than 1 make the shadows darker,
+                      while gamma smaller than 1 make dark regions lighter.
+    """
+    def __init__(self, p=0.1, gamma=0.2):
+        self.p = p
+        self.value = [1 - gamma, 1 + gamma]
+        self.value[0] = max(self.value[0], 0)
+
+    def _adust_gamma(self, img, gamma, gain=1.0):
+        flag = False
+        if isinstance(img, np.ndarray):
+            flag = True
+            img = Image.fromarray(img)
+        input_mode = img.mode
+        img = img.convert("RGB")
+        gamma_map = [
+            int((255 + 1 - 1e-3) * gain * pow(ele / 255.0, gamma))
+            for ele in range(256)
+        ] * 3
+        img = img.point(
+            gamma_map)  # use PIL's point-function to accelerate this part
+        img = img.convert(input_mode)
+        if flag:
+            img = np.array(img)
+        return img
+
+    def __call__(self, results):
+        """
+        Performs random gamma operations.
+        Args:
+            imgs: List where each item is a PIL.Image.
+            For example, [PIL.Image0, PIL.Image1, PIL.Image2, ...]
+        return:
+            gamma_imgs: List where each item is a PIL.Image after random gamma.
+        """
+        imgs = results['imgs']
+        v = random.random()
+
+        if v < self.p:
+            gamma = random.uniform(self.value[0], self.value[1])
+            results['imgs'] = [self._adust_gamma(img, gamma) for img in imgs]
+        else:
+            results['imgs'] = imgs
+        return results
+
+
+@PIPELINES.register()
 class Image2Array(object):
     """
     transfer PIL.Image to Numpy array and transpose dimensions from 'dhwc' to 'dchw'.
@@ -618,6 +764,85 @@ class JitterScale(object):
                 frames_resize.append(scale_img)
 
         results['imgs'] = frames_resize
+        return results
+
+
+@PIPELINES.register()
+class MultiCenterCrop(object):
+    """
+    center crop, left center crop right center crop
+    Args:
+        target_size(int): Random crop a square with the target_size from an image.
+    """
+    def __init__(self, target_size):
+        self.target_size = target_size
+
+    def __call__(self, results):
+        """
+        Performs random crop operations.
+        Args:
+            imgs: List where each item is a PIL.Image.
+            For example, [PIL.Image0, PIL.Image1, PIL.Image2, ...]
+        return:
+            crop_imgs: List where each item is a PIL.Image after random crop.
+        """
+        imgs = results['imgs']
+        if 'backend' in results and results['backend'] == 'pyav':  # [c,t,h,w]
+            h, w = imgs.shape[2:]
+        else:
+            w, h = imgs[0].size
+        th, tw = self.target_size, self.target_size
+
+        assert (w >= self.target_size) and (h >= self.target_size), \
+            "image width({}) and height({}) should be larger than crop size".format(
+                w, h, self.target_size)
+
+        crop_images = []
+        #just for tensor
+        crop_imgs_center = []
+        crop_imgs_left = []
+        crop_imgs_right = []
+        if 'backend' in results and results['backend'] == 'pyav':
+            #center_corp
+            x1 = 0
+            if w > self.target_size:
+                x1 = int((w - self.target_size) / 2.0)
+            y1 = 0
+            if h > self.target_size:
+                y1 = int((h - self.target_size) / 2.0)
+            crop_imgs_center = imgs[:, :, y1:y1 + th,
+                                    x1:x1 + tw].numpy()  # [C, T, th, tw]
+            #left_crop
+            x1 = 0
+            y1 = 0
+            if h > self.target_size:
+                y1 = int((h - self.target_size) / 2.0)
+            crop_imgs_left = imgs[:, :, y1:y1 + th, x1:x1 + tw].numpy()
+            #right_crop
+            x1 = 0
+            y1 = 0
+            if w > self.target_size:
+                x1 = w - self.target_size
+            if h > self.target_size:
+                y1 = int((h - self.target_size) / 2.0)
+            crop_imgs_right = imgs[:, :, y1:y1 + th, x1:x1 + tw].numpy()
+            crop_imgs = np.concatenate(
+                (crop_imgs_center, crop_imgs_left, crop_imgs_right), axis=1)
+            crop_images = paddle.to_tensor(crop_imgs)
+
+        else:
+            x1 = 0
+            if w > self.target_size:
+                x1 = random.randint(0, w - tw)
+            y1 = 0
+            if h > self.target_size:
+                y1 = random.randint(0, h - th)
+            for img in imgs:
+                if w == tw and h == th:
+                    crop_images.append(img)
+                else:
+                    crop_images.append(img.crop((x1, y1, x1 + tw, y1 + th)))
+        results['imgs'] = crop_images
         return results
 
 

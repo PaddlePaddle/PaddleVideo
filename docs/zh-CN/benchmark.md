@@ -2,36 +2,69 @@
 
 # Benchmark
 
-此文档主要对比PaddleVideo模型库与主流模型库的训练速度。
+本文档给出了PaddleVideo系列模型在各平台预测耗时benchmark。
 
+## 1. 视频分类模型
 
-## 环境配置
-### 硬件环境
+### 1.1 测试数据
 
-- 8 NVIDIA Tesla V100 (16G) GPUs
-- Intel(R) Xeon(R) Gold 6148 CPU @ 2.40GHz
+我们从Kinetics-400数据集中，随机选择提供100条用于benchmark时间测试，测试数据可以[点击](https://videotag.bj.bcebos.com/PaddleVideo-release2.3/time-test.tar)下载。
 
-### 软件环境
+解压后文件目录：
+```txt
+time-test
+├── data       # 测试视频文件
+└── file.list  # 文件列表
+```
 
-- Python 3.7
-- PaddlePaddle2.0
-- CUDA 10.1
-- CUDNN 7.6.3
-- NCCL 2.1.15
-- GCC 8.2.0
+视频属性如下:
 
+```txt
+mean video time:  9.67s
+mean video width:  373
+mean video height:  256
+mean fps:  25
+```
 
-### 实验与评价指标
+### 1.2 测试方法
 
-实验中我们测量了平均训练时间，包括数据处理和模型训练两个部分，训练速度均采用每秒钟训练的样本数量(ips)来计量,
-数值越大说明训练速度越快，并且考虑到机器预热的问题，前50次迭代的时间没有被计算在内。
+#### 1.2.1 测试环境
 
-在相同的数据和模型配置下对比了PaddleVideo和其他的视频理解工具箱，为了保证比较的公平性，对比实验都是在相同的硬件条件下进行，实验所用数据请参考[数据准备](./dataset/k400.md)
-观察下表可以发现PaddleVideo相比其他的视频理解框架在训练速度方面取得了巨大的提升，尤其是[Slowfast](../../configs/recognition/slowfast/slowfast.yaml)模型取得了将近一倍的训练速度的提升。
-对于每一种模型配置，我们采用了相同的数据预处理方法并且保证输入是相同的。
+- 硬件环境
 
-## 实验结果
-### 分类模型
+- 软件环境
+
+#### 1.2.2 测试脚本
+
+以PP-TSM为例，请先参考模型文档[PP-TSM]()下载推理模型，之后使用如下命令进行速度测试：
+
+```python
+python3.7 tools/predict.py --input_file time-test/file.list \
+                          --config configs/recognition/pptsm/pptsm_k400_frames_uniform.yaml \
+                          --model_file inference/ppTSM/ppTSM.pdmodel \
+                          --params_file inference/ppTSM/ppTSM.pdiparams \
+                          --use_gpu=False \
+                          --use_tensorrt=False \
+                          --enable_mkldnn=True \
+                          --enable_benchmark=True
+```
+
+各参数含义如下：
+
+```txt
+enable_mkldnn: 开启benchmark时间测试，请设为True
+input_file:    指定测试文件/文件列表, 示例使用1.1小节提供的测试数据
+config:        指定模型配置文件
+model_file:    指定推理文件pdmodel路径
+params_file:   指定推理文件pdiparams路径
+use_gpu:       是否使用GPU预测, False则使用CPU预测
+use_tensorrt:  是否开启TensorRT预测
+```
+
+### 1.3 测试结果
+
+- GPU推理速度一览
+- CPU推理速度一览
 
 | Model | batch size <sub>x</sub> gpus | PaddleVideo(ips) | Reference(ips) | MMAction2 (ips)  | PySlowFast (ips)|
 | :------: | :-------------------:|:---------------:|:---------------: | :---------------:  |:---------------: |
@@ -49,6 +82,20 @@
 | [BMN](../../configs/localization/bmn.yaml)  | 43.84 | x | x |
 
 ### 分割模型
+
+### 硬件环境
+
+- 8 NVIDIA Tesla V100 (16G) GPUs
+- Intel(R) Xeon(R) Gold 6148 CPU @ 2.40GHz
+
+### 软件环境
+
+- Python 3.7
+- PaddlePaddle2.0
+- CUDA 10.1
+- CUDNN 7.6.3
+- NCCL 2.1.15
+- GCC 8.2.0
 
 本仓库提供经典和热门时序动作分割模型的性能和精度对比
 

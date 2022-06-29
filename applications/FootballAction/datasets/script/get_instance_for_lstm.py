@@ -9,7 +9,7 @@ import random
 import pickle
 import numpy as np
 
-dataset = "/home/work/datasets/EuroCup2016"
+dataset = "../EuroCup2016"
 feat_dir = dataset + '/features'
 prop_file = dataset + '/feature_bmn/prop.json'
 out_dir = dataset + '/input_for_lstm'
@@ -105,6 +105,7 @@ def save_feature(label_info, out_dir):
     print('save feature ...')
     fps = label_info['fps']
     out_feature_dir = out_dir + '/feature'
+    out_feature_dir = os.path.abspath(out_feature_dir)
     if not os.path.exists(out_feature_dir):
         os.mkdir(out_feature_dir)
     fid_train = open(out_dir + '/train.txt', 'w')
