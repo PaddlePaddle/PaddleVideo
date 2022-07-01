@@ -6,7 +6,7 @@ Global.use_gpu:null|null
 Global.auto_cast:null
 -o epochs:2
 -o output_dir:null
--o DATASET.batch_size:null
+-o DATASET.batch_size:32
 null:null
 train_model_name:null
 train_infer_video_dir:null
