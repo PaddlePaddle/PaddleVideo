@@ -1,0 +1,73 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  padding: 0;
+  margin: 0;
+}
+
+#app {
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-align: center;
+  color: #2c3e50;
+  padding: 0;
+}
+
+.rounded {
+  border: 1px solid grey;
+  border-radius: 5px;
+  padding: 5px;
+  user-select: none;
+  cursor: pointer;
+}
+
+.rounded:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.container {
+  display: flex;
+  padding: 10px;
+  flex-wrap: wrap;
+}
+
+.flex {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.board {
+  margin: 10px;
+  padding: 10px;
+  flex-grow: 1;
+  border-radius: 4px;
+  box-shadow: 0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 2px 2px 0 rgba(0, 0, 0, 0.14),
+    0 1px 5px 0 rgba(0, 0, 0, 0.12) !important;
+  transition-duration: 0.25s;
+  user-select: none;
+}
+
+.board.clickable:hover {
+  cursor: pointer;
+  box-shadow: 0 3px 5px -1px rgba(0, 0, 0, 0.2), 0 5px 8px 0 rgba(0, 0, 0, 0.14),
+    0 1px 14px 0 rgba(0, 0, 0, 0.12) !important;
+}
+
+.board.clickable:active {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.ml-5-px {
+  margin-left: 5px;
+}
+
+.mr-5-px {
+  margin-right: 5px;
+}
+
+.h-130-px {
+  height: 130px;
+}

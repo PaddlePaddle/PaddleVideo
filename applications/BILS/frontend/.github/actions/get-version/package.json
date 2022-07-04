@@ -1,0 +1,6 @@
+{
+  "private": true,
+  "devDependencies": {
+    "@actions/core": "1.2.6"
+  }
+}

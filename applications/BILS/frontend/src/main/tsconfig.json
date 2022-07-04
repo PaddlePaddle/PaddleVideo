@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "downlevelIteration": true,
+    "resolveJsonModule": true,
+    "lib": [
+      "ESNext"
+    ],
+    "strict": true,
+    "moduleResolution": "node",
+    "baseUrl": ".",
+    "paths": {
+      "/@shared/*": [
+        "../shared/*"
+      ],
+      "/@main/*": [
+        "./*"
+      ]
+    },
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": [
+    "../shared/**/*",
+    "."
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

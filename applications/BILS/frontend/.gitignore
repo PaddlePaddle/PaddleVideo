@@ -1,0 +1,8 @@
+node_modules
+.DS_Store
+dist
+build/*
+!build/icons
+*.local
+thumbs.db
+/extensions

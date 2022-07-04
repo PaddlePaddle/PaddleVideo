@@ -1,0 +1,126 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'frontend/build/**'
+      - 'frontend/scripts/*'
+      - 'frontend/src/**'
+      - 'frontend/static/**'
+      - 'frontend/package.json'
+      - 'frontend/package-lock.json'
+      - 'scripts/*'
+      - 'index.js'
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js 15
+      uses: actions/setup-node@v2
+      with:
+        node-version: 15
+    - name: Use npm 7
+      run: npm install -g npm@7
+    - name: Install
+      run: |
+        npm ci --no-optional
+    - name: Get Build Number
+      id: vars
+      uses: ./.github/actions/get-build-number
+    - name: Build
+      run: |
+        npm run build:production
+      env:
+        BUILD_NUMBER: ${{ steps.vars.outputs.build_number }}
+        FULL_RELEASE: ${{ startsWith(github.event.commits[0].message, 'chore(release)') }}
+
+  repare-release:
+    runs-on: ubuntu-latest
+    needs: build
+    if: ${{ !startsWith(github.event.commits[0].message, 'chore(release)') }}
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js 15
+      uses: actions/setup-node@v2
+      with:
+        node-version: 15
+    - name: Use npm 7
+      run: npm install -g npm@7
+    - name: Install
+      run: |
+        npm ci --no-optional
+      env:
+        CI: true
+    - name: Get Package Version
+      uses: ./.github/actions/get-version
+      id: package
+    - name: Bump Version and Generate Changelog
+      id: version
+      uses: ci010/conventional-changelog-action@master
+      with:
+        github-token: ${{ secrets.github_token }}
+        version: ${{ steps.package.outputs.version }}
+        tag-prefix: 'v'
+    - name: Update package.json and CHANGELOG.md
+      uses: ./.github/actions/update-version
+      with:
+        version: ${{ steps.version.outputs.version }}
+    - name: Create Pull Request
+      if: ${{ steps.version.outputs.skipped == 'false' }}
+      uses: peter-evans/create-pull-request@v3
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        commit-message: >-
+          ${{ format('chore(release): {0}', steps.version.outputs.version) }}
+        title: ${{ format('Prepare Release {0}', steps.version.outputs.version) }}
+        body: ${{ steps.version.outputs.clean_changelog }}
+        branch: prepare-release
+
+  release:
+    if: startsWith(github.event.commits[0].message, 'chore(release)')
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js 15
+      uses: actions/setup-node@v2
+      with:
+        node-version: 15
+    - name: Use npm 7
+      run: npm install -g npm@7
+    - name: Install
+      run: |
+        npm ci --no-optional
+    - name: Publish NPM
+      run: |
+        git reset --hard
+        npm publish
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
+    - name: Get Package Version
+      uses: ./.github/actions/get-version
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ format('v{0}', steps.package.outputs.version) }}
+        release_name: ${{ format('v{0}', steps.package.outputs.version) }}
+        draft: false
+        prerelease: false
+        body: ${{ steps.prepare_release.outputs.clean_changelog }}
+    - name: Delete PR head branch
+      uses: dawidd6/action-delete-branch@master
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        branch: prepare-release
+        be_kind: true # don't fail on errors (optional)

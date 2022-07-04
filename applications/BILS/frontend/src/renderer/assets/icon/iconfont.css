@@ -1,0 +1,25 @@
+@font-face {
+  font-family: "iconicon"; /* Project id 3217020 */
+  /* Color fonts */
+  src: 
+       url('iconfont.woff2?t=1653795677959') format('woff2'),
+       url('iconfont.woff?t=1653795677959') format('woff'),
+       url('iconfont.ttf?t=1653795677959') format('truetype');
+}
+
+.iconicon {
+  font-family: "iconicon" !important;
+  font-size: 16px;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.color-dengdaitishi:before {
+  content: "\e65c";
+}
+
+.color-wodeqianbao:before {
+  content: "\e661";
+}
+

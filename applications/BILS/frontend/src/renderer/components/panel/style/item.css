@@ -1,0 +1,23 @@
+.el-tabs__item {
+  @apply text-lg text-gray-500 !important;
+}
+
+.el-tabs__item:hover {
+  @apply text-indigo-600 !important;
+}
+
+.el-tabs__item.is-active {
+  @apply text-indigo-600 shadow-md !important;
+}
+
+.el-tabs__nav-wrap::after {
+  @apply w-0 !important;
+}
+
+.el-tabs__active-bar {
+  @apply bg-indigo-600 !important;
+}
+
+.el-tabs__header {
+  @apply m-0 !important;
+}

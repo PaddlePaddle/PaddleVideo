@@ -1,0 +1,23 @@
+{
+  "id": "3217020",
+  "name": "icon",
+  "font_family": "iconicon",
+  "css_prefix_text": "color-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "28986125",
+      "name": "等待提示",
+      "font_class": "dengdaitishi",
+      "unicode": "e65c",
+      "unicode_decimal": 58972
+    },
+    {
+      "icon_id": "28987639",
+      "name": "我的钱包",
+      "font_class": "wodeqianbao",
+      "unicode": "e661",
+      "unicode_decimal": 58977
+    }
+  ]
+}

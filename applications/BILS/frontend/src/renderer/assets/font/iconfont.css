@@ -1,0 +1,143 @@
+@font-face {
+  font-family: "iconfont"; /* Project id 3333861 */
+  src: url('iconfont.woff2?t=1650245487225') format('woff2'),
+       url('iconfont.woff?t=1650245487225') format('woff'),
+       url('iconfont.ttf?t=1650245487225') format('truetype');
+}
+
+.iconfont {
+  font-family: "iconfont" !important;
+  font-size: 16px;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-shanchu1:before {
+  content: "\e792";
+}
+
+.icon-shanchu2:before {
+  content: "\e62b";
+}
+
+.icon-shanchu3:before {
+  content: "\e641";
+}
+
+.icon-shanchu:before {
+  content: "\e658";
+}
+
+.icon-information_add:before {
+  content: "\e6d7";
+}
+
+.icon-tiaoshi:before {
+  content: "\eb61";
+}
+
+.icon-fangkuai:before {
+  content: "\ec06";
+}
+
+.icon-fangkuai-:before {
+  content: "\ec07";
+}
+
+.icon-guanbi:before {
+  content: "\eb6a";
+}
+
+.icon-baocun:before {
+  content: "\ec09";
+}
+
+.icon-bianji:before {
+  content: "\eb62";
+}
+
+.icon-icon_yingyongguanli:before {
+  content: "\eb8f";
+}
+
+.icon-liebiao:before {
+  content: "\ec6b";
+}
+
+.icon-search:before {
+  content: "\e67d";
+}
+
+.icon-play:before {
+  content: "\e6cf";
+}
+
+.icon-fast-forward:before {
+  content: "\e76b";
+}
+
+.icon-rewind:before {
+  content: "\e773";
+}
+
+.icon-more:before {
+  content: "\e617";
+}
+
+.icon-file:before {
+  content: "\e7bb";
+}
+
+.icon--Image-File:before {
+  content: "\e608";
+}
+
+.icon--Video-File:before {
+  content: "\e632";
+}
+
+.icon-folder:before {
+  content: "\e7d1";
+}
+
+.icon-delete:before {
+  content: "\e6b4";
+}
+
+.icon-zhankai:before {
+  content: "\e786";
+}
+
+.icon-biaoqian:before {
+  content: "\e63d";
+}
+
+.icon-biaoqian1:before {
+  content: "\e62c";
+}
+
+.icon-bianji1:before {
+  content: "\e8ac";
+}
+
+.icon-zanting:before {
+  content: "\e7af";
+}
+
+.icon-zhongbo-m:before {
+  content: "\e607";
+}
+
+.icon-wendangshezhi-peizhiwenjian_tiandi1:before {
+  content: "\e899";
+}
+
+.icon-xiazaijieguowenjian1:before {
+  content: "\e817";
+}
+
+.icon-huizong:before {
+  content: "\e6db";
+}
+
