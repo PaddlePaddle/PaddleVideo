@@ -836,6 +836,7 @@ class AGCN2s_Inference_helper(Base_Inference_helper):
             input_file)
         data = np.load(input_file)
         results = {'data': data}
+        
 
         res = np.expand_dims(results['data'], axis=0).copy()
         return [res]

@@ -27,7 +27,7 @@ eval:main.py --test -c configs/recognition/agcn2s/agcn2s_ntucs_joint_fsd.yaml -o
 ===========================infer_params===========================
 -o:inference/AGCN2s
 -p:null
-norm_export:tools/export_model.py -c configs/recognition/agcn/agcn_fsd.yaml --save_name inference
+norm_export:tools/export_model.py -c configs/recognition/agcn2s/agcn2s_ntucs_joint_fsd.yaml --save_name inference
 quant_export:null
 fpgm_export:null
 distill_export:null

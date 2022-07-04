@@ -63,7 +63,7 @@ if [ ${MODE} = "lite_train_lite_infer" ];then
         wget -nc https://videotag.bj.bcebos.com/Data/FSD_train_data.npy
         wget -nc https://videotag.bj.bcebos.com/Data/FSD_train_label.npy
         popd
-    elif [ ${model_name} == "AGCN2s_joint" ] || [ ${model_name} == "AGCN2s_bone" ]; then
+    elif [ ${model_name} == "AGCN2s" ]; then
         # pretrain lite train data
         pushd data/fsd10
         wget -nc https://videotag.bj.bcebos.com/Data/FSD_train_data.npy
