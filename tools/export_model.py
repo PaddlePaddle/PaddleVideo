@@ -35,6 +35,10 @@ def parse_args():
                         type=str,
                         default='configs/example.yaml',
                         help='config file path')
+    parser.add_argument('--override',
+                        action='append',
+                        default=[],
+                        help='config options to be overridden')
     parser.add_argument("-p",
                         "--pretrained_params",
                         default='./best.pdparams',
@@ -208,7 +212,8 @@ def get_input_spec(cfg, model_name):
 
 def main():
     args = parse_args()
-    cfg, model_name = trim_config(get_config(args.config, show=False))
+    cfg, model_name = trim_config(get_config(args.config, overrides=args.override, show=False))
+
     print(f"Building model({model_name})...")
     model = build_model(cfg.MODEL)
     assert osp.isfile(
