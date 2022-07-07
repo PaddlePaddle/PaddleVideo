@@ -120,9 +120,9 @@ if [ ${MODE} = "lite_train_lite_infer" ];then
         pushd ./data
         mkdir bmn_data
         cd bmn_data
-        wget -nc https://paddlemodels.bj.bcebos.com/video_detection/bmn_feat.tar.gz
+        wget -nc https://videotag.bj.bcebos.com/Data/BMN_lite/bmn_feat.tar.gz
         tar -xf bmn_feat.tar.gz
-        wget -nc https://paddlemodels.bj.bcebos.com/video_detection/activitynet_1.3_annotations.json
+        wget -nc https://videotag.bj.bcebos.com/Data/BMN_lite/activitynet_1.3_annotations.json
         wget -nc https://paddlemodels.bj.bcebos.com/video_detection/activity_net_1_3_new.json
         popd
     elif [ ${model_name} == "TokenShiftVisionTransformer" ]; then

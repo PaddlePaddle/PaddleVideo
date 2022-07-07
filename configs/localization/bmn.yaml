@@ -19,7 +19,7 @@ DATASET: #DATASET field
     train:
         format: "BMNDataset"
         file_path: "data/bmn_data/activitynet_1.3_annotations.json"
-        subset: "train"
+        subset: "training"
     valid:
         format: "BMNDataset"
         file_path: "data/bmn_data/activitynet_1.3_annotations.json"
