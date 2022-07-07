@@ -21,7 +21,6 @@ from .roi_extractor import RoIAlign
 @ROI_EXTRACTORS.register()
 class SingleRoIExtractor3D(nn.Layer):
     """Extract RoI features from a single level feature map.  """
-
     def __init__(self,
                  roi_layer_type='RoIAlign',
                  featmap_stride=16,
@@ -64,7 +63,7 @@ class SingleRoIExtractor3D(nn.Layer):
         feat = paddle.concat(feat, axis=1)  # merge slow and fast
         roi_feats = []
         for t in range(feat.shape[2]):
-            if type(t) == paddle.fluid.framework.Variable:
+            if type(t) == paddle.static.Variable:
                 index = paddle.to_tensor(t)
             else:
                 data_index = np.array([t]).astype('int32')

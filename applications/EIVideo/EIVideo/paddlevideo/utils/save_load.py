@@ -50,8 +50,7 @@ def pretrain_vit_param_trans(model, state_dicts, num_patches, seg_num,
 
     if 'time_embed' in state_dicts and seg_num != state_dicts[
             'time_embed'].shape[1]:
-        time_embed = state_dicts['time_embed'].transpose(
-            (0, 2, 1)).unsqueeze(0)
+        time_embed = state_dicts['time_embed'].transpose((0, 2, 1)).unsqueeze(0)
         new_time_embed = F.interpolate(time_embed,
                                        size=(time_embed.shape[-2], seg_num),
                                        mode='nearest')
@@ -138,8 +137,8 @@ def load_ckpt(model, weight_path, **kargs):
             for (k, v) in pose_encoder_dict.items()
         })
     elif "VisionTransformer" in str(model):  # For TimeSformer case
-        tmp = pretrain_vit_param_trans(model, state_dicts,
-                                       kargs['num_patches'], kargs['seg_num'],
+        tmp = pretrain_vit_param_trans(model, state_dicts, kargs['num_patches'],
+                                       kargs['seg_num'],
                                        kargs['attention_type'])
     else:
         tmp = {}
@@ -170,38 +169,6 @@ def mkdir(dir):
             os.makedirs(dir)
         except:
             pass
-
-
-"""
-def save(state_dicts, file_name):
-    def convert(state_dict):
-        model_dict = {}
-
-        for k, v in state_dict.items():
-            if isinstance(
-                    v,
-                (paddle.fluid.framework.Variable, paddle.fluid.core.VarBase)):
-                model_dict[k] = v.numpy()
-            else:
-                model_dict[k] = v
-
-        return model_dict
-
-    final_dict = {}
-    for k, v in state_dicts.items():
-        if isinstance(
-                v,
-            (paddle.fluid.framework.Variable, paddle.fluid.core.VarBase)):
-            final_dict = convert(state_dicts)
-            break
-        elif isinstance(v, dict):
-            final_dict[k] = convert(v)
-        else:
-            final_dict[k] = v
-
-    with open(file_name, 'wb') as f:
-        pickle.dump(final_dict, f, protocol=2)
-"""
 
 
 @main_only

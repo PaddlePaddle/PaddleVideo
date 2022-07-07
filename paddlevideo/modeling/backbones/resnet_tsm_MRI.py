@@ -137,8 +137,7 @@ class BottleneckBlock(nn.Layer):
         self.num_seg = num_seg
 
     def forward(self, inputs):
-        shifts = paddle.fluid.layers.temporal_shift(inputs, self.num_seg,
-                                                    1.0 / self.num_seg)
+        shifts = F.temporal_shift(inputs, self.num_seg, 1.0 / self.num_seg)
         y = self.conv0(shifts)
         conv1 = self.conv1(y)
         conv2 = self.conv2(conv1)

@@ -1,0 +1,14 @@
+===========================serving_params===========================
+model_name:PP-TSM
+python:python3.7
+trans_model:-m paddle_serving_client.convert
+--dirname:./inference/ppTSM/
+--model_filename:ppTSM.pdmodel
+--params_filename:ppTSM.pdiparams
+--serving_server:./deploy/cpp_serving/ppTSM_serving_server/
+--serving_client:./deploy/cpp_serving/ppTSM_serving_client/
+serving_dir:./deploy/cpp_serving
+--model:./ppTSM_serving_server/
+--port:9993
+cpp_client:serving_client.py
+--input_file:../../data/example.avi

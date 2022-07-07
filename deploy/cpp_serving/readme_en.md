@@ -1,4 +1,5 @@
-Simplified Chinese | [English](./readme_en.md)
+English | [简体中文](./readme.md)
+
 # Model service deployment
 
 ## Introduction
@@ -41,6 +42,7 @@ python3.7 -m pip install paddle-serving-server-gpu==0.7.0.post112 # GPU with CUD
 ```
 
 * If the installation speed is too slow, you can change the source through `-i https://pypi.tuna.tsinghua.edu.cn/simple` to speed up the installation process.
+
 * For more environment and corresponding installation packages, see: https://github.com/PaddlePaddle/Serving/blob/v0.9.0/doc/Install_Linux_Env_CN.md
 
 ## Action recognition service deployment
@@ -134,11 +136,12 @@ The `cpp_serving` directory contains the code for starting the pipeline service,
   ```
 
 - Send the request and get the result:
-  ```bash
-  python3.7 serving_client.py \
-  -c ./ppTSM_serving_client/serving_client_conf.prototxt \
-  --input_file=../../data/example.avi
-  ```
+```bash
+python3.7 serving_client.py \
+-n PPTSM \
+-c ./ppTSM_serving_client/serving_client_conf.prototxt \
+--input_file=../../data/example.avi
+```
 After a successful run, the results of the model prediction will be printed in the cmd window, and the results are as follows:
 
   ```bash

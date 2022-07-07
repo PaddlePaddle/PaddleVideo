@@ -41,16 +41,17 @@ python3.7 -m pip install paddle-serving-server-gpu==0.7.0.post112  # GPU with CU
 ```
 
 * 如果安装速度太慢，可以通过 `-i https://pypi.tuna.tsinghua.edu.cn/simple` 更换源，加速安装过程。
+
 * 更多环境和对应的安装包详见：https://github.com/PaddlePaddle/Serving/blob/v0.9.0/doc/Install_Linux_Env_CN.md
 
 ## 行为识别服务部署
 ### 模型转换
 使用 PaddleServing 做服务化部署时，需要将保存的 inference 模型转换为 Serving 模型。下面以 PP-TSM 模型为例，介绍如何部署行为识别服务。
 - 下载 PP-TSM 推理模型并转换为 Serving 模型：
+
   ```bash
   # 进入PaddleVideo目录
   cd PaddleVideo
-
   # 下载推理模型并解压到./inference下
   mkdir ./inference
   pushd ./inference
@@ -129,13 +130,14 @@ python3.7 -m pip install paddle-serving-server-gpu==0.7.0.post112  # GPU with CU
 
 - 启动服务：
   ```bash
-  # 在后台启动，过程中打印输出的日志会重定向保存到nohup.txt中
+  # 在后台启动，过程中打印输出的日志会重定向保存到nohup.txt中，可以使用tailf nohup.txt查看输出
   bash run_cpp_serving.sh
   ```
 
 - 发送请求并获取结果：
   ```bash
   python3.7 serving_client.py \
+  -n PPTSM \
   -c ./ppTSM_serving_client/serving_client_conf.prototxt \
   --input_file=../../data/example.avi
   ```

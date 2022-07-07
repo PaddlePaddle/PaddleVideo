@@ -28,10 +28,25 @@ from ..weight_init import weight_init_
 from ...utils.save_load import load_ckpt
 from paddle.regularizer import L2Decay
 
+# Download URL of pretrained model
+# {
+# "ResNet50_vd":
+# "wget https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_vd_ssld_v2_pretrained.pdparams",
+# "ResNet101_vd":
+# "https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ResNet101_vd_ssld_pretrained.pdparams",
+# "ResNet18_vd":
+# "https://paddle-imagenet-models-name.bj.bcebos.com/dygraph/legendary_models/ResNet18_vd_pretrained.pdparams",
+# "ResNet34_vd":
+# "https://paddle-imagenet-models-name.bj.bcebos.com/dygraph/ResNet34_vd_ssld_pretrained.pdparams",
+# "ResNet152_vd":
+# "https://paddle-imagenet-models-name.bj.bcebos.com/dygraph/legendary_models/ResNet152_vd_pretrained.pdparams",
+# "ResNet200_vd":
+# "https://paddle-imagenet-models-name.bj.bcebos.com/dygraph/legendary_models/ResNet200_vd_pretrained.pdparams",
+# }
+
 
 class ConvBNLayer(nn.Layer):
     """Conv2D and BatchNorm2D layer.
-
     Args:
         in_channels (int): Number of channels for the input.
         out_channels (int): Number of channels for the output.
@@ -41,9 +56,6 @@ class ConvBNLayer(nn.Layer):
         is_tweaks_mode (bool): switch for tweaks. Default: False.
         act (str): Indicate activation after BatchNorm2D layer.
         name (str): the name of an instance of ConvBNLayer.
-
-    Note: weight and bias initialization include initialize values and name the restored parameters, values initialization are explicit declared in the ```init_weights``` method.
-
     """
     def __init__(self,
                  in_channels,
@@ -123,39 +135,48 @@ class BottleneckBlock(nn.Layer):
                                  name=name + "_branch2c")
 
         if not shortcut:
-            self.short = ConvBNLayer(
-                in_channels=in_channels,
-                out_channels=out_channels * 4,
-                kernel_size=1,
-                stride=
-                1,  #ResNet-D 2/2:add a 2×2 average pooling layer with a stride of 2 before the convolution,
-                #             whose stride is changed to 1, works well in practice.
-                is_tweaks_mode=False if if_first else True,
-                name=name + "_branch1")
+            self.short = ConvBNLayer(in_channels=in_channels,
+                                     out_channels=out_channels * 4,
+                                     kernel_size=1,
+                                     stride=1,
+                                     is_tweaks_mode=False if if_first else True,
+                                     name=name + "_branch1")
 
         self.shortcut = shortcut
         self.num_seg = num_seg
 
     def forward(self, inputs):
-        if paddle.fluid.core.is_compiled_with_npu():
+        if paddle.device.is_compiled_with_npu():
             x = inputs
             seg_num = self.num_seg
             shift_ratio = 1.0 / self.num_seg
 
-            shape = x.shape #[N*T, C, H, W]
-            reshape_x = x.reshape((-1, seg_num, shape[1], shape[2], shape[3])) #[N, T, C, H, W]
-            pad_x = paddle.fluid.layers.pad(reshape_x, [0,0,1,1,0,0,0,0,0,0,]) #[N, T+2, C, H, W]
+            shape = x.shape  #[N*T, C, H, W]
+            reshape_x = x.reshape(
+                (-1, seg_num, shape[1], shape[2], shape[3]))  #[N, T, C, H, W]
+            pad_x = F.pad(reshape_x, [
+                0,
+                0,
+                1,
+                1,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+            ])  #[N, T+2, C, H, W]
             c1 = int(shape[1] * shift_ratio)
             c2 = int(shape[1] * 2 * shift_ratio)
             slice1 = pad_x[:, :seg_num, :c1, :, :]
-            slice2 = pad_x[:, 2:seg_num+2, c1:c2, :, :]
-            slice3 = pad_x[:, 1:seg_num+1, c2:, :, :]
-            concat_x = paddle.concat([slice1, slice2, slice3], axis=2) #[N, T, C, H, W]
+            slice2 = pad_x[:, 2:seg_num + 2, c1:c2, :, :]
+            slice3 = pad_x[:, 1:seg_num + 1, c2:, :, :]
+            concat_x = paddle.concat([slice1, slice2, slice3],
+                                     axis=2)  #[N, T, C, H, W]
             shifts = concat_x.reshape(shape)
         else:
-            shifts = paddle.fluid.layers.temporal_shift(inputs, self.num_seg,
-                                                        1.0 / self.num_seg)
-        
+            shifts = F.temporal_shift(inputs, self.num_seg, 1.0 / self.num_seg)
+
         y = self.conv0(shifts)
         conv1 = self.conv1(y)
         conv2 = self.conv2(conv1)
@@ -173,32 +194,36 @@ class BasicBlock(nn.Layer):
                  out_channels,
                  stride,
                  shortcut=True,
+                 num_seg=8,
                  name=None):
         super(BasicBlock, self).__init__()
         self.stride = stride
+        self.num_seg = num_seg
         self.conv0 = ConvBNLayer(in_channels=in_channels,
                                  out_channels=out_channels,
-                                 filter_size=3,
+                                 kernel_size=3,
                                  stride=stride,
                                  act="leaky_relu",
                                  name=name + "_branch2a")
         self.conv1 = ConvBNLayer(in_channels=out_channels,
                                  out_channels=out_channels,
-                                 filter_size=3,
+                                 kernel_size=3,
                                  act=None,
                                  name=name + "_branch2b")
 
         if not shortcut:
             self.short = ConvBNLayer(in_channels=in_channels,
                                      out_channels=out_channels,
-                                     filter_size=1,
+                                     kernel_size=1,
                                      stride=stride,
                                      name=name + "_branch1")
 
         self.shortcut = shortcut
 
     def forward(self, inputs):
-        y = self.conv0(inputs)
+        # add temporal shift module
+        shifts = F.temporal_shift(inputs, self.num_seg, 1.0 / self.num_seg)
+        y = self.conv0(shifts)
         conv1 = self.conv1(y)
 
         if self.shortcut:
@@ -290,6 +315,7 @@ class ResNetTweaksTSM(nn.Layer):
                     self.block_list.append(bottleneck_block)
                     shortcut = True
         else:
+            in_channels = [64, 64, 128, 256]
             for block in range(len(depth)):
                 shortcut = False
                 for i in range(depth[block]):
@@ -301,6 +327,7 @@ class ResNetTweaksTSM(nn.Layer):
                                    out_channels=out_channels[block],
                                    stride=2 if i == 0 and block != 0 else 1,
                                    shortcut=shortcut,
+                                   num_seg=self.num_seg,
                                    name=conv_name))
                     self.block_list.append(basic_block)
                     shortcut = True
@@ -312,28 +339,19 @@ class ResNetTweaksTSM(nn.Layer):
             2. when not indicating pretrained loading path, will follow specific initialization initiate backbone. Always, Conv2D layer will be initiated by KaimingNormal function, and BatchNorm2d will be initiated by Constant function.
             Please refer to https://www.paddlepaddle.org.cn/documentation/docs/en/develop/api/paddle/nn/initializer/kaiming/KaimingNormal_en.html
         """
-        #XXX: check bias!!! check pretrained!!!
-
         if isinstance(self.pretrained, str) and self.pretrained.strip() != "":
             load_ckpt(self, self.pretrained)
         elif self.pretrained is None or self.pretrained.strip() == "":
             for layer in self.sublayers():
                 if isinstance(layer, nn.Conv2D):
-                    #XXX: no bias
+                    # no bias
                     weight_init_(layer, 'KaimingNormal')
                 elif isinstance(layer, nn.BatchNorm2D):
                     weight_init_(layer, 'Constant', value=1)
 
     def forward(self, inputs):
         """Define how the backbone is going to run.
-
         """
-        #NOTE: Already merge axis 0(batches) and axis 1(channels) before extracting feature phase,
-        # please refer to paddlevideo/modeling/framework/recognizers/recognizer2d.py#L27
-        #y = paddle.reshape(
-        #    inputs, [-1, inputs.shape[2], inputs.shape[3], inputs.shape[4]])
-
-        ####ResNet-C: use three 3x3 conv, replace, one 7x7 conv
         y = self.conv1_1(inputs)
         y = self.conv1_2(y)
         y = self.conv1_3(y)

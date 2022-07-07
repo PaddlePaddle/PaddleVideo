@@ -63,6 +63,12 @@ if [ ${MODE} = "lite_train_lite_infer" ];then
         wget -nc https://videotag.bj.bcebos.com/Data/FSD_train_data.npy
         wget -nc https://videotag.bj.bcebos.com/Data/FSD_train_label.npy
         popd
+    elif [ ${model_name} == "AGCN2s_joint" ] || [ ${model_name} == "AGCN2s_bone" ]; then
+        # pretrain lite train data
+        pushd data/fsd10
+        wget -nc https://videotag.bj.bcebos.com/Data/FSD_train_data.npy
+        wget -nc https://videotag.bj.bcebos.com/Data/FSD_train_label.npy
+        popd
     elif [ ${model_name} == "TSM" ]; then
         # pretrain lite train data
         pushd ./data/k400
@@ -508,5 +514,24 @@ if [ ${MODE} = "serving_infer_python" ];then
 fi
 
 if [ ${MODE} = "paddle2onnx_infer" ];then
-    echo "Not added into TIPC now."
+    # install paddle2onnx
+    python_name_list=$(func_parser_value "${lines[2]}")
+    IFS='|'
+    array=(${python_name_list})
+    python_name=${array[0]}
+    ${python_name} -m pip install paddle2onnx
+    ${python_name} -m pip install onnxruntime==1.9.0
+
+    if [ ${model_name} = "PP-TSM" ]; then
+        echo "Not added into TIPC now."
+    elif [ ${model_name} = "PP-TSN" ]; then
+        mkdir -p ./inference
+        wget -P ./inference/ https://videotag.bj.bcebos.com/PaddleVideo-release2.3/ppTSN.zip
+        # unzip inference model
+        pushd ./inference
+        unzip ppTSN.zip
+        popd
+    else
+        echo "Not added into TIPC now."
+    fi
 fi

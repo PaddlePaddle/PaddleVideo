@@ -20,7 +20,9 @@ from utils.config_utils import parse_config, print_configs
 import utils.config_utils as config_utils
 
 import logger
+
 logger = logger.Logger()
+
 
 def load_model(cfg_file="configs/configs.yaml"):
     """
@@ -48,7 +50,7 @@ def video_classify(video_name):
     pcm_path = video_name.replace(".mp4", ".pcm").replace("mp4", "pcm")
 
     # step 1: extract feature
-    
+
     feature_path = video_name.replace(".mp4", ".pkl").replace("mp4", "features")
     video_features = pickle.load(open(feature_path, 'rb'))
 
@@ -63,7 +65,7 @@ def video_classify(video_name):
 
 
 if __name__ == '__main__':
-    dataset_dir = "/home/work/PaddleVideo/applications/FootballAction/datasets/EuroCup2016"
+    dataset_dir = "../datasets/EuroCup2016"
     if not os.path.exists(dataset_dir + '/feature_bmn'):
         os.mkdir(dataset_dir + '/feature_bmn')
     results = []
@@ -77,10 +79,13 @@ if __name__ == '__main__':
 
     for line in lines:
         bmn_results = video_classify(line)
-        results.append({'video_name': os.path.basename(line).split('.')[0],
-                        'num_proposal': len(bmn_results),
-                        'bmn_results': bmn_results})
+        results.append({
+            'video_name': os.path.basename(line).split('.')[0],
+            'num_proposal': len(bmn_results),
+            'bmn_results': bmn_results
+        })
 
-    with open(dataset_dir + '/feature_bmn/prop.json', 'w', encoding='utf-8') as f:
-       data = json.dumps(results, indent=4, ensure_ascii=False)
-       f.write(data) 
+    with open(dataset_dir + '/feature_bmn/prop.json', 'w',
+              encoding='utf-8') as f:
+        data = json.dumps(results, indent=4, ensure_ascii=False)
+        f.write(data)
