@@ -1,6 +1,5 @@
 from abc import abstractmethod
 from ... import builder
-import paddle
 import paddle.nn as nn
 
 
@@ -80,17 +79,3 @@ class BaseRecognizer(nn.Layer):
         """Infer step.
         """
         raise NotImplementedError
-
-    def _gather_from_gpu(self,
-                         gather_object: paddle.Tensor,
-                         concat_axis=0) -> paddle.Tensor:
-        """gather Tensor from all gpus into a list and concatenate them on `concat_axis`.
-        Args:
-            gather_object (paddle.Tensor): gather object Tensor
-            concat_axis (int, optional): axis for concatenation. Defaults to 0.
-        Returns:
-            paddle.Tensor: gatherd & concatenated Tensor
-        """
-        gather_object_list = []
-        paddle.distributed.all_gather(gather_object_list, gather_object)
-        return paddle.concat(gather_object_list, axis=concat_axis)

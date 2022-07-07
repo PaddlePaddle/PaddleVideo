@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import numpy as np
 from abc import abstractmethod
 
 import paddle
@@ -41,7 +40,6 @@ class BaseHead(nn.Layer):
         ls_eps (float): label smoothing epsilon. Default: 0. .
 
     """
-
     def __init__(
         self,
         num_classes=None,
@@ -65,17 +63,25 @@ class BaseHead(nn.Layer):
         """
         raise NotImplemented
 
-    def loss(self, scores, labels, valid_mode=False, if_top5=True, **kwargs):
+    def loss(self,
+             scores,
+             labels,
+             valid_mode=False,
+             if_top5=True,
+             all_reduce=True,
+             **kwargs):
         """Calculate the loss accroding to the model output ```scores```,
            and the target ```labels```.
 
         Args:
-            scores (paddle.Tensor): The output of the model.
-            labels (paddle.Tensor): The target output of the model.
+            scores (paddle.Tensor): output scores from model
+            labels (list): input labels
+            valid_mode (bool, optional): whether in valid mode. Defaults to False.
+            if_top5 (bool, optional): if need to compute top5 metric. Defaults to True.
+            all_reduce (bool, optional): if reduce computed metrics from all gpu. Defaults to True.
 
         Returns:
-            losses (dict): A dict containing field 'loss'(mandatory) and 'top1_acc', 'top5_acc'(optional).
-
+            losses (dict): A dict mainly containing field 'loss'(mandatory) and 'top1_acc', 'top5_acc'(optional).
         """
         if len(labels) == 1:  #commonly case
             labels = labels[0]
@@ -85,12 +91,19 @@ class BaseHead(nn.Layer):
             else:
                 loss = self.loss_func(scores, labels, **kwargs)
             if if_top5:
-                top1, top5 = self.get_acc(scores, labels, valid_mode)
+                top1, top5 = self.get_acc(scores,
+                                          labels,
+                                          valid_mode,
+                                          all_reduce=all_reduce)
                 losses['top1'] = top1
                 losses['top5'] = top5
                 losses['loss'] = loss
             else:
-                top1 = self.get_acc(scores, labels, valid_mode, if_top5)
+                top1 = self.get_acc(scores,
+                                    labels,
+                                    valid_mode,
+                                    if_top5,
+                                    all_reduce=all_reduce)
                 losses['top1'] = top1
                 losses['loss'] = loss
             return losses
@@ -108,8 +121,14 @@ class BaseHead(nn.Layer):
             loss = lam * loss_a + (1 - lam) * loss_b
 
             if if_top5:
-                top1a, top5a = self.get_acc(scores, labels_a, valid_mode)
-                top1b, top5b = self.get_acc(scores, labels_b, valid_mode)
+                top1a, top5a = self.get_acc(scores,
+                                            labels_a,
+                                            valid_mode,
+                                            all_reduce=all_reduce)
+                top1b, top5b = self.get_acc(scores,
+                                            labels_b,
+                                            valid_mode,
+                                            all_reduce=all_reduce)
                 top1 = lam * top1a + (1 - lam) * top1b
                 top5 = lam * top5a + (1 - lam) * top5b
                 losses['top1'] = top1
@@ -117,8 +136,16 @@ class BaseHead(nn.Layer):
                 losses['loss'] = loss
 
             else:
-                top1a = self.get_acc(scores, labels_a, valid_mode, if_top5)
-                top1b = self.get_acc(scores, labels_b, valid_mode, if_top5)
+                top1a = self.get_acc(scores,
+                                     labels_a,
+                                     valid_mode,
+                                     if_top5,
+                                     all_reduce=all_reduce)
+                top1b = self.get_acc(scores,
+                                     labels_b,
+                                     valid_mode,
+                                     if_top5,
+                                     all_reduce=all_reduce)
                 top1 = lam * top1a + (1 - lam) * top1b
                 losses['top1'] = top1
                 losses['loss'] = loss
@@ -152,13 +179,18 @@ class BaseHead(nn.Layer):
             loss = self.loss_func(scores, labels, soft_label=True, **kwargs)
         return loss
 
-    def get_acc(self, scores, labels, valid_mode, if_top5=True):
+    def get_acc(self,
+                scores,
+                labels,
+                valid_mode,
+                if_top5=True,
+                all_reduce=True):
         if if_top5:
             top1 = paddle.metric.accuracy(input=scores, label=labels, k=1)
             top5 = paddle.metric.accuracy(input=scores, label=labels, k=5)
             _, world_size = get_dist_info()
-            #NOTE(shipping): deal with multi cards validate
-            if world_size > 1 and valid_mode:  #reduce sum when valid
+            # NOTE(shipping): deal with multi cards validate
+            if world_size > 1 and valid_mode and all_reduce:  # reduce sum when valid
                 top1 = paddle.distributed.all_reduce(
                     top1, op=paddle.distributed.ReduceOp.SUM) / world_size
                 top5 = paddle.distributed.all_reduce(
@@ -168,8 +200,8 @@ class BaseHead(nn.Layer):
         else:
             top1 = paddle.metric.accuracy(input=scores, label=labels, k=1)
             _, world_size = get_dist_info()
-            #NOTE(shipping): deal with multi cards validate
-            if world_size > 1 and valid_mode:  #reduce sum when valid
+            # NOTE(shipping): deal with multi cards validate
+            if world_size > 1 and valid_mode and all_reduce:  # reduce sum when valid
                 top1 = paddle.distributed.all_reduce(
                     top1, op=paddle.distributed.ReduceOp.SUM) / world_size
 

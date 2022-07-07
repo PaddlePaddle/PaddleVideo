@@ -48,7 +48,7 @@ class BaseSegment(nn.Layer):
         else:
             self.loss = None
 
-    def forward(self, data_batch, mode='infer'):
+    def forward(self, data_batch, mode='infer', **kwargs):
         """
         1. Define how the model is going to run, from input to output.
         2. Console of train, valid, test or infer step

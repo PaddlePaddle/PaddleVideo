@@ -20,7 +20,8 @@ import paddle.amp as amp
 import paddle.distributed as dist
 import paddle.distributed.fleet as fleet
 from paddlevideo.utils import (add_profiler_step, build_record, get_logger,
-                               load, log_batch, log_epoch, mkdir, save)
+                               load, log_batch, log_epoch, mkdir, save,
+                               get_dist_info)
 
 from ..loader.builder import build_dataloader, build_dataset
 from ..metrics.ava_utils import collect_results_cpu
@@ -278,28 +279,27 @@ def train_model(cfg,
             record_list = build_record(cfg.MODEL)
             record_list.pop('lr')
             tic = time.time()
-            rest_data_size = len(valid_loader.dataset)
-            if parallel:
-                rank = dist.get_rank()
+            rest_data_size = len(valid_dataset)  # number of valid samples
+            rank, world_size = get_dist_info()
             # single_gpu_test and multi_gpu_test
             for i, data in enumerate(valid_loader):
                 """Next two line of code only used in test_tipc,
                 ignore it most of the time"""
                 if max_iters is not None and i >= max_iters:
                     break
-
+                real_data_size = min(rest_data_size,
+                                     world_size * valid_batch_size)
+                rest_data_size -= real_data_size
                 if use_amp:
                     with amp.auto_cast(custom_black_list={"reduce_mean"},
                                        level=amp_level):
                         outputs = model(data,
                                         mode='valid',
-                                        rest_data_size=rest_data_size)
+                                        real_data_size=real_data_size)
                 else:
                     outputs = model(data,
                                     mode='valid',
-                                    rest_data_size=rest_data_size)
-                rest_data_size -= outputs.get("selected_data_size",
-                                              valid_batch_size)
+                                    real_data_size=real_data_size)
 
                 if cfg.MODEL.framework == "FastRCNN":
                     results.extend(outputs)
@@ -308,10 +308,7 @@ def train_model(cfg,
                 if cfg.MODEL.framework != "FastRCNN":
                     for name, value in outputs.items():
                         if name in record_list:
-                            record_list[name].update(
-                                value,
-                                outputs.get("selected_data_size",
-                                            valid_batch_size))
+                            record_list[name].update(value, real_data_size)
 
                 record_list['batch_time'].update(time.time() - tic)
                 tic = time.time()

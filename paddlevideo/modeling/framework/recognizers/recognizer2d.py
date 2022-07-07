@@ -13,7 +13,7 @@
 from ...registry import RECOGNIZERS
 from .base import BaseRecognizer
 import paddle
-from paddlevideo.utils import get_logger, get_dist_info
+from paddlevideo.utils import get_logger, gather_from_gpu, get_dist_info
 
 logger = get_logger("paddlevideo")
 
@@ -53,27 +53,24 @@ class Recognizer2D(BaseRecognizer):
         labels = data_batch[1:]
         cls_score = self.forward_net(imgs)
 
-        # gather from all gpus
+        # gather data from all devices
         _, world_size = get_dist_info()
-        if world_size > 1:
-            cls_score_gathered = self._gather_from_gpu(cls_score)
-            labels_gathered = self._gather_from_gpu(labels)
-        else:
-            cls_score_gathered = cls_score
-            labels_gathered = labels
+        labels_gathered = [gather_from_gpu(x)
+                           for x in labels] if world_size > 1 else labels
+        cls_score_gathered = gather_from_gpu(
+            cls_score) if world_size > 1 else cls_score
 
-        # Remove redundant data caused by resample
-        rest_data_size = kwargs.get("rest_data_size", None)
-        selected_data_size = len(
-            cls_score_gathered) if rest_data_size is None else min(
-                len(cls_score_gathered), rest_data_size)
-        cls_score_gathered = cls_score_gathered[0:selected_data_size]
-        labels_gathered = labels_gathered[0:selected_data_size]
+        # remove possible duplicate data
+        real_data_size = kwargs.get("real_data_size")
+        cur_data_size = len(labels_gathered)
+        if real_data_size < cur_data_size:
+            labels_gathered = [x[0:real_data_size] for x in labels_gathered]
+            cls_score_gathered = cls_score_gathered[0:real_data_size]
 
         loss_metrics = self.head.loss(cls_score_gathered,
                                       labels_gathered,
-                                      valid_mode=True)
-        loss_metrics["selected_data_size"] = selected_data_size
+                                      valid_mode=True,
+                                      all_reduce=False)
         return loss_metrics
 
     def test_step(self, data_batch, **kwargs):

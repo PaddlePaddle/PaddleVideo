@@ -12,7 +12,7 @@
 
 import paddle
 import paddle.nn.functional as F
-from paddlevideo.utils import get_logger
+from paddlevideo.utils import get_logger, gather_from_gpu, get_dist_info
 
 from ...registry import RECOGNIZERS
 from .base import BaseRecognizer
@@ -46,11 +46,28 @@ class RecognizerTransformer(BaseRecognizer):
         loss_metrics = self.head.loss(cls_score, labels)
         return loss_metrics
 
-    def val_step(self, data_batch):
+    def val_step(self, data_batch, **kwargs):
         imgs = data_batch[0]
         labels = data_batch[1:]
         cls_score = self.forward_net(imgs)
-        loss_metrics = self.head.loss(cls_score, labels, valid_mode=True)
+
+        # gather data from all devices
+        _, world_size = get_dist_info()
+        labels_gathered = gather_from_gpu(labels) if world_size > 1 else labels
+        cls_score_gathered = gather_from_gpu(
+            cls_score) if world_size > 1 else cls_score
+
+        # remove possible duplicate data
+        real_data_size = kwargs.get("real_data_size")
+        cur_data_size = len(labels_gathered)
+        if real_data_size < cur_data_size:
+            labels_gathered = labels_gathered[0:real_data_size]
+            cls_score_gathered = cls_score_gathered[0:real_data_size]
+
+        loss_metrics = self.head.loss(cls_score_gathered,
+                                      labels_gathered,
+                                      valid_mode=True,
+                                      all_reduce=False)
         return loss_metrics
 
     def test_step(self, data_batch):
