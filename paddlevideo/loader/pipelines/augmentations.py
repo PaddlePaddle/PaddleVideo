@@ -77,8 +77,6 @@ class Scale(object):
                 if self.backend == 'pillow' and not isinstance(
                         img, Image.Image):
                     img = Image.fromarray(img)
-                elif self.backend == 'cv2' and not isinstance(img, np.ndarray):
-                    img = np.array(img)
                 resized_imgs.append(img)
                 continue
 
