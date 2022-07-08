@@ -66,12 +66,6 @@ class UCF101SkeletonDataset(BaseDataset):
             identifier = 'filename' if 'filename' in data[0] else 'frame_dir'
             data = [x for x in data if x[identifier] in split[self.split]]
 
-        for item in data:
-            # Sometimes we may need to load anno from the file
-            if 'filename' in item:
-                item['filename'] = item['filename']
-            if 'frame_dir' in item:
-                item['frame_dir'] = item['frame_dir']
         return data
 
     def prepare_train(self, idx):

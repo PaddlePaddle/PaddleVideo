@@ -26,7 +26,11 @@
 
 ## 数据准备
 
-UCF-101以及预训练模型下载地址:
+UCF-101-Skeleton数据集来自mmaction2项目，是由ResNet50作为主干网的Faster-RCNN识别人类，然后使用HRNet-w32实现动作估计。地址如下:
+
+[https://github.com/open-mmlab/mmaction2/tree/master/tools/data/skeleton](https://github.com/open-mmlab/mmaction2/tree/master/tools/data/skeleton)
+
+以及预训练模型下载地址:
 
 [https://aistudio.baidu.com/aistudio/datasetdetail/140593](https://aistudio.baidu.com/aistudio/datasetdetail/140593)
 

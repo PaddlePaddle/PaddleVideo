@@ -1,11 +1,11 @@
 [简体中文](../../../zh-CN/model_zoo/recognition/posec3d.md) | English
 
-# AGCN
+# PoseC3D
 
 ---
 ## Contents
 
-- [AGCN](#agcn)
+- [PoseC3D](#PoseC3D)
   - [Contents](#contents)
   - [Introduction](#introduction)
   - [Data](#data)

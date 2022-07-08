@@ -27,6 +27,55 @@ from .augmentations_ava import iminvert, imflip_
 """
 
 
+def _ntuple(n):
+    def parse(x):
+        if isinstance(x, collections.abc.Iterable):
+            return tuple(x)
+        return tuple(repeat(x, n))
+
+    return parse
+
+
+_single = _ntuple(1)
+_pair = _ntuple(2)
+_triple = _ntuple(3)
+_quadruple = _ntuple(4)
+
+
+def _init_lazy_if_proper(results, lazy):
+    """Initialize lazy operation properly.
+
+    Make sure that a lazy operation is properly initialized,
+    and avoid a non-lazy operation accidentally getting mixed in.
+
+    Required keys in results are "imgs" if "img_shape" not in results,
+    otherwise, Required keys in results are "img_shape", add or modified keys
+    are "img_shape", "lazy".
+    Add or modified keys in "lazy" are "original_shape", "crop_bbox", "flip",
+    "flip_direction", "interpolation".
+
+    Args:
+        results (dict): A dict stores data pipeline result.
+        lazy (bool): Determine whether to apply lazy operation. Default: False.
+    """
+
+    if 'img_shape' not in results:
+        results['img_shape'] = results['imgs'][0].shape[:2]
+    if lazy:
+        if 'lazy' not in results:
+            img_h, img_w = results['img_shape']
+            lazyop = dict()
+            lazyop['original_shape'] = results['img_shape']
+            lazyop['crop_bbox'] = np.array([0, 0, img_w, img_h],
+                                           dtype=np.float32)
+            lazyop['flip'] = False
+            lazyop['flip_direction'] = None
+            lazyop['interpolation'] = None
+            results['lazy'] = lazyop
+    else:
+        assert 'lazy' not in results, 'Use Fuse after lazy operations'
+
+
 @PIPELINES.register()
 class AutoPadding(object):
     """
@@ -473,25 +522,6 @@ class PoseDecode:
         return repr_str
 
 
-def _combine_quadruple(a, b):
-    return (a[0] + a[2] * b[0], a[1] + a[3] * b[1], a[2] * b[2], a[3] * b[3])
-
-
-def _ntuple(n):
-    def parse(x):
-        if isinstance(x, collections.abc.Iterable):
-            return tuple(x)
-        return tuple(repeat(x, n))
-
-    return parse
-
-
-_single = _ntuple(1)
-_pair = _ntuple(2)
-_triple = _ntuple(3)
-_quadruple = _ntuple(4)
-
-
 @PIPELINES.register()
 class PoseCompact:
     """Convert the coordinates of keypoints to make it more compact.
@@ -534,6 +564,10 @@ class PoseCompact:
 
         self.allow_imgpad = allow_imgpad
         assert self.padding >= 0
+
+    def _combine_quadruple(self, a, b):
+        return (a[0] + a[2] * b[0], a[1] + a[3] * b[1], a[2] * b[2],
+                a[3] * b[3])
 
     def __call__(self, results):
         img_shape = results['img_shape']
@@ -583,7 +617,8 @@ class PoseCompact:
         crop_quadruple = results.get('crop_quadruple', (0., 0., 1., 1.))
         new_crop_quadruple = (min_x / w, min_y / h, (max_x - min_x) / w,
                               (max_y - min_y) / h)
-        crop_quadruple = _combine_quadruple(crop_quadruple, new_crop_quadruple)
+        crop_quadruple = self._combine_quadruple(crop_quadruple,
+                                                 new_crop_quadruple)
         results['crop_quadruple'] = crop_quadruple
         return results
 
@@ -595,59 +630,7 @@ class PoseCompact:
         return repr_str
 
 
-def _init_lazy_if_proper(results, lazy):
-    """Initialize lazy operation properly.
-
-    Make sure that a lazy operation is properly initialized,
-    and avoid a non-lazy operation accidentally getting mixed in.
-
-    Required keys in results are "imgs" if "img_shape" not in results,
-    otherwise, Required keys in results are "img_shape", add or modified keys
-    are "img_shape", "lazy".
-    Add or modified keys in "lazy" are "original_shape", "crop_bbox", "flip",
-    "flip_direction", "interpolation".
-
-    Args:
-        results (dict): A dict stores data pipeline result.
-        lazy (bool): Determine whether to apply lazy operation. Default: False.
-    """
-
-    if 'img_shape' not in results:
-        results['img_shape'] = results['imgs'][0].shape[:2]
-    if lazy:
-        if 'lazy' not in results:
-            img_h, img_w = results['img_shape']
-            lazyop = dict()
-            lazyop['original_shape'] = results['img_shape']
-            lazyop['crop_bbox'] = np.array([0, 0, img_w, img_h],
-                                           dtype=np.float32)
-            lazyop['flip'] = False
-            lazyop['flip_direction'] = None
-            lazyop['interpolation'] = None
-            results['lazy'] = lazyop
-    else:
-        assert 'lazy' not in results, 'Use Fuse after lazy operations'
-
-
-class RandomCrop:
-    """Vanilla square random crop that specifics the output size.
-
-    Required keys in results are "img_shape", "keypoint" (optional), "imgs"
-    (optional), added or modified keys are "keypoint", "imgs", "lazy"; Required
-    keys in "lazy" are "flip", "crop_bbox", added or modified key is
-    "crop_bbox".
-
-    Args:
-        size (int): The output size of the images.
-        lazy (bool): Determine whether to apply lazy operation. Default: False.
-    """
-
-    def __init__(self, size, lazy=False):
-        if not isinstance(size, int):
-            raise TypeError(f'Size must be an int, but got {type(size)}')
-        self.size = size
-        self.lazy = lazy
-
+class CropBase:
     @staticmethod
     def _crop_kps(kps, crop_bbox):
         return kps - crop_bbox[:2]
@@ -690,91 +673,11 @@ class RandomCrop:
         return results
 
     def __call__(self, results):
-        """Performs the RandomCrop augmentation.
-
-        Args:
-            results (dict): The resulting dict to be modified and passed
-                to the next transform in pipeline.
-        """
-        _init_lazy_if_proper(results, self.lazy)
-        if 'keypoint' in results:
-            assert not self.lazy, ('Keypoint Augmentations are not compatible '
-                                   'with lazy == True')
-
-        img_h, img_w = results['img_shape']
-        assert self.size <= img_h and self.size <= img_w
-
-        y_offset = 0
-        x_offset = 0
-        if img_h > self.size:
-            y_offset = int(np.random.randint(0, img_h - self.size))
-        if img_w > self.size:
-            x_offset = int(np.random.randint(0, img_w - self.size))
-
-        if 'crop_quadruple' not in results:
-            results['crop_quadruple'] = np.array(
-                [0, 0, 1, 1],  # x, y, w, h
-                dtype=np.float32)
-
-        x_ratio, y_ratio = x_offset / img_w, y_offset / img_h
-        w_ratio, h_ratio = self.size / img_w, self.size / img_h
-
-        old_crop_quadruple = results['crop_quadruple']
-        old_x_ratio, old_y_ratio = old_crop_quadruple[0], old_crop_quadruple[1]
-        old_w_ratio, old_h_ratio = old_crop_quadruple[2], old_crop_quadruple[3]
-        new_crop_quadruple = [
-            old_x_ratio + x_ratio * old_w_ratio,
-            old_y_ratio + y_ratio * old_h_ratio, w_ratio * old_w_ratio,
-            h_ratio * old_h_ratio
-        ]
-        results['crop_quadruple'] = np.array(
-            new_crop_quadruple, dtype=np.float32)
-
-        new_h, new_w = self.size, self.size
-
-        crop_bbox = np.array(
-            [x_offset, y_offset, x_offset + new_w, y_offset + new_h])
-        results['crop_bbox'] = crop_bbox
-
-        results['img_shape'] = (new_h, new_w)
-
-        if not self.lazy:
-            if 'keypoint' in results:
-                results['keypoint'] = self._crop_kps(results['keypoint'],
-                                                     crop_bbox)
-            if 'imgs' in results:
-                results['imgs'] = self._crop_imgs(results['imgs'], crop_bbox)
-        else:
-            lazyop = results['lazy']
-            if lazyop['flip']:
-                raise NotImplementedError('Put Flip at last for now')
-
-            # record crop_bbox in lazyop dict to ensure only crop once in Fuse
-            lazy_left, lazy_top, lazy_right, lazy_bottom = lazyop['crop_bbox']
-            left = x_offset * (lazy_right - lazy_left) / img_w
-            right = (x_offset + new_w) * (lazy_right - lazy_left) / img_w
-            top = y_offset * (lazy_bottom - lazy_top) / img_h
-            bottom = (y_offset + new_h) * (lazy_bottom - lazy_top) / img_h
-            lazyop['crop_bbox'] = np.array(
-                [(lazy_left + left), (lazy_top + top), (lazy_left + right),
-                 (lazy_top + bottom)],
-                dtype=np.float32)
-
-        # Process entity boxes
-        if 'gt_bboxes' in results:
-            assert not self.lazy
-            results = self._all_box_crop(results, results['crop_bbox'])
-
-        return results
-
-    def __repr__(self):
-        repr_str = (f'{self.__class__.__name__}(size={self.size}, '
-                    f'lazy={self.lazy})')
-        return repr_str
+        raise NotImplementedError
 
 
 @PIPELINES.register()
-class RandomResizedCrop_V2(RandomCrop):
+class RandomResizedCrop_V2(CropBase):
     """Random crop that specifics the area and height-weight ratio range.
 
     Required keys in results are "img_shape", "crop_bbox", "imgs" (optional),
@@ -965,7 +868,7 @@ def is_tuple_of(seq, expected_type):
 
 
 @PIPELINES.register()
-class CenterCrop_V2(RandomCrop):
+class CenterCrop_V2(CropBase):
     """Crop the center area from images.
 
     Required keys are "img_shape", "imgs" (optional), "keypoint" (optional),

@@ -110,9 +110,6 @@ class Bottleneck3d(nn.Layer):
         temporal_stride (int): Temporal stride in the conv3d layer. Default: 1.
         dilation (int): Spacing between kernel elements. Default: 1.
         downsample (nn.Module | None): Downsample layer. Default: None.
-        style (str): ``pytorch`` or ``caffe``. If set to "pytorch", the
-            stride-two layer is the 3x3 conv layer, otherwise the stride-two
-            layer is the first 1x1 conv layer. Default: 'pytorch'.
         inflate (bool): Whether to inflate kernel. Default: True.
         inflate_style (str): ``3x1x1`` or ``3x3x3``. which determines the
             kernel sizes and padding strides for conv1 and conv2 in each block.
@@ -138,7 +135,6 @@ class Bottleneck3d(nn.Layer):
                  temporal_stride=1,
                  dilation=1,
                  downsample=None,
-                 style='pytorch',
                  inflate=True,
                  inflate_style='3x1x1',
                  non_local=False,
@@ -148,7 +144,6 @@ class Bottleneck3d(nn.Layer):
                  act_cfg=dict(type='ReLU'),
                  with_cp=False):
         super().__init__()
-        assert style in ['pytorch', 'caffe']
         assert inflate_style in ['3x1x1', '3x3x3']
 
         self.inplanes = inplanes
@@ -156,7 +151,6 @@ class Bottleneck3d(nn.Layer):
         self.spatial_stride = spatial_stride
         self.temporal_stride = temporal_stride
         self.dilation = dilation
-        self.style = style
         self.inflate = inflate
         self.inflate_style = inflate_style
         self.norm_cfg = norm_cfg
@@ -278,11 +272,6 @@ class ResNet3d(nn.Layer):
         pool1_stride_t (int): Temporal stride of the first pooling layer.
             Default: 1.
         with_pool2 (bool): Whether to use pool2. Default: True.
-        style (str): `pytorch` or `caffe`. If set to "pytorch", the stride-two
-            layer is the 3x3 conv layer, otherwise the stride-two layer is
-            the first 1x1 conv layer. Default: 'pytorch'.
-        frozen_stages (int): Stages to be frozen (all param fixed). -1 means
-            not freezing any parameters. Default: -1.
         inflate (Sequence[int]): Inflate Dims of each block.
             Default: (1, 1, 1, 1).
         inflate_style (str): ``3x1x1`` or ``3x3x3``. which determines the
@@ -332,8 +321,6 @@ class ResNet3d(nn.Layer):
                  pool1_stride_t=1,
                  with_pool1=True,
                  with_pool2=True,
-                 style='pytorch',
-                 frozen_stages=-1,
                  inflate=(1, 1, 1, 1),
                  inflate_style='3x1x1',
                  conv_cfg=dict(type='Conv3d'),
@@ -372,8 +359,6 @@ class ResNet3d(nn.Layer):
         self.pool1_stride_t = pool1_stride_t
         self.with_pool1 = with_pool1
         self.with_pool2 = with_pool2
-        self.style = style
-        self.frozen_stages = frozen_stages
         self.stage_inflations = _ntuple(num_stages)(inflate)
         self.non_local_stages = _ntuple(num_stages)(non_local)
         self.inflate_style = inflate_style
@@ -409,7 +394,6 @@ class ResNet3d(nn.Layer):
                 spatial_stride=spatial_stride,
                 temporal_stride=temporal_stride,
                 dilation=dilation,
-                style=self.style,
                 norm_cfg=self.norm_cfg,
                 conv_cfg=self.conv_cfg,
                 act_cfg=self.act_cfg,
@@ -435,7 +419,6 @@ class ResNet3d(nn.Layer):
                        spatial_stride=1,
                        temporal_stride=1,
                        dilation=1,
-                       style='pytorch',
                        inflate=1,
                        inflate_style='3x1x1',
                        non_local=0,
@@ -459,10 +442,6 @@ class ResNet3d(nn.Layer):
             temporal_stride (int | Sequence[int]): Temporal strides in
                 residual and conv layers. Default: 1.
             dilation (int): Spacing between kernel elements. Default: 1.
-            style (str): ``pytorch`` or ``caffe``. If set to ``pytorch``,
-                the stride-two layer is the 3x3 conv layer, otherwise
-                the stride-two layer is the first 1x1 conv layer.
-                Default: ``pytorch``.
             inflate (int | Sequence[int]): Determine whether to inflate
                 for each block. Default: 1.
             inflate_style (str): ``3x1x1`` or ``3x3x3``. which determines
@@ -507,7 +486,6 @@ class ResNet3d(nn.Layer):
                 temporal_stride=temporal_stride,
                 dilation=dilation,
                 downsample=downsample,
-                style=style,
                 inflate=(inflate[0] == 1),
                 inflate_style=inflate_style,
                 non_local=(non_local[0] == 1),
@@ -526,7 +504,6 @@ class ResNet3d(nn.Layer):
                     spatial_stride=1,
                     temporal_stride=1,
                     dilation=dilation,
-                    style=style,
                     inflate=(inflate[i] == 1),
                     inflate_style=inflate_style,
                     non_local=(non_local[i] == 1),
@@ -622,20 +599,6 @@ class ResNet3d(nn.Layer):
 
         self.pool2 = nn.MaxPool3D(kernel_size=(2, 1, 1), stride=(2, 1, 1))
 
-    def _freeze_stages(self):
-        """Prevent all the parameters from being optimized before
-        ``self.frozen_stages``."""
-        if self.frozen_stages >= 0:
-            self.conv1.eval()
-            for param in self.conv1.parameters():
-                param.requires_grad = False
-
-        for i in range(1, self.frozen_stages + 1):
-            m = getattr(self, f'layer{i}')
-            m.eval()
-            for param in m.parameters():
-                param.requires_grad = False
-
     @staticmethod
     def _init_weights(self, pretrained=None):
         pass
@@ -672,7 +635,6 @@ class ResNet3d(nn.Layer):
     def train(self, mode=True):
         """Set the optimization status when training."""
         super().train()
-        self._freeze_stages()
         if mode and self.norm_eval:
             for m in self.modules():
                 if isinstance(m, paddle.nn._BatchNormBase):

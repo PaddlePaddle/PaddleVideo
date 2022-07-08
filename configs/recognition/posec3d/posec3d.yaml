@@ -5,12 +5,14 @@ MODEL: #MODEL field
         depth: 50 # Not Optional, only 50 now.
         in_channels: 17
         base_channels: 32
+        conv1_kernel: [1, 7, 7]
         num_stages: 3
         out_indices: [2]
         stage_blocks: [3, 4, 6]
         conv1_stride_s: 1
         pool1_stride_s: 1
         inflate: [0, 1, 1]
+        with_pool2: False
         spatial_strides: [2, 2, 2]
         temporal_strides: [1, 1, 2]
         dilations: [1, 1, 1]
@@ -30,19 +32,19 @@ DATASET: #DATASET field
     train:
         format: "UCF101SkeletonDataset"
         split: "train1"
-        file_path: "/Users/alex/Downloads/ucf101.pkl" #Mandatory, train data index file path
+        file_path: "data/ucf101.pkl" #Mandatory, train data index file path
         repeat_times: 10
 
     valid:
         format: "UCF101SkeletonDataset"
         split: "test1"
-        file_path: "/Users/alex/Downloads/ucf101.pkl" #Mandatory, valid data index file path
+        file_path: "data/ucf101.pkl" #Mandatory, valid data index file path
         repeat_times: 1
 
     test:
       format: "UCF101SkeletonDataset"
       split: "test1"
-      file_path: "/Users/alex/Downloads/ucf101.pkl" #Mandatory, valid data index file path
+      file_path: "data/ucf101.pkl" #Mandatory, valid data index file path
       repeat_times: 1
 
 
