@@ -74,7 +74,8 @@ class Scale(object):
                 raise NotImplementedError
             if (w <= h and w == self.short_size) or (h <= w
                                                      and h == self.short_size):
-                if self.backend == 'pillow' and not isinstance(img, Image):
+                if self.backend == 'pillow' and not isinstance(
+                        img, Image.Image):
                     img = Image.fromarray(img)
                 elif self.backend == 'cv2' and not isinstance(img, np.ndarray):
                     img = np.array(img)
