@@ -16,10 +16,12 @@ import functools
 import paddle
 import paddle.distributed as dist
 
+
 def get_dist_info():
     world_size = dist.get_world_size()
     rank = dist.get_rank()
     return rank, world_size
+
 
 def main_only(func):
     @functools.wraps(func)
@@ -27,4 +29,21 @@ def main_only(func):
         rank, _ = get_dist_info()
         if rank == 0:
             return func(*args, **kwargs)
+
     return wrapper
+
+
+def gather_from_gpu(gather_object: paddle.Tensor,
+                    concat_axis=0) -> paddle.Tensor:
+    """gather Tensor from all gpus into a list and concatenate them on `concat_axis`.
+
+    Args:
+        gather_object (paddle.Tensor): gather object Tensor
+        concat_axis (int, optional): axis for concatenation. Defaults to 0.
+
+    Returns:
+        paddle.Tensor: gatherd & concatenated Tensor
+    """
+    gather_object_list = []
+    dist.all_gather(gather_object_list, gather_object)
+    return paddle.concat(gather_object_list, axis=concat_axis)

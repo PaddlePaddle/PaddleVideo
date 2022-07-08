@@ -17,7 +17,7 @@ from .build_utils import build
 from .config import *
 from .logger import setup_logger, coloring, get_logger
 from .record import AverageMeter, build_record, log_batch, log_epoch
-from .dist_utils import get_dist_info, main_only
+from .dist_utils import get_dist_info, main_only, gather_from_gpu
 from .save_load import save, load, load_ckpt, mkdir
 from .precise_bn import do_preciseBN
 from .profiler import add_profiler_step
