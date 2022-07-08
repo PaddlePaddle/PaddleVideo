@@ -72,6 +72,10 @@ class Scale(object):
                 w, h = img.size
             else:
                 raise NotImplementedError
+            if (w <= h and w == self.short_size) or (h <= w
+                                                     and h == self.short_size):
+                resized_imgs.append(img)
+                continue
 
             if w <= h:
                 ow = self.short_size
