@@ -1,9 +1,0 @@
-name: TEST
-description: Prepare Pull Request for the current change
-outputs:
-  build_number:
-    description: The release body
-runs:
-  using: 'node12'
-  main: index.js
-  
