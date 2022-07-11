@@ -6,3 +6,4 @@ build/*
 *.local
 thumbs.db
 /extensions
+!src/renderer/handler/export/output
