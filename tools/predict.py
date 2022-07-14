@@ -34,7 +34,13 @@ def parse_args():
                         type=str,
                         default='configs/example.yaml',
                         help='config file path')
+    parser.add_argument('-o',
+                        '--override',
+                        action='append',
+                        default=[],
+                        help='config options to be overridden')
     parser.add_argument("-i", "--input_file", type=str, help="input file path")
+    parser.add_argument("--time_test_file", type=str2bool, default=False, help="whether input time test file")    
     parser.add_argument("--model_file", type=str)
     parser.add_argument("--params_file", type=str)
 
@@ -134,7 +140,7 @@ def main():
     """predict using paddle inference model
     """
     args = parse_args()
-    cfg = get_config(args.config, show=False)
+    cfg = get_config(args.config, overrides=args.override, show=False)
 
     model_name = cfg.model_name
     print(f"Inference model({model_name})...")
@@ -224,8 +230,7 @@ def main():
                                               'postprocess_time'
                                           ],
                                           warmup=num_warmup)
-            if args.input_file.endswith('avi') or args.input_file.endswith(
-                    'mp4'):
+            if not args.time_test_file:
                 test_video_num = 15
                 files = [args.input_file for _ in range(test_video_num)]
             else:

@@ -3,16 +3,16 @@ MODEL: #MODEL field
   backbone: #Mandatory, indicate the type of backbone, associate to the 'paddlevideo/modeling/backbones/' .
     name: "AGCN2s" #Mandatory, The name of backbone.
     num_point: 25
-    num_person: 2
+    num_person: 1
     graph: "ntu_rgb_d"
     graph_args:
       labeling_mode: "spatial"
-    in_channels: 3
+    in_channels: 2
   head:
     name: "AGCN2sHead" #Mandatory, indicate the type of head, associate to the 'paddlevideo/modeling/heads'
     num_classes: 60  #Optional, the number of classes to be classified.
     in_channels: 64  #output the number of classes.
-    M: 2  #number of people.
+    M: 1  #number of people.
 
 DATASET: #DATASET field
   batch_size: 64 #Mandatory, bacth size
@@ -21,41 +21,33 @@ DATASET: #DATASET field
   test_num_workers: 0
   train:
     format: "SkeletonDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
-    file_path: "train_data.npy" #Mandatory, train data index file path
-    label_path: "train_label.npy"
+    file_path: "data/fsd10/FSD_train_data.npy" #Mandatory, train data index file path
+    label_path: "data/fsd10/FSD_train_label.npy"
   test:
     format: "SkeletonDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
-    file_path: "test_A_data.npy" #Mandatory, valid data index file path
+    file_path: "data/fsd10/test_A_data.npy" #Mandatory, valid data index file path
     test_mode: True
 
 
 PIPELINE: #PIPELINE field
   train: #Mandotary, indicate the pipeline to deal with the training data, associate to the 'paddlevideo/loader/pipelines/'
     sample:
-      - Iden:
       name: "AutoPadding"
       window_size: 300
     transform: #Mandotary, image transfrom operator
-      - SketeonModalityTransform:
-          joint: True
-          bone: False
-          motion: False
-          graph: 'ntu_rgb_d'
+      - SkeletonNorm:
   test: #Mandotary, indicate the pipeline to deal with the training data, associate to the 'paddlevideo/loader/pipelines/'
     sample:
       name: "AutoPadding"
       window_size: 300
     transform: #Mandotary, image transfrom operator
-      - SketeonModalityTransform:
-          joint: True
-          bone: False
-          motion: False
-          graph: 'ntu_rgb_d'
+      - SkeletonNorm:
 
 OPTIMIZER: #OPTIMIZER field
   name: 'Momentum'
   momentum: 0.9
   learning_rate:
+    iter_step: True
     name: 'CustomWarmupAdjustDecay'
     step_base_lr: 0.1
     warmup_epochs: 5
@@ -71,14 +63,15 @@ METRIC:
   name: 'SkeletonMetric'
   out_file: 'submission.csv'
 
-INFERENCE:
-  name: 'AGCN2s_Inference_helper'
-  num_channels: 3
-  vertex_nums: 25
-  person_nums: 2
-  window_size: 300
 
-model_name: "AGCN2s_cs_joint"
+INFERENCE:
+    name: 'STGCN_Inference_helper'
+    num_channels: 2
+    window_size: 350
+    vertex_nums: 25
+    person_nums: 1
+
+model_name: "AGCN2s"
 log_interval: 10 #Optional, the interal of logger, default:10
 epochs: 50 #Mandatory, total epoch
 save_interval: 10

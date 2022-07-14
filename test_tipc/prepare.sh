@@ -63,7 +63,7 @@ if [ ${MODE} = "lite_train_lite_infer" ];then
         wget -nc https://videotag.bj.bcebos.com/Data/FSD_train_data.npy
         wget -nc https://videotag.bj.bcebos.com/Data/FSD_train_label.npy
         popd
-    elif [ ${model_name} == "AGCN2s_joint" ] || [ ${model_name} == "AGCN2s_bone" ]; then
+    elif [ ${model_name} == "AGCN2s" ]; then
         # pretrain lite train data
         pushd data/fsd10
         wget -nc https://videotag.bj.bcebos.com/Data/FSD_train_data.npy
@@ -120,9 +120,9 @@ if [ ${MODE} = "lite_train_lite_infer" ];then
         pushd ./data
         mkdir bmn_data
         cd bmn_data
-        wget -nc https://paddlemodels.bj.bcebos.com/video_detection/bmn_feat.tar.gz
+        wget -nc https://videotag.bj.bcebos.com/Data/BMN_lite/bmn_feat.tar.gz
         tar -xf bmn_feat.tar.gz
-        wget -nc https://paddlemodels.bj.bcebos.com/video_detection/activitynet_1.3_annotations.json
+        wget -nc https://videotag.bj.bcebos.com/Data/BMN_lite/activitynet_1.3_annotations.json
         wget -nc https://paddlemodels.bj.bcebos.com/video_detection/activity_net_1_3_new.json
         popd
     elif [ ${model_name} == "TokenShiftVisionTransformer" ]; then
