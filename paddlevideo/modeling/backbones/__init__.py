@@ -43,11 +43,13 @@ from .ctrgcn import CTRGCN
 from .agcn2s import AGCN2s
 from .movinet import MoViNet
 from .toshift_vit import TokenShiftVisionTransformer
+from .pptsm_mv2 import PPTSM_MobileNetV2
 
 __all__ = [
     'ResNet', 'ResNetTSM', 'ResNetTweaksTSM', 'ResNetSlowFast', 'BMN',
     'ResNetTweaksTSN', 'VisionTransformer', 'STGCN', 'AGCN', 'TransNetV2',
     'ADDS_DepthNet', 'VisionTransformer_tweaks', 'BertForMultiModalPreTraining',
     'ResNetTSN_MRI', 'ResNetTSM_MRI', 'ResNetSlowFast_MRI', 'CFBI', 'MSTCN',
-    'ASRF', 'MoViNet', 'SwinTransformer3D', 'CTRGCN', 'TokenShiftVisionTransformer', 'AGCN2s'
+    'ASRF', 'MoViNet', 'SwinTransformer3D', 'CTRGCN',
+    'TokenShiftVisionTransformer', 'AGCN2s', 'PPTSM_MobileNetV2'
 ]
