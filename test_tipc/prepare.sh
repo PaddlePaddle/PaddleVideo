@@ -63,7 +63,7 @@ if [ ${MODE} = "lite_train_lite_infer" ];then
         wget -nc https://videotag.bj.bcebos.com/Data/FSD_train_data.npy
         wget -nc https://videotag.bj.bcebos.com/Data/FSD_train_label.npy
         popd
-    elif [ ${model_name} == "AGCN2s_joint" ] || [ ${model_name} == "AGCN2s_bone" ]; then
+    elif [ ${model_name} == "AGCN2s" ]; then
         # pretrain lite train data
         pushd data/fsd10
         wget -nc https://videotag.bj.bcebos.com/Data/FSD_train_data.npy
@@ -120,9 +120,9 @@ if [ ${MODE} = "lite_train_lite_infer" ];then
         pushd ./data
         mkdir bmn_data
         cd bmn_data
-        wget -nc https://paddlemodels.bj.bcebos.com/video_detection/bmn_feat.tar.gz
+        wget -nc https://videotag.bj.bcebos.com/Data/BMN_lite/bmn_feat.tar.gz
         tar -xf bmn_feat.tar.gz
-        wget -nc https://paddlemodels.bj.bcebos.com/video_detection/activitynet_1.3_annotations.json
+        wget -nc https://videotag.bj.bcebos.com/Data/BMN_lite/activitynet_1.3_annotations.json
         wget -nc https://paddlemodels.bj.bcebos.com/video_detection/activity_net_1_3_new.json
         popd
     elif [ ${model_name} == "TokenShiftVisionTransformer" ]; then
@@ -521,5 +521,24 @@ if [ ${MODE} = "serving_infer_python" ];then
 fi
 
 if [ ${MODE} = "paddle2onnx_infer" ];then
-    echo "Not added into TIPC now."
+    # install paddle2onnx
+    python_name_list=$(func_parser_value "${lines[2]}")
+    IFS='|'
+    array=(${python_name_list})
+    python_name=${array[0]}
+    ${python_name} -m pip install paddle2onnx
+    ${python_name} -m pip install onnxruntime==1.9.0
+
+    if [ ${model_name} = "PP-TSM" ]; then
+        echo "Not added into TIPC now."
+    elif [ ${model_name} = "PP-TSN" ]; then
+        mkdir -p ./inference
+        wget -P ./inference/ https://videotag.bj.bcebos.com/PaddleVideo-release2.3/ppTSN.zip
+        # unzip inference model
+        pushd ./inference
+        unzip ppTSN.zip
+        popd
+    else
+        echo "Not added into TIPC now."
+    fi
 fi

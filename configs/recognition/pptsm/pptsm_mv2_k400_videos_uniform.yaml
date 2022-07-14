@@ -1,32 +1,25 @@
 MODEL: #MODEL field
     framework: "Recognizer2D" #Mandatory, indicate the type of network, associate to the 'paddlevideo/modeling/framework/' .
-    backbone: #Mandatory, indicate the type of backbone, associate to the 'paddlevideo/modeling/backbones/' .
-        name: "ResNetTweaksTSM" #Mandatory, The name of backbone.
-        pretrained: "data/ResNet50_vd_ssld_v2_pretrained.pdparams" #Optional, pretrained model path.
-        depth: 50 #Optional, the depth of backbone architecture.
+    backbone:
+        name: "PPTSM_MobileNetV2" #Mandatory, The name of backbone.
+        pretrained: "data/MobileNetV2_ssld_pretrained.pdparams" #Optional, pretrained model path.
     head:
-        name: "ppTSMHead" #Mandatory, indicate the type of head, associate to the 'paddlevideo/modeling/heads'
-        num_classes: 400 #Optional, the number of classes to be classified.
-        in_channels: 2048 #input channel of the extracted feature.
-        drop_ratio: 0.5 #the ratio of dropout
-        std: 0.01 #std value in params initialization
-        ls_eps: 0.1 # label smooth factor
+        name: "MoViNetHead" #Mandatory, indicate the type of head, associate to the 'paddlevideo/modeling/heads'
 
 DATASET: #DATASET field
     batch_size: 16  #Mandatory, bacth size
     num_workers: 4 #Mandatory, the number of subprocess on each GPU.
-    test_batch_size: 1
     train:
         format: "VideoDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
-        data_prefix: "data/k400/videos" #Mandatory, train data root path
+        data_prefix: "data/k400" #Mandatory, train data root path
         file_path: "data/k400/train.list" #Mandatory, train data index file path
     valid:
         format: "VideoDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
-        data_prefix: "data/k400/videos" #Mandatory, train data root path
+        data_prefix: "data/k400" #Mandatory, valid data root path
         file_path: "data/k400/val.list" #Mandatory, valid data index file path
     test:
         format: "VideoDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
-        data_prefix: "data/k400/videos" #Mandatory, train data root path
+        data_prefix: "data/k400" #Mandatory, valid data root path
         file_path: "data/k400/val.list" #Mandatory, valid data index file path
 
 PIPELINE: #PIPELINE field
@@ -120,7 +113,7 @@ INFERENCE:
     num_seg: 8
     target_size: 224
 
-model_name: "ppTSM"
+model_name: "ppTSM_mv2"
 log_interval: 10 #Optional, the interal of logger, default:10
 epochs: 80 #Mandatory, total epoch
 log_level: "INFO" #Optional, the logger level. default: "INFO"

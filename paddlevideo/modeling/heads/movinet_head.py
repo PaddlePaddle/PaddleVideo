@@ -8,9 +8,8 @@ from ..builder import build_loss
 
 @HEADS.register()
 class MoViNetHead(BaseHead):
-
     def __init__(self):
         super().__init__()
 
-    def forward(self, x):
+    def forward(self, x, *args):
         return x

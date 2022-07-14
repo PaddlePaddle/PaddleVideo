@@ -195,7 +195,7 @@ class AGCN2s(nn.Layer):
         A = self.graph.A
         self.data_bn = nn.BatchNorm1D(num_person * in_channels * num_point)
 
-        self.l1 = Block(3, 64, A, residual=False)
+        self.l1 = Block(in_channels, 64, A, residual=False)
         self.l2 = Block(64, 64, A)
         self.l3 = Block(64, 64, A)
         self.l4 = Block(64, 64, A)

@@ -136,11 +136,12 @@ The `cpp_serving` directory contains the code for starting the pipeline service,
   ```
 
 - Send the request and get the result:
-  ```bash
-  python3.7 serving_client.py \
-  -c ./ppTSM_serving_client/serving_client_conf.prototxt \
-  --input_file=../../data/example.avi
-  ```
+```bash
+python3.7 serving_client.py \
+-n PPTSM \
+-c ./ppTSM_serving_client/serving_client_conf.prototxt \
+--input_file=../../data/example.avi
+```
 After a successful run, the results of the model prediction will be printed in the cmd window, and the results are as follows:
 
   ```bash

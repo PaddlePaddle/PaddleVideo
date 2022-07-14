@@ -24,18 +24,27 @@ from paddlevideo.utils import get_config
 
 
 def parse_args():
+
     def str2bool(v):
         return v.lower() in ("true", "t", "1")
 
     # general params
     parser = argparse.ArgumentParser("PaddleVideo Inference model script")
-    parser.add_argument(
-        '-c',
-        '--config',
-        type=str,
-        default='configs/example.yaml',
-        help='config file path')
+    parser.add_argument('-c',
+                        '--config',
+                        type=str,
+                        default='configs/example.yaml',
+                        help='config file path')
+    parser.add_argument('-o',
+                        '--override',
+                        action='append',
+                        default=[],
+                        help='config options to be overridden')
     parser.add_argument("-i", "--input_file", type=str, help="input file path")
+    parser.add_argument("--time_test_file",
+                        type=str2bool,
+                        default=False,
+                        help="whether input time test file")
     parser.add_argument("--model_file", type=str)
     parser.add_argument("--params_file", type=str)
 
@@ -101,8 +110,8 @@ def create_paddle_predictor(args, cfg):
             elif 'tokenshift' in cfg.model_name.lower():
                 num_views = 3  # UniformCrop
             max_batch_size = args.batch_size * num_views * num_seg * seg_len
-        config.enable_tensorrt_engine(
-            precision_mode=precision, max_batch_size=max_batch_size)
+        config.enable_tensorrt_engine(precision_mode=precision,
+                                      max_batch_size=max_batch_size)
 
     config.enable_memory_optim()
     # use zero copy
@@ -135,7 +144,7 @@ def main():
     """predict using paddle inference model
     """
     args = parse_args()
-    cfg = get_config(args.config, show=False)
+    cfg = get_config(args.config, overrides=args.override, show=False)
 
     model_name = cfg.model_name
     print(f"Inference model({model_name})...")
@@ -210,22 +219,22 @@ def main():
                       f"package and it's dependencies is required for "
                       f"python-inference when enable_benchmark=True.")
             pid = os.getpid()
-            autolog = auto_log.AutoLogger(
-                model_name=cfg.model_name,
-                model_precision=args.precision,
-                batch_size=args.batch_size,
-                data_shape="dynamic",
-                save_path="./output/auto_log.lpg",
-                inference_config=inference_config,
-                pids=pid,
-                process_name=None,
-                gpu_ids=0 if args.use_gpu else None,
-                time_keys=[
-                    'preprocess_time', 'inference_time', 'postprocess_time'
-                ],
-                warmup=num_warmup)
-            if args.input_file.endswith('avi') or args.input_file.endswith(
-                    'mp4') or args.input_file.endswith('pkl'):
+            autolog = auto_log.AutoLogger(model_name=cfg.model_name,
+                                          model_precision=args.precision,
+                                          batch_size=args.batch_size,
+                                          data_shape="dynamic",
+                                          save_path="./output/auto_log.lpg",
+                                          inference_config=inference_config,
+                                          pids=pid,
+                                          process_name=None,
+                                          gpu_ids=0 if args.use_gpu else None,
+                                          time_keys=[
+                                              'preprocess_time',
+                                              'inference_time',
+                                              'postprocess_time'
+                                          ],
+                                          warmup=num_warmup)
+            if not args.time_test_file:
                 test_video_num = 15
                 files = [args.input_file for _ in range(test_video_num)]
             else:
