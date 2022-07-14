@@ -133,7 +133,8 @@ if [ ${MODE} = "lite_train_lite_infer" ];then
         pushd ./data
         mkdir posec3d_data
         cd posec3d_data
-        unzip ../mini_ucf101.zip
+        wget -nc https://videotag.bj.bcebos.com/PaddleVideo-release2.3/PoseC3D_data_small.tar
+        tar -xf PoseC3D_data_small.tar
         popd
     else
         echo "Not added into TIPC yet."
