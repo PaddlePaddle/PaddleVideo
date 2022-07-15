@@ -2,7 +2,7 @@
 source test_tipc/common_func.sh
 
 FILENAME=$1
-# MODE be one of ['lite_train_lite_infer' 'lite_train_whole_infer' 'whole_train_whole_infer', 'whole_infer', 'klquant_whole_infer']
+# MODE be one of ['lite_train_lite_infer' 'lite_train_whole_infer' 'whole_train_whole_infer', 'whole_infer']
 MODE=$2
 
 dataline=$(awk 'NR==1, NR==51{print}'  $FILENAME)
