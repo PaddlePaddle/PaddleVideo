@@ -2,6 +2,7 @@
 source test_tipc/common_func.sh
 
 FILENAME=$1
+MODE=$2
 dataline=$(awk 'NR==1, NR==18{print}'  $FILENAME)
 
 # parser params
