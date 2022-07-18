@@ -252,31 +252,31 @@ class MobileNet(nn.Layer):
 
 
 @BACKBONES.register()
-def PPTSM_MobileNetV2(pretrained=None, use_ssld=False, **kwargs):
+def PPTSM_MobileNetV2(pretrained=None, **kwargs):
     model = MobileNet(pretrained=pretrained, scale=1.0, **kwargs)
     return model
 
 
-def PPTSM_MobileNetV2_x0_25(pretrained=None, use_ssld=False, **kwargs):
+def PPTSM_MobileNetV2_x0_25(pretrained=None, **kwargs):
     model = MobileNet(pretrained=pretrained, scale=0.25, **kwargs)
     return model
 
 
-def PPTSM_MobileNetV2_x0_5(pretrained=None, use_ssld=False, **kwargs):
+def PPTSM_MobileNetV2_x0_5(pretrained=None, **kwargs):
     model = MobileNet(pretrained=pretrained, scale=0.5, **kwargs)
     return model
 
 
-def PPTSM_MobileNetV2_x0_75(pretrained=None, use_ssld=False, **kwargs):
+def PPTSM_MobileNetV2_x0_75(pretrained=None, **kwargs):
     model = MobileNet(pretrained=pretrained, scale=0.75, **kwargs)
     return model
 
 
-def PPTSM_MobileNetV2_x1_5(pretrained=None, use_ssld=False, **kwargs):
+def PPTSM_MobileNetV2_x1_5(pretrained=None, **kwargs):
     model = MobileNet(pretrained=pretrained, scale=1.5, **kwargs)
     return model
 
 
-def PPTSM_MobileNetV2_x2_0(pretrained=None, use_ssld=False, **kwargs):
+def PPTSM_MobileNetV2_x2_0(pretrained=None, **kwargs):
     model = MobileNet(pretrained=pretrained, scale=2.0, **kwargs)
     return model

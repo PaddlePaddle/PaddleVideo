@@ -44,6 +44,7 @@ from .agcn2s import AGCN2s
 from .movinet import MoViNet
 from .toshift_vit import TokenShiftVisionTransformer
 from .pptsm_mv2 import PPTSM_MobileNetV2
+from .pptsm_mv3 import PPTSM_MobileNetV3
 from .pptsm_v2 import PPTSM_v2
 
 __all__ = [
@@ -53,4 +54,6 @@ __all__ = [
     'ResNetTSN_MRI', 'ResNetTSM_MRI', 'ResNetSlowFast_MRI', 'CFBI', 'MSTCN',
     'ASRF', 'MoViNet', 'SwinTransformer3D', 'CTRGCN',
     'TokenShiftVisionTransformer', 'AGCN2s', 'PPTSM_MobileNetV2', 'PPTSM_v2'
+    'TokenShiftVisionTransformer', 'AGCN2s', 'PPTSM_MobileNetV2',
+    'PPTSM_MobileNetV3', 'PPTSM_v2'
 ]
