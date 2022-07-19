@@ -45,6 +45,7 @@ from .movinet import MoViNet
 from .resnet3d_slowonly import ResNet3dSlowOnly
 from .toshift_vit import TokenShiftVisionTransformer
 from .pptsm_mv2 import PPTSM_MobileNetV2
+from .pptsm_mv3 import PPTSM_MobileNetV3
 
 __all__ = [
     'ResNet', 'ResNetTSM', 'ResNetTweaksTSM', 'ResNetSlowFast', 'BMN',
@@ -53,5 +54,5 @@ __all__ = [
     'ResNetTSN_MRI', 'ResNetTSM_MRI', 'ResNetSlowFast_MRI', 'CFBI', 'MSTCN',
     'ASRF', 'MoViNet', 'SwinTransformer3D', 'CTRGCN',
     'TokenShiftVisionTransformer', 'AGCN2s', 'PPTSM_MobileNetV2',
-    'ResNet3dSlowOnly'
+    'PPTSM_MobileNetV3', 'ResNet3dSlowOnly'
 ]

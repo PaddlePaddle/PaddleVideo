@@ -2,7 +2,7 @@
 source test_tipc/common_func.sh
 
 FILENAME=$1
-
+MODE=$2
 dataline=$(cat ${FILENAME})
 lines=(${dataline})
 # common params
