@@ -24,7 +24,7 @@ try:
     from paddlenlp.transformers import BertTokenizer
 except ImportError as e:
     print(
-        f"{e}, [paddlenlp] package and it's dependencies is required for ActBERT."
+        f"Warning! {e}, [paddlenlp] package and it's dependencies is required for ActBERT."
     )
 
 

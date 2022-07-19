@@ -22,7 +22,8 @@ try:
     import ppdet
 except ImportError as e:
     print(
-        f"{e}, [paddledet] package and it's dependencies is required for AVA.")
+        f"Warning! {e}, [paddledet] package and it's dependencies is required for AVA."
+    )
 
 __dir__ = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.abspath(os.path.join(__dir__, '../')))
