@@ -71,39 +71,6 @@ class CFAMBlock(nn.Layer):
         return output
 
 
-def load_pretrain_weight(model, weights_path):
-    model_dict = model.state_dict()
-
-    param_state_dict = paddle.load(weights_path)
-    ignore_weights = set()
-
-    # hack: fit for faster rcnn. Pretrain weights contain prefix of 'backbone'
-    # while res5 module is located in bbox_head.head. Replace the prefix of
-    # res5 with 'bbox_head.head' to load pretrain weights correctly.
-    for k in list(param_state_dict.keys()):
-        if 'backbone.res5' in k:
-            new_k = k.replace('backbone', 'bbox_head.head')
-            if new_k in model_dict.keys():
-                value = param_state_dict.pop(k)
-                param_state_dict[new_k] = value
-
-    for name, weight in param_state_dict.items():
-        if name in model_dict.keys():
-            if list(weight.shape) != list(model_dict[name].shape):
-                print(
-                    '{} not used, shape {} unmatched with {} in model.'.format(
-                        name, weight.shape, list(model_dict[name].shape)))
-                ignore_weights.add(name)
-        else:
-            print('Redundant weight {} and ignore it.'.format(name))
-            ignore_weights.add(name)
-
-    for weight in ignore_weights:
-        param_state_dict.pop(weight, None)
-
-    model.set_dict(param_state_dict)
-    print('Finish loading model weights: {}'.format(weights_path))
-    return model
 
 
 @BACKBONES.register()
@@ -121,12 +88,46 @@ class YOWO(nn.Layer):
         self.cfam = CFAMBlock(self.num_ch_2d + self.num_ch_3d, 1024)
         self.conv_final = nn.Conv2D(1024, 5 * (self.num_class + 4 + 1), kernel_size=1, bias_attr=False)
         self.seen = 0
+    
+    def get_3d_model(self, model, weights_path):
+        model_dict = model.state_dict()
+
+        param_state_dict = paddle.load(weights_path)
+        ignore_weights = set()
+
+        # hack: fit for faster rcnn. Pretrain weights contain prefix of 'backbone'
+        # while res5 module is located in bbox_head.head. Replace the prefix of
+        # res5 with 'bbox_head.head' to load pretrain weights correctly.
+        for k in list(param_state_dict.keys()):
+            if 'backbone.res5' in k:
+                new_k = k.replace('backbone', 'bbox_head.head')
+                if new_k in model_dict.keys():
+                    value = param_state_dict.pop(k)
+                    param_state_dict[new_k] = value
+
+        for name, weight in param_state_dict.items():
+            if name in model_dict.keys():
+                if list(weight.shape) != list(model_dict[name].shape):
+                    print(
+                        '{} not used, shape {} unmatched with {} in model.'.format(
+                            name, weight.shape, list(model_dict[name].shape)))
+                    ignore_weights.add(name)
+            else:
+                print('Redundant weight {} and ignore it.'.format(name))
+                ignore_weights.add(name)
+
+        for weight in ignore_weights:
+            param_state_dict.pop(weight, None)
+
+        model.set_dict(param_state_dict)
+        print('Finish loading model weights: {}'.format(weights_path))
+        return model
 
     def init_weights(self):
         if self.pretrained_2d is not None:
             self.backbone_2d.load_weights(self.pretrained_2d)
         if self.pretrained_3d is not None:
-            self.backbone_3d = load_pretrain_weight(self.backbone_3d, self.pretrained_3d)
+            self.backbone_3d = self.get_3d_model(self.backbone_3d, self.pretrained_3d)
 
     def forward(self, input):
         x_3d = input  # Input clip

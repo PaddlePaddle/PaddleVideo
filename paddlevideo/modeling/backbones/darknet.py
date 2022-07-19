@@ -16,16 +16,16 @@ import paddle
 import paddle.nn as nn
 import paddle.nn.functional as F
 import numpy as np
-from .yolo_cfg import parse_cfg, print_cfg, load_conv_bn, load_conv, load_fc, save_conv_bn, save_conv, save_fc
+from .yolo_cfg import parse_cfg, print_cfg, load_conv_bn, load_conv, load_fc
 
 
 class MaxPoolStride1(nn.Layer):
     def __init__(self):
         super(MaxPoolStride1, self).__init__()
+        self.pad = nn.Pad2D(padding=[0, 1, 0, 1], mode='replicate')
 
     def forward(self, x):
-        pad = nn.Pad2D(padding=[0, 1, 0, 1], mode='replicate')
-        x = F.max_pool2d(pad(x), 2, stride=1)
+        x = F.max_pool2d(self.pad(x), 2, stride=1)
         return x
 
 
@@ -61,7 +61,7 @@ class GlobalAvgPool2d(nn.Layer):
         C = x.shape[1]
         H = x.shape[2]
         W = x.shape[3]
-        x = F.avg_pool2d(x, (H, W))
+        x = F.adaptive_avg_pool2d(x, [H, W])
         x = x.reshape([N, C])
         return x
 

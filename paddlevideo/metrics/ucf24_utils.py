@@ -1,25 +1,22 @@
-###########################################################################################
-#                                                                                         #
-# This sample shows how to evaluate object detections applying the following metrics:     #
-#  * Precision x Recall curve       ---->       used by VOC PASCAL 2012)                  #
-#  * Average Precision (AP)         ---->       used by VOC PASCAL 2012)                  #
-#                                                                                         #
-# Developed by: Rafael Padilla (rafael.padilla@smt.ufrj.br)                               #
-#        SMT - Signal Multimedia and Telecommunications Lab                               #
-#        COPPE - Universidade Federal do Rio de Janeiro                                   #
-#        Last modification: Oct 9th 2018                                                 #
-###########################################################################################
+# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 
-import argparse
 import glob
 import os
 import shutil
-# from argparse import RawTextHelpFormatter
 import sys
-
-# utils
+from collections import Counter
+import numpy as np
 from enum import Enum
-
 import cv2
 
 
@@ -63,7 +60,6 @@ class BBFormat(Enum):
     Class representing the format of a bounding box.
     It can be (X,Y,width,height) => XYWH
     or (X1,Y1,X2,Y2) => XYX2Y2
-
         Developed by: Rafael Padilla
         Last modification: May 24 2018
     """
@@ -71,8 +67,6 @@ class BBFormat(Enum):
     XYX2Y2 = 2
 
 
-# size => (width, height) of the image
-# box => (X1, X2, Y1, Y2) of the bounding box
 def convertToRelativeValues(size, box):
     dw = 1. / (size[0])
     dh = 1. / (size[1])
@@ -84,17 +78,10 @@ def convertToRelativeValues(size, box):
     y = cy * dh
     w = w * dw
     h = h * dh
-    # x,y => (bounding_box_center)/width_of_the_image
-    # w => bounding_box_width / width_of_the_image
-    # h => bounding_box_height / height_of_the_image
-    return (x, y, w, h)
+    return x, y, w, h
 
 
-# size => (width, height) of the image
-# box => (centerX, centerY, w, h) of the bounding box relative to the image
 def convertToAbsoluteValues(size, box):
-    # w_box = round(size[0] * box[2])
-    # h_box = round(size[1] * box[3])
     xIn = round(((2 * float(box[0]) - float(box[2])) * size[0] / 2))
     yIn = round(((2 * float(box[1]) - float(box[3])) * size[1] / 2))
     xEnd = xIn + round(float(box[2]) * size[0])
@@ -107,7 +94,7 @@ def convertToAbsoluteValues(size, box):
         xEnd = size[0] - 1
     if yEnd >= size[1]:
         yEnd = size[1] - 1
-    return (xIn, yIn, xEnd, yEnd)
+    return xIn, yIn, xEnd, yEnd
 
 
 def add_bb_into_image(image, bb, color=(255, 0, 0), thickness=2, label=None):
@@ -145,7 +132,6 @@ def add_bb_into_image(image, bb, color=(255, 0, 0), thickness=2, label=None):
     return image
 
 
-# BoundingBox
 class BoundingBox:
     def __init__(self,
                  imageName,
@@ -188,9 +174,6 @@ class BoundingBox:
         if bbType == BBType.Detected and classConfidence is None:
             raise IOError(
                 'For bbType=\'Detection\', it is necessary to inform the classConfidence value.')
-        # if classConfidence != None and (classConfidence < 0 or classConfidence > 1):
-        # raise IOError('classConfidence value must be a real value between 0 and 1. Value: %f' %
-        # classConfidence)
 
         self._classConfidence = classConfidence
         self._bbType = bbType
@@ -199,7 +182,7 @@ class BoundingBox:
 
         # If relative coordinates, convert to absolute values
         # For relative coords: (x,y,w,h)=(X_center/img_width , Y_center/img_height)
-        if (typeCoordinates == CoordinatesType.Relative):
+        if typeCoordinates == CoordinatesType.Relative:
             (self._x, self._y, self._w, self._h) = convertToAbsoluteValues(imgSize, (x, y, w, h))
             self._width_img = imgSize[0]
             self._height_img = imgSize[1]
@@ -234,9 +217,9 @@ class BoundingBox:
 
     def getAbsoluteBoundingBox(self, format=None):
         if format == BBFormat.XYWH:
-            return (self._x, self._y, self._w, self._h)
+            return self._x, self._y, self._w, self._h
         elif format == BBFormat.XYX2Y2:
-            return (self._x, self._y, self._x2, self._y2)
+            return self._x, self._y, self._x2, self._y2
 
     def getRelativeBoundingBox(self, imgSize=None):
         if imgSize is None and self._width_img is None and self._height_img is None:
@@ -262,7 +245,7 @@ class BoundingBox:
         return self._classId
 
     def getImageSize(self):
-        return (self._width_img, self._height_img)
+        return self._width_img, self._height_img
 
     def getCoordinatesType(self):
         return self._typeCoordinates
@@ -291,7 +274,6 @@ class BoundingBox:
     @staticmethod
     def clone(boundingBox):
         absBB = boundingBox.getAbsoluteBoundingBox(format=BBFormat.XYWH)
-        # return (self._x,self._y,self._x2,self._y2)
         newBoundingBox = BoundingBox(
             boundingBox.getImageName(),
             boundingBox.getClassId(),
@@ -306,8 +288,6 @@ class BoundingBox:
             format=BBFormat.XYWH)
         return newBoundingBox
 
-
-# BoundingBoxes
 
 class BoundingBoxes:
     def __init__(self):
@@ -375,23 +355,6 @@ class BoundingBoxes:
             else:  # if detection
                 image = add_bb_into_image(image, bb, color=(255, 0, 0))  # red
         return image
-
-
-###########################################################################################
-#                                                                                         #
-# Evaluator class: Implements the most popular metrics for object detection               #
-#                                                                                         #
-# Developed by: Rafael Padilla (rafael.padilla@smt.ufrj.br)                               #
-#        SMT - Signal Multimedia and Telecommunications Lab                               #
-#        COPPE - Universidade Federal do Rio de Janeiro                                   #
-#        Last modification: Oct 9th 2018                                                 #
-###########################################################################################
-
-import os
-import sys
-from collections import Counter
-
-import numpy as np
 
 
 class Evaluator:
@@ -468,15 +431,12 @@ class Evaluator:
             det = Counter([cc[0] for cc in gts])
             for key, val in det.items():
                 det[key] = np.zeros(val)
-            # print("Evaluating class: %s (%d detections)" % (str(c), len(dects)))
             # Loop through detections
             for d in range(len(dects)):
-                # print('dect %s => %s' % (dects[d][0], dects[d][3],))
                 # Find ground truth image
                 gt = [gt for gt in gts if gt[0] == dects[d][0]]
                 iouMax = sys.float_info.min
                 for j in range(len(gt)):
-                    # print('Ground truth gt => %s' % (gt[j][3],))
                     iou = Evaluator.iou(dects[d][3], gt[j][3])
                     if iou > iouMax:
                         iouMax = iou
@@ -486,14 +446,11 @@ class Evaluator:
                     if det[dects[d][0]][jmax] == 0:
                         TP[d] = 1  # count as true positive
                         det[dects[d][0]][jmax] = 1  # flag as already 'seen'
-                        # print("TP")
                     else:
                         FP[d] = 1  # count as false positive
-                        # print("FP")
                 # - A detected "cat" is overlaped with a GT "cat" with IOU >= IOUThreshold.
                 else:
                     FP[d] = 1  # count as false positive
-                    # print("FP")
             # compute precision, recall and average precision
             acc_FP = np.cumsum(FP)
             acc_TP = np.cumsum(TP)
@@ -521,12 +478,10 @@ class Evaluator:
 
     @staticmethod
     def CalculateAveragePrecision(rec, prec):
-        mrec = []
-        mrec.append(0)
+        mrec = [0]
         [mrec.append(e) for e in rec]
         mrec.append(1)
-        mpre = []
-        mpre.append(0)
+        mpre = [0]
         [mpre.append(e) for e in prec]
         mpre.append(0)
         for i in range(len(mpre) - 1, 0, -1):
@@ -538,26 +493,19 @@ class Evaluator:
         ap = 0
         for i in ii:
             ap = ap + np.sum((mrec[i] - mrec[i - 1]) * mpre[i])
-        # return [ap, mpre[1:len(mpre)-1], mrec[1:len(mpre)-1], ii]
         return [ap, mpre[0:len(mpre) - 1], mrec[0:len(mpre) - 1], ii]
 
     @staticmethod
     # 11-point interpolated average precision
     def ElevenPointInterpolatedAP(rec, prec):
-        # def CalculateAveragePrecision2(rec, prec):
         mrec = []
-        # mrec.append(0)
         [mrec.append(e) for e in rec]
-        # mrec.append(1)
         mpre = []
-        # mpre.append(0)
         [mpre.append(e) for e in prec]
-        # mpre.append(0)
         recallValues = np.linspace(0, 1, 11)
         recallValues = list(recallValues[::-1])
         rhoInterp = []
         recallValid = []
-        # For each recallValues (0, 0.1, 0.2, ... , 1)
         for r in recallValues:
             # Obtain all recall values higher or equal than r
             argGreaterRecalls = np.argwhere(mrec[:] >= r)
@@ -570,12 +518,10 @@ class Evaluator:
         # By definition AP = sum(max(precision whose recall is above r))/11
         ap = sum(rhoInterp) / 11
         # Generating values for the plot
-        rvals = []
-        rvals.append(recallValid[0])
+        rvals = [recallValid[0]]
         [rvals.append(e) for e in recallValid]
         rvals.append(0)
-        pvals = []
-        pvals.append(0)
+        pvals = [0]
         [pvals.append(e) for e in rhoInterp]
         pvals.append(0)
         # rhoInterp = rhoInterp[::-1]
@@ -600,13 +546,7 @@ class Evaluator:
         for d in detections:
             bb = d.getAbsoluteBoundingBox(BBFormat.XYX2Y2)
             iou = Evaluator.iou(bbReference, bb)
-            # Show blank image with the bounding boxes
-            # img = add_bb_into_image(img, d, color=(255,0,0), thickness=2, label=None)
-            # img = add_bb_into_image(img, reference, color=(0,255,0), thickness=2, label=None)
             ret.append((iou, reference, d))  # iou, reference, detection
-        # cv2.imshow("comparing",img)
-        # cv2.waitKey(0)
-        # cv2.destroyWindow("comparing")
         return sorted(ret, key=lambda i: i[0], reverse=True)  # sort by iou (from highest to lowest)
 
     @staticmethod
@@ -621,8 +561,6 @@ class Evaluator:
         assert iou >= 0
         return iou
 
-    # boxA = (Ax1,Ay1,Ax2,Ay2)
-    # boxB = (Bx1,By1,Bx2,By2)
     @staticmethod
     def _boxesIntersect(boxA, boxB):
         if boxA[0] > boxB[2]:
@@ -727,13 +665,7 @@ def getBoundingBoxes(directory,
     os.chdir(directory)
     files = glob.glob("*.txt")
     files.sort()
-    # Read GT detections from txt file
-    # Each line of the files in the groundtruths folder represents a ground truth bounding box
-    # (bounding boxes that a detector should detect)
-    # Each value of each line is  "class_id, x, y, width, height" respectively
-    # Class_id represents the class of the bounding box
-    # x, y represents the most top-left coordinates of the bounding box
-    # x2, y2 represents the most bottom-right coordinates of the bounding box
+
     for f in files:
         nameOfImage = f.replace(".txt", "")
         fh1 = open(f, "r")
@@ -743,7 +675,6 @@ def getBoundingBoxes(directory,
                 continue
             splitLine = line.split(" ")
             if isGT:
-                # idClass = int(splitLine[0]) #class
                 idClass = (splitLine[0])  # class
                 x = float(splitLine[1])
                 y = float(splitLine[2])
@@ -761,7 +692,6 @@ def getBoundingBoxes(directory,
                     BBType.GroundTruth,
                     format=bbFormat)
             else:
-                # idClass = int(splitLine[0]) #class
                 idClass = (splitLine[0])  # class
                 confidence = float(splitLine[1])
                 x = float(splitLine[2])
@@ -788,8 +718,6 @@ def getBoundingBoxes(directory,
 
 
 def get_mAP(gtFolder, detFolder, threshold=0.5, savePath=None):
-    # Get current path to set default folders
-    # VERSION = '0.1 (beta)'
     gtFormat = 'xyrb'
     detFormat = 'xyrb'
     gtCoordinates = 'abs'
@@ -829,8 +757,7 @@ def get_mAP(gtFolder, detFolder, threshold=0.5, savePath=None):
 
     # Plot Precision x Recall curve
     detections = evaluator.GetPascalVOCMetrics(allBoundingBoxes, iouThreshold,
-                                           method=MethodAveragePrecision.EveryPointInterpolation)
-
+                                               method=MethodAveragePrecision.EveryPointInterpolation)
 
     # each detection is a class and store AP and mAP results in AP_res list
     AP_res = []
@@ -838,8 +765,6 @@ def get_mAP(gtFolder, detFolder, threshold=0.5, savePath=None):
         # Get metric values per each class
         cl = metricsPerClass['class']
         ap = metricsPerClass['AP']
-        precision = metricsPerClass['precision']
-        recall = metricsPerClass['recall']
         totalPositives = metricsPerClass['total positives']
 
         if totalPositives > 0:

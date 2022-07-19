@@ -53,10 +53,10 @@ def parse_cfg(cfgfile):
     return blocks
 
 
-def print_cfg(blocks):
+def print_cfg(blocks, width=224, height=224):
     print('layer     filters    size              input                output');
-    prev_width = 416
-    prev_height = 416
+    prev_width = 224
+    prev_height = 224
     prev_filters = 3
     out_filters = []
     out_widths = []
@@ -64,11 +64,11 @@ def print_cfg(blocks):
     ind = -2
     for block in blocks:
         ind = ind + 1
-        if block['type'] == 'net':
-            prev_width = int(block['width'])
-            prev_height = int(block['height'])
-            continue
-        elif block['type'] == 'convolutional':
+        # if block['type'] == 'net':
+        #     prev_width = int(width)
+        #     prev_height = int(height)
+        #     continue
+        if block['type'] == 'convolutional':
             filters = int(block['filters'])
             kernel_size = int(block['size'])
             stride = int(block['stride'])
@@ -77,8 +77,8 @@ def print_cfg(blocks):
             width = (prev_width + 2 * pad - kernel_size) / stride + 1
             height = (prev_height + 2 * pad - kernel_size) / stride + 1
             print('%5d %-6s %4d  %d x %d / %d   %3d x %3d x%4d   ->   %3d x %3d x%4d' % (
-            ind, 'conv', filters, kernel_size, kernel_size, stride, prev_width, prev_height, prev_filters, width,
-            height, filters))
+                ind, 'conv', filters, kernel_size, kernel_size, stride, prev_width, prev_height, prev_filters, width,
+                height, filters))
             prev_width = width
             prev_height = height
             prev_filters = filters
@@ -91,7 +91,8 @@ def print_cfg(blocks):
             width = prev_width / stride
             height = prev_height / stride
             print('%5d %-6s       %d x %d / %d   %3d x %3d x%4d   ->   %3d x %3d x%4d' % (
-            ind, 'max', pool_size, pool_size, stride, prev_width, prev_height, prev_filters, width, height, filters))
+                ind, 'max', pool_size, pool_size, stride, prev_width, prev_height, prev_filters, width, height,
+                filters))
             prev_width = width
             prev_height = height
             prev_filters = filters
@@ -102,7 +103,7 @@ def print_cfg(blocks):
             width = 1
             height = 1
             print('%5d %-6s                   %3d x %3d x%4d   ->  %3d' % (
-            ind, 'avg', prev_width, prev_height, prev_filters, prev_filters))
+                ind, 'avg', prev_width, prev_height, prev_filters, prev_filters))
             prev_width = width
             prev_height = height
             prev_filters = filters
@@ -125,7 +126,7 @@ def print_cfg(blocks):
             width = prev_width / stride
             height = prev_height / stride
             print('%5d %-6s             / %d   %3d x %3d x%4d   ->   %3d x %3d x%4d' % (
-            ind, 'reorg', stride, prev_width, prev_height, prev_filters, width, height, filters))
+                ind, 'reorg', stride, prev_width, prev_height, prev_filters, width, height, filters))
             prev_width = width
             prev_height = height
             prev_filters = filters
@@ -176,30 +177,6 @@ def print_cfg(blocks):
             print('unknown type %s' % (block['type']))
 
 
-def save_conv(fp, conv_model):
-    if conv_model.bias.is_cuda:
-        convert2cpu(conv_model.bias.data).numpy().tofile(fp)
-        convert2cpu(conv_model.weight.data).numpy().tofile(fp)
-    else:
-        conv_model.bias.data.numpy().tofile(fp)
-        conv_model.weight.data.numpy().tofile(fp)
-
-
-def save_conv_bn(fp, conv_model, bn_model):
-    if bn_model.bias.is_cuda:
-        convert2cpu(bn_model.bias.data).numpy().tofile(fp)
-        convert2cpu(bn_model.weight.data).numpy().tofile(fp)
-        convert2cpu(bn_model.running_mean).numpy().tofile(fp)
-        convert2cpu(bn_model.running_var).numpy().tofile(fp)
-        convert2cpu(conv_model.weight.data).numpy().tofile(fp)
-    else:
-        bn_model.bias.data.numpy().tofile(fp)
-        bn_model.weight.data.numpy().tofile(fp)
-        bn_model.running_mean.numpy().tofile(fp)
-        bn_model.running_var.numpy().tofile(fp)
-        conv_model.weight.data.numpy().tofile(fp)
-
-
 def load_conv(buf, start, conv_model):
     num_w = conv_model.weight.numel()
     num_b = conv_model.bias.numel()
@@ -209,7 +186,6 @@ def load_conv(buf, start, conv_model):
         conv_model.weight.shape[0], conv_model.weight.shape[1], conv_model.weight.shape[2],
         conv_model.weight.shape[3])));
     start = start + num_w
-    # conv_model.weight.data.copy_(torch.from_numpy(buf[start:start+num_w])); start = start + num_w
     return start
 
 
@@ -228,7 +204,6 @@ def load_conv_bn(buf, start, conv_model, bn_model):
         conv_model.weight.shape[0], conv_model.weight.shape[1], conv_model.weight.shape[2],
         conv_model.weight.shape[3])));
     start = start + num_w
-    # conv_model.weight.data.copy_(torch.from_numpy(buf[start:start+num_w])); start = start + num_w
     return start
 
 
@@ -240,8 +215,3 @@ def load_fc(buf, start, fc_model):
     fc_model.weight.set_value(paddle.to_tensor(buf[start:start + num_w]));
     start = start + num_w
     return start
-
-
-def save_fc(fp, fc_model):
-    fc_model.bias.data.numpy().tofile(fp)
-    fc_model.weight.data.numpy().tofile(fp)

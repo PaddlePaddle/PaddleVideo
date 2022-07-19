@@ -16,9 +16,9 @@ import json
 import os
 import shutil
 import sys
+from typing import List
 
 import cv2
-
 try:
     import imageio
 except ImportError as e:
@@ -57,7 +57,6 @@ from paddlevideo.modeling.framework.segmenters.utils import ASRFPostProcessing
 from ava_predict import (detection_inference, frame_extraction,
                          get_detection_result, get_timestep_result, pack_result,
                          visualize)
-from paddlevideo.modeling.yowo_utils import nms, get_region_boxes
 
 INFERENCE = Registry('inference')
 
@@ -126,13 +125,21 @@ def build_inference_helper(cfg):
 
 
 class Base_Inference_helper():
-
     def __init__(self,
                  num_seg=8,
                  seg_len=1,
                  short_size=256,
                  target_size=224,
                  top_k=1):
+        """Base_Inference_helper
+
+        Args:
+            num_seg (int, optional): number of segmentations of an sliced input video. Defaults to 8.
+            seg_len (int, optional): length of each segmentation. Defaults to 1.
+            short_size (int, optional): short size of input video. Defaults to 256.
+            target_size (int, optional): size of cropped video. Defaults to 224.
+            top_k (int, optional): select topk result in outputs. Defaults to 1.
+        """
         self.num_seg = num_seg
         self.seg_len = seg_len
         self.short_size = short_size
@@ -140,10 +147,23 @@ class Base_Inference_helper():
         self.top_k = top_k
 
     @abstractmethod
-    def preprocess(self, input_file):
+    def preprocess(self, input_file: str):
+        """preprocess abstractmethod
+
+        Args:
+            input_file (str): input file path.
+        """
         pass
 
-    def preprocess_batch(self, file_list):
+    def preprocess_batch(self, file_list: List[str]) -> List[np.ndarray]:
+        """preprocess for file list
+
+        Args:
+            file_list (List[str]): file pathes in an list, [path1, path2, ...].
+
+        Returns:
+            List[np.ndarray]: batched inputs data, [data_batch[0], data_batch[1], ...].
+        """
         batched_inputs = []
         for file in file_list:
             inputs = self.preprocess(file)
@@ -155,9 +175,14 @@ class Base_Inference_helper():
         self.input_file = file_list
         return batched_inputs
 
-    def postprocess(self, output, print_output=True):
-        """
-        output: list
+    def postprocess(self,
+                    output: np.ndarray,
+                    print_output: bool = True) -> None:
+        """postprocess
+
+        Args:
+            output (np.ndarray): batched output scores, shape of (batch_size, class_num).
+            print_output (bool, optional): whether to print result. Defaults to True.
         """
         if not isinstance(self.input_file, list):
             self.input_file = [
@@ -183,7 +208,6 @@ class Base_Inference_helper():
 
 @INFERENCE.register()
 class ppTSM_Inference_helper(Base_Inference_helper):
-
     def __init__(self,
                  num_seg=8,
                  seg_len=1,
@@ -223,7 +247,6 @@ class ppTSM_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class ppTSN_Inference_helper(Base_Inference_helper):
-
     def __init__(self,
                  num_seg=25,
                  seg_len=1,
@@ -247,7 +270,7 @@ class ppTSN_Inference_helper(Base_Inference_helper):
         img_mean = [0.485, 0.456, 0.406]
         img_std = [0.229, 0.224, 0.225]
         ops = [
-            VideoDecoder(),
+            VideoDecoder(backend="decord"),
             Sampler(self.num_seg,
                     self.seg_len,
                     valid_mode=True,
@@ -269,7 +292,6 @@ class ppTSN_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class BMN_Inference_helper(Base_Inference_helper):
-
     def __init__(self, feat_dim, dscale, tscale, result_path):
         self.feat_dim = feat_dim
         self.dscale = dscale
@@ -317,7 +339,7 @@ class BMN_Inference_helper(Base_Inference_helper):
                 start_index = jdx
                 end_index = start_index + idx
                 if end_index < self.tscale and start_mask[
-                    start_index] == 1 and end_mask[end_index] == 1:
+                        start_index] == 1 and end_mask[end_index] == 1:
                     xmin = snippet_xmins[start_index]
                     xmax = snippet_xmaxs[end_index]
                     xmin_score = pred_start[start_index]
@@ -334,9 +356,9 @@ class BMN_Inference_helper(Base_Inference_helper):
         proposal_list = []
         df = soft_nms(df, alpha=0.4, t1=0.55, t2=0.9)
         for idx in range(min(100, len(df))):
-            tmp_prop = {"score": df.score.values[idx], \
-                        "segment": [max(0, df.xmin.values[idx]) * self.video_duration, \
-                                    min(1, df.xmax.values[idx]) * self.video_duration]}
+            tmp_prop={"score":df.score.values[idx], \
+                      "segment":[max(0,df.xmin.values[idx])*self.video_duration, \
+                                 min(1,df.xmax.values[idx])*self.video_duration]}
             proposal_list.append(tmp_prop)
 
         result_dict[self.feat_path] = proposal_list
@@ -400,7 +422,6 @@ class TokenShift_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class TimeSformer_Inference_helper(Base_Inference_helper):
-
     def __init__(self,
                  num_seg=8,
                  seg_len=1,
@@ -446,7 +467,6 @@ class TimeSformer_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class VideoSwin_Inference_helper(Base_Inference_helper):
-
     def __init__(self,
                  num_seg=4,
                  seg_len=32,
@@ -527,7 +547,6 @@ class VideoSwin_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class VideoSwin_TableTennis_Inference_helper(Base_Inference_helper):
-
     def __init__(self,
                  num_seg=1,
                  seg_len=32,
@@ -656,7 +675,6 @@ class VideoSwin_TableTennis_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class SlowFast_Inference_helper(Base_Inference_helper):
-
     def __init__(self,
                  num_frames=32,
                  sampling_rate=2,
@@ -730,7 +748,6 @@ class SlowFast_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class STGCN_Inference_helper(Base_Inference_helper):
-
     def __init__(self,
                  num_channels,
                  window_size,
@@ -762,7 +779,6 @@ class STGCN_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class CTRGCN_Inference_helper(Base_Inference_helper):
-
     def __init__(self,
                  num_channels=3,
                  vertex_nums=25,
@@ -820,6 +836,7 @@ class AGCN2s_Inference_helper(Base_Inference_helper):
             input_file)
         data = np.load(input_file)
         results = {'data': data}
+        
 
         res = np.expand_dims(results['data'], axis=0).copy()
         return [res]
@@ -827,7 +844,6 @@ class AGCN2s_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class MSTCN_Inference_helper(Base_Inference_helper):
-
     def __init__(self, num_channels, actions_map_file_path, feature_path=None):
         self.num_channels = num_channels
         file_ptr = open(actions_map_file_path, 'r')
@@ -903,7 +919,6 @@ class MSTCN_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class ASRF_Inference_helper(Base_Inference_helper):
-
     def __init__(self,
                  num_channels,
                  actions_map_file_path,
@@ -995,10 +1010,9 @@ class ASRF_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class AttentionLSTM_Inference_helper(Base_Inference_helper):
-
     def __init__(
             self,
-            num_classes,  # Optional, the number of classes to be classified.
+            num_classes,  #Optional, the number of classes to be classified.
             feature_num,
             feature_dims,
             embedding_size,
@@ -1036,7 +1050,6 @@ class AttentionLSTM_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class TransNetV2_Inference_helper():
-
     def __init__(self,
                  num_frames,
                  height,
@@ -1139,7 +1152,7 @@ class TransNetV2_Inference_helper():
         img = frames.reshape([height, width, ih + 1, iw + len(predictions), ic])
         img = np.concatenate(np.split(
             np.concatenate(np.split(img, height), axis=2)[0], width),
-            axis=2)[0, :-1]
+                             axis=2)[0, :-1]
 
         img = Image.fromarray(img)
         draw = ImageDraw.Draw(img)
@@ -1178,11 +1191,11 @@ class TransNetV2_Inference_helper():
             [all_ for single_, all_ in predictions])
         single_frame_predictions, all_frame_predictions = single_frame_pred[:
                                                                             self
-                                                                                .
-                                                                                len_frames], all_frames_pred[:
-                                                                                                             self
-                                                                                                                 .
-                                                                                                                 len_frames]
+                                                                            .
+                                                                            len_frames], all_frames_pred[:
+                                                                                                         self
+                                                                                                         .
+                                                                                                         len_frames]
 
         scenes = self.predictions_to_scenes(single_frame_predictions)
 
@@ -1214,7 +1227,6 @@ class TransNetV2_Inference_helper():
 
 @INFERENCE.register()
 class ADDS_Inference_helper(Base_Inference_helper):
-
     def __init__(self,
                  frame_idxs=[0],
                  num_scales=4,
@@ -1312,7 +1324,6 @@ class ADDS_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class AVA_SlowFast_FastRCNN_Inference_helper(Base_Inference_helper):
-
     def __init__(self,
                  detection_model_name,
                  detection_model_weights,
@@ -1328,7 +1339,7 @@ class AVA_SlowFast_FastRCNN_Inference_helper(Base_Inference_helper):
         self.detection_model_weights = detection_model_weights
 
         self.config = get_config(config_file_path,
-                                 show=False)  # parse config file
+                                 show=False)  #parse config file
         self.predict_stepsize = predict_stepsize
         self.output_stepsize = output_stepsize
         self.output_fps = output_fps
@@ -1344,7 +1355,7 @@ class AVA_SlowFast_FastRCNN_Inference_helper(Base_Inference_helper):
 
         frame_dir = 'tmp_frames'
         self.frame_paths, frames, FPS = frame_extraction(input_file, frame_dir)
-        num_frame = len(self.frame_paths)  # 视频秒数*FPS
+        num_frame = len(self.frame_paths)  #视频秒数*FPS
         assert num_frame != 0
 
         # 帧图像高度和宽度
@@ -1352,7 +1363,7 @@ class AVA_SlowFast_FastRCNN_Inference_helper(Base_Inference_helper):
 
         # Get clip_len, frame_interval and calculate center index of each clip
         data_process_pipeline = build_pipeline(
-            self.config.PIPELINE.test)  # 测试时输出处理流水配置
+            self.config.PIPELINE.test)  #测试时输出处理流水配置
 
         clip_len = self.config.PIPELINE.test.sample['clip_len']
         assert clip_len % 2 == 0, 'We would like to have an even clip_len'
@@ -1403,7 +1414,7 @@ class AVA_SlowFast_FastRCNN_Inference_helper(Base_Inference_helper):
                 (float)(self.config.DATASET.test['person_det_score_thr']))
 
             if proposals.shape[0] == 0:
-                # person_num_list.append(0)
+                #person_num_list.append(0)
                 human_detections.append(None)
                 continue
 
@@ -1460,8 +1471,8 @@ class AVA_SlowFast_FastRCNN_Inference_helper(Base_Inference_helper):
 
         assert len(self.person_num_list) == len(outputs)
 
-        # print("***  self.human_detections",len( self.human_detections))
-        # print("***  outputs",len( outputs))
+        #print("***  self.human_detections",len( self.human_detections))
+        #print("***  outputs",len( outputs))
 
         index = 0
         for t_index in range(len(self.timestamps)):
@@ -1472,7 +1483,7 @@ class AVA_SlowFast_FastRCNN_Inference_helper(Base_Inference_helper):
             human_detection = self.human_detections[t_index]
 
             output = outputs[index]
-            result = output  # 长度为类别个数，不包含背景
+            result = output  #长度为类别个数，不包含背景
 
             person_num = self.person_num_list[index]
 
@@ -1512,7 +1523,7 @@ class AVA_SlowFast_FastRCNN_Inference_helper(Base_Inference_helper):
                 len(timestamps) * n) * old_frame_interval / n + start
             return new_frame_inds.astype(np.int)
 
-        dense_n = int(self.predict_stepsize / self.output_stepsize)  # 30
+        dense_n = int(self.predict_stepsize / self.output_stepsize)  #30
         frames = [
             cv2.imread(self.frame_paths[i - 1])
             for i in dense_timestamps(self.timestamps, dense_n)

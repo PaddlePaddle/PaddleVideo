@@ -1419,8 +1419,7 @@ class YowoAug(object):
                 label[0:tsz] = tmp
             clip = [img.resize(self.shape) for img in clip]
 
-        import paddle.vision.transforms as T
-        transform = T.ToTensor()
+        transform = paddle.vision.transforms.ToTensor()
         clip = [transform(img) for img in clip]
 
         # (self.duration, -1) + self.shape = (8, -1, 224, 224)
