@@ -56,7 +56,11 @@ python3.7 -m pip install dist/paddlevideo-1.0.0-py3-none-any.whl
 ppvideo --model_name='ppTSM_v2' --use_gpu=False --video_file='data/example.avi'
 ```
 
-上述代码使用`PP-TSM_v2`模型，基于`CPU`，对`data/example.avi`示例文件进行预测，运行结果如下：
+- 上述代码使用`PP-TSM_v2`模型，基于`CPU`，对`data/example.avi`示例文件进行预测。
+
+- 示例视频长度约10s，抽帧策略采用分段抽帧，即先将视频按时间轴等分成16段，每段抽取一帧，所有帧组合之后，输入网络进行预测。
+
+运行结果如下：
 
 ```
 Current video file: data/example.avi
@@ -65,7 +69,7 @@ Current video file: data/example.avi
         top-1 label names: ['archery']
 ```
 
-可以看到，使用在Kinetics-400上训练好的`PP-TSM_v2`模型对`data/example.avi`进行预测，输出的top1类别id为`5`，置信度为`1.0`，预测类别名称为`archery`。
+可以看到，使用在Kinetics-400上训练好的`PP-TSM_v2`模型对`data/example.avi`进行行为识别，输出的top1类别id为`5`，置信度为`1.0`，预测类别名称为`archery`。
 
 <a name="22"></a>
 ### 2.2 python脚本使用
