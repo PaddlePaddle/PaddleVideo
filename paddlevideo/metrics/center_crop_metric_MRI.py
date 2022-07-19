@@ -12,7 +12,6 @@
 
 import numpy as np
 import paddle
-from paddle.hapi.model import _all_gather
 
 from .registry import METRIC
 from .base import BaseMetric

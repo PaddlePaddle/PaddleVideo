@@ -30,8 +30,6 @@ try:
     from nvidia.dali.plugin.paddle import DALIGenericIterator
 except:
     Pipeline = object
-    logger.info(
-        "DALI is not installed, you can improve performance if use DALI")
 
 
 def get_input_data(data):

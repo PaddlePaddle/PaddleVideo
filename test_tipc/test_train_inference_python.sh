@@ -2,7 +2,7 @@
 source test_tipc/common_func.sh
 
 FILENAME=$1
-# MODE be one of ['lite_train_lite_infer' 'lite_train_whole_infer' 'whole_train_whole_infer', 'whole_infer', 'klquant_whole_infer']
+# MODE be one of ['lite_train_lite_infer' 'lite_train_whole_infer' 'whole_train_whole_infer', 'whole_infer']
 MODE=$2
 
 dataline=$(awk 'NR==1, NR==51{print}'  $FILENAME)
@@ -128,7 +128,7 @@ if [ ${MODE} = "klquant_whole_infer" ]; then
     infer_value1=$(func_parser_value "${lines[17]}")
 fi
 
-LOG_PATH="./test_tipc/output/${model_name}"
+LOG_PATH="./test_tipc/output/${model_name}/${MODE}"
 mkdir -p ${LOG_PATH}
 status_log="${LOG_PATH}/results_python.log"
 
@@ -171,7 +171,7 @@ function func_inference(){
                             eval $command
                             last_status=${PIPESTATUS[0]}
                             eval "cat ${_save_log_path}"
-                            status_check $last_status "${command}" "${status_log}"
+                            status_check $last_status "${command}" "${status_log}" "${model_name}"
                         done
                     done
                 done
@@ -204,7 +204,7 @@ function func_inference(){
 
                         last_status=${PIPESTATUS[0]}
                         eval "cat ${_save_log_path}"
-                        status_check $last_status "${command}" "${status_log}"
+                        status_check $last_status "${command}" "${status_log}" "${model_name}"
 
                     done
                 done
@@ -239,7 +239,8 @@ if [ ${MODE} = "whole_infer" ] || [ ${MODE} = "klquant_whole_infer" ]; then
             eval $export_cmd
             echo $export_cmd
             status_export=$?
-            status_check $status_export "${export_cmd}" "${status_log}"
+            status_check $status_export "${export_cmd}" "${status_log}" "${model_name}"
+            
         else
             save_infer_dir=${infer_model}
         fi
@@ -368,7 +369,7 @@ else
                 # run train
                 eval "unset CUDA_VISIBLE_DEVICES"
                 eval $cmd
-                status_check $? "${cmd}" "${status_log}"
+                status_check $? "${cmd}" "${status_log}" "${model_name}"
 
                 # set_eval_pretrain=$(func_set_params "${pretrain_model_key}" "${save_log}/${train_model_name}")
                 # save norm trained models to set pretrain for pact training and fpgm training
@@ -385,7 +386,7 @@ else
                         eval_cmd="${python} ${eval_py} ${set_use_gpu} ${set_eval_params1}"
                     fi
                     eval $eval_cmd
-                    status_check $? "${eval_cmd}" "${status_log}"
+                    status_check $? "${eval_cmd}" "${status_log}" "${model_name}"
                 fi
                 # run export model
                 if [ ${run_export} != "null" ]; then
@@ -396,7 +397,7 @@ else
                     set_save_infer_key=$(func_set_params "${save_infer_key}" "${save_log}")
                     export_cmd="${python} ${run_export} ${set_export_weight} ${set_save_infer_key}"
                     eval $export_cmd
-                    status_check $? "${export_cmd}" "${status_log}"
+                    status_check $? "${export_cmd}" "${status_log}" "${model_name}"
 
                     #run inference
                     eval $env

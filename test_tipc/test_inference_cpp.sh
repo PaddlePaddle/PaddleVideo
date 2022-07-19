@@ -2,6 +2,7 @@
 source test_tipc/common_func.sh
 
 FILENAME=$1
+MODE=$2
 dataline=$(awk 'NR==1, NR==18{print}'  $FILENAME)
 
 # parser params
@@ -39,7 +40,7 @@ cpp_infer_value2=$(func_parser_value "${lines[16]}")
 cpp_infer_key3=$(func_parser_key "${lines[17]}")
 cpp_infer_value3=$(func_parser_value "${lines[17]}")
 
-LOG_PATH="./test_tipc/output/${model_name}"
+LOG_PATH="./test_tipc/output/${model_name}/${MODE}"
 mkdir -p ${LOG_PATH}
 status_log="${LOG_PATH}/results_cpp.log"
 

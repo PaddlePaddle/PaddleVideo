@@ -19,7 +19,7 @@ MODEL: #MODEL field
 
 DATASET: #DATASET field
     batch_size: 8  #single card bacth size
-    test_batch_size: 8
+    #test_batch_size: 8
     num_workers: 8
     train:
         format: "SFVideoDataset"

@@ -1,39 +1,34 @@
 MODEL: #MODEL field
     framework: "Recognizer2D" #Mandatory, indicate the type of network, associate to the 'paddlevideo/modeling/framework/' .
     backbone: #Mandatory, indicate the type of backbone, associate to the 'paddlevideo/modeling/backbones/' .
-        name: "ResNetTweaksTSM" #Mandatory, The name of backbone.
-        pretrained: "data/ResNet50_vd_ssld_v2_pretrained.pdparams" #Optional, pretrained model path.
-        depth: 50 #Optional, the depth of backbone architecture.
+        name: "PPTSM_MobileNetV3" #Mandatory, The name of backbone.
+        pretrained: "data/MobileNetV3_large_x1_0_ssld_pretrained.pdparams" #Optional, pretrained model path.
     head:
-        name: "ppTSMHead" #Mandatory, indicate the type of head, associate to the 'paddlevideo/modeling/heads'
-        num_classes: 400 #Optional, the number of classes to be classified.
-        in_channels: 2048 #input channel of the extracted feature.
-        drop_ratio: 0.5 #the ratio of dropout
-        std: 0.01 #std value in params initialization
-        ls_eps: 0.1 # label smooth factor
+        name: "MoViNetHead" #Mandatory, indicate the type of head, associate to the 'paddlevideo/modeling/heads'
 
 DATASET: #DATASET field
     batch_size: 16  #Mandatory, bacth size
     num_workers: 4 #Mandatory, the number of subprocess on each GPU.
-    test_batch_size: 1
     train:
-        format: "VideoDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
-        data_prefix: "data/k400/videos" #Mandatory, train data root path
+        format: "FrameDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
+        data_prefix: "data/k400/rawframes" #Mandatory, train data root path
         file_path: "data/k400/train.list" #Mandatory, train data index file path
+        suffix: 'img_{:05}.jpg'
     valid:
-        format: "VideoDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
-        data_prefix: "data/k400/videos" #Mandatory, train data root path
+        format: "FrameDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
+        data_prefix: "data/k400/rawframes" #Mandatory, valid data root path
         file_path: "data/k400/val.list" #Mandatory, valid data index file path
+        suffix: 'img_{:05}.jpg'
     test:
-        format: "VideoDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
-        data_prefix: "data/k400/videos" #Mandatory, train data root path
+        format: "FrameDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
+        data_prefix: "data/k400/rawframes" #Mandatory, valid data root path
         file_path: "data/k400/val.list" #Mandatory, valid data index file path
+        suffix: 'img_{:05}.jpg'
 
 PIPELINE: #PIPELINE field
     train: #Mandotary, indicate the pipeline to deal with the training data, associate to the 'paddlevideo/loader/pipelines/'
         decode:
-            name: "VideoDecoder"
-            backend: "decord"
+            name: "FrameDecoder"
         sample:
             name: "Sampler"
             num_seg: 8
@@ -53,8 +48,7 @@ PIPELINE: #PIPELINE field
                 std: [0.229, 0.224, 0.225]
     valid: #Mandatory, indicate the pipeline to deal with the validing data. associate to the 'paddlevideo/loader/pipelines/'
         decode:
-            name: "VideoDecoder"
-            backend: "decord"
+            name: "FrameDecoder"
         sample:
             name: "Sampler"
             num_seg: 8
@@ -71,8 +65,7 @@ PIPELINE: #PIPELINE field
                 std: [0.229, 0.224, 0.225]
     test:  #Mandatory, indicate the pipeline to deal with the validing data. associate to the 'paddlevideo/loader/pipelines/'
         decode:
-            name: "VideoDecoder"
-            backend: "decord"
+            name: "FrameDecoder"
         sample:
             name: "Sampler"
             num_seg: 8
