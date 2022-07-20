@@ -1,4 +1,4 @@
-简体中文 | [English](../en/whl_en.md)
+简体中文 | [English](../en/quick_start.md)
 
 # PaddleVide快速开始
 
