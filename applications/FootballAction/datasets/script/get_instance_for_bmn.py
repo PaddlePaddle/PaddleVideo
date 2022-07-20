@@ -53,12 +53,9 @@ def gen_gts_for_bmn(gts_data):
         # 如果只有一个动作 默认开始为0 结束为该动作开始时间+bmn_window 可优化
         if len(sub_actions) == 1:
             gts_bmn['gts'][-1]['root_actions'].append({
-                'before_id':
-                    0,
-                    'after_id':
-                    sub_actions[0]['start_id']+bmn_window,
-                    'actions':
-                    root_actions
+                'before_id': 0,
+                'after_id': sub_actions[0]['start_id']+bmn_window,
+                'actions': root_actions
             })
         # before_id, 前一动作的最后一帧
         # after_id, 后一动作的第一帧
