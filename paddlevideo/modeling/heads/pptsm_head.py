@@ -40,6 +40,7 @@ class ppTSMHead(TSNHead):
             drop_ratio=0.8,
             std=0.01,
             data_format="NCHW",
+            num_seg=8,
             **kwargs):
 
         super().__init__(num_classes,
@@ -56,12 +57,13 @@ class ppTSMHead(TSNHead):
                          bias_attr=ParamAttr(learning_rate=10.0,
                                              regularizer=L2Decay(0.0)))
         self.stdv = std
+        self.num_seg = num_seg
 
     def init_weights(self):
         """Initiate the FC layer parameters"""
         weight_init_(self.fc, 'Normal', 'fc_0.w_0', 'fc_0.b_0', std=self.stdv)
 
-    def forward(self, x, num_seg):
+    def forward(self, x, num_seg=None):
         """Define how the head is going to run.
         Args:
             x (paddle.Tensor): The input data.
@@ -77,6 +79,7 @@ class ppTSMHead(TSNHead):
         if self.dropout is not None:
             x = self.dropout(x)
             # [N * num_seg, in_channels, 1, 1]
+        num_seg = num_seg if num_seg is not None else self.num_seg
         x = paddle.reshape(x, [-1, num_seg, x.shape[1]])
         # [N, num_seg, in_channels]
         x = paddle.mean(x, axis=1)
