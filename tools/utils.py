@@ -54,9 +54,9 @@ from paddlevideo.metrics.bmn_metric import boundary_choose, soft_nms
 from paddlevideo.utils import Registry, build, get_config
 from paddlevideo.modeling.framework.segmenters.utils import ASRFPostProcessing
 
-from .ava_predict import (detection_inference, frame_extraction,
-                          get_detection_result, get_timestep_result,
-                          pack_result, visualize)
+from tools.ava_predict import (detection_inference, frame_extraction,
+                               get_detection_result, get_timestep_result,
+                               pack_result, visualize)
 
 INFERENCE = Registry('inference')
 
