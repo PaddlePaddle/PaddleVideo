@@ -231,7 +231,7 @@ class ppTSM_Inference_helper(Base_Inference_helper):
         img_mean = [0.485, 0.456, 0.406]
         img_std = [0.229, 0.224, 0.225]
         ops = [
-            VideoDecoder(),
+            VideoDecoder(backend="decord"),
             Sampler(self.num_seg, self.seg_len, valid_mode=True),
             Scale(self.short_size),
             CenterCrop(self.target_size),
@@ -375,9 +375,9 @@ class BMN_Inference_helper(Base_Inference_helper):
 
         json.dump(result_dict, outfile)
 
+
 @INFERENCE.register()
 class TokenShift_Inference_helper(Base_Inference_helper):
-
     def __init__(self,
                  num_seg=8,
                  seg_len=1,
@@ -404,9 +404,7 @@ class TokenShift_Inference_helper(Base_Inference_helper):
         results = {'filename': input_file}
         ops = [
             VideoDecoder(backend='pyav', mode='test', num_seg=self.num_seg),
-            Sampler(self.num_seg,
-                    self.seg_len,
-                    valid_mode=True),
+            Sampler(self.num_seg, self.seg_len, valid_mode=True),
             Normalization(self.mean, self.std, tensor_shape=[1, 1, 1, 3]),
             Image2Array(data_format='cthw'),
             JitterScale(self.short_size, self.short_size),
@@ -836,7 +834,6 @@ class AGCN2s_Inference_helper(Base_Inference_helper):
             input_file)
         data = np.load(input_file)
         results = {'data': data}
-        
 
         res = np.expand_dims(results['data'], axis=0).copy()
         return [res]
