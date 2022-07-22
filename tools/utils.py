@@ -236,7 +236,7 @@ class ppTSM_Inference_helper(Base_Inference_helper):
         img_mean = [0.485, 0.456, 0.406]
         img_std = [0.229, 0.224, 0.225]
         ops = [
-            VideoDecoder(),
+            VideoDecoder(backend="decord"),
             Sampler(self.num_seg, self.seg_len, valid_mode=True),
             Scale(self.short_size),
             CenterCrop(self.target_size),
@@ -385,7 +385,6 @@ class BMN_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class TokenShift_Inference_helper(Base_Inference_helper):
-
     def __init__(self,
                  num_seg=8,
                  seg_len=1,

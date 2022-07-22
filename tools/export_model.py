@@ -74,7 +74,7 @@ def trim_config(cfg):
 
 
 def get_input_spec(cfg, model_name):
-    if model_name in ['ppTSM', 'TSM', 'MoViNet']:
+    if model_name in ['ppTSM', 'TSM', 'MoViNet', 'PPTSM_v2']:
         input_spec = [[
             InputSpec(
                 shape=[None, cfg.num_seg, 3, cfg.target_size, cfg.target_size],
