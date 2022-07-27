@@ -168,7 +168,7 @@ INFERENCE:
     short_size: 256
     target_size: 224
 
-model_name: "VideoSwin"
+model_name: "VideoSwin_small"
 log_interval: 20 #Optional, the interal of logger, default:10
 save_interval: 5
 epochs: 30 #Mandatory, total epoch
