@@ -8,6 +8,7 @@
 * [3. 模型微调](#3)
 * [4. 模型测试](#4)
 * [5. 模型推理](#5)
+* [6. 混合精度训练](#6)
 
 
 请参考[安装指南](./install.md)配置运行环境，PaddleVideo目前支持Linux下的GPU单卡和多卡运行环境。
@@ -69,7 +70,7 @@ sh run.sh
 
 当前为评估结果最好的epoch时，打印最优精度：
 ```txt
-[09/24 14:18:47] Already save the best model (top1 acc)0.0221
+[09/24 14:18:47] Already save the best model (top1 acc)0.7467
 ```
 
 ### 1.4 输出存储路径
@@ -185,5 +186,22 @@ python tools/predict.py \
 + `params_file`：模型权重文件路径，如 `./inference/TSN.pdiparams`
 + `use_tensorrt`：是否使用 TesorRT 预测引擎，默认值：`False`
 + `use_gpu`：是否使用 GPU 预测，默认值：`True`
+
+
+<a name="6"></a>
+
+## 6. 混合精度训练
+
+[混合精度训练](https://www.paddlepaddle.org.cn/documentation/docs/zh/guides/performance_improving/amp_cn.html#amp)使用fp16数据类型进行训练，可以加速训练过程，减少显存占用，其训练启动命令如下：
+
+```bash
+export CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7
+
+export FLAGS_conv_workspace_size_limit=800 #MB
+export FLAGS_cudnn_exhaustive_search=1
+export FLAGS_cudnn_batchnorm_spatial_persistent=1
+
+python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=your_log_dir  main.py --amp --validate -c configs_path/your_config.yaml
+```
 
 各模型详细的使用文档，可以参考[Models](./model_zoo/README.md)

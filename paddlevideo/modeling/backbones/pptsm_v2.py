@@ -26,6 +26,11 @@ from ..registry import BACKBONES
 from ..weight_init import weight_init_
 from ...utils import load_ckpt
 
+# MODEL_URLS = {
+#     "PPLCNetV2":
+#     "https://paddle-imagenet-models-name.bj.bcebos.com/dygraph/legendary_models/PPLCNetV2_base_ssld_pretrained.pdparams",
+# }
+
 MODEL_STAGES_PATTERN = {
     "PPLCNet": ["blocks2", "blocks3", "blocks4", "blocks5", "blocks6"]
 }
