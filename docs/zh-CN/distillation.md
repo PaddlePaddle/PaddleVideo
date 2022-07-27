@@ -79,7 +79,7 @@ DML论文中，在蒸馏的过程中，不依赖于教师模型，两个结构�
 
 ##### 2.1.2 DML 配置
 
-DML配置如下所示。在模型构建Arch字段中，需要同时定义学生模型与教师模型，教师模型与学生模型均保持梯度更新状态。在损失函数Loss字段中，需要定义`DistillationDMLLoss`（学生与教师之间的JS-Div loss）以及`DistillationGTCELoss`（学生与教师关于真值标签的CE loss），作为训练的损失函数。
+DML配置如下所示。在模型构建Arch字段中，需要同时定义学生模型与教师模型，教师模型与学生模型均保持梯度更新状态。在损失函数Loss字段中，需要定义`DistillationDMLLoss`（学生与教师之间的JS-Div loss）以及`DistillationCELoss`（学生与教师关于真值标签的CE loss），作为训练的损失函数。
 
 
 使用蒸馏训练，配置文件需要做一定的修改：
@@ -88,7 +88,7 @@ DML配置如下所示。在模型构建Arch字段中，需要同时定义学生�
 MODEL:
     framework: "Recognizer2D"
     backbone:
-        name: "PPLCNetV2_base"
+        name: "PPTSM_v2"
         pretrained: "data/PPLCNetV2_base_ssld_pretrained.pdparams"
         num_seg: 16
     head:

@@ -1,7 +1,7 @@
 MODEL: #MODEL field
     framework: "Recognizer2D" #Mandatory, indicate the type of network, associate to the 'paddlevideo/modeling/framework/' .
     backbone: #Mandatory, indicate the type of backbone, associate to the 'paddlevideo/modeling/backbones/' .
-        name: "PPLCNetV2_base" #Mandatory, The name of backbone.
+        name: "PPTSM_v2" #Mandatory, The name of backbone.
         pretrained: "data/PPLCNetV2_base_ssld_pretrained.pdparams" #Optional, pretrained model path.
         num_seg: 16
         class_num: 400
