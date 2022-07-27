@@ -72,7 +72,7 @@ DML论文中，在蒸馏的过程中，不依赖于教师模型，两个结构�
 在Kinetics-400公开数据集上，效果如下所示。
 
 | 策略 | 骨干网络 | 配置文件 | Top-1 acc |
-| --- | --- | --- | --- | --- |
+| --- | --- | --- | --- |
 | baseline | PP-TSMv2 | [pptsm_lcnet_k400_frames_uniform.yaml](../configs/recognition/pptsm/v2/pptsm_lcnet_k400_frames_uniform.yaml) | 72.66% |
 | DML | PP-TSMv2 | [pptsm_lcnet_k400_frames_uniform_dml_distillation.yaml](../configs/recognition/pptsm/v2/pptsm_lcnet_k400_frames_uniform_dml_distillation.yaml) | 74.67%(**+2.01%**) |
 
@@ -175,7 +175,7 @@ MODEL:
 实验发现，在Kinetics-400公开数据集上，使用自蒸馏方法，PP-TSMv2的精度也能获得1个点左右的提升:
 
 | 策略 | 教师网络 | Top-1 acc |
-| --- | --- | --- | --- | --- |
+| --- | --- | --- |
 | baseline | - | 69.06% |
 | DML | PP-TSMv2 | 70.34%(**+1.28%**) |
 | DML | PP-TSM_ResNet50 | 71.27%(**+2.20%**) |
