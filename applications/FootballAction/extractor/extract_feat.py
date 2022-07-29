@@ -26,7 +26,7 @@ import logger
 logger = logger.Logger()
 
 
-def load_model(cfg_file="configs/configs.yaml"):
+def load_model(cfg_file="../configs/configs.yaml"):
     """
     load_model
     """

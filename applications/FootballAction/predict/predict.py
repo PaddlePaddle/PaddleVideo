@@ -9,7 +9,7 @@ if __name__ == '__main__':
     #dataset_dir = "/workspace/PaddleVideo/applications/FootballAction/datasets/EuroCup2016"
     dataset_dir = "../datasets/EuroCup2016"
 
-    model_predict = ActionDetection(cfg_file="./configs/configs.yaml")
+    model_predict = ActionDetection(cfg_file="../configs/configs.yaml")
     model_predict.load_model()
 
     video_url = os.path.join(dataset_dir, 'url_val.list')
