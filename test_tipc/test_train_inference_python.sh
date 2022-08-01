@@ -234,7 +234,8 @@ if [ ${MODE} = "whole_infer" ] || [ ${MODE} = "klquant_whole_infer" ]; then
             save_infer_dir=$(dirname $infer_model)
             set_export_weight=$(func_set_params "${export_weight}" "${infer_model}")
             set_save_infer_key=$(func_set_params "${save_infer_key}" "${save_infer_dir}")
-            export_cmd="${python} ${infer_run_exports[Count]} ${set_export_weight} ${set_save_infer_key}"
+            export_log_path="${LOG_PATH}_export_${Count}.log"
+            export_cmd="${python} ${infer_run_exports[Count]} ${set_export_weight} ${set_save_infer_key} > ${export_log_path} 2>&1 "
             echo ${infer_run_exports[Count]}
             eval $export_cmd
             echo $export_cmd
@@ -376,14 +377,15 @@ else
                 if [ [${trainer} = ${trainer_norm}] ] && [ [${nodes} -le 1] ]; then
                     load_norm_train_model=${set_eval_pretrain}
                 fi
-                # run test
+                # run eval
                 if [ ${eval_py} != "null" ]; then
                     real_model_name=${model_name/PP-/pp}
                     set_eval_params1=$(func_set_params "${eval_key1}" "${save_log}/${real_model_name}_epoch_00001.pdparams")
+                    eval_log_path="${LOG_PATH}/${trainer}_gpus_${gpu}_autocast_${autocast}_nodes_${nodes}_eval.log"
                     if [[ $MODE =~ "lite_infer" ]] && [[ ${train_param_key1} != "null" ]]; then
-                        eval_cmd="${python} ${eval_py} ${set_use_gpu} ${set_eval_params1} ${train_param_key1}=${train_param_value1}"
+                        eval_cmd="${python} ${eval_py} ${set_use_gpu} ${set_eval_params1} ${train_param_key1}=${train_param_value1} > ${eval_log_path} 2>&1 "
                     else
-                        eval_cmd="${python} ${eval_py} ${set_use_gpu} ${set_eval_params1}"
+                        eval_cmd="${python} ${eval_py} ${set_use_gpu} ${set_eval_params1} > ${eval_log_path} 2>&1 "
                     fi
                     eval $eval_cmd
                     status_check $? "${eval_cmd}" "${status_log}" "${model_name}"
@@ -395,7 +397,8 @@ else
                     set_export_weight=$(func_set_params "${export_weight}" "${save_log}/${real_model_name}_epoch_00001.pdparams")
 
                     set_save_infer_key=$(func_set_params "${save_infer_key}" "${save_log}")
-                    export_cmd="${python} ${run_export} ${set_export_weight} ${set_save_infer_key}"
+                    export_log_path="${LOG_PATH}/${trainer}_gpus_${gpu}_autocast_${autocast}_nodes_${nodes}_export.log"
+                    export_cmd="${python} ${run_export} ${set_export_weight} ${set_save_infer_key} > ${export_log_path} 2>&1 "
                     eval $export_cmd
                     status_check $? "${export_cmd}" "${status_log}" "${model_name}"
 

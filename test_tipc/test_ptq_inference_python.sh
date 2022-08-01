@@ -76,7 +76,7 @@ function func_inference(){
                 eval $command
                 last_status=${PIPESTATUS[0]}
                 eval "cat ${_save_log_path}"
-                status_check $last_status "${command}" "${status_log}"
+                status_check $last_status "${command}" "${status_log}" "${model_name}"
             done
         # gpu
         elif [ ${use_gpu} = "True" ] || [ ${use_gpu} = "gpu" ]; then
@@ -93,7 +93,7 @@ function func_inference(){
                 eval $command
                 last_status=${PIPESTATUS[0]}
                 eval "cat ${_save_log_path}"
-                status_check $last_status "${command}" "${status_log}"
+                status_check $last_status "${command}" "${status_log}" "${model_name}"
             done
         else
             echo "Does not support hardware other than CPU and GPU Currently!"
@@ -118,11 +118,12 @@ if [ ${MODE} = "whole_infer" ]; then
     set_config_file=$(func_set_params "${quant_config_file_key}" "${quant_config_file_value}")
     set_use_gpu=$(func_set_params "${use_gpu_key}" "${use_gpu_value}")
 
-    export_cmd="${python} ${train_py} ${set_use_gpu} ${set_config_file} ${set_model_path} ${set_batch_num} ${set_batch_size} ${set_data_dir} ${set_data_anno} ${set_output_dir}"
+    export_log_path="${LOG_PATH}/${MODE}_export_${Count}.log"
+    export_cmd="${python} ${train_py} ${set_use_gpu} ${set_config_file} ${set_model_path} ${set_batch_num} ${set_batch_size} ${set_data_dir} ${set_data_anno} ${set_output_dir} > ${export_log_path} 2>&1 "
     echo $export_cmd
     eval $export_cmd
     status_export=$?
-    status_check $status_export "${export_cmd}" "${status_log}"
+    status_check $status_export "${export_cmd}" "${status_log}" "${model_name}"
 
     save_infer_dir=${output_dir_value}
     #run inference
