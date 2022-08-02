@@ -100,7 +100,7 @@ python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=lo
 python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=log_pptsm  main.py  --validate -c configs/recognition/pptsm/v2/pptsm_lcnet_k400_frames_uniform_dml_distillation.yaml
 ```
 
-知识蒸馏更多细节参[知识蒸馏](../../distillation.md)。
+知识蒸馏更多细节参考[知识蒸馏](../../distillation.md)。
 
 
 <a name="44"></a>
