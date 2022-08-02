@@ -53,34 +53,6 @@ def make_divisible(v, divisor=8, min_value=None):
     return new_v
 
 
-class GlobalAttention(nn.Layer):
-    """
-    Lightweight temporal attention module.
-    """
-    def __init__(self, num_seg=8):
-        super().__init__()
-        self.fc = nn.Linear(in_features=num_seg,
-                            out_features=num_seg,
-                            weight_attr=ParamAttr(learning_rate=5.0,
-                                                  regularizer=L2Decay(1e-4)),
-                            bias_attr=ParamAttr(learning_rate=10.0,
-                                                regularizer=L2Decay(0.0)))
-        self.num_seg = num_seg
-
-    def forward(self, x):
-        _, C, H, W = x.shape
-        x = x.reshape([-1, self.num_seg, C, H, W])
-        x0 = x
-        x = F.adaptive_avg_pool3d(x, 1)
-        x = paddle.transpose(x, [0, 2, 3, 4, 1])
-        x = self.fc(x)
-        x = paddle.transpose(x, [0, 4, 1, 2, 3])
-        attention = F.sigmoid(x)
-        y = paddle.multiply(x0, attention)
-        y = y.reshape_([-1, C, H, W])
-        return y
-
-
 class ConvBNLayer(nn.Layer):
     def __init__(self,
                  in_channels,
@@ -334,7 +306,6 @@ class PPTSM_v2_LCNet(nn.Layer):
         in_features = self.class_expand if self.use_last_conv else NET_CONFIG[
             "stage4"][0] * 2 * scale
         self.fc = Linear(in_features, class_num)
-        self.global_attention = GlobalAttention(num_seg=self.num_seg)
 
     def init_weights(self):
         """Initiate the parameters.
@@ -354,7 +325,6 @@ class PPTSM_v2_LCNet(nn.Layer):
         for stage in self.stages:
             # only add temporal attention and tsm in stage3 for efficiency
             if count == 2:
-                x = self.global_attention(x)
                 x = F.temporal_shift(x, self.num_seg, 1.0 / self.num_seg)
             count += 1
             x = stage(x)

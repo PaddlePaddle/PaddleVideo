@@ -73,8 +73,8 @@ DML论文中，在蒸馏的过程中，不依赖于教师模型，两个结构�
 
 | 策略 | 骨干网络 | 配置文件 | Top-1 acc |
 | --- | --- | --- | --- |
-| baseline | PP-TSMv2 | [pptsm_lcnet_k400_frames_uniform.yaml](../configs/recognition/pptsm/v2/pptsm_lcnet_k400_frames_uniform.yaml) | 72.66% |
-| DML | PP-TSMv2 | [pptsm_lcnet_k400_frames_uniform_dml_distillation.yaml](../configs/recognition/pptsm/v2/pptsm_lcnet_k400_frames_uniform_dml_distillation.yaml) | 74.67%(**+2.01%**) |
+| baseline | PP-TSMv2 | [pptsm_lcnet_k400_frames_uniform.yaml](../configs/recognition/pptsm/v2/pptsm_lcnet_k400_frames_uniform.yaml) | 72.37% |
+| DML | PP-TSMv2 | [pptsm_lcnet_k400_frames_uniform_dml_distillation.yaml](../configs/recognition/pptsm/v2/pptsm_lcnet_k400_frames_uniform_dml_distillation.yaml) | 74.38%(**+2.01%**) |
 
 
 ##### 2.1.2 DML 配置
@@ -180,7 +180,7 @@ MODEL:
 | DML | PP-TSMv2 | 70.34%(**+1.28%**) |
 | DML | PP-TSM_ResNet50 | 71.27%(**+2.20%**) |
 
-* 注：完整的PP-TSMv2加了其它trick训练，这里为了方便对比，baseline未加其它tricks，因此指标比官网最终开源出来的模型精度（74.67%）低一些。
+* 注：完整的PP-TSMv2加了其它trick训练，这里为了方便对比，baseline未加其它tricks，因此指标比官网最终开源出来的模型精度（74.38%）低一些。
 
 完成配置文件的修改后，参考[使用说明](./usage.md)即可开启模型训练、测试与推理。
 
