@@ -31,7 +31,7 @@ PP-TSM基于ResNet-50骨干网络进行优化，从数据增强、网络结构�
 
 ### PP-TSMv2
 
-PP-TSMv2是轻量化的视频分类模型，基于CPU端模型[PP-LCNetV2](https://github.com/PaddlePaddle/PaddleClas/blob/release/2.4/docs/zh_CN/models/PP-LCNetV2.md)进行优化，从数据增强、网络结构调整与设计(使用最优的tsm模块插入数量和位置、新增时序attention模块)、训练策略、输入帧数与解码方式优化、dml蒸馏等5个方面进行模型调优，在中心采样评估方式下，精度达到74.38%，输入10s视频在CPU端的推理速度仅需xxx。更多细节参考[PP-TSMv2技术报告](doing)。
+PP-TSMv2是轻量化的视频分类模型，基于CPU端模型[PP-LCNetV2](https://github.com/PaddlePaddle/PaddleClas/blob/release/2.4/docs/zh_CN/models/PP-LCNetV2.md)进行优化，从数据增强、网络结构调整与设计(使用最优的tsm模块插入数量和位置、新增时序attention模块)、训练策略、输入帧数与解码方式优化、dml蒸馏等5个方面进行模型调优，在中心采样评估方式下，精度达到74.38%，输入10s视频在CPU端的推理速度仅需433.9ms。更多细节参考[PP-TSMv2技术报告](doing)。
 
 <a name="2"></a>
 ## 2. 性能benchmark
@@ -196,7 +196,7 @@ Current video file: data/example.avi
 
 | 模型名称 | 骨干网络 | 测试方式 | 采样帧数 | Top-1% | 训练模型 |
 | :------: | :----------: | :----: | :----: | :----: | :---- |
-| PP-TSMv2 | LCNet_v2 |  Uniform | 16 | 72.37 | [下载链接](https://videotag.bj.bcebos.com/PaddleVideo-release2.3/PPTSMv2_k400_16f.pdparams) |
+| PP-TSMv2 | LCNet_v2 |  Uniform | 16 | 72.37 | [下载链接]() |
 | PP-TSM | MobileNetV2 |  Uniform | 8 | 68.09 | [下载链接](https://videotag.bj.bcebos.com/PaddleVideo-release2.3/ppTSM_mv2_k400.pdparams) |
 | PP-TSM | MobileNetV3 |  Uniform | 8 | 69.84 | [下载链接](https://videotag.bj.bcebos.com/PaddleVideo-release2.3/ppTSM_mv3_k400.pdparams) |
 | PP-TSM | ResNet50 |  Uniform | 8 | 74.54 | [下载链接](https://videotag.bj.bcebos.com/PaddleVideo-release2.1/PPTSM/ppTSM_k400_uniform.pdparams) |
