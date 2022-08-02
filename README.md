@@ -4,6 +4,8 @@
 
 ## 近期更新
 
+- 发布轻量化行为识别模型[PP-TSMv2](./docs/zh-CN/model_zoo/recognition/pp-tsm.md)
+- 新增[dml蒸馏](./docs/zh-CN/distillation.md)功能.
 - 新增基于transformer的行为识别模型[TokenShift](https://github.com/PaddlePaddle/PaddleVideo/blob/develop/docs/zh-CN/model_zoo/recognition/tokenshift_transformer.md).
 - 新增基于骨骼点的行为识别模型[2s-ACGN](https://github.com/PaddlePaddle/PaddleVideo/blob/develop/docs/zh-CN/model_zoo/recognition/agcn2s.md)、[CTR-GCN](./docs/zh-CN/model_zoo/recognition/ctrgcn.md).
 - 新增轻量化行为识别模型[MoViNet](./docs/zh-CN/model_zoo/recognition/movinet.md).
