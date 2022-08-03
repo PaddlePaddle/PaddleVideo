@@ -64,9 +64,9 @@ mean fps:  25
 |模型名称 | 骨干网络 | 配置文件 | 精度% | 预处理时间ms | 模型推理时间ms | 预测总时间ms |
 | :---- | :---- | :----: |:----: |:----: |:----: |:----: |
 | PP-TSM | MobileNetV2 | [pptsm_mv2_k400_videos_uniform.yaml](../../../../configs/recognition/pptsm/pptsm_mv2_k400_videos_uniform.yaml) | 68.09 | 51.5 | 3.31 | 54.81 |
-| PP-TSM | MobileNetV3 | [pptsm_mv3_k400_frames_uniform.yaml](../../../../configs/recognition/pptsm/pptsm_mv3_k400_frames_uniform.yaml) | 51 | 4.34 | 55.34 |
+| PP-TSM | MobileNetV3 | [pptsm_mv3_k400_frames_uniform.yaml](../../../../configs/recognition/pptsm/pptsm_mv3_k400_frames_uniform.yaml) | 69.84 | 51 | 4.34 | 55.34 |
 | TSM | R50 | [tsm_k400_frames.yaml](../../../../configs/recognition/tsm/tsm_k400_frames.yaml) | 71.06 | 52.02 | 9.87 | 61.89 |
-|**PP-TSM**	| R50 |	[pptsm_k400_frames_uniform.yaml](../../../../configs/recognition/pptsm/pptsm_k400_frames_uniform.yaml) | **75.11** | 51.84 | 11.26 | 63.1 |
+|**PP-TSM**	| R50 |	[pptsm_k400_frames_uniform.yaml](../../../../configs/recognition/pptsm/pptsm_k400_frames_uniform.yaml) | **75.11** | 51.84 | 11.26 | **63.1** |
 |PP-TSM	| R101 | [pptsm_k400_frames_dense_r101.yaml](../../../../configs/recognition/pptsm/pptsm_k400_frames_dense_r101.yaml) | 76.35| 52.1 | 17.91 | 70.01 |
 | PP-TSMv2 | PP-LCNet_v2 |	[pptsm_lcnet_k400_frames_uniform.yaml](../../../../configs/recognition/pptsm/v2/pptsm_lcnet_k400_frames_uniform.yaml) | 74.38 |  69.4 | 7.26 | 76.66 |
 | SlowFast | 4*16 |	[slowfast.yaml](../../../../configs/recognition/slowfast/slowfast.yaml) | 74.35 | 99.27 | 27.4 | 126.67 |
