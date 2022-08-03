@@ -13,6 +13,7 @@
     - [4.2 多卡训练](#42)
     - [4.3 蒸馏训练](#43)
     - [4.4 配置文件说明](#44)
+    - [4.5 推荐使用](#45)
 - [5. 模型测试](#5)
     - [5.1 中心采样测试](#51)
     - [5.2 密集采样测试](#52)
@@ -36,9 +37,27 @@ PP-TSMv2是轻量化的视频分类模型，基于CPU端模型[PP-LCNetV2](https
 <a name="2"></a>
 ## 2. 性能benchmark
 
-PP-TSM模型与主流模型之间的对比。
+PP-TSMv2模型与主流模型之间CPU推理速度对比(按预测总时间排序)：
 
-更多细节请查看[benchmark](xxx)文档。
+|模型名称 | 骨干网络 | 配置文件 | 精度% | 预处理时间ms | 模型推理时间ms | 预测总时间ms |
+| :---- | :---- | :----: |:----: |:----: |:----: |:----: |
+| PP-TSM | MobileNetV2 | [pptsm_mv2_k400_videos_uniform.yaml](../../../../configs/recognition/pptsm/pptsm_mv2_k400_videos_uniform.yaml) | 68.09 | 52.62 | 137.03 | 189.65 |
+| PP-TSM | MobileNetV3 | [pptsm_mv3_k400_frames_uniform.yaml](../../../../configs/recognition/pptsm/pptsm_mv3_k400_frames_uniform.yaml) | 69.84| 53.44 | 139.13 | 192.58 |
+| **PP-TSMv2** | PP-LCNet_v2 |	[pptsm_lcnet_k400_frames_uniform.yaml](../../../../configs/recognition/pptsm/v2/pptsm_lcnet_k400_frames_uniform.yaml) | **74.38**|  68.07 | 365.23 | **433.31** |
+| SlowFast | 4*16 |	[slowfast.yaml](../../../../configs/recognition/slowfast/slowfast.yaml) | 74.35 | 110.04 | 1201.36 | 1311.41 |
+| TSM | R50 | [tsm_k400_frames.yaml](../../../../configs/recognition/tsm/tsm_k400_frames.yaml) | 71.06 | 52.47 | 1302.49 | 1354.96 |
+|PP-TSM	| R50 |	[pptsm_k400_frames_uniform.yaml](../../../../configs/recognition/pptsm/pptsm_k400_frames_uniform.yaml) | 75.11 | 52.26  | 1354.21 | 1406.48 |
+|*MoViNet | A0 | [movinet_k400_frame.yaml](../../../../configs/recognition/movinet/movinet_k400_frame.yaml) | 66.62 | 148.30 |	1290.46 | 1438.76 |
+|PP-TSM	| R101 | [pptsm_k400_frames_dense_r101.yaml](../../../../configs/recognition/pptsm/pptsm_k400_frames_dense_r101.yaml) | 76.35| 52.50 | 2236.94 | 2289.45 |
+| TimeSformer |	base |	[timesformer_k400_videos.yaml](../../../../configs/recognition/timesformer/timesformer_k400_videos.yaml) | 77.29 | 297.33 |	14034.77 |	14332.11 |
+| TSN | R50	| [tsn_k400_frames.yaml](../../../../configs/recognition/tsn/tsn_k400_frames.yaml) | 69.81 | 860.41 | 18359.26 | 19219.68 |
+| *VideoSwin | B | [videoswin_k400_videos.yaml](../../../../configs/recognition/videoswin/videoswin_k400_videos.yaml) | 82.4 | 76.21 | 32983.49 | 33059.70 |
+
+
+* 注:
+(1) 带`*`表示该模型未使用mkldnn进行预测加速。
+
+更多细节请查看[benchmark](../../benchmark.md)文档。
 
 <a name="3"></a>
 ## 3. 数据准备
@@ -110,15 +129,22 @@ PP-TSM模型提供的各配置文件均放置在[configs/recognition/pptsm](../.
 
 `模型名称_骨干网络名称_数据集名称_数据格式_测试方式_其它.yaml`。
 
-- `数据格式`包括`frame`和`video`，`video`表示使用在线解码的方式进行训练，`frame`表示先将视频解码成图像帧存储起来，训练时直接读取图片进行训练。相较于使用视频格式训练，frame格式输入可以加快训练速度，加速比约4-5倍，但会占用更大的存储空间，如Kinetics-400数据集video格式135G，解码成图像后需要2T。使用不同数据格式，仅需修改配置文件中的`DATASET`和`PIPELINE`字段，参考[pptsm_k400_frames_uniform.yaml](../../../../configs/recognition/pptsm/pptsm_k400_frames_uniform.yaml)和[pptsm_k400_videos_uniform.yaml](../../../../configs/recognition/pptsm/pptsm_k400_videos_uniform.yaml)。注意，由于编解码的细微差异，两种格式训练得到的模型在精度上可能会有些许差异。
+- 数据格式包括`frame`和`video`，`video`表示使用在线解码的方式进行训练，`frame`表示先将视频解码成图像帧存储起来，训练时直接读取图片进行训练。使用不同数据格式，仅需修改配置文件中的`DATASET`和`PIPELINE`字段，参考[pptsm_k400_frames_uniform.yaml](../../../../configs/recognition/pptsm/pptsm_k400_frames_uniform.yaml)和[pptsm_k400_videos_uniform.yaml](../../../../configs/recognition/pptsm/pptsm_k400_videos_uniform.yaml)。注意，由于编解码的细微差异，两种格式训练得到的模型在精度上可能会有些许差异。
 
-- `测试方式`包括`uniform`和`dense`，uniform表示中心采样，dense表示密集采样，更多细节参考第5章节模型测试部分。
-
-- PP-TSMv2推荐参考配置：无蒸馏-[pptsm_lcnet_k400_frames_uniform.yaml](../../../../configs/recognition/pptsm/v2/pptsm_lcnet_k400_frames_uniform.yaml)，加蒸馏-[pptsm_lcnet_k400_frames_uniform_dml_distillation.yaml](../../../../configs/recognition/pptsm/v2/pptsm_lcnet_k400_frames_uniform_dml_distillation.yaml)
-
-- PP-TSM推荐参考配置：frame格式-[pptsm_k400_frames_uniform.yaml](../../../../configs/recognition/pptsm/pptsm_k400_frames_uniform.yaml)，video格式-[pptsm_k400_videos_uniform.yaml](../../../../configs/recognition/pptsm/pptsm_k400_videos_uniform.yaml)
+- 测试方式包括`uniform`和`dense`，uniform表示中心采样，dense表示密集采样，更多细节参考第5章节模型测试部分。
 
 - 您也可以自定义修改参数配置，以达到在不同的数据集上进行训练/测试的目的。
+
+<a name="45"></a>
+### 4.5 推荐使用
+
+- 1. 数据格式：如硬盘存储空间足够，推荐使用`frame`格式，解码一次后，后续可以获得更快的训练速度。相较于使用视频格式训练，frame格式输入可以加快训练速度，加速比约4-5倍，但会占用更大的存储空间，如Kinetics-400数据集video格式135G，解码成图像后需要2T。
+
+- 2. 测试方式：对于产业落地场景，推荐使用`uniform`方式，简洁高效，可以获得较好的精度与速度平衡。
+
+- 3. 对于CPU或端侧需求，推荐使用`PP-TSMv2`，精度较高，速度快。对应配置文件为无蒸馏-[pptsm_lcnet_k400_frames_uniform.yaml](../../../../configs/recognition/pptsm/v2/pptsm_lcnet_k400_frames_uniform.yaml)，加蒸馏-[pptsm_lcnet_k400_frames_uniform_dml_distillation.yaml](../../../../configs/recognition/pptsm/v2/pptsm_lcnet_k400_frames_uniform_dml_distillation.yaml)。相对于无蒸馏，蒸馏后能获得更高的精度，但训练时需要更大的显存，以运行教师模型。
+
+- 4. 对于GPU服务器端需求，推荐使用`PP-TSM`，对应配置文件为[pptsm_k400_frames_uniform.yaml](../../../../configs/recognition/pptsm/pptsm_k400_frames_uniform.yaml)。GPU端推理，速度瓶颈更多在于数据预处理(视频编解码)部分，更优的解码器和更高的精度，会是侧重考虑的部分。
 
 <a name="5"></a>
 ## 5. 模型测试
