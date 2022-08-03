@@ -32,7 +32,7 @@ PP-TSM基于ResNet-50骨干网络进行优化，从数据增强、网络结构�
 
 ### PP-TSMv2
 
-PP-TSMv2是轻量化的视频分类模型，基于CPU端模型[PP-LCNetV2](https://github.com/PaddlePaddle/PaddleClas/blob/release/2.4/docs/zh_CN/models/PP-LCNetV2.md)进行优化，从数据增强、网络结构调整与设计(使用最优的tsm模块插入数量和位置、新增时序attention模块)、训练策略、输入帧数与解码方式优化、dml蒸馏等5个方面进行模型调优，在中心采样评估方式下，精度达到74.38%，输入10s视频在CPU端的推理速度仅需xxx。更多细节参考[PP-TSMv2技术报告](doing)。
+PP-TSMv2是轻量化的视频分类模型，基于CPU端模型[PP-LCNetV2](https://github.com/PaddlePaddle/PaddleClas/blob/release/2.4/docs/zh_CN/models/PP-LCNetV2.md)进行优化，从数据增强、网络结构调整与设计(使用最优的tsm模块插入数量和位置、新增时序attention模块)、训练策略、输入帧数与解码方式优化、dml蒸馏等5个方面进行模型调优，在中心采样评估方式下，精度达到74.38%，输入10s视频在CPU端的推理速度仅需434ms。更多细节参考[PP-TSMv2技术报告](doing)。
 
 <a name="2"></a>
 ## 2. 性能benchmark
@@ -141,7 +141,7 @@ PP-TSM模型提供的各配置文件均放置在[configs/recognition/pptsm](../.
 
 - 2. 测试方式：对于产业落地场景，推荐使用`uniform`方式，简洁高效，可以获得较好的精度与速度平衡。
 
-- 3. 对于CPU或端侧需求，推荐使用`PP-TSMv2`，精度较高，速度快。对应配置文件为无蒸馏-[pptsm_lcnet_k400_frames_uniform.yaml](../../../../configs/recognition/pptsm/v2/pptsm_lcnet_k400_frames_uniform.yaml)，加蒸馏-[pptsm_lcnet_k400_frames_uniform_dml_distillation.yaml](../../../../configs/recognition/pptsm/v2/pptsm_lcnet_k400_frames_uniform_dml_distillation.yaml)。相对于无蒸馏，蒸馏后能获得更高的精度，但训练时需要更大的显存，以运行教师模型。
+- 3. 对于CPU或端侧需求，推荐使用`PP-TSMv2`，精度较高，速度快，具体性能和速度对比请查看[benchmark](../../benchmark.md)文档。对应配置文件为无蒸馏-[pptsm_lcnet_k400_frames_uniform.yaml](../../../../configs/recognition/pptsm/v2/pptsm_lcnet_k400_frames_uniform.yaml)，加蒸馏-[pptsm_lcnet_k400_frames_uniform_dml_distillation.yaml](../../../../configs/recognition/pptsm/v2/pptsm_lcnet_k400_frames_uniform_dml_distillation.yaml)。相对于无蒸馏，蒸馏后能获得更高的精度，但训练时需要更大的显存，以运行教师模型。
 
 - 4. 对于GPU服务器端需求，推荐使用`PP-TSM`，对应配置文件为[pptsm_k400_frames_uniform.yaml](../../../../configs/recognition/pptsm/pptsm_k400_frames_uniform.yaml)。GPU端推理，速度瓶颈更多在于数据预处理(视频编解码)部分，更优的解码器和更高的精度，会是侧重考虑的部分。
 
