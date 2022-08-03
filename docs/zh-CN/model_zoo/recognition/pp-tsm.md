@@ -39,23 +39,22 @@ PP-TSMv2是轻量化的视频分类模型，基于CPU端模型[PP-LCNetV2](https
 
 PP-TSMv2模型与主流模型之间CPU推理速度对比(按预测总时间排序)：
 
-|模型名称 | 骨干网络 | 配置文件 | 精度% | 预处理时间ms | 模型推理时间ms | 预测总时间ms |
-| :---- | :---- | :----: |:----: |:----: |:----: |:----: |
-| PP-TSM | MobileNetV2 | [pptsm_mv2_k400_videos_uniform.yaml](../../../../configs/recognition/pptsm/pptsm_mv2_k400_videos_uniform.yaml) | 68.09 | 52.62 | 137.03 | 189.65 |
-| PP-TSM | MobileNetV3 | [pptsm_mv3_k400_frames_uniform.yaml](../../../../configs/recognition/pptsm/pptsm_mv3_k400_frames_uniform.yaml) | 69.84| 53.44 | 139.13 | 192.58 |
-| **PP-TSMv2** | PP-LCNet_v2 |	[pptsm_lcnet_k400_frames_uniform.yaml](../../../../configs/recognition/pptsm/v2/pptsm_lcnet_k400_frames_uniform.yaml) | **74.38**|  68.07 | 365.23 | **433.31** |
-| SlowFast | 4*16 |	[slowfast.yaml](../../../../configs/recognition/slowfast/slowfast.yaml) | 74.35 | 110.04 | 1201.36 | 1311.41 |
-| TSM | R50 | [tsm_k400_frames.yaml](../../../../configs/recognition/tsm/tsm_k400_frames.yaml) | 71.06 | 52.47 | 1302.49 | 1354.96 |
-|PP-TSM	| R50 |	[pptsm_k400_frames_uniform.yaml](../../../../configs/recognition/pptsm/pptsm_k400_frames_uniform.yaml) | 75.11 | 52.26  | 1354.21 | 1406.48 |
-|*MoViNet | A0 | [movinet_k400_frame.yaml](../../../../configs/recognition/movinet/movinet_k400_frame.yaml) | 66.62 | 148.30 |	1290.46 | 1438.76 |
-|PP-TSM	| R101 | [pptsm_k400_frames_dense_r101.yaml](../../../../configs/recognition/pptsm/pptsm_k400_frames_dense_r101.yaml) | 76.35| 52.50 | 2236.94 | 2289.45 |
-| TimeSformer |	base |	[timesformer_k400_videos.yaml](../../../../configs/recognition/timesformer/timesformer_k400_videos.yaml) | 77.29 | 297.33 |	14034.77 |	14332.11 |
-| TSN | R50	| [tsn_k400_frames.yaml](../../../../configs/recognition/tsn/tsn_k400_frames.yaml) | 69.81 | 860.41 | 18359.26 | 19219.68 |
-| *VideoSwin | B | [videoswin_k400_videos.yaml](../../../../configs/recognition/videoswin/videoswin_k400_videos.yaml) | 82.4 | 76.21 | 32983.49 | 33059.70 |
+|模型名称 | 骨干网络 | 精度% | 预处理时间ms | 模型推理时间ms | 预测总时间ms |
+| :---- | :---- | :----: |:----: |:----: |:----: |
+| PP-TSM | MobileNetV2 |  68.09 | 52.62 | 137.03 | 189.65 |
+| PP-TSM | MobileNetV3 |  69.84| 53.44 | 139.13 | 192.58 |
+| **PP-TSMv2** | PP-LCNet_v2 |	**74.38**|  68.07 | 365.23 | **433.31** |
+| SlowFast | 4*16 |74.35 | 110.04 | 1201.36 | 1311.41 |
+| TSM | R50 |  71.06 | 52.47 | 1302.49 | 1354.96 |
+|PP-TSM	| R50 |	75.11 | 52.26  | 1354.21 | 1406.48 |
+|*MoViNet | A0 | 66.62 | 148.30 |	1290.46 | 1438.76 |
+|PP-TSM	| R101 |  76.35| 52.50 | 2236.94 | 2289.45 |
+| TimeSformer |	base |	 77.29 | 297.33 |	14034.77 |	14332.11 |
+| TSN | R50	| 69.81 | 860.41 | 18359.26 | 19219.68 |
+| *VideoSwin | B | 82.4 | 76.21 | 32983.49 | 33059.70 |
 
 
-* 注:
-(1) 带`*`表示该模型未使用mkldnn进行预测加速。
+* 注: 带`*`表示该模型未使用mkldnn进行预测加速。
 
 更多细节请查看[benchmark](../../benchmark.md)文档。
 
