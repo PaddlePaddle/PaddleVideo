@@ -77,10 +77,9 @@ mean fps:  25
 | TSN | R50	| [tsn_k400_frames.yaml](../../../../configs/recognition/tsn/tsn_k400_frames.yaml) | 69.81 | 794.30 | 168.70 | 963.00 |
 | PP-TSN | R50 | [pptsn_k400_frames.yaml](../../../../configs/recognition/pptsn/pptsn_k400_frames.yaml) | 75.06 | 837.75 | 175.12 | 1012.87 |
 
-* 注:
-(1) 带`*`表示该模型未使用tensorRT进行预测加速。
+* 注:带`*`表示该模型未使用tensorRT进行预测加速。
 
-(2) TSN预测时采用TenCrop，比TSM采用的CenterCrop更加耗时。TSN如果使用CenterCrop，则速度稍优于TSM，但精度会低3.5个点。
+- TSN预测时采用TenCrop，比TSM采用的CenterCrop更加耗时。TSN如果使用CenterCrop，则速度稍优于TSM，但精度会低3.5个点。
 
 #### CPU推理速度一览
 
@@ -103,8 +102,7 @@ mean fps:  25
 | *VideoSwin | B | [videoswin_k400_videos.yaml](../../../../configs/recognition/videoswin/videoswin_k400_videos.yaml) | 82.4 | 76.21 | 32983.49 | 33059.70 |
 
 
-* 注:
-(1) 带`*`表示该模型未使用mkldnn进行预测加速。
+* 注: 带`*`表示该模型未使用mkldnn进行预测加速。
 
 
 ### 1.4 测试方法
