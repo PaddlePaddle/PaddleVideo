@@ -13,18 +13,23 @@
     - [4.2 多卡训练](#42)
     - [4.3 蒸馏训练](#43)
     - [4.4 配置文件说明](#44)
-    - [4.5 推荐使用](#45)
+    - [4.5 配置文件推荐使用](#45)
 - [5. 模型测试](#5)
     - [5.1 中心采样测试](#51)
     - [5.2 密集采样测试](#52)
-- [6. 模型推理](#6)
+- [6. 模型推理部署](#6)
+    - [6.1 导出推理模型](#61)
+    - [6.2 基于python预测引擎推理](#62)
+    - [6.3 基于c++预测引擎推理](#63)
+    - [6.4 服务化部署](#64)
+    - [6.5 Paddle2ONNX 模型预测与转换](#65)
 - [7. 模型库下载](#7)
 - [8. 参考论文](#8)
 
 <a name="1"></a>
 ## 1. 简介
 
-视频分类任务是指输入视频，输出标签类别。与图像分类不同的是，视频分类往往需要利用多帧图像之间的时序信息。如果标签都是行为类别，则该任务也称为行为识别。PP-TSM是PaddleVideo自研的实用产业级视频分类模型，在实现前沿算法的基础上，考虑精度和速度的平衡，进行模型瘦身和精度优化，使其可能满足产业落地需求。
+视频分类任务是指输入视频，输出标签类别。如果标签都是行为类别，则该任务也称为行为识别。与图像分类不同的是，视频分类往往需要利用多帧图像之间的时序信息。PP-TSM是PaddleVideo自研的实用产业级视频分类模型，在实现前沿算法的基础上，考虑精度和速度的平衡，进行模型瘦身和精度优化，使其可能满足产业落地需求。
 
 ### PP-TSM
 
@@ -136,7 +141,7 @@ PP-TSM模型提供的各配置文件均放置在[configs/recognition/pptsm](../.
 - 您也可以自定义修改参数配置，以达到在不同的数据集上进行训练/测试的目的。
 
 <a name="45"></a>
-### 4.5 推荐使用
+### 4.5 配置文件推荐使用
 
 - 1. 数据格式：如硬盘存储空间足够，推荐使用`frame`格式，解码一次后，后续可以获得更快的训练速度。相较于使用视频格式训练，frame格式输入可以加快训练速度，加速比约4-5倍，但会占用更大的存储空间，如Kinetics-400数据集video格式135G，解码成图像后需要2T。
 
@@ -180,7 +185,8 @@ python3 main.py --test -c configs/recognition/pptsm/pptsm_k400_frames_dense.yaml
 <a name="6"></a>
 ## 6. 模型推理
 
-### 导出inference模型
+<a name="61"></a>
+### 导出推理模型
 
 ```bash
 python3.7 tools/export_model.py -c configs/recognition/pptsm/v2/pptsm_lcnet_k400_frames_uniform_dml_distillation.yaml \
@@ -188,11 +194,18 @@ python3.7 tools/export_model.py -c configs/recognition/pptsm/v2/pptsm_lcnet_k400
                                 -o inference/PPTSMv2
 ```
 
-上述命令将生成预测所需的模型结构文件`PPTSMv2.pdmodel`和模型权重文件`PPTSMv2.pdiparams`。
+上述命令会在`inference/PPTSMv2`下生成预测所需的文件，结构如下:
+```
+├── inference/PPTSMv2
+│   ├── PPTSMv2.pdiparams       # 模型权重文件
+│   ├── PPTSMv2.pdiparams.info  # 模型信息文件
+│   └── PPTSMv2.pdmodel           # 模型结构文件
+```
 
+<a name="62"></a>
+### 基于python预测引擎推理
 
-### 使用预测引擎推理
-
+运行下面命令，对示例视频文件`data/example.avi`进行分类:
 ```bash
 python3.7 tools/predict.py --input_file data/example.avi \
                            --config configs/recognition/pptsm/v2/pptsm_lcnet_k400_frames_uniform_dml_distillation.yaml \
@@ -212,7 +225,28 @@ Current video file: data/example.avi
 ```
 
 
-可以看到，使用在Kinetics-400上训练好的PP-TSM模型对`data/example.avi`进行预测，输出的top1类别id为`5`，置信度为1.0。通过查阅类别id与名称对应表`data/k400/Kinetics-400_label_list.txt`，可知预测类别名称为`archery`。
+可以看到，使用在Kinetics-400上训练好的PP-TSMv2模型对`data/example.avi`进行预测，输出的top1类别id为`5`，置信度为1.0。通过查阅类别id与名称对应表`data/k400/Kinetics-400_label_list.txt`，可知预测类别名称为`archery`。
+
+<a name="63"></a>
+### 基于c++预测引擎推理
+
+PaddleVideo 提供了基于 C++ 预测引擎推理的示例，您可以参考[服务器端C++预测](../../deploy/cpp_infer/)来完成相应的推理部署。
+
+
+<a name="64"></a>
+### 服务化部署
+
+Paddle Serving 提供高性能、灵活易用的工业级在线推理服务。Paddle Serving 支持 RESTful、gRPC、bRPC 等多种协议，提供多种异构硬件和多种操作系统环境下推理解决方案。更多关于Paddle Serving 的介绍，可以参考[Paddle Serving](https://github.com/PaddlePaddle/Serving) 代码仓库。
+
+PaddleVideo 提供了基于 Paddle Serving 来完成模型服务化部署的示例，您可以参考[基于python的模型服务化部署](../../deploy/python_serving/)或[基于c++的模型服务化部署](../../deploy/cpp_serving/)来完成相应的部署工作。
+
+
+<a name="65"></a>
+### Paddle2ONNX 模型预测与转换
+
+Paddle2ONNX 支持将 PaddlePaddle 模型格式转化到 ONNX 模型格式。通过 ONNX 可以完成将 Paddle 模型到多种推理引擎的部署，包括TensorRT/OpenVINO/MNN/TNN/NCNN，以及其它对 ONNX 开源格式进行支持的推理引擎或硬件。更多关于 Paddle2ONNX 的介绍，可以参考[Paddle2ONNX](https://github.com/PaddlePaddle/Paddle2ONNX) 代码仓库。
+
+PaddleVideo 提供了基于 Paddle2ONNX 来完成 inference 模型转换 ONNX 模型并作推理预测的示例，您可以参考[Paddle2ONNX 模型转换与预测](../../deploy/paddle2onnx/)来完成相应的部署工作。
 
 
 <a name="7"></a>
