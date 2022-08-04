@@ -17,6 +17,7 @@ import os
 import shutil
 import sys
 from typing import List
+import pickle
 
 import cv2
 try:
@@ -48,7 +49,9 @@ from paddlevideo.loader.pipelines import (
     GroupResize, Image2Array, ImageDecoder, JitterScale, MultiCrop,
     Normalization, PackOutput, Sampler, SamplerPkl, Scale, SkeletonNorm,
     TenCrop, ToArray, UniformCrop, VideoDecoder, SegmentationSampler,
-    SketeonCropSample, MultiCenterCrop)
+    SketeonCropSample, MultiCenterCrop, SketeonCropSample, UniformSampleFrames,
+    PoseDecode, PoseCompact, Resize, CenterCrop_V2, GeneratePoseTarget,
+    FormatShape, Collect)
 from paddlevideo.metrics.ava_utils import read_labelmap
 from paddlevideo.metrics.bmn_metric import boundary_choose, soft_nms
 from paddlevideo.utils import Registry, build, get_config
@@ -183,7 +186,7 @@ class ppTSM_Inference_helper(Base_Inference_helper):
         img_mean = [0.485, 0.456, 0.406]
         img_std = [0.229, 0.224, 0.225]
         ops = [
-            VideoDecoder("decord"),
+            VideoDecoder(backend="decord"),
             Sampler(self.num_seg, self.seg_len, valid_mode=True),
             Scale(self.short_size),
             CenterCrop(self.target_size),
@@ -1493,3 +1496,62 @@ class AVA_SlowFast_FastRCNN_Inference_helper(Base_Inference_helper):
         # delete tmp files and dirs
         shutil.rmtree(self.frame_dir)
         shutil.rmtree(self.detection_result_dir)
+
+
+@INFERENCE.register()
+class PoseC3D_Inference_helper(Base_Inference_helper):
+    def __init__(self, top_k=1):
+        self.top_k = top_k
+
+    def preprocess(self, input_file):
+        """
+        input_file: str, file path
+        return: list
+        """
+        assert os.path.isfile(input_file) is not None, "{0} not exists".format(
+            input_file)
+        with open(input_file, 'rb') as f:
+            data = pickle.load(f)
+        self.input_file = input_file
+
+        left_kp = [1, 3, 5, 7, 9, 11, 13, 15]
+        right_kp = [2, 4, 6, 8, 10, 12, 14, 16]
+        ops = [
+            UniformSampleFrames(clip_len=48, num_clips=10, test_mode=True),
+            PoseDecode(),
+            PoseCompact(hw_ratio=1., allow_imgpad=True),
+            Resize(scale=(-1, 56)),
+            CenterCrop_V2(crop_size=56),
+            GeneratePoseTarget(sigma=0.6,
+                               use_score=True,
+                               with_kp=True,
+                               with_limb=False,
+                               double=True,
+                               left_kp=left_kp,
+                               right_kp=right_kp),
+            FormatShape(input_format='NCTHW'),
+            Collect(keys=['imgs', 'label'], meta_keys=[])
+        ]
+
+        for op in ops:
+            results = op(data)
+        results = [results[0][np.newaxis, :, :, :, :, :]]
+        self.num_segs = results[0].shape[1]
+        return results
+
+    def postprocess(self, outputs, print_output=True):
+        batch_size = outputs[0].shape[0]
+        cls_score = outputs[0].reshape(
+            [batch_size // self.num_segs, self.num_segs, outputs[0].shape[-1]])
+        output = F.softmax(paddle.to_tensor(cls_score),
+                           axis=2).mean(axis=1).numpy()
+        N = len(self.input_file)
+        for i in range(N):
+            classes = np.argpartition(output[i], -self.top_k)[-self.top_k:]
+            classes = classes[np.argsort(-output[i, classes])]
+            scores = output[i, classes]
+            if print_output:
+                print("Current video file: {0}".format(self.input_file[i]))
+                for j in range(self.top_k):
+                    print("\ttop-{0} class: {1}".format(j + 1, classes[j]))
+                    print("\ttop-{0} score: {1}".format(j + 1, scores[j]))

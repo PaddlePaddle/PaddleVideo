@@ -74,7 +74,7 @@ class ppTSNHead(BaseHead):
                      mean=0.,
                      std=self.std)
 
-    def forward(self, x, num_seg):
+    def forward(self, x, num_seg=8):
         """Define how the head is going to run.
 
         Args:

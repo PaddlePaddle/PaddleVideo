@@ -128,6 +128,14 @@ if [ ${MODE} = "lite_train_lite_infer" ];then
     elif [ ${model_name} == "TokenShiftVisionTransformer" ]; then
         # download pretrained weights
         wget -nc -P ./data https://paddle-imagenet-models-name.bj.bcebos.com/dygraph/ViT_base_patch16_224_pretrained.pdparams --no-check-certificate
+    elif [ ${model_name} == "PoseC3D" ]; then
+        # pretrain lite train data
+        pushd ./data
+        mkdir posec3d_data
+        cd posec3d_data
+        wget -nc https://videotag.bj.bcebos.com/PaddleVideo-release2.3/PoseC3D_data_small.tar
+        tar -xf PoseC3D_data_small.tar
+        popd
     else
         echo "Not added into TIPC yet."
     fi

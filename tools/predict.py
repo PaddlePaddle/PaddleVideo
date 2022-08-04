@@ -24,6 +24,7 @@ from paddlevideo.utils import get_config
 
 
 def parse_args():
+
     def str2bool(v):
         return v.lower() in ("true", "t", "1")
 
@@ -40,7 +41,10 @@ def parse_args():
                         default=[],
                         help='config options to be overridden')
     parser.add_argument("-i", "--input_file", type=str, help="input file path")
-    parser.add_argument("--time_test_file", type=str2bool, default=False, help="whether input time test file")    
+    parser.add_argument("--time_test_file",
+                        type=str2bool,
+                        default=False,
+                        help="whether input time test file")
     parser.add_argument("--model_file", type=str)
     parser.add_argument("--params_file", type=str)
 
