@@ -207,6 +207,10 @@ def get_input_spec(cfg, model_name):
             InputSpec(shape=[None, None, 4], dtype='float32', name='proposals'),
             InputSpec(shape=[None, 2], dtype='float32', name='img_shape')
         ]]
+    elif model_name in ['PoseC3D']:
+        input_spec = [[
+            InputSpec(shape=[None, 1, 17, 48, 56, 56], dtype='float32'),
+        ]]
     return input_spec
 
 

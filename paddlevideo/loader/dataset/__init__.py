@@ -28,10 +28,12 @@ from .oxford import MonoDataset
 from .skeleton import SkeletonDataset
 from .slowfast_video import SFVideoDataset
 from .video import VideoDataset
+from .ucf101_skeleton import UCF101SkeletonDataset
 
 __all__ = [
     'VideoDataset', 'FrameDataset', 'SFVideoDataset', 'BMNDataset',
     'FeatureDataset', 'SkeletonDataset', 'AVADataset', 'MonoDataset',
     'MSRVTTDataset', 'ActBertDataset', 'DavisDataset', 'MRIDataset',
-    'SFMRIDataset', 'FrameDataset_Sport', 'MSTCNDataset', 'ASRFDataset'
+    'SFMRIDataset', 'FrameDataset_Sport', 'MSTCNDataset', 'ASRFDataset',
+    'UCF101SkeletonDataset'
 ]

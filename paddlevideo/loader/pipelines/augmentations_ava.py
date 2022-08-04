@@ -37,6 +37,7 @@ cv2_interp_codes = {
     'lanczos': cv2.INTER_LANCZOS4
 }
 
+
 def _init_lazy_if_proper(results, lazy):
     """Initialize lazy operation properly.
 
@@ -70,6 +71,7 @@ def _init_lazy_if_proper(results, lazy):
     else:
         assert 'lazy' not in results, 'Use Fuse after lazy operations'
 
+
 def _scale_size(size, scale):
     """Rescale a size by a ratio.
 
@@ -82,6 +84,7 @@ def _scale_size(size, scale):
     """
     w, h = size
     return int(w * float(scale) + 0.5), int(h * float(scale) + 0.5)
+
 
 def rescale_size(old_size, scale, return_scale=False):
     """Calculate the new size to be rescaled to.
@@ -119,6 +122,7 @@ def rescale_size(old_size, scale, return_scale=False):
     else:
         return new_size
 
+
 def imresize(img,
              size,
              return_scale=False,
@@ -148,6 +152,7 @@ def imresize(img,
         h_scale = size[1] / h
         return resized_img, w_scale, h_scale
 
+
 @PIPELINES.register()
 class EntityBoxRescale:
     """Rescale the entity box and proposals according to the image shape.
@@ -165,11 +170,11 @@ class EntityBoxRescale:
 
     def __call__(self, results):
         scale_factor = np.concatenate([self.scale_factor, self.scale_factor])
-        
+
         if 'gt_bboxes' in results:
             gt_bboxes = results['gt_bboxes']
             results['gt_bboxes'] = gt_bboxes * scale_factor
-        
+
         if 'proposals' in results:
             proposals = results['proposals']
             if proposals is not None:
@@ -182,6 +187,7 @@ class EntityBoxRescale:
 
     def __repr__(self):
         return f'{self.__class__.__name__}(scale_factor={self.scale_factor})'
+
 
 @PIPELINES.register()
 class EntityBoxCrop:
@@ -217,13 +223,16 @@ class EntityBoxCrop:
         if proposals is not None:
             assert proposals.shape[-1] == 4
             proposals_ = proposals.copy()
-            proposals_[..., 0::2] = np.clip(proposals[..., 0::2] - x1, 0, img_w - 1)
-            proposals_[..., 1::2] = np.clip(proposals[..., 1::2] - y1, 0, img_h - 1)
+            proposals_[..., 0::2] = np.clip(proposals[..., 0::2] - x1, 0,
+                                            img_w - 1)
+            proposals_[..., 1::2] = np.clip(proposals[..., 1::2] - y1, 0,
+                                            img_h - 1)
             results['proposals'] = proposals_
         return results
 
     def __repr__(self):
         return f'{self.__class__.__name__}(crop_bbox={self.crop_bbox})'
+
 
 @PIPELINES.register()
 class EntityBoxFlip:
@@ -299,6 +308,8 @@ class Resize:
                  keep_ratio=True,
                  interpolation='bilinear',
                  lazy=False):
+        if isinstance(scale, str):
+            scale = eval(scale)
         if isinstance(scale, float):
             if scale <= 0:
                 raise ValueError(f'Invalid scale {scale}, must be positive.')
@@ -341,13 +352,15 @@ class Resize:
         results['keep_ratio'] = self.keep_ratio
         results['scale_factor'] = results['scale_factor'] * self.scale_factor
 
-        
-        if not self.lazy: 
-            results['imgs'] = [
-                imresize(
-                    img, (new_w, new_h), interpolation=self.interpolation)
-                for img in results['imgs']
-            ]
+        if not self.lazy:
+            if 'imgs' in results:
+                results['imgs'] = [
+                    imresize(
+                        img, (new_w, new_h), interpolation=self.interpolation)
+                    for img in results['imgs']
+                ]
+            if 'keypoint' in results:
+                results['keypoint'] = results['keypoint'] * self.scale_factor
         else:
             lazyop = results['lazy']
             if lazyop['flip']:
@@ -368,6 +381,7 @@ class Resize:
                     f'lazy={self.lazy})')
         return repr_str
 
+
 @PIPELINES.register()
 class RandomRescale:
     """Randomly resize images so that the short_edge is resized to a specific
@@ -377,7 +391,7 @@ class RandomRescale:
     def __init__(self, scale_range, interpolation='bilinear'):
         scale_range = eval(scale_range)
         self.scale_range = scale_range
-        
+
         assert len(scale_range) == 2
         assert scale_range[0] < scale_range[1]
         assert np.all([x > 0 for x in scale_range])
@@ -410,6 +424,7 @@ class RandomRescale:
                     f'interpolation={self.interpolation})')
         return repr_str
 
+
 @PIPELINES.register()
 class Rescale:
     """resize images so that the short_edge is resized to a specific
@@ -440,10 +455,11 @@ class Rescale:
             results (dict): The resulting dict to be modified and passed
                 to the next transform in pipeline.
         """
-        resize = Resize(self.scale_range, 
-                        keep_ratio=True,
-                        interpolation=self.interpolation,
-                        lazy=False)
+        resize = Resize(
+            self.scale_range,
+            keep_ratio=True,
+            interpolation=self.interpolation,
+            lazy=False)
         results = resize(results)
         return results
 
@@ -508,11 +524,13 @@ class RandomCrop_v2:
             old_y_ratio + y_ratio * old_h_ratio, w_ratio * old_w_ratio,
             h_ratio * old_x_ratio
         ]
-        results['crop_quadruple'] = np.array( new_crop_quadruple, dtype=np.float32) 
+        results['crop_quadruple'] = np.array(
+            new_crop_quadruple, dtype=np.float32)
 
         new_h, new_w = self.size, self.size
 
-        results['crop_bbox'] = np.array( [x_offset, y_offset, x_offset + new_w, y_offset + new_h])
+        results['crop_bbox'] = np.array(
+            [x_offset, y_offset, x_offset + new_w, y_offset + new_h])
         results['img_shape'] = (new_h, new_w)
 
         if not self.lazy:
@@ -531,11 +549,10 @@ class RandomCrop_v2:
             right = (x_offset + new_w) * (lazy_right - lazy_left) / img_w
             top = y_offset * (lazy_bottom - lazy_top) / img_h
             bottom = (y_offset + new_h) * (lazy_bottom - lazy_top) / img_h
-            lazyop['crop_bbox'] = np.array([(lazy_left + left),
-                                            (lazy_top + top),
-                                            (lazy_left + right),
-                                            (lazy_top + bottom)],
-                                           dtype=np.float32)
+            lazyop['crop_bbox'] = np.array(
+                [(lazy_left + left), (lazy_top + top), (lazy_left + right),
+                 (lazy_top + bottom)],
+                dtype=np.float32)
 
         # Process entity boxes
         if 'gt_bboxes' in results:
@@ -549,6 +566,7 @@ class RandomCrop_v2:
         repr_str = (f'{self.__class__.__name__}(size={self.size}, '
                     f'lazy={self.lazy})')
         return repr_str
+
 
 def imflip_(img, direction='horizontal'):
     """Inplace flip an image horizontally or vertically.
@@ -569,6 +587,7 @@ def imflip_(img, direction='horizontal'):
     else:
         return cv2.flip(img, -1, img)
 
+
 def iminvert(img):
     """Invert (negate) an image.
 
@@ -579,6 +598,7 @@ def iminvert(img):
         ndarray: The inverted image.
     """
     return np.full_like(img, 255) - img
+
 
 @PIPELINES.register()
 class Flip:
@@ -649,6 +669,7 @@ class Flip:
             f'lazy={self.lazy})')
         return repr_str
 
+
 def imnormalize_(img, mean, std, to_rgb=True):
     """Inplace normalize an image with mean and std.
 
@@ -671,6 +692,7 @@ def imnormalize_(img, mean, std, to_rgb=True):
     cv2.multiply(img, stdinv, img)  # inplace
     return img
 
+
 @PIPELINES.register()
 class Normalize:
     """Normalize images with the given mean and std value.
@@ -691,8 +713,7 @@ class Normalize:
     def __init__(self, mean, std, to_bgr=False, adjust_magnitude=False):
         if not isinstance(mean, Sequence):
             raise TypeError(
-                f'Mean must be list, tuple or np.ndarray, but got {type(mean)}'
-            )
+                f'Mean must be list, tuple or np.ndarray, but got {type(mean)}')
 
         if not isinstance(std, Sequence):
             raise TypeError(
@@ -716,7 +737,7 @@ class Normalize:
         results['imgs'] = imgs
         results['img_norm_cfg'] = dict(
             mean=self.mean, std=self.std, to_bgr=self.to_bgr)
-        
+
         return results
 
     def __repr__(self):
@@ -726,5 +747,3 @@ class Normalize:
                     f'to_bgr={self.to_bgr}, '
                     f'adjust_magnitude={self.adjust_magnitude})')
         return repr_str
-
-
