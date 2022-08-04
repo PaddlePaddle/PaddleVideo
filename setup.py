@@ -25,14 +25,14 @@ def readme():
 
 
 setup(
-    name='paddlevideo',  #name of .whl file
+    name='ppvideo',  #name of .whl file
     packages=['ppvideo'],  #install package name
     package_dir={'ppvideo': ''},
     include_package_data=
     True,  #Accept all data files and directories matched by MANIFEST.in
     install_requires=requirements,
     entry_points={"console_scripts": ["ppvideo= ppvideo.tools.wheel:main"]},
-    version='1.0.0',
+    version='2.3.0',
     license='Apache License 2.0',
     description='Awesome Video toolkits based on PaddlePaddle ',
     long_description=readme(),

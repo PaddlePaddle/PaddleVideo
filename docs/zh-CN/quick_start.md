@@ -35,14 +35,14 @@
 - 方式1: 使用pypi安装（建议使用）
 
 ```bash
-python3.7 -m pip install paddlevideo==1.0.0
+pip3.7 install ppvideo==2.3.0
 ```
 
 
 - 方式2: 本地打包whl文件并安装
 ```bash
 python3.7 setup.py bdist_wheel
-python3.7 -m pip install dist/paddlevideo-1.0.0-py3-none-any.whl
+python3.7 -m pip install dist/ppvideo-2.3.0-py3-none-any.whl
 ```
 
 

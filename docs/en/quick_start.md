@@ -36,14 +36,14 @@ For more software version requirements, please refer to the instructions in [Ins
 - option1: use pypi（recommand）
 
 ```bash
-python3.7 -m pip install paddlevideo==1.0.0
+pip3.7 install ppvideo==2.3.0
 ```
 
 
 - option2: build and install locally
 ```bash
 python3.7 setup.py bdist_wheel
-python3.7 -m pip install dist/paddlevideo-1.0.0-py3-none-any.whl
+python3.7 -m pip install dist/ppvideo-2.3.0-py3-none-any.whl
 ```
 
 
