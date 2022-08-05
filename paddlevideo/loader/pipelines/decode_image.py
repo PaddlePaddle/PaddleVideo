@@ -21,7 +21,7 @@ try:
     import skimage.transform
 except ImportError as e:
     print(
-        f"{e}, [scikit-image] package and it's dependencies is required for ADDS."
+        f"Warning! {e}, [scikit-image] package and it's dependencies is required for ADDS."
     )
 from PIL import Image
 

@@ -17,20 +17,21 @@ import os
 import shutil
 import sys
 from typing import List
+import pickle
 
 import cv2
 try:
     import imageio
 except ImportError as e:
     print(
-        f"{e}, [imageio] package and it's dependencies is required for VideoSwin."
+        f"Warning! {e}, [imageio] package and it's dependencies is required for VideoSwin."
     )
 try:
     import matplotlib as mpl
     import matplotlib.cm as cm
 except ImportError as e:
     print(
-        f"{e}, [matplotlib] package and it's dependencies is required for ADDS."
+        f"Warning! {e}, [matplotlib] package and it's dependencies is required for ADDS."
     )
 import numpy as np
 import paddle
@@ -48,76 +49,19 @@ from paddlevideo.loader.pipelines import (
     GroupResize, Image2Array, ImageDecoder, JitterScale, MultiCrop,
     Normalization, PackOutput, Sampler, SamplerPkl, Scale, SkeletonNorm,
     TenCrop, ToArray, UniformCrop, VideoDecoder, SegmentationSampler,
-    SketeonCropSample, MultiCenterCrop)
+    SketeonCropSample, MultiCenterCrop, SketeonCropSample, UniformSampleFrames,
+    PoseDecode, PoseCompact, Resize, CenterCrop_V2, GeneratePoseTarget,
+    FormatShape, Collect)
 from paddlevideo.metrics.ava_utils import read_labelmap
 from paddlevideo.metrics.bmn_metric import boundary_choose, soft_nms
 from paddlevideo.utils import Registry, build, get_config
 from paddlevideo.modeling.framework.segmenters.utils import ASRFPostProcessing
 
-from ava_predict import (detection_inference, frame_extraction,
-                         get_detection_result, get_timestep_result, pack_result,
-                         visualize)
+from tools.ava_predict import (detection_inference, frame_extraction,
+                               get_detection_result, get_timestep_result,
+                               pack_result, visualize)
 
 INFERENCE = Registry('inference')
-
-
-def decode(filepath, args):
-    num_seg = args.num_seg
-    seg_len = args.seg_len
-
-    cap = cv2.VideoCapture(filepath)
-    videolen = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-    sampledFrames = []
-    for i in range(videolen):
-        ret, frame = cap.read()
-        # maybe first frame is empty
-        if ret == False:
-            continue
-        img = frame[:, :, ::-1]
-        sampledFrames.append(img)
-    average_dur = int(len(sampledFrames) / num_seg)
-    imgs = []
-    for i in range(num_seg):
-        idx = 0
-        if average_dur >= seg_len:
-            idx = (average_dur - 1) // 2
-            idx += i * average_dur
-        elif average_dur >= 1:
-            idx += i * average_dur
-        else:
-            idx = i
-
-        for jj in range(idx, idx + seg_len):
-            imgbuf = sampledFrames[int(jj % len(sampledFrames))]
-            img = Image.fromarray(imgbuf, mode='RGB')
-            imgs.append(img)
-
-    return imgs
-
-
-def preprocess(img, args):
-    img = {"imgs": img}
-    resize_op = Scale(short_size=args.short_size)
-    img = resize_op(img)
-    ccrop_op = CenterCrop(target_size=args.target_size)
-    img = ccrop_op(img)
-    to_array = Image2Array()
-    img = to_array(img)
-    if args.normalize:
-        img_mean = [0.485, 0.456, 0.406]
-        img_std = [0.229, 0.224, 0.225]
-        normalize_op = Normalization(mean=img_mean, std=img_std)
-        img = normalize_op(img)
-    return img['imgs']
-
-
-def postprocess(output, args):
-    output = output.flatten()
-    output = F.softmax(paddle.to_tensor(output)).numpy()
-    classes = np.argpartition(output, -args.top_k)[-args.top_k:]
-    classes = classes[np.argsort(-output[classes])]
-    scores = output[classes]
-    return classes, scores
 
 
 def build_inference_helper(cfg):
@@ -177,7 +121,8 @@ class Base_Inference_helper():
 
     def postprocess(self,
                     output: np.ndarray,
-                    print_output: bool = True) -> None:
+                    print_output: bool = True,
+                    return_result: bool = False):
         """postprocess
 
         Args:
@@ -195,15 +140,25 @@ class Base_Inference_helper():
                                     list(output.shape[1:]))  # [N, T, C]
             output = output.mean(axis=1)  # [N, C]
         output = F.softmax(paddle.to_tensor(output), axis=-1).numpy()
+        results_list = []
         for i in range(N):
             classes = np.argpartition(output[i], -self.top_k)[-self.top_k:]
             classes = classes[np.argsort(-output[i, classes])]
             scores = output[i, classes]
+            topk_class = classes[:self.top_k]
+            topk_scores = scores[:self.top_k]
+            result = {
+                "video_id": self.input_file[i],
+                "topk_class": topk_class,
+                "topk_scores": topk_scores
+            }
+            results_list.append(result)
             if print_output:
                 print("Current video file: {0}".format(self.input_file[i]))
-                for j in range(self.top_k):
-                    print("\ttop-{0} class: {1}".format(j + 1, classes[j]))
-                    print("\ttop-{0} score: {1}".format(j + 1, scores[j]))
+                print("\ttop-{0} class: {1}".format(self.top_k, topk_class))
+                print("\ttop-{0} score: {1}".format(self.top_k, topk_scores))
+        if return_result:
+            return results_list
 
 
 @INFERENCE.register()
@@ -1090,7 +1045,7 @@ class TransNetV2_Inference_helper():
             import ffmpeg
         except ImportError as e:
             print(
-                f"{e}, [ffmpeg-python] package and it's dependencies is required for TransNetV2."
+                f"Warning! {e}, [ffmpeg-python] package and it's dependencies is required for TransNetV2."
             )
         assert os.path.isfile(input_file) is not None, "{0} not exists".format(
             input_file)
@@ -1541,3 +1496,62 @@ class AVA_SlowFast_FastRCNN_Inference_helper(Base_Inference_helper):
         # delete tmp files and dirs
         shutil.rmtree(self.frame_dir)
         shutil.rmtree(self.detection_result_dir)
+
+
+@INFERENCE.register()
+class PoseC3D_Inference_helper(Base_Inference_helper):
+    def __init__(self, top_k=1):
+        self.top_k = top_k
+
+    def preprocess(self, input_file):
+        """
+        input_file: str, file path
+        return: list
+        """
+        assert os.path.isfile(input_file) is not None, "{0} not exists".format(
+            input_file)
+        with open(input_file, 'rb') as f:
+            data = pickle.load(f)
+        self.input_file = input_file
+
+        left_kp = [1, 3, 5, 7, 9, 11, 13, 15]
+        right_kp = [2, 4, 6, 8, 10, 12, 14, 16]
+        ops = [
+            UniformSampleFrames(clip_len=48, num_clips=10, test_mode=True),
+            PoseDecode(),
+            PoseCompact(hw_ratio=1., allow_imgpad=True),
+            Resize(scale=(-1, 56)),
+            CenterCrop_V2(crop_size=56),
+            GeneratePoseTarget(sigma=0.6,
+                               use_score=True,
+                               with_kp=True,
+                               with_limb=False,
+                               double=True,
+                               left_kp=left_kp,
+                               right_kp=right_kp),
+            FormatShape(input_format='NCTHW'),
+            Collect(keys=['imgs', 'label'], meta_keys=[])
+        ]
+
+        for op in ops:
+            results = op(data)
+        results = [results[0][np.newaxis, :, :, :, :, :]]
+        self.num_segs = results[0].shape[1]
+        return results
+
+    def postprocess(self, outputs, print_output=True):
+        batch_size = outputs[0].shape[0]
+        cls_score = outputs[0].reshape(
+            [batch_size // self.num_segs, self.num_segs, outputs[0].shape[-1]])
+        output = F.softmax(paddle.to_tensor(cls_score),
+                           axis=2).mean(axis=1).numpy()
+        N = len(self.input_file)
+        for i in range(N):
+            classes = np.argpartition(output[i], -self.top_k)[-self.top_k:]
+            classes = classes[np.argsort(-output[i, classes])]
+            scores = output[i, classes]
+            if print_output:
+                print("Current video file: {0}".format(self.input_file[i]))
+                for j in range(self.top_k):
+                    print("\ttop-{0} class: {1}".format(j + 1, classes[j]))
+                    print("\ttop-{0} score: {1}".format(j + 1, scores[j]))

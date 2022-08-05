@@ -21,6 +21,7 @@ logger = get_logger("paddlevideo")
 class Recognizer3D(BaseRecognizer):
     """3D Recognizer model framework.
     """
+
     def forward_net(self, imgs):
         """Define how the model is going to run, from input to output.
         """
@@ -31,8 +32,14 @@ class Recognizer3D(BaseRecognizer):
     def train_step(self, data_batch):
         """Training step.
         """
-        imgs = data_batch[0:2]
-        labels = data_batch[2:]
+        if self.backbone.__class__.__name__ == 'ResNet3dSlowOnly':
+            imgs = data_batch[0]
+            labels = data_batch[1:]
+            if imgs.dim() == 6:
+                imgs = imgs.reshape([-1] + imgs.shape[2:])
+        else:
+            imgs = data_batch[0:2]
+            labels = data_batch[2:]
 
         # call forward
         cls_score = self.forward_net(imgs)
@@ -42,8 +49,14 @@ class Recognizer3D(BaseRecognizer):
     def val_step(self, data_batch):
         """Validating setp.
         """
-        imgs = data_batch[0:2]
-        labels = data_batch[2:]
+        if self.backbone.__class__.__name__ == 'ResNet3dSlowOnly':
+            imgs = data_batch[0]
+            labels = data_batch[1:]
+            if imgs.dim() == 6:
+                imgs = imgs.reshape([-1] + imgs.shape[2:])
+        else:
+            imgs = data_batch[0:2]
+            labels = data_batch[2:]
 
         # call forward
         cls_score = self.forward_net(imgs)
@@ -53,7 +66,12 @@ class Recognizer3D(BaseRecognizer):
     def test_step(self, data_batch):
         """Test step.
         """
-        imgs = data_batch[0:2]
+        if self.backbone.__class__.__name__ == 'ResNet3dSlowOnly':
+            imgs = data_batch[0]
+            if imgs.dim() == 6:
+                imgs = imgs.reshape([-1] + imgs.shape[2:])
+        else:
+            imgs = data_batch[0:2]
         # call forward
         cls_score = self.forward_net(imgs)
 
@@ -62,8 +80,14 @@ class Recognizer3D(BaseRecognizer):
     def infer_step(self, data_batch):
         """Infer step.
         """
-        imgs = data_batch[0:2]
-        # call forward
-        cls_score = self.forward_net(imgs)
+        if self.backbone.__class__.__name__ == 'ResNet3dSlowOnly':
+            imgs = data_batch[0]
+            # call forward
+            imgs = imgs.reshape((-1, ) + imgs.shape[2:])
+            cls_score = self.forward_net(imgs)
+        else:
+            imgs = data_batch[0:2]
+            # call forward
+            cls_score = self.forward_net(imgs)
 
         return cls_score

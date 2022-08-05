@@ -21,7 +21,7 @@ try:
     import SimpleITK as sitk
 except ImportError as e:
     print(
-        f"{e}, [SimpleITK] package and it's dependencies is required for PP-Care."
+        f"Warning! {e}, [SimpleITK] package and it's dependencies is required for PP-Care."
     )
 import cv2
 
