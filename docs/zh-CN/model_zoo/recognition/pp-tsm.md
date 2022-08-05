@@ -255,7 +255,7 @@ PaddleVideo 提供了基于 Paddle2ONNX 来完成 inference 模型转换 ONNX �
 
 | 模型名称 | 骨干网络 | 测试方式 | 采样帧数 | Top-1% | 训练模型 |
 | :------: | :----------: | :----: | :----: | :----: | :---- |
-| PP-TSMv2 | LCNet_v2 |  Uniform | 16 | 72.37 | [下载链接](https://videotag.bj.bcebos.com/PaddleVideo-release2.3/PPTSMv2_k400_16f.pdparams) |
+| PP-TSMv2 | LCNet_v2 |  Uniform | 16 | 73.1 | [下载链接](https://videotag.bj.bcebos.com/PaddleVideo-release2.3/PPTSMv2_k400_16f.pdparams) |
 | PP-TSM | MobileNetV2 |  Uniform | 8 | 68.09 | [下载链接](https://videotag.bj.bcebos.com/PaddleVideo-release2.3/ppTSM_mv2_k400.pdparams) |
 | PP-TSM | MobileNetV3 |  Uniform | 8 | 69.84 | [下载链接](https://videotag.bj.bcebos.com/PaddleVideo-release2.3/ppTSM_mv3_k400.pdparams) |
 | PP-TSM | ResNet50 |  Uniform | 8 | 74.54 | [下载链接](https://videotag.bj.bcebos.com/PaddleVideo-release2.1/PPTSM/ppTSM_k400_uniform.pdparams) |

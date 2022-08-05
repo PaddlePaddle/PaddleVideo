@@ -73,8 +73,8 @@ DML论文中，在蒸馏的过程中，不依赖于教师模型，两个结构�
 
 | 策略 | 骨干网络 | 配置文件 | Top-1 acc |
 | --- | --- | --- | --- |
-| baseline | PP-TSMv2 | [pptsm_lcnet_k400_frames_uniform.yaml](../configs/recognition/pptsm/v2/pptsm_lcnet_k400_frames_uniform.yaml) | 72.37% |
-| DML | PP-TSMv2 | [pptsm_lcnet_k400_frames_uniform_dml_distillation.yaml](../configs/recognition/pptsm/v2/pptsm_lcnet_k400_frames_uniform_dml_distillation.yaml) | 74.38%(**+2.01%**) |
+| baseline | PP-TSMv2 | [pptsm_lcnet_k400_frames_uniform.yaml](../configs/recognition/pptsm/v2/pptsm_lcnet_k400_frames_uniform.yaml) | 73.1% |
+| DML | PP-TSMv2 | [pptsm_lcnet_k400_frames_uniform_dml_distillation.yaml](../configs/recognition/pptsm/v2/pptsm_lcnet_k400_frames_uniform_dml_distillation.yaml) | 74.38%(**+1.28%**) |
 
 
 ##### 2.1.2 DML 配置
