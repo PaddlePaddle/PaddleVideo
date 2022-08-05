@@ -113,7 +113,7 @@ INFERENCE:
     num_seg: 8
     target_size: 224
 
-model_name: "ppTSM_mv3"
+model_name: "ppTSM"
 log_interval: 10 #Optional, the interal of logger, default:10
 epochs: 80 #Mandatory, total epoch
 log_level: "INFO" #Optional, the logger level. default: "INFO"

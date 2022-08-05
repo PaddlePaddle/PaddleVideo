@@ -70,11 +70,18 @@ def trim_config(cfg):
     if cfg.MODEL.get('backbone') and cfg.MODEL.backbone.get('pretrained'):
         cfg.MODEL.backbone.pretrained = ""  # not ued when inference
 
+    # for distillation
+    if cfg.MODEL.get('models'):
+        if cfg.MODEL.models[0]['Teacher']['backbone'].get('pretrained'):
+            cfg.MODEL.models[0]['Teacher']['backbone']['pretrained'] = ""
+        if cfg.MODEL.models[1]['Student']['backbone'].get('pretrained'):
+            cfg.MODEL.models[1]['Student']['backbone']['pretrained'] = ""
+
     return cfg, model_name
 
 
 def get_input_spec(cfg, model_name):
-    if model_name in ['ppTSM', 'TSM', 'MoViNet', 'PPTSM_v2']:
+    if model_name in ['ppTSM', 'TSM', 'MoViNet', 'ppTSMv2']:
         input_spec = [[
             InputSpec(
                 shape=[None, cfg.num_seg, 3, cfg.target_size, cfg.target_size],

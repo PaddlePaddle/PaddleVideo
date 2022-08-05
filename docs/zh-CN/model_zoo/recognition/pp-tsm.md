@@ -13,17 +13,23 @@
     - [4.2 多卡训练](#42)
     - [4.3 蒸馏训练](#43)
     - [4.4 配置文件说明](#44)
+    - [4.5 配置文件推荐使用](#45)
 - [5. 模型测试](#5)
     - [5.1 中心采样测试](#51)
     - [5.2 密集采样测试](#52)
-- [6. 模型推理](#6)
+- [6. 模型推理部署](#6)
+    - [6.1 导出推理模型](#61)
+    - [6.2 基于python预测引擎推理](#62)
+    - [6.3 基于c++预测引擎推理](#63)
+    - [6.4 服务化部署](#64)
+    - [6.5 Paddle2ONNX 模型预测与转换](#65)
 - [7. 模型库下载](#7)
 - [8. 参考论文](#8)
 
 <a name="1"></a>
 ## 1. 简介
 
-视频分类任务是指输入视频，输出标签类别。与图像分类不同的是，视频分类往往需要利用多帧图像之间的时序信息。如果标签都是行为类别，则该任务也称为行为识别。PP-TSM是PaddleVideo自研的实用产业级视频分类模型，在实现前沿算法的基础上，考虑精度和速度的平衡，进行模型瘦身和精度优化，使其可能满足产业落地需求。
+视频分类任务是指输入视频，输出标签类别。如果标签都是行为类别，则该任务也称为行为识别。与图像分类不同的是，视频分类往往需要利用多帧图像之间的时序信息。PP-TSM是PaddleVideo自研的实用产业级视频分类模型，在实现前沿算法的基础上，考虑精度和速度的平衡，进行模型瘦身和精度优化，使其可能满足产业落地需求。
 
 ### PP-TSM
 
@@ -31,14 +37,32 @@ PP-TSM基于ResNet-50骨干网络进行优化，从数据增强、网络结构�
 
 ### PP-TSMv2
 
-PP-TSMv2是轻量化的视频分类模型，基于CPU端模型[PP-LCNetV2](https://github.com/PaddlePaddle/PaddleClas/blob/release/2.4/docs/zh_CN/models/PP-LCNetV2.md)进行优化，从数据增强、网络结构调整与设计(使用最优的tsm模块插入数量和位置、新增时序attention模块)、训练策略、输入帧数与解码方式优化、dml蒸馏等5个方面进行模型调优，在中心采样评估方式下，精度达到74.38%，输入10s视频在CPU端的推理速度仅需434ms。更多细节参考[PP-TSMv2技术报告](doing)。
+PP-TSMv2是轻量化的视频分类模型，基于CPU端模型[PP-LCNetV2](https://github.com/PaddlePaddle/PaddleClas/blob/release/2.4/docs/zh_CN/models/PP-LCNetV2.md)进行优化，从骨干网络与预训练模型选择、数据增强、网络结构调整(使用最优的tsm模块插入数量和位置、新增时序attention模块)、输入帧数优化、解码速度优化、dml蒸馏等6个方面进行模型调优，在中心采样评估方式下，精度达到74.38%，输入10s视频在CPU端的推理速度仅需433ms。更多细节参考[PP-TSMv2技术报告](./pp-tsm_v2.md)。
+
 
 <a name="2"></a>
 ## 2. 性能benchmark
 
-PP-TSM模型与主流模型之间的对比。
+PP-TSMv2模型与主流模型之间CPU推理速度对比(按预测总时间排序)：
 
-更多细节请查看[benchmark](xxx)文档。
+|模型名称 | 骨干网络 | 精度% | 预处理时间ms | 模型推理时间ms | 预测总时间ms |
+| :---- | :---- | :----: |:----: |:----: |:----: |
+| PP-TSM | MobileNetV2 |  68.09 | 52.62 | 137.03 | 189.65 |
+| PP-TSM | MobileNetV3 |  69.84| 53.44 | 139.13 | 192.58 |
+| **PP-TSMv2** | PP-LCNet_v2 |	**74.38**|  68.07 | 365.23 | **433.31** |
+| SlowFast | 4*16 |74.35 | 110.04 | 1201.36 | 1311.41 |
+| TSM | R50 |  71.06 | 52.47 | 1302.49 | 1354.96 |
+|PP-TSM	| R50 |	75.11 | 52.26  | 1354.21 | 1406.48 |
+|*MoViNet | A0 | 66.62 | 148.30 |	1290.46 | 1438.76 |
+|PP-TSM	| R101 |  76.35| 52.50 | 2236.94 | 2289.45 |
+| TimeSformer |	base |	 77.29 | 297.33 |	14034.77 |	14332.11 |
+| TSN | R50	| 69.81 | 860.41 | 18359.26 | 19219.68 |
+| *VideoSwin | B | 82.4 | 76.21 | 32983.49 | 33059.70 |
+
+
+* 注: 带`*`表示该模型未使用mkldnn进行预测加速。
+
+更多细节请查看[benchmark](../../benchmark.md)文档。
 
 <a name="3"></a>
 ## 3. 数据准备
@@ -110,15 +134,22 @@ PP-TSM模型提供的各配置文件均放置在[configs/recognition/pptsm](../.
 
 `模型名称_骨干网络名称_数据集名称_数据格式_测试方式_其它.yaml`。
 
-- `数据格式`包括`frame`和`video`，`video`表示使用在线解码的方式进行训练，`frame`表示先将视频解码成图像帧存储起来，训练时直接读取图片进行训练。相较于使用视频格式训练，frame格式输入可以加快训练速度，加速比约4-5倍，但会占用更大的存储空间，如Kinetics-400数据集video格式135G，解码成图像后需要2T。使用不同数据格式，仅需修改配置文件中的`DATASET`和`PIPELINE`字段，参考[pptsm_k400_frames_uniform.yaml](../../../../configs/recognition/pptsm/pptsm_k400_frames_uniform.yaml)和[pptsm_k400_videos_uniform.yaml](../../../../configs/recognition/pptsm/pptsm_k400_videos_uniform.yaml)。注意，由于编解码的细微差异，两种格式训练得到的模型在精度上可能会有些许差异。
+- 数据格式包括`frame`和`video`，`video`表示使用在线解码的方式进行训练，`frame`表示先将视频解码成图像帧存储起来，训练时直接读取图片进行训练。使用不同数据格式，仅需修改配置文件中的`DATASET`和`PIPELINE`字段，参考[pptsm_k400_frames_uniform.yaml](../../../../configs/recognition/pptsm/pptsm_k400_frames_uniform.yaml)和[pptsm_k400_videos_uniform.yaml](../../../../configs/recognition/pptsm/pptsm_k400_videos_uniform.yaml)。注意，由于编解码的细微差异，两种格式训练得到的模型在精度上可能会有些许差异。
 
-- `测试方式`包括`uniform`和`dense`，uniform表示中心采样，dense表示密集采样，更多细节参考第5章节模型测试部分。
-
-- PP-TSMv2推荐参考配置：无蒸馏-[pptsm_lcnet_k400_frames_uniform.yaml](../../../../configs/recognition/pptsm/v2/pptsm_lcnet_k400_frames_uniform.yaml)，加蒸馏-[pptsm_lcnet_k400_frames_uniform_dml_distillation.yaml](../../../../configs/recognition/pptsm/v2/pptsm_lcnet_k400_frames_uniform_dml_distillation.yaml)
-
-- PP-TSM推荐参考配置：frame格式-[pptsm_k400_frames_uniform.yaml](../../../../configs/recognition/pptsm/pptsm_k400_frames_uniform.yaml)，video格式-[pptsm_k400_videos_uniform.yaml](../../../../configs/recognition/pptsm/pptsm_k400_videos_uniform.yaml)
+- 测试方式包括`uniform`和`dense`，uniform表示中心采样，dense表示密集采样，更多细节参考第5章节模型测试部分。
 
 - 您也可以自定义修改参数配置，以达到在不同的数据集上进行训练/测试的目的。
+
+<a name="45"></a>
+### 4.5 配置文件推荐使用
+
+- 1. 数据格式：如硬盘存储空间足够，推荐使用`frame`格式，解码一次后，后续可以获得更快的训练速度。相较于使用视频格式训练，frame格式输入可以加快训练速度，加速比约4-5倍，但会占用更大的存储空间，如Kinetics-400数据集video格式135G，解码成图像后需要2T。
+
+- 2. 测试方式：对于产业落地场景，推荐使用`uniform`方式，简洁高效，可以获得较好的精度与速度平衡。
+
+- 3. 对于CPU或端侧需求，推荐使用`PP-TSMv2`，精度较高，速度快，具体性能和速度对比请查看[benchmark](../../benchmark.md)文档。对应配置文件为无蒸馏-[pptsm_lcnet_k400_frames_uniform.yaml](../../../../configs/recognition/pptsm/v2/pptsm_lcnet_k400_frames_uniform.yaml)，加蒸馏-[pptsm_lcnet_k400_frames_uniform_dml_distillation.yaml](../../../../configs/recognition/pptsm/v2/pptsm_lcnet_k400_frames_uniform_dml_distillation.yaml)。相对于无蒸馏，蒸馏后能获得更高的精度，但训练时需要更大的显存，以运行教师模型。
+
+- 4. 对于GPU服务器端需求，推荐使用`PP-TSM`，对应配置文件为[pptsm_k400_frames_uniform.yaml](../../../../configs/recognition/pptsm/pptsm_k400_frames_uniform.yaml)。GPU端推理，速度瓶颈更多在于数据预处理(视频编解码)部分，更优的解码器和更高的精度，会是侧重考虑的部分。
 
 <a name="5"></a>
 ## 5. 模型测试
@@ -154,7 +185,8 @@ python3 main.py --test -c configs/recognition/pptsm/pptsm_k400_frames_dense.yaml
 <a name="6"></a>
 ## 6. 模型推理
 
-### 导出inference模型
+<a name="61"></a>
+### 导出推理模型
 
 ```bash
 python3.7 tools/export_model.py -c configs/recognition/pptsm/v2/pptsm_lcnet_k400_frames_uniform_dml_distillation.yaml \
@@ -162,11 +194,18 @@ python3.7 tools/export_model.py -c configs/recognition/pptsm/v2/pptsm_lcnet_k400
                                 -o inference/PPTSMv2
 ```
 
-上述命令将生成预测所需的模型结构文件`PPTSMv2.pdmodel`和模型权重文件`PPTSMv2.pdiparams`。
+上述命令会在`inference/PPTSMv2`下生成预测所需的文件，结构如下:
+```
+├── inference/PPTSMv2
+│   ├── PPTSMv2.pdiparams       # 模型权重文件
+│   ├── PPTSMv2.pdiparams.info  # 模型信息文件
+│   └── PPTSMv2.pdmodel           # 模型结构文件
+```
 
+<a name="62"></a>
+### 基于python预测引擎推理
 
-### 使用预测引擎推理
-
+运行下面命令，对示例视频文件`data/example.avi`进行分类:
 ```bash
 python3.7 tools/predict.py --input_file data/example.avi \
                            --config configs/recognition/pptsm/v2/pptsm_lcnet_k400_frames_uniform_dml_distillation.yaml \
@@ -186,7 +225,28 @@ Current video file: data/example.avi
 ```
 
 
-可以看到，使用在Kinetics-400上训练好的PP-TSM模型对`data/example.avi`进行预测，输出的top1类别id为`5`，置信度为1.0。通过查阅类别id与名称对应表`data/k400/Kinetics-400_label_list.txt`，可知预测类别名称为`archery`。
+可以看到，使用在Kinetics-400上训练好的PP-TSMv2模型对`data/example.avi`进行预测，输出的top1类别id为`5`，置信度为1.0。通过查阅类别id与名称对应表`data/k400/Kinetics-400_label_list.txt`，可知预测类别名称为`archery`。
+
+<a name="63"></a>
+### 基于c++预测引擎推理
+
+PaddleVideo 提供了基于 C++ 预测引擎推理的示例，您可以参考[服务器端C++预测](../../deploy/cpp_infer/)来完成相应的推理部署。
+
+
+<a name="64"></a>
+### 服务化部署
+
+Paddle Serving 提供高性能、灵活易用的工业级在线推理服务。Paddle Serving 支持 RESTful、gRPC、bRPC 等多种协议，提供多种异构硬件和多种操作系统环境下推理解决方案。更多关于Paddle Serving 的介绍，可以参考[Paddle Serving](https://github.com/PaddlePaddle/Serving) 代码仓库。
+
+PaddleVideo 提供了基于 Paddle Serving 来完成模型服务化部署的示例，您可以参考[基于python的模型服务化部署](../../deploy/python_serving/)或[基于c++的模型服务化部署](../../deploy/cpp_serving/)来完成相应的部署工作。
+
+
+<a name="65"></a>
+### Paddle2ONNX 模型预测与转换
+
+Paddle2ONNX 支持将 PaddlePaddle 模型格式转化到 ONNX 模型格式。通过 ONNX 可以完成将 Paddle 模型到多种推理引擎的部署，包括TensorRT/OpenVINO/MNN/TNN/NCNN，以及其它对 ONNX 开源格式进行支持的推理引擎或硬件。更多关于 Paddle2ONNX 的介绍，可以参考[Paddle2ONNX](https://github.com/PaddlePaddle/Paddle2ONNX) 代码仓库。
+
+PaddleVideo 提供了基于 Paddle2ONNX 来完成 inference 模型转换 ONNX 模型并作推理预测的示例，您可以参考[Paddle2ONNX 模型转换与预测](../../deploy/paddle2onnx/)来完成相应的部署工作。
 
 
 <a name="7"></a>
@@ -196,7 +256,7 @@ Current video file: data/example.avi
 
 | 模型名称 | 骨干网络 | 测试方式 | 采样帧数 | Top-1% | 训练模型 |
 | :------: | :----------: | :----: | :----: | :----: | :---- |
-| PP-TSMv2 | LCNet_v2 |  Uniform | 16 | 72.37 | [下载链接]() |
+| PP-TSMv2 | LCNet_v2 |  Uniform | 16 | 73.1 | [下载链接](https://videotag.bj.bcebos.com/PaddleVideo-release2.3/PPTSMv2_k400_16f.pdparams) |
 | PP-TSM | MobileNetV2 |  Uniform | 8 | 68.09 | [下载链接](https://videotag.bj.bcebos.com/PaddleVideo-release2.3/ppTSM_mv2_k400.pdparams) |
 | PP-TSM | MobileNetV3 |  Uniform | 8 | 69.84 | [下载链接](https://videotag.bj.bcebos.com/PaddleVideo-release2.3/ppTSM_mv3_k400.pdparams) |
 | PP-TSM | ResNet50 |  Uniform | 8 | 74.54 | [下载链接](https://videotag.bj.bcebos.com/PaddleVideo-release2.1/PPTSM/ppTSM_k400_uniform.pdparams) |
