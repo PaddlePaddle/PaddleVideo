@@ -24,14 +24,14 @@ try:
     import imageio
 except ImportError as e:
     print(
-        f"{e}, [imageio] package and it's dependencies is required for VideoSwin."
+        f"Warning! {e}, [imageio] package and it's dependencies is required for VideoSwin."
     )
 try:
     import matplotlib as mpl
     import matplotlib.cm as cm
 except ImportError as e:
     print(
-        f"{e}, [matplotlib] package and it's dependencies is required for ADDS."
+        f"Warning! {e}, [matplotlib] package and it's dependencies is required for ADDS."
     )
 import numpy as np
 import paddle
@@ -57,70 +57,11 @@ from paddlevideo.metrics.bmn_metric import boundary_choose, soft_nms
 from paddlevideo.utils import Registry, build, get_config
 from paddlevideo.modeling.framework.segmenters.utils import ASRFPostProcessing
 
-from ava_predict import (detection_inference, frame_extraction,
-                         get_detection_result, get_timestep_result, pack_result,
-                         visualize)
+from tools.ava_predict import (detection_inference, frame_extraction,
+                               get_detection_result, get_timestep_result,
+                               pack_result, visualize)
 
 INFERENCE = Registry('inference')
-
-
-def decode(filepath, args):
-    num_seg = args.num_seg
-    seg_len = args.seg_len
-
-    cap = cv2.VideoCapture(filepath)
-    videolen = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-    sampledFrames = []
-    for i in range(videolen):
-        ret, frame = cap.read()
-        # maybe first frame is empty
-        if ret == False:
-            continue
-        img = frame[:, :, ::-1]
-        sampledFrames.append(img)
-    average_dur = int(len(sampledFrames) / num_seg)
-    imgs = []
-    for i in range(num_seg):
-        idx = 0
-        if average_dur >= seg_len:
-            idx = (average_dur - 1) // 2
-            idx += i * average_dur
-        elif average_dur >= 1:
-            idx += i * average_dur
-        else:
-            idx = i
-
-        for jj in range(idx, idx + seg_len):
-            imgbuf = sampledFrames[int(jj % len(sampledFrames))]
-            img = Image.fromarray(imgbuf, mode='RGB')
-            imgs.append(img)
-
-    return imgs
-
-
-def preprocess(img, args):
-    img = {"imgs": img}
-    resize_op = Scale(short_size=args.short_size)
-    img = resize_op(img)
-    ccrop_op = CenterCrop(target_size=args.target_size)
-    img = ccrop_op(img)
-    to_array = Image2Array()
-    img = to_array(img)
-    if args.normalize:
-        img_mean = [0.485, 0.456, 0.406]
-        img_std = [0.229, 0.224, 0.225]
-        normalize_op = Normalization(mean=img_mean, std=img_std)
-        img = normalize_op(img)
-    return img['imgs']
-
-
-def postprocess(output, args):
-    output = output.flatten()
-    output = F.softmax(paddle.to_tensor(output)).numpy()
-    classes = np.argpartition(output, -args.top_k)[-args.top_k:]
-    classes = classes[np.argsort(-output[classes])]
-    scores = output[classes]
-    return classes, scores
 
 
 def build_inference_helper(cfg):
@@ -128,7 +69,6 @@ def build_inference_helper(cfg):
 
 
 class Base_Inference_helper():
-
     def __init__(self,
                  num_seg=8,
                  seg_len=1,
@@ -181,7 +121,8 @@ class Base_Inference_helper():
 
     def postprocess(self,
                     output: np.ndarray,
-                    print_output: bool = True) -> None:
+                    print_output: bool = True,
+                    return_result: bool = False):
         """postprocess
 
         Args:
@@ -199,20 +140,29 @@ class Base_Inference_helper():
                                     list(output.shape[1:]))  # [N, T, C]
             output = output.mean(axis=1)  # [N, C]
         output = F.softmax(paddle.to_tensor(output), axis=-1).numpy()
+        results_list = []
         for i in range(N):
             classes = np.argpartition(output[i], -self.top_k)[-self.top_k:]
             classes = classes[np.argsort(-output[i, classes])]
             scores = output[i, classes]
+            topk_class = classes[:self.top_k]
+            topk_scores = scores[:self.top_k]
+            result = {
+                "video_id": self.input_file[i],
+                "topk_class": topk_class,
+                "topk_scores": topk_scores
+            }
+            results_list.append(result)
             if print_output:
                 print("Current video file: {0}".format(self.input_file[i]))
-                for j in range(self.top_k):
-                    print("\ttop-{0} class: {1}".format(j + 1, classes[j]))
-                    print("\ttop-{0} score: {1}".format(j + 1, scores[j]))
+                print("\ttop-{0} class: {1}".format(self.top_k, topk_class))
+                print("\ttop-{0} score: {1}".format(self.top_k, topk_scores))
+        if return_result:
+            return results_list
 
 
 @INFERENCE.register()
 class ppTSM_Inference_helper(Base_Inference_helper):
-
     def __init__(self,
                  num_seg=8,
                  seg_len=1,
@@ -252,7 +202,6 @@ class ppTSM_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class ppTSN_Inference_helper(Base_Inference_helper):
-
     def __init__(self,
                  num_seg=25,
                  seg_len=1,
@@ -298,7 +247,6 @@ class ppTSN_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class BMN_Inference_helper(Base_Inference_helper):
-
     def __init__(self, feat_dim, dscale, tscale, result_path):
         self.feat_dim = feat_dim
         self.dscale = dscale
@@ -427,7 +375,6 @@ class TokenShift_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class TimeSformer_Inference_helper(Base_Inference_helper):
-
     def __init__(self,
                  num_seg=8,
                  seg_len=1,
@@ -473,7 +420,6 @@ class TimeSformer_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class VideoSwin_Inference_helper(Base_Inference_helper):
-
     def __init__(self,
                  num_seg=4,
                  seg_len=32,
@@ -554,7 +500,6 @@ class VideoSwin_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class VideoSwin_TableTennis_Inference_helper(Base_Inference_helper):
-
     def __init__(self,
                  num_seg=1,
                  seg_len=32,
@@ -683,7 +628,6 @@ class VideoSwin_TableTennis_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class SlowFast_Inference_helper(Base_Inference_helper):
-
     def __init__(self,
                  num_frames=32,
                  sampling_rate=2,
@@ -757,7 +701,6 @@ class SlowFast_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class STGCN_Inference_helper(Base_Inference_helper):
-
     def __init__(self,
                  num_channels,
                  window_size,
@@ -789,7 +732,6 @@ class STGCN_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class CTRGCN_Inference_helper(Base_Inference_helper):
-
     def __init__(self,
                  num_channels=3,
                  vertex_nums=25,
@@ -826,7 +768,6 @@ class CTRGCN_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class AGCN2s_Inference_helper(Base_Inference_helper):
-
     def __init__(self,
                  window_size=300,
                  num_channels=3,
@@ -855,7 +796,6 @@ class AGCN2s_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class MSTCN_Inference_helper(Base_Inference_helper):
-
     def __init__(self, num_channels, actions_map_file_path, feature_path=None):
         self.num_channels = num_channels
         file_ptr = open(actions_map_file_path, 'r')
@@ -931,7 +871,6 @@ class MSTCN_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class ASRF_Inference_helper(Base_Inference_helper):
-
     def __init__(self,
                  num_channels,
                  actions_map_file_path,
@@ -1023,7 +962,6 @@ class ASRF_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class AttentionLSTM_Inference_helper(Base_Inference_helper):
-
     def __init__(
             self,
             num_classes,  #Optional, the number of classes to be classified.
@@ -1064,7 +1002,6 @@ class AttentionLSTM_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class TransNetV2_Inference_helper():
-
     def __init__(self,
                  num_frames,
                  height,
@@ -1108,7 +1045,7 @@ class TransNetV2_Inference_helper():
             import ffmpeg
         except ImportError as e:
             print(
-                f"{e}, [ffmpeg-python] package and it's dependencies is required for TransNetV2."
+                f"Warning! {e}, [ffmpeg-python] package and it's dependencies is required for TransNetV2."
             )
         assert os.path.isfile(input_file) is not None, "{0} not exists".format(
             input_file)
@@ -1242,7 +1179,6 @@ class TransNetV2_Inference_helper():
 
 @INFERENCE.register()
 class ADDS_Inference_helper(Base_Inference_helper):
-
     def __init__(self,
                  frame_idxs=[0],
                  num_scales=4,
@@ -1340,7 +1276,6 @@ class ADDS_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class AVA_SlowFast_FastRCNN_Inference_helper(Base_Inference_helper):
-
     def __init__(self,
                  detection_model_name,
                  detection_model_weights,
@@ -1565,7 +1500,6 @@ class AVA_SlowFast_FastRCNN_Inference_helper(Base_Inference_helper):
 
 @INFERENCE.register()
 class PoseC3D_Inference_helper(Base_Inference_helper):
-
     def __init__(self, top_k=1):
         self.top_k = top_k
 
