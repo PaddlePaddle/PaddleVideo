@@ -18,38 +18,45 @@ import paddle
 def convert2cpu(gpu_matrix):
     float_32_g = gpu_matrix.astype('float32')
     return float_32_g.cpu()
+ 
 
-
-def parse_cfg(cfgfile):
-    blocks = []
-    fp = open(cfgfile, 'r')
-    block = None
-    line = fp.readline()
-    while line != '':
-        line = line.rstrip()
-        if line == '' or line[0] == '#':
-            line = fp.readline()
-            continue
-        elif line[0] == '[':
-            if block:
-                blocks.append(block)
-            block = dict()
-            block['type'] = line.lstrip('[').rstrip(']')
-            # set default value
-            if block['type'] == 'convolutional':
-                block['batch_normalize'] = 0
-        else:
-            key, value = line.split('=')
-            key = key.strip()
-            if key == 'type':
-                key = '_type'
-            value = value.strip()
-            block[key] = value
-        line = fp.readline()
-
-    if block:
-        blocks.append(block)
-    fp.close()
+def parse_cfg():
+    blocks = [{'type': 'net', 'batch': '1', 'subdivisions': '1', 'width': '224', 'height': '224', 'channels': '3', 'momentum': '0.9', 'decay': '0.0005', 'angle': '0',
+    'saturation': '1.5', 'exposure': '1.5', 'hue': '.1', 'learning_rate': '0.001', 'burn_in': '1000', 'max_batches': '500200', 'policy': 'steps', 'steps': '400000,450000', 'scales': '.1,.1'}, 
+    {'type': 'convolutional', 'batch_normalize': '1', 'filters': '32', 'size': '3', 'stride': '1', 'pad': '1', 'activation': 'leaky'}, 
+    {'type': 'maxpool', 'size': '2', 'stride': '2'}, 
+    {'type': 'convolutional', 'batch_normalize': '1', 'filters': '64', 'size': '3', 'stride': '1', 'pad': '1', 'activation': 'leaky'}, 
+    {'type': 'maxpool', 'size': '2', 'stride': '2'}, 
+    {'type': 'convolutional', 'batch_normalize': '1', 'filters': '128', 'size': '3', 'stride': '1', 'pad': '1',
+    'activation': 'leaky'}, 
+    {'type': 'convolutional', 'batch_normalize': '1', 'filters': '64', 'size': '1', 'stride': '1', 'pad': '1', 'activation': 'leaky'}, 
+    {'type': 'convolutional', 'batch_normalize': '1', 'filters': '128', 'size': '3', 'stride': '1', 'pad': '1', 'activation': 'leaky'}, 
+    {'type': 'maxpool', 'size': '2', 'stride': '2'}, 
+    {'type': 'convolutional', 'batch_normalize': '1', 'filters': '256', 'size': '3', 'stride': '1', 'pad': '1', 'activation': 'leaky'}, 
+    {'type': 'convolutional', 'batch_normalize': '1', 'filters': '128', 'size': '1', 'stride': '1', 'pad': '1', 'activation': 'leaky'}, 
+    {'type': 'convolutional', 'batch_normalize': '1', 'filters': '256', 'size': '3', 'stride': '1', 'pad': '1', 'activation': 'leaky'}, 
+    {'type': 'maxpool', 'size': '2', 'stride': '2'}, 
+    {'type': 'convolutional', 'batch_normalize': '1', 'filters': '512', 'size': '3', 'stride': '1', 'pad': '1', 'activation': 'leaky'}, 
+    {'type': 'convolutional', 'batch_normalize': '1', 'filters': '256', 'size': '1', 'stride': '1', 'pad': '1', 'activation': 'leaky'}, 
+    {'type': 'convolutional', 'batch_normalize': '1', 'filters': '512', 'size': '3', 'stride': '1', 'pad': '1', 'activation': 'leaky'}, 
+    {'type': 'convolutional', 'batch_normalize': '1', 'filters': '256', 'size': '1', 'stride': '1', 'pad': '1', 'activation': 'leaky'}, 
+    {'type': 'convolutional', 'batch_normalize': '1', 'filters': '512', 'size': '3', 'stride': '1', 'pad': '1', 'activation': 'leaky'}, 
+    {'type': 'maxpool', 'size': '2', 'stride': '2'}, 
+    {'type': 'convolutional', 'batch_normalize': '1', 'filters': '1024', 'size': '3', 'stride': '1', 'pad': '1', 'activation': 'leaky'}, 
+    {'type': 'convolutional', 'batch_normalize': '1', 'filters': '512', 'size': '1', 'stride': '1', 'pad': '1', 'activation': 'leaky'}, 
+    {'type': 'convolutional', 'batch_normalize': '1', 'filters': '1024', 'size': '3', 'stride': '1', 'pad': '1', 'activation': 'leaky'}, 
+    {'type': 'convolutional', 'batch_normalize': '1', 'filters': '512', 'size': '1', 'stride': '1', 'pad': '1', 'activation': 'leaky'}, 
+    {'type': 'convolutional', 'batch_normalize': '1', 'filters': '1024', 'size': '3', 'stride': '1', 'pad': '1', 'activation': 'leaky'}, 
+    {'type': 'convolutional', 'batch_normalize': '1', 'size': '3', 'stride': '1', 'pad': '1', 'filters': '1024', 'activation': 'leaky'}, 
+    {'type': 'convolutional', 'batch_normalize': '1', 'size': '3', 'stride': '1', 'pad': '1', 'filters': '1024', 'activation': 'leaky'}, 
+    {'type': 'route', 'layers': '-9'}, 
+    {'type': 'convolutional', 'batch_normalize': '1', 'size': '1', 'stride': '1', 'pad': '1', 'filters': '64', 'activation': 'leaky'}, 
+    {'type': 'reorg', 'stride': '2'}, 
+    {'type': 'route', 'layers': '-1,-4'}, 
+    {'type': 'convolutional', 'batch_normalize': '1', 'size': '3', 'stride': '1', 'pad': '1', 'filters': '1024', 'activation': 'leaky'}, 
+    {'type': 'convolutional', 'batch_normalize': 0, 'size': '1', 'stride': '1', 'pad': '1', 'filters': '425', 'activation': 'linear'}, 
+    {'type': 'region', 'anchors': '0.57273, 0.677385, 1.87446, 2.06253, 3.33843, 5.47434, 7.88282, 3.52778, 9.77052, 9.16828', 'bias_match': '1', 'classes': '80', 
+    'coords': '4', 'num': '5', 'softmax': '1', 'jitter': '.3', 'rescore': '1', 'object_scale': '5', 'noobject_scale': '1', 'class_scale': '1', 'coord_scale': '1', 'absolute': '1', 'thresh': '.6', 'random': '1'}]
     return blocks
 
 
@@ -64,10 +71,6 @@ def print_cfg(blocks, width=224, height=224):
     ind = -2
     for block in blocks:
         ind = ind + 1
-        # if block['type'] == 'net':
-        #     prev_width = int(width)
-        #     prev_height = int(height)
-        #     continue
         if block['type'] == 'convolutional':
             filters = int(block['filters'])
             kernel_size = int(block['size'])
@@ -77,8 +80,8 @@ def print_cfg(blocks, width=224, height=224):
             width = (prev_width + 2 * pad - kernel_size) / stride + 1
             height = (prev_height + 2 * pad - kernel_size) / stride + 1
             print('%5d %-6s %4d  %d x %d / %d   %3d x %3d x%4d   ->   %3d x %3d x%4d' % (
-                ind, 'conv', filters, kernel_size, kernel_size, stride, prev_width, prev_height, prev_filters, width,
-                height, filters))
+            ind, 'conv', filters, kernel_size, kernel_size, stride, prev_width, prev_height, prev_filters, width,
+            height, filters))
             prev_width = width
             prev_height = height
             prev_filters = filters
@@ -91,8 +94,7 @@ def print_cfg(blocks, width=224, height=224):
             width = prev_width / stride
             height = prev_height / stride
             print('%5d %-6s       %d x %d / %d   %3d x %3d x%4d   ->   %3d x %3d x%4d' % (
-                ind, 'max', pool_size, pool_size, stride, prev_width, prev_height, prev_filters, width, height,
-                filters))
+            ind, 'max', pool_size, pool_size, stride, prev_width, prev_height, prev_filters, width, height, filters))
             prev_width = width
             prev_height = height
             prev_filters = filters
@@ -103,7 +105,7 @@ def print_cfg(blocks, width=224, height=224):
             width = 1
             height = 1
             print('%5d %-6s                   %3d x %3d x%4d   ->  %3d' % (
-                ind, 'avg', prev_width, prev_height, prev_filters, prev_filters))
+            ind, 'avg', prev_width, prev_height, prev_filters, prev_filters))
             prev_width = width
             prev_height = height
             prev_filters = filters
@@ -126,7 +128,7 @@ def print_cfg(blocks, width=224, height=224):
             width = prev_width / stride
             height = prev_height / stride
             print('%5d %-6s             / %d   %3d x %3d x%4d   ->   %3d x %3d x%4d' % (
-                ind, 'reorg', stride, prev_width, prev_height, prev_filters, width, height, filters))
+            ind, 'reorg', stride, prev_width, prev_height, prev_filters, width, height, filters))
             prev_width = width
             prev_height = height
             prev_filters = filters

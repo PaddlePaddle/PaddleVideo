@@ -75,10 +75,10 @@ class EmptyModule(nn.Layer):
 
 
 class Darknet(nn.Layer):
-    def __init__(self, cfgfile):
+    def __init__(self):
         super(Darknet, self).__init__()
         self.loss = None
-        self.blocks = parse_cfg(cfgfile)
+        self.blocks = parse_cfg()
         self.models = self.create_network(self.blocks)  # merge conv, bn,leaky
 
         self.header = paddle.to_tensor([0, 0, 0, 0]).astype('int32')

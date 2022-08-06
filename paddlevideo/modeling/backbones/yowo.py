@@ -80,7 +80,7 @@ class YOWO(nn.Layer):
 
         self.pretrained_2d = pretrained_2d
         self.pretrained_3d = pretrained_3d
-        self.backbone_2d = Darknet('./paddlevideo/modeling/backbones/yolo.cfg')
+        self.backbone_2d = Darknet()
         self.backbone_3d = resNext101()
         self.num_ch_2d = 425
         self.num_ch_3d = 2048
