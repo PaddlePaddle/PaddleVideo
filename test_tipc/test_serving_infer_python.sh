@@ -3,7 +3,7 @@ source test_tipc/common_func.sh
 
 FILENAME=$1
 dataline=$(awk 'NR==1, NR==18{print}'  $FILENAME)
-# MODE=$2
+MODE=$2
 
 # parser params
 IFS=$'\n'
@@ -30,7 +30,7 @@ video_dir_key=$(func_parser_key "${lines[12]}")
 video_dir_value=$(func_parser_value "${lines[12]}")
 
 
-LOG_PATH="./test_tipc/output/log/${model_name}/serving_infer_python"
+LOG_PATH="./test_tipc/output/log/${model_name}/${MODE}"
 mkdir -p ${LOG_PATH}
 status_log="${LOG_PATH}/results_serving.log"
 

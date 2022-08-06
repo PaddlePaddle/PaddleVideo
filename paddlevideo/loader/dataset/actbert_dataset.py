@@ -19,14 +19,16 @@ import numpy as np
 try:
     import lmdb
 except ImportError as e:
-    print(f"{e}, [lmdb] package and it's dependencies is required for ActBERT.")
+    print(
+        f"Warning! {e}, [lmdb] package and it's dependencies is required for ActBERT."
+    )
 import pickle
 import json
 try:
     from paddlenlp.transformers import BertTokenizer
 except ImportError as e:
     print(
-        f"{e}, [paddlenlp] package and it's dependencies is required for ActBERT."
+        f"Warning! {e}, [paddlenlp] package and it's dependencies is required for ActBERT."
     )
 from ..registry import DATASETS
 from .base import BaseDataset

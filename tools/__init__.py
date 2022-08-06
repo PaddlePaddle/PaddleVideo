@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+__all__ = ['utils', 'PaddleVideo', 'ava_predict']
+
 from . import utils
-from .paddlevideo_clas import PaddleVideo
+from .wheel import PaddleVideo
 from . import ava_predict

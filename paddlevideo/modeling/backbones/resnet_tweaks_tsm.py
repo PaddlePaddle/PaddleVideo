@@ -22,11 +22,11 @@ from paddle.nn import (Conv2D, BatchNorm2D, Linear, Dropout, MaxPool2D,
                        AvgPool2D)
 from paddle import ParamAttr
 import paddle.nn.functional as F
+from paddle.regularizer import L2Decay
 
 from ..registry import BACKBONES
 from ..weight_init import weight_init_
 from ...utils.save_load import load_ckpt
-from paddle.regularizer import L2Decay
 
 # Download URL of pretrained model
 # {

@@ -35,6 +35,10 @@ def parse_args():
                         type=str,
                         default='configs/example.yaml',
                         help='config file path')
+    parser.add_argument('--override',
+                        action='append',
+                        default=[],
+                        help='config options to be overridden')
     parser.add_argument("-p",
                         "--pretrained_params",
                         default='./best.pdparams',
@@ -66,11 +70,18 @@ def trim_config(cfg):
     if cfg.MODEL.get('backbone') and cfg.MODEL.backbone.get('pretrained'):
         cfg.MODEL.backbone.pretrained = ""  # not ued when inference
 
+    # for distillation
+    if cfg.MODEL.get('models'):
+        if cfg.MODEL.models[0]['Teacher']['backbone'].get('pretrained'):
+            cfg.MODEL.models[0]['Teacher']['backbone']['pretrained'] = ""
+        if cfg.MODEL.models[1]['Student']['backbone'].get('pretrained'):
+            cfg.MODEL.models[1]['Student']['backbone']['pretrained'] = ""
+
     return cfg, model_name
 
 
 def get_input_spec(cfg, model_name):
-    if model_name in ['ppTSM', 'TSM', 'MoViNet']:
+    if model_name in ['ppTSM', 'TSM', 'MoViNet', 'ppTSMv2']:
         input_spec = [[
             InputSpec(
                 shape=[None, cfg.num_seg, 3, cfg.target_size, cfg.target_size],
@@ -82,7 +93,7 @@ def get_input_spec(cfg, model_name):
                 None, 3, cfg.num_seg * 3, cfg.target_size, cfg.target_size
             ],
                       dtype='float32'),
-        ]] 
+        ]]
     elif model_name in ['TSN', 'ppTSN']:
         input_spec = [[
             InputSpec(shape=[
@@ -203,12 +214,18 @@ def get_input_spec(cfg, model_name):
             InputSpec(shape=[None, None, 4], dtype='float32', name='proposals'),
             InputSpec(shape=[None, 2], dtype='float32', name='img_shape')
         ]]
+    elif model_name in ['PoseC3D']:
+        input_spec = [[
+            InputSpec(shape=[None, 1, 17, 48, 56, 56], dtype='float32'),
+        ]]
     return input_spec
 
 
 def main():
     args = parse_args()
-    cfg, model_name = trim_config(get_config(args.config, show=False))
+    cfg, model_name = trim_config(
+        get_config(args.config, overrides=args.override, show=False))
+
     print(f"Building model({model_name})...")
     model = build_model(cfg.MODEL)
     assert osp.isfile(
