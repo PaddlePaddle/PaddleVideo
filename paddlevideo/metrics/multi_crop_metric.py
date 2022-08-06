@@ -55,8 +55,8 @@ class MultiCropMetric(BaseMetric):
         # gather mulit card, results of following process in each card is the same.
         if self.world_size > 1:
             outputs = _all_gather(outputs, self.world_size)
-            labels = _all_gather(labels, self.world_size)
-            clip_ids = _all_gather(clip_ids, self.world_size)
+            labels = _all_gather(labels.cuda(), self.world_size)
+            clip_ids = _all_gather(clip_ids.cuda(), self.world_size)
 
         # to numpy
         preds = outputs.numpy()

@@ -38,7 +38,7 @@ class BaseMetric(object):
             paddle.Tensor: gatherd & concatenated Tensor
         """
         gather_object_list = []
-        paddle.distributed.all_gather(gather_object_list, gather_object)
+        paddle.distributed.all_gather(gather_object_list, gather_object.cuda())
         return paddle.concat(gather_object_list, axis=concat_axis)
 
     @abstractmethod

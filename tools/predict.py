@@ -34,7 +34,13 @@ def parse_args():
                         type=str,
                         default='configs/example.yaml',
                         help='config file path')
+    parser.add_argument('-o',
+                        '--override',
+                        action='append',
+                        default=[],
+                        help='config options to be overridden')
     parser.add_argument("-i", "--input_file", type=str, help="input file path")
+    parser.add_argument("--time_test_file", type=str2bool, default=False, help="whether input time test file")    
     parser.add_argument("--model_file", type=str)
     parser.add_argument("--params_file", type=str)
 
@@ -134,7 +140,7 @@ def main():
     """predict using paddle inference model
     """
     args = parse_args()
-    cfg = get_config(args.config, show=False)
+    cfg = get_config(args.config, overrides=args.override, show=False)
 
     model_name = cfg.model_name
     print(f"Inference model({model_name})...")
@@ -223,7 +229,6 @@ def main():
                 InferenceHelper.postprocess(outputs, frames[idx], osp.join(save_path, str(idx).zfill(3)))
     else:
         if args.enable_benchmark:
-            test_video_num = 12
             num_warmup = 3
 
             # instantiate auto log
@@ -249,9 +254,14 @@ def main():
                                               'postprocess_time'
                                           ],
                                           warmup=num_warmup)
-            files = [
-                args.input_file for _ in range(test_video_num + num_warmup)
-            ]
+            if not args.time_test_file:
+                test_video_num = 15
+                files = [args.input_file for _ in range(test_video_num)]
+            else:
+                f_input = open(args.input_file, 'r')
+                files = [i.strip() for i in f_input.readlines()]
+                test_video_num = len(files)
+                f_input.close()
 
         # Inferencing process
         batch_num = args.batch_size
