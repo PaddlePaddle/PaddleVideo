@@ -34,7 +34,16 @@ def parse_args():
                         type=str,
                         default='configs/example.yaml',
                         help='config file path')
+    parser.add_argument('-o',
+                        '--override',
+                        action='append',
+                        default=[],
+                        help='config options to be overridden')
     parser.add_argument("-i", "--input_file", type=str, help="input file path")
+    parser.add_argument("--time_test_file",
+                        type=str2bool,
+                        default=False,
+                        help="whether input time test file")
     parser.add_argument("--model_file", type=str)
     parser.add_argument("--params_file", type=str)
 
@@ -48,6 +57,7 @@ def parse_args():
     parser.add_argument("--enable_benchmark", type=str2bool, default=False)
     parser.add_argument("--enable_mkldnn", type=str2bool, default=False)
     parser.add_argument("--cpu_threads", type=int, default=None)
+    parser.add_argument("--disable_glog", type=str2bool, default=False)
     # parser.add_argument("--hubserving", type=str2bool, default=False)  #TODO
 
     return parser.parse_args()
@@ -107,6 +117,10 @@ def create_paddle_predictor(args, cfg):
     # use zero copy
     config.switch_use_feed_fetch_ops(False)
 
+    # disable glog
+    if args.disable_glog:
+        config.disable_glog_info()
+
     # for ST-GCN tensorRT case usage
     # config.delete_pass("shuffle_channel_detect_pass")
 
@@ -134,7 +148,7 @@ def main():
     """predict using paddle inference model
     """
     args = parse_args()
-    cfg = get_config(args.config, show=False)
+    cfg = get_config(args.config, overrides=args.override, show=False)
 
     model_name = cfg.model_name
     print(f"Inference model({model_name})...")
@@ -224,8 +238,7 @@ def main():
                                               'postprocess_time'
                                           ],
                                           warmup=num_warmup)
-            if args.input_file.endswith('avi') or args.input_file.endswith(
-                    'mp4'):
+            if not args.time_test_file:
                 test_video_num = 15
                 files = [args.input_file for _ in range(test_video_num)]
             else:

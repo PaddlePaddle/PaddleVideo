@@ -362,8 +362,10 @@ def train_model(cfg,
             if save_best_flag:
                 save(optimizer.state_dict(),
                      osp.join(output_dir, model_name + "_best.pdopt"))
+                save_student_model_flag = True if "Distillation" in cfg.MODEL.framework else False
                 save(model.state_dict(),
-                     osp.join(output_dir, model_name + "_best.pdparams"))
+                     osp.join(output_dir, model_name + "_best.pdparams"),
+                     save_student_model=save_student_model_flag)
                 if model_name == "AttentionLstm":
                     logger.info(
                         f"Already save the best model (hit_at_one){best}")

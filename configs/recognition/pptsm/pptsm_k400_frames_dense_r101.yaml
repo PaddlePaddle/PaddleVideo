@@ -117,6 +117,12 @@ PRECISEBN:
 METRIC:
     name: 'CenterCropMetric'
 
+
+INFERENCE:
+    name: 'ppTSM_Inference_helper'
+    num_seg: 8
+    target_size: 224
+
 model_name: "ppTSM"
 log_interval: 10 #Optional, the interal of logger, default:10
 epochs: 100 #Mandatory, total epoch

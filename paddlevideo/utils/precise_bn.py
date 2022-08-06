@@ -66,7 +66,7 @@ def do_preciseBN(model,
 
     ind = -1
     for ind, data in enumerate(itertools.islice(data_loader, num_iters)):
-        logger.info("doing precise BN {} / {}...".format(ind + 1, num_iters))
+        logger.info("Computing precise BN {} / {}...".format(ind + 1, num_iters))
 
         if parallel:
             if use_amp:

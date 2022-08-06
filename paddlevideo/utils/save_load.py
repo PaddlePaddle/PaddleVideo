@@ -265,8 +265,21 @@ def mkdir(dir):
             pass
 
 
+def _extract_student_weights(all_params, student_prefix="Student."):
+    s_params = {
+        key[len(student_prefix):]: all_params[key]
+        for key in all_params if student_prefix in key
+    }
+    return s_params
+
+
 @main_only
-def save(obj, path):
+def save(obj, path, save_student_model=False):
+    if save_student_model:
+        s_params = _extract_student_weights(obj)
+        student_path = path.replace(".pdparams", "_student.pdparams")
+        if len(s_params) > 0:
+            paddle.save(s_params, student_path)
     paddle.save(obj, path)
 
 

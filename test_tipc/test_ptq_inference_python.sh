@@ -106,7 +106,7 @@ LOG_PATH="./log/${model_name}/${MODE}"
 mkdir -p ${LOG_PATH}
 status_log="${LOG_PATH}/results_python.log"
 
-if [ ${MODE} = "klquant_whole_infer" ]; then
+if [ ${MODE} = "whole_infer" ]; then
     IFS="|"
     # run export
     set_output_dir=$(func_set_params "${output_dir_key}" "${output_dir_value}")
