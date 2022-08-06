@@ -40,7 +40,10 @@ def parse_args():
                         default=[],
                         help='config options to be overridden')
     parser.add_argument("-i", "--input_file", type=str, help="input file path")
-    parser.add_argument("--time_test_file", type=str2bool, default=False, help="whether input time test file")    
+    parser.add_argument("--time_test_file",
+                        type=str2bool,
+                        default=False,
+                        help="whether input time test file")
     parser.add_argument("--model_file", type=str)
     parser.add_argument("--params_file", type=str)
 
@@ -54,6 +57,7 @@ def parse_args():
     parser.add_argument("--enable_benchmark", type=str2bool, default=False)
     parser.add_argument("--enable_mkldnn", type=str2bool, default=False)
     parser.add_argument("--cpu_threads", type=int, default=None)
+    parser.add_argument("--disable_glog", type=str2bool, default=False)
     # parser.add_argument("--hubserving", type=str2bool, default=False)  #TODO
 
     return parser.parse_args()
@@ -112,6 +116,10 @@ def create_paddle_predictor(args, cfg):
     config.enable_memory_optim()
     # use zero copy
     config.switch_use_feed_fetch_ops(False)
+
+    # disable glog
+    if args.disable_glog:
+        config.disable_glog_info()
 
     # for ST-GCN tensorRT case usage
     # config.delete_pass("shuffle_channel_detect_pass")
