@@ -4,7 +4,7 @@
 
 ## 近期更新
 
-- 发布轻量化行为识别模型🌟[PP-TSMv2](./docs/zh-CN/model_zoo/recognition/pp-tsm.md)🌟, Kinetics-400精度74.38%，25fps的10s视频cpu推理时间仅需434ms.
+- 发布轻量化行为识别模型🌟[PP-TSMv2](./docs/zh-CN/model_zoo/recognition/pp-tsm.md)🌟, Kinetics-400精度74.38%，25fps的10s视频cpu推理时间仅需433ms.
 - 新增[知识蒸馏](./docs/zh-CN/distillation.md)功能.
 - 发布各模型[benchmark](./docs/zh-CN/benchmark.md)文档.
 - 更新[快速开始](./docs/zh-CN/quick_start.md)文档.
