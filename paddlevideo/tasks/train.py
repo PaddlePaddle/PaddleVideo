@@ -138,7 +138,8 @@ def train_model(cfg,
         model, optimizer = amp.decorate(models=model,
                                         optimizers=optimizer,
                                         level=amp_level,
-                                        save_dtype='float32')
+                                        master_weight=True,
+                                        save_dtype=None)
         # NOTE: save_dtype is set to float32 now.
         logger.info(f"Training in amp mode, amp_level={amp_level}.")
     else:
@@ -221,7 +222,8 @@ def train_model(cfg,
                     # 8.2 backward
                     scaled.backward()
                     # 8.3 minimize
-                    scaler.minimize(optimizer, scaled)
+                    scaler.step(optimizer)  # update parameters
+                    scaler.update()  # update loss_scaling factor
                     optimizer.clear_grad()
             else:
                 outputs = model(data, mode='train')
