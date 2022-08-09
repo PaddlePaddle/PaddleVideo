@@ -222,8 +222,7 @@ def train_model(cfg,
                     # 8.2 backward
                     scaled.backward()
                     # 8.3 minimize
-                    scaler.step(optimizer)  # update parameters
-                    scaler.update()  # update loss_scaling factor
+                    scaler.minimize(optimizer, scaled)
                     optimizer.clear_grad()
             else:
                 outputs = model(data, mode='train')
