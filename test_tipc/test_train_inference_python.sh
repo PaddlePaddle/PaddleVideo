@@ -141,6 +141,7 @@ function func_inference(){
     _log_path=$4
     _video_dir=$5
     _flag_quant=$6
+    _gpu=$7
     # inference
     for use_gpu in ${use_gpu_list[*]}; do
         if [ ${use_gpu} = "False" ] || [ ${use_gpu} = "cpu" ]; then
@@ -159,7 +160,7 @@ function func_inference(){
                             fi # skip when quant model inference but precision is not int8
                             set_precision=$(func_set_params "${precision_key}" "${precision}")
 
-                            _save_log_path="${_log_path}/python_infer_cpu_usemkldnn_${use_mkldnn}_threads_${threads}_precision_${precision}_batchsize_${batch_size}.log"
+                            _save_log_path="${_log_path}/python_infer_cpu_gpus_${_gpu}_usemkldnn_${use_mkldnn}_threads_${threads}_precision_${precision}_batchsize_${batch_size}.log"
                             mkdir -p ${_log_path}
                             set_infer_data=$(func_set_params "${video_dir_key}" "${infer_video_dir}")
                             set_benchmark=$(func_set_params "${benchmark_key}" "${benchmark_value}")
@@ -241,7 +242,7 @@ if [ ${MODE} = "whole_infer" ] || [ ${MODE} = "klquant_whole_infer" ]; then
             echo $export_cmd
             status_export=$?
             status_check $status_export "${export_cmd}" "${status_log}" "${model_name}"
-            
+
         else
             save_infer_dir=${infer_model}
         fi
@@ -370,6 +371,7 @@ else
                 # run train
                 eval "unset CUDA_VISIBLE_DEVICES"
                 eval $cmd
+                eval "cat ${save_log}/train.log >> ${save_log}.log"
                 status_check $? "${cmd}" "${status_log}" "${model_name}"
 
                 # set_eval_pretrain=$(func_set_params "${pretrain_model_key}" "${save_log}/${train_model_name}")
@@ -410,7 +412,7 @@ else
                     else
                         infer_model_dir=${save_infer_path}
                     fi
-                    func_inference "${python}" "${inference_py}" "${infer_model_dir}" "${LOG_PATH}" "${flag_quant}"
+                    func_inference "${python}" "${inference_py}" "${infer_model_dir}" "${LOG_PATH}" "${flag_quant}" "${gpu}"
 
                     eval "unset CUDA_VISIBLE_DEVICES"
                 fi
