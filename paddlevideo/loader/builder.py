@@ -78,12 +78,12 @@ def build_dataloader(dataset,
     if multigrid:
         sampler = DistributedShortSampler(dataset,
                                           batch_sizes=batch_size,
-                                          shuffle=True,
+                                          shuffle=False,
                                           drop_last=True)
     else:
         sampler = DistributedBatchSampler(dataset,
                                           batch_size=batch_size,
-                                          shuffle=shuffle,
+                                          shuffle=False,
                                           drop_last=drop_last)
 
     #NOTE(shipping): when switch the mix operator on, such as: mixup, cutmix.

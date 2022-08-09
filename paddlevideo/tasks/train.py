@@ -27,7 +27,42 @@ from ..metrics.ava_utils import collect_results_cpu
 from ..modeling.builder import build_model
 from ..solver import build_lr, build_optimizer
 from ..utils import do_preciseBN
+import paddle.profiler as profiler
+GLOBAL_PROFILE_STATE = False
+def add_nvtx_event(event_name, is_first=False, is_last=False):
+    global GLOBAL_PROFILE_STATE
+    if not GLOBAL_PROFILE_STATE:
+        return
 
+    if not is_first:
+        paddle.fluid.core.nvprof_nvtx_pop()
+    if not is_last:
+        paddle.fluid.core.nvprof_nvtx_push(event_name)
+
+def switch_profile(start, end, step_idx, event_name=None):
+    global GLOBAL_PROFILE_STATE
+    if step_idx > start and step_idx < end:
+        GLOBAL_PROFILE_STATE = True
+    else:
+        GLOBAL_PROFILE_STATE = False
+
+    #if step_idx == start:
+    #    paddle.utils.profiler.start_profiler("All", "Default")
+    #elif step_idx == end:
+    #    paddle.utils.profiler.stop_profiler("total", "tmp.profile")
+
+    if event_name is None:
+        event_name = str(step_idx)
+    if step_idx == start:
+        paddle.fluid.core.nvprof_start()
+        paddle.fluid.core.nvprof_enable_record_event()
+        paddle.fluid.core.nvprof_nvtx_push(event_name)
+    elif step_idx == end:
+        paddle.fluid.core.nvprof_nvtx_pop()
+        paddle.fluid.core.nvprof_stop()
+    elif step_idx > start and step_idx < end:
+        paddle.fluid.core.nvprof_nvtx_pop()
+        paddle.fluid.core.nvprof_nvtx_push(event_name)
 
 def train_model(cfg,
                 weights=None,
@@ -170,7 +205,10 @@ def train_model(cfg,
     if use_fleet:
         model = fleet.distributed_model(model)
         optimizer = fleet.distributed_optimizer(optimizer)
-
+    prof = profiler.Profiler(targets=[paddle.profiler.ProfilerTarget.CPU, paddle.profiler.ProfilerTarget.GPU],
+                                 scheduler=[100, 110],
+                                 timer_only=True)
+    prof.start()
     # 8. Train Model
     best = 0.0
     for epoch in range(0, cfg.epochs):
@@ -189,6 +227,7 @@ def train_model(cfg,
             if max_iters is not None and i >= max_iters:
                 break
 
+            #switch_profile(100, 110, i,"(iter is ={})".format(i))
             record_list['reader_time'].update(time.time() - tic)
 
             # Collect performance information when profiler_options is activate
@@ -199,7 +238,9 @@ def train_model(cfg,
             if use_amp:
                 with amp.auto_cast(custom_black_list={"reduce_mean"},
                                    level=amp_level):
+                    add_nvtx_event("forward", is_first=True, is_last=False)
                     outputs = model(data, mode='train')
+                add_nvtx_event("loss", is_first=False, is_last=False)
                 avg_loss = outputs['loss']
                 if use_gradient_accumulation:
                     # clear grad at when epoch begins
@@ -210,21 +251,30 @@ def train_model(cfg,
                     # Loss scaling
                     scaled = scaler.scale(avg_loss)
                     # 8.2 backward
+                    add_nvtx_event("backward", is_first=False, is_last=False)
                     scaled.backward()
                     # 8.3 minimize
                     if (i + 1) % cfg.GRADIENT_ACCUMULATION.num_iters == 0:
+                        add_nvtx_event("minimize", is_first=False, is_last=False)
                         scaler.minimize(optimizer, scaled)
+                        add_nvtx_event("clear_grad", is_first=False, is_last=False)
                         optimizer.clear_grad()
                 else:  # general case
                     # Loss scaling
                     scaled = scaler.scale(avg_loss)
                     # 8.2 backward
+                    add_nvtx_event("backward", is_first=False, is_last=False)
                     scaled.backward()
                     # 8.3 minimize
+                    add_nvtx_event("minimize", is_first=False, is_last=False)
                     scaler.minimize(optimizer, scaled)
+                    add_nvtx_event("clear_grad", is_first=False, is_last=False)
                     optimizer.clear_grad()
             else:
+
+                add_nvtx_event("forward", is_first=True, is_last=False)
                 outputs = model(data, mode='train')
+                add_nvtx_event("loss", is_first=False, is_last=False)
                 avg_loss = outputs['loss']
                 if use_gradient_accumulation:
                     # clear grad at when epoch begins
@@ -233,24 +283,32 @@ def train_model(cfg,
                     # Loss normalization
                     avg_loss /= cfg.GRADIENT_ACCUMULATION.num_iters
                     # 8.2 backward
+                    add_nvtx_event("backward", is_first=False, is_last=False)
                     avg_loss.backward()
                     # 8.3 minimize
                     if (i + 1) % cfg.GRADIENT_ACCUMULATION.num_iters == 0:
+                        add_nvtx_event("minimize", is_first=False, is_last=False)
                         optimizer.step()
+                        add_nvtx_event("clear_grad", is_first=False, is_last=False)
                         optimizer.clear_grad()
                 else:  # general case
                     # 8.2 backward
+                    add_nvtx_event("backward", is_first=False, is_last=False)
                     avg_loss.backward()
                     # 8.3 minimize
+                    add_nvtx_event("minimize", is_first=False, is_last=False)
                     optimizer.step()
+                    add_nvtx_event("clear_grad", is_first=False, is_last=False)
                     optimizer.clear_grad()
 
             # log record
+            add_nvtx_event("update_lr", is_first=False, is_last=False)
             record_list['lr'].update(optimizer.get_lr(), batch_size)
+            add_nvtx_event("others", is_first=False, is_last=True)
             for name, value in outputs.items():
                 if name in record_list:
                     record_list[name].update(value, batch_size)
-
+            prof.step(num_samples=batch_size)
             record_list['batch_time'].update(time.time() - tic)
             tic = time.time()
 
@@ -395,4 +453,6 @@ def train_model(cfg,
                 osp.join(output_dir,
                          model_name + f"_epoch_{epoch + 1:05d}.pdparams"))
 
+    prof.stop()
+    #prof.summary(op_detail=True) 
     logger.info(f'training {model_name} finished')
