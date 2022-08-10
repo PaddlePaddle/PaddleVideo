@@ -393,9 +393,21 @@ fi
 if [ ${MODE} = "benchmark_train" ];then
     ${python} -m pip install -r requirements.txt
     if [ ${model_name} == "PP-TSM" ]; then
-        echo "Not added into TIPC yet."
+        # pretrain lite train data
+        pushd ./data/k400
+        wget -nc https://videotag.bj.bcebos.com/Data/k400_rawframes_small.tar
+        tar -xf k400_rawframes_small.tar
+        popd
+        # download pretrained weights
+        wget -nc -P ./data https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_vd_ssld_v2_pretrained.pdparams --no-check-certificate
     elif [ ${model_name} == "PP-TSN" ]; then
-        echo "Not added into TIPC yet."
+        # pretrain lite train data
+        pushd ./data/k400
+        wget -nc https://videotag.bj.bcebos.com/Data/k400_videos_small.tar
+        tar -xf k400_videos_small.tar
+        popd
+        # download pretrained weights
+        wget -nc -P ./data https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_vd_ssld_v2_pretrained.pdparams --no-check-certificate
     elif [ ${model_name} == "AGCN" ]; then
         echo "Not added into TIPC yet."
     elif [ ${model_name} == "STGCN" ]; then

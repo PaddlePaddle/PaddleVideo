@@ -138,7 +138,8 @@ def train_model(cfg,
         model, optimizer = amp.decorate(models=model,
                                         optimizers=optimizer,
                                         level=amp_level,
-                                        save_dtype='float32')
+                                        master_weight=True,
+                                        save_dtype=None)
         # NOTE: save_dtype is set to float32 now.
         logger.info(f"Training in amp mode, amp_level={amp_level}.")
     else:
@@ -197,7 +198,7 @@ def train_model(cfg,
             # 8.1 forward
             # AMP #
             if use_amp:
-                with amp.auto_cast(custom_black_list={"reduce_mean"},
+                with amp.auto_cast(custom_black_list={"reduce_mean", "conv3d"},
                                    level=amp_level):
                     outputs = model(data, mode='train')
                 avg_loss = outputs['loss']
@@ -288,8 +289,9 @@ def train_model(cfg,
                     break
 
                 if use_amp:
-                    with amp.auto_cast(custom_black_list={"reduce_mean"},
-                                       level=amp_level):
+                    with amp.auto_cast(
+                            custom_black_list={"reduce_mean", "conv3d"},
+                            level=amp_level):
                         outputs = model(data, mode='valid')
                 else:
                     outputs = model(data, mode='valid')

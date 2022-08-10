@@ -279,7 +279,7 @@ for batch_size in ${batch_size_list[*]}; do
                 echo $cmd
                 eval $cmd
                 last_status=${PIPESTATUS[0]}
-                status_check $last_status "${cmd}" "${status_log}"
+                status_check $last_status "${cmd}" "${status_log}" "${model_name}"
             fi
         done
     done
