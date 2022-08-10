@@ -50,7 +50,8 @@ function func_serving(){
     set_serving_client=$(func_set_params "${serving_client_key}" "${serving_client_value}")
     python_list=(${python_list})
     python=${python_list[0]}
-    trans_model_cmd="${python} ${trans_model_py} ${set_dirname} ${set_model_filename} ${set_params_filename} ${set_serving_server} ${set_serving_client}"
+    trans_log="${LOG_PATH}/python_trans_model.log"
+    trans_model_cmd="${python} ${trans_model_py} ${set_dirname} ${set_model_filename} ${set_params_filename} ${set_serving_server} ${set_serving_client} > ${trans_log} 2>&1 "
 
     eval ${trans_model_cmd}
 
@@ -65,12 +66,14 @@ function func_serving(){
     unset https_proxy
     unset http_proxy
 
-    web_service_cmd="${python} ${web_service_py} &"
-
+    server_log_path="${LOG_PATH}/python_server_gpu.log"
+    web_service_cmd="${python} ${web_service_py} > ${server_log_path} 2>&1 &"
     eval $web_service_cmd
+    last_status=${PIPESTATUS[0]}
+    status_check $last_status "${web_service_cmd}" "${status_log}" "${model_name}"
     sleep 30s # not too short is ok
 
-    _save_log_path="../../${LOG_PATH}/server_infer_python_gpu_batchsize_1.log"
+    _save_log_path="../../${LOG_PATH}/python_server_infer_gpu_batchsize_1.log"
     set_video_dir=$(func_set_params "${video_dir_key}" "${video_dir_value}")
     pipeline_cmd="${python} ${pipeline_py} ${set_video_dir} > ${_save_log_path} 2>&1 "
 
@@ -79,7 +82,7 @@ function func_serving(){
 
     eval "cat ${_save_log_path}"
     cd ../../
-    status_check $last_status "${pipeline_cmd}" "${status_log}"
+    status_check $last_status "${pipeline_cmd}" "${status_log}" "${model_name}"
     ps ux | grep -E 'web_service|pipeline' | awk '{print $2}' | xargs kill -s 9
 }
 
