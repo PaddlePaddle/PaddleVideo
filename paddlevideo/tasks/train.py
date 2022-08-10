@@ -256,9 +256,14 @@ def train_model(cfg,
             tic = time.time()
 
             if i % cfg.get("log_interval", 10) == 0:
-                ips = "ips: {:.5f} instance/sec.".format(
+                ips = "ips: {:.5f} instance/sec,".format(
                     batch_size / record_list["batch_time"].val)
-                log_batch(record_list, i, epoch + 1, cfg.epochs, "train", ips)
+                cur_progress = ((i + 1) + epoch * len(train_loader)) / (
+                    len(train_loader) * cfg.epochs)
+                eta = int(record_list["batch_time"].sum *
+                          (1 - cur_progress) / cur_progress + 0.5)
+                log_batch(record_list, i, epoch + 1, cfg.epochs, "train", ips,
+                          eta)
 
             # learning rate iter step
             if cfg.OPTIMIZER.learning_rate.get("iter_step"):
