@@ -138,7 +138,8 @@ def train_model(cfg,
         model, optimizer = amp.decorate(models=model,
                                         optimizers=optimizer,
                                         level=amp_level,
-                                        save_dtype='float32')
+                                        master_weight=True,
+                                        save_dtype=None)
         # NOTE: save_dtype is set to float32 now.
         logger.info(f"Training in amp mode, amp_level={amp_level}.")
     else:
