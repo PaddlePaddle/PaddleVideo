@@ -11,10 +11,11 @@ REPO_ROOT_PATH=$(readlinkf ${BASEDIR}/../)
 config_files=$(find ${REPO_ROOT_PATH}/test_tipc/configs -name "train_infer_python.txt")
 for file in ${config_files}; do
    echo $file
+   sed -i "s/Global.use_gpu/Global.use_npu/g" $file
    sed -i '16s/$/ -o use_npu=True/' $file
    sed -i '24s/$/ -o use_npu=True/' $file
-   sed -i '40s/$/ --use_npu=True/' $file
-   sed -i "s/--use_gpu:True|False/--use_gpu:False/g" $file
+   sed -i '40s/$/ --use_gpu=False/' $file
+   sed -i "s/--use_gpu:True|False/--use_npu:True|False/g" $file
 done
 
 yaml_files=$(find ${REPO_ROOT_PATH}/configs/recognition/ -name "*.yaml")
