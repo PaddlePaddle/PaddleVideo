@@ -417,6 +417,9 @@ if [ ${MODE} = "benchmark_train" ];then
         pushd ./data/k400
         wget -nc https://videotag.bj.bcebos.com/Data/k400_rawframes_small.tar
         tar -xf k400_rawframes_small.tar
+        # download datalist for fleet benchmark
+        wget -nc https://videotag.bj.bcebos.com/PaddleVideo-release2.3/train_fleet_frames.list
+        wget -nc https://videotag.bj.bcebos.com/PaddleVideo-release2.3/val_fleet_frames.list
         popd
         # download pretrained weights
         wget -nc -P ./data https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_pretrain.pdparams --no-check-certificate
