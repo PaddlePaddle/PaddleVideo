@@ -33,7 +33,7 @@ PaddleVideo旨在打造一套丰富、领先且实用的Video工具库，旨在�
 支持多种Video相关前沿算法，在此基础上打造产业级特色模型[PP-TSM](docs/zh-CN/model_zoo/recognition/pp-tsm.md)和[PP-TSMv2](docs/zh-CN/model_zoo/recognition/pp-tsm.md)，并打通数据生产、模型训练、压缩、预测部署全流程。
 
 <div align="center">
-    <img src="./doc/imgs/features.png" width="800">
+    <img src="./doc/imgs/features.png" width="600">
 </div>
 
 ## 快速开始
@@ -62,11 +62,10 @@ PaddleVideo场景应用覆盖体育、互联网、工业、医疗行业，在PP-
       - [Paddle2ONNX模型转化与预测](./deploy/paddle2onnx/readme.md)
       - [Benchmark](./docs/zh-CN/benchmark.md)
 - [前沿算法与模型](./docs/zh-CN/model_zoo/README.md)🚀
-- [AI-Studio模型教程](./docs/zh-CN/model_zoo/README.md#3)
-- [数据集](./docs/zh_CN/dataset/README.md)
+- [数据集](./docs/zh-CN/dataset/README.md)
 - [场景应用](./applications/README.md)
 - [数据标注](./applications/BILS)
-- [赛事支持](./docs/competition.md)
+- [赛事支持](./docs/zh-CN/competition.md)
 - [贡献代码](./docs/zh-CN/contribute/README.md)
 
 ## 许可证书
