@@ -282,7 +282,7 @@ else
         fi
         for autocast in ${autocast_list[*]}; do
             if [ ${autocast} = "fp16" ]; then
-                set_amp_config="--amp"
+                set_amp_config="--amp --amp_level 'O2'"
             else
                 set_amp_config=" "
             fi

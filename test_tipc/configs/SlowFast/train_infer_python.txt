@@ -51,9 +51,10 @@ null:null
 --params_file:inference.pdiparams
 ===========================train_benchmark_params==========================
 batch_size:8
-fp_items:fp32
+fp_items:fp32|fp16
 epoch:1
 --profiler_options:batch_range=[10,20];state=GPU;tracer_option=Default;profile_path=model.profile
 flags:FLAGS_conv_workspace_size_limit=800
+max-iters:200
 ===========================infer_benchmark_params==========================
 random_infer_input:[{float32,[3, 4, 256, 256]},{float32,[3, 32, 256, 256]}]

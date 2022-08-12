@@ -198,7 +198,7 @@ def train_model(cfg,
             # 8.1 forward
             # AMP #
             if use_amp:
-                with amp.auto_cast(custom_black_list={"reduce_mean"},
+                with amp.auto_cast(custom_black_list={"reduce_mean", "conv3d"},
                                    level=amp_level):
                     outputs = model(data, mode='train')
                 avg_loss = outputs['loss']
@@ -294,8 +294,9 @@ def train_model(cfg,
                     break
 
                 if use_amp:
-                    with amp.auto_cast(custom_black_list={"reduce_mean"},
-                                       level=amp_level):
+                    with amp.auto_cast(
+                            custom_black_list={"reduce_mean", "conv3d"},
+                            level=amp_level):
                         outputs = model(data, mode='valid')
                 else:
                     outputs = model(data, mode='valid')

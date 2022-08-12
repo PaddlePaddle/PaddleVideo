@@ -99,6 +99,11 @@ profile_option="${profile_option_key}:${profile_option_params}"
 
 line_num=`expr $line_num + 1`
 flags_value=$(func_parser_value "${lines[line_num]}")
+
+# 设置每个模型max-iters，以获取稳定的ips
+line_num=`expr $line_num + 1`
+max_iters_value=$(func_parser_value "${lines[line_num]}")
+
 # set flags
 IFS=";"
 flags_list=(${flags_value})
@@ -134,8 +139,9 @@ func_sed_params "$FILENAME" "${line_export_py_2}" "null"
 func_sed_params "$FILENAME" "${line_export_py_3}" "null"
 func_sed_params "$FILENAME" "${line_python}"  "$python"
 
+
 # 末尾加上--max_iters=30和--log_interval=1，以便运行并输出足量数据
-set_log_interval_cmd="sed -i '${line_norm_train}s/.*/& --max_iters=30 -o log_interval=1/' '${filename}'"
+set_log_interval_cmd="sed -i '${line_norm_train}s/.*/& --max_iters=${max_iters_value} -o log_interval=1/' '${filename}'"
 eval $set_log_interval_cmd
 
 # 去掉--validate，benchmark不需要validate
@@ -279,7 +285,7 @@ for batch_size in ${batch_size_list[*]}; do
                 echo $cmd
                 eval $cmd
                 last_status=${PIPESTATUS[0]}
-                status_check $last_status "${cmd}" "${status_log}"
+                status_check $last_status "${cmd}" "${status_log}" "${model_name}"
             fi
         done
     done
