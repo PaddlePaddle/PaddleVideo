@@ -32,6 +32,10 @@ PaddleVideo旨在打造一套丰富、领先且实用的Video工具库，旨在�
 
 支持多种Video相关前沿算法，在此基础上打造产业级特色模型[PP-TSM](docs/zh-CN/model_zoo/recognition/pp-tsm.md)和[PP-TSMv2](docs/zh-CN/model_zoo/recognition/pp-tsm.md)，并打通数据生产、模型训练、压缩、预测部署全流程。
 
+<div align="center">
+    <img src="./doc/imgs/features.png" width="800">
+</div>
+
 ## 快速开始
 
 - 一行命令快速使用: [快速开始](./docs/zh-CN/quick_start.md)
