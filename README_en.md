@@ -30,7 +30,7 @@ PaddleVideo is a toolset for video tasks prepared for the industry and academia.
 PaddleVideo support a variety of cutting-edge algorithms related to video, and developed industrial featured models/solution [PP-TSM](docs/zh-CN/model_zoo/recognition/pp-tsm.md) and [PP-TSMv2](docs/zh-CN/model_zoo/recognition/pp-tsm.md) on this basis, and get through the whole process of data production, model training, compression, inference and deployment.
 
 <div align="center">
-    <img src="./doc/imgs/features_en.png" width="600">
+    <img src="./docs/images/features_en.png" width="700">
 </div>
 
 ## Quick Start
