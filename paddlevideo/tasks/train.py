@@ -28,6 +28,7 @@ from ..modeling.builder import build_model
 from ..solver import build_lr, build_optimizer
 from ..utils import do_preciseBN
 import paddle.profiler as profiler
+
 GLOBAL_PROFILE_STATE = False
 def add_nvtx_event(event_name, is_first=False, is_last=False):
     global GLOBAL_PROFILE_STATE
@@ -221,6 +222,7 @@ def train_model(cfg,
 
         record_list = build_record(cfg.MODEL)
         tic = time.time()
+        optimizer_time=0
         for i, data in enumerate(train_loader):
             """Next two line of code only used in test_tipc,
             ignore it most of the time"""
@@ -236,6 +238,7 @@ def train_model(cfg,
             # 8.1 forward
             # AMP #
             if use_amp:
+                #with amp.auto_cast(custom_black_list={'reduce_mean','reshape','reshape2','reshape_','squared_l2_norm'},
                 with amp.auto_cast(custom_black_list={"reduce_mean"},
                                    level=amp_level):
                     add_nvtx_event("forward", is_first=True, is_last=False)
@@ -256,7 +259,9 @@ def train_model(cfg,
                     # 8.3 minimize
                     if (i + 1) % cfg.GRADIENT_ACCUMULATION.num_iters == 0:
                         add_nvtx_event("minimize", is_first=False, is_last=False)
+                        before_time=time.time()
                         scaler.minimize(optimizer, scaled)
+                        optimizer_time +=time.time()-before_time
                         add_nvtx_event("clear_grad", is_first=False, is_last=False)
                         optimizer.clear_grad()
                 else:  # general case
@@ -267,7 +272,9 @@ def train_model(cfg,
                     scaled.backward()
                     # 8.3 minimize
                     add_nvtx_event("minimize", is_first=False, is_last=False)
+                    before_time=time.time()
                     scaler.minimize(optimizer, scaled)
+                    optimizer_time +=time.time()-before_time
                     add_nvtx_event("clear_grad", is_first=False, is_last=False)
                     optimizer.clear_grad()
             else:
@@ -288,7 +295,9 @@ def train_model(cfg,
                     # 8.3 minimize
                     if (i + 1) % cfg.GRADIENT_ACCUMULATION.num_iters == 0:
                         add_nvtx_event("minimize", is_first=False, is_last=False)
+                        before_time=time.time()
                         optimizer.step()
+                        optimizer_time +=time.time()-before_time
                         add_nvtx_event("clear_grad", is_first=False, is_last=False)
                         optimizer.clear_grad()
                 else:  # general case
@@ -297,7 +306,9 @@ def train_model(cfg,
                     avg_loss.backward()
                     # 8.3 minimize
                     add_nvtx_event("minimize", is_first=False, is_last=False)
+                    before_time=time.time()
                     optimizer.step()
+                    optimizer_time +=time.time()-before_time
                     add_nvtx_event("clear_grad", is_first=False, is_last=False)
                     optimizer.clear_grad()
 
@@ -454,5 +465,6 @@ def train_model(cfg,
                          model_name + f"_epoch_{epoch + 1:05d}.pdparams"))
 
     prof.stop()
-    #prof.summary(op_detail=True) 
+    prof.summary(op_detail=True) 
     logger.info(f'training {model_name} finished')
+    print("time all optimizer_time :", optimizer_time*1000)
