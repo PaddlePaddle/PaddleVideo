@@ -49,7 +49,7 @@ PP-TSMv2模型与主流模型之间CPU推理速度对比(按预测总时间排�
 | :---- | :---- | :----: |:----: |:----: |:----: |
 | PP-TSM | MobileNetV2 |  68.09 | 52.62 | 137.03 | 189.65 |
 | PP-TSM | MobileNetV3 |  69.84| 53.44 | 139.13 | 192.58 |
-| **PP-TSMv2** | PP-LCNet_v2.8f |	**72.45**|   |  |  |
+| **PP-TSMv2** | PP-LCNet_v2.8f | **72.45**| 53.37 | 189.62 | **242.99** |
 | **PP-TSMv2** | PP-LCNet_v2.16f |	**74.38**|  68.07 | 365.23 | **433.31** |
 | SlowFast | 4*16 |74.35 | 110.04 | 1201.36 | 1311.41 |
 | TSM | R50 |  71.06 | 52.47 | 1302.49 | 1354.96 |
@@ -148,7 +148,7 @@ PP-TSM模型提供的各配置文件均放置在[configs/recognition/pptsm](../.
 
 - 2. 测试方式：对于产业落地场景，推荐使用`uniform`方式，简洁高效，可以获得较好的精度与速度平衡。
 
-- 3. 对于CPU或端侧需求，推荐使用`PP-TSMv2`，精度较高，速度快，具体性能和速度对比请查看[benchmark](../../benchmark.md)文档。PP-TSMv2提供8帧输入和16帧输入两套配置，8帧输入速度更快，精度稍低。16帧输入精度更高，速度稍慢。如果追求精度，推荐使用16帧输入，配置文件为无蒸馏-[pptsm_lcnet_k400_16frames_uniform.yaml](../../../../configs/recognition/pptsm/v2/pptsm_lcnet_k400_16frames_uniform.yaml)，加蒸馏-[pptsm_lcnet_k400_16frames_uniform_dml_distillation.yaml](../../../../configs/recognition/pptsm/v2/pptsm_lcnet_k400_16frames_uniform_dml_distillation.yaml)。相对于无蒸馏，蒸馏后能获得更高的精度，但训练时需要更大的显存，以运行教师模型。如果对速度要求高，推荐使用8帧输入，配置文件为无蒸馏-[pptsm_lcnet_k400_8frames_uniform.yaml](../../../../configs/recognition/pptsm/v2/pptsm_lcnet_k400_8frames_uniform.yaml)，加蒸馏-[pptsm_lcnet_k400_8frames_uniform_dml_distillation.yaml](../../../../configs/recognition/pptsm/v2/pptsm_lcnet_k400_8frames_uniform_dml_distillation.yaml)。
+- 3. 对于CPU或端侧需求，推荐使用`PP-TSMv2`，精度较高，速度快，具体性能和速度对比请查看[benchmark](../../benchmark.md)文档。PP-TSMv2提供8帧输入和16帧输入两套配置，8帧速度更快，精度稍低。16帧精度更高，速度稍慢。如果追求高精度，推荐使用16帧，配置文件为无蒸馏-[pptsm_lcnet_k400_16frames_uniform.yaml](../../../../configs/recognition/pptsm/v2/pptsm_lcnet_k400_16frames_uniform.yaml)，加蒸馏-[pptsm_lcnet_k400_16frames_uniform_dml_distillation.yaml](../../../../configs/recognition/pptsm/v2/pptsm_lcnet_k400_16frames_uniform_dml_distillation.yaml)。相对于无蒸馏，蒸馏后能获得更高的精度，但训练时需要更大的显存，以运行教师模型。如果对速度要求极高，推荐使用8帧，配置文件为无蒸馏-[pptsm_lcnet_k400_8frames_uniform.yaml](../../../../configs/recognition/pptsm/v2/pptsm_lcnet_k400_8frames_uniform.yaml)，加蒸馏-[pptsm_lcnet_k400_8frames_uniform_dml_distillation.yaml](../../../../configs/recognition/pptsm/v2/pptsm_lcnet_k400_8frames_uniform_dml_distillation.yaml)。
 
 - 4. 对于GPU服务器端需求，推荐使用`PP-TSM`，对应配置文件为[pptsm_k400_frames_uniform.yaml](../../../../configs/recognition/pptsm/pptsm_k400_frames_uniform.yaml)。GPU端推理，速度瓶颈更多在于数据预处理(视频编解码)部分，更优的解码器和更高的精度，会是侧重考虑的部分。
 
