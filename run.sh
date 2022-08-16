@@ -11,7 +11,7 @@ start_time=$(date +%s)
 #python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=log_pptsm  main.py --validate -c configs/recognition/pptsm/pptsm_k400_frames_uniform.yaml
 
 # run pp-tsm_v2 distillation training
-python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=log_pptsm_v2  main.py --validate -c configs/recognition/pptsm/v2/pptsm_lcnet_k400_frames_uniform_dml_distillation.yaml
+python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=log_pptsm_v2  main.py --validate -c configs/recognition/pptsm/v2/pptsm_lcnet_k400_16frames_uniform_dml_distillation.yaml
 
 # run ava training
 # python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3" --log_dir=logdir.ava_part main.py --validate -w paddle.init_param.pdparams -c configs/detection/ava/ava_part.yaml
