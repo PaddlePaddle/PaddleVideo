@@ -49,7 +49,8 @@ PP-TSMv2模型与主流模型之间CPU推理速度对比(按预测总时间排�
 | :---- | :---- | :----: |:----: |:----: |:----: |
 | PP-TSM | MobileNetV2 |  68.09 | 52.62 | 137.03 | 189.65 |
 | PP-TSM | MobileNetV3 |  69.84| 53.44 | 139.13 | 192.58 |
-| **PP-TSMv2** | PP-LCNet_v2 |	**74.38**|  68.07 | 365.23 | **433.31** |
+| **PP-TSMv2** | PP-LCNet_v2.8f | **72.45**| 53.37 | 189.62 | **242.99** |
+| **PP-TSMv2** | PP-LCNet_v2.16f |	**74.38**|  68.07 | 365.23 | **433.31** |
 | SlowFast | 4*16 |74.35 | 110.04 | 1201.36 | 1311.41 |
 | TSM | R50 |  71.06 | 52.47 | 1302.49 | 1354.96 |
 |PP-TSM	| R50 |	75.11 | 52.26  | 1354.21 | 1406.48 |
@@ -107,7 +108,7 @@ MODEL:
 PP-TSMv2在Kinetics400数据集使用8卡训练，多卡训练启动命令如下:
 
 ```bash
-python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=log_pptsm  main.py  --validate -c configs/recognition/pptsm/v2/pptsm_lcnet_k400_frames_uniform.yaml
+python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=log_pptsm  main.py  --validate -c configs/recognition/pptsm/v2/pptsm_lcnet_k400_16frames_uniform.yaml
 ```
 
 - 训练各参数含义参考[使用说明](../../usage.md)，若希望加速训练过程，可以按照使用说明第6章节开启混合精度训练。
@@ -121,7 +122,7 @@ python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=lo
 通过模型蒸馏将大模型的知识迁移到小模型中，可以进一步提升模型精度。PP-TSMv2基于DML蒸馏，teacher模型使用PP-TSM ResNet-50 backbone。蒸馏训练启动方式如下：
 
 ```bash
-python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=log_pptsm  main.py  --validate -c configs/recognition/pptsm/v2/pptsm_lcnet_k400_frames_uniform_dml_distillation.yaml
+python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=log_pptsm  main.py  --validate -c configs/recognition/pptsm/v2/pptsm_lcnet_k400_16frames_uniform_dml_distillation.yaml
 ```
 
 知识蒸馏更多细节参考[知识蒸馏](../../distillation.md)。
@@ -147,7 +148,7 @@ PP-TSM模型提供的各配置文件均放置在[configs/recognition/pptsm](../.
 
 - 2. 测试方式：对于产业落地场景，推荐使用`uniform`方式，简洁高效，可以获得较好的精度与速度平衡。
 
-- 3. 对于CPU或端侧需求，推荐使用`PP-TSMv2`，精度较高，速度快，具体性能和速度对比请查看[benchmark](../../benchmark.md)文档。对应配置文件为无蒸馏-[pptsm_lcnet_k400_frames_uniform.yaml](../../../../configs/recognition/pptsm/v2/pptsm_lcnet_k400_frames_uniform.yaml)，加蒸馏-[pptsm_lcnet_k400_frames_uniform_dml_distillation.yaml](../../../../configs/recognition/pptsm/v2/pptsm_lcnet_k400_frames_uniform_dml_distillation.yaml)。相对于无蒸馏，蒸馏后能获得更高的精度，但训练时需要更大的显存，以运行教师模型。
+- 3. 对于CPU或端侧需求，推荐使用`PP-TSMv2`，精度较高，速度快，具体性能和速度对比请查看[benchmark](../../benchmark.md)文档。PP-TSMv2提供8帧输入和16帧输入两套配置，8帧速度更快，精度稍低。16帧精度更高，速度稍慢。如果追求高精度，推荐使用16帧，配置文件为无蒸馏-[pptsm_lcnet_k400_16frames_uniform.yaml](../../../../configs/recognition/pptsm/v2/pptsm_lcnet_k400_16frames_uniform.yaml)，加蒸馏-[pptsm_lcnet_k400_16frames_uniform_dml_distillation.yaml](../../../../configs/recognition/pptsm/v2/pptsm_lcnet_k400_16frames_uniform_dml_distillation.yaml)。相对于无蒸馏，蒸馏后能获得更高的精度，但训练时需要更大的显存，以运行教师模型。如果对速度要求极高，推荐使用8帧，配置文件为无蒸馏-[pptsm_lcnet_k400_8frames_uniform.yaml](../../../../configs/recognition/pptsm/v2/pptsm_lcnet_k400_8frames_uniform.yaml)，加蒸馏-[pptsm_lcnet_k400_8frames_uniform_dml_distillation.yaml](../../../../configs/recognition/pptsm/v2/pptsm_lcnet_k400_8frames_uniform_dml_distillation.yaml)。
 
 - 4. 对于GPU服务器端需求，推荐使用`PP-TSM`，对应配置文件为[pptsm_k400_frames_uniform.yaml](../../../../configs/recognition/pptsm/pptsm_k400_frames_uniform.yaml)。GPU端推理，速度瓶颈更多在于数据预处理(视频编解码)部分，更优的解码器和更高的精度，会是侧重考虑的部分。
 
@@ -167,7 +168,7 @@ Already save the best model (top1 acc)0.7467
 
 也可以使用如下命令对训练好的模型进行测试：
 ```bash
-python3 main.py --test -c configs/recognition/pptsm/v2/pptsm_lcnet_k400_frames_uniform_dml_distillation.yaml -w output/PPTSMv2/PPTSMv2_best.pdparams
+python3 main.py --test -c configs/recognition/pptsm/v2/pptsm_lcnet_k400_16frames_uniform_dml_distillation.yaml -w output/PPTSMv2/PPTSMv2_best.pdparams
 ```
 
 <a name="52"></a>
@@ -189,7 +190,7 @@ python3 main.py --test -c configs/recognition/pptsm/pptsm_k400_frames_dense.yaml
 ### 导出推理模型
 
 ```bash
-python3.7 tools/export_model.py -c configs/recognition/pptsm/v2/pptsm_lcnet_k400_frames_uniform_dml_distillation.yaml \
+python3.7 tools/export_model.py -c configs/recognition/pptsm/v2/pptsm_lcnet_k400_16frames_uniform_dml_distillation.yaml \
                                 -p output/PPTSMv2/PPTSMv2_best.pdparams \
                                 -o inference/PPTSMv2
 ```
@@ -208,7 +209,7 @@ python3.7 tools/export_model.py -c configs/recognition/pptsm/v2/pptsm_lcnet_k400
 运行下面命令，对示例视频文件`data/example.avi`进行分类:
 ```bash
 python3.7 tools/predict.py --input_file data/example.avi \
-                           --config configs/recognition/pptsm/v2/pptsm_lcnet_k400_frames_uniform_dml_distillation.yaml \
+                           --config configs/recognition/pptsm/v2/pptsm_lcnet_k400_16frames_uniform_dml_distillation.yaml \
                            --model_file inference/PPTSMv2/PPTSMv2.pdmodel \
                            --params_file inference/PPTSMv2/PPTSMv2.pdiparams \
                            --use_gpu=True \
@@ -256,6 +257,7 @@ PaddleVideo 提供了基于 Paddle2ONNX 来完成 inference 模型转换 ONNX �
 
 | 模型名称 | 骨干网络 | 测试方式 | 采样帧数 | Top-1% | 训练模型 |
 | :------: | :----------: | :----: | :----: | :----: | :---- |
+| PP-TSMv2 | LCNet_v2 |  Uniform | 8 | 71.81 | [下载链接](https://videotag.bj.bcebos.com/PaddleVideo-release2.3/PPTSMv2_k400_8f.pdparams) |
 | PP-TSMv2 | LCNet_v2 |  Uniform | 16 | 73.1 | [下载链接](https://videotag.bj.bcebos.com/PaddleVideo-release2.3/PPTSMv2_k400_16f.pdparams) |
 | PP-TSM | MobileNetV2 |  Uniform | 8 | 68.09 | [下载链接](https://videotag.bj.bcebos.com/PaddleVideo-release2.3/ppTSM_mv2_k400.pdparams) |
 | PP-TSM | MobileNetV3 |  Uniform | 8 | 69.84 | [下载链接](https://videotag.bj.bcebos.com/PaddleVideo-release2.3/ppTSM_mv3_k400.pdparams) |
@@ -268,6 +270,7 @@ PaddleVideo 提供了基于 Paddle2ONNX 来完成 inference 模型转换 ONNX �
 
 | 模型名称 | 骨干网络 | 蒸馏方式 | 测试方式 | 采样帧数 | Top-1% | 训练模型 |
 | :------: | :----------: | :----: | :----: | :----: | :---- | :---- |
+| PP-TSMv2 | LCNet_v2 | DML | Uniform | 8 | 72.45 | [下载链接](https://videotag.bj.bcebos.com/PaddleVideo-release2.3/PPTSMv2_k400_8f_dml.pdparams) \| [Student模型](https://videotag.bj.bcebos.com/PaddleVideo-release2.3/PPTSMv2_k400_8f_dml_student.pdparams) |
 | PP-TSMv2 | LCNet_v2 | DML | Uniform | 16 | 74.38 | [下载链接](https://videotag.bj.bcebos.com/PaddleVideo-release2.3/PPTSMv2_k400_16f_dml.pdparams) \| [Student模型](https://videotag.bj.bcebos.com/PaddleVideo-release2.3/PPTSMv2_k400_16f_dml_student.pdparams) |
 | PP-TSM | ResNet50 | KD | Uniform | 8 | 75.11 | [下载链接](https://videotag.bj.bcebos.com/PaddleVideo-release2.1/PPTSM/ppTSM_k400_uniform_distill.pdparams) |
 | PP-TSM | ResNet50 | KD | Dense | 8 | 76.16 | [下载链接](https://videotag.bj.bcebos.com/PaddleVideo-release2.1/PPTSM/ppTSM_k400_dense_distill.pdparams) |
