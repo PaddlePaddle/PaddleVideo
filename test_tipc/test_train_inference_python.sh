@@ -371,6 +371,8 @@ else
                 # run train
                 eval "unset CUDA_VISIBLE_DEVICES"
                 eval $cmd
+                # display log for benchmark train
+                eval "cat ${LOG_PATH}/train.log"
                 eval "cat ${LOG_PATH}/train.log >> ${save_log}.log"
                 status_check $? "${cmd}" "${status_log}" "${model_name}"
 
