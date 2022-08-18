@@ -1,0 +1,29 @@
+[ 2022-06-06 17:45:16,587 ] Saving folder path: ./log/EfficinetGCNB0/lite_train_lite_infer/norm_train_gpus_0/2001_infer_EfficientGCN-B0_ntu-xsub/2022-06-06 17-45-16
+[ 2022-06-06 17:45:16,587 ] Saving model name: None
+[ 2022-06-06 17:45:16,593 ] Dataset: ntu-xsub
+[ 2022-06-06 17:45:16,593 ] Batch size: train-16, eval-16
+[ 2022-06-06 17:45:16,593 ] Data shape (branch, channel, frame, joint, person): [3, 6, 288, 25, 2]
+[ 2022-06-06 17:45:16,593 ] Number of action classes: 60
+[ 2022-06-06 17:45:19,556 ] Model: EfficientGCN-B0 {'stem_channel': 64, 'block_args': [[48, 1, 0.5], [24, 1, 0.5], [64, 2, 1], [128, 2, 1]], 'fusion_stage': 2, 'act_type': 'swish', 'att_type': 'stja', 'layer_type': 'SG', 'drop_prob': 0.25, 'kernel_size': [5, 2], 'scale_args': [1.2, 1.35], 'expand_ratio': 0, 'reduct_ratio': 2, 'bias': True, 'edge': True}
+[ 2022-06-06 17:45:19,558 ] LR_Scheduler: cosine {'max_epoch': 1, 'warm_up': 10}
+[ 2022-06-06 17:45:19,559 ] Optimizer: Momentum {'learning_rate': <paddle.optimizer.lr.LambdaDecay object at 0x7fa4bdb30510>, 'momentum': 0.9, 'use_nesterov': True, 'weight_decay': 0.0001}
+[ 2022-06-06 17:45:19,560 ] Loss function: CrossEntropyLoss
+[ 2022-06-06 17:45:19,560 ] Successful!
+[ 2022-06-06 17:45:19,560 ] 
+[ 2022-06-06 17:45:19,560 ] Starting training ...
+[ 2022-06-06 17:45:37,437 ] Epoch: 1/1, Training accuracy: 16/800(2.00%), Training time: 17.88s
+[ 2022-06-06 17:45:37,437 ] 
+[ 2022-06-06 17:45:37,437 ] Evaluating for epoch 1/1 ...
+[ 2022-06-06 17:45:43,942 ] Top-1 accuracy: 19/800(2.38%), Top-5 accuracy: 79/800(9.88%), Mean loss:4.6169
+[ 2022-06-06 17:45:43,942 ] Evaluating time: 6.50s, Speed: 123.02 sequnces/(second*GPU)
+[ 2022-06-06 17:45:43,943 ] 
+[ 2022-06-06 17:45:43,943 ] Saving model for epoch 1/1 ...
+[ 2022-06-06 17:45:43,973 ] Best top-1 accuracy: 2.38%, Total time: 00d-00h-00m-24s
+[ 2022-06-06 17:45:43,973 ] 
+[ 2022-06-06 17:45:43,973 ] Finish training!
+[ 2022-06-06 17:45:43,973 ] 
+ 2022-06-06 17:45:43,943 ] Saving model for epoch 1/1 ...
+[ 2022-06-06 17:45:43,973 ] Best top-1 accuracy: 2.38%, Total time: 00d-00h-00m-24s
+[ 2022-06-06 17:45:43,973 ] 
+[ 2022-06-06 17:45:43,973 ] Finish training!
+[ 2022-06-06 17:45:43,973 ] 
