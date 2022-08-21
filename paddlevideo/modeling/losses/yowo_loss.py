@@ -20,7 +20,7 @@ from paddle.static import Variable
 
 from ..registry import LOSSES
 from .base import BaseWeightedLoss
-from ..yowo_utils import build_targets
+from ..framework.localizers.yowo_utils import build_targets
 
 
 class FocalLoss(nn.Layer):
