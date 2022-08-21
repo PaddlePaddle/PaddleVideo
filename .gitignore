@@ -5,6 +5,7 @@ __pycache__/
 *.swp
 *.swo
 *.swn
+.DS_Store
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

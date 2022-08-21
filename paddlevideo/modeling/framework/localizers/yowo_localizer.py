@@ -12,9 +12,7 @@
 
 from ...registry import LOCALIZERS
 from .base import BaseLocalizer
-from ...yowo_utils import truths_length, nms, get_region_boxes, bbox_iou
-
-import paddle
+from .yowo_utils import truths_length, nms, get_region_boxes, bbox_iou
 
 
 @LOCALIZERS.register()

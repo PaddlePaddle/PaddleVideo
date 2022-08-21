@@ -3,8 +3,8 @@ MODEL: #MODEL field
     backbone: #Mandatory, indicate the type of backbone, associate to the 'paddlevideo/modeling/backbones/' .
         name: "YOWO" #Mandatory, The name of backbone.
         num_class: 24
-        pretrained_2d: "data/ucf24/yolo.weights"
-        pretrained_3d: "data/ucf24/resnext-101-kinetics.pdparams"
+        pretrained_2d: "data/ucf24/darknet.pdparam"
+        pretrained_3d: "data/ucf24/resnext101_kinetics.pdparams"
     loss:
         name: "RegionLoss"
         num_classes: 24

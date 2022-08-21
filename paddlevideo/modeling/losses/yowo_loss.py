@@ -88,25 +88,6 @@ class FocalLoss(nn.Layer):
         return loss
 
 
-class AverageMeter(object):
-    """Computes and stores the average and current value"""
-
-    def __init__(self):
-        self.reset()
-
-    def reset(self):
-        self.val = 0
-        self.avg = 0
-        self.sum = 0
-        self.count = 0
-
-    def update(self, val, n=1):
-        self.val = val
-        self.sum += val * n
-        self.count += n
-        self.avg = self.sum / self.count
-
-
 @LOSSES.register()
 class RegionLoss(BaseWeightedLoss):
     # for our model anchors has 10 values and number of anchors is 5
@@ -148,12 +129,12 @@ class RegionLoss(BaseWeightedLoss):
         output = paddle.reshape(output, [nB, nA, (5 + nC), nH, nW])
         # anchor's parameter tx
 
-        x = paddle.nn.functional.sigmoid(
+        x = F.sigmoid(
             paddle.reshape(paddle.index_select(output, paddle.to_tensor([0], dtype='int64').cuda(), axis=2),
                            [nB, nA, nH, nW]))
         x.stop_gradient = False
         # anchor's parameter ty
-        y = paddle.nn.functional.sigmoid(
+        y = F.sigmoid(
             paddle.reshape(paddle.index_select(output, paddle.to_tensor([1], dtype='int64').cuda(), axis=2),
                            [nB, nA, nH, nW]))
         y.stop_gradient = False
@@ -166,7 +147,7 @@ class RegionLoss(BaseWeightedLoss):
                            [nB, nA, nH, nW])
         h.stop_gradient = False
         # confidence score for each anchor
-        conf = paddle.nn.functional.sigmoid(
+        conf = F.sigmoid(
             paddle.reshape(paddle.index_select(output, paddle.to_tensor([4], dtype='int64').cuda(), axis=2),
                            [nB, nA, nH, nW]))
         conf.stop_gradient = False

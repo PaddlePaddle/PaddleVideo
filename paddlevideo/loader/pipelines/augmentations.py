@@ -1409,22 +1409,19 @@ class YowoAug(object):
             label = self._fill_truth_detection(labpath, flip, dx, dy, 1. / sx, 1. / sy)
 
         else:
-            label = paddle.zeros([50 * 5])
-            tmp = paddle.to_tensor(self._read_truths_args(labpath, 8.0 / clip[0].width).astype('float32'))
-            tmp = paddle.reshape(tmp, [-1])
-            tsz = paddle.numel(tmp)
+            label = np.zeros([50 * 5])
+            tmp = self._read_truths_args(labpath, 8.0 / clip[0].width).astype('float32')
+            tmp = np.reshape(tmp, [-1])
+            tsz = tmp.size
             if tsz > 50 * 5:
                 label = tmp[0:50 * 5]
             elif tsz > 0:
                 label[0:tsz] = tmp
             clip = [img.resize(self.shape) for img in clip]
 
-        transform = paddle.vision.transforms.ToTensor()
-        clip = [transform(img) for img in clip]
-
-        # (self.duration, -1) + self.shape = (8, -1, 224, 224)
-        clip = paddle.concat(clip, 0).reshape([frame_num, -1, 224, 224])
-        clip = paddle.transpose(clip, [1, 0, 2, 3])
+        clip = [np.asarray(img).astype('float32') / 255.0 for img in clip]
+        clip = np.concatenate(clip, 0).reshape([frame_num, 224, 224, 3])
+        clip = np.transpose(clip, [3, 0, 1, 2])
         results['imgs'] = clip
         results['labels'] = label
         return results

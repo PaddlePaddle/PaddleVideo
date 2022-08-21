@@ -1,10 +1,10 @@
-# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.
+# copyright (c) 2021 PaddlePaddle Authors. All Rights Reserve.
 #
-# Licensed under the Apache License, Version 2.0 (the "License"
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#    http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -57,7 +57,8 @@ def convert2cpu_long(gpu_matrix):
 
 
 def get_region_boxes(output, conf_thresh=0.005, num_classes=24,
-                     anchors=[0.70458, 1.18803, 1.26654, 2.55121, 1.59382, 4.08321, 2.30548, 4.94180, 3.52332, 5.91979],
+                     anchors=[0.70458, 1.18803, 1.26654, 2.55121, 1.59382,
+                              4.08321, 2.30548, 4.94180, 3.52332, 5.91979],
                      num_anchors=5, only_objectness=1, validation=False):
     anchor_step = len(anchors) // num_anchors
     if output.dim() == 3:
@@ -67,9 +68,11 @@ def get_region_boxes(output, conf_thresh=0.005, num_classes=24,
     h = output.shape[2]
     w = output.shape[3]
     all_boxes = []
-    output = paddle.reshape(output, [batch * num_anchors, 5 + num_classes, h * w])
+    output = paddle.reshape(
+        output, [batch * num_anchors, 5 + num_classes, h * w])
     output = paddle.transpose(output, (1, 0, 2))
-    output = paddle.reshape(output, [5 + num_classes, batch * num_anchors * h * w])
+    output = paddle.reshape(
+        output, [5 + num_classes, batch * num_anchors * h * w])
 
     grid_x = paddle.linspace(0, w - 1, w)
     grid_x = paddle.tile(grid_x, [h, 1])
@@ -87,11 +90,13 @@ def get_region_boxes(output, conf_thresh=0.005, num_classes=24,
 
     anchor_w = paddle.to_tensor(anchors)
     anchor_w = paddle.reshape(anchor_w, [num_anchors, anchor_step])
-    anchor_w = paddle.index_select(anchor_w, index=paddle.to_tensor(np.array([0]).astype('int32')), axis=1)
+    anchor_w = paddle.index_select(anchor_w, index=paddle.to_tensor(
+        np.array([0]).astype('int32')), axis=1)
 
     anchor_h = paddle.to_tensor(anchors)
     anchor_h = paddle.reshape(anchor_h, [num_anchors, anchor_step])
-    anchor_h = paddle.index_select(anchor_h, index=paddle.to_tensor(np.array([1]).astype('int32')), axis=1)
+    anchor_h = paddle.index_select(anchor_h, index=paddle.to_tensor(
+        np.array([1]).astype('int32')), axis=1)
 
     anchor_w = paddle.tile(anchor_w, [batch, 1])
     anchor_w = paddle.tile(anchor_w, [1, 1, h * w])
@@ -116,7 +121,6 @@ def get_region_boxes(output, conf_thresh=0.005, num_classes=24,
 
     cls_max_confs = paddle.reshape(cls_max_confs, [-1])
     cls_max_ids = paddle.reshape(cls_max_ids, [-1])
-
 
     sz_hw = h * w
     sz_hwa = sz_hw * num_anchors
@@ -149,7 +153,8 @@ def get_region_boxes(output, conf_thresh=0.005, num_classes=24,
                         bh = hs[ind]
                         cls_max_conf = cls_max_confs[ind]
                         cls_max_id = cls_max_ids[ind]
-                        box = [bcx / w, bcy / h, bw / w, bh / h, det_conf, cls_max_conf, cls_max_id]
+                        box = [bcx / w, bcy / h, bw / w, bh / h,
+                               det_conf, cls_max_conf, cls_max_id]
                         if (not only_objectness) and validation:
                             for c in range(num_classes):
                                 tmp_conf = cls_confs[ind][c]
@@ -172,10 +177,14 @@ def bbox_iou(box1, box2, x1y1x2y2=True):
         w2 = box2[2] - box2[0]
         h2 = box2[3] - box2[1]
     else:
-        mx = min(float(box1[0] - box1[2] / 2.0), float(box2[0] - box2[2] / 2.0))
-        Mx = max(float(box1[0] + box1[2] / 2.0), float(box2[0] + box2[2] / 2.0))
-        my = min(float(box1[1] - box1[3] / 2.0), float(box2[1] - box2[3] / 2.0))
-        My = max(float(box1[1] + box1[3] / 2.0), float(box2[1] + box2[3] / 2.0))
+        mx = min(float(box1[0] - box1[2] / 2.0),
+                 float(box2[0] - box2[2] / 2.0))
+        Mx = max(float(box1[0] + box1[2] / 2.0),
+                 float(box2[0] + box2[2] / 2.0))
+        my = min(float(box1[1] - box1[3] / 2.0),
+                 float(box2[1] - box2[3] / 2.0))
+        My = max(float(box1[1] + box1[3] / 2.0),
+                 float(box2[1] + box2[3] / 2.0))
         w1 = box1[2]
         h1 = box1[3]
         w2 = box2[2]
@@ -206,10 +215,14 @@ def bbox_ious(boxes1, boxes2, x1y1x2y2=True):
         w2 = boxes2[2] - boxes2[0]
         h2 = boxes2[3] - boxes2[1]
     else:
-        mx = paddle.min(paddle.stack([boxes1[0] - boxes1[2] / 2.0, boxes2[0] - boxes2[2] / 2.0], axis=0), axis=0)
-        Mx = paddle.max(paddle.stack([boxes1[0] + boxes1[2] / 2.0, boxes2[0] + boxes2[2] / 2.0], axis=0), axis=0)
-        my = paddle.min(paddle.stack([boxes1[1] - boxes1[3] / 2.0, boxes2[1] - boxes2[3] / 2.0], axis=0), axis=0)
-        My = paddle.max(paddle.stack([boxes1[1] + boxes1[3] / 2.0, boxes2[1] + boxes2[3] / 2.0], axis=0), axis=0)
+        mx = paddle.min(paddle.stack(
+            [boxes1[0] - boxes1[2] / 2.0, boxes2[0] - boxes2[2] / 2.0], axis=0), axis=0)
+        Mx = paddle.max(paddle.stack(
+            [boxes1[0] + boxes1[2] / 2.0, boxes2[0] + boxes2[2] / 2.0], axis=0), axis=0)
+        my = paddle.min(paddle.stack(
+            [boxes1[1] - boxes1[3] / 2.0, boxes2[1] - boxes2[3] / 2.0], axis=0), axis=0)
+        My = paddle.max(paddle.stack(
+            [boxes1[1] + boxes1[3] / 2.0, boxes2[1] + boxes2[3] / 2.0], axis=0), axis=0)
         w1 = boxes1[2]
         h1 = boxes1[3]
         w2 = boxes2[2]
@@ -218,7 +231,8 @@ def bbox_ious(boxes1, boxes2, x1y1x2y2=True):
     uh = My - my
     cw = w1 + w2 - uw
     ch = h1 + h2 - uh
-    mask = paddle.cast(cw <= 0, dtype="int32") + paddle.cast(ch <= 0, dtype="int32") > 0
+    mask = paddle.cast(cw <= 0, dtype="int32") + \
+        paddle.cast(ch <= 0, dtype="int32") > 0
     area1 = w1 * h1
     area2 = w2 * h2
     carea = cw * ch
@@ -267,7 +281,8 @@ def build_targets(pred_boxes, target, anchors, num_anchors, num_classes, nH, nW,
             gw = target[b][t * 5 + 3] * nW
             gh = target[b][t * 5 + 4] * nH
             # groud truth boxes
-            cur_gt_boxes = paddle.tile(paddle.to_tensor([gx, gy, gw, gh], dtype='float32').t(), [nAnchors, 1]).t()
+            cur_gt_boxes = paddle.tile(paddle.to_tensor(
+                [gx, gy, gw, gh], dtype='float32').t(), [nAnchors, 1]).t()
             # bbox_ious is the iou value between orediction and groud truth
             cur_ious = paddle.max(
                 paddle.stack([cur_ious, bbox_ious(cur_pred_boxes, cur_gt_boxes, x1y1x2y2=False)], axis=0), axis=0)
@@ -315,7 +330,8 @@ def build_targets(pred_boxes, target, anchors, num_anchors, num_classes, nH, nW,
             # then we determine the parameters for an anchor (4 values together)
             gt_box = [gx, gy, gw, gh]
             # find corresponding prediction box
-            pred_box = pred_boxes[b * nAnchors + best_n * nPixels + gj * nW + gi]
+            pred_box = pred_boxes[b * nAnchors +
+                                  best_n * nPixels + gj * nW + gi]
 
             # only consider the best anchor box, for each image
             coord_mask[b, best_n, gj, gi] = 1
@@ -323,14 +339,19 @@ def build_targets(pred_boxes, target, anchors, num_anchors, num_classes, nH, nW,
 
             # in this cell of the output feature map, there exists an object
             conf_mask[b, best_n, gj, gi] = object_scale
-            tx[b, best_n, gj, gi] = paddle.cast(target[b][t * 5 + 1] * nW - gi, dtype='float32')
-            ty[b, best_n, gj, gi] = paddle.cast(target[b][t * 5 + 2] * nH - gj, dtype='float32')
-            tw[b, best_n, gj, gi] = math.log(gw / anchors[anchor_step * best_n])
-            th[b, best_n, gj, gi] = math.log(gh / anchors[anchor_step * best_n + 1])
+            tx[b, best_n, gj, gi] = paddle.cast(
+                target[b][t * 5 + 1] * nW - gi, dtype='float32')
+            ty[b, best_n, gj, gi] = paddle.cast(
+                target[b][t * 5 + 2] * nH - gj, dtype='float32')
+            tw[b, best_n, gj, gi] = math.log(
+                gw / anchors[anchor_step * best_n])
+            th[b, best_n, gj, gi] = math.log(
+                gh / anchors[anchor_step * best_n + 1])
             iou = bbox_iou(gt_box, pred_box, x1y1x2y2=False)  # best_iou
             # confidence equals to iou of the corresponding anchor
             tconf[b, best_n, gj, gi] = paddle.cast(iou, dtype='float32')
-            tcls[b, best_n, gj, gi] = paddle.cast(target[b][t * 5], dtype='float32')
+            tcls[b, best_n, gj, gi] = paddle.cast(
+                target[b][t * 5], dtype='float32')
             # if ious larger than 0.5, we justify it as a correct prediction
             if iou > 0.5:
                 nCorrect = nCorrect + 1

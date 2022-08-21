@@ -1,6 +1,6 @@
 [English](../../../en/model_zoo/localization/yowo.md) | 简体中文
 
-# YOWO 视频动作定位模型
+# YOWO 视频动作检测模型
 
 ## 内容
 
@@ -17,7 +17,7 @@
 YOWO是具有两个分支的单阶段网络。一个分支通过2D-CNN提取关键帧（即当前帧）的空间特征，而另一个分支则通过3D-CNN获取由先前帧组成的剪辑的时空特征。为准确汇总这些特征，YOWO使用了一种通道融合和关注机制，最大程度地利用了通道间的依赖性。最后将融合后的特征进行帧级检测。
 
 <div align="center">
-<img src="../../../images/yowo.png">
+<img src="../../../images/yowo.jpg">
 </div>
 
 
@@ -35,8 +35,8 @@ UCF101-24数据下载及准备请参考[UCF101-24数据准备](../../dataset/ucf
 1. 下载预训练模型 [resnext-101-kinetics](https://aistudio.baidu.com/aistudio/datasetdetail/145592) 和 [yolo](https://aistudio.baidu.com/aistudio/datasetdetail/145592) 作为Backbone初始化参数，或通过wget命令下载
 
    ```bash
-    wget -nc -O yolo.weights https://bj.bcebos.com/v1/ai-studio-online/8559f34317e642c888783b81b9fef55f8750ef4b7e924feaac8899f3ab0b151f?responseContentDisposition=attachment%3B%20filename_yolo.weights
-    wget -nc -O resnext-101-kinetics.pdparams https://bj.bcebos.com/v1/ai-studio-online/cf96b0278a944363bc238cfca727474f889a17f7015746d99523e7068d64e96b?responseContentDisposition=attachment%3B%20filename%3Dresnext-101-kinetics.pdparams&authorization=bce-auth-v1%2F0ef6765c1e494918bc0d4c3ca3e5c6d1%2F2022-05-17T11%3A35%3A40Z%2F-1%2F%2F4a587997708b3c582cbb2f98c8b7d02c395de3ef34e71b918789c761b3feae14
+    wget -nc -O yolo.weights https://videotag.bj.bcebos.com/PaddleVideo-release2.3/yolo.weight
+    wget -nc -O resnext-101-kinetics.pdparams https://videotag.bj.bcebos.com/PaddleVideo-release2.3/resnext-101-kinetics.pdparams
    ```
 
 2. 打开`PaddleVideo/configs/localization/yowo.yaml`，将下载好的权重存放路径分别填写到下方`pretrained_2d:`和`pretrained_3d:`之后
@@ -87,7 +87,7 @@ UCF101-24数据下载及准备请参考[UCF101-24数据准备](../../dataset/ucf
 
   | Model    | 3D-CNN backbone | 2D-CNN backbone | Dataset  |Input    | Frame-mAP <br>(@ IoU 0.5)    |   checkpoints  |
   | :-----------: | :-----------: | :-----------: | :-----------: | :-----------: | :-----------: | :-----------: |
-  | YOWO | 3D-ResNext-101 | Darknet-19 | UCF101-24 | 16-frames, d=1 | 80.83 | [YOWO.pdparams](https://pan.baidu.com/s/1RznZpYpZxoZg9XiUWNkQWQ?pwd=r5g3) |
+  | YOWO | 3D-ResNext-101 | Darknet-19 | UCF101-24 | 16-frames, d=1 | 80.83 | [YOWO.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.3/YOWO_epoch_00005.pdparams) |
 
 
 ## 模型推理
