@@ -118,3 +118,7 @@ PaddleVideo自研并开源了PP-TSM，该模型基于TSM进行优化，在保持
 - [BMN视频动作定位](https://aistudio.baidu.com/aistudio/projectdetail/2250674)
 - [花样滑冰选手骨骼点动作识别ST-GCN教程](https://aistudio.baidu.com/aistudio/projectdetail/2417717)
 - [【实践】CV领域的Transformer模型TimeSformer实现视频理解](https://aistudio.baidu.com/aistudio/projectdetail/3413254?contributionType=1)
+
+## 4. Benchmark
+
+各模型训练推理速度参考 [Benchmark](../benchmark.md).
