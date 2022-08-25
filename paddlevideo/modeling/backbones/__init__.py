@@ -42,6 +42,7 @@ from .cfbi import CFBI
 from .ctrgcn import CTRGCN
 from .agcn2s import AGCN2s
 from .movinet import MoViNet
+from .resnet3d_slowonly import ResNet3dSlowOnly
 from .toshift_vit import TokenShiftVisionTransformer
 from .pptsm_mv2 import PPTSM_MobileNetV2
 from .pptsm_mv3 import PPTSM_MobileNetV3
@@ -55,5 +56,5 @@ __all__ = [
     'ASRF', 'MoViNet', 'SwinTransformer3D', 'CTRGCN',
     'TokenShiftVisionTransformer', 'AGCN2s', 'PPTSM_MobileNetV2', 'PPTSM_v2'
     'TokenShiftVisionTransformer', 'AGCN2s', 'PPTSM_MobileNetV2',
-    'PPTSM_MobileNetV3', 'PPTSM_v2'
+    'PPTSM_MobileNetV3', 'PPTSM_v2', 'ResNet3dSlowOnly'
 ]

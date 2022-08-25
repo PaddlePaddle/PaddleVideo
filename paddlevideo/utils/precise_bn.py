@@ -16,6 +16,7 @@ import paddle
 import itertools
 
 from paddlevideo.utils import get_logger
+
 logger = get_logger("paddlevideo")
 """
 Implement precise bn, which is useful for improving accuracy.
@@ -66,22 +67,16 @@ def do_preciseBN(model,
 
     ind = -1
     for ind, data in enumerate(itertools.islice(data_loader, num_iters)):
-        logger.info("Computing precise BN {} / {}...".format(ind + 1, num_iters))
+        logger.info("Computing precise BN {} / {}...".format(
+            ind + 1, num_iters))
 
-        if parallel:
-            if use_amp:
-                with paddle.amp.auto_cast(custom_black_list={"reduce_mean"},
-                                          level=amp_level):
-                    model._layers.train_step(data)
-            else:
-                model._layers.train_step(data)
+        if use_amp:
+            with paddle.amp.auto_cast(
+                    custom_black_list={"reduce_mean",
+                                       "conv3d"}, level=amp_level):
+                model(data, mode='train')
         else:
-            if use_amp:
-                with paddle.amp.auto_cast(custom_black_list={"reduce_mean"},
-                                          level=amp_level):
-                    model.train_step(data)
-            else:
-                model.train_step(data)
+            model(data, mode='train')
 
         for i, bn in enumerate(bn_layers_list):
             # Accumulates the bn stats.
