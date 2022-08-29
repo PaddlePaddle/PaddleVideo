@@ -1,42 +1,18 @@
-# Applications
+# 应用案例
 
-- [FootballAction](FootballAction): Football action detection solution
+## 1. 概览
 
-<div align="center">
-  <img src="../docs/images/FootballAction.gif" width=250/></div>
-
-- [BasketballAction](BasketballAction): Basketball action detection solution
-
-<div align="center">
-  <img src="BasketballAction/images/BasketballAction_demo.gif" width=250/></div>
-
-- [TableTennis](TableTennis): Table tennis action recognition solution
-
-
-- [FigureSkating](FigureSkating): Figure skating action recognition solution
-
-<div align="center">
-  <img src="FigureSkating/Alex.gif" width=250/></div>
-
-- [VideoTag](VideoTag): 3000-category large-scale video classification solution
-
-<div align="center">
-  <img src="../docs/images/VideoTag.gif" width=250/></div>
-
-- [MultimodalVideoTag](MultimodalVideoTag): Multimodal video classification solution
-
-<div align="center">
-  <img src="MultimodalVideoTag/images/show.gif" width=250/></div>
-
-- [VideoQualityAssessment](VideoQualityAssessment): Video quality assessment solution
-
-
-- [PP-Care](PP-Care): 3DMRI medical image recognition solution
-
-
-- [EIVideo](EIVideo): Interactive video segmentation tool
-
-<div align="center">
-  <img src="https://ai-studio-static-online.cdn.bcebos.com/f792bac0dd3b4f44ade7d744b58e908e2a85ed8718b541cfb6b2ce9fc8ad4374" width=250/></div>
-
-- [Anti-UAV](Anti-UAV): UAV detection solution
+| Applications | Descriptions |
+| :--------------- | :-------- |
+| [FootballAction](./FootballAction) | 足球动作检测方案|
+| [BasketballAction](./BasketballAction) | 篮球动作检测方案 |
+| [TableTennis](./TableTennis) | 乒乓球动作识别方案|
+| [FigureSkating](./FigureSkating) | 花样滑冰动作识别方案|
+| [VideoTag](./VideoTag) | 3000类大规模视频分类方案 |
+| [MultimodalVideoTag](./MultimodalVideoTag) | 多模态视频分类方案|
+| [VideoQualityAssessment](.s/VideoQualityAssessment) | 视频质量评估方案|
+| [PP-Care](./PP-Care) | 3DMRI医疗图像识别方案 |
+| [EIVideo](./EIVideo) | 视频交互式分割工具|
+| [Anti-UAV](./Anti-UAV) |无人机检测方案|
+| [AbnormalActionDetection](./AbnormalActionDetection) |异常行为检测方案|
+| [PP-Human](./PPHuman) | 行人分析场景动作识别方案 |

@@ -100,6 +100,11 @@ MIX:
     name: "Mixup"
     alpha: 0.2
 
+INFERENCE:
+    name: 'ppTSM_Inference_helper'
+    num_seg: 8
+    target_size: 224
+
 PRECISEBN:
   preciseBN_interval: 5     # epoch interval to do preciseBN, default 1.
   num_iters_preciseBN: 200  # how many batches used to do preciseBN, default 200.
@@ -113,7 +118,7 @@ INFERENCE:
     num_seg: 8
     target_size: 224
 
-model_name: "ppTSM_mv2"
+model_name: "ppTSM"
 log_interval: 10 #Optional, the interal of logger, default:10
 epochs: 80 #Mandatory, total epoch
 log_level: "INFO" #Optional, the logger level. default: "INFO"

@@ -62,10 +62,13 @@ pip3.7 install --upgrade -r requirements.txt
 
 **Install python package**
 
-Install PaddleVideo via pip <sup>WIP</sup>
+```bash
+pip3.7 install ppvideo==2.3.0
+```
 
-**Install docker**
-
-Install PaddleVideo via docker <sup>WIP</sup> 
+use scripts:
+```bash
+ppvideo --model_name='ppTSM_v2' --use_gpu=False --video_file='data/example.avi'
+```
 
 

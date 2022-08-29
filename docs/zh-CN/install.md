@@ -76,12 +76,14 @@ pip3.7 install --upgrade -r requirements.txt
 使用pypi安装
 
 ```bash
-pip install paddlevideo==0.0.1
+pip3.7 install ppvideo==2.3.0
 ```
 
 安装完成后，可以使用命令行方式启动程序
 ```bash
-ppvideo --model_name='ppTSM' --video_file='data/example.avi'
+ppvideo --model_name='ppTSM_v2' --use_gpu=False --video_file='data/example.avi'
 ```
+
+wheel包更多的使用教程可以参考[快速开始](./quick_start.md)
 
 ---

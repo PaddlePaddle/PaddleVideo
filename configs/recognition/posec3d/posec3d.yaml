@@ -1,0 +1,168 @@
+MODEL: #MODEL field
+    framework: "Recognizer3D"
+    backbone:
+        name: "ResNet3dSlowOnly"
+        depth: 50 # Not Optional, only 50 now.
+        in_channels: 17
+        base_channels: 32
+        conv1_kernel: [1, 7, 7]
+        num_stages: 3
+        out_indices: [2]
+        stage_blocks: [3, 4, 6]
+        conv1_stride_s: 1
+        pool1_stride_s: 1
+        inflate: [0, 1, 1]
+        with_pool2: False
+        spatial_strides: [2, 2, 2]
+        temporal_strides: [1, 1, 2]
+        dilations: [1, 1, 1]
+    head:
+        name: "I3DHead"
+        num_classes: 101
+        in_channels: 512
+        spatial_type: "avg"
+        drop_ratio: 0.5
+        ls_eps: 0.1
+
+DATASET: #DATASET field
+    batch_size: 16  #single card bacth size
+    valid_batch_size: 16
+    test_batch_size: 1
+    num_workers: 8
+    train:
+        format: "UCF101SkeletonDataset"
+        split: "train1"
+        file_path: "data/ucf101.pkl" #Mandatory, train data index file path
+        repeat_times: 10
+
+    valid:
+        format: "UCF101SkeletonDataset"
+        split: "test1"
+        file_path: "data/ucf101.pkl" #Mandatory, valid data index file path
+        repeat_times: 1
+
+    test:
+      format: "UCF101SkeletonDataset"
+      split: "test1"
+      file_path: "data/ucf101.pkl" #Mandatory, valid data index file path
+      repeat_times: 1
+
+
+PIPELINE:
+    train:
+        decode_sampler:
+            name: "UniformSampleFrames"
+            clip_len: 48
+        transform: #Mandotary, image transfrom operator
+            - PoseDecode:
+            - PoseCompact:
+                hw_ratio: 1.0
+                allow_imgpad: True
+            - Resize:
+                scale: (-1, 64)
+            - RandomResizedCrop_V2:
+                area_range: (0.56, 1.0)
+            - Resize:
+                  scale: (48, 48)
+                  keep_ratio: False
+            - Flip_V2:
+                  flip_ratio: 0.5
+                  left_kp: [1, 3, 5, 7, 9, 11, 13, 15]
+                  right_kp: [2, 4, 6, 8, 10, 12, 14, 16]
+            - GeneratePoseTarget:
+                  sigma: 0.6
+                  use_score: True
+                  with_kp: True
+                  with_limb: False
+            - FormatShape:
+                  input_format: 'NCTHW'
+            - Collect:
+                  keys: ['imgs', 'label']
+                  meta_keys: []
+
+    valid:
+        decode_sampler:
+            name: "UniformSampleFrames"
+            clip_len: 48
+            num_clips: 1
+            test_mode: True
+        transform: #Mandotary, image transfrom operator
+            - PoseDecode:
+            - PoseCompact:
+                hw_ratio: 1.0
+                allow_imgpad: True
+            - Resize:
+                scale: (-1, 56)
+            - CenterCrop_V2:
+                crop_size: 56
+            - GeneratePoseTarget:
+                sigma: 0.6
+                use_score: True
+                with_kp: True
+                with_limb: False
+            - FormatShape:
+                  input_format: 'NCTHW'
+            - Collect:
+                  keys: ['imgs', 'label']
+                  meta_keys: []
+    test:
+      decode_sampler:
+        name: "UniformSampleFrames"
+        clip_len: 48
+        num_clips: 10
+        test_mode: True
+      transform: #Mandotary, image transfrom operator
+        - PoseDecode:
+        - PoseCompact:
+            hw_ratio: 1.0
+            allow_imgpad: True
+        - Resize:
+            scale: (-1, 56)
+        - CenterCrop_V2:
+            crop_size: 56
+        - GeneratePoseTarget:
+            sigma: 0.6
+            use_score: True
+            with_kp: True
+            with_limb: False
+        - FormatShape:
+            input_format: 'NCTHW'
+        - Collect:
+            keys: [ 'imgs', 'label' ]
+            meta_keys: [ ]
+
+OPTIMIZER: #OPTIMIZER field
+    name: 'Momentum'
+    momentum: 0.9
+    learning_rate:
+        name: 'MultiStepDecay'
+        learning_rate: 1.25e-3
+        milestones: [9, 11]
+        gamma: 0.1
+    weight_decay:
+        name: 'L2'
+        value: 3e-4
+    use_nesterov: False
+    grad_clip:
+        name: 'ClipGradByGlobalNorm'
+        value: 40.0
+
+
+METRIC:
+   name: 'SkeletonMetric'
+   out_file: 'submission.csv'
+
+PRECISEBN:
+    preciseBN_interval: 2
+    num_iters_preciseBN: 200  #default
+
+
+INFERENCE:
+    name: 'PoseC3D_Inference_helper'
+    top_k: 1
+
+model_name: PoseC3D
+save_interval: 10
+val_interval: 10
+epochs: 12 #Mandatory, total epoch
+log_level: "INFO"

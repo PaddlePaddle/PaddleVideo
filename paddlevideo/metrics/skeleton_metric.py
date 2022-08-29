@@ -50,6 +50,12 @@ class SkeletonMetric(BaseMetric):
     def update(self, batch_id, data, outputs):
         """update metrics during each iter
         """
+        if data[0].shape[0] != outputs.shape[0]:
+            num_segs = data[0].shape[1]
+            batch_size = outputs.shape[0]
+            outputs = outputs.reshape(
+                [batch_size // num_segs, num_segs, outputs.shape[-1]])
+            outputs = outputs.mean(axis=1)
         if len(data) == 2:  # data with label
             labels = data[1]
             top1 = paddle.metric.accuracy(input=outputs, label=labels, k=1)

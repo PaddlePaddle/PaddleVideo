@@ -51,8 +51,11 @@ function func_serving(){
     set_serving_client=$(func_set_params "${serving_client_key}" "${serving_client_value}")
     python_list=(${python_list})
     python=${python_list[0]}
-    trans_model_cmd="${python} ${trans_model_py} ${set_dirname} ${set_model_filename} ${set_params_filename} ${set_serving_server} ${set_serving_client}"
+    trans_log="${LOG_PATH}/cpp_trans_model.log"
+    trans_model_cmd="${python} ${trans_model_py} ${set_dirname} ${set_model_filename} ${set_params_filename} ${set_serving_server} ${set_serving_client} > ${trans_log} 2>&1 "
     eval ${trans_model_cmd}
+    last_status=${PIPESTATUS[0]}
+    status_check $last_status "${trans_model_cmd}" "${status_log}" "${model_name}"
 
     # modify the alias name of fetch_var to "outputs"
     server_fetch_var_line_cmd="sed -i '/fetch_var/,/is_lod_tensor/s/alias_name: .*/alias_name: \"outputs\"/' $serving_server_value/serving_server_conf.prototxt"
@@ -64,9 +67,10 @@ function func_serving(){
     unset https_proxy
     unset http_proxy
 
-    _save_log_path="${LOG_PATH}/server_infer_gpu_batchsize_1.log"
+    _save_log_path="${LOG_PATH}/cpp_client_infer_gpu_batchsize_1.log"
     # phase 2: run server
-    cpp_server_cmd="${python} -m paddle_serving_server.serve ${run_model_path_key} ${run_model_path_value} ${port_key} ${port_value} &"
+    server_log_path="${LOG_PATH}/cpp_server_gpu.log"
+    cpp_server_cmd="${python} -m paddle_serving_server.serve ${run_model_path_key} ${run_model_path_value} ${port_key} ${port_value} > ${server_log_path} 2>&1 &"
     eval ${cpp_server_cmd}
     sleep 20s
 
@@ -80,7 +84,7 @@ function func_serving(){
 
     eval "cat ${_save_log_path}"
     cd ../../
-    status_check $last_status "${cpp_server_cmd}" "${status_log}"
+    status_check $last_status "${cpp_server_cmd}" "${status_log}" "${model_name}"
     ps ux | grep -i 'paddle_serving_server' | awk '{print $2}' | xargs kill -s 9
 }
 
