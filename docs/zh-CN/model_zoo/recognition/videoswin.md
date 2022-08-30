@@ -35,7 +35,9 @@ K400数据下载及准备请参考[Kinetics-400数据准备](../../dataset/k400.
 1. 下载图像预训练模型[swin_base_patch4_window7_224.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/swin_base_patch4_window7_224.pdparams)作为Backbone初始化参数，或通过wget命令下载
 
    ```bash
-   wget https://videotag.bj.bcebos.com/PaddleVideo-release2.2/swin_base_patch4_window7_224.pdparams
+   wget https://videotag.bj.bcebos.com/PaddleVideo-release2.2/swin_base_patch4_window7_224.pdparams # ImageNet pretrained model for VideoSwin_base
+
+   # wget https://videotag.bj.bcebos.com/PaddleVideorelease2.2/swin_small_patch4_window7_224.pdparams # Imagenet pretrained model for VideoSwin_small
    ```
 
 2. 打开`configs/recognition/videoswin/videoswin_base_k400_videos.yaml`，将下载好的权重存放路径填写到下方`pretrained:`之后
@@ -86,10 +88,10 @@ K400数据下载及准备请参考[Kinetics-400数据准备](../../dataset/k400.
 
   当测试配置采用如下参数时，在Kinetics-400的validation数据集上的测试指标如下：
 
-   |        backbone        | Sampling method | num_seg | target_size | Top-1 |                                                        checkpoints                                                         |
-   | :--------------------: | :-------------: | :-----: | :---------: | :---- | :------------------------------------------------------------------------------------------------------------------------: |
-   | Swin-Transformer_base  |   UniformCrop   |   32    |     224     | 82.40 |  [SwinTransformer_k400_base.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/VideoSwin_base_k400.pdparams)  |
-   | Swin-Transformer_small |   UniformCrop   |   32    |     224     | 80.18 | [SwinTransformer_k400_small.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/VideoSwin_small_k400.pdparams) |
+   |        backbone        | Sampling method | num_seg | target_size | Top-1 |                                                        checkpoints                                                         | pretrain model |
+   | :--------------------: | :-------------: | :-----: | :---------: | :---- | :------------------------------------------------------------------------------------------------------------------------: | :----: |
+   | Swin-Transformer_base  |   UniformCrop   |   32    |     224     | 82.40 |  [SwinTransformer_k400_base.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/VideoSwin_base_k400.pdparams)  | [swin_base_patch4_window7_224.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/swin_base_patch4_window7_224.pdparams) |
+   | Swin-Transformer_small |   UniformCrop   |   32    |     224     | 80.18 | [SwinTransformer_k400_small.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/VideoSwin_small_k400.pdparams) | [swin_small_patch4_window7_224.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/swin_small_patch4_window7_224.pdparams) |
 
 ## 模型推理
 

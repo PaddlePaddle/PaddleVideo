@@ -33,7 +33,9 @@ K400 data download and preparation please refer to [Kinetics-400 data preparatio
 1. Download the image pre-training model [swin_base_patch4_window7_224.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/swin_base_patch4_window7_224.pdparams) as the Backbone initialization parameter, or download it through the wget command
 
    ```bash
-   wget https://videotag.bj.bcebos.com/PaddleVideo-release2.2/swin_base_patch4_window7_224.pdparams
+   wget https://videotag.bj.bcebos.com/PaddleVideo-release2.2/swin_base_patch4_window7_224.pdparams # ImageNet pretrained model for VideoSwin_base
+
+   # wget https://videotag.bj.bcebos.com/PaddleVideorelease2.2/swin_small_patch4_window7_224.pdparams # Imagenet pretrained model for VideoSwin_small
    ```
 
 2. Open `configs/recognition/videoswin/videoswin_base_k400_videos.yaml`, and fill in the downloaded weight storage path below `pretrained:`
@@ -84,10 +86,10 @@ K400 data download and preparation please refer to [Kinetics-400 data preparatio
 
   When the test configuration uses the following parameters, the test indicators on the validation data set of Kinetics-400 are as follows:
 
-   |        backbone        | Sampling method | num_seg | target_size | Top-1 |                                                        checkpoints                                                         |
-   | :--------------------: | :-------------: | :-----: | :---------: | :---- | :------------------------------------------------------------------------------------------------------------------------: |
-   | Swin-Transformer_base  |   UniformCrop   |   32    |     224     | 82.40 |  [SwinTransformer_k400_base.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/VideoSwin_base_k400.pdparams)  |
-   | Swin-Transformer_small |   UniformCrop   |   32    |     224     | 80.18 | [SwinTransformer_k400_small.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/VideoSwin_small_k400.pdparams) |
+   |        backbone        | Sampling method | num_seg | target_size | Top-1 |                                                        checkpoints                                                         | pretrain model |
+   | :--------------------: | :-------------: | :-----: | :---------: | :---- | :------------------------------------------------------------------------------------------------------------------------: | :----: |
+   | Swin-Transformer_base  |   UniformCrop   |   32    |     224     | 82.40 |  [SwinTransformer_k400_base.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/VideoSwin_base_k400.pdparams)  | [swin_base_patch4_window7_224.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/swin_base_patch4_window7_224.pdparams) |
+   | Swin-Transformer_small |   UniformCrop   |   32    |     224     | 80.18 | [SwinTransformer_k400_small.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/VideoSwin_small_k400.pdparams) | [swin_small_patch4_window7_224.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/swin_small_patch4_window7_224.pdparams) |
 
 ## Inference
 
