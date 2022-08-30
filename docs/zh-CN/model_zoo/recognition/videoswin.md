@@ -28,15 +28,19 @@ K400数据下载及准备请参考[Kinetics-400数据准备](../../dataset/k400.
 
 ### Kinetics-400数据集训练
 
+下面以VideoSwin_base模型在Kinetics-400数据集进行训练为例
+
 #### 下载并添加预训练模型
 
-1. 下载图像预训练模型[SwinTransformer_imagenet.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/SwinTransformer_imagenet.pdparams)作为Backbone初始化参数，或通过wget命令下载
+1. 下载图像预训练模型[swin_base_patch4_window7_224.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/swin_base_patch4_window7_224.pdparams)作为Backbone初始化参数，或通过wget命令下载
 
    ```bash
-   wget https://videotag.bj.bcebos.com/PaddleVideo-release2.2/SwinTransformer_imagenet.pdparams
+   wget https://videotag.bj.bcebos.com/PaddleVideo-release2.2/swin_base_patch4_window7_224.pdparams # ImageNet pretrained model for VideoSwin_base
+
+   # wget https://videotag.bj.bcebos.com/PaddleVideorelease2.2/swin_small_patch4_window7_224.pdparams # Imagenet pretrained model for VideoSwin_small
    ```
 
-2. 打开`configs/recognition/videoswin/videoswin_k400_videos.yaml`，将下载好的权重存放路径填写到下方`pretrained:`之后
+2. 打开`configs/recognition/videoswin/videoswin_base_k400_videos.yaml`，将下载好的权重存放路径填写到下方`pretrained:`之后
 
     ```yaml
     MODEL:
@@ -52,7 +56,7 @@ K400数据下载及准备请参考[Kinetics-400数据准备](../../dataset/k400.
 
     ```bash
     # videos数据格式
-    python3.7 -u -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=log_videoswin main.py --validate -c configs/recognition/videoswin/videoswin_k400_videos.yaml
+    python3.7 -u -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=log_videoswin_base main.py --validate -c configs/recognition/videoswin/videoswin_base_k400_videos.yaml
     ```
 
 - 开启amp混合精度训练，可加速训练过程，其训练启动命令如下：
@@ -62,62 +66,61 @@ K400数据下载及准备请参考[Kinetics-400数据准备](../../dataset/k400.
     export FLAGS_cudnn_exhaustive_search=1
     export FLAGS_cudnn_batchnorm_spatial_persistent=1
     # videos数据格式
-    python3.7 -u -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=log_videoswin main.py --amp --validate -c configs/recognition/videoswin/videoswin_k400_videos.yaml
+    python3.7 -u -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=log_videoswin_base main.py --amp --validate -c configs/recognition/videoswin/videoswin_base_k400_videos.yaml
     ```
 
-- 另外您可以自定义修改参数配置，以达到在不同的数据集上进行训练/测试的目的，建议配置文件的命名方式为`模型_数据集名称_文件格式_数据格式_采样方式.yaml`，参数用法请参考[config](../../tutorials/config.md)。
+- 另外您可以自定义修改参数配置，以达到在不同的数据集上进行训练/测试的目的，建议配置文件的命名方式为`模型_数据集名称_文件格式_数据格式_采样方式.yaml`，参数用法请参考[config](../../contribute/config.md)。
 
 
 ## 模型测试
 
 - Video-Swin-Transformer模型在训练时同步进行验证，您可以通过在训练日志中查找关键字`best`获取模型测试精度，日志示例如下:
 
-  ```
+  ```log
   Already save the best model (top1 acc)0.7258
   ```
 
-- 由于Video-Swin-Transformer模型测试模式的采样方式是速度稍慢但精度高一些的**UniformCrop**，与训练过程中验证模式采用的**CenterCrop**不同，所以训练日志中记录的验证指标`topk Acc`不代表最终的测试分数，因此在训练完成之后可以用测试模式对最好的模型进行测试获取最终的指标，命令如下：
+- 由于Video-Swin-Transformer模型测试模式的采样方式是速度稍慢但精度高一些的**UniformCrop**，与训练过程中验证模式采用的**CenterCrop**不同，所以训练日志中记录的验证指标`topk Acc`不代表最终的测试分数，因此在训练完成之后可以用测试模式对指定的模型进行测试获取最终的指标，命令如下：
 
   ```bash
-  python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=log_videoswin  main.py  --test -c configs/recognition/videoswin/videoswin_k400_videos.yaml -w "output/VideoSwin/VideoSwin_best.pdparams"
+  python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3,4,5,6,7"  --log_dir=log_videoswin_base main.py --test -c configs/recognition/videoswin/videoswin_base_k400_videos.yaml -w "output/VideoSwin_base/VideoSwin_base_best.pdparams"
   ```
-
 
   当测试配置采用如下参数时，在Kinetics-400的validation数据集上的测试指标如下：
 
-   |      backbone      | Sampling method | num_seg | target_size | Top-1 |                         checkpoints                          |
-   | :----------------: | :-------------: | :-----: | :---------: | :---- | :----------------------------------------------------------: |
-   | Swin Transformer |   UniformCrop   |   32    |     224     | 82.40 | [SwinTransformer_k400.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/VideoSwin_k400.pdparams) |
-
+   |        backbone        | Sampling method | num_seg | target_size | Top-1 |                                                        checkpoints                                                         | pretrain model |
+   | :--------------------: | :-------------: | :-----: | :---------: | :---- | :------------------------------------------------------------------------------------------------------------------------: | :----: |
+   | Swin-Transformer_base  |   UniformCrop   |   32    |     224     | 82.40 |  [SwinTransformer_k400_base.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/VideoSwin_base_k400.pdparams)  | [swin_base_patch4_window7_224.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/swin_base_patch4_window7_224.pdparams) |
+   | Swin-Transformer_small |   UniformCrop   |   32    |     224     | 80.18 | [SwinTransformer_k400_small.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/VideoSwin_small_k400.pdparams) | [swin_small_patch4_window7_224.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/swin_small_patch4_window7_224.pdparams) |
 
 ## 模型推理
 
 ### 导出inference模型
 
 ```bash
-python3.7 tools/export_model.py -c configs/recognition/videoswin/videoswin_k400_videos.yaml \
-                                -p data/VideoSwin_k400.pdparams \
-                                -o inference/VideoSwin
+python3.7 tools/export_model.py -c configs/recognition/videoswin/videoswin_base_k400_videos.yaml \
+                                -p data/VideoSwin_base_k400.pdparams \
+                                -o inference/VideoSwin_base
 ```
 
-上述命令将生成预测所需的模型结构文件`VideoSwin.pdmodel`和模型权重文件`VideoSwin.pdiparams`。
+上述命令将生成预测所需的模型结构文件`VideoSwin_base.pdmodel`和模型权重文件`VideoSwin_base.pdiparams`。
 
-- 各参数含义可参考[模型推理方法](../../start.md#2-模型推理)
+- 各参数含义可参考[模型推理方法](../../usage.md#5-模型推理)
 
 ### 使用预测引擎推理
 
 ```bash
 python3.7 tools/predict.py --input_file data/example.avi \
-                           --config configs/recognition/videoswin/videoswin_k400_videos.yaml \
-                           --model_file inference/VideoSwin/VideoSwin.pdmodel \
-                           --params_file inference/VideoSwin/VideoSwin.pdiparams \
+                           --config configs/recognition/videoswin/videoswin_base_k400_videos.yaml \
+                           --model_file inference/VideoSwin_base/VideoSwin_base.pdmodel \
+                           --params_file inference/VideoSwin_base/VideoSwin_base.pdiparams \
                            --use_gpu=True \
                            --use_tensorrt=False
 ```
 
 输出示例如下:
 
-```
+```log
 Current video file: data/example.avi
         top-1 class: 5
         top-1 score: 0.9999829530715942
