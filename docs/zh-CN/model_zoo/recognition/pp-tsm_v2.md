@@ -88,7 +88,7 @@ PP-TSMv2沿用了部分PP-TSM的优化策略，从骨干网络与预训练模型
 
 在解码速度上，我们对比了常见的视频解码库在视频分段采样策略中的速度，[测试数据](https://videotag.bj.bcebos.com/PaddleVideo-release2.3/time-test.tar)，不同解码库速度对比如下表所示。PP-TSMv2最终选用[decord](https://github.com/dmlc/decord)作为解码器。
 
-| lib | Time/ms |
+| lib | Time/s |
 |:--:|:--:|
 | opencv | 0.056 |
 | **decord** | **0.043** |
