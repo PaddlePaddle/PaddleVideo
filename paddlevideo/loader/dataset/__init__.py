@@ -29,11 +29,11 @@ from .skeleton import SkeletonDataset
 from .slowfast_video import SFVideoDataset
 from .video import VideoDataset
 from .ucf101_skeleton import UCF101SkeletonDataset
-
+from .ntu_feeder import NTU_Feeder, NTU_Location_Feeder
 __all__ = [
     'VideoDataset', 'FrameDataset', 'SFVideoDataset', 'BMNDataset',
     'FeatureDataset', 'SkeletonDataset', 'AVADataset', 'MonoDataset',
     'MSRVTTDataset', 'ActBertDataset', 'DavisDataset', 'MRIDataset',
     'SFMRIDataset', 'FrameDataset_Sport', 'MSTCNDataset', 'ASRFDataset',
-    'UCF101SkeletonDataset'
+    'UCF101SkeletonDataset', 'NTU_Location_Feeder', 'NTU_Feeder'
 ]

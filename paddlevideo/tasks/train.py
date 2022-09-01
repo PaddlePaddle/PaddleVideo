@@ -87,7 +87,7 @@ def train_model(cfg,
     if cfg.get('use_npu'):
         places = paddle.set_device('npu')
     else:
-        places = paddle.set_device('gpu')
+        places = paddle.set_device('cpu')
 
     # default num worker: 0, which means no subprocess will be created
     num_workers = cfg.DATASET.get('num_workers', 0)
@@ -101,10 +101,11 @@ def train_model(cfg,
 
     # 2. Construct dataset and dataloader for training and evaluation
     train_dataset = build_dataset((cfg.DATASET.train, cfg.PIPELINE.train))
-    train_dataloader_setting = dict(batch_size=batch_size,
-                                    num_workers=num_workers,
-                                    collate_fn_cfg=cfg.get('MIX', None),
-                                    places=places)
+    train_dataloader_setting = dict(
+        batch_size=batch_size,
+        num_workers=num_workers,
+        collate_fn_cfg=cfg.get('MIX', None),
+        places=places)
     train_loader = build_dataloader(train_dataset, **train_dataloader_setting)
 
     if validate:
@@ -123,23 +124,22 @@ def train_model(cfg,
 
     # 3. Construct learning rate scheduler(lr) and optimizer
     lr = build_lr(cfg.OPTIMIZER.learning_rate, len(train_loader))
-    optimizer = build_optimizer(cfg.OPTIMIZER,
-                                lr,
-                                model=model,
-                                use_amp=use_amp,
-                                amp_level=amp_level)
+    optimizer = build_optimizer(
+        cfg.OPTIMIZER, lr, model=model, use_amp=use_amp, amp_level=amp_level)
 
     # 4. Construct scalar and convert parameters for amp(optional)
     if use_amp:
-        scaler = amp.GradScaler(init_loss_scaling=2.0**16,
-                                incr_every_n_steps=2000,
-                                decr_every_n_nan_or_inf=1)
+        scaler = amp.GradScaler(
+            init_loss_scaling=2.0**16,
+            incr_every_n_steps=2000,
+            decr_every_n_nan_or_inf=1)
         # convert model parameters to fp16 when amp_level is O2(pure fp16)
-        model, optimizer = amp.decorate(models=model,
-                                        optimizers=optimizer,
-                                        level=amp_level,
-                                        master_weight=True,
-                                        save_dtype=None)
+        model, optimizer = amp.decorate(
+            models=model,
+            optimizers=optimizer,
+            level=amp_level,
+            master_weight=True,
+            save_dtype=None)
         # NOTE: save_dtype is set to float32 now.
         logger.info(f"Training in amp mode, amp_level={amp_level}.")
     else:
@@ -198,8 +198,9 @@ def train_model(cfg,
             # 8.1 forward
             # AMP #
             if use_amp:
-                with amp.auto_cast(custom_black_list={"reduce_mean", "conv3d"},
-                                   level=amp_level):
+                with amp.auto_cast(
+                        custom_black_list={"reduce_mean", "conv3d"},
+                        level=amp_level):
                     outputs = model(data, mode='train')
                 avg_loss = outputs['loss']
                 if use_gradient_accumulation:
@@ -353,8 +354,9 @@ def train_model(cfg,
             return best, best_flag
 
         # use precise bn to improve acc
-        if cfg.get("PRECISEBN") and (epoch % cfg.PRECISEBN.preciseBN_interval
-                                     == 0 or epoch == cfg.epochs - 1):
+        if cfg.get("PRECISEBN") and (
+                epoch % cfg.PRECISEBN.preciseBN_interval == 0
+                or epoch == cfg.epochs - 1):
             do_preciseBN(
                 model, train_loader, parallel,
                 min(cfg.PRECISEBN.num_iters_preciseBN, len(train_loader)),
@@ -370,9 +372,10 @@ def train_model(cfg,
                 save(optimizer.state_dict(),
                      osp.join(output_dir, model_name + "_best.pdopt"))
                 save_student_model_flag = True if "Distillation" in cfg.MODEL.framework else False
-                save(model.state_dict(),
-                     osp.join(output_dir, model_name + "_best.pdparams"),
-                     save_student_model=save_student_model_flag)
+                save(
+                    model.state_dict(),
+                    osp.join(output_dir, model_name + "_best.pdparams"),
+                    save_student_model=save_student_model_flag)
                 if model_name == "AttentionLstm":
                     logger.info(
                         f"Already save the best model (hit_at_one){best}")
