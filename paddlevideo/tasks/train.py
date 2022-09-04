@@ -86,6 +86,8 @@ def train_model(cfg,
 
     if cfg.get('use_npu'):
         places = paddle.set_device('npu')
+    elif cfg.get('use_xpu'):
+        places = paddle.set_device('xpu')
     else:
         places = paddle.set_device('gpu')
 
