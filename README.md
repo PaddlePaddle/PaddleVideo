@@ -14,7 +14,7 @@ PaddleVideo旨在打造一套丰富、领先且实用的Video工具库，旨在�
 
 ## 近期更新
 
-- 发布轻量化行为识别模型**🔥[PP-TSMv2](./docs/zh-CN/model_zoo/recognition/pp-tsm.md)**, Kinetics-400精度74.38%，25fps的10s视频cpu推理时间仅需433ms.各模型性能对比[benchmark](./docs/zh-CN/benchmark.md).
+- 发布轻量化行为识别模型**🔥[PP-TSMv2](./docs/zh-CN/model_zoo/recognition/pp-tsm_v2.md)**, Kinetics-400精度74.38%，25fps的10s视频cpu推理时间仅需433ms.各模型性能对比[benchmark](./docs/zh-CN/benchmark.md).
 - 新增[知识蒸馏](./docs/zh-CN/distillation.md)功能.
 - 新增基于transformer的行为识别模型[TokenShift](https://github.com/PaddlePaddle/PaddleVideo/blob/develop/docs/zh-CN/model_zoo/recognition/tokenshift_transformer.md).
 - 新增基于骨骼点的行为识别模型[2s-ACGN](https://github.com/PaddlePaddle/PaddleVideo/blob/develop/docs/zh-CN/model_zoo/recognition/agcn2s.md)、[CTR-GCN](./docs/zh-CN/model_zoo/recognition/ctrgcn.md).
@@ -30,7 +30,7 @@ PaddleVideo旨在打造一套丰富、领先且实用的Video工具库，旨在�
 
 ## 特性
 
-支持多种Video相关前沿算法，在此基础上打造产业级特色模型[PP-TSM](docs/zh-CN/model_zoo/recognition/pp-tsm.md)和[PP-TSMv2](docs/zh-CN/model_zoo/recognition/pp-tsm.md)，并打通数据生产、模型训练、压缩、预测部署全流程。
+支持多种Video相关前沿算法，在此基础上打造产业级特色模型[PP-TSM](docs/zh-CN/model_zoo/recognition/pp-tsm.md)和[PP-TSMv2](docs/zh-CN/model_zoo/recognition/pp-tsm_v2.md)，并打通数据生产、模型训练、压缩、预测部署全流程。
 
 <div align="center">
     <img src="./docs/images/features.png" width="700">
