@@ -23,7 +23,7 @@ YOWO是具有两个分支的单阶段网络。一个分支通过2D-CNN提取关�
 
 ## 数据准备
 
-UCF101-24数据下载及准备请参考[UCF101-24数据准备](../../dataset/ucf101.md)
+UCF101-24数据下载及准备请参考[UCF101-24数据准备](../../dataset/ucf24.md)
 
 
 ## 模型训练
@@ -32,11 +32,11 @@ UCF101-24数据下载及准备请参考[UCF101-24数据准备](../../dataset/ucf
 
 #### 下载并添加预训练模型
 
-1. 下载预训练模型 [resnext-101-kinetics](https://aistudio.baidu.com/aistudio/datasetdetail/145592) 和 [yolo](https://aistudio.baidu.com/aistudio/datasetdetail/145592) 作为Backbone初始化参数，或通过wget命令下载
+1. 下载预训练模型 [resnext101_kinetics](https://videotag.bj.bcebos.com/PaddleVideo-release2.3/resnext101_kinetics.pdparams) 和 [darknet](https://videotag.bj.bcebos.com/PaddleVideo-release2.3/darknet.pdparam) 作为Backbone初始化参数，或通过wget命令下载
 
    ```bash
-    wget -nc -O yolo.weights https://videotag.bj.bcebos.com/PaddleVideo-release2.3/yolo.weight
-    wget -nc -O resnext-101-kinetics.pdparams https://videotag.bj.bcebos.com/PaddleVideo-release2.3/resnext-101-kinetics.pdparams
+    wget -nc https://videotag.bj.bcebos.com/PaddleVideo-release2.3/darknet.pdparam
+    wget -nc https://videotag.bj.bcebos.com/PaddleVideo-release2.3/resnext101_kinetics.pdparams
    ```
 
 2. 打开`PaddleVideo/configs/localization/yowo.yaml`，将下载好的权重存放路径分别填写到下方`pretrained_2d:`和`pretrained_3d:`之后

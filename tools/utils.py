@@ -60,6 +60,7 @@ from paddlevideo.modeling.framework.segmenters.utils import ASRFPostProcessing
 from tools.ava_predict import (detection_inference, frame_extraction,
                                get_detection_result, get_timestep_result,
                                pack_result, visualize)
+from paddlevideo.modeling.framework.localizers.yowo_utils import nms, get_region_boxes
 
 INFERENCE = Registry('inference')
 

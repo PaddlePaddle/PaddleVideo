@@ -61,8 +61,6 @@ def build_record(cfg):
 
     elif 'YOWOLocalizer' in cfg.framework:
         record_list.append(("nCorrect", AverageMeter('nCorrect', '.1f')))
-        record_list.append(("recall", AverageMeter("recall", '.5f')))
-        record_list.append(("precision", AverageMeter("precision", '.5f')))
         record_list.append(("fscore", AverageMeter("fscore", '.5f')))
 
     record_list.append(("batch_time", AverageMeter('batch_cost', '.5f')))

@@ -7,10 +7,10 @@ Global.auto_cast:null
 -o epochs:1
 -o output_dir:null
 -o DATASET.batch_size:4
--o MODEL.backbone.pretrained_2d:data/ucf24/yolo.weights
+-o MODEL.backbone.pretrained_2d:data/ucf24/darknet.pdparam
 train_model_name:null
 train_infer_video_dir:null
--o model_name:YOWO -o DATASET.train.file_path='data/ucf-24-lite/trainlist_small.txt' -o DATASET.valid.file_path='data/ucf-24-lite/testlist_small.txt' -o DATASET.test.file_path='data/ucf-24-lite/testlist_small.txt' -o MODEL.backbone.pretrained_3d=data/ucf24/resnext-101-kinetics.pdparams -o METRIC.gt_folder=data/ucf-24-lite/groundtruths_ucf -o METRIC.result_path=output/detections_lite
+-o model_name:YOWO -o DATASET.train.file_path='data/ucf-24-lite/trainlist_small.txt' -o DATASET.valid.file_path='data/ucf-24-lite/testlist_small.txt' -o DATASET.test.file_path='data/ucf-24-lite/testlist_small.txt' -o MODEL.backbone.pretrained_3d=data/ucf24/resnext101_kinetics.pdparams -o METRIC.gt_folder=data/ucf-24-lite/groundtruths_ucf -o METRIC.result_path=output/detections_lite -w 'data/ucf24/YOWO_epoch_00005.pdparams'
 ##
 trainer:norm_train
 norm_train:main.py -c configs/localization/yowo.yaml --seed=1
@@ -21,7 +21,7 @@ amp_train:null
 null:null
 ##
 ===========================eval_params===========================
-eval:main.py -c configs/localization/yowo.yaml --test --seed=1 -w 'data/ucf24/YOWO_epoch_00005.pdparams'
+eval:main.py -c configs/localization/yowo.yaml --test --seed=1
 null:null
 ##
 ===========================infer_params===========================
@@ -34,7 +34,7 @@ distill_export:null
 export1:null
 export2:null
 inference_dir:inference
-infer_model:YOWO.pdiparams
+infer_model:inference.pdiparams
 infer_export:tools/export_model.py -c configs/localization/yowo.yaml
 infer_quant:False
 inference:tools/predict.py --config configs/localization/yowo.yaml
@@ -44,8 +44,8 @@ inference:tools/predict.py --config configs/localization/yowo.yaml
 --batch_size:1
 --use_tensorrt:False
 --precision:fp32
---model_file:YOWO.pdmodel
+--model_file:inference.pdmodel
 --input_file:data/ucf-24-lite/HorseRiding.avi
 null:null
 --enable_benchmark:False
---params_file:YOWO.pdiparams
+--params_file:inference.pdiparams

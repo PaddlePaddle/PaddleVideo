@@ -11,13 +11,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-###########################################################################################
-# Developed by: Rafael Padilla (rafael.padilla@smt.ufrj.br)                               #
-#        SMT - Signal Multimedia and Telecommunications Lab                               #
-#        COPPE - Universidade Federal do Rio de Janeiro                                   #
-#        Last modification: Oct 9th 2018                                                 #
-###########################################################################################
+#
+# Forked from: https://github.com/rafaelpadilla/Object-Detection-Metrics
+# Developed by: Rafael Padilla (rafael.padilla@smt.ufrj.br)
 
 import glob
 import os

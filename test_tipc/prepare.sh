@@ -139,12 +139,12 @@ if [ ${MODE} = "lite_train_lite_infer" ];then
     elif [ ${model_name} == "YOWO" ]; then
         # pretrain lite train data
         pushd ./data
+        wget -nc https://videotag.bj.bcebos.com/Data/ucf-24-lite.zip
         unzip -qo ucf-24-lite.zip
         pushd ./ucf24
-        wget -nc -O yolo.weights https://bj.bcebos.com/v1/ai-studio-online/8559f34317e642c888783b81b9fef55f8750ef4b7e924feaac8899f3ab0b151f?responseContentDisposition=attachment%3B%20filename_yolo.weights --no-check-certificate
-        wget -nc -O resnext-101-kinetics.pdparams https://bj.bcebos.com/v1/ai-studio-online/cf96b0278a944363bc238cfca727474f889a17f7015746d99523e7068d64e96b?responseContentDisposition=attachment%3B%20filename%3Dresnext-101-kinetics.pdparams&authorization=bce-auth-v1%2F0ef6765c1e494918bc0d4c3ca3e5c6d1%2F2022-05-17T11%3A35%3A40Z%2F-1%2F%2F4a587997708b3c582cbb2f98c8b7d02c395de3ef34e71b918789c761b3feae14 --no-check-certificate
-        wget -nc -O YOWO_epoch_00005.pdparams https://bj.bcebos.com/v1/ai-studio-online/cb4f08d38add4d4ab62bc2619eed04d045f9df6513794a8395defdf5ed26d69a?responseContentDisposition=attachment%3B%20filename%3DYOWO_epoch_00005.pdparams&authorization=bce-auth-v1%2F0ef6765c1e494918bc0d4c3ca3e5c6d1%2F2022-05-15T11%3A49%3A23Z%2F-1%2F%2Ffe6055b5abbd28774a27614da64787f8c1794aa1f739d21a6a15276ff1b23e0d --no-check-certificate
-        wget -nc -O YOWO_epoch_00005.pdopt https://bj.bcebos.com/v1/ai-studio-online/98f76310ce9b4d53b6ce517238c97ab67c2c2c6dc52c40159ebbf77f61f42c54?responseContentDisposition=attachment%3B%20filename%3DYOWO_epoch_00005.pdopt&authorization=bce-auth-v1%2F0ef6765c1e494918bc0d4c3ca3e5c6d1%2F2022-05-15T11%3A49%3A47Z%2F-1%2F%2Fcb6e6131e47eae31d1856d2e8b029a7259e29f1540d63370a8812373676439d3 --no-check-certificate
+        wget -nc https://videotag.bj.bcebos.com/PaddleVideo-release2.3/darknet.pdparam
+        wget -nc https://videotag.bj.bcebos.com/PaddleVideo-release2.3/resnext101_kinetics.pdparams
+        wget -nc https://videotag.bj.bcebos.com/PaddleVideo-release2.3/YOWO_epoch_00005.pdparams
         popd
     else
         echo "Not added into TIPC yet."
