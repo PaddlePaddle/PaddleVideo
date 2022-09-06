@@ -1,38 +1,39 @@
-简体中文 | [English](../../en/dataset/ucf24.md)
+English | [简体中文](../../zh-CN/dataset/ucf24.md)
 
-# UCF24数据准备
-UCF24数据的相关准备。主要包括UCF24的RGB帧文件、标注文件的下载和生成文件的路径list。
+# UCF24 Data Preparation
+This document mainly introduces the preparation process of UCF24 dataset. It mainly includes the download of the RGB frame files, the annotation files and the pathlist of the generated file.
 
 ---
-## 1. 数据下载
-UCF24数据的详细信息可以参考网站[UCF24](http://www.thumos.info/download.html)。 为了方便使用，PaddleVideo提供了UCF24数据的RGB帧、标注文件的下载脚本。
+## 1. Data Download
+Detailed information on UCF24 data can be found on the website [UCF24](http://www.thumos.info/download.html). For ease of use, PaddleVideo provides a download script for the RGB frame, annotation file of the UCF24 data.
 
-首先，请确保在[data/ucf24/ 目录](../../../data/ucf24)下，输入如下UCF24数据集的RGB帧、标注文件的命令。
+First, please ensure access to the [data/ucf24/ directory](../../../data/ucf24) and enter the following command for downloading the RGB frame, annotation file of the UCF24 dataset.
 
 ```shell
 bash download_frames_annotations.sh
 ```
 
-- 运行该命令需要安装unrar解压工具，可使用pip方式安装。
+- To run this command you need to install the unrar decompression tool, which can be installed using the pip method.
 
-- RGB帧文件会存储在[data/ucf24/rgb-images/ 文件夹](../../../data/ucf24/rgb-images)下
+- The RGB frame files will be stored in the [data/ucf24/rgb-images/ directory](../../../data/ucf24/rgb-images)
 
-- 标注文件会存储在[data/ucf24/lables/ 文件夹](../../../data/ucf24/labels)下
+- The annotation files will be stored in the [data/ucf24/lables/ directory](../../../data/ucf24/labels)
 
 ---
-## 2. 生成文件的路径list
-指定格式划分文件，输入如下命令
+## 2. File Pathlist Generation
+To specify the format for dividing the file, enter the following command
 
 ```python
 python build_split.py --raw_path ./splitfiles
 ```
 
-**参数说明**
+**Description of parameters**
 
-`--raw_path`： 表示原始划分文件的存储路径
+`--raw_path`： indicates the storage path of the original division file
 
 
-# 以上步骤完成后，文件组织形式如下所示
+# Folder Structure
+After the whole data pipeline for UCF24 preparation, the folder structure will look like:
 
 ```
 ├── data

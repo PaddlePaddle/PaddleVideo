@@ -18,13 +18,13 @@ YOWO is a single-stage network with two branches. One branch extracts spatial fe
 
 
 <div align="center">
-<img src="../../../images/yowo.png">
+<img src="../../../images/yowo.jpg">
 </div>
 
 
 ## Data
 
-UCF101-24 data download and preparation please refer to [UCF101-24 data preparation](../../dataset/ucf101.md)
+UCF101-24 data download and preparation please refer to [UCF101-24 data preparation](../../dataset/ucf24.md)
 
 
 ## Train
@@ -33,11 +33,11 @@ UCF101-24 data download and preparation please refer to [UCF101-24 data preparat
 
 #### Download and add pre-trained models
 
-1. Download the pre-training model [resnext-101-kinetics](https://aistudio.baidu.com/aistudio/datasetdetail/145592) 和 [yolo](https://aistudio.baidu.com/aistudio/datasetdetail/145592) as Backbone initialization parameters, or download through the wget command
+1. Download the pre-training model [resnext-101-kinetics](https://videotag.bj.bcebos.com/PaddleVideo-release2.3/resnext101_kinetics.pdparams) 和 [darknet](https://videotag.bj.bcebos.com/PaddleVideo-release2.3/darknet.pdparam) as Backbone initialization parameters, or download through the wget command
 
    ```bash
-    wget -nc -O yolo.weights https://bj.bcebos.com/v1/ai-studio-online/8559f34317e642c888783b81b9fef55f8750ef4b7e924feaac8899f3ab0b151f?responseContentDisposition=attachment%3B%20filename_yolo.weights
-    wget -nc -O resnext-101-kinetics.pdparams https://bj.bcebos.com/v1/ai-studio-online/cf96b0278a944363bc238cfca727474f889a17f7015746d99523e7068d64e96b?responseContentDisposition=attachment%3B%20filename%3Dresnext-101-kinetics.pdparams&authorization=bce-auth-v1%2F0ef6765c1e494918bc0d4c3ca3e5c6d1%2F2022-05-17T11%3A35%3A40Z%2F-1%2F%2F4a587997708b3c582cbb2f98c8b7d02c395de3ef34e71b918789c761b3feae14
+    wget -nc https://videotag.bj.bcebos.com/PaddleVideo-release2.3/darknet.pdparam
+    wget -nc https://videotag.bj.bcebos.com/PaddleVideo-release2.3/resnext101_kinetics.pdparams
    ```
 
 2. Open `PaddleVideo/configs/localization/yowo.yaml`, and fill in the downloaded weight storage path below `pretrained_2d:` and `pretrained_3d:` respectively
@@ -89,7 +89,7 @@ UCF101-24 data download and preparation please refer to [UCF101-24 data preparat
 
   | Model    | 3D-CNN backbone | 2D-CNN backbone | Dataset  |Input    | Frame-mAP <br>(@ IoU 0.5)    |   checkpoints  |
   | :-----------: | :-----------: | :-----------: | :-----------: | :-----------: | :-----------: | :-----------: |
-  | YOWO | 3D-ResNext-101 | Darknet-19 | UCF101-24 | 16-frames, d=1 | 80.83 | [YOWO.pdparams](https://pan.baidu.com/s/1RznZpYpZxoZg9XiUWNkQWQ?pwd=r5g3) |
+  | YOWO | 3D-ResNext-101 | Darknet-19 | UCF101-24 | 16-frames, d=1 | 80.94 | [YOWO.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.3/YOWO_epoch_00005.pdparams) |
 
 
 
