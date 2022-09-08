@@ -4,7 +4,8 @@ import paddle.nn.functional as F
 from ..registry import BACKBONES
 import math
 import numpy as np
-from .initializer import kaiming_normal_, ones_, zeros_, normal_
+import paddle.nn.initializer as init
+from ..weight_init import weight_init_
 
 
 def import_class(name):
@@ -263,7 +264,7 @@ class MetaAconC(nn.Layer):
             attr=paddle.ParamAttr(
                 initializer=nn.initializer.Assign(p1), trainable=True))
         self.add_parameter('p1', p1)
-        p2 = sself.create_parameter(
+        p2 = self.create_parameter(
             shape=p2.shape,
             dtype=str(p2.numpy().dtype),
             attr=paddle.ParamAttr(
@@ -273,6 +274,14 @@ class MetaAconC(nn.Layer):
     def forward(self, x, **kwargs):
         return (self.p1 * x - self.p2 * x) * F.sigmoid(
             self.fcn(x) * (self.p1 * x - self.p2 * x)) + self.p2 * x
+
+
+activation = {
+    'swish': Swish,
+    'hswish': HardSwish,
+    'aconc': AconC,
+    'metaaconc': MetaAconC
+}
 
 
 ## attentions
@@ -290,7 +299,7 @@ class Attention_Layer(nn.Layer):
 
         self.att = __attetion[att_type](channel=out_channel, **kwargs)
         self.bn = nn.BatchNorm2D(out_channel)
-        self.act = act
+        self.act = activation[act]()
 
     def forward(self, x):
         res = x
@@ -334,7 +343,7 @@ class ST_Joint_Att(nn.Layer):
 
 
 class Part_Att(nn.Layer):
-    def __init__(self, channel, parts, reduct_ratio, bias, **kwargs):
+    def __init__(self, channel, parts, reduct_ratio, bias, A, **kwargs):
         super(Part_Att, self).__init__()
 
         self.parts = parts
@@ -442,7 +451,7 @@ class Basic_Layer(nn.Layer):
         self.bn = nn.BatchNorm2D(out_channel)
 
         self.residual = nn.Identity() if residual else Zero_Layer()
-        self.act = act
+        self.act = activation[act]()
 
     def forward(self, x):
         res = self.residual(x)
@@ -516,7 +525,7 @@ class Temporal_Bottleneck_Layer(nn.Layer):
         super(Temporal_Bottleneck_Layer, self).__init__()
         inner_channel = channel // reduct_ratio
         padding = (temporal_window_size - 1) // 2
-        self.act = act
+        self.act = activation[act]()
         self.reduct_conv = nn.Sequential(
             nn.Conv2D(
                 in_channels=channel,
@@ -581,7 +590,7 @@ class Temporal_Sep_Layer(nn.Layer):
         super(Temporal_Sep_Layer, self).__init__()
 
         padding = (temporal_window_size - 1) // 2
-        self.act = act
+        self.act = activation[act]()
 
         if expand_ratio > 0:
             inner_channel = channel * expand_ratio
@@ -660,7 +669,7 @@ class Temporal_SG_Layer(nn.Layer):
 
         padding = (temporal_window_size - 1) // 2
         inner_channel = channel // reduct_ratio
-        self.act = act
+        self.act = activation[act]()
 
         self.depth_conv1 = nn.Sequential(
             nn.Conv2D(
@@ -738,9 +747,9 @@ class Zero_Layer(nn.Layer):
 
 class SpatialGraphConv(nn.Layer):
     def __init__(self, in_channel, out_channel, max_graph_distance, bias, edge,
-                 graph, **kwargs):
+                 A, **kwargs):
         super(SpatialGraphConv, self).__init__()
-        g = Graph(**graph)
+
         self.s_kernel_size = max_graph_distance + 1
         self.gcn = nn.Conv2D(
             in_channel,
@@ -748,7 +757,6 @@ class SpatialGraphConv(nn.Layer):
             1,
             stride=(1, 1),
             bias_attr=bias)
-        A = g.A[:self.s_kernel_size]
         _A = self.create_parameter(
             shape=A.shape,
             dtype='float32',
@@ -787,11 +795,13 @@ class SpatialGraphConv(nn.Layer):
 @BACKBONES.register()
 class EfficientGCN(nn.Layer):
     def __init__(self, data_shape, block_args, fusion_stage, stem_channel,
-                 **kwargs):
+                 graph, **kwargs):
         super(EfficientGCN, self).__init__()
 
         num_input, num_channel, _, _, _ = data_shape
-
+        g = Graph(**graph)
+        A = g.A[:self.s_kernel_size]
+        kwargs['A'] = A
         # input branches
         self.input_branches = nn.LayerList([
             EfficientGCN_Blocks(
@@ -901,14 +911,13 @@ class EfficientGCN_Classifier(nn.Sequential):
 def init_param(layers):
     for l in layers:
         if isinstance(l, nn.Conv1D) or isinstance(l, nn.Conv2D):
-            l.weight.set_value(kaiming_normal_(l.weight, mode='fan_out'))
-            if l.bias is not None:
-                l.bias.set_value(zeros_(l.bias))
-
+            weight_init_(l, 'KaimingNormal')
         elif isinstance(l, nn.BatchNorm1D) or isinstance(
                 l, nn.BatchNorm2D) or isinstance(l, nn.BatchNorm3D):
-            l.weight.set_value(ones_(l.weight))
-            l.bias.set_value(zeros_(l.bias))
+            weight_init_(l, 'Constant', value=1)
+            # l.weight.set_value(ones_(l.weight))
+            # l.bias.set_value(zeros_(l.bias))
         elif isinstance(l, nn.Conv3D) or isinstance(l, nn.Linear):
-            l.weight.set_value(normal_(l.weight))
-            l.bias.set_value(zeros_(l.bias))
+            weight_init_(l, 'Normal')
+            # l.weight.set_value(normal_(l.weight))
+            # l.bias.set_value(zeros_(l.bias))

@@ -89,7 +89,7 @@ def train_model(cfg,
     elif cfg.get('use_xpu'):
         places = paddle.set_device('xpu')
     else:
-        places = paddle.set_device('cpu')
+        places = paddle.set_device('gpu')
 
     # default num worker: 0, which means no subprocess will be created
     num_workers = cfg.DATASET.get('num_workers', 0)

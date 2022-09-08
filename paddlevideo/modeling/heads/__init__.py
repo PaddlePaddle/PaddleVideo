@@ -38,6 +38,7 @@ from .ctrgcn_head import CTRGCNHead
 from .movinet_head import MoViNetHead
 from .agcn2s_head import AGCN2sHead
 from .token_shift_head import TokenShiftHead
+from .efficientgcn_head import EfficientGCNHead
 
 __all__ = [
     'BaseHead', 'TSNHead', 'TSMHead', 'ppTSMHead', 'ppTSNHead', 'SlowFastHead',
@@ -45,5 +46,5 @@ __all__ = [
     'I3DHead', 'SingleRoIExtractor3D', 'AVARoIHead', 'BBoxHeadAVA', 'AddsHead',
     'ppTimeSformerHead', 'CollaborativeEnsemblerMS', 'MSTCNHead', 'ASRFHead',
     'MoViNetHead', 'CTRGCNHead', 'TokenShiftHead', 'ActionAttentionLstmHead',
-    'AGCN2sHead'
+    'AGCN2sHead', 'EfficientGCNHead'
 ]

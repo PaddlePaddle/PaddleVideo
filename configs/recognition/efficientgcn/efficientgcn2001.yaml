@@ -1,3 +1,4 @@
+# xsub
 MODEL: #MODEL field
   framework: "RecognizerGCN" #Mandatory, indicate the type of network, associate to the 'paddlevideo/modeling/framework/' .
   backbone: #Mandatory, indicate the type of backbone, associate to the 'paddlevideo/modeling/backbones/' .
@@ -19,6 +20,8 @@ MODEL: #MODEL field
     num_class: 60
     graph:
         dataset: "ntu"
+  head:
+    name: "EfficientGCNHead"
 
 DATASET: #DATASET field
     batch_size: 16 #Mandatory, bacth size
@@ -26,48 +29,75 @@ DATASET: #DATASET field
     test_batch_size: 1
     test_num_workers: 0
     train:
-        format: "NTU_Feeder" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
-        file_path: "NTU-RGB-D/xsub/train_data.npy" #Mandatory, train data index file path
-        label_path: "NTU-RGB-D/xsub/train_label.pkl"
+        format: "NTUDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
+        file_path: "./data/ntu-rgb-d/xsub/train_data.npy" #Mandatory, train data index file path
+        label_path: "./data/ntu-rgb-d/xsub/train_label.pkl"
+        dataset: "ntu"
+        inputs: "JVB"
     valid:
-        format: "NTU_Feeder" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
-        file_path: "NTU-RGB-D/xsub/val_data.npy" #Mandatory, valid data index file path
-        label_path: "NTU-RGB-D/xsub/val_label.pkl"
+        format: "NTUDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
+        file_path: "./data/ntu-rgb-d/xsub/val_data.npy" #Mandatory, valid data index file path
+        label_path: "./data/ntu-rgb-d/xsub/val_label.pkl"
         test_mode: True
+        dataset: "ntu"
+        inputs: "JVB"
     test:
-        format: "NTU_Feeder" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
-        file_path: "NTU-RGB-D/xsub/val_data.npy" #Mandatory, valid data index file path
-        label_path: "NTU-RGB-D/xsub/val_label.pkl"
+        format: "NTUDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
+        file_path: "./data/ntu-rgb-d/xsub/val_data.npy" #Mandatory, valid data index file path
+        label_path: "./data/ntu-rgb-d/xsub/val_label.pkl"
         test_mode: True
+        dataset: "ntu"
+        inputs: "JVB"
+
 
 
 PIPELINE: #PIPELINE field
   train: #Mandotary, indicate the pipeline to deal with the training data, associate to the 'paddlevideo/loader/pipelines/'
     sample:
-      name: "AutoPadding"
-      window_size: 300
+      - Iden:
     transform: #Mandotary, image transfrom operator
-      - SkeletonNorm:
+      - SketeonModalityTransform:
+          joint: True
+          bone: False
+          motion: False
+          graph: 'ntu_rgb_d'
+  valid: #Mandotary, indicate the pipeline to deal with the training data, associate to the 'paddlevideo/loader/pipelines/'
+    sample:
+      - Iden:
+    transform: #Mandotary, image transfrom operator
+      - SketeonModalityTransform:
+          joint: True
+          bone: False
+          motion: False
+          graph: 'ntu_rgb_d'
   test: #Mandotary, indicate the pipeline to deal with the training data, associate to the 'paddlevideo/loader/pipelines/'
     sample:
-      name: "AutoPadding"
-      window_size: 300
+      - Iden:
     transform: #Mandotary, image transfrom operator
-      - SkeletonNorm:
+      - SketeonModalityTransform:
+          joint: True
+          bone: False
+          motion: False
+          graph: 'ntu_rgb_d'
 
 OPTIMIZER:
   name: 'Momentum'
   momentum: 0.9
-  learning_rate: 0.1
   learning_rate:
     iter_step: True
     name: 'CustomWarmupCosineDecay'   # LR class name
     max_epoch: 70                     # init args
     warmup_epochs: 10                 # init args
+    warmup_start_lr: 0.1
+    cosine_base_lr: 0.1
+
+
+METRIC:
+  name: 'SkeletonMetric'
 
 model_name: "EfficientGCN"
 log_interval: 10 #Optional, the interal of logger, default:10
-epochs: 50 #Mandatory, total epoch
+epochs: 70 #Mandatory, total epoch
 save_interval: 10
 
 
