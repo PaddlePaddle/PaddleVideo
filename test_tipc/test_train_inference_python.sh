@@ -43,8 +43,8 @@ distill_key=$(func_parser_key "${lines[18]}")
 distill_trainer=$(func_parser_value "${lines[18]}")
 amp_key=$(func_parser_key "${lines[19]}")
 amp_trainer=$(func_parser_value "${lines[19]}")
-trainer_key2=$(func_parser_key "${lines[20]}")
-trainer_value2=$(func_parser_value "${lines[20]}")
+to_static_key=$(func_parser_key "${lines[20]}")
+to_static_trainer=$(func_parser_value "${lines[20]}")
 
 eval_py=$(func_parser_value "${lines[23]}")
 eval_key1=$(func_parser_key "${lines[24]}")
@@ -301,9 +301,12 @@ else
                 elif [ ${trainer} = ${amp_key} ]; then
                     run_train=${amp_trainer}
                     run_export=${norm_export}
-                elif [[ ${trainer} = ${trainer_key2} ]]; then
-                    run_train=${trainer_value2}
-                    run_export=${export_value2}
+                # In case of @to_static, we re-used norm_traier,
+                # but append "-o Global.to_static=True" for config
+                # to trigger "apply_to_static" logic in 'engine.py'
+                elif [ ${trainer} = "${to_static_key}" ]; then
+                    run_train="${norm_trainer}  ${to_static_trainer}"
+                    run_export=${norm_export}
                 else
                     run_train=${norm_trainer}
                     run_export=${norm_export}
