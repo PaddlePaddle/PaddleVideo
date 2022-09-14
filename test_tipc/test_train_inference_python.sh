@@ -172,7 +172,7 @@ function func_inference(){
                             eval $command
                             last_status=${PIPESTATUS[0]}
                             eval "cat ${_save_log_path}"
-                            status_check $last_status "${command}" "${status_log}" "${model_name}"
+                            status_check $last_status "${command}" "${status_log}" "${model_name}" "${_save_log_path}"
                         done
                     done
                 done
@@ -205,7 +205,7 @@ function func_inference(){
 
                         last_status=${PIPESTATUS[0]}
                         eval "cat ${_save_log_path}"
-                        status_check $last_status "${command}" "${status_log}" "${model_name}"
+                        status_check $last_status "${command}" "${status_log}" "${model_name}" "${_save_log_path}"
 
                     done
                 done
@@ -241,7 +241,7 @@ if [ ${MODE} = "whole_infer" ] || [ ${MODE} = "klquant_whole_infer" ]; then
             eval $export_cmd
             echo $export_cmd
             status_export=$?
-            status_check $status_export "${export_cmd}" "${status_log}" "${model_name}"
+            status_check $status_export "${export_cmd}" "${status_log}" "${model_name}" "${export_log_path}"
 
         else
             save_infer_dir=${infer_model}
@@ -374,7 +374,7 @@ else
                 # display log for benchmark train
                 eval "cat ${LOG_PATH}/train.log"
                 eval "cat ${LOG_PATH}/train.log >> ${save_log}.log"
-                status_check $? "${cmd}" "${status_log}" "${model_name}"
+                status_check $? "${cmd}" "${status_log}" "${model_name}" "${save_log}.log"
 
                 # set_eval_pretrain=$(func_set_params "${pretrain_model_key}" "${save_log}/${train_model_name}")
                 # save norm trained models to set pretrain for pact training and fpgm training
@@ -392,7 +392,7 @@ else
                         eval_cmd="${python} ${eval_py} ${set_use_gpu} ${set_eval_params1} > ${eval_log_path} 2>&1 "
                     fi
                     eval $eval_cmd
-                    status_check $? "${eval_cmd}" "${status_log}" "${model_name}"
+                    status_check $? "${eval_cmd}" "${status_log}" "${model_name}" "${eval_log_path}"
                 fi
                 # run export model
                 if [ ${run_export} != "null" ]; then
@@ -404,7 +404,7 @@ else
                     export_log_path="${LOG_PATH}/${trainer}_gpus_${gpu}_autocast_${autocast}_nodes_${nodes}_export.log"
                     export_cmd="${python} ${run_export} ${set_export_weight} ${set_save_infer_key} > ${export_log_path} 2>&1 "
                     eval $export_cmd
-                    status_check $? "${export_cmd}" "${status_log}" "${model_name}"
+                    status_check $? "${export_cmd}" "${status_log}" "${model_name}" "${export_log_path}"
 
                     #run inference
                     eval $env
