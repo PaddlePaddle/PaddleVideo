@@ -48,7 +48,7 @@ PaddleVideo场景应用覆盖体育、互联网、工业、医疗行业，在PP-
 
 - [快速开始](./docs/zh-CN/quick_start.md)
 - [安装说明](./docs/zh-CN/install.md)
-- [使用指南](./docs/zh-CN/usage.md)
+- [训练/测试/推理全流程使用指南](./docs/zh-CN/usage.md)
 - [PP-TSM行为识别🔥](./docs/zh-CN/model_zoo/recognition/pp-tsm.md)
   - [模型库](./docs/zh-CN/model_zoo/recognition/pp-tsm.md#7)
   - [模型训练](./docs/zh-CN/model_zoo/recognition/pp-tsm.md#4)
