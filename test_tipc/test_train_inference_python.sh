@@ -302,8 +302,8 @@ else
                     run_train=${amp_trainer}
                     run_export=${norm_export}
                 # In case of @to_static, we re-used norm_traier,
-                # but append "-o Global.to_static=True" for config
-                # to trigger "apply_to_static" logic in 'engine.py'
+                # but append "-o to_static=True" for config
+                # to trigger "to_static" logic in 'train.py'
                 elif [ ${trainer} = "${to_static_key}" ]; then
                     run_train="${norm_trainer}  ${to_static_trainer}"
                     run_export=${norm_export}
