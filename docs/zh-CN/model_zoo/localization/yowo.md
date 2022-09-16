@@ -104,11 +104,25 @@ python3 tools/export_model.py -c configs/localization/yowo.yaml -p 'output/YOWO/
 
 ### 使用预测引擎推理
 
+- 下载测试视频[HorseRiding.avi](https://videotag.bj.bcebos.com/Data/HorseRiding.avi)以快速体验，或通过wget命令下载，下载的视频放到`data/ucf24`目录下：
+
+```bash
+wget -nc https://videotag.bj.bcebos.com/Data/HorseRiding.avi
+```
+
+- 运行以下命令进行推理：
+
 ```bash
 python3 tools/predict.py -c configs/localization/yowo.yaml -i 'data/ucf24/HorseRiding.avi' --model_file ./inference/YOWO.pdmodel --params_file ./inference/YOWO.pdiparams
 ```
 
-输出示例如下（可视化）:
+- 推理结束后，将在`inference/YOWO_infer`目录下保存图片形式的预测结果。可通过运行以下命令，将图片序列转换为gif动图，以完成最终可视化：
+
+```
+python3 data/ucf24/visualization.py --frames_dir ./inference/YOWO_infer/HorseRiding --duration 0.04
+```
+
+最终生成的可视化结果如下:
 
 <div align="center">
   <img  src="../../../images/horse_riding.gif" alt="Horse Riding">

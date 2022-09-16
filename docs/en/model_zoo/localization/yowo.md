@@ -107,11 +107,25 @@ The above command will generate the model structure file `YOWO.pdmodel` and the 
 
 ### Use prediction engine inference
 
+- Download the test video [HorseRiding.avi](https://videotag.bj.bcebos.com/Data/HorseRiding.avi) for a quick experience, or via the wget command. The downloaded video should be placed in the `data/ucf24` directory:
+
+```bash
+wget -nc https://videotag.bj.bcebos.com/Data/HorseRiding.avi
+```
+
+- Run the following command for inference:
+
 ```bash
 python3 tools/predict.py -c configs/localization/yowo.yaml -i 'data/ucf24/HorseRiding.avi' --model_file ./inference/YOWO.pdmodel --params_file ./inference/YOWO.pdiparams
 ```
 
-The output example is as follows（Visualization）:
+- When inference is over, the prediction results in image form will be saved in the `inference/YOWO_infer` directory. The image sequence can be converted to a gif by running the following command to complete the final visualisation.
+
+```
+python3 data/ucf24/visualization.py --frames_dir ./inference/YOWO_infer/HorseRiding --duration 0.04
+```
+
+The resulting visualization is as follows:
 
 <div align="center">
   <img  src="../../../images/horse_riding.gif" alt="Horse Riding">
