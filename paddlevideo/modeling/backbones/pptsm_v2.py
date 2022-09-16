@@ -285,6 +285,7 @@ class PPTSM_v2_LCNet(nn.Layer):
                  class_num=400,
                  dropout_prob=0,
                  num_seg=8,
+                 use_temporal_att=False,
                  pretrained=None,
                  use_last_conv=True,
                  class_expand=1280):
@@ -293,6 +294,7 @@ class PPTSM_v2_LCNet(nn.Layer):
         self.use_last_conv = use_last_conv
         self.class_expand = class_expand
         self.num_seg = num_seg
+        self.use_temporal_att = use_temporal_att
         self.pretrained = pretrained
 
         self.stem = nn.Sequential(*[
@@ -343,7 +345,8 @@ class PPTSM_v2_LCNet(nn.Layer):
         in_features = self.class_expand if self.use_last_conv else NET_CONFIG[
             "stage4"][0] * 2 * scale
         self.fc = Linear(in_features, class_num)
-        self.global_attention = GlobalAttention(num_seg=self.num_seg)
+        if self.use_temporal_att:
+            self.global_attention = GlobalAttention(num_seg=self.num_seg)
 
     def init_weights(self):
         """Initiate the parameters.
@@ -363,7 +366,9 @@ class PPTSM_v2_LCNet(nn.Layer):
         for stage in self.stages:
             # only add temporal attention and tsm in stage3 for efficiency
             if count == 2:
-                x = self.global_attention(x)
+                # add temporal attention
+                if self.use_temporal_att:
+                    x = self.global_attention(x)
                 x = F.temporal_shift(x, self.num_seg, 1.0 / self.num_seg)
             count += 1
             x = stage(x)
