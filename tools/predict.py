@@ -24,6 +24,7 @@ from paddlevideo.utils import get_config
 
 
 def parse_args():
+
     def str2bool(v):
         return v.lower() in ("true", "t", "1")
 
@@ -50,6 +51,7 @@ def parse_args():
     # params for paddle predict
     parser.add_argument("-b", "--batch_size", type=int, default=1)
     parser.add_argument("--use_gpu", type=str2bool, default=True)
+    parser.add_argument("--use_npu", type=str2bool, default=False)
     parser.add_argument("--precision", type=str, default="fp32")
     parser.add_argument("--ir_optim", type=str2bool, default=True)
     parser.add_argument("--use_tensorrt", type=str2bool, default=False)
@@ -67,6 +69,8 @@ def create_paddle_predictor(args, cfg):
     config = Config(args.model_file, args.params_file)
     if args.use_gpu:
         config.enable_use_gpu(args.gpu_mem, 0)
+    elif args.use_npu:
+        config.enable_npu()
     else:
         config.disable_gpu()
         if args.cpu_threads:
