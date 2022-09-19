@@ -84,9 +84,9 @@ def train_model(cfg,
             f"num_gpus={num_gpus}, "
             f"num_accumulative_iters={cfg.GRADIENT_ACCUMULATION.num_iters}")
 
-    if cfg.get('use_npu', False):
+    if cfg.get('use_npu'):
         places = paddle.set_device('npu')
-    elif cfg.get('use_xpu', False):
+    elif cfg.get('use_xpu'):
         places = paddle.set_device('xpu')
     else:
         places = paddle.set_device('gpu')
@@ -100,12 +100,6 @@ def train_model(cfg,
 
     # 1. Construct model
     model = build_model(cfg.MODEL)
-
-    if cfg.get('to_static', False):
-        specs = None
-        model = paddle.jit.to_static(model, input_spec=specs)
-        logger.info(
-            "Successfully to apply @to_static with specs: {}".format(specs))
 
     # 2. Construct dataset and dataloader for training and evaluation
     train_dataset = build_dataset((cfg.DATASET.train, cfg.PIPELINE.train))
