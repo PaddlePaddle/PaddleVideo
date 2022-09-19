@@ -101,6 +101,12 @@ def train_model(cfg,
     # 1. Construct model
     model = build_model(cfg.MODEL)
 
+    if cfg.get('to_static', False):
+        specs = None
+        model = paddle.jit.to_static(model, input_spec=specs)
+        logger.info(
+            "Successfully to apply @to_static with specs: {}".format(specs))
+
     # 2. Construct dataset and dataloader for training and evaluation
     train_dataset = build_dataset((cfg.DATASET.train, cfg.PIPELINE.train))
     train_dataloader_setting = dict(
