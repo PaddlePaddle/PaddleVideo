@@ -15,7 +15,7 @@
 
 ![模型结构图](../../../images/efficientgcn.png)
 
-[2s-AGCN](https://arxiv.org/pdf/2106.15125v2.pdf)一文提出了基于骨架行为识别的baseline，在论文中，将基于骨架识别的网络分为input branch和 main stream两部分。Input branch 用于提取骨架数据的多模态特征，提取的特征通过concat等操作完成特征融合后将输入main stream中预测动作分类。
+[EfficientGCNv1](https://arxiv.org/pdf/2106.15125v2.pdf)一文提出了基于骨架行为识别的baseline，在论文中，将基于骨架识别的网络分为input branch和 main stream两部分。Input branch 用于提取骨架数据的多模态特征，提取的特征通过concat等操作完成特征融合后将输入main stream中预测动作分类。
 
 ## 数据准备
 
@@ -44,7 +44,7 @@ python main.py --validate -c configs/recognition/efficientgcn/efficientgcn2002.y
 # test cross subject
 python main.py --test -c configs/recognition/efficientgcn/efficientgcn2001.yaml -w data/efficientgcn2001.pdparams
 # test cross view
-python main.py --test -c configs/recognition/efficientgcn/efficientgcn2002.yaml -w data/efficientgcn2001.pdparams
+python main.py --test -c configs/recognition/efficientgcn/efficientgcn2002.yaml -w data/efficientgcn2002.pdparams
 ```
 
 * 通过`-c`参数指定配置文件，通过`-w`指定权重存放路径进行模型测试。
@@ -55,27 +55,25 @@ python main.py --test -c configs/recognition/efficientgcn/efficientgcn2002.yaml 
 | :------------: | :---: | :----: |
 | EfficientGCNv1 | 90.2% | 94.9% |
 
-训练日志：[日志](https://github.com/ELKYang/2s-AGCN-paddle/tree/main/work_dir/ntu)
-
-VisualDL可视化日志：[VDL](https://github.com/ELKYang/2s-AGCN-paddle/tree/main/runs)
+训练日志：[日志](https://github.com/Wuxiao85/paddle_EfficientGCNv/blob/main/workdir/)
 
 模型权重如下：
 
-|      | CS-Js                                                        | CS-Bs                                                        | CV-JS                                                        | CV-Bs                                                        |
-| ---- | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| 地址 | [ntu_effcientgcn](https://github.com/Wuxiao85/paddle_EfficientGCNv/tree/main/pretrain_model) | [ntu_cs_agcn_bone](https://github.com/ELKYang/2s-AGCN-paddle/blob/main/weights/ntu_cs_agcn_bone-44-28170.pdparams) | [ntu_cv_agcn_joint](https://github.com/ELKYang/2s-AGCN-paddle/blob/main/weights/ntu_cv_agcn_joint-38-22932.pdparams) | [ntu_cv_agcn_bone](https://github.com/ELKYang/2s-AGCN-paddle/blob/main/weights/ntu_cv_agcn_bone-49-29400.pdparams) |
+|      | x-sub                                                        | x-view                                                        |
+| ---- | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| 地址 | [x-sub](https://github.com/Wuxiao85/paddle_EfficientGCNv/tree/main/pretrain_model/xsub.pdparams) | [x-view](https://github.com/Wuxiao85/paddle_EfficientGCNv/tree/main/pretrain_model/xsub.pdparams)|
 
 ## 模型推理
 
-### 导出inference模型（以cs_joint为例）
+### 导出inference模型
 
 ```bash
-python3.7 tools/export_model.py -c configs/recognition/agcn2s/agcn2s_ntucs_joint.yaml \
-                                -p data/AGCN2s_ntucs_joint.pdparams \
-                                -o inference/AGCN2s_ntucs_joint
+python3.7 tools/export_model.py -c configs/recognition/efficientgcn/efficientgcn2001.yaml \
+                                -p data/efficientgcn2001.pdparams \
+                                -o inference/efficientgcn2001
 ```
 
-上述命令将生成预测所需的模型结构文件`AGCN2s_ntucs_joint.pdmodel`和模型权重文件`AGCN2s_ntucs_joint.pdiparams`。
+上述命令将生成预测所需的模型结构文件`efficientgcn2001.pdmodel`和模型权重文件`efficientgcn2001.pdiparams`。
 
 - 各参数含义可参考[模型推理方法](https://github.com/PaddlePaddle/PaddleVideo/blob/release/2.0/docs/zh-CN/start.md#2-%E6%A8%A1%E5%9E%8B%E6%8E%A8%E7%90%86)
 
@@ -83,16 +81,14 @@ python3.7 tools/export_model.py -c configs/recognition/agcn2s/agcn2s_ntucs_joint
 
 ```bash
 python3.7 tools/predict.py --input_file data/example_NTU-RGB-D_sketeton.npy \
-                           --config configs/recognition/agcn2s/2sagcn_ntucs_joint.yaml \
-                           --model_file inference/AGCN2s_ntucs_joint/AGCN2s_ntucs_joint.pdmodel \
-                           --params_file inference/AGCN2s_ntucs_joint/AGCN2s_ntucs_joint.pdiparams \
+                           --config configs/recognition/efficientgcn/efficientgcn2001.yaml \
+                           --model_file inference/efficientgcn2001/efficientgcn2001.pdmodel \
+                           --params_file inference/efficientgcn2001/efficientgcn2001.pdiparams \
                            --use_gpu=True \
                            --use_tensorrt=False
 ```
 
-### 预测引擎推理结果
-![预测引擎推理结果图](../../../images/agcn2s_result.png)
 
 ## 参考论文
 
-- [Two-Stream Adaptive Graph Convolutional Networks for Skeleton-Based Action Recognition](https://openaccess.thecvf.com/content_CVPR_2019/papers/Shi_Two-Stream_Adaptive_Graph_Convolutional_Networks_for_Skeleton-Based_Action_Recognition_CVPR_2019_paper.pdf), Lei Shi and Yifan Zhang and Jian Cheng and Hanqing Lu
+- [EfficientGCN: Constructing Stronger and Faster Baselines for Skeleton-based Action Recognition ](https://arxiv.org/pdf/2106.15125v2.pdf)

@@ -749,7 +749,6 @@ class SpatialGraphConv(nn.Layer):
     def __init__(self, in_channel, out_channel, max_graph_distance, bias, edge,
                  A, **kwargs):
         super(SpatialGraphConv, self).__init__()
-
         self.s_kernel_size = max_graph_distance + 1
         self.gcn = nn.Conv2D(
             in_channel,
@@ -757,6 +756,7 @@ class SpatialGraphConv(nn.Layer):
             1,
             stride=(1, 1),
             bias_attr=bias)
+        A = A[:self.s_kernel_size]
         _A = self.create_parameter(
             shape=A.shape,
             dtype='float32',
@@ -800,7 +800,7 @@ class EfficientGCN(nn.Layer):
 
         num_input, num_channel, _, _, _ = data_shape
         g = Graph(**graph)
-        A = g.A[:self.s_kernel_size]
+        A = g.A
         kwargs['A'] = A
         # input branches
         self.input_branches = nn.LayerList([
@@ -825,7 +825,14 @@ class EfficientGCN(nn.Layer):
         self.classifier = EfficientGCN_Classifier(last_channel, **kwargs)
 
         # init parameters
-        init_param(self.sublayers())
+        for l in self.sublayers():
+            if isinstance(l, nn.Conv1D) or isinstance(l, nn.Conv2D):
+                weight_init_(l, 'KaimingNormal')
+            elif isinstance(l, nn.BatchNorm1D) or isinstance(
+                    l, nn.BatchNorm2D) or isinstance(l, nn.BatchNorm3D):
+                weight_init_(l, 'Constant', value=1)
+            elif isinstance(l, nn.Conv3D) or isinstance(l, nn.Linear):
+                weight_init_(l, 'Normal')
 
     def forward(self, x):
 
@@ -906,18 +913,3 @@ class EfficientGCN_Classifier(nn.Sequential):
         self.add_sublayer('dropout', nn.Dropout(drop_prob))
         self.add_sublayer('fc', nn.Conv3D(
             curr_channel, num_class, kernel_size=1))
-
-
-def init_param(layers):
-    for l in layers:
-        if isinstance(l, nn.Conv1D) or isinstance(l, nn.Conv2D):
-            weight_init_(l, 'KaimingNormal')
-        elif isinstance(l, nn.BatchNorm1D) or isinstance(
-                l, nn.BatchNorm2D) or isinstance(l, nn.BatchNorm3D):
-            weight_init_(l, 'Constant', value=1)
-            # l.weight.set_value(ones_(l.weight))
-            # l.bias.set_value(zeros_(l.bias))
-        elif isinstance(l, nn.Conv3D) or isinstance(l, nn.Linear):
-            weight_init_(l, 'Normal')
-            # l.weight.set_value(normal_(l.weight))
-            # l.bias.set_value(zeros_(l.bias))

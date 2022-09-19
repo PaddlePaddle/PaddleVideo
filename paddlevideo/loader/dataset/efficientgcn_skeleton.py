@@ -117,7 +117,7 @@ class NTUDataset(BaseDataset):
         try:
             self.data = np.load(data_path, mmap_mode='r')
             with open(self.label_path, 'rb') as f:
-                self.name, self.label = pickle.load(f, encoding='latin1')
+                self.name, self.label = pickle.load(f, encoding='latin1')[0:2]
         except:
             logger.info('')
             logger.error('Error: Wrong in loading data files: {} or {}!'.format(
