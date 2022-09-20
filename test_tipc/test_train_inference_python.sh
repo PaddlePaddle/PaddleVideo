@@ -43,8 +43,8 @@ distill_key=$(func_parser_key "${lines[18]}")
 distill_trainer=$(func_parser_value "${lines[18]}")
 amp_key=$(func_parser_key "${lines[19]}")
 amp_trainer=$(func_parser_value "${lines[19]}")
-trainer_key2=$(func_parser_key "${lines[20]}")
-trainer_value2=$(func_parser_value "${lines[20]}")
+to_static_key=$(func_parser_key "${lines[20]}")
+to_static_trainer=$(func_parser_value "${lines[20]}")
 
 eval_py=$(func_parser_value "${lines[23]}")
 eval_key1=$(func_parser_key "${lines[24]}")
@@ -172,7 +172,7 @@ function func_inference(){
                             eval $command
                             last_status=${PIPESTATUS[0]}
                             eval "cat ${_save_log_path}"
-                            status_check $last_status "${command}" "${status_log}" "${model_name}"
+                            status_check $last_status "${command}" "${status_log}" "${model_name}" "${_save_log_path}"
                         done
                     done
                 done
@@ -205,7 +205,7 @@ function func_inference(){
 
                         last_status=${PIPESTATUS[0]}
                         eval "cat ${_save_log_path}"
-                        status_check $last_status "${command}" "${status_log}" "${model_name}"
+                        status_check $last_status "${command}" "${status_log}" "${model_name}" "${_save_log_path}"
 
                     done
                 done
@@ -241,7 +241,7 @@ if [ ${MODE} = "whole_infer" ] || [ ${MODE} = "klquant_whole_infer" ]; then
             eval $export_cmd
             echo $export_cmd
             status_export=$?
-            status_check $status_export "${export_cmd}" "${status_log}" "${model_name}"
+            status_check $status_export "${export_cmd}" "${status_log}" "${model_name}" "${export_log_path}"
 
         else
             save_infer_dir=${infer_model}
@@ -301,9 +301,12 @@ else
                 elif [ ${trainer} = ${amp_key} ]; then
                     run_train=${amp_trainer}
                     run_export=${norm_export}
-                elif [[ ${trainer} = ${trainer_key2} ]]; then
-                    run_train=${trainer_value2}
-                    run_export=${export_value2}
+                # In case of @to_static, we re-used norm_traier,
+                # but append "-o to_static=True" for config
+                # to trigger "to_static" logic in 'train.py'
+                elif [ ${trainer} = "${to_static_key}" ]; then
+                    run_train="${norm_trainer}  ${to_static_trainer}"
+                    run_export=${norm_export}
                 else
                     run_train=${norm_trainer}
                     run_export=${norm_export}
@@ -363,9 +366,9 @@ else
                 if [ ${#gpu} -le 2 ];then  # train with cpu or single gpu
                     cmd="${python} ${run_train} ${set_amp_config} ${set_use_gpu}  ${set_save_model} ${set_epoch} ${set_pretrain} ${set_batchsize} ${set_train_params1} ${set_train_params2} > ${LOG_PATH}/train.log 2>&1"
                 elif [ ${#ips} -le 15 ];then  # train with multi-gpu
-                    cmd="${python} -B -m paddle.distributed.launch --gpus=\"${gpu}\" ${run_train} ${set_amp_config} ${set_use_gpu} ${set_save_model} ${set_epoch} ${set_pretrain} ${set_batchsize} ${set_train_params1} ${set_train_params2} > ${LOG_PATH}/train.log 2>&1"
+                    cmd="${python} -B -m paddle.distributed.launch --devices=\"${gpu}\" ${run_train} ${set_amp_config} ${set_use_gpu} ${set_save_model} ${set_epoch} ${set_pretrain} ${set_batchsize} ${set_train_params1} ${set_train_params2} > ${LOG_PATH}/train.log 2>&1"
                 else     # train with multi-machine
-                    cmd="${python} -B -m paddle.distributed.launch --ips=${ips} --gpus=\"${gpu}\" ${run_train} ${set_amp_config} ${set_use_gpu} ${set_save_model} ${set_pretrain} ${set_epoch} ${set_batchsize} ${set_train_params1} ${set_train_params2} > ${LOG_PATH}/train.log 2>&1"
+                    cmd="${python} -B -m paddle.distributed.launch --ips=${ips} --devices=\"${gpu}\" ${run_train} ${set_amp_config} ${set_use_gpu} ${set_save_model} ${set_pretrain} ${set_epoch} ${set_batchsize} ${set_train_params1} ${set_train_params2} > ${LOG_PATH}/train.log 2>&1"
                 fi
 
                 # run train
@@ -374,7 +377,7 @@ else
                 # display log for benchmark train
                 eval "cat ${LOG_PATH}/train.log"
                 eval "cat ${LOG_PATH}/train.log >> ${save_log}.log"
-                status_check $? "${cmd}" "${status_log}" "${model_name}"
+                status_check $? "${cmd}" "${status_log}" "${model_name}" "${save_log}.log"
 
                 # set_eval_pretrain=$(func_set_params "${pretrain_model_key}" "${save_log}/${train_model_name}")
                 # save norm trained models to set pretrain for pact training and fpgm training
@@ -392,7 +395,7 @@ else
                         eval_cmd="${python} ${eval_py} ${set_use_gpu} ${set_eval_params1} > ${eval_log_path} 2>&1 "
                     fi
                     eval $eval_cmd
-                    status_check $? "${eval_cmd}" "${status_log}" "${model_name}"
+                    status_check $? "${eval_cmd}" "${status_log}" "${model_name}" "${eval_log_path}"
                 fi
                 # run export model
                 if [ ${run_export} != "null" ]; then
@@ -404,7 +407,7 @@ else
                     export_log_path="${LOG_PATH}/${trainer}_gpus_${gpu}_autocast_${autocast}_nodes_${nodes}_export.log"
                     export_cmd="${python} ${run_export} ${set_export_weight} ${set_save_infer_key} > ${export_log_path} 2>&1 "
                     eval $export_cmd
-                    status_check $? "${export_cmd}" "${status_log}" "${model_name}"
+                    status_check $? "${export_cmd}" "${status_log}" "${model_name}" "${export_log_path}"
 
                     #run inference
                     eval $env

@@ -39,8 +39,8 @@ def construct_loader(cfg, places, validate, precise_bn, num_iters_precise_bn,
     )
     if precise_bn:
         cfg.DATASET.train.num_samples_precise_bn = num_iters_precise_bn * batch_size * world_size
-        precise_bn_dataset = build_dataset(
-            (cfg.DATASET.train, cfg.PIPELINE.train))
+        precise_bn_dataset = build_dataset((cfg.DATASET.train,
+                                            cfg.PIPELINE.train))
         precise_bn_loader = build_dataloader(precise_bn_dataset,
                                              **precise_bn_dataloader_setting)
         cfg.DATASET.train.num_samples_precise_bn = None
@@ -51,10 +51,9 @@ def construct_loader(cfg, places, validate, precise_bn, num_iters_precise_bn,
         # get batch size list in short cycle schedule
         bs_factor = [
             int(
-                round((float(
-                    cfg.PIPELINE.train.transform[1]['MultiCrop']['target_size'])
-                       / (s * cfg.MULTIGRID.default_crop_size))**2))
-            for s in cfg.MULTIGRID.short_cycle_factors
+                round((float(cfg.PIPELINE.train.transform[1]['MultiCrop'][
+                    'target_size']) / (s * cfg.MULTIGRID.default_crop_size))
+                      **2)) for s in cfg.MULTIGRID.short_cycle_factors
         ]
         batch_sizes = [
             batch_size * bs_factor[0],
@@ -73,12 +72,12 @@ def construct_loader(cfg, places, validate, precise_bn, num_iters_precise_bn,
     train_loader = build_dataloader(train_dataset, **train_dataloader_setting)
     if validate:
         valid_dataset = build_dataset((cfg.DATASET.valid, cfg.PIPELINE.valid))
-        validate_dataloader_setting = dict(batch_size=batch_size,
-                                           num_workers=cfg.DATASET.get(
-                                               'num_workers', 0),
-                                           places=places,
-                                           drop_last=False,
-                                           shuffle=False)
+        validate_dataloader_setting = dict(
+            batch_size=batch_size,
+            num_workers=cfg.DATASET.get('num_workers', 0),
+            places=places,
+            drop_last=False,
+            shuffle=False)
         valid_loader = build_dataloader(valid_dataset,
                                         **validate_dataloader_setting)
     else:
@@ -150,8 +149,10 @@ def train_model_multigrid(cfg, world_size=1, validate=True):
     logger = get_logger("paddlevideo")
     batch_size = cfg.DATASET.get('batch_size', 2)
 
-    if cfg.get('use_npu'):
+    if cfg.get('use_npu', False):
         places = paddle.set_device('npu')
+    elif cfg.get('use_xpu', False):
+        places = paddle.set_device('xpu')
     else:
         places = paddle.set_device('gpu')
 
@@ -179,9 +180,8 @@ def train_model_multigrid(cfg, world_size=1, validate=True):
 
     # 3. Construct optimizer
     lr = build_lr(cfg.OPTIMIZER.learning_rate, len(train_loader))
-    optimizer = build_optimizer(cfg.OPTIMIZER,
-                                lr,
-                                parameter_list=model.parameters())
+    optimizer = build_optimizer(
+        cfg.OPTIMIZER, lr, parameter_list=model.parameters())
 
     # Resume
     resume_epoch = cfg.get("resume_epoch", 0)

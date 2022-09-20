@@ -19,6 +19,12 @@ Video-Swin-Transformer是基于Swin Transformer的视频分类模型，其利用
 
 ![VideoSwin](../../../images/videoswin.jpg)
 
+- **注：运行VideoSwin模型，请安装PaddlePaddle==2.3.1及以上版本**
+
+```bash
+python3.7 -m pip install paddlepaddle-gpu==2.3.1 -i https://pypi.tuna.tsinghua.edu.cn/simple
+```
+
 ## 数据准备
 
 K400数据下载及准备请参考[Kinetics-400数据准备](../../dataset/k400.md)
