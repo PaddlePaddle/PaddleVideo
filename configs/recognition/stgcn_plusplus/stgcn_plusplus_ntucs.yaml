@@ -1,0 +1,115 @@
+MODEL: #MODEL field
+    framework: "RecognizerGCN" #Mandatory, indicate the type of network, associate to the 'paddlevideo/modeling/framework/' .
+    backbone: #Mandatory, indicate the type of backbone, associate to the 'paddlevideo/modeling/backbones/' .
+        name: "STGCNPlusPlus" #Mandatory, The name of backbone.
+        gcn_adaptive: "init"
+        gcn_with_res: True
+        tcn_type: "mstcn"
+        layout: "coco_keypoint"
+        strategy: "spatial"
+    head:
+        name: "STGCNPlusPlusHead" #Mandatory, indicate the type of head, associate to the 'paddlevideo/modeling/heads'
+        in_channels: 256
+        num_classes: 60  #Optional, the number of classes to be classified.
+        dropout: 0.0
+        ls_eps: 0.0
+
+DATASET: #DATASET field
+    batch_size: 128 #Mandatory, bacth size
+    num_workers: 8 #Mandatory, the number of subprocess on each GPU.
+    test_batch_size: 1
+    test_num_workers: 0
+    train:
+        format: "NTUCSSkeletonDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
+        split: "xview_train"
+        repeat_times: 5
+        file_path: "data/ntu60_hrnet.pkl" #Mandatory, train data index file path
+
+    valid:
+        format: "NTUCSSkeletonDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
+        split: "xview_val"
+        file_path: "data/ntu60_hrnet.pkl" #Mandatory, train data index file path
+        repeat_times: 1
+        test_mode: True
+    test:
+        format: "NTUCSSkeletonDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
+        split: "xview_val"
+        file_path: "data/ntu60_hrnet.pkl" #Mandatory, train data index file path
+        repeat_times: 1
+        test_mode: True
+
+PIPELINE: #PIPELINE field
+    train: #Mandotary, indicate the pipeline to deal with the training data, associate to the 'paddlevideo/loader/pipelines/'
+        decode_sampler:
+          name: "UniformSampleFrames"
+          clip_len: 100
+        transform: #Mandotary, image transfrom operator
+            - PreNormalize2D:
+            - GenSkeFeat:
+                dataset: 'coco'
+                feats: ['j']
+            - PoseDecode:
+            - FormatGCNInput:
+                num_person: 2
+            - Collect:
+                keys: ['keypoint', 'label' ]
+                meta_keys: []
+
+    valid: #Mandotary, indicate the pipeline to deal with the training data, associate to the 'paddlevideo/loader/pipelines/'
+        decode_sampler:
+          name: "UniformSampleFrames"
+          clip_len: 100
+          num_clips: 1
+          test_mode: True
+        transform: #Mandotary, image transfrom operator
+            - PreNormalize2D:
+            - GenSkeFeat:
+                dataset: 'coco'
+                feats: ['j']
+            - PoseDecode:
+            - FormatGCNInput:
+                num_person: 2
+            - Collect:
+                keys: ['keypoint', 'label' ]
+                meta_keys: []
+    test: #Mandotary, indicate the pipeline to deal with the training data, associate to the 'paddlevideo/loader/pipelines/'
+        decode_sampler:
+          name: "UniformSampleFrames"
+          clip_len: 100
+          num_clips: 10
+          test_mode: True
+        transform: #Mandotary, image transfrom operator
+            - PreNormalize2D:
+            - GenSkeFeat:
+                dataset: 'coco'
+                feats: ['j']
+            - PoseDecode:
+            - FormatGCNInput:
+                num_person: 2
+            - Collect:
+                keys: ['keypoint', 'label' ]
+                meta_keys: []
+
+OPTIMIZER: #OPTIMIZER field
+  name: 'Momentum'
+  momentum: 0.9
+  learning_rate:
+    name: 'CustomCosineAnnealingDecay'
+    learning_rate: 0.1
+    max_epoch: 16
+    iter_step: True
+  weight_decay:
+    name: 'L2'
+    value: 5e-4
+  use_nesterov: True
+
+METRIC:
+    name: 'SkeletonMetric'
+
+INFERENCE:
+    name: 'STGCN_PlusPlus_Inference_helper'
+    top_k: 1
+
+model_name: "STGCN_PlusPlus"
+log_interval: 10 #Optional, the interal of logger, default:10
+epochs: 16 #Mandatory, total epoch

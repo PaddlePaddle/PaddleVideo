@@ -29,6 +29,7 @@ from .resnet_tsn_MRI import ResNetTSN_MRI
 from .resnet_tweaks_tsm import ResNetTweaksTSM
 from .resnet_tweaks_tsn import ResNetTweaksTSN
 from .stgcn import STGCN
+from .stgcn_plusplus import STGCNPlusPlus
 from .swin_transformer import SwinTransformer3D
 from .transnetv2 import TransNetV2
 from .vit import VisionTransformer

@@ -336,3 +336,20 @@ class CustomWarmupAdjustDecay(LRScheduler):
             lr = self.step_base_lr * (self.lr_decay_rate**np.sum(
                 self.last_epoch >= np.array(self.boundaries)))
         return lr
+
+
+class CustomCosineAnnealingDecay(CosineAnnealingDecay):
+
+    def __init__(self,
+                 learning_rate,
+                 num_iters,
+                 max_epoch,
+                 eta_min=0,
+                 last_epoch=-1,
+                 verbose=False):
+        super(CustomCosineAnnealingDecay,
+              self).__init__(learning_rate=learning_rate,
+                             T_max=max_epoch * num_iters,
+                             eta_min=eta_min,
+                             last_epoch=last_epoch,
+                             verbose=verbose)

@@ -23,6 +23,7 @@ import random
 import paddle
 from ..registry import PIPELINES
 from .augmentations_ava import iminvert, imflip_
+from .compose import Compose
 """pipeline ops for Activity Net.
 """
 
@@ -449,7 +450,7 @@ class UniformSampleFrames:
         start_index = results['start_index']
         inds = inds + start_index
 
-        results['frame_inds'] = inds.astype(np.int)
+        results['frame_inds'] = inds.astype(np.int64)
         results['clip_len'] = self.clip_len
         results['frame_interval'] = None
         results['num_clips'] = self.num_clips
@@ -1551,4 +1552,213 @@ class GeneratePoseTarget:
                     f'double={self.double}, '
                     f'left_kp={self.left_kp}, '
                     f'right_kp={self.right_kp})')
+        return repr_str
+
+
+@PIPELINES.register()
+class JointToBone:
+
+    def __init__(self, dataset='nturgb+d', target='keypoint'):
+        self.dataset = dataset
+        self.target = target
+        if self.dataset not in ['nturgb+d', 'openpose', 'coco']:
+            raise ValueError(
+                f'The dataset type {self.dataset} is not supported')
+        if self.dataset == 'nturgb+d':
+            self.pairs = [(0, 1), (1, 20), (2, 20), (3, 2), (4, 20), (5, 4),
+                          (6, 5), (7, 6), (8, 20), (9, 8), (10, 9), (11, 10),
+                          (12, 0), (13, 12), (14, 13), (15, 14), (16, 0),
+                          (17, 16), (18, 17), (19, 18), (21, 22), (20, 20),
+                          (22, 7), (23, 24), (24, 11)]
+        elif self.dataset == 'openpose':
+            self.pairs = ((0, 0), (1, 0), (2, 1), (3, 2), (4, 3), (5, 1),
+                          (6, 5), (7, 6), (8, 2), (9, 8), (10, 9), (11, 5),
+                          (12, 11), (13, 12), (14, 0), (15, 0), (16, 14), (17,
+                                                                           15))
+        elif self.dataset == 'coco':
+            self.pairs = ((0, 0), (1, 0), (2, 0), (3, 1), (4, 2), (5, 0),
+                          (6, 0), (7, 5), (8, 6), (9, 7), (10, 8), (11, 0),
+                          (12, 0), (13, 11), (14, 12), (15, 13), (16, 14))
+
+    def __call__(self, results):
+
+        keypoint = results['keypoint']
+        M, T, V, C = keypoint.shape
+        bone = np.zeros((M, T, V, C), dtype=np.float32)
+
+        assert C in [2, 3]
+        for v1, v2 in self.pairs:
+            bone[..., v1, :] = keypoint[..., v1, :] - keypoint[..., v2, :]
+            if C == 3 and self.dataset in ['openpose', 'coco']:
+                score = (keypoint[..., v1, 2] + keypoint[..., v2, 2]) / 2
+                bone[..., v1, 2] = score
+
+        results[self.target] = bone
+        return results
+
+
+@PIPELINES.register()
+class ToMotion:
+
+    def __init__(self, dataset='nturgb+d', source='keypoint', target='motion'):
+        self.dataset = dataset
+        self.source = source
+        self.target = target
+
+    def __call__(self, results):
+        data = results[self.source]
+        M, T, V, C = data.shape
+        motion = np.zeros_like(data)
+
+        assert C in [2, 3]
+        motion[:, :T - 1] = np.diff(data, axis=1)
+        if C == 3 and self.dataset in ['openpose', 'coco']:
+            score = (data[:, :T - 1, :, 2] + data[:, 1:, :, 2]) / 2
+            motion[:, :T - 1, :, 2] = score
+
+        results[self.target] = motion
+
+        return results
+
+
+@PIPELINES.register()
+class MergeSkeFeat:
+
+    def __init__(self, feat_list=['keypoint'], target='keypoint', axis=-1):
+        """Merge different feats (ndarray) by concatenate them in the last axis. """
+
+        self.feat_list = feat_list
+        self.target = target
+        self.axis = axis
+
+    def __call__(self, results):
+        feats = []
+        for name in self.feat_list:
+            feats.append(results.pop(name))
+        feats = np.concatenate(feats, axis=self.axis)
+        results[self.target] = feats
+        return results
+
+
+@PIPELINES.register()
+class Rename:
+    """Rename the key in results.
+
+    Args:
+        mapping (dict): The keys in results that need to be renamed. The key of
+            the dict is the original name, while the value is the new name. If
+            the original name not found in results, do nothing.
+            Default: dict().
+    """
+
+    def __init__(self, mapping):
+        self.mapping = mapping
+
+    def __call__(self, results):
+        for key, value in self.mapping.items():
+            if key in results:
+                assert isinstance(key, str) and isinstance(value, str)
+                assert value not in results, ('the new name already exists in '
+                                              'results')
+                results[value] = results[key]
+                results.pop(key)
+        return results
+
+
+@PIPELINES.register()
+class GenSkeFeat:
+
+    def __init__(self, dataset='nturgb+d', feats=['j'], axis=-1):
+        self.dataset = dataset
+        self.feats = feats
+        self.axis = axis
+        ops = {}
+        if 'b' in feats or 'bm' in feats:
+            ops['JointToBone'] = JointToBone(dataset=dataset, target='b')
+        ops['Rename'] = Rename({'keypoint': 'j'})
+        if 'jm' in feats:
+            ops['ToMotion'] = ToMotion(dataset=dataset, source='j', target='jm')
+        if 'bm' in feats:
+            ops['ToMotion'] = ToMotion(dataset=dataset, source='b', target='bm')
+        ops['MergeSkeFeat'] = MergeSkeFeat(feat_list=feats, axis=axis)
+        self.ops = Compose(ops)
+
+    def __call__(self, results):
+        if 'keypoint_score' in results and 'keypoint' in results:
+            assert self.dataset != 'nturgb+d'
+            assert results['keypoint'].shape[
+                -1] == 2, 'Only 2D keypoints have keypoint_score. '
+            keypoint = results.pop('keypoint')
+            keypoint_score = results.pop('keypoint_score')
+            results['keypoint'] = np.concatenate(
+                [keypoint, keypoint_score[..., None]], -1)
+        return self.ops(results)
+
+
+@PIPELINES.register()
+class PreNormalize2D:
+    """Normalize the range of keypoint values. """
+
+    def __init__(self, img_shape=(1080, 1920)):
+        self.img_shape = img_shape
+
+    def __call__(self, results):
+        h, w = results.get('img_shape', self.img_shape)
+        results['keypoint'][..., 0] = (results['keypoint'][..., 0] -
+                                       (w / 2)) / (w / 2)
+        results['keypoint'][..., 1] = (results['keypoint'][..., 1] -
+                                       (h / 2)) / (h / 2)
+        return results
+
+
+@PIPELINES.register()
+class FormatGCNInput:
+    """Format final skeleton shape to the given input_format. """
+
+    def __init__(self, num_person=2, mode='zero'):
+        self.num_person = num_person
+        assert mode in ['zero', 'loop']
+        self.mode = mode
+
+    def __call__(self, results):
+        """Performs the FormatShape formatting.
+
+        Args:
+            results (dict): The resulting dict to be modified and passed
+                to the next transform in pipeline.
+        """
+        keypoint = results['keypoint']
+        if 'keypoint_score' in results:
+            keypoint = np.concatenate(
+                (keypoint, results['keypoint_score'][..., None]), axis=-1)
+
+        # M T V C
+        if keypoint.shape[0] < self.num_person:
+            pad_dim = self.num_person - keypoint.shape[0]
+            pad = np.zeros((pad_dim, ) + keypoint.shape[1:],
+                           dtype=keypoint.dtype)
+            keypoint = np.concatenate((keypoint, pad), axis=0)
+            if self.mode == 'loop' and keypoint.shape[0] == 1:
+                for i in range(1, self.num_person):
+                    keypoint[i] = keypoint[0]
+
+        elif keypoint.shape[0] > self.num_person:
+            keypoint = keypoint[:self.num_person]
+
+        M, T, V, C = keypoint.shape
+        nc = results.get('num_clips', 1)
+        assert T % nc == 0
+        keypoint = keypoint.reshape(
+            (M, nc, T // nc, V, C)).transpose(1, 0, 2, 3, 4)
+        results['keypoint'] = np.ascontiguousarray(keypoint)
+
+        label = results['label']
+
+        if isinstance(label, int):
+            label = np.array([label])
+            results['label'] = label
+        return results
+
+    def __repr__(self):
+        repr_str = self.__class__.__name__ + f'(num_person={self.num_person}, mode={self.mode})'
         return repr_str

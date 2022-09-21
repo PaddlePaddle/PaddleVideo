@@ -33,7 +33,8 @@ from .skeleton_pipeline import AutoPadding, Iden, SkeletonNorm
 from .skeleton_pipeline import SketeonCropSample, SketeonModalityTransform, RandomRotation
 from .skeleton_pipeline import (UniformSampleFrames, PoseDecode, PoseCompact,
                                 RandomResizedCrop_V2, Flip_V2, CenterCrop_V2,
-                                GeneratePoseTarget, FormatShape, Collect)
+                                GeneratePoseTarget, PreNormalize2D, GenSkeFeat,
+                                FormatGCNInput, FormatShape, Collect)
 from .decode_sampler_MRI import SFMRI_DecodeSampler
 from .segmentation_pipline import SegmentationSampler
 
@@ -51,5 +52,5 @@ __all__ = [
     'RandomGamma', 'MultiCenterCrop', 'RandomBrightness', 'RandomHue',
     'RandomSaturation', 'UniformSampleFrames', 'PoseDecode', 'PoseCompact',
     'Resize', 'RandomResizedCrop_V2', 'Flip_V2', 'GeneratePoseTarget',
-    'FormatShape', 'Collect'
+    'PreNormalize2D', 'GenSkeFeat', 'FormatGCNInput', 'FormatShape', 'Collect'
 ]

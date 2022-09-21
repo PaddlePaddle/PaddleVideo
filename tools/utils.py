@@ -51,7 +51,7 @@ from paddlevideo.loader.pipelines import (
     TenCrop, ToArray, UniformCrop, VideoDecoder, SegmentationSampler,
     SketeonCropSample, MultiCenterCrop, SketeonCropSample, UniformSampleFrames,
     PoseDecode, PoseCompact, Resize, CenterCrop_V2, GeneratePoseTarget,
-    FormatShape, Collect)
+    PreNormalize2D, GenSkeFeat, FormatGCNInput, FormatShape, Collect)
 from paddlevideo.metrics.ava_utils import read_labelmap
 from paddlevideo.metrics.bmn_metric import boundary_choose, soft_nms
 from paddlevideo.utils import Registry, build, get_config
@@ -1555,3 +1555,35 @@ class PoseC3D_Inference_helper(Base_Inference_helper):
                 for j in range(self.top_k):
                     print("\ttop-{0} class: {1}".format(j + 1, classes[j]))
                     print("\ttop-{0} score: {1}".format(j + 1, scores[j]))
+
+
+@INFERENCE.register()
+class STGCN_PlusPlus_Inference_helper(PoseC3D_Inference_helper):
+    def __init__(self, top_k=1):
+        self.top_k = top_k
+
+    def preprocess(self, input_file):
+        """
+        input_file: str, file path
+        return: list
+        """
+        assert os.path.isfile(input_file) is not None, "{0} not exists".format(
+            input_file)
+        with open(input_file, 'rb') as f:
+            data = pickle.load(f)
+        self.input_file = input_file
+
+        ops = [
+            UniformSampleFrames(clip_len=100, num_clips=1, test_mode=True),
+            PreNormalize2D(),
+            GenSkeFeat(dataset='coco', feats=['j']),
+            PoseDecode(),
+            FormatGCNInput(num_person=2),
+            Collect(keys=['keypoint', 'label'], meta_keys=[])
+        ]
+        data['start_index'] = 0
+        for op in ops:
+            results = op(data)
+        results = [results[0][np.newaxis, :, :, :, :, :]]
+        self.num_segs = results[0].shape[1]
+        return results

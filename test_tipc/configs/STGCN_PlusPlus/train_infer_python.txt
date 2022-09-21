@@ -1,0 +1,53 @@
+===========================train_params===========================
+model_name:STGCN_PlusPlus
+python:python3.7
+gpu_list:0
+Global.use_gpu:null|null
+Global.auto_cast:null
+-o epochs:2
+-o output_dir:null
+-o DATASET.batch_size:null
+-o MODEL.backbone.pretrained:null
+train_model_name:null
+train_infer_video_dir:null
+-o DATASET.train.file_path:'data/stdgcn_plusplus_data/mini_ntu60_hrnet.pkl' -o DATASET.valid.file_path='data/stdgcn_plusplus_data/mini_ntu60_hrnet.pkl' -o DATASET.test.file_path='data/stdgcn_plusplus_data/mini_ntu60_hrnet.pkl' -o DATASET.batch_size=1 -o DATASET.valid_batch_size=1
+##
+trainer:norm_train
+norm_train:main.py --validate -c configs/recognition/stgcn_plusplus/stgcn_plusplus_ntucs.yaml --seed 1234
+pact_train:null
+fpgm_train:null
+distill_train:null
+null:null
+null:null
+##
+===========================eval_params===========================
+eval:main.py --test -c configs/recognition/stgcn_plusplus/stgcn_plusplus_ntucs.yaml
+-w:./test_tipc/output/STGCN_PlusPlus/lite_train_lite_infer/norm_train_gpus_0_autocast_null_nodes_1/STGCN_PlusPlus_best.pdparams
+##
+===========================infer_params===========================
+-o:inference/STGCN_PLUSPLUS
+-p:null
+norm_export:tools/export_model.py -c configs/recognition/stgcn_plusplus/stgcn_plusplus_ntucs.yaml --save_name inference
+quant_export:null
+fpgm_export:null
+distill_export:null
+export1:null
+export2:null
+inference_dir:null
+infer_model:./test_tipc/output/STGCN_PlusPlus/lite_train_lite_infer/norm_train_gpus_0_autocast_null_nodes_1/STGCN_PlusPlus_best.pdparams
+infer_export:tools/export_model.py -c configs/recognition/stgcn_plusplus/stgcn_plusplus_ntucs.yaml
+infer_quant:False
+inference:tools/predict.py --config configs/recognition/stgcn_plusplus/stgcn_plusplus_ntucs.yaml
+--use_gpu:True|False
+--enable_mkldnn:False
+--cpu_threads:1|6
+--batch_size:1
+--use_tensorrt:False
+--precision:fp32|fp16
+--model_file:inference.pdmodel
+--input_file:./data/stdgcn_plusplus_data/example_ntu60_skeleton.pkl
+null:null
+--enable_benchmark:True
+--params_file:inference.pdiparams
+===========================infer_benchmark_params==========================
+random_infer_input:[{float32,[3, 4, 256, 256]},{float32,[3, 32, 256, 256]}]

@@ -29,11 +29,12 @@ from .skeleton import SkeletonDataset
 from .slowfast_video import SFVideoDataset
 from .video import VideoDataset
 from .ucf101_skeleton import UCF101SkeletonDataset
+from .ntucs_skeleton import NTUCSSkeletonDataset
 
 __all__ = [
     'VideoDataset', 'FrameDataset', 'SFVideoDataset', 'BMNDataset',
     'FeatureDataset', 'SkeletonDataset', 'AVADataset', 'MonoDataset',
     'MSRVTTDataset', 'ActBertDataset', 'DavisDataset', 'MRIDataset',
     'SFMRIDataset', 'FrameDataset_Sport', 'MSTCNDataset', 'ASRFDataset',
-    'UCF101SkeletonDataset'
+    'UCF101SkeletonDataset', 'NTUCSSkeletonDataset'
 ]

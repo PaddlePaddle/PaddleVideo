@@ -1,4 +1,4 @@
-#!/bin/bash
+ #!/bin/bash
 source test_tipc/common_func.sh
 
 FILENAME=$1
@@ -135,6 +135,15 @@ if [ ${MODE} = "lite_train_lite_infer" ];then
         cd posec3d_data
         wget -nc https://videotag.bj.bcebos.com/PaddleVideo-release2.3/PoseC3D_data_small.tar
         tar -xf PoseC3D_data_small.tar
+        popd
+    elif [ ${model_name} == "STGCN_PlusPlus" ]; then
+        # pretrain lite train data
+        pushd ./data
+        mkdir stdgcn_plusplus_data
+        cd stdgcn_plusplus_data
+#        wget -nc https://videotag.bj.bcebos.com/PaddleVideo-release2.3/STGCN_PlusPlus_data_small.tar
+        cp ../../STGCN_PlusPlus_data_small.tar .
+        tar -xf STGCN_PlusPlus_data_small.tar
         popd
     else
         echo "Not added into TIPC yet."

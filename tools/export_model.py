@@ -218,6 +218,10 @@ def get_input_spec(cfg, model_name):
         input_spec = [[
             InputSpec(shape=[None, 1, 17, 48, 56, 56], dtype='float32'),
         ]]
+    elif model_name in ['STGCN_PlusPlus']:
+        input_spec = [[
+            InputSpec(shape=[None, 1, 2, 100, 17, 3], dtype='float32'),
+        ]]
     return input_spec
 
 

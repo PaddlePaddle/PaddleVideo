@@ -91,15 +91,18 @@ def _no_grad_trunc_normal_(tensor, mean, std, a, b):
         return tensor
 
 
-def _calculate_fan_in_and_fan_out(tensor):
+def _calculate_fan_in_and_fan_out(tensor, reverse=False):
     dimensions = tensor.dim()
     if dimensions < 2:
         raise ValueError(
             "Fan in and fan out can not be computed for tensor with fewer than 2 dimensions"
         )
-
-    num_input_fmaps = tensor.shape[1]
-    num_output_fmaps = tensor.shape[0]
+    if reverse:
+        num_input_fmaps = tensor.shape[0]
+        num_output_fmaps = tensor.shape[1]
+    else:
+        num_input_fmaps = tensor.shape[1]
+        num_output_fmaps = tensor.shape[0]
     receptive_field_size = 1
     if tensor.dim() > 2:
         receptive_field_size = tensor[0][0].numel()
@@ -113,8 +116,13 @@ def trunc_normal_(tensor, mean=0., std=1., a=-2., b=2.):
     return _no_grad_trunc_normal_(tensor, mean, std, a, b)
 
 
-def kaiming_normal_(tensor, a=0., mode='fan_in', nonlinearity='leaky_relu'):
-    def _calculate_correct_fan(tensor, mode):
+def kaiming_normal_(tensor,
+                    a=0.,
+                    mode='fan_in',
+                    nonlinearity='leaky_relu',
+                    reverse=False):
+
+    def _calculate_correct_fan(tensor, mode, reverse=False):
         mode = mode.lower()
         valid_modes = ['fan_in', 'fan_out']
         if mode not in valid_modes:
@@ -122,7 +130,7 @@ def kaiming_normal_(tensor, a=0., mode='fan_in', nonlinearity='leaky_relu'):
                 "Mode {} not supported, please use one of {}".format(
                     mode, valid_modes))
 
-        fan_in, fan_out = _calculate_fan_in_and_fan_out(tensor)
+        fan_in, fan_out = _calculate_fan_in_and_fan_out(tensor, reverse)
         return fan_in if mode == 'fan_in' else fan_out
 
     def calculate_gain(nonlinearity, param=None):
@@ -149,9 +157,14 @@ def kaiming_normal_(tensor, a=0., mode='fan_in', nonlinearity='leaky_relu'):
         else:
             raise ValueError("Unsupported nonlinearity {}".format(nonlinearity))
 
-    fan = _calculate_correct_fan(tensor, mode)
+    fan = _calculate_correct_fan(tensor, mode, reverse)
     gain = calculate_gain(nonlinearity, a)
     std = gain / math.sqrt(fan)
     with paddle.no_grad():
         paddle.nn.initializer.Normal(0, std)(tensor)
         return tensor
+
+
+def constant_(tensor, value=0.0):
+    initializer = paddle.nn.initializer.Constant(value=value)
+    initializer(tensor)
