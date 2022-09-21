@@ -42,9 +42,11 @@ class Graph(GraphBase):
             neighbor_1base = [(15, 13), (13, 11), (16, 14), (14, 12), (11, 5),
                               (12, 6), (9, 7), (7, 5), (10, 8), (8, 6), (5, 0),
                               (6, 0), (1, 0), (3, 1), (2, 0), (4, 2)]
-            self.neighbor_link = [(j, i) for (i, j) in neighbor_1base]
+            neighbor_link = [(i, j) for (i, j) in neighbor_1base]
+            self.outward = [(j, i) for (i, j) in neighbor_1base]
             self.self_link = self_link
             self.neighbor_1base = neighbor_1base
+            self.edge = self_link + neighbor_link
             self.center = 0
         else:
             raise ValueError("Do Not Exist This Layout.")
@@ -59,8 +61,7 @@ class Graph(GraphBase):
             Iden = self.edge2mat(self.self_link, self.num_node)
             In = normalize_digraph(
                 self.edge2mat(self.neighbor_1base, self.num_node))
-            Out = normalize_digraph(
-                self.edge2mat(self.neighbor_link, self.num_node))
+            Out = normalize_digraph(self.edge2mat(self.outward, self.num_node))
             A = np.stack((Iden, In, Out))
             self.A = A
         else:
