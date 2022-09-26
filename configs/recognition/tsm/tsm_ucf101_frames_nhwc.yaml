@@ -2,7 +2,8 @@ MODEL: #MODEL field
     framework: "Recognizer2D" #Mandatory, indicate the type of network, associate to the 'paddlevideo/modeling/framework/' .
     backbone: #Mandatory, indicate the type of backbone, associate to the 'paddlevideo/modeling/backbones/' .
         name: "ResNetTSM" #Mandatory, The name of backbone.
-        pretrained: "data/TSM_k400.pdparams" #Optional, pretrained model path.
+        #pretrained: "data/TSM_k400.pdparams" #Optional, pretrained model path.
+        pretrained: "" #data/TSM_k400.pdparams" #Optional, pretrained model path.
         num_seg: 8
         depth: 50 #Optional, the depth of backbone architecture.
         data_format: "NHWC"
@@ -17,11 +18,11 @@ MODEL: #MODEL field
 
 DATASET: #DATASET field
     batch_size: 16 #Mandatory, bacth size
-    num_workers: 4 #Mandatory, XXX the number of subprocess on each GPU.
+    num_workers: 8 #Mandatory, XXX the number of subprocess on each GPU.
     train:
         format: "FrameDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
-        data_prefix: "" #Mandatory, train data root path
-        file_path: "data/ucf101/ucf101_train_split_1_rawframes.txt" #Mandatory, train data index file path
+        data_prefix: "/data/TSM/ucf101/rawframes" #Mandatory, train data root path
+        file_path: "/data/TSM/ucf101/ucf101_train_split_1_rawframes.txt" #Mandatory, train data index file path
         suffix: 'img_{:05}.jpg'
     valid:
         format: "FrameDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
@@ -121,5 +122,5 @@ METRIC:
 model_name: "TSM"
 log_interval: 20 #Optional, the interal of logger, default:10
 save_interval: 10
-epochs: 25 #Mandatory, total epoch
+epochs: 1 #Mandatory, total epoch
 log_level: "INFO" #Optional, the logger level. default: "INFO"

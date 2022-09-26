@@ -27,7 +27,7 @@ from ..metrics.ava_utils import collect_results_cpu
 from ..modeling.builder import build_model
 from ..solver import build_lr, build_optimizer
 from ..utils import do_preciseBN
-
+import paddle.profiler as profiler
 
 def train_model(cfg,
                 weights=None,
@@ -180,6 +180,10 @@ def train_model(cfg,
         model = fleet.distributed_model(model)
         optimizer = fleet.distributed_optimizer(optimizer)
 
+    prof = profiler.Profiler(targets=[paddle.profiler.ProfilerTarget.CPU, paddle.profiler.ProfilerTarget.GPU],
+                             scheduler=[100, 110],
+                             timer_only=True)
+    prof.start()
     # 8. Train Model
     best = 0.0
     for epoch in range(0, cfg.epochs):
@@ -260,7 +264,7 @@ def train_model(cfg,
             for name, value in outputs.items():
                 if name in record_list:
                     record_list[name].update(value, batch_size)
-
+            prof.step(num_samples=batch_size)
             record_list['batch_time'].update(time.time() - tic)
             tic = time.time()
 
@@ -277,7 +281,6 @@ def train_model(cfg,
             # learning rate iter step
             if cfg.OPTIMIZER.learning_rate.get("iter_step"):
                 lr.step()
-
         # learning rate epoch step
         if not cfg.OPTIMIZER.learning_rate.get("iter_step"):
             lr.step()
@@ -412,4 +415,6 @@ def train_model(cfg,
                  osp.join(output_dir,
                           model_name + f"_epoch_{epoch + 1:05d}.pdparams"))
 
+    prof.stop()
+    prof.summary(op_detail=False) 
     logger.info(f'training {model_name} finished')

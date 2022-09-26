@@ -87,6 +87,7 @@ class TSMHead(TSNHead):
 
         if self.data_format == 'NCHW':
             x = paddle.reshape(x, x.shape[:2])
+            #x = paddle.reshape(x, x.shape[::3])
         else:
             x = paddle.reshape(x, x.shape[::3])
         score = self.fc(x)  # [N * num_seg, num_class]

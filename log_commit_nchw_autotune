@@ -1,0 +1,186 @@
+grep: warning: GREP_OPTIONS is deprecated; please use an alias or script
+Warning! No module named 'paddlenlp', [paddlenlp] package and it's dependencies is required for ActBERT.
+Warning! No module named 'SimpleITK', [SimpleITK] package and it's dependencies is required for PP-Care.
+Warning! No module named 'SimpleITK', [SimpleITK] package and it's dependencies is required for PP-Care.
+Warning! No module named 'lmdb', [lmdb] package and it's dependencies is required for ActBERT.
+Warning! No module named 'paddlenlp', [paddlenlp] package and it's dependencies is required for ActBERT.
+Warning! No module named 'lmdb', [lmdb] package and it's dependencies is required for ActBERT.
+Warning! No module named 'paddlenlp', [paddlenlp] package and it's dependencies is required for ActBERT.
+[09/26 13:52:23] [35mDATASET[0m : 
+[09/26 13:52:23]     [35mbatch_size[0m : [92m16[0m
+[09/26 13:52:23]     [35mnum_workers[0m : [92m8[0m
+[09/26 13:52:23]     [35mtest[0m : 
+[09/26 13:52:23]         [35mdata_prefix[0m : [92m[0m
+[09/26 13:52:23]         [35mfile_path[0m : [92mdata/ucf101/ucf101_val_split_1_rawframes.txt[0m
+[09/26 13:52:23]         [35mformat[0m : [92mFrameDataset[0m
+[09/26 13:52:23]         [35msuffix[0m : [92mimg_{:05}.jpg[0m
+[09/26 13:52:23]     [35mtrain[0m : 
+[09/26 13:52:23]         [35mdata_prefix[0m : [92m/data/TSM/ucf101/rawframes[0m
+[09/26 13:52:23]         [35mfile_path[0m : [92m/data/TSM/ucf101/ucf101_train_split_1_rawframes.txt[0m
+[09/26 13:52:23]         [35mformat[0m : [92mFrameDataset[0m
+[09/26 13:52:23]         [35msuffix[0m : [92mimg_{:05}.jpg[0m
+[09/26 13:52:23]     [35mvalid[0m : 
+[09/26 13:52:23]         [35mdata_prefix[0m : [92m[0m
+[09/26 13:52:23]         [35mfile_path[0m : [92mdata/ucf101/ucf101_val_split_1_rawframes.txt[0m
+[09/26 13:52:23]         [35mformat[0m : [92mFrameDataset[0m
+[09/26 13:52:23]         [35msuffix[0m : [92mimg_{:05}.jpg[0m
+[09/26 13:52:23] ------------------------------------------------------------
+[09/26 13:52:23] [35mINFERENCE[0m : 
+[09/26 13:52:23]     [35mname[0m : [92mppTSM_Inference_helper[0m
+[09/26 13:52:23]     [35mnum_seg[0m : [92m8[0m
+[09/26 13:52:23]     [35mtarget_size[0m : [92m224[0m
+[09/26 13:52:23] ------------------------------------------------------------
+[09/26 13:52:23] [35mMETRIC[0m : 
+[09/26 13:52:23]     [35mname[0m : [92mCenterCropMetric[0m
+[09/26 13:52:23] ------------------------------------------------------------
+[09/26 13:52:23] [35mMODEL[0m : 
+[09/26 13:52:23]     [35mbackbone[0m : 
+[09/26 13:52:23]         [35mdepth[0m : [92m50[0m
+[09/26 13:52:23]         [35mname[0m : [92mResNetTSM[0m
+[09/26 13:52:23]         [35mnum_seg[0m : [92m8[0m
+[09/26 13:52:23]         [35mpretrained[0m : [92m[0m
+[09/26 13:52:23]     [35mframework[0m : [92mRecognizer2D[0m
+[09/26 13:52:23]     [35mhead[0m : 
+[09/26 13:52:23]         [35mdrop_ratio[0m : [92m0.8[0m
+[09/26 13:52:23]         [35min_channels[0m : [92m2048[0m
+[09/26 13:52:23]         [35mname[0m : [92mTSMHead[0m
+[09/26 13:52:23]         [35mnum_classes[0m : [92m101[0m
+[09/26 13:52:23]         [35mstd[0m : [92m0.001[0m
+[09/26 13:52:23] ------------------------------------------------------------
+[09/26 13:52:23] [35mOPTIMIZER[0m : 
+[09/26 13:52:23]     [35mgrad_clip[0m : 
+[09/26 13:52:23]         [35mname[0m : [92mClipGradByGlobalNorm[0m
+[09/26 13:52:23]         [35mvalue[0m : [92m20.0[0m
+[09/26 13:52:23]     [35mlearning_rate[0m : 
+[09/26 13:52:23]         [35mboundaries[0m : [92m[10, 20][0m
+[09/26 13:52:23]         [35mname[0m : [92mPiecewiseDecay[0m
+[09/26 13:52:23]         [35mvalues[0m : [92m[0.001, 0.0001, 1e-05][0m
+[09/26 13:52:23]     [35mmomentum[0m : [92m0.9[0m
+[09/26 13:52:23]     [35mname[0m : [92mMomentum[0m
+[09/26 13:52:23] ------------------------------------------------------------
+[09/26 13:52:23] [35mPIPELINE[0m : 
+[09/26 13:52:23]     [35mtest[0m : 
+[09/26 13:52:23]         [35mdecode[0m : 
+[09/26 13:52:23]             [35mname[0m : [92mFrameDecoder[0m
+[09/26 13:52:23]         [35msample[0m : 
+[09/26 13:52:23]             [35mname[0m : [92mSampler[0m
+[09/26 13:52:23]             [35mnum_seg[0m : [92m8[0m
+[09/26 13:52:23]             [35mseg_len[0m : [92m1[0m
+[09/26 13:52:23]             [35mselect_left[0m : [92mTrue[0m
+[09/26 13:52:23]             [35mvalid_mode[0m : [92mTrue[0m
+[09/26 13:52:23]         [35mtransform[0m : 
+[09/26 13:52:23]             [35mScale[0m : 
+[09/26 13:52:23]                 [35mfixed_ratio[0m : [92mFalse[0m
+[09/26 13:52:23]                 [35mshort_size[0m : [92m256[0m
+[09/26 13:52:23]             [35mCenterCrop[0m : 
+[09/26 13:52:23]                 [35mtarget_size[0m : [92m224[0m
+[09/26 13:52:23]             [35mImage2Array[0m : [92mNone[0m
+[09/26 13:52:23]             [35mNormalization[0m : 
+[09/26 13:52:23]                 [35mmean[0m : [92m[0.485, 0.456, 0.406][0m
+[09/26 13:52:23]                 [35mstd[0m : [92m[0.229, 0.224, 0.225][0m
+[09/26 13:52:23]     [35mtrain[0m : 
+[09/26 13:52:23]         [35mdecode[0m : 
+[09/26 13:52:23]             [35mname[0m : [92mFrameDecoder[0m
+[09/26 13:52:23]         [35msample[0m : 
+[09/26 13:52:23]             [35mname[0m : [92mSampler[0m
+[09/26 13:52:23]             [35mnum_seg[0m : [92m8[0m
+[09/26 13:52:23]             [35mseg_len[0m : [92m1[0m
+[09/26 13:52:23]             [35mselect_left[0m : [92mTrue[0m
+[09/26 13:52:23]             [35mvalid_mode[0m : [92mFalse[0m
+[09/26 13:52:23]         [35mtransform[0m : 
+[09/26 13:52:23]             [35mMultiScaleCrop[0m : 
+[09/26 13:52:23]                 [35mallow_duplication[0m : [92mTrue[0m
+[09/26 13:52:23]                 [35mtarget_size[0m : [92m224[0m
+[09/26 13:52:23]             [35mRandomFlip[0m : [92mNone[0m
+[09/26 13:52:23]             [35mImage2Array[0m : [92mNone[0m
+[09/26 13:52:23]             [35mNormalization[0m : 
+[09/26 13:52:23]                 [35mmean[0m : [92m[0.485, 0.456, 0.406][0m
+[09/26 13:52:23]                 [35mstd[0m : [92m[0.229, 0.224, 0.225][0m
+[09/26 13:52:23]     [35mvalid[0m : 
+[09/26 13:52:23]         [35mdecode[0m : 
+[09/26 13:52:23]             [35mname[0m : [92mFrameDecoder[0m
+[09/26 13:52:23]         [35msample[0m : 
+[09/26 13:52:23]             [35mname[0m : [92mSampler[0m
+[09/26 13:52:23]             [35mnum_seg[0m : [92m8[0m
+[09/26 13:52:23]             [35mseg_len[0m : [92m1[0m
+[09/26 13:52:23]             [35mselect_left[0m : [92mTrue[0m
+[09/26 13:52:23]             [35mvalid_mode[0m : [92mTrue[0m
+[09/26 13:52:23]         [35mtransform[0m : 
+[09/26 13:52:23]             [35mScale[0m : 
+[09/26 13:52:23]                 [35mfixed_ratio[0m : [92mFalse[0m
+[09/26 13:52:23]                 [35mshort_size[0m : [92m256[0m
+[09/26 13:52:23]             [35mCenterCrop[0m : 
+[09/26 13:52:23]                 [35mtarget_size[0m : [92m224[0m
+[09/26 13:52:23]             [35mImage2Array[0m : [92mNone[0m
+[09/26 13:52:23]             [35mNormalization[0m : 
+[09/26 13:52:23]                 [35mmean[0m : [92m[0.485, 0.456, 0.406][0m
+[09/26 13:52:23]                 [35mstd[0m : [92m[0.229, 0.224, 0.225][0m
+[09/26 13:52:23] ------------------------------------------------------------
+[09/26 13:52:23] [35mepochs[0m : [92m1[0m
+[09/26 13:52:23] [35mlog_interval[0m : [92m20[0m
+[09/26 13:52:23] [35mlog_level[0m : [92mINFO[0m
+[09/26 13:52:23] [35mmodel_name[0m : [92mTSM[0m
+[09/26 13:52:23] [35msave_interval[0m : [92m10[0m
+W0926 13:52:23.016273 40489 gpu_resources.cc:61] Please NOTE: device: 0, GPU Compute Capability: 7.0, Driver API Version: 11.7, Runtime API Version: 10.1
+W0926 13:52:23.022783 40489 gpu_resources.cc:91] device: 0, cuDNN Version: 7.6.
+[09/26 13:52:24] Training in amp mode, amp_level=O1.
+/usr/local/lib/python3.7/site-packages/pandas/compat/numpy/__init__.py:10: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.
+  _nlv = LooseVersion(_np_version)
+/usr/local/lib/python3.7/site-packages/pandas/compat/numpy/__init__.py:11: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.
+  _np_version_under1p16 = _nlv < LooseVersion("1.16")
+/usr/local/lib/python3.7/site-packages/pandas/compat/numpy/__init__.py:12: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.
+  _np_version_under1p17 = _nlv < LooseVersion("1.17")
+/usr/local/lib/python3.7/site-packages/pandas/compat/numpy/__init__.py:13: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.
+  _np_version_under1p18 = _nlv < LooseVersion("1.18")
+/usr/local/lib/python3.7/site-packages/pandas/compat/numpy/__init__.py:14: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.
+  _np_version_under1p19 = _nlv < LooseVersion("1.19")
+/usr/local/lib/python3.7/site-packages/pandas/compat/numpy/__init__.py:15: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.
+  _np_version_under1p20 = _nlv < LooseVersion("1.20")
+/usr/local/lib/python3.7/site-packages/setuptools/_distutils/version.py:351: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.
+  other = LooseVersion(other)
+/usr/local/lib/python3.7/site-packages/pandas/compat/numpy/function.py:125: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.
+  if LooseVersion(_np_version) >= LooseVersion("1.17.0"):
+/paddle_test/PaddleVideo/paddlevideo/solver/optimizer.py:124: DeprecationWarning: inspect.getargspec() is deprecated, use inspect.signature() or inspect.getfullargspec()
+  getattr(paddle.optimizer, opt_name).__init__).args
+[09/26 13:52:28] [35mepoch:[  1/1  ][0m [95mtrain step:0   [0m [92mloss: 4.63844 lr: 0.001000 top1: 0.00000 top5: 0.00000[0m [92mbatch_cost: 3.54086 sec,[0m [92mreader_cost: 1.29756 sec,[0m ips: 4.51867 instance/sec, eta: 0:35:07
+Found inf or nan, current scale is: 65536.0, decrease to: 65536.0*0.5
+[09/26 13:52:31] epoch:[  1/1  ] [95mtrain step:20  [0m [92mloss: 5.89191 lr: 0.001000 top1: 0.00000 top5: 0.06250[0m [92mbatch_cost: 0.16673 sec,[0m [92mreader_cost: 0.00031 sec,[0m ips: 95.96440 instance/sec, eta: 0:03:08
+[09/26 13:52:34] epoch:[  1/1  ] [95mtrain step:40  [0m [92mloss: 6.95538 lr: 0.001000 top1: 0.00000 top5: 0.06250[0m [92mbatch_cost: 0.16611 sec,[0m [92mreader_cost: 0.00460 sec,[0m ips: 96.32294 instance/sec, eta: 0:02:18
+[09/26 13:52:38] epoch:[  1/1  ] [95mtrain step:60  [0m [92mloss: 5.90127 lr: 0.001000 top1: 0.00000 top5: 0.00000[0m [92mbatch_cost: 0.16632 sec,[0m [92mreader_cost: 0.00477 sec,[0m ips: 96.20212 instance/sec, eta: 0:01:58
+[09/26 13:52:41] epoch:[  1/1  ] [95mtrain step:80  [0m [92mloss: 7.72320 lr: 0.001000 top1: 0.00000 top5: 0.00000[0m [92mbatch_cost: 0.16234 sec,[0m [92mreader_cost: 0.00028 sec,[0m ips: 98.56007 instance/sec, eta: 0:01:47
+[09/26 13:52:44] epoch:[  1/1  ] [95mtrain step:100 [0m [92mloss: 6.68995 lr: 0.001000 top1: 0.00000 top5: 0.06250[0m [92mbatch_cost: 0.16628 sec,[0m [92mreader_cost: 0.00469 sec,[0m ips: 96.22557 instance/sec, eta: 0:01:38
+[09/26 13:52:48] epoch:[  1/1  ] [95mtrain step:120 [0m [92mloss: 5.65147 lr: 0.001000 top1: 0.00000 top5: 0.06250[0m [92mbatch_cost: 0.16178 sec,[0m [92mreader_cost: 0.00028 sec,[0m ips: 98.89894 instance/sec, eta: 0:01:32
+[09/26 13:52:51] epoch:[  1/1  ] [95mtrain step:140 [0m [92mloss: 5.13803 lr: 0.001000 top1: 0.00000 top5: 0.12500[0m [92mbatch_cost: 0.16162 sec,[0m [92mreader_cost: 0.00028 sec,[0m ips: 98.99727 instance/sec, eta: 0:01:26
+[09/26 13:52:54] epoch:[  1/1  ] [95mtrain step:160 [0m [92mloss: 5.82665 lr: 0.001000 top1: 0.00000 top5: 0.00000[0m [92mbatch_cost: 0.16557 sec,[0m [92mreader_cost: 0.00460 sec,[0m ips: 96.63641 instance/sec, eta: 0:01:21
+[09/26 13:52:57] epoch:[  1/1  ] [95mtrain step:180 [0m [92mloss: 5.99307 lr: 0.001000 top1: 0.00000 top5: 0.06250[0m [92mbatch_cost: 0.16181 sec,[0m [92mreader_cost: 0.00029 sec,[0m ips: 98.87927 instance/sec, eta: 0:01:16
+[09/26 13:53:01] epoch:[  1/1  ] [95mtrain step:200 [0m [92mloss: 5.67140 lr: 0.001000 top1: 0.00000 top5: 0.00000[0m [92mbatch_cost: 0.16562 sec,[0m [92mreader_cost: 0.00029 sec,[0m ips: 96.60400 instance/sec, eta: 0:01:12
+[09/26 13:53:04] epoch:[  1/1  ] [95mtrain step:220 [0m [92mloss: 4.89151 lr: 0.001000 top1: 0.00000 top5: 0.12500[0m [92mbatch_cost: 0.16146 sec,[0m [92mreader_cost: 0.00027 sec,[0m ips: 99.09755 instance/sec, eta: 0:01:07
+[09/26 13:53:07] epoch:[  1/1  ] [95mtrain step:240 [0m [92mloss: 6.14784 lr: 0.001000 top1: 0.00000 top5: 0.06250[0m [92mbatch_cost: 0.16599 sec,[0m [92mreader_cost: 0.00469 sec,[0m ips: 96.39156 instance/sec, eta: 0:01:03
+[09/26 13:53:10] epoch:[  1/1  ] [95mtrain step:260 [0m [92mloss: 5.28680 lr: 0.001000 top1: 0.00000 top5: 0.12500[0m [92mbatch_cost: 0.16586 sec,[0m [92mreader_cost: 0.00452 sec,[0m ips: 96.46749 instance/sec, eta: 0:00:59
+[09/26 13:53:14] epoch:[  1/1  ] [95mtrain step:280 [0m [92mloss: 4.29181 lr: 0.001000 top1: 0.12500 top5: 0.18750[0m [92mbatch_cost: 0.16608 sec,[0m [92mreader_cost: 0.00477 sec,[0m ips: 96.34119 instance/sec, eta: 0:00:55
+[09/26 13:53:17] epoch:[  1/1  ] [95mtrain step:300 [0m [92mloss: 5.37902 lr: 0.001000 top1: 0.00000 top5: 0.00000[0m [92mbatch_cost: 0.16145 sec,[0m [92mreader_cost: 0.00028 sec,[0m ips: 99.09916 instance/sec, eta: 0:00:52
+[09/26 13:53:20] epoch:[  1/1  ] [95mtrain step:320 [0m [92mloss: 4.92756 lr: 0.001000 top1: 0.00000 top5: 0.06250[0m [92mbatch_cost: 0.16151 sec,[0m [92mreader_cost: 0.00029 sec,[0m ips: 99.06713 instance/sec, eta: 0:00:48
+[09/26 13:53:23] epoch:[  1/1  ] [95mtrain step:340 [0m [92mloss: 5.40483 lr: 0.001000 top1: 0.00000 top5: 0.06250[0m [92mbatch_cost: 0.16580 sec,[0m [92mreader_cost: 0.00462 sec,[0m ips: 96.50009 instance/sec, eta: 0:00:44
+[09/26 13:53:27] epoch:[  1/1  ] [95mtrain step:360 [0m [92mloss: 5.53947 lr: 0.001000 top1: 0.00000 top5: 0.12500[0m [92mbatch_cost: 0.16155 sec,[0m [92mreader_cost: 0.00027 sec,[0m ips: 99.03847 instance/sec, eta: 0:00:41
+[09/26 13:53:30] epoch:[  1/1  ] [95mtrain step:380 [0m [92mloss: 4.95971 lr: 0.001000 top1: 0.00000 top5: 0.06250[0m [92mbatch_cost: 0.16108 sec,[0m [92mreader_cost: 0.00028 sec,[0m ips: 99.33166 instance/sec, eta: 0:00:37
+[09/26 13:53:33] epoch:[  1/1  ] [95mtrain step:400 [0m [92mloss: 4.90828 lr: 0.001000 top1: 0.00000 top5: 0.00000[0m [92mbatch_cost: 0.16538 sec,[0m [92mreader_cost: 0.00455 sec,[0m ips: 96.74493 instance/sec, eta: 0:00:34
+[09/26 13:53:36] epoch:[  1/1  ] [95mtrain step:420 [0m [92mloss: 5.12787 lr: 0.001000 top1: 0.06250 top5: 0.12500[0m [92mbatch_cost: 0.16618 sec,[0m [92mreader_cost: 0.00472 sec,[0m ips: 96.28148 instance/sec, eta: 0:00:30
+[09/26 13:53:40] epoch:[  1/1  ] [95mtrain step:440 [0m [92mloss: 5.41792 lr: 0.001000 top1: 0.00000 top5: 0.12500[0m [92mbatch_cost: 0.16054 sec,[0m [92mreader_cost: 0.00029 sec,[0m ips: 99.66431 instance/sec, eta: 0:00:27
+[09/26 13:53:43] epoch:[  1/1  ] [95mtrain step:460 [0m [92mloss: 5.67575 lr: 0.001000 top1: 0.00000 top5: 0.00000[0m [92mbatch_cost: 0.16212 sec,[0m [92mreader_cost: 0.00030 sec,[0m ips: 98.68965 instance/sec, eta: 0:00:23
+[09/26 13:53:46] epoch:[  1/1  ] [95mtrain step:480 [0m [92mloss: 4.68394 lr: 0.001000 top1: 0.00000 top5: 0.06250[0m [92mbatch_cost: 0.16152 sec,[0m [92mreader_cost: 0.00029 sec,[0m ips: 99.05616 instance/sec, eta: 0:00:20
+[09/26 13:53:49] epoch:[  1/1  ] [95mtrain step:500 [0m [92mloss: 5.18077 lr: 0.001000 top1: 0.12500 top5: 0.12500[0m [92mbatch_cost: 0.16156 sec,[0m [92mreader_cost: 0.00027 sec,[0m ips: 99.03394 instance/sec, eta: 0:00:16
+[09/26 13:53:53] epoch:[  1/1  ] [95mtrain step:520 [0m [92mloss: 4.67199 lr: 0.001000 top1: 0.06250 top5: 0.06250[0m [92mbatch_cost: 0.16067 sec,[0m [92mreader_cost: 0.00029 sec,[0m ips: 99.58607 instance/sec, eta: 0:00:13
+[09/26 13:53:56] epoch:[  1/1  ] [95mtrain step:540 [0m [92mloss: 5.01149 lr: 0.001000 top1: 0.00000 top5: 0.00000[0m [92mbatch_cost: 0.16222 sec,[0m [92mreader_cost: 0.00027 sec,[0m ips: 98.63149 instance/sec, eta: 0:00:09
+[09/26 13:53:59] epoch:[  1/1  ] [95mtrain step:560 [0m [92mloss: 4.61246 lr: 0.001000 top1: 0.00000 top5: 0.00000[0m [92mbatch_cost: 0.16235 sec,[0m [92mreader_cost: 0.00028 sec,[0m ips: 98.55356 instance/sec, eta: 0:00:06
+[09/26 13:54:02] epoch:[  1/1  ] [95mtrain step:580 [0m [92mloss: 5.04224 lr: 0.001000 top1: 0.00000 top5: 0.00000[0m [92mbatch_cost: 0.16720 sec,[0m [92mreader_cost: 0.00472 sec,[0m ips: 95.69100 instance/sec, eta: 0:00:03
+[09/26 13:54:05] [31mEND epoch:1  [0m [95mtrain[0m [92mloss_avg: 5.53807  top1_avg: 0.01426 top5_avg: 0.06334[0m [92mavg_batch_cost: 0.15982 sec,[0m [92mavg_reader_cost: 0.00018 sec,[0m [92mbatch_cost_sum: 100.64481 sec,[0m avg_ips: 94.74905 instance/sec.
+============================================Perf Summary============================================
+Reader Ratio: 0.902%
+Time Unit: s, IPS Unit: samples/s
+|                 |       avg       |       max       |       min       |
+|   reader_cost   |     0.00147     |     0.00631     |     0.00009     |
+|    batch_cost   |     0.16344     |     0.17207     |     0.15901     |
+|       ips       |     98.06503    |    100.62535    |     92.98494    |
+[09/26 13:54:06] training TSM finished
+/usr/local/lib/python3.7/site-packages/paddle/nn/layer/norm.py:676: UserWarning: When training, we now always track global mean and variance.
+  "When training, we now always track global mean and variance.")
