@@ -113,6 +113,13 @@ mean fps:  25
 
 ### 1.4 测试方法
 
+在进行测试之前，需要安装[requirements.txt](../../requirements.txt)相关依赖，并且还需安装`AutoLog`用于记录计算时间，使用如下命令安装:
+```bash
+python3.7 -m pip install --upgrade pip
+pip3.7 install --upgrade -r requirements.txt
+python3.7 -m pip install git+https://github.com/LDOUBLEV/AutoLog
+```
+
 #### 1.4.1 单个模型测试
 
 以PP-TSM模型为例，请先参考[PP-TSM文档](./model_zoo/recognition/pp-tsm.md)导出推理模型，之后使用如下命令进行速度测试：
