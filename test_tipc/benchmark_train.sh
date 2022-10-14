@@ -79,7 +79,7 @@ REST_ARGS=$4
 
 to_static=""
 # parse "to_static" options and modify trainer into "to_static_trainer"
-if [ $REST_ARGS = "to_static" ] || [ $PARAMS = "to_static" ] ;then
+if [[ $PARAMS =~ "dynamicTostatic" ]] ;then
    to_static="d2sT_"
    sed -i 's/trainer:norm_train/trainer:to_static_train/g' $FILENAME
    # clear PARAM contents
