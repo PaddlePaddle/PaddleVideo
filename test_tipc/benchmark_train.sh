@@ -75,7 +75,7 @@ FILENAME=$new_filename
 MODE=$2
 PARAMS=$3
 REST_ARGS=$4
-# bash test_tipc/benchmark_train.sh /workspace/PaddleVideo/test_tipc/configs/BMN/train_infer_python.txt benchmark_train to_static
+# bash test_tipc/benchmark_train.sh /workspace/PaddleVideo/test_tipc/configs/BMN/train_infer_python.txt benchmark_train dynamicTostatic_bs8_fp32_DP_N1C8
 
 to_static=""
 # parse "to_static" options and modify trainer into "to_static_trainer"
