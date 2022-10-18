@@ -88,9 +88,7 @@ class TSN_Dali_loader(object):
                     f"lines length: {len(lines)}, "
                     f"total: {len(full_lines)}")
 
-            video_files = ''
-            for item in lines:
-                video_files += item
+            video_files = ''.join([item for item in lines])
             tf = tempfile.NamedTemporaryFile()
             tf.write(str.encode(video_files))
             tf.flush()
