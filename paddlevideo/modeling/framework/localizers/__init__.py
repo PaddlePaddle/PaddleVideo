@@ -14,5 +14,6 @@
 
 from .base import BaseLocalizer
 from .bmn_localizer import BMNLocalizer
+from .yowo_localizer import YOWOLocalizer
 
-__all__ = ['BaseLocalizer', 'BMNLocalizer']
+__all__ = ['BaseLocalizer', 'BMNLocalizer', 'YOWOLocalizer']
