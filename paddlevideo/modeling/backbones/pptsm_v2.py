@@ -73,7 +73,7 @@ class GlobalAttention(nn.Layer):
         x0 = x
 
         x = x.reshape([-1, self.num_seg, C * H * W])
-        x = F.adaptive_avg_pool1d(x, 1)
+        x = paddle.mean(x, axis=2)
         x = x.squeeze(axis=-1)
         x = self.fc(x)
         attention = F.sigmoid(x)
