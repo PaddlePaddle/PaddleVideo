@@ -41,7 +41,7 @@ PP-TSMv2沿用了部分PP-TSM的优化策略，从骨干网络与预训练模型
 | 策略 | Top-1 Acc(\%) |
 |:--:|:--:|
 | baseline | 69.06 |
-| baseline + VideoMix | 69.95(+**0.89**) |
+| baseline + SSLD Backbone | 69.95(+**0.89**) |
 
 <a name="22"></a>
 ### 2.2 数据增强
