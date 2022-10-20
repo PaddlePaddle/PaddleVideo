@@ -172,8 +172,8 @@ temporal shift模块通过把特征在时间通道上位移，获取时序信息
 
 | 策略 | Top-1 Acc(\%) |
 |:--:|:--:|
-| pptsmv2 不加时序attention | 74.38 |
-| pptsmv2 加时序attention | 75.16(+**0.78**) |
+| pptsmv2 w/o temporal_attention | 74.38 |
+| pptsmv2 w/ temporal_attention | 75.16(+**0.78**) |
 
 <a name="3"></a>
 ## 3. 快速体验
