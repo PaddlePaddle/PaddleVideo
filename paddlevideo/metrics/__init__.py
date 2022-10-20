@@ -26,9 +26,11 @@ from .segmentation_metric import SegmentationMetric
 from .ava_metric import AVAMetric
 from .vos_metric import VOSMetric
 from .center_crop_metric_MRI import CenterCropMetric_MRI
+from .yowo_metric import YOWOMetric
 
 __all__ = [
     'METRIC', 'build_metric', 'MultiCropMetric', 'BMNMetric',
     'CenterCropMetric', 'SkeletonMetric', 'HitOneMetric', 'TransNetV2Metric',
-    'DepthMetric', 'MSRVTTMetric', 'VOSMetric', 'CenterCropMetric_MRI','AVAMetric', 'SegmentationMetric'
+    'DepthMetric', 'MSRVTTMetric', 'VOSMetric', 'CenterCropMetric_MRI','AVAMetric',
+    'SegmentationMetric', 'YOWOMetric'
 ]

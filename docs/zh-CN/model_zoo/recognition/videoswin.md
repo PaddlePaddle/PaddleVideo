@@ -19,6 +19,12 @@ Video-Swin-Transformer是基于Swin Transformer的视频分类模型，其利用
 
 ![VideoSwin](../../../images/videoswin.jpg)
 
+- **注：运行VideoSwin模型，请安装PaddlePaddle==2.3.1及以上版本**
+
+```bash
+python3.7 -m pip install paddlepaddle-gpu==2.3.1 -i https://pypi.tuna.tsinghua.edu.cn/simple
+```
+
 ## 数据准备
 
 K400数据下载及准备请参考[Kinetics-400数据准备](../../dataset/k400.md)
@@ -37,7 +43,7 @@ K400数据下载及准备请参考[Kinetics-400数据准备](../../dataset/k400.
    ```bash
    wget https://videotag.bj.bcebos.com/PaddleVideo-release2.2/swin_base_patch4_window7_224.pdparams # ImageNet pretrained model for VideoSwin_base
 
-   # wget https://videotag.bj.bcebos.com/PaddleVideorelease2.2/swin_small_patch4_window7_224.pdparams # Imagenet pretrained model for VideoSwin_small
+   # wget https://videotag.bj.bcebos.com/PaddleVideo-release2.2/swin_small_patch4_window7_224.pdparams # Imagenet pretrained model for VideoSwin_small
    ```
 
 2. 打开`configs/recognition/videoswin/videoswin_base_k400_videos.yaml`，将下载好的权重存放路径填写到下方`pretrained:`之后

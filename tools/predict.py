@@ -29,27 +29,32 @@ def parse_args():
 
     # general params
     parser = argparse.ArgumentParser("PaddleVideo Inference model script")
-    parser.add_argument('-c',
-                        '--config',
-                        type=str,
-                        default='configs/example.yaml',
-                        help='config file path')
-    parser.add_argument('-o',
-                        '--override',
-                        action='append',
-                        default=[],
-                        help='config options to be overridden')
+    parser.add_argument(
+        '-c',
+        '--config',
+        type=str,
+        default='configs/example.yaml',
+        help='config file path')
+    parser.add_argument(
+        '-o',
+        '--override',
+        action='append',
+        default=[],
+        help='config options to be overridden')
     parser.add_argument("-i", "--input_file", type=str, help="input file path")
-    parser.add_argument("--time_test_file",
-                        type=str2bool,
-                        default=False,
-                        help="whether input time test file")
+    parser.add_argument(
+        "--time_test_file",
+        type=str2bool,
+        default=False,
+        help="whether input time test file")
     parser.add_argument("--model_file", type=str)
     parser.add_argument("--params_file", type=str)
 
     # params for paddle predict
     parser.add_argument("-b", "--batch_size", type=int, default=1)
     parser.add_argument("--use_gpu", type=str2bool, default=True)
+    parser.add_argument("--use_xpu", type=str2bool, default=False)
+    parser.add_argument("--use_npu", type=str2bool, default=False)
     parser.add_argument("--precision", type=str, default="fp32")
     parser.add_argument("--ir_optim", type=str2bool, default=True)
     parser.add_argument("--use_tensorrt", type=str2bool, default=False)
@@ -67,6 +72,10 @@ def create_paddle_predictor(args, cfg):
     config = Config(args.model_file, args.params_file)
     if args.use_gpu:
         config.enable_use_gpu(args.gpu_mem, 0)
+    elif args.use_npu:
+        config.enable_npu()
+    elif args.use_xpu:
+        config.enable_xpu()
     else:
         config.disable_gpu()
         if args.cpu_threads:
@@ -110,8 +119,8 @@ def create_paddle_predictor(args, cfg):
             elif 'tokenshift' in cfg.model_name.lower():
                 num_views = 3  # UniformCrop
             max_batch_size = args.batch_size * num_views * num_seg * seg_len
-        config.enable_tensorrt_engine(precision_mode=precision,
-                                      max_batch_size=max_batch_size)
+        config.enable_tensorrt_engine(
+            precision_mode=precision, max_batch_size=max_batch_size)
 
     config.enable_memory_optim()
     # use zero copy
@@ -211,6 +220,30 @@ def main():
 
             # Post process output
             InferenceHelper.postprocess(outputs)
+    elif model_name == 'YOWO':
+        for file in files:  # for videos
+            (_, filename) = os.path.split(file)
+            (filename, _) = os.path.splitext(filename)
+            save_dir = osp.join('inference', 'YOWO_infer')
+            if not osp.exists('inference'):
+                os.mkdir('inference')
+            if not osp.exists(save_dir):
+                os.mkdir(save_dir)
+            save_path = osp.join(save_dir, filename)
+            if not osp.exists(save_path):
+                os.mkdir(save_path)
+            inputs, frames = InferenceHelper.preprocess(file)
+            for idx, input in enumerate(inputs):
+                # Run inference
+                outputs = []
+                input_len = len(input_tensor_list)
+                for i in range(input_len):
+                    input_tensor_list[i].copy_from_cpu(input[i])
+                predictor.run()
+                for j in range(len(output_tensor_list)):
+                    outputs.append(output_tensor_list[j].copy_to_cpu())
+                # Post process output
+                InferenceHelper.postprocess(outputs, frames[idx], osp.join(save_path, str(idx).zfill(3)))
     else:
         if args.enable_benchmark:
             num_warmup = 3
@@ -223,21 +256,20 @@ def main():
                       f"package and it's dependencies is required for "
                       f"python-inference when enable_benchmark=True.")
             pid = os.getpid()
-            autolog = auto_log.AutoLogger(model_name=cfg.model_name,
-                                          model_precision=args.precision,
-                                          batch_size=args.batch_size,
-                                          data_shape="dynamic",
-                                          save_path="./output/auto_log.lpg",
-                                          inference_config=inference_config,
-                                          pids=pid,
-                                          process_name=None,
-                                          gpu_ids=0 if args.use_gpu else None,
-                                          time_keys=[
-                                              'preprocess_time',
-                                              'inference_time',
-                                              'postprocess_time'
-                                          ],
-                                          warmup=num_warmup)
+            autolog = auto_log.AutoLogger(
+                model_name=cfg.model_name,
+                model_precision=args.precision,
+                batch_size=args.batch_size,
+                data_shape="dynamic",
+                save_path="./output/auto_log.lpg",
+                inference_config=inference_config,
+                pids=pid,
+                process_name=None,
+                gpu_ids=0 if args.use_gpu else None,
+                time_keys=[
+                    'preprocess_time', 'inference_time', 'postprocess_time'
+                ],
+                warmup=num_warmup)
             if not args.time_test_file:
                 test_video_num = 15
                 files = [args.input_file for _ in range(test_video_num)]
