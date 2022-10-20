@@ -22,6 +22,7 @@ MODEL: #MODEL field
             name: "PPTSM_v2" #Mandatory, The name of backbone.
             pretrained: "data/PPLCNetV2_base_ssld_pretrained.pdparams" #Optional, pretrained model path.
             num_seg: 16
+            use_temporal_att: True
             class_num: 400
         head:
             name: "MoViNetHead" #Mandatory, indicate the type of head, associate to the 'paddlevideo/modeling/heads'

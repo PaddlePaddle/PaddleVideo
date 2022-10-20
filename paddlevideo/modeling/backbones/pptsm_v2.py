@@ -53,7 +53,41 @@ def make_divisible(v, divisor=8, min_value=None):
     return new_v
 
 
+class GlobalAttention(nn.Layer):
+    """
+    Lightweight temporal attention module.
+    """
+
+    def __init__(self, num_seg=8):
+        super().__init__()
+        self.fc = nn.Linear(in_features=num_seg,
+                            out_features=num_seg,
+                            weight_attr=ParamAttr(learning_rate=5.0,
+                                                  regularizer=L2Decay(1e-4)),
+                            bias_attr=ParamAttr(learning_rate=10.0,
+                                                regularizer=L2Decay(0.0)))
+        self.num_seg = num_seg
+
+    def forward(self, x):
+        _, C, H, W = x.shape
+        x0 = x
+
+        x = x.reshape([-1, self.num_seg, C * H * W])
+        x = paddle.mean(x, axis=2)  # efficient way of avg_pool
+        x = x.squeeze(axis=-1)
+        x = self.fc(x)
+        attention = F.sigmoid(x)
+        attention = attention.reshape(
+            (-1, self.num_seg, 1, 1, 1))  #for broadcast
+
+        x0 = x0.reshape([-1, self.num_seg, C, H, W])
+        y = paddle.multiply(x0, attention)
+        y = y.reshape_([-1, C, H, W])
+        return y
+
+
 class ConvBNLayer(nn.Layer):
+
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -87,6 +121,7 @@ class ConvBNLayer(nn.Layer):
 
 
 class SEModule(nn.Layer):
+
     def __init__(self, channel, reduction=4):
         super().__init__()
         self.avg_pool = AdaptiveAvgPool2D(1)
@@ -115,6 +150,7 @@ class SEModule(nn.Layer):
 
 
 class RepDepthwiseSeparable(nn.Layer):
+
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -242,12 +278,14 @@ class RepDepthwiseSeparable(nn.Layer):
 
 
 class PPTSM_v2_LCNet(nn.Layer):
+
     def __init__(self,
                  scale,
                  depths,
                  class_num=400,
                  dropout_prob=0,
                  num_seg=8,
+                 use_temporal_att=False,
                  pretrained=None,
                  use_last_conv=True,
                  class_expand=1280):
@@ -256,6 +294,7 @@ class PPTSM_v2_LCNet(nn.Layer):
         self.use_last_conv = use_last_conv
         self.class_expand = class_expand
         self.num_seg = num_seg
+        self.use_temporal_att = use_temporal_att
         self.pretrained = pretrained
 
         self.stem = nn.Sequential(*[
@@ -306,6 +345,8 @@ class PPTSM_v2_LCNet(nn.Layer):
         in_features = self.class_expand if self.use_last_conv else NET_CONFIG[
             "stage4"][0] * 2 * scale
         self.fc = Linear(in_features, class_num)
+        if self.use_temporal_att:
+            self.global_attention = GlobalAttention(num_seg=self.num_seg)
 
     def init_weights(self):
         """Initiate the parameters.
@@ -325,6 +366,9 @@ class PPTSM_v2_LCNet(nn.Layer):
         for stage in self.stages:
             # only add temporal attention and tsm in stage3 for efficiency
             if count == 2:
+                # add temporal attention
+                if self.use_temporal_att:
+                    x = self.global_attention(x)
                 x = F.temporal_shift(x, self.num_seg, 1.0 / self.num_seg)
             count += 1
             x = stage(x)
