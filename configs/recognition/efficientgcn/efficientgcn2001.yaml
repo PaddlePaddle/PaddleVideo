@@ -30,21 +30,21 @@ DATASET: #DATASET field
     test_num_workers: 0
     train:
         format: "NTUDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
-        file_path: "./data/ntu-rgb-d/xsub/train_data.npy" #Mandatory, train data index file path
-        label_path: "./data/ntu-rgb-d/xsub/train_label.pkl"
+        file_path: "./data/ntu-rgb-d/NTU-RGB-D/xsub/train_data.npy" #Mandatory, train data index file path
+        label_path: "./data/ntu-rgb-d/NTU-RGB-D/xsub/train_label.pkl"
         dataset: "ntu"
         inputs: "JVB"
     valid:
         format: "NTUDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
-        file_path: "./data/ntu-rgb-d/xsub/val_data.npy" #Mandatory, valid data index file path
-        label_path: "./data/ntu-rgb-d/xsub/val_label.pkl"
+        file_path: "./data/ntu-rgb-d/NTU-RGB-D/xsub/val_data.npy" #Mandatory, valid data index file path
+        label_path: "./data/ntu-rgb-d/NTU-RGB-D/xsub/val_label.pkl"
         test_mode: True
         dataset: "ntu"
         inputs: "JVB"
     test:
         format: "NTUDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
-        file_path: "./data/ntu-rgb-d/xsub/val_data.npy" #Mandatory, valid data index file path
-        label_path: "./data/ntu-rgb-d/xsub/val_label.pkl"
+        file_path: "./data/ntu-rgb-d/NTU-RGB-D/xsub/val_data.npy" #Mandatory, valid data index file path
+        label_path: "./data/ntu-rgb-d/NTU-RGB-D/xsub/val_label.pkl"
         test_mode: True
         dataset: "ntu"
         inputs: "JVB"

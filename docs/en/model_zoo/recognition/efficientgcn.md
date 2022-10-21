@@ -21,13 +21,13 @@
 
 ## Data
 
-Data download and processing are consistent with CTR-GCN. For details, please refer to [NTU-RGBD Data Preparation](../../dataset/ntu-rgbd.md)
+Data download and processing are consistent with ST-GCN. For details, please refer to [NTU-RGBD Data Preparation](../../dataset/ntu-rgbd.md)
 
 ##Train
 
 ### Train on NTU-RGBD
 
-Train CTR-GCN on NTU-RGBD scripts using single gpu：
+Train EfficientGCNv1 on NTU-RGBD scripts using single gpu：
 
 ```bash
 # train cross subject

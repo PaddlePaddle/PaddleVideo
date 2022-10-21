@@ -19,7 +19,7 @@
 
 ## 数据准备
 
-数据下载及处理与CTR-GCN一致，详情请参考[NTU-RGBD数据准备](../../dataset/ntu-rgbd.md)
+数据下载及处理与ST-GCN一致，详情请参考[NTU-RGBD数据准备](../../dataset/ntu-rgbd.md)
 
 ## 模型训练
 
