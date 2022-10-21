@@ -218,6 +218,13 @@ def get_input_spec(cfg, model_name):
         input_spec = [[
             InputSpec(shape=[None, 1, 17, 48, 56, 56], dtype='float32'),
         ]]
+    elif model_name in ['YOWO']:
+        input_spec = [[
+            InputSpec(shape=[
+                1, 3, cfg.num_seg, cfg.target_size, cfg.target_size
+            ],
+                      dtype='float32'),
+        ]]
     return input_spec
 
 

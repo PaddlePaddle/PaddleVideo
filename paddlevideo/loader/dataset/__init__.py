@@ -30,6 +30,7 @@ from .slowfast_video import SFVideoDataset
 from .video import VideoDataset
 from .ucf101_skeleton import UCF101SkeletonDataset
 from .efficientgcn_skeleton import NTUDataset
+
 __all__ = [
     'VideoDataset', 'FrameDataset', 'SFVideoDataset', 'BMNDataset',
     'FeatureDataset', 'SkeletonDataset', 'AVADataset', 'MonoDataset',

@@ -18,7 +18,7 @@
 [CTR-GCN](https://github.com/Uason-Chen/CTR-GCN.git)是ICCV 2021提出的基于骨骼的行为识别模型，通过将改动应用在具有拓扑结构的人体骨骼数据上的图卷积，使用时空图卷积提取时空特征进行行为识别，提升了基于骨骼的行为识别任务精度。
 
 <div align="center">
-<img src="../../../images/ctrgcn.jpg" height=200 width=950 hspace='10'/> <br />
+<img src="../../../images/ctrgcn.jpg" height=200 width=750 hspace='10'/> <br />
 </div>
 
 
@@ -31,7 +31,7 @@ NTU-RGBD数据下载及准备请参考[NTU-RGBD数据准备](../../dataset/ntu-r
 
 ### NTU-RGBD数据集训练
 
-- NTU-RGBD数据集单卡训练，启动命令如下：
+- NTU-RGBD数据集，默认使用单卡训练，启动命令如下：
 
 ```bash
 # joint modality
@@ -47,7 +47,7 @@ python main.py --validate -c configs/recognition/ctrgcn/ctrgcn_ntucs_motion.yaml
 python main.py --validate -c configs/recognition/ctrgcn/ctrgcn_ntucs_bone_motion.yaml --seed 1
 ```
 
-- NTU-RGBD数据集使用4卡训练，启动命令如下:
+- 若使用4卡训练，请线性调整学习率，训练启动命令如下:
 
 ```bash
 python3.7 -B -m paddle.distributed.launch --gpus="0,1,2,3"  --log_dir=log_ctrgcn  main.py  --validate -c configs/recognition/ctrgcn/ctrgcn_ntucs_joint.yaml

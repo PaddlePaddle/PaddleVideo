@@ -60,6 +60,7 @@ from paddlevideo.modeling.framework.segmenters.utils import ASRFPostProcessing
 from tools.ava_predict import (detection_inference, frame_extraction,
                                get_detection_result, get_timestep_result,
                                pack_result, visualize)
+from paddlevideo.modeling.framework.localizers.yowo_utils import nms, get_region_boxes
 
 INFERENCE = Registry('inference')
 
@@ -1555,3 +1556,115 @@ class PoseC3D_Inference_helper(Base_Inference_helper):
                 for j in range(self.top_k):
                     print("\ttop-{0} class: {1}".format(j + 1, classes[j]))
                     print("\ttop-{0} score: {1}".format(j + 1, scores[j]))
+                  
+
+@INFERENCE.register()
+class YOWO_Inference_helper(Base_Inference_helper):
+
+    def __init__(self,
+                 num_seg=16,
+                 target_size=224,
+                 nms_thresh=0.5,
+                 conf_thresh_valid=0.5,
+                 mean=[0.4345, 0.4051, 0.3775],
+                 std=[0.2768, 0.2713, 0.2737]):
+        self.num_seg = num_seg
+        self.target_size = target_size
+        self.nms_thresh = nms_thresh
+        self.conf_thresh_valid = conf_thresh_valid
+        self.mean = mean
+        self.std = std
+
+    def preprocess(self, input_file):
+        """
+        input_file: str, file path
+        return: list
+        """
+        assert os.path.isfile(input_file) is not None, "{0} not exists".format(
+            input_file)
+        cap = cv2.VideoCapture(input_file)
+        queue = []
+        inputs = []
+        frames = []
+        while (cap.isOpened()):
+            ret, frame = cap.read()
+            if ret == False:
+                break
+            if len(queue) <= 0:  # At initialization, populate queue with initial frame
+                for i in range(self.num_seg):
+                    queue.append(frame)
+
+            # Add the read frame to last and pop out the oldest one
+            queue.append(frame)
+            queue.pop(0)
+
+            # Resize images
+            imgs = [cv2.resize(img, (self.target_size, self.target_size), interpolation=cv2.INTER_LINEAR) for img in
+                    queue]
+
+            # Convert image to CHW keeping BGR order.
+            imgs = [img.transpose([2, 0, 1]) for img in imgs]
+
+            # Image [0, 255] -> [0, 1].
+            imgs = [img / 255.0 for img in imgs]
+
+            imgs = [
+                np.ascontiguousarray(
+                    img.reshape((3, imgs[0].shape[1], imgs[0].shape[2]))
+                ).astype(np.float32)
+                for img in imgs
+            ]
+
+            # Concat list of images to single ndarray.
+            imgs = np.concatenate(
+                [np.expand_dims(img, axis=1) for img in imgs], axis=1
+            )
+
+            imgs = np.ascontiguousarray(imgs)
+            imgs = np.expand_dims(imgs, axis=0)
+            imgs = np.expand_dims(imgs, axis=0)
+            inputs.append(imgs)
+            frames.append(queue[-1])
+
+        return inputs, frames
+
+    def postprocess(self, outputs, frame, filename, save_img=True):
+        """
+        outputs: list
+        frames: list
+        """
+        labels = [
+            "Basketball", "BasketballDunk", "Biking", "CliffDiving", "CricketBowling",
+            "Diving", "Fencing", "FloorGymnastics", "GolfSwing", "HorseRiding",
+            "IceDancing", "LongJump", "PoleVault", "RopeClimbing", "SalsaSpin",
+            "SkateBoarding", "Skiing", "Skijet", "SoccerJuggling", "Surfing",
+            "TennisSwing", "TrampolineJumping", "VolleyballSpiking", "WalkingWithDog"]
+        nms_thresh = 0.5
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        for out in outputs:
+            out = paddle.to_tensor(out)
+            preds = []
+            all_boxes = get_region_boxes(out)
+            for i in range(out.shape[0]):
+                boxes = all_boxes[i]
+                boxes = nms(boxes, nms_thresh)
+
+                for box in boxes:
+                    x1 = round(float(box[0] - box[2] / 2.0) * 320.0)
+                    y1 = round(float(box[1] - box[3] / 2.0) * 240.0)
+                    x2 = round(float(box[0] + box[2] / 2.0) * 320.0)
+                    y2 = round(float(box[1] + box[3] / 2.0) * 240.0)
+
+                    det_conf = float(box[4])
+                    for j in range((len(box) - 5) // 2):
+                        cls_conf = float(box[5 + 2 * j].item())
+                        prob = det_conf * cls_conf
+                    preds.append([[x1, y1, x2, y2], prob, labels[int(box[6])]])
+
+            for _, dets in enumerate(preds):
+                if dets[1] < 0.4:
+                    break
+                text = dets[2] + ' ' + '{:.2f}'.format(dets[1])
+                cv2.rectangle(frame, (dets[0][0], dets[0][1]), (dets[0][2], dets[0][3]), (0, 255, 0), 2)
+                cv2.putText(frame, text, (dets[0][0] + 3, dets[0][1] - 5 - 10 * _), font, 0.5, (0, 255, 0), 2)
+            cv2.imwrite('{}.jpg'.format(filename), frame)
