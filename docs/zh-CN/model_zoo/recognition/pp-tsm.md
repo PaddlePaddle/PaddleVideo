@@ -37,7 +37,7 @@ PP-TSM基于ResNet-50骨干网络进行优化，从数据增强、网络结构�
 
 ### PP-TSMv2
 
-PP-TSMv2是轻量化的视频分类模型，基于CPU端模型[PP-LCNetV2](https://github.com/PaddlePaddle/PaddleClas/blob/release/2.4/docs/zh_CN/models/PP-LCNetV2.md)进行优化，从骨干网络与预训练模型选择、数据增强、网络结构调整(使用最优的tsm模块插入数量和位置、新增时序attention模块)、输入帧数优化、解码速度优化、dml蒸馏等6个方面进行模型调优，在中心采样评估方式下，精度达到74.38%，输入10s视频在CPU端的推理速度仅需433ms。更多细节参考[PP-TSMv2技术报告](./pp-tsm_v2.md)。
+PP-TSMv2是轻量化的视频分类模型，基于CPU端模型[PP-LCNetV2](https://github.com/PaddlePaddle/PaddleClas/blob/release/2.4/docs/zh_CN/models/PP-LCNetV2.md)进行优化，从骨干网络与预训练模型选择、数据增强、tsm模块调优、输入帧数优化、解码速度优化、dml蒸馏、新增时序attention模块等7个方面进行模型调优，在中心采样评估方式下，精度达到75.16%，输入10s视频在CPU端的推理速度仅需456ms。更多细节参考[PP-TSMv2技术报告](./pp-tsm_v2.md)。
 
 
 <a name="2"></a>
@@ -50,7 +50,7 @@ PP-TSMv2模型与主流模型之间CPU推理速度对比(按预测总时间排�
 | PP-TSM | MobileNetV2 |  68.09 | 52.62 | 137.03 | 189.65 |
 | PP-TSM | MobileNetV3 |  69.84| 53.44 | 139.13 | 192.58 |
 | **PP-TSMv2** | PP-LCNet_v2.8f | **72.45**| 53.37 | 189.62 | **242.99** |
-| **PP-TSMv2** | PP-LCNet_v2.16f |	**74.38**|  68.07 | 365.23 | **433.31** |
+| **PP-TSMv2** | PP-LCNet_v2.16f |	**75.16**|  68.07 | 388.64 | **456.71** |
 | SlowFast | 4*16 |74.35 | 110.04 | 1201.36 | 1311.41 |
 | TSM | R50 |  71.06 | 52.47 | 1302.49 | 1354.96 |
 |PP-TSM	| R50 |	75.11 | 52.26  | 1354.21 | 1406.48 |
@@ -271,7 +271,7 @@ PaddleVideo 提供了基于 Paddle2ONNX 来完成 inference 模型转换 ONNX �
 | 模型名称 | 骨干网络 | 蒸馏方式 | 测试方式 | 采样帧数 | Top-1% | 训练模型 |
 | :------: | :----------: | :----: | :----: | :----: | :---- | :---- |
 | PP-TSMv2 | LCNet_v2 | DML | Uniform | 8 | 72.45 | [下载链接](https://videotag.bj.bcebos.com/PaddleVideo-release2.3/PPTSMv2_k400_8f_dml.pdparams) \| [Student模型](https://videotag.bj.bcebos.com/PaddleVideo-release2.3/PPTSMv2_k400_8f_dml_student.pdparams) |
-| PP-TSMv2 | LCNet_v2 | DML | Uniform | 16 | 74.38 | [下载链接](https://videotag.bj.bcebos.com/PaddleVideo-release2.3/PPTSMv2_k400_16f_dml.pdparams) \| [Student模型](https://videotag.bj.bcebos.com/PaddleVideo-release2.3/PPTSMv2_k400_16f_dml_student.pdparams) |
+| PP-TSMv2 | LCNet_v2 | DML | Uniform | 16 | 75.16 | [下载链接](https://videotag.bj.bcebos.com/PaddleVideo-release2.3/PPTSMv2_k400_16f_dml.pdparams) \| [Student模型](https://videotag.bj.bcebos.com/PaddleVideo-release2.3/PPTSMv2_k400_16f_dml_student.pdparams) |
 | PP-TSM | ResNet50 | KD | Uniform | 8 | 75.11 | [下载链接](https://videotag.bj.bcebos.com/PaddleVideo-release2.1/PPTSM/ppTSM_k400_uniform_distill.pdparams) |
 | PP-TSM | ResNet50 | KD | Dense | 8 | 76.16 | [下载链接](https://videotag.bj.bcebos.com/PaddleVideo-release2.1/PPTSM/ppTSM_k400_dense_distill.pdparams) |
 | PP-TSM | ResNet101 | KD | Uniform | 8 | 76.35 | [下载链接](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ppTSM_k400_uniform_distill_r101.pdparams) |

@@ -60,6 +60,10 @@ def build_record(cfg):
     elif 'MSTCN' in cfg.framework or 'ASRF' in cfg.framework:
         record_list.append(("F1@0.50", AverageMeter("F1@0.50", '.5f')))
 
+    elif 'YOWOLocalizer' in cfg.framework:
+        record_list.append(("nCorrect", AverageMeter('nCorrect', '.1f')))
+        record_list.append(("fscore", AverageMeter("fscore", '.5f')))
+
     record_list.append(("batch_time", AverageMeter('batch_cost', '.5f')))
     record_list.append(("reader_time", AverageMeter('reader_cost', '.5f')))
     record_list = OrderedDict(record_list)

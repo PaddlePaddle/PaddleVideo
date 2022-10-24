@@ -220,6 +220,30 @@ def main():
 
             # Post process output
             InferenceHelper.postprocess(outputs)
+    elif model_name == 'YOWO':
+        for file in files:  # for videos
+            (_, filename) = os.path.split(file)
+            (filename, _) = os.path.splitext(filename)
+            save_dir = osp.join('inference', 'YOWO_infer')
+            if not osp.exists('inference'):
+                os.mkdir('inference')
+            if not osp.exists(save_dir):
+                os.mkdir(save_dir)
+            save_path = osp.join(save_dir, filename)
+            if not osp.exists(save_path):
+                os.mkdir(save_path)
+            inputs, frames = InferenceHelper.preprocess(file)
+            for idx, input in enumerate(inputs):
+                # Run inference
+                outputs = []
+                input_len = len(input_tensor_list)
+                for i in range(input_len):
+                    input_tensor_list[i].copy_from_cpu(input[i])
+                predictor.run()
+                for j in range(len(output_tensor_list)):
+                    outputs.append(output_tensor_list[j].copy_to_cpu())
+                # Post process output
+                InferenceHelper.postprocess(outputs, frames[idx], osp.join(save_path, str(idx).zfill(3)))
     else:
         if args.enable_benchmark:
             num_warmup = 3

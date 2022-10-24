@@ -145,6 +145,16 @@ if [ ${MODE} = "lite_train_lite_infer" ];then
         cp ../../STGCN_PlusPlus_data_small.tar .
         tar -xf STGCN_PlusPlus_data_small.tar
         popd
+    elif [ ${model_name} == "YOWO" ]; then
+        # pretrain lite train data
+        pushd ./data
+        wget -nc https://videotag.bj.bcebos.com/Data/ucf-24-lite.zip
+        unzip -qo ucf-24-lite.zip
+        pushd ./ucf24
+        wget -nc https://videotag.bj.bcebos.com/PaddleVideo-release2.3/darknet.pdparam
+        wget -nc https://videotag.bj.bcebos.com/PaddleVideo-release2.3/resnext101_kinetics.pdparams
+        wget -nc https://videotag.bj.bcebos.com/PaddleVideo-release2.3/YOWO_epoch_00005.pdparams
+        popd
     else
         echo "Not added into TIPC yet."
     fi
