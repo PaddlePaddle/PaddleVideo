@@ -49,6 +49,9 @@ from .pptsm_mv3 import PPTSM_MobileNetV3
 from .pptsm_v2 import PPTSM_v2
 from .yowo import YOWO
 
+from .ctrgcn_light_v1 import CTRGCN_lightV1
+from .ctrgcn_light_v2 import CTRGCN_lightV2
+
 __all__ = [
     'ResNet', 'ResNetTSM', 'ResNetTweaksTSM', 'ResNetSlowFast', 'BMN',
     'ResNetTweaksTSN', 'VisionTransformer', 'STGCN', 'AGCN', 'TransNetV2',
