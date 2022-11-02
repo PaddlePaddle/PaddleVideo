@@ -34,7 +34,7 @@ class SamplingResult():
         self.num_gts = gt_bboxes.shape[0]
         self.pos_assigned_gt_inds = paddle.index_select(assign_result.gt_inds,pos_inds) - 1
 
-        if gt_bboxes.numel().numpy()[0] == 0:
+        if float(gt_bboxes.numel()) == 0:
             assert self.pos_assigned_gt_inds.numel() == 0
             self.pos_gt_bboxes = paddle.empty_like(gt_bboxes).view(-1, 4)
         else:
@@ -128,9 +128,9 @@ class RandomSampler():
         #2. 只要这个pos_inds的数目不是0个 这些就都可以是positive sample
         # 当pos_inds的数目小于num_expected(想要的sample的最大数目), 就直接用这个pos_inds
         # 反之就从这么多index里随机采样num_expected个出来
-        if pos_inds.numel().numpy()[0] != 0:
+        if float(pos_inds.numel()) != 0:
             pos_inds = pos_inds.squeeze() 
-        if pos_inds.numel().numpy()[0] <= num_expected:
+        if float(pos_inds.numel()) <= num_expected:
             return pos_inds
         else:
             return self.random_choice(pos_inds, num_expected)
@@ -138,9 +138,9 @@ class RandomSampler():
     def _sample_neg(self, assign_result, num_expected, **kwargs):
         """Randomly sample some negative samples."""
         neg_inds = paddle.nonzero(assign_result.gt_inds == 0, as_tuple=False)
-        if neg_inds.numel().numpy()[0] != 0:
+        if float(neg_inds.numel()) != 0:
             neg_inds = neg_inds.squeeze() 
-        if (neg_inds.numel().numpy()[0]) <= num_expected.numpy()[0]:
+        if (float(neg_inds.numel())) <= float(num_expected):
             return neg_inds
         else:
             return self.random_choice(neg_inds, num_expected)

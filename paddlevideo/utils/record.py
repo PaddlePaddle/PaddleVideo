@@ -90,7 +90,7 @@ class AverageMeter(object):
     def update(self, val, n=1):
         """ update """
         if isinstance(val, paddle.Tensor):
-            val = val.numpy()[0]
+            val = float(val)
         self.val = val
         self.sum += val * n
         self.count += n
