@@ -242,9 +242,9 @@ def train_model_multigrid(cfg, world_size=1, validate=True):
 
             # log record
             record_list['lr'].update(
-                optimizer._global_learning_rate().numpy()[0], batch_size)
+                float(optimizer._global_learning_rate()), batch_size)
             for name, value in outputs.items():
-                record_list[name].update(value.numpy()[0], batch_size)
+                record_list[name].update(float(value), batch_size)
             record_list['batch_time'].update(time.time() - tic)
             tic = time.time()
 
@@ -276,7 +276,7 @@ def train_model_multigrid(cfg, world_size=1, validate=True):
 
                 # log_record
                 for name, value in outputs.items():
-                    record_list[name].update(value.numpy()[0], batch_size)
+                    record_list[name].update(float(value), batch_size)
 
                 record_list['batch_time'].update(time.time() - tic)
                 tic = time.time()

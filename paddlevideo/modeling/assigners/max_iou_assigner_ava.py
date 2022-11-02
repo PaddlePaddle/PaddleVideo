@@ -117,7 +117,7 @@ class MaxIoUAssignerAVA():
             assigned_labels = paddle.full([num_bboxes, len(gt_labels[0])], 0, dtype='float32')
             assigned_gt_inds_reshape = assigned_gt_inds.reshape([assigned_gt_inds.shape[1]])
             pos_inds = paddle.nonzero( assigned_gt_inds_reshape , as_tuple=False)
-            pos_inds_num = paddle.numel(pos_inds).numpy()[0]
+            pos_inds_num = float(paddle.numel(pos_inds))
             if pos_inds_num > 0:
                 pos_inds = paddle.squeeze(pos_inds, axis = 1 )
                 assigned_gt_inds_squeeze = paddle.squeeze(assigned_gt_inds, axis=0)
@@ -127,7 +127,7 @@ class MaxIoUAssignerAVA():
                 X = assigned_gt_inds_squeeze - 1
                 Y = paddle.zeros_like(X)
                 if A.shape[0]==1:
-                    if A.numpy()[0]>0:
+                    if float(A) > 0:
                         T=X
                     else:
                         T=Y

@@ -161,7 +161,7 @@ class VOSMetric(BaseMetric):
                     one_frametime = time.time() - time_start
                     seq_total_time += one_frametime
                     seq_total_frame += 1
-                    obj_num = obj_num.numpy()[0].item()
+                    obj_num = float(obj_num)
                     logger.info('Frame: {}, Obj Num: {}, Time: {}'.format(
                         imgname[0], obj_num, one_frametime))
                     self.save_mask(
