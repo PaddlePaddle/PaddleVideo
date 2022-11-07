@@ -69,7 +69,7 @@ class SkeletonMetric(BaseMetric):
             self.top5.append(top5.numpy())
         else:  # data without label, only support batch_size=1. Used for fsd-10.
             prob = F.softmax(outputs)
-            clas = float(paddle.argmax(prob, axis=1))
+            clas = paddle.argmax(prob, axis=1).numpy()[0]
             self.values.append((batch_id, clas))
 
         # preds ensemble
