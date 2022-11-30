@@ -5,7 +5,7 @@ FILENAME=$1
 # MODE be one of ['lite_train_lite_infer' 'lite_train_whole_infer' 'whole_train_whole_infer', 'whole_infer']
 MODE=$2
 
-dataline=$(awk 'NR==1, NR==51{print}'  $FILENAME)
+dataline=$(cat ${FILENAME})
 
 # parser params
 IFS=$'\n'
@@ -43,8 +43,8 @@ distill_key=$(func_parser_key "${lines[18]}")
 distill_trainer=$(func_parser_value "${lines[18]}")
 amp_key=$(func_parser_key "${lines[19]}")
 amp_trainer=$(func_parser_value "${lines[19]}")
-to_static_key=$(func_parser_key "${lines[20]}")
-to_static_trainer=$(func_parser_value "${lines[20]}")
+trainer_key2=$(func_parser_key "${lines[20]}")
+trainer_value2=$(func_parser_value "${lines[20]}")
 
 eval_py=$(func_parser_value "${lines[23]}")
 eval_key1=$(func_parser_key "${lines[24]}")
@@ -93,6 +93,10 @@ benchmark_value=$(func_parser_value "${lines[49]}")
 
 infer_key1=$(func_parser_key "${lines[50]}")
 infer_value1=$(func_parser_value "${lines[50]}")
+
+line_num=`grep -n -w "to_static_train_benchmark_params" $FILENAME  | cut -d ":" -f 1`
+to_static_key=$(func_parser_key "${lines[line_num]}")
+to_static_trainer=$(func_parser_value "${lines[line_num]}")
 
 # parser klquant_infer
 if [ ${MODE} = "klquant_whole_infer" ]; then
@@ -301,6 +305,9 @@ else
                 elif [ ${trainer} = ${amp_key} ]; then
                     run_train=${amp_trainer}
                     run_export=${norm_export}
+                elif [[ ${trainer} = ${trainer_key2} ]]; then
+                    run_train=${trainer_value2}
+                    run_export=${export_value2}
                 # In case of @to_static, we re-used norm_traier,
                 # but append "-o to_static=True" for config
                 # to trigger "to_static" logic in 'train.py'
