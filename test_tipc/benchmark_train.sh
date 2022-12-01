@@ -97,7 +97,7 @@ lines=(${dataline})
 model_name=$(func_parser_value "${lines[1]}")
 
 # 获取'train_benchmark_params'所在的行数
-line_num=`grep -n "train_benchmark_params" $FILENAME  | cut -d ":" -f 1`
+line_num=`grep -n -w "train_benchmark_params" $FILENAME  | cut -d ":" -f 1`
 # for train log parser
 batch_size=$(func_parser_value "${lines[line_num]}")
 line_num=`expr $line_num + 1`
@@ -165,6 +165,13 @@ eval $remove_validate_cmd
 if  [ ! -n "$PARAMS" ] ;then
     # PARAMS input is not a word.
     IFS="|"
+    batch_size_list=(${batch_size})
+    fp_items_list=(${fp_items})
+    device_num_list=(N1C4)
+    run_mode="DP"
+elif [[ ${PARAMS} = "dynamicTostatic" ]] ;then
+    IFS="|"
+    model_type=$PARAMS
     batch_size_list=(${batch_size})
     fp_items_list=(${fp_items})
     device_num_list=(N1C4)
