@@ -14,7 +14,7 @@ PaddleVideo旨在打造一套丰富、领先且实用的Video工具库，旨在�
 
 ## 近期更新
 
-- 开源视频标注工具[BILS](./docs/zh-CN/annotation_tools.md)，欢迎下载安装包体验～
+- 开源视频标注工具🌟[BILS](./docs/zh-CN/annotation_tools.md)，欢迎下载安装包体验～
 - 发布轻量化行为识别模型**🔥[PP-TSMv2](./docs/zh-CN/model_zoo/recognition/pp-tsm_v2.md)**, Kinetics-400精度74.38%，25fps的10s视频cpu推理时间仅需433ms.各模型性能对比[benchmark](./docs/zh-CN/benchmark.md).
 - 新增[知识蒸馏](./docs/zh-CN/distillation.md)功能.
 - 新增基于transformer的行为识别模型[TokenShift](https://github.com/PaddlePaddle/PaddleVideo/blob/develop/docs/zh-CN/model_zoo/recognition/tokenshift_transformer.md).
