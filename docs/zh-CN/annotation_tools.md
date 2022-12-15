@@ -4,13 +4,16 @@ BILS (Baidu Intelligent Labeling System) 是一款支持时间轴打标签的视
 
 ## 下载链接
 
-mac端: [dmg包下载]()
-windows端： [exe文件下载]()
-使用教学视频: [视频下载]()
+mac端: [dmg包下载](https://videotag.bj.bcebos.com/Annotation-tools/4.11-EIVideo-0.0.0.dmg)
+
+windows端： [exe文件下载](https://videotag.bj.bcebos.com/Annotation-tools/EIVideo-Setup-0.0.0.exe)
+
+使用教学视频: [视频下载](https://videotag.bj.bcebos.com/Annotation-tools/4.11-%E4%BA%A7%E5%93%81%E8%AF%B4%E6%98%8E.mp4)
 
 ## 百度网盘下载
 
 链接: https://pan.baidu.com/s/1EmDaLwZstczICF8oeNJ0pg 
+
 提取码: ea9v 
 
 ## 源码链接
