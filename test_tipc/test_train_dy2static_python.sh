@@ -54,8 +54,8 @@ do
     eval $cmd
 
     # analysis and compare the losses.
-    dyout=`cat $dy2static_output | python test_tipc/extract_loss.py -v 'train step' -e 'loss: {%f} '`
-    stout=`cat $dygraph_output   | python test_tipc/extract_loss.py -v 'train step' -e 'loss: {%f} '`
+    dyout=`cat $dy2static_output | python test_tipc/extract_loss.py -v 'train step' -e 'loss: {%f} ' | head -n 3`
+    stout=`cat $dygraph_output   | python test_tipc/extract_loss.py -v 'train step' -e 'loss: {%f} ' | head -n 3`
     echo $dyout > $dygraph_loss
     echo $stout > $dy2static_loss
     diff_log=$LOG_PATH/${config_name}_diff_log.txt
