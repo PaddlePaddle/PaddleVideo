@@ -37,7 +37,7 @@ PP-TSM基于ResNet-50骨干网络进行优化，从数据增强、网络结构�
 
 ### PP-TSMv2
 
-PP-TSMv2是轻量化的视频分类模型，基于CPU端模型[PP-LCNetV2](https://github.com/PaddlePaddle/PaddleClas/blob/release/2.4/docs/zh_CN/models/PP-LCNetV2.md)进行优化，从骨干网络与预训练模型选择、数据增强、tsm模块调优、输入帧数优化、解码速度优化、dml蒸馏、新增时序attention模块等7个方面进行模型调优，在中心采样评估方式下，精度达到75.16%，输入10s视频在CPU端的推理速度仅需456ms。更多细节参考[PP-TSMv2技术报告](./pp-tsm_v2.md)。
+PP-TSMv2是轻量化的视频分类模型，基于CPU端模型[PP-LCNetV2](https://github.com/PaddlePaddle/PaddleClas/blob/release/2.4/docs/zh_CN/models/PP-LCNetV2.md)进行优化，从骨干网络与预训练模型选择、数据增强、tsm模块调优、输入帧数优化、解码速度优化、DML蒸馏、LTA模块等7个方面进行模型调优，在中心采样评估方式下，精度达到75.16%，输入10s视频在CPU端的推理速度仅需456ms。更多细节参考[PP-TSMv2技术报告](./pp-tsm_v2.md)。
 
 
 <a name="2"></a>
