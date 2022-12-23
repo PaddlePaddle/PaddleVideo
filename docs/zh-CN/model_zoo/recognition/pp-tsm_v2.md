@@ -166,12 +166,12 @@ PP-TSMv2沿用了部分PP-TSM的优化策略，从骨干网络与预训练模型
 
 
 <a name="27"></a>
-### 2.7 新增时序attention模块
+### 2.7 LTA模块
 
-temporal shift模块通过把特征在时间通道上位移，获取时序信息。但这种位移方式仅让局部的特征进行交互，缺少对全局时序信息的建模能力。为此我们提出了轻量化的时序attention模块，如图所示，通过全局池化组合可学习的fc层，得到全局尺度上的时序attention。在tsm模块之前，添加时序attention模块，使得网络在全局信息的指导下进行时序位移。轻量化的时序attention模块，能够在基本不增加推理时间的前提下，进一步提升模型精度。
+temporal shift模块通过把特征在时间通道上位移，获取时序信息。但这种位移方式仅让局部的特征进行交互，缺少对全局时序信息的建模能力。为此我们提出了轻量化的时序attention模块(Lightweight Temporal Attention, LTA)，如图所示，通过全局池化组合可学习的fc层，得到全局尺度上的时序attention。在tsm模块之前，添加时序attention模块，使得网络在全局信息的指导下进行时序位移。LTA模块能够在基本不增加推理时间的前提下，进一步提升模型精度。
 
 <div align="left">
-  <img src="https://user-images.githubusercontent.com/22365664/209292517-7c6e1a0f-2067-4ea9-8965-cf01cbbc5dcf.png" width="450px"/><br>
+  <img src="https://user-images.githubusercontent.com/22365664/209295833-3f68ab67-c7e4-460f-ad12-68d4b9115460.png" width="450px"/><br>
 </div>
 
 | 策略 | Top-1 Acc(\%) |
