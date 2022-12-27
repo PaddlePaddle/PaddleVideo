@@ -32,6 +32,14 @@ def test_model(cfg, weights, parallel=True):
         parallel (bool): Whether to do multi-cards testing. Default: True.
 
     """
+
+    if cfg.get('use_npu', False):
+        paddle.set_device('npu')
+    elif cfg.get('use_xpu', False):
+        places = paddle.set_device('xpu')
+    else:
+        places = paddle.set_device('gpu')
+
     # 1. Construct model.
     if cfg.MODEL.get('backbone') and cfg.MODEL.backbone.get('pretrained'):
         cfg.MODEL.backbone.pretrained = ''  # disable pretrain model init
@@ -45,26 +53,18 @@ def test_model(cfg, weights, parallel=True):
     dataset = build_dataset((cfg.DATASET.test, cfg.PIPELINE.test))
     batch_size = cfg.DATASET.get("test_batch_size", 8)
 
-    if cfg.get('use_npu', False):
-        places = paddle.set_device('npu')
-    elif cfg.get('use_xpu', False):
-        places = paddle.set_device('xpu')
-    else:
-        places = paddle.set_device('gpu')
-
     # default num worker: 0, which means no subprocess will be created
     num_workers = cfg.DATASET.get('num_workers', 0)
     num_workers = cfg.DATASET.get('test_num_workers', num_workers)
-    dataloader_setting = dict(
-        batch_size=batch_size,
-        num_workers=num_workers,
-        places=places,
-        drop_last=False,
-        shuffle=False)
+    dataloader_setting = dict(batch_size=batch_size,
+                              num_workers=num_workers,
+                              places=places,
+                              drop_last=False,
+                              shuffle=False)
 
     data_loader = build_dataloader(
-        dataset,
-        **dataloader_setting) if cfg.model_name not in ['CFBI'] else dataset
+        dataset, **dataloader_setting) if cfg.model_name not in ['CFBI'
+                                                                 ] else dataset
 
     model.eval()
 
