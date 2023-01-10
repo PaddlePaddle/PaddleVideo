@@ -379,7 +379,6 @@ else
                 fi
 
                 # run train
-                eval "unset CUDA_VISIBLE_DEVICES"
                 eval $cmd
                 # display log for benchmark train
                 eval "cat ${LOG_PATH}/train.log"
