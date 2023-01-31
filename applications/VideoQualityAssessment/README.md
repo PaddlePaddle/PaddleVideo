@@ -186,5 +186,5 @@ python3 -m paddle.distributed.launch \
 
 - [TSM: Temporal Shift Module for Efficient Video Understanding](https://arxiv.org/pdf/1811.08383.pdf), Ji Lin, Chuang Gan, Song Han
 
-- [ [Quality Assessment of In-the-Wild Videos](https://dl.acm.org/citation.cfm?doid=3343031.3351028)], Dingquan Li, Tingting Jiang, and Ming Jiang
+- [Quality Assessment of In-the-Wild Videos](https://dl.acm.org/citation.cfm?doid=3343031.3351028), Dingquan Li, Tingting Jiang, and Ming Jiang
 
