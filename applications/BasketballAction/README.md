@@ -338,11 +338,11 @@ python tools/export_model.py -c ${BasketballAction}/train_lstm/conf/conf.yaml \
 ## 模型推理
 测试数据格式，可参考使用样例
 ```
-wget https://bj.bcebos.com/v1/acg-algo/PaddleVideo_application/basketball/datasets.tar.gz
+wget https://videotag.bj.bcebos.com/Applications/basketball/datasets.tar.gz
 ```
 测试模型，可使用我们提供的模型
 ```
-wget https://bj.bcebos.com/v1/acg-algo/PaddleVideo_application/basketball/checkpoints_basketball.tar.gz
+wget https://videotag.bj.bcebos.com/Applications/basketball/checkpoints_basketball.tar.gz
 ```
 运行预测代码
 ```
