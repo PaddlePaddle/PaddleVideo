@@ -1,6 +1,6 @@
 简体中文 | [English](../en/quick_start.md)
 
-# PaddleVide快速开始
+# PaddleVideo快速开始
 
 - [1. 安装](#1)
   - [1.1 安装PaddlePaddle](#11)
