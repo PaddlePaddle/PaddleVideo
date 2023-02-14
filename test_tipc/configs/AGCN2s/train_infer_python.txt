@@ -50,4 +50,4 @@ null:null
 --enable_benchmark:True
 --params_file:inference.pdiparams
 ===========================infer_benchmark_params==========================
-random_infer_input:[{float32,[2, 300, 25, 1]}]
+random_infer_input:[{float32,[2, 250, 25, 1]}]
