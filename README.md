@@ -66,7 +66,7 @@ PaddleVideo场景应用覆盖体育、互联网、工业、医疗行业，在PP-
 - [前沿算法与模型](./docs/zh-CN/model_zoo/README.md)🚀
 - [数据集](./docs/zh-CN/dataset/README.md)
 - [场景应用](./applications/README.md)
-- [数据标注](./applications/BILS)
+- [数据标注](./docs/zh-CN/annotation_tools.md)
 - [赛事支持](./docs/zh-CN/competition.md)
 - [贡献代码](./docs/zh-CN/contribute/README.md)
 
