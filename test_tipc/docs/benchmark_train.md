@@ -28,6 +28,8 @@ bash test_tipc/benchmark_train.sh test_tipc/configs/TSM/train_infer_python.txt b
 bash test_tipc/benchmark_train.sh test_tipc/configs/TSM/train_infer_python.txt benchmark_train dynamic_bs30_fp32_DP_N1C1
 ## 动态图, batchsize=30, fp16, 数据并行模式, 单机4卡训练配置
 bash test_tipc/benchmark_train.sh test_tipc/configs/TSM/train_infer_python.txt benchmark_train dynamic_bs30_fp16_DP_N1C4
+# 动转静训练, batchsize=30, fp32, 数据并行模式, 单机单卡训练配置
+bash test_tipc/benchmark_train.sh test_tipc/configs/TSM/train_infer_python.txt benchmark_train dynamicTostatic_bs30_fp32_DP_N1C1
 ```
 dynamic_bs30_fp16_DP_N1C4/benchmark_train.sh传入的参数，格式如下：
 
