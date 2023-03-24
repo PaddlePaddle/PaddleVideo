@@ -1,0 +1,62 @@
+===========================train_params===========================
+model_name:VideoSwin
+python:python3.7
+gpu_list:0|0,1
+Global.use_gpu:null|null
+Global.auto_cast:null
+-o epochs:2
+-o output_dir:null
+-o DATASET.batch_size:null
+-o MODEL.backbone.pretrained:'data/swin_small_patch4_window7_224.pdparams'
+train_model_name:null
+train_infer_video_dir:null
+-o DATASET.train.file_path:'data/k400/train_small_videos.list' -o DATASET.valid.file_path='data/k400/val_small_videos.list' -o DATASET.test.file_path='data/k400/val_small_videos.list'
+##
+trainer:norm_train
+norm_train:main.py --validate -c configs/recognition/videoswin/videoswin_small_k400_videos.yaml --seed 1234
+pact_train:null
+fpgm_train:null
+distill_train:null
+null:null
+null:null
+##
+===========================eval_params===========================
+eval:main.py --test -c configs/recognition/videoswin/videoswin_small_k400_videos.yaml
+-w:./test_tipc/output/VideoSwin/VideoSwin_epoch_00001.pdparams
+##
+===========================infer_params===========================
+-o:inference/VideoSwin
+-p:null
+norm_export:tools/export_model.py -c configs/recognition/videoswin/videoswin_small_k400_videos.yaml --save_name inference
+quant_export:null
+fpgm_export:null
+distill_export:null
+export1:null
+export2:null
+inference_dir:null
+infer_model:./data/VideoSwin_small_k400.pdparams
+infer_export:tools/export_model.py -c configs/recognition/videoswin/videoswin_small_k400_videos.yaml
+infer_quant:False
+inference:tools/predict.py --config configs/recognition/videoswin/videoswin_small_k400_videos.yaml
+--use_gpu:True|False
+--enable_mkldnn:False
+--cpu_threads:1|6
+--batch_size:1
+--use_tensorrt:False
+--precision:fp32|fp16
+--model_file:inference.pdmodel
+--input_file:./data/example.avi
+null:null
+--enable_benchmark:True
+--params_file:inference.pdiparams
+===========================infer_benchmark_params==========================
+random_infer_input:[{float32,[3, 32, 224, 224]}]
+===========================train_benchmark_params==========================
+batch_size:1
+fp_items:fp32|fp16
+epoch:1
+--profiler_options:batch_range=[10,20];state=GPU;tracer_option=Default;profile_path=model.profile
+flags:FLAGS_conv_workspace_size_limit=800;FLAGS_cudnn_exhaustive_search=1 
+max-iters:2000
+===========================to_static_train_benchmark_params===========================
+to_static_train:-o to_static=True

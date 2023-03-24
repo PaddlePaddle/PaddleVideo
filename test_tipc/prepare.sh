@@ -467,6 +467,14 @@ if [ ${MODE} = "benchmark_train" ];then
         wget -nc https://paddlemodels.bj.bcebos.com/video_detection/activitynet_1.3_annotations.json
         wget -nc https://paddlemodels.bj.bcebos.com/video_detection/activity_net_1_3_new.json
         popd
+    elif [ ${model_name} == "VideoSwin" ]; then
+        # pretrain lite train data
+        pushd ./data/k400
+        wget -nc https://videotag.bj.bcebos.com/Data/k400_videos_small.tar
+        tar -xf k400_videos_small.tar
+        popd
+        # download pretrained weights
+        wget -nc -P ./data https://videotag.bj.bcebos.com/PaddleVideo-release2.2/swin_small_patch4_window7_224.pdparams --no-check-certificate
     else
         echo "Not added into TIPC yet."
     fi
