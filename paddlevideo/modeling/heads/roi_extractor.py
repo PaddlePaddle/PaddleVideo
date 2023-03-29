@@ -13,8 +13,6 @@
 # limitations under the License.
 
 import paddle
-from . import ops
-
 
 #@register
 class RoIAlign(object):
@@ -35,21 +33,21 @@ class RoIAlign(object):
         rois_num = paddle.to_tensor(rois_num, dtype='int32')
         rois_num = paddle.cast(rois_num, dtype='int32')
         if len(feats) == 1:
-            roi_feat = ops.roi_align(feats,
+            roi_feat = paddle.vision.ops.roi_align(feats,
                                      roi,
+                                     rois_num,
                                      self.resolution,
                                      self.spatial_scale,
-                                     sampling_ratio=self.sampling_ratio,
-                                     rois_num=rois_num,
-                                     aligned=self.aligned)
+                                     self.sampling_ratio,
+                                     self.aligned)
         else:
             rois_feat_list = []
-            roi_feat = ops.roi_align(feats,
+            roi_feat = paddle.vision.ops.roi_align(feats,
                                      roi,
+                                     rois_num,
                                      self.resolution,
                                      self.spatial_scale,
-                                     sampling_ratio=self.sampling_ratio,
-                                     rois_num=rois_num,
-                                     aligned=self.aligned)
+                                     self.sampling_ratio,
+                                     self.aligned)
 
         return roi_feat
