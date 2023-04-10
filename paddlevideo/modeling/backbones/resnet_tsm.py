@@ -124,7 +124,7 @@ class BottleneckBlock(nn.Layer):
         self.num_seg = num_seg
 
     def forward(self, inputs):
-        if paddle.device.is_compiled_with_npu():
+        if paddle.is_compiled_with_custom_device('npu'):
             x = inputs
             seg_num = self.num_seg
             shift_ratio = 1.0 / self.num_seg

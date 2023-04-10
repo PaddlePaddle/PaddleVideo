@@ -134,7 +134,7 @@ class BaseHead(nn.Layer):
         Returns:
             paddle.Tensor: [1,]
         """
-        if paddle.device.is_compiled_with_npu():
+        if paddle.is_compiled_with_custom_device('npu'):
             """
             Designed for the lack of temporary operators of NPU,
             main idea is to split smooth loss into uniform distribution loss
