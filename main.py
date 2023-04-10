@@ -89,8 +89,7 @@ def main():
     cfg = get_config(args.config, overrides=args.override)
 
     # enable to use npu if paddle is built with npu
-    if paddle.device.is_compiled_with_npu(
-    ) or "npu" in paddle.device.get_all_custom_device_type():
+    if paddle.is_compiled_with_custom_device('npu') :
         cfg.__setattr__("use_npu", True)
     elif paddle.device.is_compiled_with_xpu():
         cfg.__setattr__("use_xpu", True)

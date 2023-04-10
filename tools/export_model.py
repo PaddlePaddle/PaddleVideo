@@ -248,6 +248,11 @@ def main():
 
     model.eval()
 
+    # for rep nets
+    for layer in model.sublayers():
+        if hasattr(layer, "rep") and not getattr(layer, "is_repped"):
+            layer.rep()
+            
     input_spec = get_input_spec(cfg.INFERENCE, model_name)
     model = to_static(model, input_spec=input_spec)
     paddle.jit.save(
