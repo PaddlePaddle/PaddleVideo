@@ -34,7 +34,7 @@ def test_model(cfg, weights, parallel=True):
     """
 
     if cfg.get('use_npu', False):
-        paddle.set_device('npu')
+        places = paddle.set_device('npu')
     elif cfg.get('use_xpu', False):
         places = paddle.set_device('xpu')
     else:
