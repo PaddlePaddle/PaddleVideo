@@ -83,7 +83,7 @@ class Recognizer3D(BaseRecognizer):
         if self.backbone.__class__.__name__ == 'ResNet3dSlowOnly':
             imgs = data_batch[0]
             # call forward
-            imgs = imgs.reshape((-1, ) + imgs.shape[2:])
+            imgs = imgs.reshape([-1] + imgs.shape[2:])
             cls_score = self.forward_net(imgs)
         else:
             imgs = data_batch[0:2]
