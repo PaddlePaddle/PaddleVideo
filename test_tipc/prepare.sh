@@ -20,8 +20,7 @@ IFS=$'\n'
 lines=(${dataline})
 
 # determine python interpreter version
-python=$(func_parser_value "${lines[2]}")
-
+python=python
 # install auto-log package.
 ${python} -m pip install unrar
 ${python} -m pip install https://paddleocr.bj.bcebos.com/libs/auto_log-1.2.0-py3-none-any.whl
