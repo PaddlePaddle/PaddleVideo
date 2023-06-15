@@ -130,7 +130,8 @@ repo_name=$(get_repo_name )
 SAVE_LOG=${BENCHMARK_LOG_DIR:-$(pwd)}   # */benchmark_log
 mkdir -p "${SAVE_LOG}/benchmark_log/"
 status_log="${SAVE_LOG}/benchmark_log/results.log"
-
+# get benchmark profiling params : PROFILING_TIMER_ONLY=no|True|False
+PROFILING_TIMER_ONLY=${PROFILING_TIMER_ONLY:-"True"}
 # The number of lines in which train params can be replaced.
 line_python=3
 line_gpuid=4
@@ -209,26 +210,31 @@ for batch_size in ${batch_size_list[*]}; do
             gpu_id=$(set_gpu_id $device_num)
 
             if [ ${#gpu_id} -le 1 ];then
-                log_path="$SAVE_LOG/profiling_log"
-                mkdir -p $log_path
-                log_name="${repo_name}_${model_name}_bs${batch_size}_${precision}_${run_mode}_${device_num}_${to_static}profiling"
-                func_sed_params "$FILENAME" "${line_gpuid}" "0"  # sed used gpu_id
-                # set profile_option params
-                tmp=`sed -i "${line_profile}s/.*/${profile_option}/" "${FILENAME}"`
-
-                # for models which need to accumulate gradient.
-                if [[ ${model_name} =~ "TimeSformer" ]]; then
-                    global_bs=`expr ${batch_size} \* ${device_num:3:4} \* 8`
-                    modify_global_bs_cmd="sed -i '${line_norm_train}s/.*/& -o GRADIENT_ACCUMULATION.global_batch_size=${global_bs}/' '${filename}'"
-                    eval $modify_global_bs_cmd
+                func_sed_params "$FILENAME" "${line_gpuid}" "0"  # sed used gpu_id 
+                if [[ ${PROFILING_TIMER_ONLY} != "no" ]];then
+                    echo "run profile"
+                    # The default value of profile_option's timer_only parameter is True
+                    if [[ ${PROFILING_TIMER_ONLY} = "False" ]];then
+                        profile_option="${profile_option};timer_only=False"
+                    fi
+                    log_path="$SAVE_LOG/profiling_log"
+                    mkdir -p $log_path
+                    log_name="${repo_name}_${model_name}_bs${batch_size}_${precision}_${run_mode}_${device_num}_${to_static}profiling"
+                    # set profile_option params
+                    tmp=`sed -i "${line_profile}s/.*/\"${profile_option}\"/" "${FILENAME}"`
+                    # for models which need to accumulate gradient.
+                    if [[ ${model_name} =~ "TimeSformer" ]]; then
+                        global_bs=`expr ${batch_size} \* ${device_num:3:4} \* 8`
+                        modify_global_bs_cmd="sed -i '${line_norm_train}s/.*/& -o GRADIENT_ACCUMULATION.global_batch_size=${global_bs}/' '${filename}'"
+                        eval $modify_global_bs_cmd
+                    fi
+                    # run test_train_inference_python.sh
+                    cmd="timeout 5m bash test_tipc/test_train_inference_python.sh ${FILENAME} benchmark_train > ${log_path}/${log_name} 2>&1 "
+                    echo $cmd
+                    eval ${cmd}
+                    eval "cat ${log_path}/${log_name}"
                 fi
-
-                # run test_train_inference_python.sh
-                cmd="bash test_tipc/test_train_inference_python.sh ${FILENAME} benchmark_train > ${log_path}/${log_name} 2>&1 "
-                echo $cmd
-                eval $cmd
-                eval "cat ${log_path}/${log_name}"
-
+                echo "run without profile"  
                 # without profile
                 log_path="$SAVE_LOG/train_log"
                 speed_log_path="$SAVE_LOG/index"
