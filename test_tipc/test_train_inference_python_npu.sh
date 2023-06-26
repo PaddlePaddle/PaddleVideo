@@ -18,6 +18,9 @@ REPO_ROOT_PATH=$(readlinkf ${BASEDIR}/../)
 
 FILENAME=$1
 
+# npu environment
+export LD_PRELOAD=/opt/compiler/gcc-8.2/lib64/libgomp.so.1
+
 # disable mkldnn on non x86_64 env
 arch=$(uname -i)
 if [ $arch != "x86_64" ]; then
