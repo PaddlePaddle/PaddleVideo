@@ -85,9 +85,10 @@ def get_model_and_data_loaders(
         ce_shared_dim=config["experts"].get("ce_shared_dim", None),
         feat_aggregation=config["data_loader"]["args"]["feat_aggregation"],
     )
-    model_path = config._args.resume
+    # fix duplicate assignment
+    # model_path = config._args.resume
     logger.info(f"Loading checkpoint: {model_path} ...")
-    checkpoint = paddle.load(model_path)
+    checkpoint = paddle.load(model_path.as_posix())
     state_dict = checkpoint
     if config['n_gpu'] > 1:
         model = paddle.DataParallel(model)
