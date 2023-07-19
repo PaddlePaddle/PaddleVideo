@@ -23,7 +23,10 @@ import logging
 import shutil
 
 import numpy as np
-import paddle.fluid as fluid
+import paddle
+import paddle.static as static
+import static as static
+
 
 logger = logging.getLogger(__name__)
 
@@ -83,7 +86,7 @@ def train_with_pyreader(exe, train_prog, compiled_train_prog, train_pyreader,
     best_test_acc1 = 0
 
     for epoch in range(epochs):
-        lr = fluid.global_scope().find_var("learning_rate").get_tensor()
+        lr = static.global_scope().find_var("learning_rate").get_tensor()
         logger.info(
             "------- learning rate {}, learning rate counter  -----".format(
                 np.array(lr)))
@@ -151,9 +154,9 @@ def save_model(exe, program, save_dir, model_name, postfix=None):
         shutil.rmtree(model_path)
     # fluid.io.save_persistables(exe, model_path, main_program=program)
     save_vars = [x for x in program.list_vars() \
-                                 if isinstance(x, fluid.framework.Parameter)]
+                                 if isinstance(x, paddle.framework.Parameter)]
 
-    fluid.io.save_vars(exe,
+    static.save_vars(exe,
                        dirname=model_path,
                        main_program=program,
                        vars=save_vars,
@@ -165,7 +168,7 @@ def save_model_persist(exe, program, save_dir, model_name, postfix=None):
     model_path = os.path.join(save_dir, model_name + postfix)
     if os.path.isdir(model_path):
         shutil.rmtree(model_path)
-    fluid.io.save_persistables(exe,
+    paddle.fluid.io.save_persistables(exe,
                                save_dir,
                                main_program=program,
                                filename=model_path)
@@ -185,12 +188,12 @@ def init_pretraining_params(exe,
         """
         Load existed params
         """
-        if not isinstance(var, fluid.framework.Parameter):
+        if not isinstance(var, paddle.framework.Parameter):
             return False
         flag = os.path.exists(os.path.join(pretraining_params_path, var.name))
         return flag
 
-    fluid.io.load_vars(exe,
+    static.load_vars(exe,
                        pretraining_params_path,
                        main_program=main_program,
                        predicate=existed_params)

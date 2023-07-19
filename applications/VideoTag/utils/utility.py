@@ -17,7 +17,6 @@ import sys
 import signal
 import logging
 import paddle
-import paddle.fluid as fluid
 
 __all__ = ['AttrDict']
 
@@ -48,7 +47,7 @@ def check_cuda(use_cuda, err = \
     Please: 1. Install paddlepaddle-gpu to run your models on GPU or 2. Set use_gpu = False to run models on CPU.\n"
                                                                                                                      ):
     try:
-        if use_cuda == True and fluid.is_compiled_with_cuda() == False:
+        if use_cuda == True and paddle.is_compiled_with_cuda() == False:
             print(err)
             sys.exit(1)
     except Exception as e:
@@ -65,7 +64,7 @@ def check_version():
           "Please make sure the version is good with your code." \
 
     try:
-        fluid.require_version('1.6.0')
+        paddle.utils.require_version('1.6.0')
     except Exception as e:
         logger.error(err)
         sys.exit(1)

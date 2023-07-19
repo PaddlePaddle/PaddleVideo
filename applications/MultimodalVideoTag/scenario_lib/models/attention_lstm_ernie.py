@@ -18,9 +18,9 @@ attention lstm add ernie model
 # limitations under the License.
 
 import os
+import paddle
+import paddle.static as static
 
-import paddle.fluid as fluid
-from paddle.fluid import ParamAttr
 from .ernie import ErnieConfig, ErnieModel
 
 
@@ -87,15 +87,15 @@ class AttentionLstmErnie(object):
                                                self.feature_dtypes,
                                                self.feature_lod_level):
             self.feature_input.append(
-                fluid.layers.data(shape=dim,
+                static.data(shape=dim,
                                   lod_level=lod_level,
                                   dtype=dtype,
                                   name=name))
-        self.label_input = fluid.layers.data(shape=[self.num_classes],
+        self.label_input = static.data(shape=[self.num_classes],
                                              dtype='float32',
                                              name='label')
 
-        self.py_reader = fluid.io.PyReader(feed_list=self.feature_input +
+        self.py_reader = paddle.fluid.io.PyReader(feed_list=self.feature_input +
                                            [self.label_input],
                                            capacity=1024,
                                            iterable=True)
@@ -128,10 +128,7 @@ class AttentionLstmErnie(object):
         # ernie cnn
         enc_out_cnn = ernie.get_sequence_textcnn_output(enc_out, input_mask)
 
-        enc_out_cnn_drop = fluid.layers.dropout(
-            x=enc_out_cnn,
-            dropout_prob=self.drop_rate,
-            is_test=(not self.mode == 'train'))
+        enc_out_cnn_drop = paddle.nn.functional.dropout(enc_out_cnn, p=self.drop_rate, training=(self.mode=='train'))
         return enc_out_cnn_drop
 
     def build_model(self):
@@ -144,107 +141,100 @@ class AttentionLstmErnie(object):
         self.ernie_feature = self.ernie_encoder()
 
         # ------image------
-        lstm_forward_fc = fluid.layers.fc(input=video_input_tensor,
+        lstm_forward_fc = static.nn.fc(x=video_input_tensor,
                                           size=self.lstm_size_img * 4,
-                                          act=None,
+                                          activation=None,
                                           bias_attr=False)
-        lstm_forward, _ = fluid.layers.dynamic_lstm(input=lstm_forward_fc,
+        lstm_forward, _ = paddle.fluid.layers.dynamic_lstm(input=lstm_forward_fc,
                                                     size=self.lstm_size_img *
                                                     4,
                                                     is_reverse=False,
                                                     use_peepholes=True)
 
-        lsmt_backward_fc = fluid.layers.fc(input=video_input_tensor,
+        lsmt_backward_fc = static.nn.fc(x=video_input_tensor,
                                            size=self.lstm_size_img * 4,
-                                           act=None,
+                                           activation=None,
                                            bias_attr=None)
-        lstm_backward, _ = fluid.layers.dynamic_lstm(input=lsmt_backward_fc,
+        lstm_backward, _ = paddle.fluid.layers.dynamic_lstm(input=lsmt_backward_fc,
                                                      size=self.lstm_size_img *
                                                      4,
                                                      is_reverse=True,
                                                      use_peepholes=True)
 
-        lstm_forward_img = fluid.layers.concat(
-            input=[lstm_forward, lstm_backward], axis=1)
+        lstm_forward_img = paddle.concat(
+            x=[lstm_forward, lstm_backward], axis=1)
 
-        lstm_dropout = fluid.layers.dropout(x=lstm_forward_img,
-                                            dropout_prob=self.drop_rate,
-                                            is_test=(not self.mode == 'train'))
+        lstm_dropout = paddle.nn.functional.dropout(lstm_forward_img, p=self.drop_rate, training=(self.mode=='train'))
         if self.lstm_pool_mode == 'text_guide':
             lstm_weight = self.attention_weight_by_feature_seq2seq_attention(
                 self.ernie_feature, lstm_dropout, self.lstm_size_img * 2)
         else:
-            lstm_weight = fluid.layers.fc(input=lstm_dropout,
+            lstm_weight = static.nn.fc(x=lstm_dropout,
                                           size=1,
-                                          act='sequence_softmax',
+                                          activation='sequence_softmax',
                                           bias_attr=None)
-        scaled = fluid.layers.elementwise_mul(x=lstm_dropout,
-                                              y=lstm_weight,
-                                              axis=0)
-        self.lstm_pool = fluid.layers.sequence_pool(input=scaled,
+        scaled = paddle.multiply(x=lstm_dropout,
+                                              y=lstm_weight)
+        self.lstm_pool = paddle.static.nn.sequence_pool(input=scaled,
                                                     pool_type='sum')
         # ------audio------
-        lstm_forward_fc_audio = fluid.layers.fc(
-            input=audio_input_tensor,
+        lstm_forward_fc_audio = static.nn.fc(
+            x=audio_input_tensor,
             size=self.lstm_size_audio * 4,
-            act=None,
-            bias_attr=ParamAttr(
-                regularizer=fluid.regularizer.L2Decay(0.0),
-                initializer=fluid.initializer.NormalInitializer(scale=0.0)))
-        lstm_forward_audio, _ = fluid.layers.dynamic_lstm(
+            activation=None,
+            bias_attr=paddle.ParamAttr(
+                regularizer=paddle.regularizer.L2Decay(coeff=0.0),
+                initializer=paddle.nn.initializer.Normal(std=0.0)))
+        lstm_forward_audio, _ = paddle.fluid.layers.dynamic_lstm(
             input=lstm_forward_fc_audio,
             size=self.lstm_size_audio * 4,
             is_reverse=False,
             use_peepholes=True)
 
-        lsmt_backward_fc_audio = fluid.layers.fc(input=audio_input_tensor,
+        lsmt_backward_fc_audio = static.nn.fc(x=audio_input_tensor,
                                                  size=self.lstm_size_audio * 4,
-                                                 act=None,
+                                                 activation=None,
                                                  bias_attr=False)
-        lstm_backward_audio, _ = fluid.layers.dynamic_lstm(
+        lstm_backward_audio, _ = paddle.fluid.layers.dynamic_lstm(
             input=lsmt_backward_fc_audio,
             size=self.lstm_size_audio * 4,
             is_reverse=True,
             use_peepholes=True)
 
-        lstm_forward_audio = fluid.layers.concat(
-            input=[lstm_forward_audio, lstm_backward_audio], axis=1)
+        lstm_forward_audio = paddle.concat(
+            x=[lstm_forward_audio, lstm_backward_audio], axis=1)
 
-        lstm_dropout_audio = fluid.layers.dropout(
-            x=lstm_forward_audio,
-            dropout_prob=self.drop_rate,
-            is_test=(not self.mode == 'train'))
+        lstm_dropout_audio = paddle.nn.functional.dropout(lstm_forward_audio, p=self.drop_rate, training=(self.mode=='train'))
         if self.lstm_pool_mode == 'text_guide':
             lstm_weight_audio = self.attention_weight_by_feature_seq2seq_attention(
                 self.ernie_feature, lstm_dropout_audio,
                 self.lstm_size_audio * 2)
         else:
-            lstm_weight_audio = fluid.layers.fc(input=lstm_dropout_audio,
+            lstm_weight_audio = static.nn.fc(x=lstm_dropout_audio,
                                                 size=1,
-                                                act='sequence_softmax',
+                                                activation='sequence_softmax',
                                                 bias_attr=None)
-        scaled_audio = fluid.layers.elementwise_mul(x=lstm_dropout_audio,
-                                                    y=lstm_weight_audio,
-                                                    axis=0)
-        self.lstm_pool_audio = fluid.layers.sequence_pool(input=scaled_audio,
+        scaled_audio = paddle.multiply(x=lstm_dropout_audio,
+                                                    y=lstm_weight_audio)
+        self.lstm_pool_audio = paddle.static.nn.sequence_pool(input=scaled_audio,
                                                           pool_type='sum')
 
-        lstm_concat = fluid.layers.concat(
-            input=[self.lstm_pool, self.lstm_pool_audio, self.ernie_feature],
+        lstm_concat = paddle.concat(
+            x=[self.lstm_pool, self.lstm_pool_audio, self.ernie_feature],
             axis=1,
             name='final_concat')
 
         # lstm_concat = self.add_bn(lstm_concat)
         if self.loss_type == 'softmax':
-            self.fc = fluid.layers.fc(input=lstm_concat,
+            self.fc = static.nn.fc(x=lstm_concat,
                                       size=self.num_classes,
-                                      act='softmax')
+                                      activation='softmax')
         elif self.loss_type == 'sigmoid':
-            self.fc = fluid.layers.fc(input=lstm_concat,
+            self.fc = static.nn.fc(x=lstm_concat,
                                       size=self.num_classes,
-                                      act=None)
+                                      activation=None)
             self.logit = self.fc
-            self.fc = fluid.layers.sigmoid(self.fc)
+            self.fc = paddle.nn.functional.sigmoid(self.fc)
 
         self.network_outputs = [self.fc]
 
@@ -258,20 +248,20 @@ class AttentionLstmErnie(object):
         caculate weight by feature
         Neural Machine Translation by Jointly Learning to Align and Translate
         """
-        text_feature_expand = fluid.layers.sequence_expand(text_feature,
+        text_feature_expand = paddle.static.nn.sequence_expand(text_feature,
                                                            sequence_feature,
                                                            ref_level=0)
-        sequence_text_concat = fluid.layers.concat(
-            [sequence_feature, text_feature_expand],
+        sequence_text_concat = paddle.concat(
+            x=[sequence_feature, text_feature_expand],
             axis=-1,
             name='video_text_concat')
-        energy = fluid.layers.fc(input=sequence_text_concat,
+        energy = static.nn.fc(x=sequence_text_concat,
                                  size=sequence_feature_dim,
-                                 act='tanh',
+                                 activation='tanh',
                                  name=name_prefix + "_tanh_fc")
-        weight_vector = fluid.layers.fc(input=energy,
+        weight_vector = static.nn.fc(x=energy,
                                         size=1,
-                                        act='sequence_softmax',
+                                        activation='sequence_softmax',
                                         bias_attr=None,
                                         name=name_prefix + "_softmax_fc")
         return weight_vector
@@ -280,36 +270,36 @@ class AttentionLstmErnie(object):
         """
         v2.5 add drop out and batch norm
         """
-        input_fc_proj = fluid.layers.fc(
-            input=lstm_concat,
+        input_fc_proj = static.nn.fc(
+            x=lstm_concat,
             size=8192,
-            act=None,
-            bias_attr=ParamAttr(
-                regularizer=fluid.regularizer.L2Decay(0.0),
-                initializer=fluid.initializer.NormalInitializer(scale=0.0)))
-        input_fc_proj_bn = fluid.layers.batch_norm(
+            activation=None,
+            bias_attr=paddle.ParamAttr(
+                regularizer=paddle.regularizer.L2Decay(coeff=0.0),
+                initializer=paddle.nn.initializer.Normal(std=0.0)))
+        input_fc_proj_bn = paddle.static.nn.batch_norm(
             input=input_fc_proj,
             act="relu",
             is_test=(not self.mode == 'train'))
-        input_fc_proj_dropout = fluid.layers.dropout(
-            x=input_fc_proj_bn,
-            dropout_prob=self.drop_rate,
-            is_test=(not self.mode == 'train'))
-        input_fc_hidden = fluid.layers.fc(
-            input=input_fc_proj_dropout,
+        input_fc_proj_dropout = paddle.nn.functional.dropout(
+            input_fc_proj_bn,
+            p=self.drop_rate,
+            training=(self.mode=='train'))
+        input_fc_hidden = static.nn.fc(
+            x=input_fc_proj_dropout,
             size=4096,
-            act=None,
-            bias_attr=ParamAttr(
-                regularizer=fluid.regularizer.L2Decay(0.0),
-                initializer=fluid.initializer.NormalInitializer(scale=0.0)))
-        input_fc_hidden_bn = fluid.layers.batch_norm(
+            activation=None,
+            bias_attr=paddle.ParamAttr(
+                regularizer=paddle.regularizer.L2Decay(coeff=0.0),
+                initializer=paddle.nn.initializer.Normal(std=0.0)))
+        input_fc_hidden_bn = paddle.static.nn.batch_norm(
             input=input_fc_hidden,
             act="relu",
             is_test=(not self.mode == 'train'))
-        input_fc_hidden_dropout = fluid.layers.dropout(
-            x=input_fc_hidden_bn,
-            dropout_prob=self.drop_rate,
-            is_test=(not self.mode == 'train'))
+        input_fc_hidden_dropout = paddle.nn.functional.dropout(
+            input_fc_hidden_bn,
+            p=self.drop_rate,
+            training=(self.mode=='train'))
         return input_fc_hidden_dropout
 
     def optimizer(self):
@@ -323,12 +313,12 @@ class AttentionLstmErnie(object):
         ]
         iter_per_epoch = self.num_samples / self.batch_size
         boundaries = [e * iter_per_epoch for e in self.decay_epochs]
-        return fluid.optimizer.RMSProp(
-            learning_rate=fluid.layers.piecewise_decay(values=values,
+        return paddle.optimizer.RMSProp(
+            learning_rate=paddle.optimizer.lr.PiecewiseDecay(values=values,
                                                        boundaries=boundaries),
             centered=True,
-            regularization=fluid.regularizer.L2Decay(
-                regularization_coeff=self.weight_decay))
+            weight_decay=paddle.regularizer.L2Decay(
+                coeff=self.weight_decay))
 
     def softlabel_cross_entropy_loss(self):
         """
@@ -336,16 +326,16 @@ class AttentionLstmErnie(object):
         """
         assert self.mode != 'infer', "invalid loss calculationg in infer mode"
         '''
-        cost = fluid.layers.cross_entropy(input=self.network_outputs[0], \
+        cost = paddle.nn.functional.cross_entropy(input=self.network_outputs[0], \
                                           label=self.label_input)
         '''
-        cost = fluid.layers.cross_entropy(input=self.network_outputs[0], \
+        cost = paddle.nn.functional.cross_entropy(input=self.network_outputs[0], \
                                           label=self.label_input,
                                           soft_label=True)
 
-        cost = fluid.layers.reduce_sum(cost, dim=-1)
-        sum_cost = fluid.layers.reduce_sum(cost)
-        self.loss_ = fluid.layers.scale(sum_cost,
+        cost = paddle.sum(x=cost, axis=-1)
+        sum_cost = paddle.sum(x=cost)
+        self.loss_ = paddle.scale(sum_cost,
                                         scale=self.num_gpus,
                                         bias_after_scale=False)
 
@@ -356,12 +346,12 @@ class AttentionLstmErnie(object):
         sigmoid_cross_entropy_loss
         """
         assert self.mode != 'infer', "invalid loss calculationg in infer mode"
-        cost = fluid.layers.sigmoid_cross_entropy_with_logits(x=self.logit,\
-                                          label=self.label_input)
+        cost = paddle.nn.functional.binary_cross_entropy(input=self.logit,\
+                                          label=self.label_input, reduction=None)
 
-        cost = fluid.layers.reduce_sum(cost, dim=-1)
-        sum_cost = fluid.layers.reduce_sum(cost)
-        self.loss_ = fluid.layers.scale(sum_cost,
+        cost = paddle.sum(x=cost, axis=-1)
+        sum_cost = paddle.sum(x=cost)
+        self.loss_ = paddle.scale(sum_cost,
                                         scale=self.num_gpus,
                                         bias_after_scale=False)
 
@@ -403,8 +393,8 @@ class AttentionLstmErnie(object):
         load_test_weights_file
         """
         load_vars = [x for x in prog.list_vars() \
-                     if isinstance(x, fluid.framework.Parameter)]
-        fluid.io.load_vars(exe,
+                     if isinstance(x, paddle.framework.Parameter)]
+        static.load_vars(exe,
                            dirname=weights,
                            vars=load_vars,
                            filename="param")

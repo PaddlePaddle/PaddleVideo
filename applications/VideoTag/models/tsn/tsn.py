@@ -12,13 +12,13 @@
 #See the License for the specific language governing permissions and
 #limitations under the License.
 
-import paddle.fluid as fluid
-from paddle.fluid import ParamAttr
 
 from ..model import ModelBase
 from .tsn_res_model import TSN_ResNet
 
 import logging
+import paddle
+import paddle.static as static
 logger = logging.getLogger(__name__)
 
 __all__ = ["TSN"]
@@ -59,16 +59,16 @@ class TSN(ModelBase):
         image_shape = [None, self.seg_num] + image_shape
         self.use_dataloader = use_dataloader
 
-        image = fluid.data(name='image', shape=image_shape, dtype='float32')
+        image = static.data(name='image', shape=image_shape, dtype='float32')
         if self.mode != 'infer':
-            label = fluid.data(name='label', shape=[None, 1], dtype='int64')
+            label = static.data(name='label', shape=[None, 1], dtype='int64')
         else:
             label = None
 
         if use_dataloader:
             assert self.mode != 'infer', \
                         'dataloader is not recommendated when infer, please set use_dataloader to be false.'
-            self.dataloader = fluid.io.DataLoader.from_generator(
+            self.dataloader = paddle.io.DataLoader.from_generator(
                 feed_list=[image, label], capacity=4, iterable=True)
 
         self.feature_input = [image]
@@ -102,19 +102,19 @@ class TSN(ModelBase):
         lr = [base_lr, base_lr * lr_decay, base_lr * lr_decay * lr_decay]
         l2_weight_decay = self.l2_weight_decay
         momentum = self.momentum
-        optimizer = fluid.optimizer.Momentum(
-            learning_rate=fluid.layers.piecewise_decay(boundaries=bd,
+        optimizer = paddle.optimizer.Momentum(
+            learning_rate=paddle.optimizer.lr.PiecewiseDecay(boundaries=bd,
                                                        values=lr),
             momentum=momentum,
-            regularization=fluid.regularizer.L2Decay(l2_weight_decay))
+            weight_decay=paddle.regularizer.L2Decay(coeff=l2_weight_decay))
 
         return optimizer
 
     def loss(self):
         assert self.mode != 'infer', "invalid loss calculationg in infer mode"
-        cost = fluid.layers.cross_entropy(input=self.network_outputs[0], \
+        cost = paddle.nn.functional.cross_entropy(input=self.network_outputs[0], \
                            label=self.label_input, ignore_index=-1)
-        self.loss_ = fluid.layers.mean(x=cost)
+        self.loss_ = paddle.mean(x=cost)
         return self.loss_
 
     def outputs(self):
@@ -148,13 +148,13 @@ class TSN(ModelBase):
 
     def load_pretrain_params(self, exe, pretrain, prog):
         def is_parameter(var):
-            return isinstance(var, fluid.framework.Parameter)
+            return isinstance(var, paddle.framework.Parameter)
 
         logger.info(
             "Load pretrain weights from {}, exclude fc layer.".format(pretrain))
 
         print("===pretrain===", pretrain)
-        state_dict = fluid.load_program_state(pretrain)
+        state_dict = paddle.static.load_program_state(pretrain)
         dict_keys = list(state_dict.keys())
         # remove fc layer when pretrain, because the number of classes in final fc may not match
         for name in dict_keys:
@@ -162,4 +162,4 @@ class TSN(ModelBase):
                 del state_dict[name]
                 print('Delete {} from pretrained parameters. Do not load it'.
                       format(name))
-        fluid.set_program_state(prog, state_dict)
+        paddle.static.set_program_state(prog, state_dict)

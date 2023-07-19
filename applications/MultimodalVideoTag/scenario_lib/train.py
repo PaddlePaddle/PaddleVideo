@@ -23,9 +23,9 @@ import logging
 
 
 import numpy as np
-import paddle.fluid as fluid
 import paddle
 paddle.enable_static()
+import paddle.static as static
 
 from accuracy_metrics import MetricsCalculator
 from datareader import get_reader
@@ -131,41 +131,43 @@ def train(args):
     max_train_steps = train_config.TRAIN.epoch * train_config.TRAIN.num_samples // train_config.TRAIN.batch_size
     print('max train steps %d' % (max_train_steps))
     # build model
-    startup = fluid.Program()
-    train_prog = fluid.Program()
-    with fluid.program_guard(train_prog, startup):
-        with fluid.unique_name.guard():
-            train_model.build_input(use_pyreader=True)
-            train_model.build_model()
+    startup = static.Program()
+    train_prog = static.Program()
+    with static.program_guard(train_prog, startup):
+        paddle.disable_static()
+        train_model.build_input(use_pyreader=True)
+        train_model.build_model()
             # for the input, has the form [data1, data2,..., label], so train_feeds[-1] is label
-            train_feeds = train_model.feeds()
-            train_feeds[-1].persistable = True
+        train_feeds = train_model.feeds()
+        train_feeds[-1].persistable = True
             # for the output of classification model, has the form [pred]
-            train_outputs = train_model.outputs()
-            for output in train_outputs:
-                output.persistable = True
-            train_loss = train_model.loss()
-            train_loss.persistable = True
+        train_outputs = train_model.outputs()
+        for output in train_outputs:
+            output.persistable = True
+        train_loss = train_model.loss()
+        train_loss.persistable = True
             # outputs, loss, label should be fetched, so set persistable to be true
-            optimizer = train_model.optimizer()
-            optimizer.minimize(train_loss)
-            train_pyreader = train_model.pyreader()
+        optimizer = train_model.optimizer()
+        optimizer.minimize(train_loss)
+        train_pyreader = train_model.pyreader()
+        paddle.enable_static()
 
     if not args.no_memory_optimize:
-        fluid.memory_optimize(train_prog)
+        paddle.distributed.transpiler.memory_optimize(train_prog)
 
-    valid_prog = fluid.Program()
-    with fluid.program_guard(valid_prog, startup):
-        with fluid.unique_name.guard():
-            valid_model.build_input(True)
-            valid_model.build_model()
-            valid_feeds = valid_model.feeds()
-            valid_outputs = valid_model.outputs()
-            valid_loss = valid_model.loss()
-            valid_pyreader = valid_model.pyreader()
+    valid_prog = static.Program()
+    with static.program_guard(valid_prog, startup):
+        paddle.disable_static()
+        valid_model.build_input(True)
+        valid_model.build_model()
+        valid_feeds = valid_model.feeds()
+        valid_outputs = valid_model.outputs()
+        valid_loss = valid_model.loss()
+        valid_pyreader = valid_model.pyreader()
+        paddle.enable_static()
 
-    place = fluid.CUDAPlace(0) if args.use_gpu else fluid.CPUPlace()
-    exe = fluid.Executor(place)
+    place = paddle.CUDAPlace(0) if args.use_gpu else paddle.CPUPlace()
+    exe = static.Executor(place)
     exe.run(startup)
 
     if args.resume:
@@ -179,7 +181,7 @@ def train(args):
             return os.path.exists(os.path.join(args.resume, var.name))
 
         print('resuming ,,,,,,,,,,,,,,')
-        fluid.io.load_persistables(
+        paddle.fluid.io.load_persistables(
                     exe, '', main_program=train_prog, filename=args.resume)
 
     else:
@@ -195,20 +197,20 @@ def train(args):
         if args.pretrain:
             train_model.load_test_weights_file(exe, args.pretrain, train_prog, place)
 
-    build_strategy = fluid.BuildStrategy()
+    build_strategy = paddle.static.BuildStrategy()
     build_strategy.enable_inplace = True
 
-    compiled_train_prog = fluid.compiler.CompiledProgram(
+    compiled_train_prog = static.CompiledProgram(
         train_prog).with_data_parallel(loss_name=train_loss.name,
                                        build_strategy=build_strategy)
-    compiled_valid_prog = fluid.compiler.CompiledProgram(
+    compiled_valid_prog = static.CompiledProgram(
         valid_prog).with_data_parallel(share_vars_from=compiled_train_prog,
                                        build_strategy=build_strategy)
-    
+
     # get reader
     bs_denominator = 1
     if (not args.no_use_pyreader) and args.use_gpu:
-        dev_list = fluid.cuda_places()
+        dev_list = static.cuda_places()
         bs_denominator = len(dev_list)
     train_config.TRAIN.batch_size = int(train_config.TRAIN.batch_size /
                                         bs_denominator)
@@ -217,7 +219,7 @@ def train(args):
     train_reader = get_reader(args.model_name.upper(), 'train', train_config)
     valid_reader = get_reader(args.model_name.upper(), 'valid', valid_config)
 
-    exe_places = fluid.cuda_places() if args.use_gpu else fluid.cpu_places()
+    exe_places = static.cuda_places() if args.use_gpu else static.cpu_places()
     train_pyreader.decorate_sample_list_generator(train_reader,
                                                   places=exe_places)
     valid_pyreader.decorate_sample_list_generator(valid_reader,

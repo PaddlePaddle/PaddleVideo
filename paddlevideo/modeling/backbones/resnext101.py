@@ -12,14 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from paddle import ParamAttr
-from paddle import fluid
-import paddle.nn as nn
-from paddle.nn import Conv3D, BatchNorm3D
 from functools import partial
+import paddle
 
 
-class ConvBNLayer(nn.Layer):
+class ConvBNLayer(paddle.nn.Layer):
     def __init__(self,
                  num_channels,
                  num_filters,
@@ -34,7 +31,7 @@ class ConvBNLayer(nn.Layer):
                  name=None,
                  data_format="NCDHW"):
         super(ConvBNLayer, self).__init__()
-        self._conv = Conv3D(
+        self._conv = paddle.nn.Conv3D(
             in_channels=num_channels,
             out_channels=num_filters,
             kernel_size=filter_size,
@@ -43,18 +40,18 @@ class ConvBNLayer(nn.Layer):
             dilation=dilation,
             groups=groups,
             padding_mode=padding_mode,
-            weight_attr=ParamAttr(initializer=nn.initializer.KaimingNormal(
+            weight_attr=paddle.ParamAttr(initializer=paddle.nn.initializer.KaimingNormal(
                 fan_in=num_filters * filter_size * filter_size), name=name+'_weights'),
             bias_attr=bias_attr,
             data_format=data_format)
         bn_name = "bn_" + name
-        self._batch_norm = BatchNorm3D(
+        self._batch_norm = paddle.nn.BatchNorm3D(
             num_filters,
             momentum=0.9,
             epsilon=1e-05,
-            weight_attr=ParamAttr(initializer=nn.initializer.Constant(
+            weight_attr=paddle.ParamAttr(initializer=paddle.nn.initializer.Constant(
                 1.), name=bn_name + '_scale'),
-            bias_attr=ParamAttr(initializer=nn.initializer.Constant(
+            bias_attr=paddle.ParamAttr(initializer=paddle.nn.initializer.Constant(
                 0.), name=bn_name + '_offset'),
             data_format=data_format)
 
@@ -65,15 +62,14 @@ class ConvBNLayer(nn.Layer):
 
 
 def _downsample_basic_block(self, x, planes, stride):
-    out = fluid.layers.pool3d(
-        x, pool_size=1, pool_stride=stride, pool_type='avg')
+    out = paddle.nn.functional.avg_pool3d(x, kernel_size=1, stride=stride)
     shape = out.shape
-    zero_pads = fluid.layers.zeros([shape[0], planes - shape[1], shape[2], shape[3], shape[4]],
+    zero_pads = paddle.zeros(shape=[shape[0], planes - shape[1], shape[2], shape[3], shape[4]],
                                    dtype='float32')
-    out = fluid.layers.concat([out, zero_pads], axis=1)
+    out = paddle.concat(x=[out, zero_pads], axis=1)
 
 
-class BottleneckBlock(nn.Layer):
+class BottleneckBlock(paddle.nn.Layer):
     expansion = 2
 
     def __init__(self, inplanes, planes, cardinality, stride=1, downsample=None, name=None):
@@ -88,7 +84,7 @@ class BottleneckBlock(nn.Layer):
                                  filter_size=1, bias_attr=False, name=name+'_branch2c')
         self.downsample = downsample
         self.stride = stride
-        self.relu = nn.ReLU()
+        self.relu = paddle.nn.ReLU()
 
     def forward(self, x):
         residual = x
@@ -108,7 +104,7 @@ class BottleneckBlock(nn.Layer):
         return out
 
 
-class ResNeXt(nn.Layer):
+class ResNeXt(paddle.nn.Layer):
     def __init__(self,
                  block,
                  layers,
@@ -125,8 +121,8 @@ class ResNeXt(nn.Layer):
             bias_attr=False,
             name="res_conv1"
         )
-        self.relu = nn.ReLU()
-        self.maxpool = nn.MaxPool3D(kernel_size=(3, 3, 3), stride=2, padding=1)
+        self.relu = paddle.nn.ReLU()
+        self.maxpool = paddle.nn.MaxPool3D(kernel_size=(3, 3, 3), stride=2, padding=1)
         self.layer1 = self._make_layer(block, 128, layers[0], shortcut_type,
                                        cardinality, stride=1, name='layer1')
 
@@ -138,7 +134,7 @@ class ResNeXt(nn.Layer):
 
         self.layer4 = self._make_layer(
             block, 1024, layers[3], shortcut_type, cardinality, stride=2, name='layer4')
-        self.avgpool = nn.AvgPool3D((2, 1, 1), stride=1, exclusive=False)
+        self.avgpool = paddle.nn.AvgPool3D((2, 1, 1), stride=1, exclusive=False)
 
     def _make_layer(self,
                     block,
@@ -171,7 +167,7 @@ class ResNeXt(nn.Layer):
             layers.append(block(self.inplanes, planes,
                           cardinality, name=name+'_res_block'+str(i)))
 
-        return nn.Sequential(*layers)
+        return paddle.nn.Sequential(*layers)
 
     def forward(self, x):
         x = self.conv(x)
