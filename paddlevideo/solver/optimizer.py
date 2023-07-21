@@ -13,6 +13,10 @@
 # limitations under the License.
 
 import inspect
+# for python3.11
+if not hasattr(inspect, 'getargspec'):
+    inspect.getargspec = inspect.getfullargspec
+
 from typing import Dict
 
 import paddle
