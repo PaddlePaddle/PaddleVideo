@@ -19,7 +19,8 @@ import logging
 import argparse
 import ast
 import numpy as np
-import paddle.fluid as fluid
+import paddle
+import paddle.static as static
 
 from utils.config_utils import *
 import models
@@ -102,52 +103,53 @@ def main():
     extractor_infer_config = merge_configs(extractor_config, 'infer',
                                            vars(args))
     extractor_start_time = time.time()
-    extractor_scope = fluid.Scope()
-    with fluid.scope_guard(extractor_scope):
-        extractor_startup_prog = fluid.Program()
-        extractor_main_prog = fluid.Program()
-        with fluid.program_guard(extractor_main_prog, extractor_startup_prog):
-            with fluid.unique_name.guard():
+    extractor_scope = paddle.static.Scope()
+    with static.scope_guard(extractor_scope):
+        extractor_startup_prog = static.Program()
+        extractor_main_prog = static.Program()
+        with static.program_guard(extractor_main_prog, extractor_startup_prog):
+            paddle.disable_static()
                 # build model
-                extractor_model = models.get_model(args.extractor_name,
-                                                   extractor_infer_config,
-                                                   mode='infer',
-                                                   is_videotag=True)
-                extractor_model.build_input(use_dataloader=False)
-                extractor_model.build_model()
-                extractor_feeds = extractor_model.feeds()
-                extractor_fetch_list = extractor_model.fetches()
+            extractor_model = models.get_model(args.extractor_name,
+                                               extractor_infer_config,
+                                               mode='infer',
+                                               is_videotag=True)
+            extractor_model.build_input(use_dataloader=False)
+            extractor_model.build_model()
+            extractor_feeds = extractor_model.feeds()
+            extractor_fetch_list = extractor_model.fetches()
 
-                place = fluid.CUDAPlace(0) if args.use_gpu else fluid.CPUPlace()
-                exe = fluid.Executor(place)
+            place = paddle.CUDAPlace(0) if args.use_gpu else paddle.CPUPlace()
+            exe = static.Executor(place)
 
-                exe.run(extractor_startup_prog)
+            exe.run(extractor_startup_prog)
 
-                logger.info('load extractor weights from {}'.format(
-                    args.extractor_weights))
+            logger.info('load extractor weights from {}'.format(
+                args.extractor_weights))
 
-                extractor_model.load_pretrain_params(exe,
-                                                     args.extractor_weights,
-                                                     extractor_main_prog)
+            extractor_model.load_pretrain_params(exe,
+                                                 args.extractor_weights,
+                                                 extractor_main_prog)
 
                 # get reader and metrics
-                extractor_reader = get_reader(args.extractor_name, 'infer',
-                                              extractor_infer_config)
-                extractor_feeder = fluid.DataFeeder(place=place,
-                                                    feed_list=extractor_feeds)
+            extractor_reader = get_reader(args.extractor_name, 'infer',
+                                          extractor_infer_config)
+            extractor_feeder = paddle.fluid.DataFeeder(place=place,
+                                                feed_list=extractor_feeds)
 
-                feature_list = []
-                file_list = []
-                for idx, data in enumerate(extractor_reader()):
-                    file_id = [item[-1] for item in data]
-                    feed_data = [item[:-1] for item in data]
-                    feature_out = exe.run(fetch_list=extractor_fetch_list,
-                                          feed=extractor_feeder.feed(feed_data))
-                    feature_list.append(feature_out[0])  #get out from list
-                    file_list.append(file_id)
-                    logger.info(
-                        '========[Stage 1 Sample {} ] Extractor finished======'.
-                        format(idx))
+            feature_list = []
+            file_list = []
+            for idx, data in enumerate(extractor_reader()):
+                file_id = [item[-1] for item in data]
+                feed_data = [item[:-1] for item in data]
+                feature_out = exe.run(fetch_list=extractor_fetch_list,
+                                      feed=extractor_feeder.feed(feed_data))
+                feature_list.append(feature_out[0])  #get out from list
+                file_list.append(file_id)
+                logger.info(
+                    '========[Stage 1 Sample {} ] Extractor finished======'.
+                    format(idx))
+            paddle.enable_static()
         extractor_end_time = time.time()
         print('extractor_time', extractor_end_time - extractor_start_time)
 
@@ -175,49 +177,50 @@ def main():
         predictor_feed_list.append((predictor_feed_data, file_list[i]))
 
     predictor_start_time = time.time()
-    predictor_scope = fluid.Scope()
-    with fluid.scope_guard(predictor_scope):
-        predictor_startup_prog = fluid.Program()
-        predictor_main_prog = fluid.Program()
-        with fluid.program_guard(predictor_main_prog, predictor_startup_prog):
-            with fluid.unique_name.guard():
+    predictor_scope = paddle.static.Scope()
+    with static.scope_guard(predictor_scope):
+        predictor_startup_prog = static.Program()
+        predictor_main_prog = static.Program()
+        with static.program_guard(predictor_main_prog, predictor_startup_prog):
+            paddle.disable_static()
                 # parse config
-                predictor_model = models.get_model(args.predictor_name,
-                                                   predictor_infer_config,
-                                                   mode='infer')
-                predictor_model.build_input(use_dataloader=False)
-                predictor_model.build_model()
-                predictor_feeds = predictor_model.feeds()
+            predictor_model = models.get_model(args.predictor_name,
+                                               predictor_infer_config,
+                                               mode='infer')
+            predictor_model.build_input(use_dataloader=False)
+            predictor_model.build_model()
+            predictor_feeds = predictor_model.feeds()
 
-                exe.run(predictor_startup_prog)
+            exe.run(predictor_startup_prog)
 
-                logger.info('load predictor weights from {}'.format(
-                    args.predictor_weights))
-                predictor_model.load_test_weights(exe, args.predictor_weights,
-                                                  predictor_main_prog)
+            logger.info('load predictor weights from {}'.format(
+                args.predictor_weights))
+            predictor_model.load_test_weights(exe, args.predictor_weights,
+                                              predictor_main_prog)
 
-                predictor_feeder = fluid.DataFeeder(place=place,
-                                                    feed_list=predictor_feeds)
-                predictor_fetch_list = predictor_model.fetches()
-                predictor_metrics = get_metrics(args.predictor_name.upper(),
-                                                'infer', predictor_infer_config)
-                predictor_metrics.reset()
+            predictor_feeder = paddle.fluid.DataFeeder(place=place,
+                                                feed_list=predictor_feeds)
+            predictor_fetch_list = predictor_model.fetches()
+            predictor_metrics = get_metrics(args.predictor_name.upper(),
+                                            'infer', predictor_infer_config)
+            predictor_metrics.reset()
 
-                for idx, data in enumerate(predictor_feed_list):
-                    file_id = data[1]
-                    predictor_feed_data = data[0]
-                    final_outs = exe.run(
-                        fetch_list=predictor_fetch_list,
-                        feed=predictor_feeder.feed(predictor_feed_data))
-                    logger.info(
-                        '=======[Stage 2 Sample {} ] Predictor finished========'
-                        .format(idx))
-                    final_result_list = [item
-                                         for item in final_outs] + [file_id]
+            for idx, data in enumerate(predictor_feed_list):
+                file_id = data[1]
+                predictor_feed_data = data[0]
+                final_outs = exe.run(
+                    fetch_list=predictor_fetch_list,
+                    feed=predictor_feeder.feed(predictor_feed_data))
+                logger.info(
+                    '=======[Stage 2 Sample {} ] Predictor finished========'
+                    .format(idx))
+                final_result_list = [item
+                                     for item in final_outs] + [file_id]
 
-                    predictor_metrics.accumulate(final_result_list)
-                predictor_metrics.finalize_and_log_out(
-                    savedir=args.save_dir, label_file=args.label_file)
+                predictor_metrics.accumulate(final_result_list)
+            predictor_metrics.finalize_and_log_out(
+                savedir=args.save_dir, label_file=args.label_file)
+            paddle.enable_static()
     predictor_end_time = time.time()
     print('predictor_time', predictor_end_time - predictor_start_time)
 

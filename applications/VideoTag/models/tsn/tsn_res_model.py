@@ -15,7 +15,8 @@
 import os
 import time
 import sys
-import paddle.fluid as fluid
+import paddle
+import paddle.static as static
 import math
 
 
@@ -38,27 +39,26 @@ class TSN_ResNet():
                       groups=1,
                       act=None,
                       name=None):
-        conv = fluid.layers.conv2d(
+        conv = paddle.static.nn.conv2d(
             input=input,
             num_filters=num_filters,
             filter_size=filter_size,
             stride=stride,
             padding=(filter_size - 1) // 2,
             groups=groups,
-            act=None,
-            param_attr=fluid.param_attr.ParamAttr(name=name + "_weights"),
+            param_attr=paddle.ParamAttr(name=name + "_weights"),
             bias_attr=False)
         if name == "conv1":
             bn_name = "bn_" + name
         else:
             bn_name = "bn" + name[3:]
 
-        return fluid.layers.batch_norm(
+        return paddle.static.nn.batch_norm(
             input=conv,
             act=act,
             is_test=(not self.is_training),
-            param_attr=fluid.param_attr.ParamAttr(name=bn_name + "_scale"),
-            bias_attr=fluid.param_attr.ParamAttr(bn_name + '_offset'),
+            param_attr=paddle.ParamAttr(name=bn_name + "_scale"),
+            bias_attr=paddle.ParamAttr(bn_name + '_offset'),
             moving_mean_name=bn_name + "_mean",
             moving_variance_name=bn_name + '_variance')
 
@@ -92,7 +92,7 @@ class TSN_ResNet():
                               stride,
                               name=name + "_branch1")
 
-        return fluid.layers.elementwise_add(x=short, y=conv2, act='relu')
+        return paddle.add(x=short, y=conv2)
 
     def net(self, input, class_dim=101):
         layers = self.layers
@@ -104,7 +104,7 @@ class TSN_ResNet():
         # reshape input
         channels = input.shape[2]
         short_size = input.shape[3]
-        input = fluid.layers.reshape(
+        input = paddle.reshape(
             x=input, shape=[-1, channels, short_size, short_size])
 
         if layers == 50:
@@ -121,11 +121,10 @@ class TSN_ResNet():
                                   stride=2,
                                   act='relu',
                                   name='conv1')
-        conv = fluid.layers.pool2d(input=conv,
-                                   pool_size=3,
-                                   pool_stride=2,
-                                   pool_padding=1,
-                                   pool_type='max')
+        conv = paddle.nn.functional.max_pool2d(x=conv,
+                                   kernel_size=3,
+                                   stride=2,
+                                   padding=1)
 
         for block in range(len(depth)):
             for i in range(depth[block]):
@@ -143,23 +142,20 @@ class TSN_ResNet():
                     stride=2 if i == 0 and block != 0 else 1,
                     name=conv_name)
 
-        pool = fluid.layers.pool2d(input=conv,
-                                   pool_size=7,
-                                   pool_type='avg',
-                                   global_pooling=True)
+        pool = paddle.nn.functional.adaptive_avg_pool2d(x=conv, output_size=1)
 
-        feature = fluid.layers.reshape(x=pool,
+        feature = paddle.reshape(x=pool,
                                        shape=[-1, seg_num, pool.shape[1]])
         if self.is_extractor:
             out = feature
         else:
-            out = fluid.layers.reduce_mean(feature, dim=1)
+            out = paddle.mean(x=feature, axis=1)
 
             stdv = 1.0 / math.sqrt(pool.shape[1] * 1.0)
-            out = fluid.layers.fc(
-                input=out,
+            out = static.nn.fc(
+                x=out,
                 size=class_dim,
-                act='softmax',
-                param_attr=fluid.param_attr.ParamAttr(
-                    initializer=fluid.initializer.Uniform(-stdv, stdv)))
+                activation='softmax',
+                weight_attr=paddle.ParamAttr(
+                    initializer=paddle.nn.initializer.Uniform(low=-stdv, high=stdv)))
         return out

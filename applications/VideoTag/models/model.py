@@ -15,12 +15,13 @@
 import os
 import wget
 import logging
+import paddle
+import paddle.static as static
 try:
     from configparser import ConfigParser
 except:
     from ConfigParser import ConfigParser
 
-import paddle.fluid as fluid
 from .utils import download, AttrDict
 
 WEIGHT_DIR = os.path.join(os.path.expanduser('~'), '.paddle', 'weights')
@@ -29,7 +30,7 @@ logger = logging.getLogger(__name__)
 
 
 def is_parameter(var):
-    return isinstance(var, fluid.framework.Parameter)
+    return isinstance(var, paddle.framework.Parameter)
 
 
 class NotImplementError(Exception):
@@ -150,12 +151,12 @@ class ModelBase(object):
 
     def load_pretrain_params(self, exe, pretrain, prog):
         logger.info("Load pretrain weights from {}".format(pretrain))
-        state_dict = fluid.load_program_state(pretrain)
-        fluid.set_program_state(prog, state_dict)
+        state_dict = paddle.static.load_program_state(pretrain)
+        paddle.static.set_program_state(prog, state_dict)
 
     def load_test_weights(self, exe, weights, prog):
         params_list = list(filter(is_parameter, prog.list_vars()))
-        fluid.load(prog, weights, executor=exe, var_list=params_list)
+        static.load(prog, weights, executor=exe, var_list=params_list)
 
     def get_config_from_sec(self, sec, item, default=None):
         if sec.upper() not in self.cfg:

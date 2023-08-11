@@ -18,7 +18,8 @@ import time
 import logging
 import argparse
 import ast
-import paddle.fluid as fluid
+import paddle
+import paddle.static as static
 
 from utils.config_utils import *
 import models
@@ -84,10 +85,10 @@ def test(args):
     test_feeds = test_model.feeds()
     test_fetch_list = test_model.fetches()
 
-    place = fluid.CUDAPlace(0) if args.use_gpu else fluid.CPUPlace()
-    exe = fluid.Executor(place)
+    place = paddle.CUDAPlace(0) if args.use_gpu else paddle.CPUPlace()
+    exe = static.Executor(place)
 
-    exe.run(fluid.default_startup_program())
+    exe.run(static.default_startup_program())
 
     if args.weights:
         assert os.path.exists(
@@ -96,13 +97,13 @@ def test(args):
 
     logger.info('load test weights from {}'.format(weights))
 
-    test_model.load_test_weights(exe, weights, fluid.default_main_program())
+    test_model.load_test_weights(exe, weights, static.default_main_program())
 
     # get reader and metrics
     test_reader = get_reader(args.model_name.upper(), 'test', test_config)
     test_metrics = get_metrics(args.model_name.upper(), 'test', test_config)
 
-    test_feeder = fluid.DataFeeder(place=place, feed_list=test_feeds)
+    test_feeder = paddle.fluid.DataFeeder(place=place, feed_list=test_feeds)
 
     epoch_period = []
     for test_iter, data in enumerate(test_reader()):

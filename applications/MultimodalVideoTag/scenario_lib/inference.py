@@ -12,10 +12,7 @@ import argparse
 import time
 
 import numpy as np
-import paddle.fluid as fluid
-from paddle.inference import Config
-from paddle.inference import create_predictor
-from paddle.inference import Predictor
+import paddle
 
 from datareader import get_reader
 from config import merge_configs, parse_config, print_configs
@@ -60,7 +57,7 @@ class InferModel(object):
         """
         model_file = os.path.join(model_dir, "model")
         params_file = os.path.join(model_dir, "params")
-        config = Config(model_file, params_file)
+        config = paddle.inference.Config(model_file, params_file)
         if use_gpu:
             config.enable_use_gpu(1024)
         else:
@@ -69,7 +66,7 @@ class InferModel(object):
         config.enable_memory_optim()
         # use zero copy
         config.switch_use_feed_fetch_ops(False)
-        self.predictor = create_predictor(config)
+        self.predictor = paddle.inference.create_predictor(config)
         # build input tensor and output tensor
         self.build_input_output()
 

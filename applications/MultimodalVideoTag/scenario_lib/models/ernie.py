@@ -22,9 +22,9 @@ from __future__ import absolute_import
 import json
 import six
 import logging
-import paddle.fluid as fluid
+import paddle
+import paddle.static as static
 from io import open
-from paddle.fluid.layers import core
 
 from .transformer_encoder import encoder, pre_process_layer
 
@@ -75,7 +75,7 @@ class ErnieConfig(object):
 
 class ErnieModel(object):
     """
-    ERINE Model 
+    ERINE Model
     """
     def __init__(self,
                  src_ids,
@@ -111,13 +111,13 @@ class ErnieModel(object):
         self._pos_emb_name = "pos_embedding"
         self._sent_emb_name = "sent_embedding"
         self._task_emb_name = "task_embedding"
-        self._dtype = core.VarDesc.VarType.FP16 if use_fp16 else core.VarDesc.VarType.FP32
-        self._emb_dtype = core.VarDesc.VarType.FP32
+        self._dtype = "float16" if use_fp16 else "float32"
+        self._emb_dtype = "float32"
 
         # Initialize all weigths by truncated normal initializer, and all biases
         # will be initialized by constant zero by default.
-        self._param_initializer = fluid.initializer.TruncatedNormal(
-            scale=config['initializer_range'])
+        self._param_initializer = paddle.nn.initializer.TruncatedNormal(
+            std=config['initializer_range'])
 
         self._build_model(src_ids, position_ids, sentence_ids, task_ids,
                           input_mask)
@@ -128,39 +128,39 @@ class ErnieModel(object):
         build  model
         """
         # padding id in vocabulary must be set to 0
-        emb_out = fluid.layers.embedding(
+        emb_out = static.nn.embedding(
             input=src_ids,
             size=[self._voc_size, self._emb_size],
             dtype=self._emb_dtype,
-            param_attr=fluid.ParamAttr(
+            param_attr=paddle.ParamAttr(
                 name=self._word_emb_name, initializer=self._param_initializer),
             is_sparse=False)
-        
-        position_emb_out = fluid.layers.embedding(
+
+        position_emb_out = static.nn.embedding(
             input=position_ids,
             size=[self._max_position_seq_len, self._emb_size],
             dtype=self._emb_dtype,
-            param_attr=fluid.ParamAttr(
+            param_attr=paddle.ParamAttr(
                 name=self._pos_emb_name, initializer=self._param_initializer))
 
-        sent_emb_out = fluid.layers.embedding(
+        sent_emb_out = static.nn.embedding(
             sentence_ids,
             size=[self._sent_types, self._emb_size],
             dtype=self._emb_dtype,
-            param_attr=fluid.ParamAttr(
+            param_attr=paddle.ParamAttr(
                 name=self._sent_emb_name, initializer=self._param_initializer))
 
         # emb_out = emb_out + position_emb_out
         # emb_out = emb_out + sent_emb_out
-        emb_out = fluid.layers.elementwise_add(emb_out, position_emb_out, axis=0)
-        emb_out = fluid.layers.elementwise_add(emb_out, sent_emb_out, axis=0)
+        emb_out = paddle.add(x=emb_out, y=position_emb_out)
+        emb_out = paddle.add(x=emb_out, y=sent_emb_out)
 
         if self._use_task_id:
-            task_emb_out = fluid.layers.embedding(
+            task_emb_out = static.nn.embedding(
                 task_ids,
                 size=[self._task_types, self._emb_size],
                 dtype=self._emb_dtype,
-                param_attr=fluid.ParamAttr(
+                param_attr=paddle.ParamAttr(
                     name=self._task_emb_name,
                     initializer=self._param_initializer))
 
@@ -169,15 +169,15 @@ class ErnieModel(object):
         emb_out = pre_process_layer(
             emb_out, 'nd', self._prepostprocess_dropout, name='pre_encoder')
 
-        if self._dtype == core.VarDesc.VarType.FP16:
-            emb_out = fluid.layers.cast(x=emb_out, dtype=self._dtype)
-            input_mask = fluid.layers.cast(x=input_mask, dtype=self._dtype)
-        self_attn_mask = fluid.layers.matmul(
+        if self._dtype == "float16":
+            emb_out = paddle.cast(x=emb_out, dtype=self._dtype)
+            input_mask = paddle.cast(x=input_mask, dtype=self._dtype)
+        self_attn_mask = paddle.matmul(
             x=input_mask, y=input_mask, transpose_y=True)
 
-        self_attn_mask = fluid.layers.scale(
+        self_attn_mask = paddle.scale(
             x=self_attn_mask, scale=10000.0, bias=-1.0, bias_after_scale=False)
-        n_head_self_attn_mask = fluid.layers.stack(
+        n_head_self_attn_mask = paddle.stack(
             x=[self_attn_mask] * self._n_head, axis=1)
         n_head_self_attn_mask.stop_gradient = True
 
@@ -198,8 +198,8 @@ class ErnieModel(object):
             postprocess_cmd="dan",
             param_initializer=self._param_initializer,
             name='encoder')
-        if self._dtype == core.VarDesc.VarType.FP16:
-            self._enc_out = fluid.layers.cast(
+        if self._dtype == "float16":
+            self._enc_out = paddle.cast(
                 x=self._enc_out, dtype=self._emb_dtype)
 
 
@@ -208,30 +208,30 @@ class ErnieModel(object):
         get sequence output
         """
         return self._enc_out
-    
+
     def get_sequence_textcnn_output(self, sequence_feature, input_mask):
         """
         get sequence output
         """
-        seq_len = fluid.layers.reduce_sum(input_mask, dim=[1, 2])
-        seq_len = fluid.layers.cast(seq_len, 'int64')
-        sequence_feature = fluid.layers.sequence_unpad(sequence_feature, seq_len) 
+        seq_len = paddle.sum(x=input_mask, axis=[1, 2])
+        seq_len = paddle.cast(seq_len, 'int64')
+        sequence_feature = paddle.static.nn.sequence_unpad(sequence_feature, seq_len)
 
         return self.textcnn(sequence_feature)
 
     def get_pooled_output(self):
         """Get the first feature of each sequence for classification"""
-        next_sent_feat = fluid.layers.slice(
+        next_sent_feat = paddle.slice(
             input=self._enc_out, axes=[1], starts=[0], ends=[1])
-        next_sent_feat = fluid.layers.fc(
-            input=next_sent_feat,
+        next_sent_feat = static.nn.fc(
+            x=next_sent_feat,
             size=self._emb_size,
-            act="tanh",
-            param_attr=fluid.ParamAttr(
+            activation="tanh",
+            weight_attr=paddle.ParamAttr(
                 name="pooled_fc.w_0", initializer=self._param_initializer),
             bias_attr="pooled_fc.b_0")
         return next_sent_feat
-    
+
     def textcnn(self, feature, name='text_cnn'):
         """
         TextCNN sequence feature extraction
@@ -240,11 +240,11 @@ class ErnieModel(object):
         hid_dim = 256
         convs = []
         for win_size in win_sizes:
-            conv_h = fluid.nets.sequence_conv_pool(input=feature,
+            conv_h = paddle.fluid.nets.sequence_conv_pool(input=feature,
                                                    num_filters=hid_dim,
                                                    filter_size=win_size,
                                                    act="tanh",
                                                    pool_type="max")
             convs.append(conv_h)
-        convs_out = fluid.layers.concat(input=convs, axis=1)
-        return convs_out 
+        convs_out = paddle.concat(x=convs, axis=1)
+        return convs_out

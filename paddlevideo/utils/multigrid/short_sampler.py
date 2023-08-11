@@ -3,13 +3,13 @@ from __future__ import division
 
 import numpy as np
 import math
+import paddle
 
-from paddle.io import BatchSampler
 
 __all__ = ["DistributedShortSampler"]
 
 
-class DistributedShortSampler(BatchSampler):
+class DistributedShortSampler(paddle.io.BatchSampler):
     """Sampler that restricts data loading to a subset of the dataset.
     In such case, each process can pass a DistributedBatchSampler instance
     as a DataLoader sampler, and load a subset of the original dataset that
@@ -54,21 +54,20 @@ class DistributedShortSampler(BatchSampler):
         assert isinstance(drop_last, bool), \
             "drop_last should be a boolean number"
 
-        from paddle.distributed import ParallelEnv
-
+        
         if num_replicas is not None:
             assert isinstance(num_replicas, int) and num_replicas > 0, \
                 "num_replicas should be a positive integer"
             self.nranks = num_replicas
         else:
-            self.nranks = ParallelEnv().nranks
+            self.nranks = paddle.distributed.ParallelEnv().nranks
 
         if rank is not None:
             assert isinstance(rank, int) and rank >= 0, \
                 "rank should be a non-negative integer"
             self.local_rank = rank
         else:
-            self.local_rank = ParallelEnv().local_rank
+            self.local_rank = paddle.distributed.ParallelEnv().local_rank
 
         self.drop_last = drop_last
         self.epoch = 0
