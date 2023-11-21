@@ -137,11 +137,13 @@ def log_batch(metric_list,
             str(datetime.timedelta(seconds=int(eta_sec))))
     else:
         eta_str = ''
-    logger.info("{:s} {:s} {:s} {:s} {:s} {} {:s}".format(
+    max_mem_reserved_str = f"max_mem_reserved: {paddle.device.cuda.max_memory_reserved()} B"
+    max_mem_allocated_str = f"max_mem_allocated: {paddle.device.cuda.max_memory_allocated()} B"
+    logger.info("{:s} {:s} {:s} {:s} {:s} {} {:s}, {}, {}".format(
         coloring(epoch_str, "HEADER") if batch_id == 0 else epoch_str,
         coloring(step_str, "PURPLE"), coloring(metric_str, 'OKGREEN'),
         coloring(batch_cost, "OKGREEN"), coloring(reader_cost, 'OKGREEN'), ips,
-        eta_str))
+        eta_str, max_mem_reserved_str, max_mem_allocated_str))
 
 
 def log_epoch(metric_list, epoch, mode, ips):
