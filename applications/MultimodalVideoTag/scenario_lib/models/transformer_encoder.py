@@ -18,9 +18,9 @@ from __future__ import division
 from __future__ import print_function
 
 from functools import partial
+import paddle
+import paddle.static as static
 
-import paddle.fluid as fluid
-import paddle.fluid.layers as layers
 
 
 def multi_head_attention(queries,
@@ -51,24 +51,24 @@ def multi_head_attention(queries,
         """
         Add linear projection to queries, keys, and values.
         """
-        q = layers.fc(input=queries,
+        q = static.nn.fc(x=queries,
                       size=d_key * n_head,
                       num_flatten_dims=2,
-                      param_attr=fluid.ParamAttr(
+                      weight_attr=paddle.ParamAttr(
                           name=name + '_query_fc.w_0',
                           initializer=param_initializer),
                       bias_attr=name + '_query_fc.b_0')
-        k = layers.fc(input=keys,
+        k = static.nn.fc(x=keys,
                       size=d_key * n_head,
                       num_flatten_dims=2,
-                      param_attr=fluid.ParamAttr(
+                      weight_attr=paddle.ParamAttr(
                           name=name + '_key_fc.w_0',
                           initializer=param_initializer),
                       bias_attr=name + '_key_fc.b_0')
-        v = layers.fc(input=values,
+        v = static.nn.fc(x=values,
                       size=d_value * n_head,
                       num_flatten_dims=2,
-                      param_attr=fluid.ParamAttr(
+                      weight_attr=paddle.ParamAttr(
                           name=name + '_value_fc.w_0',
                           initializer=param_initializer),
                       bias_attr=name + '_value_fc.b_0')
@@ -84,12 +84,12 @@ def multi_head_attention(queries,
         hidden_size = x.shape[-1]
         # The value 0 in shape attr means copying the corresponding dimension
         # size of the input as the output dimension size.
-        reshaped = layers.reshape(
-            x=x, shape=[0, 0, n_head, hidden_size // n_head], inplace=True)
+        reshaped = paddle.reshape(
+            x=x, shape=[0, 0, n_head, hidden_size // n_head])
 
         # permuate the dimensions into:
         # [batch_size, n_head, max_sequence_len, hidden_size_per_head]
-        return layers.transpose(x=reshaped, perm=[0, 2, 1, 3])
+        return paddle.transpose(x=reshaped, perm=[0, 2, 1, 3])
 
     def __combine_heads(x):
         """
@@ -100,31 +100,26 @@ def multi_head_attention(queries,
         if len(x.shape) != 4:
             raise ValueError("Input(x) should be a 4-D Tensor.")
 
-        trans_x = layers.transpose(x, perm=[0, 2, 1, 3])
+        trans_x = paddle.transpose(x, perm=[0, 2, 1, 3])
         # The value 0 in shape attr means copying the corresponding dimension
         # size of the input as the output dimension size.
-        return layers.reshape(
+        return paddle.reshape(
             x=trans_x,
-            shape=[0, 0, trans_x.shape[2] * trans_x.shape[3]],
-            inplace=True)
+            shape=[0, 0, trans_x.shape[2] * trans_x.shape[3]])
 
     def scaled_dot_product_attention(q, k, v, attn_bias, d_key, dropout_rate):
         """
         Scaled Dot-Product Attention
         """
-        scaled_q = layers.scale(x=q, scale=d_key**-0.5)
-        product = layers.matmul(x=scaled_q, y=k, transpose_y=True)
+        scaled_q = paddle.scale(x=q, scale=d_key**-0.5)
+        product = paddle.matmul(x=scaled_q, y=k, transpose_y=True)
         if attn_bias:
             # product += attn_bias
-            product = fluid.layers.elementwise_add(product, attn_bias, axis=0)
-        weights = layers.softmax(product)
+            product = paddle.add(x=product, y=attn_bias)
+        weights = paddle.nn.functional.softmax(x=product)
         if dropout_rate:
-            weights = layers.dropout(
-                weights,
-                dropout_prob=dropout_rate,
-                dropout_implementation="upscale_in_train",
-                is_test=False)
-        out = layers.matmul(weights, v)
+            weights = paddle.nn.functional.dropout(weights, p=dropout_rate, mode="upscale_in_train", training=True)
+        out = paddle.matmul(x=weights, y=v)
         return out
 
     q, k, v = __compute_qkv(queries, keys, values, n_head, d_key, d_value)
@@ -133,12 +128,12 @@ def multi_head_attention(queries,
         # Since the inplace reshape in __split_heads changes the shape of k and
         # v, which is the cache input for next time step, reshape the cache
         # input from the previous time step first.
-        k = cache["k"] = layers.concat(
-            [layers.reshape(
-                cache["k"], shape=[0, 0, d_model]), k], axis=1)
-        v = cache["v"] = layers.concat(
-            [layers.reshape(
-                cache["v"], shape=[0, 0, d_model]), v], axis=1)
+        k = cache["k"] = paddle.concat(
+            x=[paddle.reshape(
+                x=cache["k"], shape=[0, 0, d_model]), k], axis=1)
+        v = cache["v"] = paddle.concat(
+            x=[paddle.reshape(
+                x=cache["v"], shape=[0, 0, d_model]), v], axis=1)
 
     q = __split_heads(q, n_head)
     k = __split_heads(k, n_head)
@@ -150,10 +145,10 @@ def multi_head_attention(queries,
     out = __combine_heads(ctx_multiheads)
 
     # Project back to the model size.
-    proj_out = layers.fc(input=out,
+    proj_out = static.nn.fc(x=out,
                          size=d_model,
                          num_flatten_dims=2,
-                         param_attr=fluid.ParamAttr(
+                         weight_attr=paddle.ParamAttr(
                              name=name + '_output_fc.w_0',
                              initializer=param_initializer),
                          bias_attr=name + '_output_fc.b_0')
@@ -172,24 +167,24 @@ def positionwise_feed_forward(x,
     This module consists of two linear transformations with a ReLU activation
     in between, which is applied to each position separately and identically.
     """
-    hidden = layers.fc(input=x,
+    hidden = static.nn.fc(x=x,
                        size=d_inner_hid,
                        num_flatten_dims=2,
-                       act=hidden_act,
-                       param_attr=fluid.ParamAttr(
+                       activation=hidden_act,
+                       weight_attr=paddle.ParamAttr(
                            name=name + '_fc_0.w_0',
                            initializer=param_initializer),
                        bias_attr=name + '_fc_0.b_0')
     if dropout_rate:
-        hidden = layers.dropout(
+        hidden = paddle.nn.functional.dropout(
             hidden,
-            dropout_prob=dropout_rate,
-            dropout_implementation="upscale_in_train",
-            is_test=False)
-    out = layers.fc(input=hidden,
+            p=dropout_rate,
+            mode="upscale_in_train",
+            training=True)
+    out = static.nn.fc(x=hidden,
                     size=d_hid,
                     num_flatten_dims=2,
-                    param_attr=fluid.ParamAttr(
+                    weight_attr=paddle.ParamAttr(
                         name=name + '_fc_1.w_0', initializer=param_initializer),
                     bias_attr=name + '_fc_1.b_0')
     return out
@@ -206,29 +201,29 @@ def pre_post_process_layer(prev_out, out, process_cmd, dropout_rate=0.,
     for cmd in process_cmd:
         if cmd == "a":  # add residual connection
             # out = out + prev_out if prev_out else out
-            out = fluid.layers.elementwise_add(out, prev_out, axis=0) if prev_out else out
+            out = paddle.add(x=out, y=prev_out) if prev_out else out
         elif cmd == "n":  # add layer normalization
             out_dtype = out.dtype
-            if out_dtype == fluid.core.VarDesc.VarType.FP16:
-                out = layers.cast(x=out, dtype="float32")
-            out = layers.layer_norm(
+            if out_dtype == "float16":
+                out = paddle.cast(x=out, dtype="float32")
+            out = static.nn.layer_norm(
                 out,
                 begin_norm_axis=len(out.shape) - 1,
-                param_attr=fluid.ParamAttr(
+                param_attr=paddle.ParamAttr(
                     name=name + '_layer_norm_scale',
-                    initializer=fluid.initializer.Constant(1.)),
-                bias_attr=fluid.ParamAttr(
+                    initializer=paddle.nn.initializer.Constant(value=1.)),
+                bias_attr=paddle.ParamAttr(
                     name=name + '_layer_norm_bias',
-                    initializer=fluid.initializer.Constant(0.)))
-            if out_dtype == fluid.core.VarDesc.VarType.FP16:
-                out = layers.cast(x=out, dtype="float16")
+                    initializer=paddle.nn.initializer.Constant(value=0.)))
+            if out_dtype == "float16":
+                out = paddle.cast(x=out, dtype="float16")
         elif cmd == "d":  # add dropout
             if dropout_rate:
-                out = layers.dropout(
+                out = paddle.nn.functional.dropout(
                     out,
-                    dropout_prob=dropout_rate,
+                    p=dropout_rate,
                     dropout_implementation="upscale_in_train",
-                    is_test=False)
+                    training=True)
     return out
 
 

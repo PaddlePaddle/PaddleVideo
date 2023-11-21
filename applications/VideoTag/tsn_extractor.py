@@ -19,11 +19,12 @@ import logging
 import argparse
 import ast
 import numpy as np
+import paddle
+import paddle.static as static
 try:
     import cPickle as pickle
 except:
     import pickle
-import paddle.fluid as fluid
 
 from utils.config_utils import *
 import models
@@ -101,10 +102,10 @@ def infer(args):
     infer_feeds = infer_model.feeds()
     infer_outputs = infer_model.outputs()
 
-    place = fluid.CUDAPlace(0) if args.use_gpu else fluid.CPUPlace()
-    exe = fluid.Executor(place)
+    place = paddle.CUDAPlace(0) if args.use_gpu else paddle.CPUPlace()
+    exe = static.Executor(place)
 
-    exe.run(fluid.default_startup_program())
+    exe.run(static.default_startup_program())
 
     filelist = args.filelist or infer_config.INFER.filelist
     filepath = args.video_path or infer_config.INFER.get('filepath', '')
@@ -122,9 +123,9 @@ def infer(args):
     # if no weight files specified, download weights from paddle
     weights = args.weights or infer_model.get_weights()
 
-    infer_model.load_test_weights(exe, weights, fluid.default_main_program())
+    infer_model.load_test_weights(exe, weights, static.default_main_program())
 
-    infer_feeder = fluid.DataFeeder(place=place, feed_list=infer_feeds)
+    infer_feeder = paddle.fluid.DataFeeder(place=place, feed_list=infer_feeds)
     fetch_list = infer_model.fetches()
 
     infer_metrics = get_metrics(args.model_name.upper(), 'infer', infer_config)

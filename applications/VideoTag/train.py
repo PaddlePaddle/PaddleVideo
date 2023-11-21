@@ -17,7 +17,8 @@ import sys
 import argparse
 import ast
 import logging
-import paddle.fluid as fluid
+import paddle
+import paddle.static as static
 
 from utils.train_utils import train_with_dataloader
 import models
@@ -99,13 +100,13 @@ def train(args):
     valid_model = models.get_model(args.model_name, valid_config, mode='valid')
 
     # build model
-    startup = fluid.Program()
-    train_prog = fluid.Program()
+    startup = static.Program()
+    train_prog = static.Program()
     if args.fix_random_seed:
         startup.random_seed = 1000
         train_prog.random_seed = 1000
-    with fluid.program_guard(train_prog, startup):
-        with fluid.unique_name.guard():
+    with static.program_guard(train_prog, startup):
+        with paddle.utils.unique_name.guard():
             train_model.build_input(use_dataloader=True)
             train_model.build_model()
             # for the input, has the form [data1, data2,..., label], so train_feeds[-1] is label
@@ -116,32 +117,32 @@ def train(args):
             optimizer.minimize(train_loss)
             train_dataloader = train_model.dataloader()
 
-    valid_prog = fluid.Program()
-    with fluid.program_guard(valid_prog, startup):
-        with fluid.unique_name.guard():
+    valid_prog = static.Program()
+    with static.program_guard(valid_prog, startup):
+        with paddle.utils.unique_name.guard():
             valid_model.build_input(use_dataloader=True)
             valid_model.build_model()
             valid_feeds = valid_model.feeds()
             valid_fetch_list = valid_model.fetches()
             valid_dataloader = valid_model.dataloader()
 
-    place = fluid.CUDAPlace(0) if args.use_gpu else fluid.CPUPlace()
-    exe = fluid.Executor(place)
+    place = paddle.CUDAPlace(0) if args.use_gpu else paddle.CPUPlace()
+    exe = static.Executor(place)
     exe.run(startup)
 
     if args.pretrain:
         train_model.load_pretrain_params(exe, args.pretrain, train_prog)
 
-    build_strategy = fluid.BuildStrategy()
+    build_strategy = static.BuildStrategy()
     build_strategy.enable_inplace = True
 
-    exec_strategy = fluid.ExecutionStrategy()
+    exec_strategy = static.ExecutionStrategy()
 
-    compiled_train_prog = fluid.compiler.CompiledProgram(
+    compiled_train_prog = static.CompiledProgram(
         train_prog).with_data_parallel(loss_name=train_loss.name,
                                        build_strategy=build_strategy,
                                        exec_strategy=exec_strategy)
-    compiled_valid_prog = fluid.compiler.CompiledProgram(
+    compiled_valid_prog = static.CompiledProgram(
         valid_prog).with_data_parallel(share_vars_from=compiled_train_prog,
                                        build_strategy=build_strategy,
                                        exec_strategy=exec_strategy)
@@ -176,7 +177,7 @@ def train(args):
 
     epochs = args.epoch or train_model.epoch_num()
 
-    exe_places = fluid.cuda_places() if args.use_gpu else fluid.cpu_places()
+    exe_places = static.cuda_places() if args.use_gpu else static.cpu_places()
     train_dataloader.set_sample_list_generator(train_reader, places=exe_places)
     valid_dataloader.set_sample_list_generator(valid_reader, places=exe_places)
 

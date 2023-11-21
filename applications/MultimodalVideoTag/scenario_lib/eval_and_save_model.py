@@ -23,9 +23,9 @@ import logging
 import pickle
 
 import numpy as np
-import paddle.fluid as fluid
 import paddle
 paddle.enable_static()
+import paddle.static as static
 
 from accuracy_metrics import MetricsCalculator
 from datareader import get_reader
@@ -86,21 +86,22 @@ def evaluate(args):
     valid_model = AttentionLstmErnie(args.model_name,
                                      valid_config,
                                      mode='valid')
-    startup = fluid.Program()
-    valid_prog = fluid.default_main_program().clone(for_test=True)
-    with fluid.program_guard(valid_prog, startup):
-        with fluid.unique_name.guard():
-            valid_model.build_input(True)
-            valid_model.build_model()
-            valid_feeds = valid_model.feeds()
-            valid_outputs = valid_model.outputs()
-            valid_loss = valid_model.loss()
-            valid_pyreader = valid_model.pyreader()
+    startup = static.Program()
+    valid_prog = static.default_main_program().clone(for_test=True)
+    with static.program_guard(valid_prog, startup):
+        paddle.disable_static()
+        valid_model.build_input(True)
+        valid_model.build_model()
+        valid_feeds = valid_model.feeds()
+        valid_outputs = valid_model.outputs()
+        valid_loss = valid_model.loss()
+        valid_pyreader = valid_model.pyreader()
+        paddle.enable_static()
 
-    place = fluid.CUDAPlace(0) if args.use_gpu else fluid.CPUPlace()
-    exe = fluid.Executor(place)
+    place = paddle.CUDAPlace(0) if args.use_gpu else paddle.CPUPlace()
+    exe = static.Executor(place)
     exe.run(startup)
-    compiled_valid_prog = fluid.compiler.CompiledProgram(valid_prog)
+    compiled_valid_prog = static.CompiledProgram(valid_prog)
 
     # load weights
     assert os.path.exists(args.save_model_param_dir), \
@@ -128,7 +129,7 @@ def evaluate(args):
     valid_fetch_list = [valid_loss.name] + [x.name for x in valid_outputs
                                             ] + [valid_feeds[-1].name]
     # get reader
-    exe_places = fluid.cuda_places() if args.use_gpu else fluid.cpu_places()
+    exe_places = static.cuda_places() if args.use_gpu else static.cpu_places()
     valid_pyreader.decorate_sample_list_generator(valid_reader,
                                                   places=exe_places)
 
@@ -145,7 +146,7 @@ def save_model_params(exe, program, model_object, save_dir):
     """save_model_params
     """
     feeded_var_names = [var.name for var in model_object.feeds()][:-1]
-    fluid.io.save_inference_model(dirname=save_dir,
+    static.save_inference_model(dirname=save_dir,
                                   feeded_var_names=feeded_var_names,
                                   main_program=program,
                                   target_vars=model_object.outputs(),

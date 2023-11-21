@@ -17,8 +17,8 @@ import sys
 import time
 import numpy as np
 import paddle
-import paddle.fluid as fluid
-from paddle.fluid import profiler
+import paddle.static as static
+import paddle.profiler as profiler
 import logging
 import shutil
 
@@ -33,13 +33,13 @@ def log_lr_and_step():
         # learning_rate_scheduler, lr_var name is 'learning_rate',
         # and iteration counter is recorded with name '@LR_DECAY_COUNTER@',
         # better impliment is required here
-        lr_var = fluid.global_scope().find_var("learning_rate")
+        lr_var = static.global_scope().find_var("learning_rate")
         if not lr_var:
-            lr_var = fluid.global_scope().find_var("learning_rate_0")
+            lr_var = static.global_scope().find_var("learning_rate_0")
         lr = np.array(lr_var.get_tensor())
 
         lr_count = '[-]'
-        lr_count_var = fluid.global_scope().find_var("@LR_DECAY_COUNTER@")
+        lr_count_var = static.global_scope().find_var("@LR_DECAY_COUNTER@")
         if lr_count_var:
             lr_count = np.array(lr_count_var.get_tensor())
         logger.info(
@@ -85,6 +85,10 @@ def train_with_dataloader(exe, train_prog, compiled_train_prog, train_dataloader
         logger.error("[TRAIN] get dataloader failed.")
     epoch_periods = []
     train_loss = 0
+
+    # NOTE: profiler tools, used for benchmark
+    if is_profiler:
+        prof = profiler.Profiler()
     for epoch in range(epochs):
         log_lr_and_step()
 
@@ -93,6 +97,9 @@ def train_with_dataloader(exe, train_prog, compiled_train_prog, train_dataloader
 
         cur_time = time.time()
         for data in train_dataloader():
+            if is_profiler and train_iter == log_interval:
+                prof.start()
+
             train_outs = exe.run(compiled_train_prog,
                                  fetch_list=train_fetch_list,
                                  feed=data)
@@ -107,12 +114,12 @@ def train_with_dataloader(exe, train_prog, compiled_train_prog, train_dataloader
             train_iter += 1
             cur_time = time.time()
 
-            # NOTE: profiler tools, used for benchmark
-            if is_profiler and epoch == 0 and train_iter == log_interval:
-                profiler.start_profiler("All")
-            elif is_profiler and epoch == 0 and train_iter == log_interval + 5:
-                profiler.stop_profiler("total", profiler_path)
-                return
+            if is_profiler:
+                prof.step()
+                if train_iter == log_interval + 5:
+                    prof.stop()
+                    prof.export(path=profiler_path, format="json")
+                    return
 
         if len(epoch_periods) < 1:
             logger.info(
@@ -149,6 +156,6 @@ def save_model(exe, program, save_dir, model_name, postfix=''):
         os.makedirs(save_dir)
     saved_model_name = model_name + postfix
 
-    fluid.save(program, os.path.join(save_dir, saved_model_name))
+    paddle.static.save(program, os.path.join(save_dir, saved_model_name))
 
     return

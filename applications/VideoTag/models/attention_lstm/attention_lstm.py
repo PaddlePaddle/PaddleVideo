@@ -12,13 +12,13 @@
 #See the License for the specific language governing permissions and
 #limitations under the License.
 
-import paddle.fluid as fluid
-from paddle.fluid import ParamAttr
 
 from ..model import ModelBase
 from .lstm_attention import LSTMAttentionModel
 
 import logging
+import paddle
+import paddle.static as static
 logger = logging.getLogger(__name__)
 
 __all__ = ["AttentionLSTM"]
@@ -59,12 +59,12 @@ class AttentionLSTM(ModelBase):
         self.feature_input = []
         for name, dim in zip(self.feature_names, self.feature_dims):
             self.feature_input.append(
-                fluid.data(shape=[None, dim],
+                static.data(shape=[None, dim],
                            lod_level=1,
                            dtype='float32',
                            name=name))
         if self.mode != 'infer':
-            self.label_input = fluid.data(shape=[None, self.num_classes],
+            self.label_input = static.data(shape=[None, self.num_classes],
                                           dtype='float32',
                                           name='label')
         else:
@@ -72,7 +72,7 @@ class AttentionLSTM(ModelBase):
         if use_dataloader:
             assert self.mode != 'infer', \
                     'dataloader is not recommendated when infer, please set use_dataloader to be false.'
-            self.dataloader = fluid.io.DataLoader.from_generator(
+            self.dataloader = paddle.io.DataLoader.from_generator(
                 feed_list=self.feature_input + [self.label_input],
                 capacity=8,
                 iterable=True)
@@ -87,32 +87,32 @@ class AttentionLSTM(ModelBase):
             att_out = att.forward(feature, is_training=(self.mode == 'train'))
             att_outs.append(att_out)
         if len(att_outs) > 1:
-            out = fluid.layers.concat(att_outs, axis=1)
+            out = paddle.concat(x=att_outs, axis=1)
         else:
             out = att_outs[0]  # video only, without audio in videoTag
 
-        fc1 = fluid.layers.fc(
-            input=out,
+        fc1 = static.nn.fc(
+            x=out,
             size=8192,
-            act='relu',
-            bias_attr=ParamAttr(
-                regularizer=fluid.regularizer.L2Decay(0.0),
-                initializer=fluid.initializer.NormalInitializer(scale=0.0)),
+            activation='relu',
+            bias_attr=paddle.ParamAttr(
+                regularizer=paddle.regularizer.L2Decay(coeff=0.0),
+                initializer=paddle.nn.initializer.Normal(std=0.0)),
             name='fc1')
-        fc2 = fluid.layers.fc(
-            input=fc1,
+        fc2 = static.nn.fc(
+            x=fc1,
             size=4096,
-            act='tanh',
-            bias_attr=ParamAttr(
-                regularizer=fluid.regularizer.L2Decay(0.0),
-                initializer=fluid.initializer.NormalInitializer(scale=0.0)),
+            activation='tanh',
+            bias_attr=paddle.ParamAttr(
+                regularizer=paddle.regularizer.L2Decay(coeff=0.0),
+                initializer=paddle.nn.initializer.Normal(std=0.0)),
             name='fc2')
 
-        self.logit = fluid.layers.fc(input=fc2, size=self.num_classes, act=None, \
-                              bias_attr=ParamAttr(regularizer=fluid.regularizer.L2Decay(0.0),
-                                                  initializer=fluid.initializer.NormalInitializer(scale=0.0)), name='output')
+        self.logit = static.nn.fc(x=fc2, size=self.num_classes, activation=None, \
+                              bias_attr=paddle.ParamAttr(regularizer=paddle.regularizer.L2Decay(coeff=0.0),
+                                                  initializer=paddle.nn.initializer.Normal(std=0.0)), name='output')
 
-        self.output = fluid.layers.sigmoid(self.logit)
+        self.output = paddle.nn.functional.sigmoid(self.logit)
 
     def optimizer(self):
         assert self.mode == 'train', "optimizer only can be get in train mode"
@@ -122,19 +122,19 @@ class AttentionLSTM(ModelBase):
         ]
         iter_per_epoch = self.num_samples / self.batch_size
         boundaries = [e * iter_per_epoch for e in self.decay_epochs]
-        return fluid.optimizer.RMSProp(
-            learning_rate=fluid.layers.piecewise_decay(values=values,
+        return paddle.optimizer.RMSProp(
+            learning_rate=paddle.optimizer.lr.PiecewiseDecay(values=values,
                                                        boundaries=boundaries),
             centered=True,
-            regularization=fluid.regularizer.L2Decay(self.weight_decay))
+            weight_decay=paddle.regularizer.L2Decay(coeff=self.weight_decay))
 
     def loss(self):
         assert self.mode != 'infer', "invalid loss calculationg in infer mode"
-        cost = fluid.layers.sigmoid_cross_entropy_with_logits(
-            x=self.logit, label=self.label_input)
-        cost = fluid.layers.reduce_sum(cost, dim=-1)
-        sum_cost = fluid.layers.reduce_sum(cost)
-        self.loss_ = fluid.layers.scale(sum_cost,
+        cost = paddle.nn.functional.binary_cross_entropy(
+            input=self.logit, label=self.label_input, reduction=None)
+        cost = paddle.sum(x=cost, axis=-1)
+        sum_cost = paddle.sum(x=cost)
+        self.loss_ = paddle.scale(sum_cost,
                                         scale=self.num_gpus,
                                         bias_after_scale=False)
         return self.loss_
@@ -169,7 +169,7 @@ class AttentionLSTM(ModelBase):
         logger.info(
             "Load pretrain weights from {}, exclude fc layer.".format(pretrain))
 
-        state_dict = fluid.load_program_state(pretrain)
+        state_dict = paddle.static.load_program_state(pretrain)
         dict_keys = list(state_dict.keys())
         for name in dict_keys:
             if "fc_0" in name:
@@ -177,4 +177,4 @@ class AttentionLSTM(ModelBase):
                 logger.info(
                     'Delete {} from pretrained parameters. Do not load it'.
                     format(name))
-        fluid.set_program_state(prog, state_dict)
+        paddle.static.set_program_state(prog, state_dict)

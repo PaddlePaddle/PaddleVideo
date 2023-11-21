@@ -12,9 +12,9 @@
 #See the License for the specific language governing permissions and
 #limitations under the License.
 
-import paddle.fluid as fluid
-from paddle.fluid import ParamAttr
 import numpy as np
+import paddle
+import paddle.static as static
 
 
 class LSTMAttentionModel(object):
@@ -29,56 +29,55 @@ class LSTMAttentionModel(object):
         self.drop_rate = drop_rate
 
     def forward(self, input, is_training):
-        input_fc = fluid.layers.fc(
-            input=input,
+        input_fc = static.nn.fc(
+            x=input,
             size=self.embedding_size,
-            act='tanh',
-            bias_attr=ParamAttr(
-                regularizer=fluid.regularizer.L2Decay(0.0),
-                initializer=fluid.initializer.NormalInitializer(scale=0.0)),
+            activation='tanh',
+            bias_attr=paddle.ParamAttr(
+                regularizer=paddle.regularizer.L2Decay(coeff=0.0),
+                initializer=paddle.nn.initializer.Normal(std=0.0)),
             name='rgb_fc')
 
-        lstm_forward_fc = fluid.layers.fc(
-            input=input_fc,
+        lstm_forward_fc = static.nn.fc(
+            x=input_fc,
             size=self.lstm_size * 4,
-            act=None,
+            activation=None,
             bias_attr=False,  # video_tag
             name='rgb_fc_forward')
 
-        lstm_forward, _ = fluid.layers.dynamic_lstm(input=lstm_forward_fc,
+        lstm_forward, _ = paddle.fluid.layers.dynamic_lstm(input=lstm_forward_fc,
                                                     size=self.lstm_size * 4,
                                                     is_reverse=False,
                                                     name='rgb_lstm_forward')
 
-        lsmt_backward_fc = fluid.layers.fc(
-            input=input_fc,
+        lsmt_backward_fc = static.nn.fc(
+            x=input_fc,
             size=self.lstm_size * 4,
-            act=None,
+            activation=None,
             bias_attr=False,  #video_tag
             name='rgb_fc_backward')
 
-        lstm_backward, _ = fluid.layers.dynamic_lstm(input=lsmt_backward_fc,
+        lstm_backward, _ = paddle.fluid.layers.dynamic_lstm(input=lsmt_backward_fc,
                                                      size=self.lstm_size * 4,
                                                      is_reverse=True,
                                                      name='rgb_lstm_backward')
 
-        lstm_concat = fluid.layers.concat(input=[lstm_forward, lstm_backward],
+        lstm_concat = paddle.concat(x=[lstm_forward, lstm_backward],
                                           axis=1)
 
-        lstm_dropout = fluid.layers.dropout(x=lstm_concat,
-                                            dropout_prob=self.drop_rate,
-                                            is_test=(not is_training))
+        lstm_dropout = paddle.nn.functional.dropout2d(x=lstm_concat,
+                                            p=self.drop_rate,
+                                            training=is_training)
 
-        lstm_weight = fluid.layers.fc(
-            input=lstm_dropout,
+        lstm_weight = static.nn.fc(
+            x=lstm_dropout,
             size=1,
-            act='sequence_softmax',
+            activation='sequence_softmax',
             bias_attr=False,  #video_tag
             name='rgb_weight')
 
-        scaled = fluid.layers.elementwise_mul(x=lstm_dropout,
-                                              y=lstm_weight,
-                                              axis=0)
-        lstm_pool = fluid.layers.sequence_pool(input=scaled, pool_type='sum')
+        scaled = paddle.multiply(x=lstm_dropout,
+                                              y=lstm_weight)
+        lstm_pool = paddle.static.nn.sequence_pool(input=scaled, pool_type='sum')
 
         return lstm_pool

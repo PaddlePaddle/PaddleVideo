@@ -29,6 +29,8 @@ fi
 sed -i "s/use_gpu/use_xpu/g" $FILENAME
 # disable benchmark as AutoLog required nvidia-smi command
 sed -i "s/--enable_benchmark:True/--enable_benchmark:False/g" $FILENAME
+# python has been updated to version 3.9 for npu backend
+sed -i "s/python3.7/python3.9/g" $FILENAME
 dataline=`cat $FILENAME`
 
 # change gpu to xpu in execution script
