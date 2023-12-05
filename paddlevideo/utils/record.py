@@ -140,8 +140,8 @@ def log_batch(metric_list,
     max_mem_reserved_str = ""
     max_mem_allocated_str = ""
     if paddle.device.is_compiled_with_cuda():
-        max_mem_reserved_str = f"max_mem_reserved: {paddle.device.cuda.max_memory_reserved() // (1024 ** 2)} MB"
-        max_mem_allocated_str = f"max_mem_allocated: {paddle.device.cuda.max_memory_allocated() // (1024 ** 2)} MB"
+        max_mem_reserved_str = f"max_mem_reserved: {format(paddle.device.cuda.max_memory_reserved() / (1024 ** 2), '.2f')} MB"
+        max_mem_allocated_str = f"max_mem_allocated: {format(paddle.device.cuda.max_memory_allocated() / (1024 ** 2), '.2f')} MB"
     logger.info("{:s} {:s} {:s} {:s} {:s} {} {:s}, {} {}".format(
         coloring(epoch_str, "HEADER") if batch_id == 0 else epoch_str,
         coloring(step_str, "PURPLE"), coloring(metric_str, 'OKGREEN'),
