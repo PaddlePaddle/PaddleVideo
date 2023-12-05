@@ -137,9 +137,12 @@ def log_batch(metric_list,
             str(datetime.timedelta(seconds=int(eta_sec))))
     else:
         eta_str = ''
-    max_mem_reserved_str = f"max_mem_reserved: {paddle.device.cuda.max_memory_reserved()} B"
-    max_mem_allocated_str = f"max_mem_allocated: {paddle.device.cuda.max_memory_allocated()} B"
-    logger.info("{:s} {:s} {:s} {:s} {:s} {} {:s}, {}, {}".format(
+    max_mem_reserved_str = ""
+    max_mem_allocated_str = ""
+    if paddle.device.is_compiled_with_cuda():
+        max_mem_reserved_str = f"max_mem_reserved: {paddle.device.cuda.max_memory_reserved() // (1024 ** 2)} MB"
+        max_mem_allocated_str = f"max_mem_allocated: {paddle.device.cuda.max_memory_allocated() // (1024 ** 2)} MB"
+    logger.info("{:s} {:s} {:s} {:s} {:s} {} {:s}, {} {}".format(
         coloring(epoch_str, "HEADER") if batch_id == 0 else epoch_str,
         coloring(step_str, "PURPLE"), coloring(metric_str, 'OKGREEN'),
         coloring(batch_cost, "OKGREEN"), coloring(reader_cost, 'OKGREEN'), ips,
