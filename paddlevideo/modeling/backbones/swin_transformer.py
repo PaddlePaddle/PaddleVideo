@@ -239,7 +239,7 @@ class WindowAttention3D(nn.Layer):
         if mask is not None:
             nW = mask.shape[0]
             attn = attn.reshape([B_ // nW, nW, self.num_heads, N, N
-                                 ]) + mask.unsqueeze(1).unsqueeze(0)
+                                 ]) + mask.unsqueeze(1).unsqueeze(0).astype(attn.dtype)
             attn = attn.reshape([-1, self.num_heads, N, N])
             attn = self.softmax(attn)
         else:
@@ -376,8 +376,8 @@ class SwinTransformerBlock3D(nn.Layer):
 
         shortcut = x
         x = self.forward_part1(x, mask_matrix)
-        x = shortcut + self.drop_path(x)
-        x = x + self.forward_part2(x)
+        x = shortcut + self.drop_path(x).astype(shortcut.dtype)
+        x = x + self.forward_part2(x).astype(x.dtype)
 
         return x
 
