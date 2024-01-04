@@ -37,8 +37,8 @@ def build_record(cfg):
         record_list.append(("top1", AverageMeter("top1", '.5f')))
         record_list.append(("top5", AverageMeter("top5", '.5f')))
     elif 'FastRCNN' in cfg.framework:
-        record_list.append(
-            ("recall@thr=0.5", AverageMeter("recall@thr=0.5", '.5f')))
+        record_list.append(("recall@thr=0.5",
+                            AverageMeter("recall@thr=0.5", '.5f')))
         record_list.append(("prec@thr=0.5", AverageMeter("prec@thr=0.5",
                                                          '.5f')))
         record_list.append(("recall@top3", AverageMeter("recall@top3", '.5f')))
@@ -74,6 +74,7 @@ class AverageMeter(object):
     """
     Computes and stores the average and current value
     """
+
     def __init__(self, name='', fmt='f', need_avg=True):
         self.name = name
         self.fmt = fmt
@@ -102,8 +103,8 @@ class AverageMeter(object):
 
     @property
     def total_minute(self):
-        return '{self.name}_sum: {s:{self.fmt}} min'.format(s=self.sum / 60,
-                                                            self=self)
+        return '{self.name}_sum: {s:{self.fmt}} min'.format(
+            s=self.sum / 60, self=self)
 
     @property
     def mean(self):
@@ -121,7 +122,8 @@ def log_batch(metric_list,
               total_epoch,
               mode,
               ips,
-              eta_sec: int = None):
+              eta_sec: int = None,
+              print_mem_info: bool = False):
     batch_cost = str(metric_list['batch_time'].value) + ' sec,'
     reader_cost = str(metric_list['reader_time'].value) + ' sec,'
 
@@ -139,9 +141,10 @@ def log_batch(metric_list,
         eta_str = ''
     max_mem_reserved_str = ""
     max_mem_allocated_str = ""
-    if paddle.device.is_compiled_with_cuda():
-        max_mem_reserved_str = f"max_mem_reserved: {format(paddle.device.cuda.max_memory_reserved() / (1024 ** 2), '.2f')} MB"
-        max_mem_allocated_str = f"max_mem_allocated: {format(paddle.device.cuda.max_memory_allocated() / (1024 ** 2), '.2f')} MB"
+    if print_mem_info:
+        if paddle.device.is_compiled_with_cuda():
+            max_mem_reserved_str = f"max_mem_reserved: {format(paddle.device.cuda.max_memory_reserved() / (1024 ** 2), '.2f')} MB"
+            max_mem_allocated_str = f"max_mem_allocated: {format(paddle.device.cuda.max_memory_allocated() / (1024 ** 2), '.2f')} MB"
     logger.info("{:s} {:s} {:s} {:s} {:s} {} {:s}, {} {}".format(
         coloring(epoch_str, "HEADER") if batch_id == 0 else epoch_str,
         coloring(step_str, "PURPLE"), coloring(metric_str, 'OKGREEN'),
