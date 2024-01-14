@@ -1,0 +1,10 @@
+{
+    "summary": "Updating PaddleVideo's EIVideo on GitHub: pushing and pulling development branches, splitting and rejoining code.",
+    "details": [
+        {
+            "comment": "Updating PaddleVideo's EIVideo on GitHub: pushing and pulling development branches, splitting and rejoining code.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/EIVideo/resources/cmd\":0-3",
+            "content": "# \u66f4\u65b0PaddleVideo\u4e0a\u7684EIVideo\ngit subtree push --prefix=applications/EIVideo/ https://github.com/QPT-Family/EIVideo \u5f00\u53d1\u5206\u652f\ngit subtree pull --prefix=applications/EIVideo/ https://github.com/QPT-Family/EIVideo \u5f00\u53d1\u5206\u652f --squash\ngit subtree split --rejoin --prefix=applications/EIVideo/  --branch \u5f00\u53d1\u5206\u652f"
+        }
+    ]
+}

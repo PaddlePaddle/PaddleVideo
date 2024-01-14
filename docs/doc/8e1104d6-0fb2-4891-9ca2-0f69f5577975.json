@@ -1,0 +1,10 @@
+{
+    "summary": "These comments provide author, date, and copyright information, indicating the source should be cited if the code is reprinted.",
+    "details": [
+        {
+            "comment": "These comments provide author, date, and copyright information, indicating the source should be cited if the code is reprinted.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/EIVideo/EIVideo/setup.py\":0-3",
+            "content": "# Author: Acer Zhang\n# Datetime: 2022/1/11\n# Copyright belongs to the author.\n# Please indicate the source for reprinting."
+        }
+    ]
+}

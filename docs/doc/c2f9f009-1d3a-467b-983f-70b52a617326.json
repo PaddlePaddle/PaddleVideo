@@ -1,0 +1,15 @@
+{
+    "summary": "The code initializes an ActionDetection instance, loads a model for prediction, processes video URLs by extracting frames and audio, makes predictions on these inputs, and stores the results in a JSON file. The JSON file is written without escaping special characters.",
+    "details": [
+        {
+            "comment": "The code imports necessary libraries, appends the \"action_detect\" directory to the system path, and initializes an ActionDetection instance. It then loads the model for prediction using a specified configuration file. The code reads a list of video URLs from a file, processes each video by extracting image frames and audio, and makes predictions on these inputs. Finally, it stores the results in a JSON file.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/BasketballAction/predict/predict.py\":1-32",
+            "content": "import os\nimport sys\nimport json\nsys.path.append('action_detect')\nfrom action import ActionDetection\nif __name__ == '__main__':\n    dataset_dir = \"datasets/\"\n    model_predict = ActionDetection(cfg_file=\"configs_basketball/configs_basketball.yaml\")\n    model_predict.load_model()\n    video_url = os.path.join(dataset_dir, 'mp4.list')\n    with open(video_url, 'r') as f:\n        lines = f.readlines()\n    lines = [os.path.join(dataset_dir, \"mp4\", os.path.basename(k.strip())) for k in lines]\n    results = []\n    for line in lines:\n        video_name = line\n        print(video_name)\n        imgs_path = video_name.replace(\".mp4\", \"\").replace(\"mp4\", \"frames\")\n        pcm_path = video_name.replace(\".mp4\", \".pcm\").replace(\"mp4\", \"pcm\")\n        bmn_results, action_results = model_predict.infer(imgs_path, pcm_path)\n        results.append({'video_name': line,\n                        'bmn_results': bmn_results, \n                        'action_results': action_results})\n    with open('results.json', 'w', encoding='utf-8') as f:"
+        },
+        {
+            "comment": "Writes JSON-formatted 'results' to file using indentation and without escaping special characters.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/BasketballAction/predict/predict.py\":33-34",
+            "content": "       data = json.dumps(results, indent=4, ensure_ascii=False)\n       f.write(data) "
+        }
+    ]
+}

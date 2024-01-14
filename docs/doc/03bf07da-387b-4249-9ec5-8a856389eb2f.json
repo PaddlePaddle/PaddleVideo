@@ -1,0 +1,15 @@
+{
+    "summary": "The code prepares an environment for training and testing a computer vision model using the DeeplabV3_coco pre-trained model on the DAVIS dataset. It sets parameters, saves intermediate results, and runs test.py for actual testing without IntSeg enabled.",
+    "details": [
+        {
+            "comment": "The code sets environment variables, then runs two training scripts for a computer vision model in stages. It uses pre-trained DeeplabV3_coco model, and saves intermediate and final results to specified directories. The model is trained with specific parameters on the DAVIS dataset.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/Ma-Net/run.sh\":0-12",
+            "content": "PRETRAIN_MODEL='/home/lc/PaddleVideo/applications/Ma-Net/saved_model/DeeplabV3_coco.pdparams'\nVOS_SAVE_RESULT_DIR='/home/lc/PaddleVideo/applications/Ma-Net/saved_model/MaNet_davis2017_stage1.pdparams'\n#VOS_SAVE_RESULT_DIR='/home/lc/PaddleVideo/applications/Ma-Net/saved_model/stage1'\nINT_SAVE_RESULT_DIR='/home/lc/PaddleVideo/applications/Ma-Net/saved_model/MANet_davis2017.pdparams'\n#INT_SAVE_RESULT_DIR='/home/lc/PaddleVideo/applications/Ma-Net/saved_model/stage2'\nINT_RESULT_DIR='/home/lc/PaddleVideo/applications/Ma-Net/saved_model/result'\nRESCALE=416\nRANDOMCROP=416\nDATA_ROOT='/home/lc/PaddleVideo/data/DAVIS'\necho 'Stage1 training'\nCUDA_VISIBLE_DEVICE=3 python train_stage1.py --SAVE_RESULT_DIR $VOS_SAVE_RESULT_DIR --PRETRAINED_MODEL $PRETRAIN_MODEL --DATA_ROOT $DATA_ROOT --TRAIN_BATCH_SIZE 2 --DATA_RESCALE $RESCALE --DATA_RANDOMCROP $RANDOMCROP --TRAIN_LR 0.0007  --MODEL_MAX_LOCAL_DISTANCE 12\necho 'Stage2 training'\npython train_stage2.py --SAVE_RESULT_DIR $INT_SAVE_RESULT_DIR --SAVE_VOS_RESULT_DIR $"
+        },
+        {
+            "comment": "This code is setting up a testing environment for a video object segmentation task. It specifies the data root, save result directory, pre-trained model path and then executes a test.py script to perform the actual testing. The model is set to not use IntSeg and the TEST_MODE flag is set to True, indicating that this is indeed a testing run.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/Ma-Net/run.sh\":12-14",
+            "content": "VOS_SAVE_RESULT_DIR --DATA_ROOT $DATA_ROOT --DATA_RESCALE $RESCALE --DATA_RANDOMCROP $RANDOMCROP  --PRETRAINED_MODEL $PRETRAIN_MODEL\necho 'Testing'\npython test.py --DATA_ROOT $DATA_ROOT --SAVE_RESULT_DIR $INT_SAVE_RESULT_DIR  --RESULT_ROOT $INT_RESULT_DIR --MODEL_USEIntSeg False --TEST_MODE True"
+        }
+    ]
+}

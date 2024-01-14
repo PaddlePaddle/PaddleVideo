@@ -1,0 +1,15 @@
+{
+    "summary": "The code is for the PaddleVideo application's MA-Net model, supporting testing and training on DAVIS dataset with pretrained models for stage1 and stage1+stage2. It runs \"run_local.sh\" script to execute local environment for the MA-Net model in PaddleVideo.",
+    "details": [
+        {
+            "comment": "This code is for the PaddleVideo application, specifically Ma-Net, a CVPR2020 paper implementation. It currently supports model testing and training on DAVIS dataset, with inference on any video coming soon. Two pretrained models are provided for stage1 and stage1+stage2 training.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/Ma-Net/README.md\":0-34",
+            "content": "[\u7b80\u4f53\u4e2d\u6587](README_cn.md) | English\n# Ma-Net\n## Contents\n- [Introduction](#Introduction)\n- [Data](#Data)\n- [Train](#Train)\n- [Test](#Test)\n- [Inference](#Inference)\n## Introduction\nThis is the paddle implementation of the CVPR2020 paper \"[Memory aggregation networks for efficient interactive video object segmentation](https://arxiv.org/abs/2003.13246)\".\n![avatar](images/1836-teaser.gif)\nThis code currently supports model test and model training on DAVIS  dataset,  and model inference on any given video will be provided in few days.\n## Data\nPlease refer to DAVIS data download and preparation doc [DAVIS-data](dataloaders/DAVIS2017.md)\n## Train and Test\n- You can download [pertained model for stage1](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/DeeplabV3_coco.pdparams) decompress it for stage1 training\u3002\n- You can download [trained model of stage1](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/MaNet_davis2017_stage1.pdparams) decompress it for stage2 training directly skipping stage1 training\u3002\n```"
+        },
+        {
+            "comment": "This code snippet executes the \"run_local.sh\" script, which is used to run the local environment for the MA-Net model in the PaddleVideo application.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/Ma-Net/README.md\":35-46",
+            "content": "sh run_local.sh\n```\n- You can download [our model](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/MANet_davis2017.pdparams) decompress it for testing.\nTest accuracy in DAVIS2017:\n| J@60  |  AUC  |\n| :---: | :---: |\n| 0.761 | 0.749 |"
+        }
+    ]
+}

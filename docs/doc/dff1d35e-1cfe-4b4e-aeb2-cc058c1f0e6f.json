@@ -1,0 +1,10 @@
+{
+    "summary": "This code block appears to be a comment section at the beginning of the file, indicating the author's name, date of creation, copyright information, and request for proper citation in case of reuse. The code seems to belong to PaddleVideo's EIVideo application, specifically within QEIVideo's gui module.",
+    "details": [
+        {
+            "comment": "This code block appears to be a comment section at the beginning of the file, indicating the author's name, date of creation, copyright information, and request for proper citation in case of reuse. The code seems to belong to PaddleVideo's EIVideo application, specifically within QEIVideo's gui module.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/EIVideo/QEIVideo/gui/__init__.py\":0-3",
+            "content": "# Author: Acer Zhang\n# Datetime: 2022/1/6 \n# Copyright belongs to the author.\n# Please indicate the source for reprinting."
+        }
+    ]
+}

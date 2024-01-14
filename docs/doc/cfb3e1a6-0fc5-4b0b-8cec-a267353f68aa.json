@@ -1,0 +1,20 @@
+{
+    "summary": "The setup file installs necessary packages for PaddleVideo, supports Python 3.2-3.6, and includes a console script \"ppvideo\" with keywords: \"A treasure chest for video understanding powered by PaddlePaddle.\" The code specifies Python version 3.7 and categorizes the project as a utility for metadata description in setup.py file.",
+    "details": [
+        {
+            "comment": "This code is a setup file for the PaddleVideo package using setuptools. It specifies the package name, installs required packages from requirements.txt, reads README content, and sets up directory structure.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/setup.py\":0-30",
+            "content": "# Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nfrom setuptools import setup\nfrom io import open\nwith open('requirements.txt', encoding=\"utf-8-sig\") as f:\n    requirements = f.readlines()\ndef readme():\n    with open('docs/en/quick_start.md', encoding=\"utf-8-sig\") as f:\n        README = f.read()\n    return README\nsetup(\n    name='ppvideo',  #name of .whl file\n    packages=['ppvideo'],  #install package name\n    package_dir={'ppvideo': ''},\n    include_package_data="
+        },
+        {
+            "comment": "This code is for setting up a Python package named \"PaddleVideo\" using setup.py. It specifies package details such as its name, version, requirements, description, license, and URL. The package is built with console script \"ppvideo\", and it supports Python 3.2-3.6. Keywords: \"A treasure chest for video understanding powered by PaddlePaddle.\"",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/setup.py\":31-52",
+            "content": "    True,  #Accept all data files and directories matched by MANIFEST.in\n    install_requires=requirements,\n    entry_points={\"console_scripts\": [\"ppvideo= ppvideo.tools.wheel:main\"]},\n    version='2.3.0',\n    license='Apache License 2.0',\n    description='Awesome Video toolkits based on PaddlePaddle ',\n    long_description=readme(),\n    long_description_content_type='text/markdown',\n    url='https://github.com/PaddlePaddle/PaddleVideo',\n    download_url='https://github.com/PaddlePaddle/PaddleVideo.git',\n    keywords=[\n        'A treasure chest for video understanding powered by PaddlePaddle.'\n    ],\n    classifiers=[\n        'Intended Audience :: Developers', 'Operating System :: OS Independent',\n        'Natural Language :: Chinese (Simplified)',\n        'Programming Language :: Python :: 3',\n        'Programming Language :: Python :: 3.2',\n        'Programming Language :: Python :: 3.3',\n        'Programming Language :: Python :: 3.4',\n        'Programming Language :: Python :: 3.5',\n        'Programming Language :: Python :: 3.6',"
+        },
+        {
+            "comment": "The code is specifying Python version 3.7 and categorizing the project as a utility for metadata description in setup.py file.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/setup.py\":53-55",
+            "content": "        'Programming Language :: Python :: 3.7', 'Topic :: Utilities'\n    ],\n)"
+        }
+    ]
+}

@@ -1,0 +1,10 @@
+{
+    "summary": "This code is from PaddleVideo's EIVideo module and includes util functions for distributed computing. It defines a function get_dist_info() to retrieve the current rank and world size, and main_only() is a decorator that only runs the wrapped function if the rank is 0 (used in distributed environments).",
+    "details": [
+        {
+            "comment": "This code is from PaddleVideo's EIVideo module and includes util functions for distributed computing. It defines a function get_dist_info() to retrieve the current rank and world size, and main_only() is a decorator that only runs the wrapped function if the rank is 0 (used in distributed environments).",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/EIVideo/EIVideo/paddlevideo/utils/dist_utils.py\":0-29",
+            "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport functools\nimport paddle\nimport paddle.distributed as dist\ndef get_dist_info():\n    world_size = dist.get_world_size()\n    rank = dist.get_rank()\n    return rank, world_size\ndef main_only(func):\n    @functools.wraps(func)\n    def wrapper(*args, **kwargs):\n        rank, _ = get_dist_info()\n        if rank == 0:\n            return func(*args, **kwargs)\n    return wrapper"
+        }
+    ]
+}

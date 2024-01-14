@@ -1,0 +1,15 @@
+{
+    "summary": "The code loads an action detection model, reads a list of videos from a URL file, and for each video, it prints its name, creates paths for image frames and audio, calls the infer function to get bone-coordinate matrices (bmn_results) and action results, stores them in a list named 'results', and writes JSON data to \"results.json\" file.",
+    "details": [
+        {
+            "comment": "This code is importing necessary libraries, setting the path to access an action detection model. The model is loaded and a list of videos are read from a URL file. For each video, its name is printed, the required paths for image frames and audio are created, and the action detection model's infer function is called to get bone-coordinate matrices (bmn_results) and action results. These results are then stored in a list named 'results'.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/FootballAction/predict/predict.py\":0-32",
+            "content": "import os\nimport sys\nimport json\nsys.path.append('action_detect')\nfrom action import ActionDetection\nif __name__ == '__main__':\n    #dataset_dir = \"/workspace/PaddleVideo/applications/FootballAction/datasets/EuroCup2016\"\n    dataset_dir = \"../datasets/EuroCup2016\"\n    model_predict = ActionDetection(cfg_file=\"./configs/configs.yaml\")\n    model_predict.load_model()\n    video_url = os.path.join(dataset_dir, 'url_val.list')\n    with open(video_url, 'r') as f:\n        lines = f.readlines()\n    lines = [os.path.join(dataset_dir, k.strip()) for k in lines]\n    results = []\n    for line in lines:\n        video_name = line\n        print(video_name)\n        imgs_path = video_name.replace(\".mp4\", \"\").replace(\"mp4\", \"frames\")\n        pcm_path = video_name.replace(\".mp4\", \".pcm\").replace(\"mp4\", \"pcm\")\n        bmn_results, action_results = model_predict.infer(imgs_path, pcm_path)\n        results.append({\n            'video_name': line,\n            'bmn_results': bmn_results,\n            'action_results': action_results\n        })"
+        },
+        {
+            "comment": "Writes JSON data to \"results.json\" file, ensuring UTF-8 encoding and readable indentation for improved readability.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/FootballAction/predict/predict.py\":34-36",
+            "content": "    with open('results.json', 'w', encoding='utf-8') as f:\n        data = json.dumps(results, indent=4, ensure_ascii=False)\n        f.write(data)"
+        }
+    ]
+}

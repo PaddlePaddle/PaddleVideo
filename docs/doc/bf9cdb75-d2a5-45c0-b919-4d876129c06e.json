@@ -1,0 +1,10 @@
+{
+    "summary": "This code file contains import statements and a list of functions used for image preprocessing in PaddleVideo's EIVideo application. It includes Resize, RandomCrop, RandomHorizontalFlip, ToTensor, and RandomScale transformations specific to the \"manet\" model. These transformations are part of PaddlePaddle's video processing framework.",
+    "details": [
+        {
+            "comment": "This code file contains import statements and a list of functions used for image preprocessing in PaddleVideo's EIVideo application. It includes Resize, RandomCrop, RandomHorizontalFlip, ToTensor, and RandomScale transformations specific to the \"manet\" model. These transformations are part of PaddlePaddle's video processing framework.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/EIVideo/EIVideo/paddlevideo/loader/pipelines/__init__.py\":0-20",
+            "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nfrom .custom_transforms_f import Resize_manet, RandomCrop_manet, RandomHorizontalFlip_manet, ToTensor_manet, \\\n    RandomScale_manet\n__all__ = [\n     'Resize_manet', 'RandomCrop_manet',\n    'RandomHorizontalFlip_manet', 'ToTensor_manet', 'RandomScale_manet',\n]"
+        }
+    ]
+}

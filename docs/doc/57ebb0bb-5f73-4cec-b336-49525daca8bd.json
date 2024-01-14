@@ -1,0 +1,10 @@
+{
+    "summary": "This script downloads and extracts four tar files (audio, pptsm, bmn, lstm) related to the FootballAction application within PaddleVideo. The tar files are then deleted after extraction.",
+    "details": [
+        {
+            "comment": "This script downloads and extracts four tar files (audio, pptsm, bmn, lstm) related to the FootballAction application within PaddleVideo. The tar files are then deleted after extraction.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/FootballAction/checkpoints/download.sh\":0-17",
+            "content": "# audio\nwget https://videotag.bj.bcebos.com/PaddleVideo-release2.1/FootballAction/audio.tar\n# pptsm\nwget https://videotag.bj.bcebos.com/PaddleVideo-release2.1/FootballAction/pptsm.tar\n# bmn\nwget https://videotag.bj.bcebos.com/PaddleVideo-release2.1/FootballAction/bmn.tar\n# lstm\nwget https://videotag.bj.bcebos.com/PaddleVideo-release2.1/FootballAction/lstm.tar\ntar -xvf audio.tar\ntar -xvf pptsm.tar\ntar -xvf bmn.tar\ntar -xvf lstm.tar\nrm -f audio.tar\nrm -f pptsm.tar\nrm -f bmn.tar\nrm -f lstm.tar"
+        }
+    ]
+}

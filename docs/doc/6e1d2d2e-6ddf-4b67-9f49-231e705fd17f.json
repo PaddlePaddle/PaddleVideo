@@ -1,0 +1,10 @@
+{
+    "summary": "This is a Chinese comment for an interactive video annotation tool's Command Line Interface (CLI). It mentions installing the \"scikit-image\" package, running the program in inference mode using a specific configuration and model file, and provides a reference document link.",
+    "details": [
+        {
+            "comment": "This is a Chinese comment for an interactive video annotation tool's Command Line Interface (CLI). It mentions installing the \"scikit-image\" package, running the program in inference mode using a specific configuration and model file, and provides a reference document link.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/EIVideo/EIVideo/README.MD\":0-14",
+            "content": "# \u4ea4\u4e92\u5f0f\u89c6\u9891\u667a\u80fd\u6807\u6ce8\u5de5\u5177 - CLI(Command Line Interface)\n\u5728\u5f00\u59cb\u4f7f\u7528\u4e4b\u524d\uff0c\u60a8\u9700\u8981\u6309\u7167\u4ee5\u4e0b\u547d\u4ee4\u5b89\u88c5\u989d\u5916\u7684\u4f9d\u8d56\u5305\uff1a\n```bash\npython -m pip install scikit-image\n```\n## \u63a8\u7406\u8fd0\u884c\u65b9\u5f0f\n```shell\nC:\\Python\\Python37\\python.exe main.py --test -c E:/PaddlePaddle_Project/EIVideo/resources/backend/configs/manet.yaml -w E:/PaddlePaddle_Project/EIVideo/resources/backend/model/save_step_80000.pdparams\nC:\\Python\\Python37\\python.exe resources/backend/main.py --test -c E:/PaddlePaddle_Project/EIVideo/resources/backend/configs/manet.yaml -w E:/PaddlePaddle_Project/EIVideo/resources/backend/model/save_step_80000.pdparams\n```\n## \u53c2\u8003\u6587\u6863\n[manet](docs/zh-CN/manet.md)"
+        }
+    ]
+}

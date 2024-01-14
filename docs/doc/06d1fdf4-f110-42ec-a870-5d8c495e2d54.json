@@ -1,0 +1,15 @@
+{
+    "summary": "This code utilizes ffmpeg to extract frames and PCM audio from video files, creating folders if necessary. It can process multiple MP4 files in parallel with up to 10 workers using the \"extract_frames\", \"extract_pcm\", and \"process\" functions.",
+    "details": [
+        {
+            "comment": "This code retrieves frames and Pulse Code Modulation (PCM) audio from video files. It uses the ffmpeg tool for extraction, creating folders if they don't exist already, and removes existing files before processing new ones. The \"extract_frames\" function takes a video name and output folder to extract frames at a specified frame rate. The \"extract_pcm\" function converts audio from a video file to PCM format using ffmpeg. The \"process\" function prints each line, presumably for tracking progress or errors.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/FootballAction/datasets/script/get_frames_pcm.py\":0-36",
+            "content": "\"\"\"\nget frames and pcm from video\n\"\"\"\nimport os\nfrom concurrent import futures\ndataset = \"../EuroCup2016\"\nurl_list = os.path.join(dataset, 'url.list')\ndst_frames = os.path.join(dataset, 'frames')\ndst_pcm = os.path.join(dataset, 'pcm')\nif not os.path.exists(dst_frames):\n    os.mkdir(dst_frames)\nif not os.path.exists(dst_pcm):\n    os.mkdir(dst_pcm)\ndef extract_frames(video_name, out_folder, fps=5):\n    if os.path.exists(out_folder):\n        os.system('rm -rf ' + out_folder + '/*')\n        os.system('rm -rf ' + out_folder)\n    os.makedirs(out_folder)\n    cmd = 'ffmpeg -v 0 -i %s -r %d -q 0 %s/%s.jpg' % (video_name, fps,\n                                                      out_folder, '%08d')\n    os.system(cmd)\ndef extract_pcm(video_name, file_name_pcm):\n    cmd = 'ffmpeg -y -i %s -acodec pcm_s16le -f s16le -ac 1 -ar 16000 %s -v 0' % (\n        video_name, file_name_pcm)\n    os.system(cmd)\ndef process(line):\n    print(line)\n    mp4_name = os.path.join(dataset, line)\n    basename = os.path.basename(line).split('.')[0]\n    folder_frame = os.path.join(dst_frames, basename)"
+        },
+        {
+            "comment": "Code is reading a list of URLs, extracting frames and audio from each MP4 file, then executing the process in multiple threads with up to 10 workers.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/FootballAction/datasets/script/get_frames_pcm.py\":37-53",
+            "content": "    filename_pcm = os.path.join(dst_pcm, basename + '.pcm')\n    # extract\n    extract_frames(mp4_name, folder_frame)\n    extract_pcm(mp4_name, filename_pcm)\nif __name__ == \"__main__\":\n    with open(url_list, 'r') as f:\n        lines = f.readlines()\n    lines = [k.strip() for k in lines]\n    # multi thread\n    with futures.ProcessPoolExecutor(max_workers=10) as executer:\n        fs = [executer.submit(process, line) for line in lines]\n    #for line in lines:\n    #    process(line)\n    print(\"done\")"
+        }
+    ]
+}

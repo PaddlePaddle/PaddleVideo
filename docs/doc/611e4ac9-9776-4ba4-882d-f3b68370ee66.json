@@ -1,0 +1,10 @@
+{
+    "summary": "This code snippet is the version information for the EIVideo application, created by Acer Zhang on January 11th, 2022. It has a version number \"0.1a\" and the author requests proper attribution if reusing the code.",
+    "details": [
+        {
+            "comment": "This code snippet is the version information for the EIVideo application, created by Acer Zhang on January 11th, 2022. It has a version number \"0.1a\" and the author requests proper attribution if reusing the code.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/EIVideo/EIVideo/version.py\":0-5",
+            "content": "# Author: Acer Zhang\n# Datetime: 2022/1/11 \n# Copyright belongs to the author.\n# Please indicate the source for reprinting.\n__version__ = \"0.1a\""
+        }
+    ]
+}

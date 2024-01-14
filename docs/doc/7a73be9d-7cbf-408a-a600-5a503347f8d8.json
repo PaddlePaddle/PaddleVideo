@@ -1,0 +1,15 @@
+{
+    "summary": "The \"registry.py\" file in PaddleVideo's EIVideo application defines Registry classes for components of the video processing pipeline, and organizes them into four registries for different functionalities: bbox_coder, estimator, multimodal, and segment.",
+    "details": [
+        {
+            "comment": "The code snippet is from the \"registry.py\" file in PaddleVideo's EIVideo application. It defines several Registry classes, each representing a different component of the video processing pipeline: BACKBONES, HEADS, RECOGNIZERS, LOCALIZERS, PARTITIONERS, SEGMENT, LOSSES, ROI_EXTRACTORS, DETECTORS, BBOX_ASSIGNERS, and BBOX_SAMPLERS. These Registry classes will be used to register and manage different instances of these components in the video processing pipeline.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/EIVideo/EIVideo/paddlevideo/modeling/registry.py\":0-26",
+            "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nfrom ..utils import Registry\nBACKBONES = Registry('backbone')\nHEADS = Registry('head')\nRECOGNIZERS = Registry('recognizer')\nLOCALIZERS = Registry('localizer')\nPARTITIONERS = Registry('partitioner')\nSEGMENT = Registry('segmentation')\nLOSSES = Registry('loss')\nROI_EXTRACTORS = Registry('roi_extractor')\nDETECTORS = Registry('detectors')\nBBOX_ASSIGNERS = Registry('bbox_assigner')\nBBOX_SAMPLERS = Registry('bbox_sampler')"
+        },
+        {
+            "comment": "This code defines four registries for different functionalities: bbox_coder, estimator, multimodal, and segment. These registries will be used to organize and manage different types of models or algorithms in the codebase.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/EIVideo/EIVideo/paddlevideo/modeling/registry.py\":27-30",
+            "content": "BBOX_CODERS = Registry('bbox_coder')\nESTIMATORS = Registry('estimator')\nMULTIMODAL = Registry('multimodal')\nSEGMENT = Registry('segment')"
+        }
+    ]
+}

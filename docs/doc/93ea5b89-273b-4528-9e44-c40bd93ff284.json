@@ -1,0 +1,15 @@
+{
+    "summary": "This code is an import script for PaddleVideo, registering various modules like backbones, heads, recognizers, localizers, and losses in relevant registries. It defines key function names and includes popular models like 'DeepLab' and 'IntVOS'.",
+    "details": [
+        {
+            "comment": "This code appears to be an import script for PaddleVideo, importing various modules such as backbones, heads, recognizers, localizers, and losses from different parts of the codebase. It also registers these items in relevant registries (e.g., BACKBONES, HEADS) and defines __all__ to include those registered items.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/EIVideo/EIVideo/paddlevideo/modeling/__init__.py\":0-22",
+            "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nfrom .backbones import DeepLab\nfrom .builder import (build_backbone, build_head, build_localizer, build_loss,\n                      build_recognizer)\nfrom .heads import IntVOS\nfrom .registry import (BACKBONES, DETECTORS, HEADS, LOCALIZERS, LOSSES,\n                       PARTITIONERS, RECOGNIZERS, ROI_EXTRACTORS)\nfrom .weight_init import kaiming_normal_, trunc_normal_, weight_init_\n__all__ = [\n    'BACKBONES', 'HEADS', 'RECOGNIZERS', 'LOCALIZERS', 'PARTITIONERS',"
+        },
+        {
+            "comment": "This code defines several variables and function names used in the PaddleVideo library, including loss functions ('build_loss'), backbone building ('build_backbone'), detectors ('DETECTORS'), and initialization methods ('weight_init_'). It also includes references to popular models such as 'DeepLab' and 'IntVOS'.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/EIVideo/EIVideo/paddlevideo/modeling/__init__.py\":23-26",
+            "content": "    'LOSSES', 'build_recognizer', 'build_localizer', 'build_head',\n    'build_backbone', 'build_loss', 'DETECTORS', 'kaiming_normal_', 'trunc_normal_',\n    'weight_init_', 'DeepLab', 'IntVOS'\n]"
+        }
+    ]
+}

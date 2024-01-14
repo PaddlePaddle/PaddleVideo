@@ -1,0 +1,20 @@
+{
+    "summary": "This code provides instructions to detect UAVs in restricted areas using PaddleDetection, with data preparation and dependency installation steps. Users can customize the configuration file and trained model for specific use cases.",
+    "details": [
+        {
+            "comment": "This code is for the Paddle-Anti-UAV application that uses PaddleDetection to detect flying UAVs in restricted areas. It provides details on data preparation, where to download and unzip the dataset, and how to install PaddleDetection.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/Anti-UAV/README.md\":0-20",
+            "content": "# Paddle-Anti-UAV\nAnti-UAV base on PaddleDetection\n## Background\nUAVs are very popular and we can see them in many public spaces, such as parks and playgrounds. Most people use UAVs for taking photos.\nHowever, many areas like airport forbiden UAVs since they are potentially dangerous. In this case, we need to detect the flying UAVs in\nthese areas.\nIn this repository, we show how to train a detection model using [PaddleDetection](https://github.com/PaddlePaddle/PaddleDetection).\n## Data preparation\nThe dataset can be found [here](https://anti-uav.github.io/dataset/). We direcly download the ```test-dev``` split composed of 140 videos\ntrain the detection model.\n* Download the ```test-dev``` dataset.\n* Run `unzip Anti_UAV_test_dev.zip -d Anti_UAV`.\n* Run `python get_image_label.py`. In this step, you may change the path to the videos and the value of `interval`.\nAfter the above steps, you will get a MSCOCO-style datasst for object detection.\n## Install PaddleDetection\nPlease refer to this [link](https://github.com/PaddlePaddle/PaddleDetection/blob/release/2.3/docs/tutorials/INSTALL.md)."
+        },
+        {
+            "comment": "The code outlines the process to train and use PP-YOLO for UAV detection using PaddleDetection in a specific environment. It involves cloning a repository, moving dataset files, adjusting configurations, and running training and inference commands with specific arguments.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/Anti-UAV/README.md\":22-35",
+            "content": "We use `python=3.7`, `Paddle=2.2.1`, `CUDA=10.2`.\n## Train PP-YOLO\nWe use [PP-YOLO](https://github.com/PaddlePaddle/PaddleDetection/tree/release/2.3/configs/ppyolo) as the detector.\n* Run `git clone https://github.com/PaddlePaddle/PaddleDetection.git`. Note that you should finish this step when you install PaddleDetection.\n* Move the anti-UAV dataset to `dataset`.\n* Move `anti_uav.yml` to `configs/datasets`, move `ppyolo_r50vd_dcn_1x_antiuav.yml` to `configs/ppyolo` and move `ppyolo_r50vd_dcn_antiuav.yml`\nto `configs/ppyolo/_base`.\n* Keep the value of `anchors` in `configs/ppyolo/_base/ppyolo_reader.yml` the same as `ppyolo_r50vd_dcn_antiuav.yml`.\n* Run `python -m paddle.distributed.launch --log_dir=./ppyolo_dygraph/ --gpus 0,1,2,3,4,5,6,7 tools/train.py -c configs/ppyolo/ppyolo_r50vd_dcn_1x_antiuav.yml &>ppyolo_dygraph.log 2>&1 &`.\nNote that you may change the arguments, such as `batch_size` and `gups`.\n## Inference\nPlease refer to the infernce section on this [webpage](https://github.com/Paddle"
+        },
+        {
+            "comment": "The code snippet is referring to the README file of an anti-UAV application based on PaddleVideo. It demonstrates two GIFs showing the demo in action and mentions that users can customize the configuration file and trained model for their own use cases.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/Anti-UAV/README.md\":35-38",
+            "content": "Paddle/PaddleDetection/blob/release/2.3/docs/tutorials/GETTING_STARTED.md). You can just switch the configeration file and trained model to your own files.\n![](https://github.com/qingzwang/Paddle-Anti-UAV/blob/main/demo1.gif)\n![](https://github.com/qingzwang/Paddle-Anti-UAV/blob/main/demo.gif)"
+        }
+    ]
+}
