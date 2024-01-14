@@ -1,0 +1,10 @@
+{
+    "summary": "This code provides information about customizing different aspects of the PaddleVideo framework, including dataset, network, solvers, metrics, and debug tools. It discusses finetuning, adding new augmentations and batch augments in the pipeline, modular design, changing frameworks, initializing functions, loss functions, step/epoch decay, creating customized solvers, adding new data processing, records, and metrics, as well as using debug levels and FAQ.",
+    "details": [
+        {
+            "comment": "This code provides information about customizing different aspects of the PaddleVideo framework, including dataset, network, solvers, metrics, and debug tools. It discusses finetuning, adding new augmentations and batch augments in the pipeline, modular design, changing frameworks, initializing functions, loss functions, step/epoch decay, creating customized solvers, adding new data processing, records, and metrics, as well as using debug levels and FAQ.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/english_documents/tutorials/customized_usage.md\":0-43",
+            "content": "[\u7b80\u4f53\u4e2d\u6587](../../zh-CN/tutorials/customized_usage.md) | English\n# Customized Usage\n## Customized Dataset\n1. finetune\nPlease refer to [finetune](../start.md#model_finetune) if only change a \"regular\" dataset.\n2. customized pipeline\n  - add new augments\n  - add new batch augments\n  **Note**: Be care of checking the difference of different modes.\n## Customized Network\n1. module function\nPlease refer to [modular desigh](modular_design.md) for more information.\n2. customized framework\n  - change framework\n  - change initialized function\n  - customized loss\n## Customized Solvers\n1. step decay and epoch decay\n2. customized solvers\n## Customized metrics\n  - add new data processing\n  - add new record\n  - add new metrics\n## Debug tools\n1. Debug level\n2. FAQ"
+        }
+    ]
+}

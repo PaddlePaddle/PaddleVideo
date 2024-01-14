@@ -1,0 +1,15 @@
+{
+    "summary": "The code constructs a learning rate scheduler for PaddleVideo's VideoQualityAssessment module, using the PiecewiseDecay method and handling learning rate configurations. It creates an LR scheduler instance based on name and updates num_iters if iter_step is present.",
+    "details": [
+        {
+            "comment": "This code builds a learning rate scheduler according to the \"OPTIMIZER\" configuration. It uses the PiecewiseDecay method with specified boundaries and values. The learning rate scheduler is always passed into the optimizer.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/VideoQualityAssessment/paddlevideo/solver/lr.py\":0-32",
+            "content": "\"\"\"\n# copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"\nimport copy\nimport paddle\nfrom . import custom_lr\ndef build_lr(cfg, num_iters):\n    \"\"\"\n    Build a learning rate scheduler accroding to ```OPTIMIZER``` configuration, and it always pass into the optimizer.\n    In configuration:\n    learning_rate:\n        name: 'PiecewiseDecay'\n        boundaries: [20, 60]\n        values: [0.00025, 0.000025, 0.0000025]\n    Returns:\n        A paddle.optimizer.lr instance.\n    \"\"\""
+        },
+        {
+            "comment": "This code handles learning rate configuration in PaddleVideo's VideoQualityAssessment module. It checks if the learning rate is a dictionary and modifies it accordingly, then creates an instance of the appropriate LR scheduler based on the specified name. If an iter_step is present, it updates num_iters before removing it.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/VideoQualityAssessment/paddlevideo/solver/lr.py\":34-48",
+            "content": "    cfg_copy = cfg.copy()\n    #when learning_rate is LRScheduler\n    if cfg_copy.get('learning_rate') and isinstance(cfg_copy['learning_rate'],\n                                                    dict):\n        cfg_copy['learning_rate'] = build_lr(\n            cfg_copy['learning_rate'],\n            num_iters)  #not support only inner iter_step\n    lr_name = cfg_copy.pop('name')\n    if cfg_copy.get('iter_step'):\n        cfg_copy['num_iters'] = num_iters\n        cfg_copy.pop('iter_step')\n    return getattr(custom_lr, lr_name)(**cfg_copy)"
+        }
+    ]
+}

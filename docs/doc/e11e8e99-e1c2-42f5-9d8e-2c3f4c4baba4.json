@@ -1,0 +1,10 @@
+{
+    "summary": "This script sets the paths for OpenCV, PaddlePaddle inference, CUDA, cuDNN, and TensorRT directories. It clears existing build directory, creates a new one, navigates to it, runs cmake with specified options, and then compiles the project using 'make -j' command.",
+    "details": [
+        {
+            "comment": "This script sets the paths for OpenCV, PaddlePaddle inference, CUDA, cuDNN, and TensorRT directories. It clears existing build directory, creates a new one, navigates to it, runs cmake with specified options, and then compiles the project using 'make -j' command.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/deploy/cpp_infer/tools/build.sh\":0-21",
+            "content": "OPENCV_DIR=your_opencv_dir\nLIB_DIR=your_paddle_inference_dir\nCUDA_LIB_DIR=your_cuda_lib_dir\nCUDNN_LIB_DIR=your_cudnn_lib_dir\nTENSORRT_DIR=your_tensorRT_dir\nBUILD_DIR=build\nrm -rf ${BUILD_DIR}\nmkdir ${BUILD_DIR}\ncd ${BUILD_DIR}\ncmake .. \\\n    -DPADDLE_LIB=${LIB_DIR} \\\n    -DWITH_MKL=ON \\\n    -DWITH_GPU=OFF \\\n    -DWITH_STATIC_LIB=OFF \\\n    -DWITH_TENSORRT=OFF \\\n    -DOPENCV_DIR=${OPENCV_DIR} \\\n    -DCUDNN_LIB=${CUDNN_LIB_DIR} \\\n    -DCUDA_LIB=${CUDA_LIB_DIR} \\\n    -DTENSORRT_DIR=${TENSORRT_DIR} \\\nmake -j"
+        }
+    ]
+}

@@ -1,0 +1,20 @@
+{
+    "summary": "This code imports required modules, handles web serving for PaddleVideo models and includes a client to make predictions by passing encoded frames and shape to the predict method. It outputs labels and probabilities as results.",
+    "details": [
+        {
+            "comment": "This code is importing necessary modules, defining a function to parse command line arguments, and setting up a parser for those arguments. The main purpose of this file seems to be handling the execution of the PaddleVideo model in a web serving environment.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/deploy/python_serving/pipeline_rpc_client.py\":0-28",
+            "content": "# Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\ntry:\n    from paddle_serving_server_gpu.pipeline import PipelineClient\nexcept ImportError:\n    from paddle_serving_server.pipeline import PipelineClient\nimport argparse\nfrom utils import numpy_to_base64, parse_file_paths, video_to_numpy\ndef parse_args():\n    # general params\n    parser = argparse.ArgumentParser(\"PaddleVideo Web Serving model script\")\n    parser.add_argument('-c',\n                        '--config',"
+        },
+        {
+            "comment": "This code sets up command line arguments for the serving config file path, RPC port number, and input file/directory path. It then connects to a server at the specified port, processes the input files (decoding videos and converting ndarrays to base64 strings), and transports the data to the server for processing.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/deploy/python_serving/pipeline_rpc_client.py\":29-59",
+            "content": "                        type=str,\n                        default='configs/PP-TSM.yaml',\n                        help='serving config file path')\n    parser.add_argument('-ptn',\n                        '--port_number',\n                        type=int,\n                        default=9993,\n                        help='rpc port number')\n    parser.add_argument('-i',\n                        '--input_file',\n                        type=str,\n                        help='input file path or directory path')\n    return parser.parse_args()\nif __name__ == \"__main__\":\n    args = parse_args()\n    client = PipelineClient()\n    client.connect([f'127.0.0.1:{args.port_number}'])\n    files_list = parse_file_paths(args.input_file)\n    for file_path in files_list:\n        # decoding video and get stacked frames as ndarray\n        decoded_frames = video_to_numpy(file_path=file_path)\n        # encode ndarray to base64 string for transportation.\n        decoded_frames_base64 = numpy_to_base64(decoded_frames)\n        # transport to server & get get results."
+        },
+        {
+            "comment": "This code snippet uses a PaddleVideo client to make a prediction. It passes base64 encoded frames and their shape to the client's predict method, fetching both labels and probabilities as results. The print statement outputs these results.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/deploy/python_serving/pipeline_rpc_client.py\":60-67",
+            "content": "        ret = client.predict(feed_dict={\n            \"frames\": decoded_frames_base64,\n            \"frames_shape\": str(decoded_frames.shape)\n        },\n                             fetch=[\"label\", \"prob\"])\n        # print result\n        print(ret)"
+        }
+    ]
+}

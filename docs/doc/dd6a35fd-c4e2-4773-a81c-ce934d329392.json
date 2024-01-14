@@ -1,0 +1,20 @@
+{
+    "summary": "The code defines a `ReaderZoo` class with functions for registering and retrieving readers based on their name, mode, and configuration. A custom exception class is defined for reader not found errors.",
+    "details": [
+        {
+            "comment": "Importing necessary libraries, defining custom exception class for reader not found error.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/VideoTag/reader/reader_utils.py\":0-30",
+            "content": "#  Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n#Licensed under the Apache License, Version 2.0 (the \"License\");\n#you may not use this file except in compliance with the License.\n#You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n#Unless required by applicable law or agreed to in writing, software\n#distributed under the License is distributed on an \"AS IS\" BASIS,\n#WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n#See the License for the specific language governing permissions and\n#limitations under the License.\nimport pickle\nimport cv2\nimport numpy as np\nimport random\nclass ReaderNotFoundError(Exception):\n    \"Error: reader not found\"\n    def __init__(self, reader_name, avail_readers):\n        super(ReaderNotFoundError, self).__init__()\n        self.reader_name = reader_name\n        self.avail_readers = avail_readers\n    def __str__(self):\n        msg = \"Reader {} Not Found.\\nAvailiable readers:\\n\".format(\n            self.reader_name)"
+        },
+        {
+            "comment": "The code defines a DataReader class for video input and a ReaderZoo class for registering and retrieving readers. The DataReader class has an init method for setting the model name, mode, and configuration, as well as a create_reader method that must be implemented by subclasses. The ReaderZoo class registers readers using the regist method and retrieves them based on name, mode, and configuration with the get method.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/VideoTag/reader/reader_utils.py\":31-69",
+            "content": "        for reader in self.avail_readers:\n            msg += \"  {}\\n\".format(reader)\n        return msg\nclass DataReader(object):\n    \"\"\"data reader for video input\"\"\"\n    def __init__(self, model_name, mode, cfg):\n        self.name = model_name\n        self.mode = mode\n        self.cfg = cfg\n    def create_reader(self):\n        \"\"\"Not implemented\"\"\"\n        pass\n    def get_config_from_sec(self, sec, item, default=None):\n        if sec.upper() not in self.cfg:\n            return default\n        return self.cfg[sec.upper()].get(item, default)\nclass ReaderZoo(object):\n    def __init__(self):\n        self.reader_zoo = {}\n    def regist(self, name, reader):\n        assert reader.__base__ == DataReader, \"Unknow model type {}\".format(\n            type(reader))\n        self.reader_zoo[name] = reader\n    def get(self, name, mode, cfg):\n        for k, v in self.reader_zoo.items():\n            if k == name:\n                return v(name, mode, cfg)\n        raise ReaderNotFoundError(name, self.reader_zoo.keys())\n# singleton reader_zoo"
+        },
+        {
+            "comment": "This code defines a class `ReaderZoo` and provides two functions `regist_reader` and `get_reader`. The `ReaderZoo` is used to register different types of readers and retrieve them based on their name, mode, and configuration.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/VideoTag/reader/reader_utils.py\":70-79",
+            "content": "reader_zoo = ReaderZoo()\ndef regist_reader(name, reader):\n    reader_zoo.regist(name, reader)\ndef get_reader(name, mode, cfg):\n    reader_model = reader_zoo.get(name, mode, cfg)\n    return reader_model.create_reader()"
+        }
+    ]
+}

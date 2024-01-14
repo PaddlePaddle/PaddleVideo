@@ -1,0 +1,15 @@
+{
+    "summary": "The code imports various dataset classes from PaddleVideo library for video understanding tasks, and adds them to the `__all__` list for accessibility. These datasets include VideoDataset, FrameDataset, and more, with licensing information provided.",
+    "details": [
+        {
+            "comment": "This code is importing various dataset classes from different modules in the PaddleVideo library. These datasets are used for video understanding tasks, such as action recognition, activity classification, and video captioning. The code also includes licensing information and mentions that these datasets can be accessed on an \"AS IS\" basis.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/paddlevideo/loader/dataset/__init__.py\":0-24",
+            "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nfrom .actbert_dataset import ActBertDataset\nfrom .ava_dataset import AVADataset\nfrom .bmn_dataset import BMNDataset\nfrom .davis_dataset import DavisDataset\nfrom .feature import FeatureDataset\nfrom .frame import FrameDataset, FrameDataset_Sport\nfrom .MRI import MRIDataset\nfrom .MRI_SlowFast import SFMRIDataset\nfrom .msrvtt import MSRVTTDataset\nfrom .actbert_dataset import ActBertDataset\nfrom .asrf_dataset import ASRFDataset"
+        },
+        {
+            "comment": "This code imports several dataset classes and adds them to the `__all__` list, making them accessible within this module. The datasets include VideoDataset, FrameDataset, SFVideoDataset, BMNDataset, FeatureDataset, SkeletonDataset, AVADataset, MonoDataset, MSRVTTDataset, ActBertDataset, DavisDataset, MRIDataset, SFMRIDataset, FrameDataset_Sport, MSTCNDataset, ASRFDataset, UCF101SkeletonDataset, and UCF24Dataset.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/paddlevideo/loader/dataset/__init__.py\":25-40",
+            "content": "from .ms_tcn_dataset import MSTCNDataset\nfrom .oxford import MonoDataset\nfrom .skeleton import SkeletonDataset\nfrom .slowfast_video import SFVideoDataset\nfrom .video import VideoDataset\nfrom .ucf101_skeleton import UCF101SkeletonDataset\nfrom .ucf24_dataset import UCF24Dataset\n__all__ = [\n    'VideoDataset', 'FrameDataset', 'SFVideoDataset', 'BMNDataset',\n    'FeatureDataset', 'SkeletonDataset', 'AVADataset', 'MonoDataset',\n    'MSRVTTDataset', 'ActBertDataset', 'DavisDataset', 'MRIDataset',\n    'SFMRIDataset', 'FrameDataset_Sport', 'MSTCNDataset', 'ASRFDataset',\n    'UCF101SkeletonDataset', 'UCF24Dataset'\n]"
+        }
+    ]
+}

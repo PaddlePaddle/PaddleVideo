@@ -1,0 +1,20 @@
+{
+    "summary": "This code lists three research papers on action detection and localization in videos: Fast Action Proposals, Bag-of-fragments, and Action Localization through Context Walk.",
+    "details": [
+        {
+            "comment": "This code is a list of useful temporal action detection papers, each with their respective authors and conference/journal they were published in.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/english_documents/tutorials/Temporal Action Detection Papers\":0-11",
+            "content": "Usefull Temporal Action Detection Papers. \n    Rethinking the Faster R-CNN Architecture for Temporal Action Localization - Yu-Wei Chao et al., CVPR2018\n    Weakly Supervised Action Localization by Sparse Temporal Pooling Network - Phuc Nguyen et al., CVPR 2018\n    Temporal Deformable Residual Networks for Action Segmentation in Videos - P. Lei and S. Todrovic., CVPR2018.\n    End-to-End, Single-Stream Temporal Action Detection in Untrimmed Videos - Shayamal Buch et al., BMVC 2017\n    Cascaded Boundary Regression for Temporal Action Detection - Jiyang Gao et al., BMVC 2017\n    Temporal Tessellation: A Unified Approach for Video Analysis - Kaufman et al., ICCV2017. \n    Temporal Action Detection with Structured Segment Networks - Y. Zhao et al., ICCV2017. \n    Temporal Context Network for Activity Localization in Videos - X. Dai et al., ICCV2017.\n    Detecting the Moment of Completion: Temporal Models for Localising Action Completion - F. Heidarivincheh et al., arXiv2017.\n    CDC: Convolutional-De-"
+        },
+        {
+            "comment": "This code contains references to various papers on temporal action detection, localization, and understanding in untrimmed videos. It includes papers from different authors and years, with some including PyTorch implementation and project web links.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/english_documents/tutorials/Temporal Action Detection Papers\":11-20",
+            "content": "Convolutional Networks for Precise Temporal Action Localization in Untrimmed Videos - Z. Shou et al, CVPR2017.\n    SST: Single-Stream Temporal Action Proposals - S. Buch et al, CVPR2017.\n    R-C3D: Region Convolutional 3D Network for Temporal Activity Detection - H. Xu et al, arXiv2017. [code] [project web] [PyTorch]\n    DAPs: Deep Action Proposals for Action Understanding - V. Escorcia et al, ECCV2016. \n    Online Action Detection using Joint Classification-Regression Recurrent Neural Networks - Y. Li et al, ECCV2016. \n    Temporal Action Localization in Untrimmed Videos via Multi-stage CNNs - Z. Shou et al, CVPR2016. \n    Fast Temporal Activity Proposals for Efficient Detection of Human Actions in Untrimmed Videos - F. Heilbron et al, CVPR2016. \n    Actionness Estimation Using Hybrid Fully Convolutional Networks - L. Wang et al, CVPR2016. \n    Learning Activity Progression in LSTMs for Activity Detection and Early Detection - S. Ma et al, CVPR2016.\n    End-to-end Learning of Action Detection from Frame Glimpses in Videos - S. Yeung et al, CVPR2016. "
+        },
+        {
+            "comment": "This code provides references to three research papers related to action detection and localization in videos: \n1. Fast Action Proposals by Yu & Yuan (CVPR2015), \n2. Bag-of-fragments by Mettes et al. (ICMR2015), and \n3. Action Localization through Context Walk by Soomro et al. (ICCV2015).",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/english_documents/tutorials/Temporal Action Detection Papers\":21-23",
+            "content": "    Fast Action Proposals for Human Action Detection and Search - G. Yu and J. Yuan, CVPR2015. \n    Bag-of-fragments: Selecting and encoding video fragments for event detection and recounting - P. Mettes et al, ICMR2015.\n    Action localization in videos through context walk - K. Soomro et al, ICCV2015."
+        }
+    ]
+}

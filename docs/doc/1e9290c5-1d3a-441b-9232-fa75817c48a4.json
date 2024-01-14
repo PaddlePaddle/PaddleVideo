@@ -1,0 +1,15 @@
+{
+    "summary": "The `weight_init_` function initializes layer weights in PaddlePaddle with custom functions, supporting various initialization types such as Xavier and Uniform.",
+    "details": [
+        {
+            "comment": "This function, `weight_init_`, initializes the weights of a PaddlePaddle layer with user-defined functions. The function takes in a layer, an initialization function, optional weight and bias names, and additional keyword arguments. It performs an in-place parameter initialization and supports various types of initialization functions such as Xavier, Uniform, and others.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/VideoQualityAssessment/paddlevideo/modeling/weight_init.py\":0-35",
+            "content": "\"\"\"\n# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"\nimport numpy as np\nimport paddle.nn.initializer as init\ndef weight_init_(layer,\n                 func,\n                 weight_name=None,\n                 bias_name=None,\n                 bias_value=0.0,\n                 **kwargs):\n    \"\"\"\n    In-place params init function.\n    Usage:\n    .. code-block:: python\n        import paddle\n        import numpy as np\n        data = np.ones([3, 4], dtype='float32')\n        linear = paddle.nn.Linear(4, 4)"
+        },
+        {
+            "comment": "This code initializes the weights and biases of a neural network layer using the PaddlePaddle framework. It checks if the layer has weight and bias attributes, then applies weight initialization functions and potentially overrides their names.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/VideoQualityAssessment/paddlevideo/modeling/weight_init.py\":36-54",
+            "content": "        input = paddle.to_tensor(data)\n        print(linear.weight)\n        linear(input)\n        weight_init_(linear, 'Normal', 'fc_w0', 'fc_b0', std=0.01, mean=0.1)\n        print(linear.weight)\n    \"\"\"\n    if hasattr(layer, 'weight') and layer.weight is not None:\n        getattr(init, func)(**kwargs)(layer.weight)\n        if weight_name is not None:\n            # override weight name\n            layer.weight.name = weight_name\n    if hasattr(layer, 'bias') and layer.bias is not None:\n        init.Constant(bias_value)(layer.bias)\n        if bias_name is not None:\n            # override bias name\n            layer.bias.name = bias_name"
+        }
+    ]
+}

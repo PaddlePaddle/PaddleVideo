@@ -1,0 +1,10 @@
+{
+    "summary": "This code imports all functions and classes from the logger and log_parser modules in the T2VLAD application of PaddleVideo.",
+    "details": [
+        {
+            "comment": "This code imports all functions and classes from the logger and log_parser modules in the T2VLAD application of PaddleVideo.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/T2VLAD/logger/__init__.py\":0-1",
+            "content": "from .logger import *\nfrom .log_parser import *"
+        }
+    ]
+}

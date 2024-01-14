@@ -1,0 +1,10 @@
+{
+    "summary": "Code reads a JSON file, modifies its format, and writes it back as a new JSON file.",
+    "details": [
+        {
+            "comment": "Code reads a JSON file, modifies its format, and writes it back as a new JSON file.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/TableTennis/gts_format_transfer.py\":0-11",
+            "content": "import json\nwith open('/home/aistudio/work/BMN/Input_for_bmn/label_fixed.json') as f:\n    data = json.load(f)\nf.close()\ntarget_format = {'taxonomy': None, 'database': data, 'version': None}\njsonString = json.dumps(target_format, indent=4, ensure_ascii=False)\njsonFile = open('/home/aistudio/work/BMN/Input_for_bmn/label_gts.json', 'w')\njsonFile.write(jsonString)\njsonFile.close()"
+        }
+    ]
+}

@@ -1,0 +1,10 @@
+{
+    "summary": "The code defines a class called AverageMeter which computes and stores the average and current value. It has four attributes: val, avg, sum, and count. The reset function resets all values to 0, while the update function takes a value (val) and updates the running average based on the number of samples (n).",
+    "details": [
+        {
+            "comment": "The code defines a class called AverageMeter which computes and stores the average and current value. It has four attributes: val, avg, sum, and count. The reset function resets all values to 0, while the update function takes a value (val) and updates the running average based on the number of samples (n).",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/Ma-Net/utils/meters.py\":0-21",
+            "content": "from __future__ import absolute_import\nclass AverageMeter(object):\n    \"\"\"Computes and stores the average and current value\"\"\"\n    def __init__(self):\n        self.val = 0\n        self.avg = 0\n        self.sum = 0\n        self.count = 0\n    def reset(self):\n        self.val = 0\n        self.avg = 0\n        self.sum = 0\n        self.count = 0\n    def update(self, val, n=1):\n        self.val = val\n        self.sum += val * n\n        self.count += n\n        self.avg = self.sum / self.count"
+        }
+    ]
+}

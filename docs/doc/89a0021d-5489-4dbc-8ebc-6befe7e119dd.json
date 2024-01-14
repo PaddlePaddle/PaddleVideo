@@ -1,0 +1,15 @@
+{
+    "summary": "The code imports modules from PaddleVideo library, initializes a model registry, and provides functions for building video recognition models and defining loss functions.",
+    "details": [
+        {
+            "comment": "This code is an import statement from the PaddleVideo library, including various modules for backbones, builders, detectors, recognizers, and heads. It also includes license information and copyright details. The code allows users to access and build models using these imported modules.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/paddlevideo/modeling/__init__.py\":0-21",
+            "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nfrom .assigners import MaxIoUAssignerAVA\nfrom .backbones import ResNet\nfrom .builder import (build_backbone, build_head, build_localizer, build_loss,\n                      build_recognizer)\nfrom .framework.detectors import BaseDetector, FastRCNN, TwoStageDetector\nfrom .framework.recognizers import BaseRecognizer, Recognizer2D\nfrom .heads import (AVARoIHead, BaseHead, BBoxHeadAVA, SingleRoIExtractor3D,\n                    TSNHead)"
+        },
+        {
+            "comment": "This code imports various modules, initializes a registry of models and functions, and lists all the available ones. It also defines a few key functions like `build_recognizer` and `build_localizer`, as well as some important loss functions such as `CrossEntropyLoss`. The code is part of PaddleVideo's modeling package and seems to be involved in building different parts of a video recognition model.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/paddlevideo/modeling/__init__.py\":22-36",
+            "content": "from .losses import CrossEntropyLoss\nfrom .registry import (BACKBONES, DETECTORS, HEADS, LOCALIZERS, LOSSES,\n                       PARTITIONERS, RECOGNIZERS, ROI_EXTRACTORS)\nfrom .samplers import RandomSampler\nfrom .weight_init import kaiming_normal_, trunc_normal_, weight_init_\n__all__ = [\n    'BACKBONES', 'HEADS', 'RECOGNIZERS', 'LOCALIZERS', 'PARTITIONERS', 'LOSSES',\n    'build_recognizer', 'build_localizer', 'build_head', 'build_backbone',\n    'build_loss', 'ResNet', 'TSNHead', 'BaseHead', 'BaseRecognizer',\n    'Recognizer2d', 'CrossEntropyLoss', 'ROI_EXTRACTORS',\n    'SingleRoIExtractor3D', 'AVARoIHead', 'BBoxHeadAVA', 'MaxIoUAssignerAVA',\n    'RandomSampler', 'DETECTORS', 'kaiming_normal_', 'trunc_normal_',\n    'weight_init_'\n]"
+        }
+    ]
+}

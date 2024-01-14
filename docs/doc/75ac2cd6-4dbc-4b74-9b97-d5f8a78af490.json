@@ -1,0 +1,10 @@
+{
+    "summary": "This code provides usage instructions for various tools in PaddleVideo. It shows how to retrieve model parameters, calculate FLOPs, and test an exported model (coming soon). The code examples use Python 3.7 and require specific configuration files.",
+    "details": [
+        {
+            "comment": "This code provides usage instructions for various tools in PaddleVideo. It shows how to retrieve model parameters, calculate FLOPs, and test an exported model (coming soon). The code examples use Python 3.7 and require specific configuration files.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/english_documents/tools.md\":0-21",
+            "content": "[\u7b80\u4f53\u4e2d\u6587](../zh-CN/tools.md) | English\n# Tools\nThis page includes the usage of some useful tools in PaddleVideo.\n## Params\nTo get the params of a model.\n```shell\npython3.7 tools/summary.py -c configs/recognization/tsm/tsm.yaml\n```\n## FLOPS\nto print FLOPs.\n```shell\npython3.7 tools/summary.py -c configs/recognization/tsm/tsm.yaml --FLOPs\n```\n## Test the export model <sup>coming soon</sup>"
+        }
+    ]
+}

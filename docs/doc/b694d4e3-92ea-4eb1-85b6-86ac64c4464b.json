@@ -1,0 +1,10 @@
+{
+    "summary": "This code provides a link to the Chinese version of the modular design tutorial and the English version, allowing users to switch between languages based on their preference.",
+    "details": [
+        {
+            "comment": "This code provides a link to the Chinese version of the modular design tutorial and the English version, allowing users to switch between languages based on their preference.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/english_documents/tutorials/modular_design.md\":0-0",
+            "content": "[\u7b80\u4f53\u4e2d\u6587](../../zh-CN/tutorials/modular_design.md) | English"
+        }
+    ]
+}

@@ -1,0 +1,10 @@
+{
+    "summary": "This code defines a custom logger class for the news stripper application. It checks if the 'logs' directory exists, creates it if not, and sets up a file handler to log action detection information into \"action_detect.log\" in the 'logs' directory. The logging level is set to INFO, which will log informational messages and above (DEBUG, WARNING, ERROR, CRITICAL).",
+    "details": [
+        {
+            "comment": "This code defines a custom logger class for the news stripper application. It checks if the 'logs' directory exists, creates it if not, and sets up a file handler to log action detection information into \"action_detect.log\" in the 'logs' directory. The logging level is set to INFO, which will log informational messages and above (DEBUG, WARNING, ERROR, CRITICAL).",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/TableTennis/predict/action_detect/logger.py\":0-23",
+            "content": "\"\"\"\nlogger\n\"\"\"\nimport os\nimport logging\nclass Logger(logging.Logger):\n    \"\"\"Customized logger for news stripper\n    \"\"\"\n    def __init__(self):\n        super(Logger, self).__init__(self)\n        if not os.path.exists('logs'):\n            os.mkdir('logs')\n        handler = logging.FileHandler(\"logs/action_detect.log\")\n        # handler.setLevel(logging.DEBUG)\n        handler.setLevel(logging.INFO)\n        format = \"%(levelname)s: %(asctime)s: %(filename)s:%(lineno)d %(message)s\"\n        datefmt = \"%y-%m-%d %H:%M:%S\"\n        formatter = logging.Formatter(format, datefmt)\n        handler.setFormatter(formatter)\n        self.addHandler(handler)"
+        }
+    ]
+}

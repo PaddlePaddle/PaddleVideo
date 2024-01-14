@@ -1,0 +1,20 @@
+{
+    "summary": "This code utilizes Paddle2ONNX to convert PP-TSN model, and demonstrates prediction using ONNX engine. Environment setup involves installing necessary packages and downloading the inference model for conversion & prediction. The code generates output for video files with top-1 class and score.",
+    "details": [
+        {
+            "comment": "This code describes how to convert a PaddlePaddle (PP-TSN) model into an ONNX model and predict using the ONNX engine. It requires environment preparation by installing Paddle2ONNX and ONNXRuntime. Afterward, PP-TSN inference model should be downloaded for conversion and prediction.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/deploy/paddle2onnx/readme_en.md\":0-27",
+            "content": "# paddle2onnx model conversion and prediction\nThis chapter describes how the PP-TSN model is transformed into an ONNX model and predicted based on the ONNX engine.\n## 1. Environment preparation\nNeed to prepare Paddle2ONNX model conversion environment, and ONNX model prediction environment.\nPaddle2ONNX supports converting the PaddlePaddle model format to the ONNX model format. The operator currently supports exporting ONNX Opset 9~11 stably, and some Paddle operators support lower ONNX Opset conversion.\nFor more details, please refer to [Paddle2ONNX](https://github.com/PaddlePaddle/Paddle2ONNX/blob/develop/README_zh.md)\n- Install Paddle2ONNX\n```bash\npython3.7 -m pip install paddle2onnx\n```\n- Install ONNXRuntime\n```bash\n# It is recommended to install version 1.9.0, and the version number can be changed according to the environment\npython3.7 -m pip install onnxruntime==1.9.0\n```\n## 2. Model conversion\n- PP-TSN inference model download\n    ```bash\n    # Download the inference model to the PaddleVideo/inference/ppTSN/ directory"
+        },
+        {
+            "comment": "The provided code is for model conversion and prediction using Paddle2ONNX. First, it downloads an inference model from a URL, decompresses it, and then converts the Paddle inference model to ONNX format. Finally, it executes an example prediction using the converted ONNX model.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/deploy/paddle2onnx/readme_en.md\":28-60",
+            "content": "    mkdir -p ./inference\n    wget -P ./inference/ https://videotag.bj.bcebos.com/PaddleVideo-release2.3/ppTSN.zip\n    # Decompress the inference model\n    pushd ./inference\n    unzip ppTSN.zip\n    popd\n    ```\n- Model conversion\n    Convert Paddle inference models to ONNX format models using Paddle2ONNX:\n    ```bash\n    paddle2onnx \\\n    --model_dir=./inference/ppTSN \\\n    --model_filename=ppTSN.pdmodel \\\n    --params_filename=ppTSN.pdiparams \\\n    --save_file=./inference/ppTSN/ppTSN.onnx \\\n    --opset_version=10 \\\n    --enable_onnx_checker=True\n    ```\nAfter execution, you can find that a model file `ppTSN.onnx` in ONNX format is generated in the `./inference/ppTSN` directory\n## 3. onnx prediction\nNext, you can use the ONNX format model for prediction, which is similar to the paddle prediction model\nExecute the following command:\n```bash\npython3.7 deploy/paddle2onnx/predict_onnx.py \\\n--input_file data/example.avi \\\n--config configs/recognition/pptsn/pptsn_k400_videos.yaml \\\n--onnx_file=./inference/ppTSN/ppTSN.onnx"
+        },
+        {
+            "comment": "This code demonstrates how to generate an output for a video file using PaddleVideo. The top-1 class and score are displayed, which can be verified with the result of Paddle inference.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/deploy/paddle2onnx/readme_en.md\":61-69",
+            "content": "```\nThe result is as follows:\n```bash\nCurrent video file: data/example.avi\n        top-1 class: 5\n        top-1 score: 0.9998553991317749\n```\nIt can be verified that the result is completely consistent with the prediction result of Paddle inference"
+        }
+    ]
+}

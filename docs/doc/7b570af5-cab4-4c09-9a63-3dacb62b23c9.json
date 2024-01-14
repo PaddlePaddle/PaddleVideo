@@ -1,0 +1,15 @@
+{
+    "summary": "The code imports PaddleVideo library functions for data augmentation, composition, decoding, and sampling in video analysis tasks, while using a list of pipeline modules to perform operations like mixing, cropping, and scaling.",
+    "details": [
+        {
+            "comment": "This code imports various functions and classes from different modules in the PaddleVideo library, which are used for data augmentation, composition, decoding, and sampling in video analysis tasks.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/VideoQualityAssessment/paddlevideo/loader/pipelines/__init__.py\":0-39",
+            "content": "\"\"\"\n# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"\nfrom .augmentations import (\n    Scale,\n    RandomCrop,\n    CenterCrop,\n    RandomFlip,\n    Image2Array,\n    Normalization,\n    JitterScale,\n    MultiCrop,\n    PackOutput,\n)\nfrom .compose import Compose\nfrom .decode import VideoDecoder, FrameDecoder\nfrom .sample import Sampler\nfrom .mix import Mixup, Cutmix\n__all__ = [\n    'Scale',\n    'RandomCrop',\n    'CenterCrop',\n    'RandomFlip',\n    'Image2Array',\n    'Normalization',"
+        },
+        {
+            "comment": "The code above is a list of pipeline modules used in the PaddleVideo framework for video processing tasks. These modules perform various operations such as data augmentation, mixing, cropping, and scaling before feeding into the model for training or evaluation.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/VideoQualityAssessment/paddlevideo/loader/pipelines/__init__.py\":40-49",
+            "content": "    'Compose',\n    'VideoDecoder',\n    'FrameDecoder',\n    'Sampler',\n    'Mixup',\n    'Cutmix',\n    'JitterScale',\n    'MultiCrop',\n    'PackOutput',\n]"
+        }
+    ]
+}

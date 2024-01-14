@@ -1,0 +1,10 @@
+{
+    "summary": "This code provides instructions to run a script that executes a series of benchmark tests for the TimeSformer model in PaddleVideo. The provided script, \"run_all.sh\", performs several steps including switching to a specific branch (benchmark_dev), installing dependencies, downloading and uncompressing data, and then running various benchmarks with different parameters using another script named \"run_benchmark.sh\".",
+    "details": [
+        {
+            "comment": "This code provides instructions to run a script that executes a series of benchmark tests for the TimeSformer model in PaddleVideo. The provided script, \"run_all.sh\", performs several steps including switching to a specific branch (benchmark_dev), installing dependencies, downloading and uncompressing data, and then running various benchmarks with different parameters using another script named \"run_benchmark.sh\".",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/benchmark/TimeSformer/README.md\":0-13",
+            "content": "\u6267\u884c\n```bash\nbash ./run_all.sh down_data\n```\n\u5373\u53ef\u8fd0\u884c.\nrun_all.sh\u5185\u90e8\u7684\u6267\u884c\u6b65\u9aa4\uff1a\n1. cd \u5230 ../../ (\u4e5f\u5c31\u662f PaddleVideo \u76ee\u5f55)\n2. \u5207\u6362\u5230benchmark_dev\u5206\u652f\n3. \u5b89\u88c5 PaddleVideo \u6240\u9700\u4f9d\u8d56\n4. cd \u56dePaddleVideo/data/ucf101\n5. wget\u4e0b\u8f7d\u6570\u636e\u96c6\u5e76\u89e3\u538b\u7f29\uff0c\u5e76\u4e0b\u8f7d\u9884\u8bad\u7ec3\u6743\u91cd\u653e\u5230data\u76ee\u5f55\u4e0b\n6. \u518d\u6b21cd \u56de\u5230 ../../ (\u4e5f\u5c31\u662f PaddleVideo \u76ee\u5f55)\n8. \u6309\u7167\u4e0d\u540c\u7684\u53c2\u6570\u6267\u884c run_benchmark.sh \u811a\u672c"
+        }
+    ]
+}

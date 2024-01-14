@@ -1,0 +1,10 @@
+{
+    "summary": "The code is executing a Python script (tools/export_model.py) with specific parameters to export the best model from ./configs/recognition/tsm/pptsm.yaml, save it as ./output/ppTSM/ppTSM\\_best.pdparams and store the inference files in ./inference/. It will use 32 segments for processing.",
+    "details": [
+        {
+            "comment": "The code is executing a Python script (tools/export_model.py) with specific parameters to export the best model from ./configs/recognition/tsm/pptsm.yaml, save it as ./output/ppTSM/ppTSM\\_best.pdparams and store the inference files in ./inference/. It will use 32 segments for processing.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/VideoQualityAssessment/save_model.sh\":0-4",
+            "content": "python tools/export_model.py \\\n  -c ./configs/recognition/tsm/pptsm.yaml \\\n  -p ./output/ppTSM/ppTSM_best.pdparams \\\n  -o ./inference/ \\\n  --num_seg=32 "
+        }
+    ]
+}

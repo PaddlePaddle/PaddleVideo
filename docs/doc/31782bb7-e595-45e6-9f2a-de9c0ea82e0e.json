@@ -1,0 +1,10 @@
+{
+    "summary": "This code sets environment variables for GPU utilization and then runs the eval_and_save_model.py script in scenario_lib, evaluating a model named AttentionLstmErnie with provided configuration file and saving its parameters and inference models to specified directories. The \"--save_only\" flag is not used, so both evaluation and saving will occur.",
+    "details": [
+        {
+            "comment": "This code sets environment variables for GPU utilization and then runs the eval_and_save_model.py script in scenario_lib, evaluating a model named AttentionLstmErnie with provided configuration file and saving its parameters and inference models to specified directories. The \"--save_only\" flag is not used, so both evaluation and saving will occur.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/MultimodalVideoTag/eval_and_save_model.sh\":0-12",
+            "content": "# eval sh \nexport CUDA_VISIBLE_DEVICES=0\nexport FLAGS_eager_delete_tensor_gb=0.0\nexport FLAGS_sync_nccl_allreduce=1\nexport FLAGS_fast_eager_deletion_mode=1\nexport FLAGS_fraction_of_gpu_memory_to_use=0.5\nexport FLAGS_reallocate_gpu_memory_in_mb=0\nexport FLAGS_memory_fraction_of_eager_deletion=1\npython scenario_lib/eval_and_save_model.py --model_name=AttentionLstmErnie \\\n--config=./conf/conf.txt \\\n--save_model_param_dir=checkpoints_save \\\n--save_inference_model=inference_models_save \\\n# --save_only"
+        }
+    ]
+}

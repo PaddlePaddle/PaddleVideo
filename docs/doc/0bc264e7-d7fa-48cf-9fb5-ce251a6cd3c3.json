@@ -1,0 +1,10 @@
+{
+    "summary": "This code is used to find and include the Git package, declare an external project named \"extern_Autolog\" using FetchContent, set its base directory, specify the repository URL and tag, and finally make the external project available for use.",
+    "details": [
+        {
+            "comment": "This code is used to find and include the Git package, declare an external project named \"extern_Autolog\" using FetchContent, set its base directory, specify the repository URL and tag, and finally make the external project available for use.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/deploy/cpp_infer/external-cmake/auto-log.cmake\":0-11",
+            "content": "find_package(Git REQUIRED)\ninclude(FetchContent)\nset(FETCHCONTENT_BASE_DIR \"${CMAKE_CURRENT_BINARY_DIR}/third-party\")\nFetchContent_Declare(\n  extern_Autolog\n  PREFIX autolog\n  GIT_REPOSITORY https://github.com/LDOUBLEV/AutoLog.git\n  GIT_TAG        main\n)\nFetchContent_MakeAvailable(extern_Autolog)"
+        }
+    ]
+}

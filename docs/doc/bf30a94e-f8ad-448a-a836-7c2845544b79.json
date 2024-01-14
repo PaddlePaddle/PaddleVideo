@@ -1,0 +1,10 @@
+{
+    "summary": "This code file is a part of the PaddleVideo library and contains definitions for different head models (BaseHead, TSNHead, TSMRecHead) used in Video Quality Assessment. It imports these classes from other files within the modeling/heads directory and provides them to be used by other parts of the library.",
+    "details": [
+        {
+            "comment": "This code file is a part of the PaddleVideo library and contains definitions for different head models (BaseHead, TSNHead, TSMRecHead) used in Video Quality Assessment. It imports these classes from other files within the modeling/heads directory and provides them to be used by other parts of the library.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/VideoQualityAssessment/paddlevideo/modeling/heads/__init__.py\":0-20",
+            "content": "\"\"\"\n# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"\nfrom .base import BaseHead\nfrom .tsn_head import TSNHead\nfrom .tsm_rec_head import TSMRecHead\n__all__ = ['BaseHead', 'TSNHead', 'TSMRecHead']"
+        }
+    ]
+}

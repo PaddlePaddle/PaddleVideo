@@ -1,0 +1,10 @@
+{
+    "summary": "This code sets up the logging configuration based on a provided JSON file. If the file is found, it modifies the filename paths in the configuration according to the save_dir and then uses logging.config.dictConfig() to configure the logging system. If the file is not found, it uses basicConfig() with default level to set up logging. The function returns the filename for the \"info_file_handler\".",
+    "details": [
+        {
+            "comment": "This code sets up the logging configuration based on a provided JSON file. If the file is found, it modifies the filename paths in the configuration according to the save_dir and then uses logging.config.dictConfig() to configure the logging system. If the file is not found, it uses basicConfig() with default level to set up logging. The function returns the filename for the \"info_file_handler\".",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/T2VLAD/logger/logger.py\":0-24",
+            "content": "import os\nimport logging\nimport logging.config\nfrom pathlib import Path\nfrom utils import read_json\ndef setup_logging(save_dir, log_config='logger/logger_config.json',\n                  default_level=logging.INFO):\n    \"\"\"Setup logging configuration.\"\"\"\n    print(os.getcwd())\n    log_config = Path(log_config)\n    print(f\"log config: {log_config} exists: {log_config.exists()}\")\n    if log_config.is_file():\n        config = read_json(log_config)\n        # modify logging paths based on run config\n        for _, handler in config['handlers'].items():\n            if 'filename' in handler:\n                handler['filename'] = str(save_dir / handler['filename'])\n        logging.config.dictConfig(config)\n    else:\n        print(f\"Warning: logging configuration file is not found in {log_config}.\")\n        logging.basicConfig(level=default_level)\n    return config[\"handlers\"][\"info_file_handler\"][\"filename\"]"
+        }
+    ]
+}

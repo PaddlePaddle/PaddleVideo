@@ -1,0 +1,20 @@
+{
+    "summary": "Summary: A comprehensive list of notable Spatio-Temporal Action Detection papers and authors from 2015-2017, covering major conferences like ICCV, BMVC, ECCV, and arXiv.",
+    "details": [
+        {
+            "comment": "The code provides a list of useful Spatio-Temporal Action Detection papers and their corresponding authors, year of publication, and conference or journal.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/english_documents/tutorials/Spatio-Temporal Action Detection Papers\":0-12",
+            "content": "Usefull Spatio-Temporal Action Detection Papers.\n    A Better Baseline for AVA - R. Girdhar et al., ActivityNet Workshop, CVPR2018.\n    Real-Time End-to-End Action Detection with Two-Stream Networks - A. El-Nouby and G. Taylor, arXiv2018.\n    Human Action Localization with Sparse Spatial Supervision - P. Weinzaepfel et al., arXiv2017.\n    Unsupervised Action Discovery and Localization in Videos - K. Soomro and M. Shah, ICCV2017.\n    Spatial-Aware Object Embeddings for Zero-Shot Localization and Classification of Actions - P. Mettes and C. G. M. Snoek, ICCV2017.\n    Action Tubelet Detector for Spatio-Temporal Action Localization - V. Kalogeiton et al, ICCV2017. \n    Tube Convolutional Neural Network (T-CNN) for Action Detection in Videos - R. Hou et al, ICCV2017. \n    Chained Multi-stream Networks Exploiting Pose, Motion, and Appearance for Action Classification and Detection - M. Zolfaghari et al, ICCV2017. \n    TORNADO: A Spatio-Temporal Convolutional Regression Network for Video Action Proposal - H. Zhu et al., ICCV2017."
+        },
+        {
+            "comment": "This code provides a list of notable research papers related to action detection and localization in videos, published between 2015 and 2017. The papers are from various conferences such as ICCV, BMVC, ECCV, and arXiv, demonstrating the advancements made in this field during that period.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/english_documents/tutorials/Spatio-Temporal Action Detection Papers\":13-23",
+            "content": "    Online Real time Multiple Spatiotemporal Action Localisation and Prediction - G. Singh et al, ICCV2017. \n    AMTnet: Action-Micro-Tube regression by end-to-end trainable deep architecture - S. Saha et al, ICCV2017.\n    Am I Done? Predicting Action Progress in Videos - F. Becattini et al, BMVC2017.\n    Generic Tubelet Proposals for Action Localization - J. He et al, arXiv2017.\n    Incremental Tube Construction for Human Action Detection - H. S. Behl et al, arXiv2017.\n    Multi-region two-stream R-CNN for action detection - X. Peng and C. Schmid. ECCV2016. \n    Spot On: Action Localization from Pointly-Supervised Proposals - P. Mettes et al, ECCV2016.\n    Deep Learning for Detecting Multiple Space-Time Action Tubes in Videos - S. Saha et al, BMVC2016. \n    Learning to track for spatio-temporal action localization - P. Weinzaepfel et al. ICCV2015.\n    Action detection by implicit intentional motion clustering - W. Chen and J. Corso, ICCV2015.\n    Finding Action Tubes - G. Gkioxari and J. Malik CVPR2015. "
+        },
+        {
+            "comment": "List of papers on action localization and detection in videos.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/english_documents/tutorials/Spatio-Temporal Action Detection Papers\":24-29",
+            "content": "    APT: Action localization proposals from dense trajectories - J. Gemert et al, BMVC2015. \n    Spatio-Temporal Object Detection Proposals - D. Oneata et al, ECCV2014.\n    Action localization with tubelets from motion - M. Jain et al, CVPR2014.\n    Spatiotemporal deformable part models for action detection - Y. Tian et al, CVPR2013. \n    Action localization in videos through context walk - K. Soomro et al, ICCV2015.\n    Fast Action Proposals for Human Action Detection and Search - G. Yu and J. Yuan, CVPR2015. "
+        }
+    ]
+}

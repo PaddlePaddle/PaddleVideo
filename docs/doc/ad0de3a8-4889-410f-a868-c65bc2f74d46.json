@@ -1,0 +1,10 @@
+{
+    "summary": "This code is from the ActivityNet repo and has been modified to reduce length, possibly for efficiency or better readability. It uses metrics and evaluation methods for action recognition tasks, likely in video analysis applications.",
+    "details": [
+        {
+            "comment": "This code is from the ActivityNet repo and has been modified to reduce length, possibly for efficiency or better readability. It uses metrics and evaluation methods for action recognition tasks, likely in video analysis applications.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/paddlevideo/metrics/ava_evaluation/README.md\":0-1",
+            "content": "The code under this folder is from the official [ActivityNet repo](https://github.com/activitynet/ActivityNet).\nSome unused codes are removed to minimize the length of codes added."
+        }
+    ]
+}

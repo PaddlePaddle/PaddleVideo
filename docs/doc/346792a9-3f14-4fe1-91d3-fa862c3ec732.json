@@ -1,0 +1,10 @@
+{
+    "summary": "Code snippet registers two models, AttentionLSTM and TSN, in the application's model registry using the functions regist_model() and get_model(). Models are sorted alphabetically for easy retrieval.",
+    "details": [
+        {
+            "comment": "Code snippet registers two models, AttentionLSTM and TSN, in the application's model registry using the functions regist_model() and get_model(). Models are sorted alphabetically for easy retrieval.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/VideoTag/models/__init__.py\":0-6",
+            "content": "from .model import regist_model, get_model\nfrom .attention_lstm import AttentionLSTM\nfrom .tsn import TSN\n# regist models, sort by alphabet\nregist_model(\"AttentionLSTM\", AttentionLSTM)\nregist_model(\"TSN\", TSN)"
+        }
+    ]
+}

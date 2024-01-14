@@ -1,0 +1,15 @@
+{
+    "summary": "This code registers various model types (backbones, heads, recognizers) using a Registry class for efficient organization and management in a larger model architecture or framework implementation. Registries are created for 'bbox_coder', 'estimator', 'multimodal', and 'segment'.",
+    "details": [
+        {
+            "comment": "This code is registering different types of models (backbones, heads, recognizers, etc.) using a Registry class from the utils module. The Registry will help in organizing and managing these different model types efficiently. This code snippet seems to be part of a larger model architecture or framework implementation.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/paddlevideo/modeling/registry.py\":0-26",
+            "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nfrom ..utils import Registry\nBACKBONES = Registry('backbone')\nHEADS = Registry('head')\nRECOGNIZERS = Registry('recognizer')\nSEGMENTERS = Registry('Segmenters')\nLOCALIZERS = Registry('localizer')\nPARTITIONERS = Registry('partitioner')\nLOSSES = Registry('loss')\nROI_EXTRACTORS = Registry('roi_extractor')\nDETECTORS = Registry('detectors')\nBBOX_ASSIGNERS = Registry('bbox_assigner')\nBBOX_SAMPLERS = Registry('bbox_sampler')"
+        },
+        {
+            "comment": "Registry is created for 'bbox_coder', 'estimator', 'multimodal', and 'segment'. These Registries organize and manage the different types of models or coding methods, allowing for easy access and maintenance.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/paddlevideo/modeling/registry.py\":27-30",
+            "content": "BBOX_CODERS = Registry('bbox_coder')\nESTIMATORS = Registry('estimator')\nMULTIMODAL = Registry('multimodal')\nSEGMENT = Registry('segment')"
+        }
+    ]
+}

@@ -1,0 +1,20 @@
+{
+    "summary": "The \"SamplerUCF24\" class samples frames from videos using parameters like frame count and interval, utilizes PIL library, initializes pipeline, generates frame indices, returns sampled frames.",
+    "details": [
+        {
+            "comment": "This code defines a class \"SamplerUCF24\" for sampling frames in videos, taking parameters such as num_frames and frame_interval. It uses PIL instead of OpenCV to read images and returns the index of sampled frames.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/paddlevideo/loader/pipelines/sample_ucf24.py\":0-32",
+            "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport os\nimport random\nfrom PIL import Image\nfrom ..registry import PIPELINES\n@PIPELINES.register()\nclass SamplerUCF24(object):\n    \"\"\"\n    Sample frames id.\n    NOTE: Use PIL to read image here, has diff with CV2\n    Args:\n        num_frames(int): The amount of frames used in a video\n        frame_interval(int): Sampling rate\n        valid_mode(bool): True or False.\n    Returns:\n        frames_idx: the index of sampled #frames."
+        },
+        {
+            "comment": "This code defines a pipeline for loading and creating clips from video files. The `__init__` method initializes the number of frames, frame interval (randomly determined if valid mode is False), and valid mode flag. The `_get` method retrieves images in order, converts them to RGB, and appends them to a list. The `_make_clip` method generates a set of frame indices that create a looped clip. The pipeline is called with the results as input, extracting the image folder and filename for further processing.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/paddlevideo/loader/pipelines/sample_ucf24.py\":33-64",
+            "content": "    \"\"\"\n    def __init__(self,\n                 num_frames=16,\n                 frame_interval=1,\n                 valid_mode=False):\n        self.num_frames = num_frames\n        self.frame_interval = frame_interval if valid_mode else random.randint(1, 2)\n        self.valid_mode = valid_mode\n    def _get(self, frames_idxs, img_folder, results):\n        imgs = []\n        for idx in frames_idxs:\n            img = Image.open(\n                os.path.join(img_folder, '{:05d}.jpg'.format(idx))).convert('RGB')\n            imgs.append(img)\n        results['imgs'] = imgs\n        return results\n    def _make_clip(self, im_ind, max_num):\n        frame_idxs = []\n        for i in reversed(range(self.num_frames)):\n            # make it as a loop\n            i_temp = im_ind - i * self.frame_interval\n            if i_temp < 1:\n                i_temp = 1\n            elif i_temp > max_num:\n                i_temp = max_num\n            frame_idxs.append(i_temp)\n        return frame_idxs\n    def __call__(self, results):\n        img_folder, key_frame = os.path.split(results['filename'])"
+        },
+        {
+            "comment": "This code retrieves the number of frames in a folder, assigns a key frame index based on the input, generates frame indices for a video clip, and returns the requested frames from their folder.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/paddlevideo/loader/pipelines/sample_ucf24.py\":65-68",
+            "content": "        frame_len = len(os.listdir(img_folder))\n        key_idx = int(key_frame[0:5])\n        frame_idxs = self._make_clip(key_idx, frame_len)\n        return self._get(frame_idxs, img_folder, results)"
+        }
+    ]
+}

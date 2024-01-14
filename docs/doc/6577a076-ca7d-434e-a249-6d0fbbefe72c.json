@@ -1,0 +1,15 @@
+{
+    "summary": "This code includes utility functions for managing distributed computation in PaddleVideo's Video Quality Assessment application, providing current rank and world size info, and a decorator to limit function execution to the main process.",
+    "details": [
+        {
+            "comment": "This code provides utility functions for handling distributed computation in PaddleVideo's Video Quality Assessment application. The `get_dist_info()` function returns the current rank and world size, while `main_only(func)` is a decorator that ensures a function only runs on the main process (rank 0).",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/VideoQualityAssessment/paddlevideo/utils/dist_utils.py\":0-34",
+            "content": "\"\"\"\n# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"\nimport functools\nimport paddle\nimport paddle.distributed as dist\ndef get_dist_info():\n    \"\"\"get_dist_info\"\"\"\n    world_size = dist.get_world_size()\n    rank = dist.get_rank()\n    return rank, world_size\ndef main_only(func):\n    \"\"\"main_only\"\"\"\n    @functools.wraps(func)\n    def wrapper(*args, **kwargs):\n        \"\"\"wrapper\"\"\"\n        rank, _ = get_dist_info()\n        if rank == 0:\n            return func(*args, **kwargs)"
+        },
+        {
+            "comment": "This function returns the modified or wrapped object, which can be a tensor, model, or other data structure.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/VideoQualityAssessment/paddlevideo/utils/dist_utils.py\":35-35",
+            "content": "    return wrapper"
+        }
+    ]
+}

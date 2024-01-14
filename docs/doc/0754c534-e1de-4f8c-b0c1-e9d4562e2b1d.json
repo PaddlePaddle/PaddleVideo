@@ -1,0 +1,15 @@
+{
+    "summary": "This code defines the L1Loss class for computing the L1 loss, commonly used in image and video quality assessment tasks. The code calculates the L1 loss between 'score' and 'labels', ensuring compatible data types, and returns the resulting loss.",
+    "details": [
+        {
+            "comment": "This code defines a class called L1Loss that extends BaseWeightedLoss and implements the forward function for computing the L1 loss. The L1 loss is commonly used in image and video quality assessment tasks.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/VideoQualityAssessment/paddlevideo/modeling/losses/l1_loss.py\":0-32",
+            "content": "\"\"\"\n# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"\nimport paddle\nimport paddle.nn.functional as F\nfrom ..registry import LOSSES\nfrom .base import BaseWeightedLoss\n@LOSSES.register()\nclass L1Loss(BaseWeightedLoss):\n    \"\"\"L1 Loss.\"\"\"\n    def _forward(self, score, labels):\n        \"\"\"Forward function.\n        Args:\n            score (paddle.Tensor): The class score.\n            labels (paddle.Tensor): The ground truth labels.\n        Returns:\n            loss (paddle.Tensor): The returned L1 loss."
+        },
+        {
+            "comment": "This code snippet calculates the L1 loss between 'score' and 'labels', ensuring they have compatible data types, and then returns the resulting loss.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/VideoQualityAssessment/paddlevideo/modeling/losses/l1_loss.py\":33-37",
+            "content": "        \"\"\"\n        labels = labels.astype(score.dtype)\n        loss = F.l1_loss(score, labels)\n        return loss"
+        }
+    ]
+}

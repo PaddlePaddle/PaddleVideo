@@ -1,0 +1,15 @@
+{
+    "summary": "This Python code defines a SegmentationSampler class in PaddleVideo, which samples data at a specified rate and registers it for the Action Segmentation Dataset. It is part of a video processing library's pipeline, likely for segmentation purposes.",
+    "details": [
+        {
+            "comment": "This Python code is from the PaddleVideo library and defines a SegmentationSampler class. It samples data at a specified rate, only keeps every nth element in a 1D array, and registers this pipeline operation for the Action Segmentation Dataset.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/paddlevideo/loader/pipelines/segmentation_pipline.py\":0-34",
+            "content": "#  Copyright (c) 2021 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport copy\nimport os\nimport numpy as np\nimport random\nimport paddle\nfrom ..registry import PIPELINES\n\"\"\"\npipeline ops for Action Segmentation Dataset.\n\"\"\"\n@PIPELINES.register()\nclass SegmentationSampler(object):\n    def __init__(self, sample_rate):\n        self.sample_rate = sample_rate\n    def __call__(self, results):\n        for key, data in results.items():\n            if len(data.shape) == 1:\n                data = data[::self.sample_rate]"
+        },
+        {
+            "comment": "This code segment appears to be part of a pipeline in a video processing library, possibly for segmentation. It selects specific data based on the sample rate and stores it in a results dictionary with deep copy.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/paddlevideo/loader/pipelines/segmentation_pipline.py\":35-39",
+            "content": "                results[key] = copy.deepcopy(data)\n            else:\n                data = data[:, ::self.sample_rate]\n                results[key] = copy.deepcopy(data)\n        return results"
+        }
+    ]
+}

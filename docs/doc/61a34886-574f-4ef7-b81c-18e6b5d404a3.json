@@ -1,0 +1,10 @@
+{
+    "summary": "This function builds a backbone network for the specified model (resnet, xception, drn, or mobilenet) with the given output stride and BatchNorm implementation.",
+    "details": [
+        {
+            "comment": "This function builds a backbone network for the specified model (resnet, xception, drn, or mobilenet) with the given output stride and BatchNorm implementation.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/Ma-Net/networks/backbone/__init__.py\":0-13",
+            "content": "from networks.backbone import resnet, xception, drn, mobilenet\ndef build_backbone(backbone, output_stride, BatchNorm):\n    if backbone == 'resnet':\n        return resnet.ResNet101(output_stride, BatchNorm)\n    elif backbone == 'xception':\n        return xception.AlignedXception(output_stride, BatchNorm)\n    elif backbone == 'drn':\n        return drn.drn_d_54(BatchNorm)\n    elif backbone == 'mobilenet':\n        return mobilenet.MobileNetV2(output_stride, BatchNorm)\n    else:\n        raise NotImplementedError"
+        }
+    ]
+}

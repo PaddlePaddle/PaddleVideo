@@ -1,0 +1,10 @@
+{
+    "summary": "This code imports and registers a reader named \"ATTENTIONLSTMERNIE\" from the FeatureReader class, following alphabetical order. It is part of the PaddleVideo MultimodalVideoTag project, likely for video feature extraction or analysis.",
+    "details": [
+        {
+            "comment": "This code imports and registers a reader named \"ATTENTIONLSTMERNIE\" from the FeatureReader class, following alphabetical order. It is part of the PaddleVideo MultimodalVideoTag project, likely for video feature extraction or analysis.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/MultimodalVideoTag/scenario_lib/datareader/__init__.py\":0-12",
+            "content": "#!/usr/bin/env python\n# coding=utf-8\n\"\"\"\nCopyright 2021 Baidu.com, Inc. All Rights Reserved\nDescription: \nAuthors: wanghewei(wanghewei@baidu.com)\nLastEditors: wanghewei(wanghewei@baidu.com)\nDate: 2021-11-26 16:31:59\n\"\"\"\nfrom .reader_utils import regist_reader, get_reader\nfrom .feature_reader import FeatureReader\n# regist reader, sort by alphabet\nregist_reader(\"ATTENTIONLSTMERNIE\", FeatureReader)"
+        }
+    ]
+}

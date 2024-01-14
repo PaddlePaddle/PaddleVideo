@@ -1,0 +1,20 @@
+{
+    "summary": "The code initializes and defines a class for MS-RNN/VTT model metrics computation, updates metrics using input data, calculates rank metrics (r1, r5, r10, medr, mean), logs these metrics, and signals the end of iterations.",
+    "details": [
+        {
+            "comment": "The code is from the MSRVTTMetric class in paddlevideo's metrics module. It initializes an instance of the class, prepares for metrics computation, and creates score_matrix and target_matrix using numpy with zeroes. These matrices will be used to store results during metric calculations. The class also registers with the base BaseMetric class.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/paddlevideo/metrics/msrvtt_metric.py\":0-30",
+            "content": "# Copyright (c) 2021  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nimport numpy as np\nimport paddle\nimport paddle.nn.functional as F\nfrom .registry import METRIC\nfrom .base import BaseMetric\nfrom paddlevideo.utils import get_logger\nlogger = get_logger(\"paddlevideo\")\n@METRIC.register\nclass MSRVTTMetric(BaseMetric):\n    def __init__(self, data_size, batch_size, log_interval=1):\n        \"\"\"prepare for metrics\n        \"\"\"\n        super().__init__(data_size, batch_size, log_interval)\n        self.score_matrix = np.zeros((data_size, data_size))\n        self.target_matrix = np.zeros((data_size, data_size))"
+        },
+        {
+            "comment": "This code initializes a rank matrix, updates score and target matrices based on input data, calculates r1, r5, r10 rank metrics and median rank (medr) and mean rank, then logs these metrics.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/paddlevideo/metrics/msrvtt_metric.py\":31-55",
+            "content": "        self.rank_matrix = np.ones((data_size)) * data_size\n    def update(self, batch_id, data, outputs):\n        \"\"\"update metrics during each iter\n        \"\"\"\n        target = data[-1]\n        cm_logit = outputs[-1]\n        self.score_matrix[batch_id, :] = F.softmax(\n            cm_logit, axis=1)[:, 0].reshape([-1]).numpy()\n        self.target_matrix[batch_id, :] = target.reshape([-1]).numpy()\n        rank = np.where((np.argsort(-self.score_matrix[batch_id]) == np.where(\n            self.target_matrix[batch_id] == 1)[0][0]) == 1)[0][0]\n        self.rank_matrix[batch_id] = rank\n        rank_matrix_tmp = self.rank_matrix[:batch_id + 1]\n        r1 = 100.0 * np.sum(rank_matrix_tmp < 1) / len(rank_matrix_tmp)\n        r5 = 100.0 * np.sum(rank_matrix_tmp < 5) / len(rank_matrix_tmp)\n        r10 = 100.0 * np.sum(rank_matrix_tmp < 10) / len(rank_matrix_tmp)\n        medr = np.floor(np.median(rank_matrix_tmp) + 1)\n        meanr = np.mean(rank_matrix_tmp) + 1\n        logger.info(\n            \"[{}] Final r1:{:.3f}, r5:{:.3f}, r10:{:.3f}, mder:{:.3f}, meanr:{:.3f}\""
+        },
+        {
+            "comment": "This code defines a class for accumulating metrics related to the MS-RNN/VTT model. It seems to have methods for updating and finalizing the metric calculations. The update method takes in values r1, r5, r10, medr, and meanr, which are likely performance scores. The accumulate method signals the end of iterations by logging a message saying \"Eval Finished!\".",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/paddlevideo/metrics/msrvtt_metric.py\":56-61",
+            "content": "            .format(batch_id, r1, r5, r10, medr, meanr))\n    def accumulate(self):\n        \"\"\"accumulate metrics when finished all iters.\n        \"\"\"\n        logger.info(\"Eval Finished!\")"
+        }
+    ]
+}
