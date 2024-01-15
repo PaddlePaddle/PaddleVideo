@@ -1,0 +1,541 @@
+{
+    "4600": {
+        "file_id": 391,
+        "content": "[简体中文](../../../zh-CN/model_zoo/segmentation/asrf.md) | English\n# ASRF : Video Action Segmentation Model\n---\n## Contents\n- [Introduction](#Introduction)\n- [Data](#Data)\n- [Train](#Train)\n- [Test](#Test)\n- [Inference](#Inference)\n- [Reference](#Reference)\n## Introduction\nASRF model is an improvement on the video motion segmentation model ms-tcn, which was published on WACV in 2021. We reproduce the officially implemented pytorch code and obtain approximate results in paddlevideo.\n<p align=\"center\">\n<img src=\"../../../images/asrf.png\" height=300 width=400 hspace='10'/> <br />\nMS-TCN Overview\n</p>\n## Data\nASRF can choose 50salads, breakfast, gtea as trianing set. Please refer to Video Action Segmentation dataset download and preparation doc [Video Action Segmentation dataset](../../dataset/SegmentationDataset.md)\nUnlike MS-TCN, ASRF model requires additional data construction. The script process is as follows\n```bash\npython data/50salads/prepare_asrf_data.py --dataset_dir data/\n```\n## Train\nAfter prepare dataset, we can run sprits.",
+        "type": "code",
+        "location": "/english_documents/model_zoo/segmentation/asrf.md:1-35"
+    },
+    "4601": {
+        "file_id": 391,
+        "content": "ASRF is an improved video action segmentation model built upon ms-tcn, which was published in 2021. It utilizes the PaddlePaddle framework and can be trained on datasets such as 50salads, breakfast, or gtea. The model requires additional data construction using a specific script for preparation.",
+        "type": "comment"
+    },
+    "4602": {
+        "file_id": 391,
+        "content": "```bash\n# gtea dataset\nexport CUDA_VISIBLE_DEVICES=3\npython3.7 main.py  --validate -c configs/segmentation/asrf/asrf_gtea.yaml\n```\n- Start the training by using the above command line or script program. There is no need to use the pre training model. The video action segmentation model is usually a full convolution network. Due to the different lengths of videos, the `DATASET.batch_size` of the video action segmentation model is usually set to `1`, that is, batch training is not required. At present, only **single sample** training is supported.\n## Test\nTest MS-TCN on dataset scripts:\n```bash\npython main.py  --test -c configs/segmentation/asrf/asrf_gtea.yaml --weights=./output/ASRF/ASRF_split_1.pdparams\n```\n- The specific implementation of the index is to calculate ACC, edit and F1 scores by referring to the test script[evel.py](https://github.com/yabufarha/ms-tcn/blob/master/eval.py) provided by the author of ms-tcn.\nThe reproduction of pytorch comes from the official [code base](https://github.com/yiskw713/asrf)",
+        "type": "code",
+        "location": "/english_documents/model_zoo/segmentation/asrf.md:37-55"
+    },
+    "4603": {
+        "file_id": 391,
+        "content": "This code is running a training command for an action segmentation model (ASRF) on the GTEA dataset, specifically without using pre-training. It uses CUDA device 3 and a provided configuration file. The test command tests MS-TCN on a dataset using a previously trained model's weights. The index calculation in the test refers to an evaluation script provided by the original author of ms-tcn. The codebase is from the official ASRF repository in PyTorch.",
+        "type": "comment"
+    },
+    "4604": {
+        "file_id": 391,
+        "content": "- The evaluation method of data set adopts the folding verification method in ms-tcn paper, and the division method of folding is the same as that in ms-tcn paper.\nAccuracy on Breakfast dataset(4 folding verification):\n| Model | Acc | Edit | F1@0.1 | F1@0.25 | F1@0.5 |\n| :---: | :---: | :---: | :---: | :---: | :---: |\n| paper | 67.6% | 72.4% | 74.3% | 68.9% | 56.1% |\n| pytorch | 65.8% | 71.0% | 72.3% | 66.5% | 54.9% |\n| paddle | 66.1% | 71.9% | 73.3% | 67.9% | 55.7% |\nAccuracy on 50salads dataset(5 folding verification):\n| Model | Acc | Edit | F1@0.1 | F1@0.25 | F1@0.5 |\n| :---: | :---: | :---: | :---: | :---: | :---: |\n| paper | 84.5% | 79.3% | 82.9% | 83.5% | 77.3% |\n| pytorch | 81.4% | 75.6% | 82.7% | 81.2% | 77.2% |\n| paddle | 81.6% | 75.8% | 83.0% | 81.5% | 74.8% |\nAccuracy on gtea dataset(4 folding verification):\n| Model | Acc | Edit | F1@0.1 | F1@0.25 | F1@0.5 |\n| :---: | :---: | :---: | :---: | :---: | :---: |\n| paper | 77.3% | 83.7% | 89.4% | 87.8% | 79.8% |\n| pytorch | 76.3% | 79.6% | 87.3% | 85.8% | 74.9% |",
+        "type": "code",
+        "location": "/english_documents/model_zoo/segmentation/asrf.md:57-80"
+    },
+    "4605": {
+        "file_id": 391,
+        "content": "The code provides accuracy results for different models on three datasets, Breakfast, 50salads, and GTEA, using a 4 or 5-fold validation method as per the MS-TCN paper. The performance metrics include Accuracy (Acc), Edit Distance (Edit), and F1 scores at different thresholds (F1@0.1, F1@0.25, F1@0.5).",
+        "type": "comment"
+    },
+    "4606": {
+        "file_id": 391,
+        "content": "| paddle | 77.1% | 83.3% | 88.9% | 87.5% | 79.1% |\nModel weight for gtea\nTest_Data| F1@0.5 | checkpoints |\n| :----: | :----: | :---- |\n| gtea_split1 | 72.4409 | [ASRF_gtea_split_1.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ASRF_gtea_split_1.pdparams) |\n| gtea_split2 | 76.6666 | [ASRF_gtea_split_2.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ASRF_gtea_split_2.pdparams) |\n| gtea_split3 | 84.5528 | [ASRF_gtea_split_3.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ASRF_gtea_split_3.pdparams) |\n| gtea_split4 | 82.6771 | [ASRF_gtea_split_4.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ASRF_gtea_split_4.pdparams) |\n## Infer\n### export inference model\n```bash\npython3.7 tools/export_model.py -c configs/segmentation/asrf/asrf_gtea.yaml \\\n                                -p data/ASRF_gtea_split_1.pdparams \\\n                                -o inference/ASRF\n```\nTo get model architecture file `ASRF.pdmodel` and parameters file `ASRF.pdiparams`, use:",
+        "type": "code",
+        "location": "/english_documents/model_zoo/segmentation/asrf.md:81-100"
+    },
+    "4607": {
+        "file_id": 391,
+        "content": "Table showing model weight for gtea with corresponding F1@0.5 and checkpoint links, followed by command to export inference model for ASRF_gtea using given parameters.",
+        "type": "comment"
+    },
+    "4608": {
+        "file_id": 391,
+        "content": "- Args usage please refer to [Model Inference](https://github.com/PaddlePaddle/PaddleVideo/blob/release/2.0/docs/zh-CN/start.md#2-%E6%A8%A1%E5%9E%8B%E6%8E%A8%E7%90%86).\n### infer\nInput file are the file list for infering, for example:\n```\nS1_Cheese_C1.npy\nS1_CofHoney_C1.npy\nS1_Coffee_C1.npy\nS1_Hotdog_C1.npy\n...\n```\n```bash\npython3.7 tools/predict.py --input_file data/gtea/splits/test.split1.bundle \\\n                           --config configs/segmentation/asrf/asrf_gtea.yaml \\\n                           --model_file inference/ASRF/ASRF.pdmodel \\\n                           --params_file inference/ASRF/ASRF.pdiparams \\\n                           --use_gpu=True \\\n                           --use_tensorrt=False\n```\nexample of logs:\n```bash\nresult write in : ./inference/infer_results/S1_Cheese_C1.txt\nresult write in : ./inference/infer_results/S1_CofHoney_C1.txt\nresult write in : ./inference/infer_results/S1_Coffee_C1.txt\nresult write in : ./inference/infer_results/S1_Hotdog_C1.txt\nresult write in : ./inference/infer_results/S1_Pealate_C1.txt",
+        "type": "code",
+        "location": "/english_documents/model_zoo/segmentation/asrf.md:102-131"
+    },
+    "4609": {
+        "file_id": 391,
+        "content": "This code provides an example of how to run model inference using the ASRF segmentation model from PaddleVideo. The input file should contain a list of .npy files, and the code demonstrates how to execute it with specific configuration, model, and parameter files. It also shows the location where the results will be written after inference is complete.",
+        "type": "comment"
+    },
+    "4610": {
+        "file_id": 391,
+        "content": "result write in : ./inference/infer_results/S1_Peanut_C1.txt\nresult write in : ./inference/infer_results/S1_Tea_C1.txt\n```\n## Reference\n- [Alleviating Over-segmentation Errors by Detecting Action Boundaries](https://arxiv.org/pdf/2007.06866v1.pdf), Yuchi Ishikawa, Seito Kasai, Yoshimitsu Aoki, Hirokatsu Kataoka",
+        "type": "code",
+        "location": "/english_documents/model_zoo/segmentation/asrf.md:132-139"
+    },
+    "4611": {
+        "file_id": 391,
+        "content": "Writes the inference results to separate text files for \"Peanut\" and \"Tea\" scenes.",
+        "type": "comment"
+    },
+    "4612": {
+        "file_id": 392,
+        "content": "/english_documents/model_zoo/segmentation/cfbi.md",
+        "type": "filepath"
+    },
+    "4613": {
+        "file_id": 392,
+        "content": "The code implements the CFBI Video Object Segmentation model proposed by Baidu in ECCV 2020, considering background and foreground for segmentation, predicting on current frames given reference frame and previous frame. It follows DAVIS guidelines, uses \"cfbip_davis.yaml\" configuration file, pretrained weights \"CFBIp_davis.pdparams\", saves predictions to \"result_root\", provides evaluation metrics including J&F-Mean, and references checkpoint file \"CFBIp_r101_davis.pdparams\".",
+        "type": "summary"
+    },
+    "4614": {
+        "file_id": 392,
+        "content": "[简体中文](../../../zh-CN/model_zoo/recognition/cfbi.md) | English\n# CFBI\n---\n## Contents\n- [Introduction](#Introduction)\n- [Data](#Data)\n- [Test](#Test)\n- [Reference](#Reference)\n## Introduction\nCFBI is a Video Object Segmentation model proposed by Baidu in ECCV 2020. This method consider background should be equally treated and thus propose Collaborative video object segmentation by Foreground-Background Integration (CFBI) approach. Our CFBI implicitly imposes the feature embedding from the target foreground object and its corresponding background to be contrastive, promoting the segmentation results accordingly.  Given the image and target segmentation of the reference frame (the first frame) and the previous frame, the model will predict the segmentation of the current frame.\n<div align=\"center\">\n<img src=\"../../../images/cfbi.png\" height=400 width=600 hspace='10'/> <br />\n</div>\n## Data\nPlease refer to DAVIS data download and preparation doc [DAVIS-data](../../dataset/davis.md)\n## Test\n- Test scripts:",
+        "type": "code",
+        "location": "/english_documents/model_zoo/segmentation/cfbi.md:1-29"
+    },
+    "4615": {
+        "file_id": 392,
+        "content": "This code describes the CFBI Video Object Segmentation model, proposed by Baidu in ECCV 2020. It considers background as important as foreground and uses collaborative integration for segmentation. The model predicts segmentation of current frames given reference frame and previous frame. Data preparation follows DAVIS guidelines.",
+        "type": "comment"
+    },
+    "4616": {
+        "file_id": 392,
+        "content": "```bash\npython3.7 main.py --test -c configs/segmentation/cfbip_davis.yaml -w CFBIp_davis.pdparams\n```\n- Predicted results will be saved in `result_root`. To get evaluation metrics, please use [davis2017-evaluation tools](https://github.com/davisvideochallenge/davis2017-evaluation).\nMetrics on DAVIS:\n| J&F-Mean | J-Mean | J-Recall | J-Decay | F-Mean | F-Recall | F-Decay | checkpoints |\n| :------: | :-----: | :----: | :----: | :----: | :----: | :----: | :----: |\n| 0.823 | 0.793 | 0.885 | 0.083 | 0.852 | 0.932 | 0.100 | [CFBIp_r101_davis.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/CFBIp_r101_davis.pdparams) |\n## Reference\n- [Collaborative Video Object Segmentation by Foreground-Background Integration](https://arxiv.org/abs/2003.08333), Zongxin Yang, Yunchao Wei, Yi Yang",
+        "type": "code",
+        "location": "/english_documents/model_zoo/segmentation/cfbi.md:31-46"
+    },
+    "4617": {
+        "file_id": 392,
+        "content": "This code is running a segmentation model trained using the \"cfbip_davis.yaml\" configuration file, and testing it with pretrained weights stored in \"CFBIp_davis.pdparams\". The predicted results will be saved to the \"result_root\" directory. Evaluation metrics for this model on DAVIS dataset are provided, including J&F-Mean, J-Mean, J-Recall, J-Decay, F-Mean, F-Recall and F-Decay. The checkpoint file is referenced as \"CFBIp_r101_davis.pdparams\" which can be found at the provided URL.",
+        "type": "comment"
+    },
+    "4618": {
+        "file_id": 393,
+        "content": "/english_documents/model_zoo/segmentation/mstcn.md",
+        "type": "filepath"
+    },
+    "4619": {
+        "file_id": 393,
+        "content": "This code trains and evaluates the MS-TCN video action segmentation model using provided datasets, compares performance with PaddleVideo's MSTCN, exports inference models, uses metrics like accuracy and F1 score, and runs with GPU usage enabled.",
+        "type": "summary"
+    },
+    "4620": {
+        "file_id": 393,
+        "content": "[简体中文](../../../zh-CN/model_zoo/segmentation/mstcn.md) | English\n# MS-TCN : Video Action Segmentation Model\n---\n## Contents\n- [Introduction](#Introduction)\n- [Data](#Data)\n- [Train](#Train)\n- [Test](#Test)\n- [Inference](#Inference)\n- [Reference](#Reference)\n## Introduction\nMs-tcn model is a classic model of video motion segmentation model, which was published on CVPR in 2019. We optimized the officially implemented pytorch code and obtained higher precision results in paddlevideo.\n<p align=\"center\">\n<img src=\"../../../images/mstcn.PNG\" height=300 width=400 hspace='10'/> <br />\nMS-TCN Overview\n</p>\n## Data\nMS-TCN can choose 50salads, breakfast, gtea as trianing set. Please refer to Video Action Segmentation dataset download and preparation doc [Video Action Segmentation dataset](../../dataset/SegmentationDataset.md)\n## Train\nAfter prepare dataset, we can run sprits.\n```bash\n# gtea dataset\nexport CUDA_VISIBLE_DEVICES=3\npython3.7 main.py  --validate -c configs/segmentation/ms_tcn/ms_tcn_gtea.yaml --seed 1538574472",
+        "type": "code",
+        "location": "/english_documents/model_zoo/segmentation/mstcn.md:1-35"
+    },
+    "4621": {
+        "file_id": 393,
+        "content": "Introduction: MS-TCN model for video motion segmentation was published in 2019 and optimized for higher precision results in PaddleVideo.\nData: Choose from 50salads, breakfast, gtea datasets for training. Refer to Video Action Segmentation dataset download and preparation doc.\nTrain: After preparing the dataset, run scripts with provided command example.",
+        "type": "comment"
+    },
+    "4622": {
+        "file_id": 393,
+        "content": "```\n- Start the training by using the above command line or script program. There is no need to use the pre training model. The video action segmentation model is usually a full convolution network. Due to the different lengths of videos, the `DATASET.batch_size` of the video action segmentation model is usually set to `1`, that is, batch training is not required. At present, only **single sample** training is supported.\n## Test\nTest MS-TCN on dataset scripts:\n```bash\npython main.py  --test -c configs/segmentation/ms_tcn/ms_tcn_gtea.yaml --weights=./output/MSTCN/MSTCN_split_1.pdparams\n```\n- The specific implementation of the index is to calculate ACC, edit and F1 scores by referring to the test script[evel.py](https://github.com/yabufarha/ms-tcn/blob/master/eval.py) provided by the author of ms-tcn.\n- The evaluation method of data set adopts the folding verification method in ms-tcn paper, and the division method of folding is the same as that in ms-tcn paper.\nAccuracy on Breakfast dataset(4 folding verification):",
+        "type": "code",
+        "location": "/english_documents/model_zoo/segmentation/mstcn.md:36-52"
+    },
+    "4623": {
+        "file_id": 393,
+        "content": "The code snippet provides instructions for training and testing the video action segmentation model, specifically MSTCN. It mentions that single sample training is supported, and demonstrates how to test MSTCN on a dataset using the provided command line or script program. Additionally, it explains the evaluation method used for datasets and refers to the author's provided evaluation script.",
+        "type": "comment"
+    },
+    "4624": {
+        "file_id": 393,
+        "content": "| Model | Acc | Edit | F1@0.1 | F1@0.25 | F1@0.5 |\n| :---: | :---: | :---: | :---: | :---: | :---: |\n| paper | 66.3% | 61.7% | 48.1% | 48.1% | 37.9% |\n| paddle | 65.2% | 61.5% | 53.7% | 49.2% | 38.8% |\nAccuracy on 50salads dataset(5 folding verification):\n| Model | Acc | Edit | F1@0.1 | F1@0.25 | F1@0.5 |\n| :---: | :---: | :---: | :---: | :---: | :---: |\n| paper | 80.7% | 67.9% | 76.3% | 74.0% | 64.5% |\n| paddle | 81.1% | 71.5% | 77.9% | 75.5% | 66.5% |\nAccuracy on gtea dataset(4 folding verification):\n| Model | Acc | Edit | F1@0.1 | F1@0.25 | F1@0.5 |\n| :---: | :---: | :---: | :---: | :---: | :---: |\n| paper | 79.2% | 81.4% | 87.5% | 85.4% | 74.6% |\n| paddle | 76.9% | 81.8% | 86.4% | 84.7% | 74.8% |\nModel weight for gtea\nTest_Data| F1@0.5 | checkpoints |\n| :----: | :----: | :---- |\n| gtea_split1 | 70.2509 | [MSTCN_gtea_split_1.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/MSTCN_gtea_split_1.pdparams) |\n| gtea_split2 | 70.7224 | [MSTCN_gtea_split_2.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/MSTCN_gtea_split_2.pdparams) |",
+        "type": "code",
+        "location": "/english_documents/model_zoo/segmentation/mstcn.md:54-78"
+    },
+    "4625": {
+        "file_id": 393,
+        "content": "This table compares the performance of a paper model and PaddleVideo's MSTCN model on different datasets. The metrics include accuracy (Acc), edit distance, and F1 score (F1@0.1, F1@0.25, F1@0.5). The models are validated with 5-fold cross-validation on the 50salads dataset and 4-fold on the gtea dataset. The provided checkpoints are for gtea dataset splits.",
+        "type": "comment"
+    },
+    "4626": {
+        "file_id": 393,
+        "content": "| gtea_split3 | 80.0 | [MSTCN_gtea_split_3.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/MSTCN_gtea_split_3.pdparams) |\n| gtea_split4 | 78.1609 | [MSTCN_gtea_split_4.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/MSTCN_gtea_split_4.pdparams) |\n## Infer\n### export inference model\n```bash\npython3.7 tools/export_model.py -c configs/segmentation/ms_tcn/ms_tcn_gtea.yaml \\\n                                -p data/MSTCN_gtea_split_1.pdparams \\\n                                -o inference/MSTCN\n```\nTo get model architecture file `MSTCN.pdmodel` and parameters file `MSTCN.pdiparams`, use:\n- Args usage please refer to [Model Inference](https://github.com/PaddlePaddle/PaddleVideo/blob/release/2.0/docs/zh-CN/start.md#2-%E6%A8%A1%E5%9E%8B%E6%8E%A8%E7%90%86).\n### infer\nInput file are the file list for infering, for example:\n```\nS1_Cheese_C1.npy\nS1_CofHoney_C1.npy\nS1_Coffee_C1.npy\nS1_Hotdog_C1.npy\n...\n```\n```bash\npython3.7 tools/predict.py --input_file data/gtea/splits/test.split1.bundle \\",
+        "type": "code",
+        "location": "/english_documents/model_zoo/segmentation/mstcn.md:79-108"
+    },
+    "4627": {
+        "file_id": 393,
+        "content": "This code provides instructions for exporting and using an inference model. The `export_model.py` script is used to create the architecture file (`MSTCN.pdmodel`) and parameters file (`MSTCN.pdiparams`). These files can be obtained by running the script with the given configuration file, pre-trained parameters file path, and output directory. The inference process involves providing a list of input files in the format `S1_<item>_C1.npy`. To execute the inference, run the `predict.py` script with the input file list as an argument.",
+        "type": "comment"
+    },
+    "4628": {
+        "file_id": 393,
+        "content": "                           --config configs/segmentation/ms_tcn/ms_tcn_gtea.yaml \\\n                           --model_file inference/MSTCN/MSTCN.pdmodel \\\n                           --params_file inference/MSTCN/MSTCN.pdiparams \\\n                           --use_gpu=True \\\n                           --use_tensorrt=False\n```\nexample of logs:\n```bash\nresult write in : ./inference/infer_results/S1_Cheese_C1.txt\nresult write in : ./inference/infer_results/S1_CofHoney_C1.txt\nresult write in : ./inference/infer_results/S1_Coffee_C1.txt\nresult write in : ./inference/infer_results/S1_Hotdog_C1.txt\nresult write in : ./inference/infer_results/S1_Pealate_C1.txt\nresult write in : ./inference/infer_results/S1_Peanut_C1.txt\nresult write in : ./inference/infer_results/S1_Tea_C1.txt\n```\n## Reference\n- [MS-TCN: Multi-Stage Temporal Convolutional Network for Action Segmentation](https://arxiv.org/pdf/1903.01945.pdf), Y. Abu Farha and J. Gall.",
+        "type": "code",
+        "location": "/english_documents/model_zoo/segmentation/mstcn.md:109-130"
+    },
+    "4629": {
+        "file_id": 393,
+        "content": "The code is specifying the configuration file, model file, and parameter file for running the MSTCN (Multi-Stage Temporal Convolutional Network) segmentation model. It also sets the GPU usage to True and TensorRT to False.\nExample logs show the results being written into respective text files in the inference/infer_results folder.",
+        "type": "comment"
+    },
+    "4630": {
+        "file_id": 394,
+        "content": "/english_documents/quick_start.md",
+        "type": "filepath"
+    },
+    "4631": {
+        "file_id": 394,
+        "content": "PaddleVideo Quick Start guide covers installation, usage details, and action recognition model for classifying video files. Highlights top-5 classes with high confidence using an example command, also suggesting alternative OpenCV installation method.",
+        "type": "summary"
+    },
+    "4632": {
+        "file_id": 394,
+        "content": "English | [简体中文](../zh-CN/quick_start.md)\n# PaddleVide Quick Start\n- [1. Installation](#1)\n  - [1.1 Install PaddlePaddle](#11)\n  - [1.2 Install PaddleVideo Whl Package](#12)\n- [2. Easy-to-Use](#2)\n  - [2.1 Use by Command Line](#21)\n  - [2.2 Use by Python Code](#22)\n- [3. Arguments description](#3)\n- [4.QA](#4)\n## 1. Installation\n<a name=\"11\"></a>\n### 1.1 Install PaddlePaddle\n- If you have CUDA 9 or CUDA 10 installed on your machine, please run the following command to install\n  ```bash\n  python3.7 -m pip install paddlepaddle-gpu -i https://mirror.baidu.com/pypi/simple\n  ```\n- If you have no available GPU on your machine, please run the following command to install the CPU version\n  ```bash\n  python3.7 -m pip install paddlepaddle -i https://mirror.baidu.com/pypi/simple\n  ```\nFor more software version requirements, please refer to the instructions in [Installation Document](https://www.paddlepaddle.org.cn/install/quick) for operation.\n<a name=\"12\"></a>\n### 1.2 Install PaddleVideo Whl Package\n- option1: use pypi（recommand）",
+        "type": "code",
+        "location": "/english_documents/quick_start.md:1-36"
+    },
+    "4633": {
+        "file_id": 394,
+        "content": "Code is an English version of the Quick Start guide for PaddleVideo. It provides information on how to install the necessary packages, use PaddleVideo by command line and Python code, describes arguments, and answers frequently asked questions. The code also includes instructions for installing PaddlePaddle with or without a GPU, as well as the option to install the PaddleVideo Whl Package from pypi.",
+        "type": "comment"
+    },
+    "4634": {
+        "file_id": 394,
+        "content": "```bash\npip3.7 install ppvideo==2.3.0\n```\n- option2: build and install locally\n```bash\npython3.7 setup.py bdist_wheel\npython3.7 -m pip install dist/ppvideo-2.3.0-py3-none-any.whl\n```\n## 2. Easy-to-Use\n<a name=\"21\"></a>\n### 2.1 Use by Command Line\nRun shell command：\n```bash\nppvideo --model_name='ppTSM_v2' --use_gpu=False --video_file='data/example.avi'\n```\n- This command use `PP-TSM_v2` model to infer `data/example.avi` file in `CPU`.\n- The length of the example video is about 10s. When inference, the video is first divided into 16 segments according to the time axis, then extract one frame from each segment. Finally all frames are combined and feeded into the network.\nResults：\n```\nCurrent video file: data/example.avi\n        top-1 classes: [5]\n        top-1 scores: [1.]\n        top-1 label names: ['archery']\n```\nAs you can see, use `PP-TSM_v2` trained on Kinetics-400 to predict `data/example.avi` video，top1 prediction class_id is `5`, scores is `1.0`, class name is `archery`.\n<a name=\"22\"></a>\n### 2.2 Use by Python Code",
+        "type": "code",
+        "location": "/english_documents/quick_start.md:38-76"
+    },
+    "4635": {
+        "file_id": 394,
+        "content": "Install package using pip:\n```bash\npip3.7 install ppvideo==2.3.0\n```\nAlternatively, build and install locally:\n```bash\npython3.7 setup.py bdist_wheel\npython3.7 -m pip install dist/ppvideo-2.3.0-py3-none-any.whl\n```\nCommand to use by command line:\n```bash\nppvideo --model_name='ppTSM_v2' --use_gpu=False --video_file='data/example.avi'\n```\nThis command uses PP-TSM_v2 model on CPU for inference on data/example.avi file, divided into 16 segments and frames combined before feeding into network. Results show top-1 prediction class_id as 5, scores as 1.0, and class name as 'archery'.",
+        "type": "comment"
+    },
+    "4636": {
+        "file_id": 394,
+        "content": "Run python code：\n```python\nfrom ppvideo import PaddleVideo\nclas = PaddleVideo(model_name='ppTSM_v2', use_gpu=False)\nvideo_file='data/example.avi'\nclas.predict(video_file)\n```\n- This code use `PP-TSM_v2` model to infer `data/example.avi` file in `CPU`.\nResults:\n```\nCurrent video file: data/example.avi\n        top-1 classes: [5]\n        top-1 scores: [1.]\n        top-1 label names: ['archery']\n```\nAs you can see, use `PP-TSM_v2` trained on Kinetics-400 to predict `data/example.avi` video，top1 prediction class_id is `5`, scores is `1.0`, class name is `archery`.\n<a name=\"3\"></a>\n## 3. Arguments description\n| name | type | description |\n| :---: | :---: | :--- |\n| model_name | str | optional, model name, `'ppTSM'` or `'ppTSM_v2'`. If None, please specify the path of your inference model by args `model_file` and `params_file`. |\n| video_file | str | required, Video file path, supported format: single video file path, or folder containing multiple videos. |\n| use_gpu | bool | whether to use GPU，default True。 |\n| nu",
+        "type": "code",
+        "location": "/english_documents/quick_start.md:78-107"
+    },
+    "4637": {
+        "file_id": 394,
+        "content": "This code uses the PaddleVideo library with the PP-TSM_v2 model for video inference on a CPU. It predicts the top-1 class, score, and label name of the provided 'data/example.avi' video file. The model is trained on Kinetics-400 dataset. Arguments include model name (PP-TSM or PP-TSM_v2), video file path, GPU usage, and other optional parameters.",
+        "type": "comment"
+    },
+    "4638": {
+        "file_id": 394,
+        "content": "m_seg | int | The number of segments used in the TSM model, which is also the number of frames extracted from the video. 8 for `ppTSM`, 16 for `ppTSM_v2`, default 16. |\n| short_size | int |  short size of frame, default 256.|\n| target_size | int | target size of frame, default 224.|\n| model_file | str | optional，inference model(`.pdmodel`)path. |\n| params_file | str | optional, inference modle(`.pdiparams`) path. |\n| batch_size | int | Batch size, default 1.|\n| use_fp16 | bool | whether to use float16，default False.|\n| use_tensorrt | bool| whether to use Tensorrt, default False.|\n| gpu_mem | int | use GPU memory, default 8000.|\n| enable_mkldnn | bool | whether to use MKLDNN, default False.|\n| top_k | int | top_k, default 1. |\n| label_name_path | str | This file consists the relation of class_id and class_name. Default use `data/k400/Kinetics-400_label_list.txt` of Kinetics-400. You can replace it with your own label file. |\ncommand example1：\n```bash\nppvideo --model_name='ppTSM_v2' --num_seg=16 --video_file=\"data/mp4\" --batch_size=2  --top_k=5",
+        "type": "code",
+        "location": "/english_documents/quick_start.md:107-122"
+    },
+    "4639": {
+        "file_id": 394,
+        "content": "The code defines several parameters for the PaddleVideo model including the number of segments, short and target frame sizes, model file paths, batch size, use of float16, TensorRT, MKLDNN, top_k, and label name path. It also provides a command example usage of the model with specified parameters.",
+        "type": "comment"
+    },
+    "4640": {
+        "file_id": 394,
+        "content": "```\nResults：\n```txt\nCurrent video file: data/mp4/example3.avi\n        top-5 classes: [  5 345 311 159 327]\n        top-5 scores: [1.0000000e+00 1.0152016e-11 8.2871061e-14 6.7713670e-14 5.0752070e-14]\n        top-5 label names: ['archery', 'sword_fighting', 'skipping_rope', 'hula_hooping', 'spray_painting']\nCurrent video file: data/mp4/example2.avi\n        top-5 classes: [  5 345 311 159 327]\n        top-5 scores: [1.0000000e+00 1.0152016e-11 8.2871061e-14 6.7713670e-14 5.0752070e-14]\n        top-5 label names: ['archery', 'sword_fighting', 'skipping_rope', 'hula_hooping', 'spray_painting']\nCurrent video file: data/mp4/example.avi\n        top-5 classes: [  5 345 311 159 327]\n        top-5 scores: [1.0000000e+00 1.0152016e-11 8.2871061e-14 6.7713670e-14 5.0752070e-14]\n        top-5 label names: ['archery', 'sword_fighting', 'skipping_rope', 'hula_hooping', 'spray_painting']\nCurrent video file: data/mp4/example1.avi\n        top-5 classes: [  5 345 311 159 327]\n        top-5 scores: [1.0000000e+00 1.0152016e-11 8.2871061e-14 6.7713670e-14 5.0752070e-14]",
+        "type": "code",
+        "location": "/english_documents/quick_start.md:123-142"
+    },
+    "4641": {
+        "file_id": 394,
+        "content": "The code displays the top-5 classes, scores, and label names for five different video files. It shows that the classifier consistently identifies the same top-5 classes with high confidence for each video file, indicating a reliable classification performance.",
+        "type": "comment"
+    },
+    "4642": {
+        "file_id": 394,
+        "content": "        top-5 label names: ['archery', 'sword_fighting', 'skipping_rope', 'hula_hooping', 'spray_painting']\n```\ncommand example1：\n```bash\nppvideo --model_name='ppTSM' --num_seg=8 --video_file=\"data/mp4\" --batch_size=2  --top_k=5\n```\n<a name=\"4\"></a>\n## 4. QA\n1. opecv-python Installation maybe slow, you can try:\n```\npython3.7 -m pip install opencv-python==4.2.0.32 -i https://pypi.doubanio.com/simple\n```",
+        "type": "code",
+        "location": "/english_documents/quick_start.md:143-157"
+    },
+    "4643": {
+        "file_id": 394,
+        "content": "The code provides a list of top-5 label names for PaddleVideo's action recognition model. The command example demonstrates how to run the model with specific parameters, such as the model name, number of video segments, input video file, and batch size. Additionally, it suggests an alternative installation method for OpenCV-python if the regular installation is slow.",
+        "type": "comment"
+    },
+    "4644": {
+        "file_id": 395,
+        "content": "/english_documents/tools.md",
+        "type": "filepath"
+    },
+    "4645": {
+        "file_id": 395,
+        "content": "This code provides usage instructions for various tools in PaddleVideo. It shows how to retrieve model parameters, calculate FLOPs, and test an exported model (coming soon). The code examples use Python 3.7 and require specific configuration files.",
+        "type": "summary"
+    },
+    "4646": {
+        "file_id": 395,
+        "content": "[简体中文](../zh-CN/tools.md) | English\n# Tools\nThis page includes the usage of some useful tools in PaddleVideo.\n## Params\nTo get the params of a model.\n```shell\npython3.7 tools/summary.py -c configs/recognization/tsm/tsm.yaml\n```\n## FLOPS\nto print FLOPs.\n```shell\npython3.7 tools/summary.py -c configs/recognization/tsm/tsm.yaml --FLOPs\n```\n## Test the export model <sup>coming soon</sup>",
+        "type": "code",
+        "location": "/english_documents/tools.md:1-22"
+    },
+    "4647": {
+        "file_id": 395,
+        "content": "This code provides usage instructions for various tools in PaddleVideo. It shows how to retrieve model parameters, calculate FLOPs, and test an exported model (coming soon). The code examples use Python 3.7 and require specific configuration files.",
+        "type": "comment"
+    },
+    "4648": {
+        "file_id": 396,
+        "content": "/english_documents/tutorials/Action Recognition Datasets",
+        "type": "filepath"
+    },
+    "4649": {
+        "file_id": 396,
+        "content": "This code provides a list of useful action recognition datasets along with their respective links for further reference. These datasets are essential for training and evaluating action recognition models, each serving its specific purpose in the field of computer vision.",
+        "type": "summary"
+    },
+    "4650": {
+        "file_id": 396,
+        "content": "Usefull Action Recognition Datasets.\n    AVA,  https://arxiv.org/abs/1705.08421\n    Kinetics, https://arxiv.org/abs/1705.06950\n    YouTube-8M, https://arxiv.org/abs/1609.08675\n    ActivityNet, http://www.cv-foundation.org/openaccess/content_cvpr_2015/html/Heilbron_ActivityNet_A_Large-Scale_2015_CVPR_paper.html\n    Moments in Time, https://arxiv.org/pdf/1801.03150.pdf\n    Charades, https://arxiv.org/abs/1604.01753\n    EPIC-Kitchens, https://arxiv.org/abs/1804.02748\n    THUMOS, https://arxiv.org/abs/1604.06182\n    UCF-101, http://crcv.ucf.edu/papers/UCF101_CRCV-TR-12-01.pdf\n    HMDB51, http://serre-lab.clps.brown.edu/wp-content/uploads/2012/08/Kuehne_etal_iccv11.pdf",
+        "type": "code",
+        "location": "/english_documents/tutorials/Action Recognition Datasets:1-12"
+    },
+    "4651": {
+        "file_id": 396,
+        "content": "This code provides a list of useful action recognition datasets along with their respective links for further reference. These datasets are essential for training and evaluating action recognition models, each serving its specific purpose in the field of computer vision.",
+        "type": "comment"
+    },
+    "4652": {
+        "file_id": 397,
+        "content": "/english_documents/tutorials/Action Recognition Papers",
+        "type": "filepath"
+    },
+    "4653": {
+        "file_id": 397,
+        "content": "This code provides a list of papers on action recognition and video classification, including TSN, SlowFast Networks, X3D, ECO, 3D ResNet, etc. The paper \"Action Recognition with Trajectory-Pooled Deep-Convolutional Descriptors\" presents an efficient method for recognizing actions from video sequences using deep convolutional descriptors and trajectory pooling.",
+        "type": "summary"
+    },
+    "4654": {
+        "file_id": 397,
+        "content": "Useful Papers on Action Recognition and Video Classification.\nTSN: Temporal Segment Networks: Towards Good Practices for Deep Action Recognition, ECCV 2016\nTSM: Temporal Shift Module for Efficient Video Understanding, ICCV 2019\nSlowFast Networks for Video Recognition, ICCV 2019\nNon-local Neural Networks, CVPR 2018\nA Multigrid Method for Efficiently Training Video Models, CVPR2020\nX3D: Progressive Network Expansion for Efficient Video Recognition, CVPR2020\nECO: Efficient Convolutional Network for Online Video Understanding, ECCV 2018\n3D Resnet: Would Mega-scale Datasets Further Enhance Spatiotemporal 3D CNNs, CVPR 2018\nTPN: Temporal Pyramid Network for Action Recognition, CVPR 2020\nEvaNet: Evolving Space-Time Neural Architectures for Videos, ICCV 2019\nRepFlow: Representation Flow for Action Recognition, CVPR 2019\nMARS: Motion-Augmented RGB Stream for Action Recognition, CVPR 2019\nStNet: Local and Global Spatial-Temporal Modeling for Human Action Recognition, AAAI 2019\nAttention Cluster: Purely Attention Based Local Feature Integration for Video Classification",
+        "type": "code",
+        "location": "/english_documents/tutorials/Action Recognition Papers:1-16"
+    },
+    "4655": {
+        "file_id": 397,
+        "content": "This code contains a list of useful papers related to action recognition and video classification, including TSN, TSM, SlowFast Networks, Non-local Neural Networks, X3D, ECO, 3D ResNet, TPN, EvaNet, RepFlow, MARS, StNet, and Attention Cluster.",
+        "type": "comment"
+    },
+    "4656": {
+        "file_id": 397,
+        "content": "NeXtVLAD: An Efficient Neural Network to Aggregate Frame-level Features for Large-scale Video Classification\nC-TCN: Action localization Model by Baidu, the Champion model of ActivityNet 2018\nNeural Graph Matching Networks for Fewshot 3D Action Recognition - M. Guo et al., ECCV2018.  \nTemporal 3D ConvNets using Temporal Transition Layer - A. Diba et al., CVPRW2018.  \nTemporal 3D ConvNets: New Architecture and Transfer Learning for Video Classification - A. Diba et al., arXiv2017.  \nAttentional Pooling for Action Recognition - R. Girdhar and D. Ramanan, NIPS2017.  \nFully Context-Aware Video Prediction - Byeon et al, arXiv2017.  \nHidden Two-Stream Convolutional Networks for Action Recognition - Y. Zhu et al, arXiv2017.  \nDynamic Image Networks for Action Recognition - H. Bilen et al, CVPR2016.   \nLong-term Recurrent Convolutional Networks for Visual Recognition and Description - J. Donahue et al, CVPR2015.  \nDescribing Videos by Exploiting Temporal Structure - L. Yao et al, ICCV2015. \nReal-time Action Recognition with Enhanced Motion Vector CNNs - B. Zhang et al, CVPR2016.  ",
+        "type": "code",
+        "location": "/english_documents/tutorials/Action Recognition Papers:17-28"
+    },
+    "4657": {
+        "file_id": 397,
+        "content": "This code contains references to various research papers in the field of action recognition and video classification, highlighting different models and architectures for these tasks.",
+        "type": "comment"
+    },
+    "4658": {
+        "file_id": 397,
+        "content": "Action Recognition with Trajectory-Pooled Deep-Convolutional Descriptors - L. Wang et al, CVPR2015. ",
+        "type": "code",
+        "location": "/english_documents/tutorials/Action Recognition Papers:29-29"
+    },
+    "4659": {
+        "file_id": 397,
+        "content": "This code refers to a paper titled \"Action Recognition with Trajectory-Pooled Deep-Convolutional Descriptors\" published in CVPR 2015 by authors L. Wang et al. This paper presents a method for action recognition using deep convolutional descriptors and trajectory pooling, offering an efficient approach to analyze and recognize actions from video sequences.",
+        "type": "comment"
+    },
+    "4660": {
+        "file_id": 398,
+        "content": "/english_documents/tutorials/Spatio-Temporal Action Detection Papers",
+        "type": "filepath"
+    },
+    "4661": {
+        "file_id": 398,
+        "content": "Summary: A comprehensive list of notable Spatio-Temporal Action Detection papers and authors from 2015-2017, covering major conferences like ICCV, BMVC, ECCV, and arXiv.",
+        "type": "summary"
+    },
+    "4662": {
+        "file_id": 398,
+        "content": "Usefull Spatio-Temporal Action Detection Papers.\n    A Better Baseline for AVA - R. Girdhar et al., ActivityNet Workshop, CVPR2018.\n    Real-Time End-to-End Action Detection with Two-Stream Networks - A. El-Nouby and G. Taylor, arXiv2018.\n    Human Action Localization with Sparse Spatial Supervision - P. Weinzaepfel et al., arXiv2017.\n    Unsupervised Action Discovery and Localization in Videos - K. Soomro and M. Shah, ICCV2017.\n    Spatial-Aware Object Embeddings for Zero-Shot Localization and Classification of Actions - P. Mettes and C. G. M. Snoek, ICCV2017.\n    Action Tubelet Detector for Spatio-Temporal Action Localization - V. Kalogeiton et al, ICCV2017. \n    Tube Convolutional Neural Network (T-CNN) for Action Detection in Videos - R. Hou et al, ICCV2017. \n    Chained Multi-stream Networks Exploiting Pose, Motion, and Appearance for Action Classification and Detection - M. Zolfaghari et al, ICCV2017. \n    TORNADO: A Spatio-Temporal Convolutional Regression Network for Video Action Proposal - H. Zhu et al., ICCV2017.",
+        "type": "code",
+        "location": "/english_documents/tutorials/Spatio-Temporal Action Detection Papers:1-13"
+    },
+    "4663": {
+        "file_id": 398,
+        "content": "The code provides a list of useful Spatio-Temporal Action Detection papers and their corresponding authors, year of publication, and conference or journal.",
+        "type": "comment"
+    },
+    "4664": {
+        "file_id": 398,
+        "content": "    Online Real time Multiple Spatiotemporal Action Localisation and Prediction - G. Singh et al, ICCV2017. \n    AMTnet: Action-Micro-Tube regression by end-to-end trainable deep architecture - S. Saha et al, ICCV2017.\n    Am I Done? Predicting Action Progress in Videos - F. Becattini et al, BMVC2017.\n    Generic Tubelet Proposals for Action Localization - J. He et al, arXiv2017.\n    Incremental Tube Construction for Human Action Detection - H. S. Behl et al, arXiv2017.\n    Multi-region two-stream R-CNN for action detection - X. Peng and C. Schmid. ECCV2016. \n    Spot On: Action Localization from Pointly-Supervised Proposals - P. Mettes et al, ECCV2016.\n    Deep Learning for Detecting Multiple Space-Time Action Tubes in Videos - S. Saha et al, BMVC2016. \n    Learning to track for spatio-temporal action localization - P. Weinzaepfel et al. ICCV2015.\n    Action detection by implicit intentional motion clustering - W. Chen and J. Corso, ICCV2015.\n    Finding Action Tubes - G. Gkioxari and J. Malik CVPR2015. ",
+        "type": "code",
+        "location": "/english_documents/tutorials/Spatio-Temporal Action Detection Papers:14-24"
+    },
+    "4665": {
+        "file_id": 398,
+        "content": "This code provides a list of notable research papers related to action detection and localization in videos, published between 2015 and 2017. The papers are from various conferences such as ICCV, BMVC, ECCV, and arXiv, demonstrating the advancements made in this field during that period.",
+        "type": "comment"
+    },
+    "4666": {
+        "file_id": 398,
+        "content": "    APT: Action localization proposals from dense trajectories - J. Gemert et al, BMVC2015. \n    Spatio-Temporal Object Detection Proposals - D. Oneata et al, ECCV2014.\n    Action localization with tubelets from motion - M. Jain et al, CVPR2014.\n    Spatiotemporal deformable part models for action detection - Y. Tian et al, CVPR2013. \n    Action localization in videos through context walk - K. Soomro et al, ICCV2015.\n    Fast Action Proposals for Human Action Detection and Search - G. Yu and J. Yuan, CVPR2015. ",
+        "type": "code",
+        "location": "/english_documents/tutorials/Spatio-Temporal Action Detection Papers:25-30"
+    },
+    "4667": {
+        "file_id": 398,
+        "content": "List of papers on action localization and detection in videos.",
+        "type": "comment"
+    },
+    "4668": {
+        "file_id": 399,
+        "content": "/english_documents/tutorials/TSM.md",
+        "type": "filepath"
+    },
+    "4669": {
+        "file_id": 399,
+        "content": "The Temporal Shift Module (TSM) is an efficient video understanding technique that balances performance and efficiency, capturing spatial-temporal features. Suitable for both online and offline videos, it focuses on temporal information and has a simple 2-line implementation.",
+        "type": "summary"
+    },
+    "4670": {
+        "file_id": 399,
+        "content": "# 1. Background&Motivation\nAt present, the video data on the Internet is increasing rapidly, and the time users spend watching short videos and small videos is also increasing rapidly. How to analyze, process and classify the massive video resources quickly and accurately is an urgent problem to be solved. The video understanding technology can analyze the video content in multiple dimensions, understand the video semantics, and automatically classify and label the video, which greatly saves the efficiency of manual audit and costs. At the same time, accurate user recommendation is realized to improve the experience effect.\nIn this paper, we will introduce the classic model **TSM (Temporal Shift Module)** in the field of video understanding, which is proposed by **MIT** and **IBM Watson AI Lab** `Ji Lin, Chuang Gan and Songhan, etc`, to achieve the balance between effeiciency and performance and improve video understanding ability.\nThe most relevant video understanding model to TSM is the **Temporal Segment Network (TSN)** published by Limin Wang",
+        "type": "code",
+        "location": "/english_documents/tutorials/TSM.md:1-5"
+    },
+    "4671": {
+        "file_id": 399,
+        "content": "This code snippet provides background and motivation for TSM (Temporal Shift Module), a classic model in video understanding proposed by MIT and IBM Watson AI Lab. The TSM aims to balance efficiency and performance while improving the ability to analyze video content in various dimensions. It is related to the Temporal Segment Network (TSN) published by Limin Wang.",
+        "type": "comment"
+    },
+    "4672": {
+        "file_id": 399,
+        "content": "a series of works represented such as I3D, S3D and P3D, which carry out end-to-end joint spatial-temporal modeling through 3D convolution. Although this series of works can capture spatial-temporal features, compared with TSN, the transition from 2D convolution to 3D convolution inevitably introduces extra computation. TSM cleverly uses the idea of temporal dimension feature map shift, theoretically achieving the purpose of feature fusion and joint modeling among different frames with zero extra computing overhead compared with TSN.\n**Paper Address:** [Temporal Shift Module for Efficient Video Understanding](https://arxiv.org/pdf/1811.08383v2.pdf)\nLet's have a look at the following example: if the video is played from left to right and then from right to left respectively, the subjects will give different but correct interpretation of the video, indicating that the understanding of the video is strongly dependent on the temporal information of the video. Yes !, It is the motivation why TSM is proposed.",
+        "type": "code",
+        "location": "/english_documents/tutorials/TSM.md:6-10"
+    },
+    "4673": {
+        "file_id": 399,
+        "content": "This code describes the Temporal Shift Module (TSM), which is a method for efficient video understanding that avoids extra computation by using temporal dimension feature map shift. It is based on the concept of capturing spatial-temporal features, with a focus on temporal information in videos. This approach aims to achieve feature fusion and joint modeling among different frames without adding extra computational overhead compared to TSN.",
+        "type": "comment"
+    },
+    "4674": {
+        "file_id": 399,
+        "content": "<p align=\"center\">\n<img src=\"../../images/temporal.png\" height=188 width=500 hspace='10'/> <br />\n</p>\nIt looks interesting, next,let's dive into the core modules of TSM.\n# 2. Dark technologies used in TSM\nOn the basis of traditional image analysis, video analysis needs researchers to supplement the modeling structure of temporal information. At present, 2D CNN and 3D CNN are the two most commonly used methods in video understanding: using 2D CNN model requires less computation but will lose part of the time information; While using 3D CNN has a good effect but a large amount of computation. Faced with such a situation, Ji Lin, Chuang Gan and Song Han et al. from MIT and IBM Watson AI Lab proposed the Temp Shift Module (TSM) Module. By embedding the time displacement module into 2D CNN, they can easily achieve the same video understanding ability as 3D CNN without adding any additional calculation and parameters.\n<p align=\"center\">\n<img src=\"../../images/tsm_intr.png\" height=188 width=500 hspace='10'/> <br />",
+        "type": "code",
+        "location": "/english_documents/tutorials/TSM.md:11-21"
+    },
+    "4675": {
+        "file_id": 399,
+        "content": "The code is an introduction to Temporal Shift Module (TSM) in video understanding, highlighting the trade-offs between 2D and 3D CNN methods, and how TSM embeds time displacement into 2D CNN for equivalent performance without additional computation or parameters.",
+        "type": "comment"
+    },
+    "4676": {
+        "file_id": 399,
+        "content": "</p>\nThe rows and columns of the matrix in the figure above represent the temporal and channel dimensions of the feature graph, respectively. In TSM module, some channels are moved forward one step int the temporal dimension, and some channels are moved backward one step in the temporal dimension, and the gaps after the displacement are zeroed. In this way, context interaction on the temporal dimension is introduced into the feature graph. The channel movement operation can make the current frame contain the channel information of the two adjacent frames. In this way, the 2D convolution operation can directly extract the spatial-temporal information of the video just like the 3D convolution.\nIt improves the modeling ability of the model in time dimension. based on this basis, the researchers further subdivided the module into TSM module suitable for online video and TSM module suitable for offline video.\n<p align=\"center\">\n<img src=\"../../images/tsm_architecture.png\" height=188 width=500 hspace='10'/> <br />",
+        "type": "code",
+        "location": "/english_documents/tutorials/TSM.md:22-27"
+    },
+    "4677": {
+        "file_id": 399,
+        "content": "This code describes the TSM (Temporal Segment Networks) module, which introduces context interaction on the temporal dimension in feature graphs. It does this by moving some channels forward and backward one step in the temporal dimension, filling gaps with zeros. The channel movement allows 2D convolution to extract spatial-temporal information like 3D convolution. This improves model ability in time dimension and has TSM modules suitable for online and offline videos.",
+        "type": "comment"
+    },
+    "4678": {
+        "file_id": 399,
+        "content": "</p>\nBi-Direction TSM module can obtain past and future spatial and temporal information, which is suitable for offline video with high throughput. However, UNI-Direction TSM module is only suitable for low delay online video recognition compared with the present and past spatio-temporal information.\nIn addition, the author also considered the insertion position of TSM modules and compared two TSM insertion methods: **Residual TSM** and **in-place TSM**. The author found that **Residual TSM** could achieve better performance than **in-place TSM**, At the same time, author explained that **in-place TSM** may affect the extraction of spatial information.\n<p align=\"center\">\n<img src=\"../../images/residual_tsm.png\" height=188 width=500 hspace='10'/> <br />\n</p>\nTSM module looks **So Easy!!**, the next question is how to implement ?\n# 3. The core codes of TSM\nNow that the principle is clear, let's look at how the code works. First let's have a look the torch version tsm. Unfortunately, the Torch fr",
+        "type": "code",
+        "location": "/english_documents/tutorials/TSM.md:28-40"
+    },
+    "4679": {
+        "file_id": 399,
+        "content": "Bi-Direction TSM module handles past and future spatial and temporal information, suitable for high throughput offline videos. UNI-Direction TSM is more appropriate for low delay online video recognition. Residual TSM performs better than in-place TSM but may affect spatial information extraction. Torch version tsm implementation to follow.",
+        "type": "comment"
+    },
+    "4680": {
+        "file_id": 399,
+        "content": "amework does not provide an API for TSM, so we will have to do it by ourselves. The code is shown below:\n<p align=\"center\">\n<img src=\"../../images/torch_tsm.png\" height=160 width=500 hspace='10'/> <br />\n</p>\nThis means that you only need to add four lines of code to TSN's codebase then you can **double the accuracy in Something-Something datasets!!** what a simple and efficient model!\nBut...，\n**paddlepaddle** framework take the needs of the majority of users into account and have achieve TSM OP,then users can use it easily.\n<p align=\"center\">\n<img src=\"../../images/tsm_op.png\" height=300 width=400 hspace='10'/> <br />\n</p>\nSo you no longer have to achieve it by yourself, **it cab be called directly!!! , it can be called directly!!! , it can be called directly!!!** The important thing must say three times.\nDo you think that it is the end of the this topic?  **Too young Too simple !!!**\nWe have also optimized it to increase speed by 5 times while reducing memory consumption. See the acceleration documentation [accelerate.md](./accelerate.md) for more information.",
+        "type": "code",
+        "location": "/english_documents/tutorials/TSM.md:40-58"
+    },
+    "4681": {
+        "file_id": 399,
+        "content": "The code demonstrates a TSM model implementation in PaddlePaddle framework, allowing users to achieve Temporal Shift Module (TSM) operations without writing additional code. It significantly improves accuracy and efficiency on Something-Something datasets. The provided images visually explain the TSM implementation and the optimized version (TSM OP). Additionally, the documentation refers users to the acceleration documentation for further information on speeding up the model while reducing memory consumption.",
+        "type": "comment"
+    },
+    "4682": {
+        "file_id": 399,
+        "content": "Let's have a look at how TSM is implemented using **paddlepaddle**:\n`import paddle.nn.functional as F`\n`shifts = F.temporal_shift(inputs, self.num_seg, 1.0 / self.num_seg)`\n**Only two lines codes !!!**, isn't it easy ?\n# Reference\n[1] [Lin Ji , Gan Chuang , Han Song . TSM: Temporal Shift Module for Efficient Video Understanding. arXiv:1811.08383,2018](https://arxiv.org/pdf/1811.08383v2.pdf).\n[2] [Limin Wang, Yuanjun Xiong, Zhe Wang, Yu Qiao, Dahua Lin, Xiaoo Tang,and Luc Van Gool. Temporal segment networks for action recognition in videos? In Proceedings of the European Conference on Computer Vision,pages 20–36. Springer, 2016](https://arxiv.org/abs/1608.00859).",
+        "type": "code",
+        "location": "/english_documents/tutorials/TSM.md:60-73"
+    },
+    "4683": {
+        "file_id": 399,
+        "content": "The provided code demonstrates an implementation of the Temporal Shift Module (TSM) in PaddlePaddle. It only requires two lines of code and uses the `temporal_shift` function from `paddle.nn.functional`. This makes it easy to implement the TSM for efficient video understanding, as referenced by Lin Ji et al. and Limin Wang et al.",
+        "type": "comment"
+    },
+    "4684": {
+        "file_id": 400,
+        "content": "/english_documents/tutorials/Temporal Action Detection Papers",
+        "type": "filepath"
+    },
+    "4685": {
+        "file_id": 400,
+        "content": "This code lists three research papers on action detection and localization in videos: Fast Action Proposals, Bag-of-fragments, and Action Localization through Context Walk.",
+        "type": "summary"
+    },
+    "4686": {
+        "file_id": 400,
+        "content": "Usefull Temporal Action Detection Papers. \n    Rethinking the Faster R-CNN Architecture for Temporal Action Localization - Yu-Wei Chao et al., CVPR2018\n    Weakly Supervised Action Localization by Sparse Temporal Pooling Network - Phuc Nguyen et al., CVPR 2018\n    Temporal Deformable Residual Networks for Action Segmentation in Videos - P. Lei and S. Todrovic., CVPR2018.\n    End-to-End, Single-Stream Temporal Action Detection in Untrimmed Videos - Shayamal Buch et al., BMVC 2017\n    Cascaded Boundary Regression for Temporal Action Detection - Jiyang Gao et al., BMVC 2017\n    Temporal Tessellation: A Unified Approach for Video Analysis - Kaufman et al., ICCV2017. \n    Temporal Action Detection with Structured Segment Networks - Y. Zhao et al., ICCV2017. \n    Temporal Context Network for Activity Localization in Videos - X. Dai et al., ICCV2017.\n    Detecting the Moment of Completion: Temporal Models for Localising Action Completion - F. Heidarivincheh et al., arXiv2017.\n    CDC: Convolutional-De-",
+        "type": "code",
+        "location": "/english_documents/tutorials/Temporal Action Detection Papers:1-12"
+    },
+    "4687": {
+        "file_id": 400,
+        "content": "This code is a list of useful temporal action detection papers, each with their respective authors and conference/journal they were published in.",
+        "type": "comment"
+    },
+    "4688": {
+        "file_id": 400,
+        "content": "Convolutional Networks for Precise Temporal Action Localization in Untrimmed Videos - Z. Shou et al, CVPR2017.\n    SST: Single-Stream Temporal Action Proposals - S. Buch et al, CVPR2017.\n    R-C3D: Region Convolutional 3D Network for Temporal Activity Detection - H. Xu et al, arXiv2017. [code] [project web] [PyTorch]\n    DAPs: Deep Action Proposals for Action Understanding - V. Escorcia et al, ECCV2016. \n    Online Action Detection using Joint Classification-Regression Recurrent Neural Networks - Y. Li et al, ECCV2016. \n    Temporal Action Localization in Untrimmed Videos via Multi-stage CNNs - Z. Shou et al, CVPR2016. \n    Fast Temporal Activity Proposals for Efficient Detection of Human Actions in Untrimmed Videos - F. Heilbron et al, CVPR2016. \n    Actionness Estimation Using Hybrid Fully Convolutional Networks - L. Wang et al, CVPR2016. \n    Learning Activity Progression in LSTMs for Activity Detection and Early Detection - S. Ma et al, CVPR2016.\n    End-to-end Learning of Action Detection from Frame Glimpses in Videos - S. Yeung et al, CVPR2016. ",
+        "type": "code",
+        "location": "/english_documents/tutorials/Temporal Action Detection Papers:12-21"
+    },
+    "4689": {
+        "file_id": 400,
+        "content": "This code contains references to various papers on temporal action detection, localization, and understanding in untrimmed videos. It includes papers from different authors and years, with some including PyTorch implementation and project web links.",
+        "type": "comment"
+    },
+    "4690": {
+        "file_id": 400,
+        "content": "    Fast Action Proposals for Human Action Detection and Search - G. Yu and J. Yuan, CVPR2015. \n    Bag-of-fragments: Selecting and encoding video fragments for event detection and recounting - P. Mettes et al, ICMR2015.\n    Action localization in videos through context walk - K. Soomro et al, ICCV2015.",
+        "type": "code",
+        "location": "/english_documents/tutorials/Temporal Action Detection Papers:22-24"
+    },
+    "4691": {
+        "file_id": 400,
+        "content": "This code provides references to three research papers related to action detection and localization in videos: \n1. Fast Action Proposals by Yu & Yuan (CVPR2015), \n2. Bag-of-fragments by Mettes et al. (ICMR2015), and \n3. Action Localization through Context Walk by Soomro et al. (ICCV2015).",
+        "type": "comment"
+    },
+    "4692": {
+        "file_id": 401,
+        "content": "/english_documents/tutorials/accelerate.md",
+        "type": "filepath"
+    },
+    "4693": {
+        "file_id": 401,
+        "content": "This code snippet is providing two links to tutorials, one in English and the other in Simplified Chinese (简体中文). The English tutorial can be accessed at \"../../zh-CN/tutorials/accelerate.md\" and the Chinese one at the current location \"PaddleVideo/english_documents/tutorials/accelerate.md\".",
+        "type": "summary"
+    },
+    "4694": {
+        "file_id": 401,
+        "content": "[简体中文](../../zh-CN/tutorials/accelerate.md) | English",
+        "type": "code",
+        "location": "/english_documents/tutorials/accelerate.md:1-1"
+    },
+    "4695": {
+        "file_id": 401,
+        "content": "This code snippet is providing two links to tutorials, one in English and the other in Simplified Chinese (简体中文). The English tutorial can be accessed at \"../../zh-CN/tutorials/accelerate.md\" and the Chinese one at the current location \"PaddleVideo/english_documents/tutorials/accelerate.md\".",
+        "type": "comment"
+    },
+    "4696": {
+        "file_id": 402,
+        "content": "/english_documents/tutorials/config.md",
+        "type": "filepath"
+    },
+    "4697": {
+        "file_id": 402,
+        "content": "The code demonstrates how PaddleVideo uses Inversion of Control and Dependency Injection for improved modularity, resolving coupling issues through factory classes and configuration files. It creates class instances based on configs and applies design patterns for dependency injection, using a config file for architecture, dataset, pipeline, and optimizer configurations.",
+        "type": "summary"
+    },
+    "4698": {
+        "file_id": 402,
+        "content": "# Configs design\n---\nThis page shows how PaddleVideo use the basic IOC/DI technology to decouple and control the whole framework. It is flexible to increase modularity of this system and make it extensible. At last, we will explain the details of config yaml and script args.\n## Design\nFirst, when we create a new class, it is common to new a instance like:\n```python\nclass TSM():\n    pass\nmodel = TSM(init_attributes)\n```\nwhen more classes are created, the coupling relationship between the calling and called method will increase sharply, obviously, we can create a factory class to solve it, like that:\n```python\nif model_name == \"TSM\":\n    model = TSM()\nelif model_name == \"TSN\":\n    model = TSN()\nelif ...\n```\nand\n```python\noptimizer_cfg = dict(name:\"MOMENTUM\", params: XXX)\nif optimizer_cfg.name = \"MOMENTUM\":\n    optimizer = MOMENTUM(optimizer_cfg.pop(name))\nelif:\n    ...\n```\nmore and more conditions have to be created though. like widly used in the Java or other platforms, we apply ```inversion of control``` and ```Dependency Inversion``` to decuople.",
+        "type": "code",
+        "location": "/english_documents/tutorials/config.md:1-37"
+    },
+    "4699": {
+        "file_id": 402,
+        "content": "This code discusses the use of Inversion of Control (IOC) and Dependency Injection (DI) in PaddleVideo, a framework for video processing. It explains how these techniques help decouple and control the framework, increasing modularity and extensibility. The code demonstrates how traditional class instantiation can lead to coupling issues, and how IOC/DI can solve them by creating factory classes and using configuration files.",
+        "type": "comment"
+    }
+}

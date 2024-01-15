@@ -1,0 +1,20 @@
+{
+    "summary": "The CTRGCNHead class is a neural network head for the CTR-GCN model in PaddleVideo library, containing layers initialization, weight initialization, and forward pass function definition. The ctrgcn_head class returns the result of passing input x through a fully connected layer (fc) for feature processing and prediction.",
+    "details": [
+        {
+            "comment": "This code snippet is a part of the PaddleVideo library, specifically the CTRGCNHead class. It is a neural network head for the CTR-GCN model that takes in input feature channels and outputs the number of classes, with an optional dropout ratio. The code imports necessary libraries, registers the class under the HEADS registry, and defines the class itself as part of the BaseHead class.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/paddlevideo/modeling/heads/ctrgcn_head.py\":0-31",
+            "content": "# Copyright (c) 2021  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport math\nimport paddle\nimport paddle.nn as nn\nfrom .base import BaseHead\nfrom ..registry import HEADS\nfrom ..weight_init import weight_init_\n@HEADS.register()\nclass CTRGCNHead(BaseHead):\n    \"\"\"\n    Head for CTR-GCN model.\n    Args:\n        in_channels: int, input feature channels. Default: 64.\n        num_classes: int, output the number of classes.\n        drop_out: float, dropout ratio of layer. Default: 0.\n    \"\"\""
+        },
+        {
+            "comment": "Class constructor for a neural network head with optional dropout. Initializes layers, applies weight initialization, and defines the forward pass function.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/paddlevideo/modeling/heads/ctrgcn_head.py\":33-62",
+            "content": "    def __init__(self, in_channels=64, num_classes=10, drop_out=0, **kwargs):\n        super().__init__(num_classes, in_channels, **kwargs)\n        self.in_channels = in_channels\n        self.drop_out = drop_out\n        self.fc = nn.Linear(self.in_channels * 4, self.num_classes)\n        if drop_out:\n            self.drop_out = nn.Dropout(self.drop_out)\n        else:\n            self.drop_out = lambda x: x\n    def init_weights(self):\n        \"\"\"Initiate the parameters.\n        \"\"\"\n        for layer in self.sublayers():\n            if isinstance(layer, nn.Conv2D):\n                weight_init_(layer.weight,\n                             'Normal',\n                             mean=0.0,\n                             std=math.sqrt(2. / self.num_classes))\n    def forward(self, output_patch):\n        \"\"\"Define how the head is going to run.\n        \"\"\"\n        x, N, M = output_patch\n        # N*M,C,T,V\n        _, c_new, T, V = x.shape\n        x = paddle.reshape(x, shape=[N, M, c_new, T * V])\n        x = x.mean(3).mean(1)\n        x = self.drop_out(x)"
+        },
+        {
+            "comment": "This code snippet is from the ctrgcn_head class, and it returns the result of passing the input x through a fully connected layer (fc). The purpose might be to process the features extracted by the previous layers in the model for making predictions or generating output.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/paddlevideo/modeling/heads/ctrgcn_head.py\":64-64",
+            "content": "        return self.fc(x)"
+        }
+    ]
+}

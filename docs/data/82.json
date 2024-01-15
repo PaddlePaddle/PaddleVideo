@@ -1,0 +1,546 @@
+{
+    "8200": {
+        "file_id": 606,
+        "content": "# copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport paddle\nfrom paddlevideo.utils import get_logger, load\nfrom ..loader.builder import build_dataloader, build_dataset\nfrom ..metrics import build_metric\nfrom ..modeling.builder import build_model\nlogger = get_logger(\"paddlevideo\")\n@paddle.no_grad()\ndef test_model(cfg, weights, parallel=True):\n    \"\"\"Test model entry\n    Args:\n        cfg (dict): configuration.\n        weights (str): weights path to load.\n        parallel (bool): Whether to do multi-cards testing. Default: True.",
+        "type": "code",
+        "location": "/paddlevideo/tasks/test.py:1-32"
+    },
+    "8201": {
+        "file_id": 606,
+        "content": "The code is a Python function for testing a model using PaddlePaddle framework. It takes configuration (cfg) and weights path (weights) as inputs, and allows for parallel processing. The logger captures any log messages from the function execution.",
+        "type": "comment"
+    },
+    "8202": {
+        "file_id": 606,
+        "content": "    \"\"\"\n    if cfg.get('use_npu', False):\n        places = paddle.set_device('npu')\n    elif cfg.get('use_xpu', False):\n        places = paddle.set_device('xpu')\n    else:\n        places = paddle.set_device('gpu')\n    # 1. Construct model.\n    if cfg.MODEL.get('backbone') and cfg.MODEL.backbone.get('pretrained'):\n        cfg.MODEL.backbone.pretrained = ''  # disable pretrain model init\n    model = build_model(cfg.MODEL)\n    if parallel:\n        model = paddle.DataParallel(model)\n    # 2. Construct dataset and dataloader.\n    cfg.DATASET.test.test_mode = True\n    dataset = build_dataset((cfg.DATASET.test, cfg.PIPELINE.test))\n    batch_size = cfg.DATASET.get(\"test_batch_size\", 8)\n    # default num worker: 0, which means no subprocess will be created\n    num_workers = cfg.DATASET.get('num_workers', 0)\n    num_workers = cfg.DATASET.get('test_num_workers', num_workers)\n    dataloader_setting = dict(batch_size=batch_size,\n                              num_workers=num_workers,\n                              places=places,",
+        "type": "code",
+        "location": "/paddlevideo/tasks/test.py:34-61"
+    },
+    "8203": {
+        "file_id": 606,
+        "content": "This code block initializes the model's device, constructs and configures the model, dataset, and dataloader. It also sets test mode and adjusts batch size and number of workers.",
+        "type": "comment"
+    },
+    "8204": {
+        "file_id": 606,
+        "content": "                              drop_last=False,\n                              shuffle=False)\n    data_loader = build_dataloader(\n        dataset, **dataloader_setting) if cfg.model_name not in ['CFBI'\n                                                                 ] else dataset\n    model.eval()\n    state_dicts = load(weights)\n    model.set_state_dict(state_dicts)\n    # add params to metrics\n    cfg.METRIC.data_size = len(dataset)\n    cfg.METRIC.batch_size = batch_size\n    Metric = build_metric(cfg.METRIC)\n    if cfg.MODEL.framework == \"FastRCNN\":\n        Metric.set_dataset_info(dataset.info, len(dataset))\n    for batch_id, data in enumerate(data_loader):\n        if cfg.model_name in [\n                'CFBI'\n        ]:  # for VOS task, dataset for video and dataloader for frames in each video\n            Metric.update(batch_id, data, model)\n        else:\n            outputs = model(data, mode='test')\n            Metric.update(batch_id, data, outputs)\n    Metric.accumulate()",
+        "type": "code",
+        "location": "/paddlevideo/tasks/test.py:62-90"
+    },
+    "8205": {
+        "file_id": 606,
+        "content": "The code builds a dataloader for the dataset, loads state_dicts into the model, and sets up metrics. It then iterates over batches of data from the dataloader to either update the metric directly or get outputs from the model before updating the metric. After processing all batches, it accumulates the final result in the metric.",
+        "type": "comment"
+    },
+    "8206": {
+        "file_id": 607,
+        "content": "/paddlevideo/tasks/train.py",
+        "type": "filepath"
+    },
+    "8207": {
+        "file_id": 607,
+        "content": "The code utilizes PaddlePaddle's Fleet API for distributed training, defines models/metrics, and uses AMP to speed up gradient descent via DataParallel. It logs performance data, evaluates using PaddleVideo, saves the best model/optimizer, and periodically saves state during training.",
+        "type": "summary"
+    },
+    "8208": {
+        "file_id": 607,
+        "content": "# copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport os.path as osp\nimport time\nimport paddle\nimport paddle.amp as amp\nimport paddle.distributed as dist\nimport paddle.distributed.fleet as fleet\nfrom paddlevideo.utils import (add_profiler_step, build_record, get_logger,\n                               load, log_batch, log_epoch, mkdir, save)\nfrom ..loader.builder import build_dataloader, build_dataset\nfrom ..metrics.ava_utils import collect_results_cpu\nfrom ..modeling.builder import build_model",
+        "type": "code",
+        "location": "/paddlevideo/tasks/train.py:1-27"
+    },
+    "8209": {
+        "file_id": 607,
+        "content": "The code imports necessary libraries, defines functions to build data loaders, datasets, models, and metrics using a builder pattern. It also includes functions for logging progress and saving results. The code is licensed under the Apache License 2.0, and it might be part of a larger framework or application dealing with video analysis tasks.",
+        "type": "comment"
+    },
+    "8210": {
+        "file_id": 607,
+        "content": "from ..solver import build_lr, build_optimizer\nfrom ..utils import do_preciseBN\ndef train_model(cfg,\n                weights=None,\n                parallel=True,\n                validate=True,\n                use_amp=False,\n                amp_level=None,\n                max_iters=None,\n                use_fleet=False,\n                profiler_options=None):\n    \"\"\"Train model entry\n    Args:\n        cfg (dict): configuration.\n        weights (str, optional): weights path for finetuning. Defaults to None.\n        parallel (bool, optional): whether multi-cards training. Defaults to True.\n        validate (bool, optional): whether to do evaluation. Defaults to True.\n        use_amp (bool, optional): whether to use automatic mixed precision during training. Defaults to False.\n        amp_level (str, optional): amp optmization level, must be 'O1' or 'O2' when use_amp is True. Defaults to None.\n        max_iters (int, optional): max running iters in an epoch. Defaults to None.\n        use_fleet (bool, optional): whether to use fleet. Defaults to False.",
+        "type": "code",
+        "location": "/paddlevideo/tasks/train.py:28-51"
+    },
+    "8211": {
+        "file_id": 607,
+        "content": "The code defines a train_model function for training the model using given configuration (cfg). It takes optional arguments like weights path, parallel training flag, validation enablement, automatic mixed precision usage, and more.",
+        "type": "comment"
+    },
+    "8212": {
+        "file_id": 607,
+        "content": "        profiler_options (str, optional): configuration for the profiler function. Defaults to None.\n    \"\"\"\n    if use_fleet:\n        fleet.init(is_collective=True)\n    logger = get_logger(\"paddlevideo\")\n    batch_size = cfg.DATASET.get('batch_size', 8)\n    valid_batch_size = cfg.DATASET.get('valid_batch_size', batch_size)\n    # gradient accumulation settings\n    use_gradient_accumulation = cfg.get('GRADIENT_ACCUMULATION', None)\n    if use_gradient_accumulation and dist.get_world_size() >= 1:\n        global_batch_size = cfg.GRADIENT_ACCUMULATION.get(\n            'global_batch_size', None)\n        num_gpus = dist.get_world_size()\n        assert isinstance(\n            global_batch_size, int\n        ), f\"global_batch_size must be int, but got {type(global_batch_size)}\"\n        assert batch_size <= global_batch_size, \\\n            f\"global_batch_size({global_batch_size}) must not be less than batch_size({batch_size})\"\n        cur_global_batch_size = batch_size * num_gpus  # The number of batches calculated by all GPUs at one time",
+        "type": "code",
+        "location": "/paddlevideo/tasks/train.py:52-75"
+    },
+    "8213": {
+        "file_id": 607,
+        "content": "This code sets up gradient accumulation and global batch size for distributed training using PaddlePaddle's Fleet API. It retrieves batch and validation batch sizes from the configuration, then checks if gradient accumulation is enabled and the world size of the distributed setup. If so, it calculates the global batch size based on these settings and asserts that global_batch_size is greater than the current batch size.",
+        "type": "comment"
+    },
+    "8214": {
+        "file_id": 607,
+        "content": "        assert global_batch_size % cur_global_batch_size == 0, \\\n            f\"The global batchsize({global_batch_size}) must be divisible by cur_global_batch_size({cur_global_batch_size})\"\n        cfg.GRADIENT_ACCUMULATION[\n            \"num_iters\"] = global_batch_size // cur_global_batch_size\n        # The number of iterations required to reach the global batchsize\n        logger.info(\n            f\"Using gradient accumulation training strategy, \"\n            f\"global_batch_size={global_batch_size}, \"\n            f\"num_gpus={num_gpus}, \"\n            f\"num_accumulative_iters={cfg.GRADIENT_ACCUMULATION.num_iters}\")\n    if cfg.get('use_npu', False):\n        places = paddle.set_device('npu')\n    elif cfg.get('use_xpu', False):\n        places = paddle.set_device('xpu')\n    else:\n        places = paddle.set_device('gpu')\n    # default num worker: 0, which means no subprocess will be created\n    num_workers = cfg.DATASET.get('num_workers', 0)\n    valid_num_workers = cfg.DATASET.get('valid_num_workers', num_workers)",
+        "type": "code",
+        "location": "/paddlevideo/tasks/train.py:76-96"
+    },
+    "8215": {
+        "file_id": 607,
+        "content": "The code ensures the global batch size is divisible by cur_global_batch_size, sets the number of iterations needed to reach the global batch size, and sets the device type (NPU, XPU, or GPU) based on config values. It also allows for setting the number of workers for training and validation data loading.",
+        "type": "comment"
+    },
+    "8216": {
+        "file_id": 607,
+        "content": "    model_name = cfg.model_name\n    output_dir = cfg.get(\"output_dir\", f\"./output/{model_name}\")\n    mkdir(output_dir)\n    # 1. Construct model\n    model = build_model(cfg.MODEL)\n    if cfg.get('to_static', False):\n        specs = None\n        model = paddle.jit.to_static(model, input_spec=specs)\n        logger.info(\n            \"Successfully to apply @to_static with specs: {}\".format(specs))\n    # 2. Construct dataset and dataloader for training and evaluation\n    train_dataset = build_dataset((cfg.DATASET.train, cfg.PIPELINE.train))\n    train_dataloader_setting = dict(\n        batch_size=batch_size,\n        num_workers=num_workers,\n        collate_fn_cfg=cfg.get('MIX', None),\n        places=places)\n    train_loader = build_dataloader(train_dataset, **train_dataloader_setting)\n    if validate:\n        valid_dataset = build_dataset((cfg.DATASET.valid, cfg.PIPELINE.valid))\n        validate_dataloader_setting = dict(\n            batch_size=valid_batch_size,\n            num_workers=valid_num_workers,\n            places=places,",
+        "type": "code",
+        "location": "/paddlevideo/tasks/train.py:97-124"
+    },
+    "8217": {
+        "file_id": 607,
+        "content": "Code snippet builds a model, creates dataset and dataloader for training and validation, and optionally converts the model to static using Paddle.jit.to_static(). It saves the output in the specified directory and logs if @to_static is applied successfully.",
+        "type": "comment"
+    },
+    "8218": {
+        "file_id": 607,
+        "content": "            drop_last=False,\n            shuffle=cfg.DATASET.get(\n                'shuffle_valid',\n                False)  # NOTE: attention_LSTM needs to shuffle valid data.\n        )\n        valid_loader = build_dataloader(valid_dataset,\n                                        **validate_dataloader_setting)\n    # 3. Construct learning rate scheduler(lr) and optimizer\n    lr = build_lr(cfg.OPTIMIZER.learning_rate, len(train_loader))\n    optimizer = build_optimizer(\n        cfg.OPTIMIZER, lr, model=model, use_amp=use_amp, amp_level=amp_level)\n    # 4. Construct scalar and convert parameters for amp(optional)\n    if use_amp:\n        scaler = amp.GradScaler(\n            init_loss_scaling=2.0**16,\n            incr_every_n_steps=2000,\n            decr_every_n_nan_or_inf=1)\n        # convert model parameters to fp16 when amp_level is O2(pure fp16)\n        model, optimizer = amp.decorate(\n            models=model,\n            optimizers=optimizer,\n            level=amp_level,\n            master_weight=True,\n            save_dtype=None)",
+        "type": "code",
+        "location": "/paddlevideo/tasks/train.py:125-150"
+    },
+    "8219": {
+        "file_id": 607,
+        "content": "This code is setting up a training process for the PaddleVideo framework. It first creates train and validation dataloaders with specified settings, then constructs a learning rate scheduler and optimizer based on provided configurations. Optionally, it converts model parameters to fp16 using AMP if needed.",
+        "type": "comment"
+    },
+    "8220": {
+        "file_id": 607,
+        "content": "        # NOTE: save_dtype is set to float32 now.\n        logger.info(f\"Training in amp mode, amp_level={amp_level}.\")\n    else:\n        assert amp_level is None, f\"amp_level must be None when training in fp32 mode, but got {amp_level}.\"\n        logger.info(\"Training in fp32 mode.\")\n    # 5. Resume(optional)\n    resume_epoch = cfg.get(\"resume_epoch\", 0)\n    if resume_epoch:\n        filename = osp.join(output_dir,\n                            model_name + f\"_epoch_{resume_epoch:05d}\")\n        resume_model_dict = load(filename + '.pdparams')\n        resume_opt_dict = load(filename + '.pdopt')\n        model.set_state_dict(resume_model_dict)\n        optimizer.set_state_dict(resume_opt_dict)\n        logger.info(\"Resume from checkpoint: {}\".format(filename))\n    # 6. Finetune(optional)\n    if weights:\n        assert resume_epoch == 0, f\"Conflict occurs when finetuning, please switch resume function off by setting resume_epoch to 0 or not indicating it.\"\n        model_dict = load(weights)\n        model.set_state_dict(model_dict)",
+        "type": "code",
+        "location": "/paddlevideo/tasks/train.py:151-172"
+    },
+    "8221": {
+        "file_id": 607,
+        "content": "The code checks if training in amp mode or fp32 mode. If in amp mode, it asserts that the amp_level is not None and logs the current level. If in fp32 mode, it asserts that amp_level is None and logs the mode. It then handles optional resume and finetuning steps if specified by loading model weights from a file, setting the model state dictionary to the loaded dictionary, and logging the checkpoint used.",
+        "type": "comment"
+    },
+    "8222": {
+        "file_id": 607,
+        "content": "        logger.info(\"Finetune from checkpoint: {}\".format(weights))\n    # 7. Parallelize(optional)\n    if parallel:\n        model = paddle.DataParallel(model)\n    if use_fleet:\n        model = fleet.distributed_model(model)\n        optimizer = fleet.distributed_optimizer(optimizer)\n    # 8. Train Model\n    best = 0.0\n    for epoch in range(0, cfg.epochs):\n        if epoch < resume_epoch:\n            logger.info(\n                f\"| epoch: [{epoch + 1}] <= resume_epoch: [{resume_epoch}], continue...\"\n            )\n            continue\n        model.train()\n        record_list = build_record(cfg.MODEL)\n        tic = time.time()\n        for i, data in enumerate(train_loader):\n            \"\"\"Next two line of code only used in test_tipc,\n            ignore it most of the time\"\"\"\n            if max_iters is not None and i >= max_iters:\n                break\n            record_list['reader_time'].update(time.time() - tic)\n            # Collect performance information when profiler_options is activate\n            add_profiler_step(profiler_options)",
+        "type": "code",
+        "location": "/paddlevideo/tasks/train.py:173-204"
+    },
+    "8223": {
+        "file_id": 607,
+        "content": "The code finetunes a model from a specified checkpoint. It optionally parallelizes the training process using Paddle's DataParallel API and Fleet distributed computing for further optimization. The code trains the model for a specified number of epochs, continuing from a previous resume_epoch if needed. Performance information is collected when profiler options are activated.",
+        "type": "comment"
+    },
+    "8224": {
+        "file_id": 607,
+        "content": "            # 8.1 forward\n            # AMP #\n            if use_amp:\n                with amp.auto_cast(\n                        custom_black_list={\"reduce_mean\", \"conv3d\"},\n                        level=amp_level):\n                    outputs = model(data, mode='train')\n                avg_loss = outputs['loss']\n                if use_gradient_accumulation:\n                    # clear grad at when epoch begins\n                    if i == 0:\n                        optimizer.clear_grad()\n                    # Loss normalization\n                    avg_loss /= cfg.GRADIENT_ACCUMULATION.num_iters\n                    # Loss scaling\n                    scaled = scaler.scale(avg_loss)\n                    # 8.2 backward\n                    scaled.backward()\n                    # 8.3 minimize\n                    if (i + 1) % cfg.GRADIENT_ACCUMULATION.num_iters == 0:\n                        scaler.minimize(optimizer, scaled)\n                        optimizer.clear_grad()\n                else:  # general case\n                    # Loss scaling",
+        "type": "code",
+        "location": "/paddlevideo/tasks/train.py:206-229"
+    },
+    "8225": {
+        "file_id": 607,
+        "content": "Applies Automatic Mixed Precision (AMP) for faster training, calculates average loss, performs gradient accumulation, and scales backpropagation to reduce memory usage.",
+        "type": "comment"
+    },
+    "8226": {
+        "file_id": 607,
+        "content": "                    scaled = scaler.scale(avg_loss)\n                    # 8.2 backward\n                    scaled.backward()\n                    # 8.3 minimize\n                    scaler.minimize(optimizer, scaled)\n                    optimizer.clear_grad()\n            else:\n                outputs = model(data, mode='train')\n                avg_loss = outputs['loss']\n                if use_gradient_accumulation:\n                    # clear grad at when epoch begins\n                    if i == 0:\n                        optimizer.clear_grad()\n                    # Loss normalization\n                    avg_loss /= cfg.GRADIENT_ACCUMULATION.num_iters\n                    # 8.2 backward\n                    avg_loss.backward()\n                    # 8.3 minimize\n                    if (i + 1) % cfg.GRADIENT_ACCUMULATION.num_iters == 0:\n                        optimizer.step()\n                        optimizer.clear_grad()\n                else:  # general case\n                    # 8.2 backward\n                    avg_loss.backward()",
+        "type": "code",
+        "location": "/paddlevideo/tasks/train.py:230-253"
+    },
+    "8227": {
+        "file_id": 607,
+        "content": "This code calculates the average loss, scales it if necessary, performs backward pass, and applies gradient descent to minimize the loss. If gradient accumulation is used, the gradients are cleared at the start of each epoch and after every accumulated number of iterations.",
+        "type": "comment"
+    },
+    "8228": {
+        "file_id": 607,
+        "content": "                    # 8.3 minimize\n                    optimizer.step()\n                    optimizer.clear_grad()\n            # log record\n            record_list['lr'].update(optimizer.get_lr(), batch_size)\n            for name, value in outputs.items():\n                if name in record_list:\n                    record_list[name].update(value, batch_size)\n            record_list['batch_time'].update(time.time() - tic)\n            tic = time.time()\n            if i % cfg.get(\"log_interval\", 10) == 0:\n                ips = \"ips: {:.5f} instance/sec,\".format(\n                    batch_size / record_list[\"batch_time\"].val)\n                cur_progress = ((i + 1) + epoch * len(train_loader)) / (\n                    len(train_loader) * cfg.epochs)\n                eta = int(record_list[\"batch_time\"].sum *\n                          (1 - cur_progress) / cur_progress + 0.5)\n                log_batch(record_list, i, epoch + 1, cfg.epochs, \"train\", ips,\n                          eta)\n            # learning rate iter step",
+        "type": "code",
+        "location": "/paddlevideo/tasks/train.py:254-277"
+    },
+    "8229": {
+        "file_id": 607,
+        "content": "Optimizer step and gradient clearance followed by logging records, updating logs, calculating instantaneous performance (ips), determining progress and estimated time of arrival (eta), and calling log_batch function.",
+        "type": "comment"
+    },
+    "8230": {
+        "file_id": 607,
+        "content": "            if cfg.OPTIMIZER.learning_rate.get(\"iter_step\"):\n                lr.step()\n        # learning rate epoch step\n        if not cfg.OPTIMIZER.learning_rate.get(\"iter_step\"):\n            lr.step()\n        ips = \"avg_ips: {:.5f} instance/sec.\".format(\n            batch_size * record_list[\"batch_time\"].count /\n            record_list[\"batch_time\"].sum)\n        log_epoch(record_list, epoch + 1, \"train\", ips)\n        def evaluate(best):\n            model.eval()\n            results = []\n            record_list = build_record(cfg.MODEL)\n            record_list.pop('lr')\n            tic = time.time()\n            if parallel:\n                rank = dist.get_rank()\n            # single_gpu_test and multi_gpu_test\n            for i, data in enumerate(valid_loader):\n                \"\"\"Next two line of code only used in test_tipc,\n                ignore it most of the time\"\"\"\n                if max_iters is not None and i >= max_iters:\n                    break\n                if use_amp:\n                    with amp.auto_cast(",
+        "type": "code",
+        "location": "/paddlevideo/tasks/train.py:278-306"
+    },
+    "8231": {
+        "file_id": 607,
+        "content": "This code snippet is from the PaddleVideo library and it contains code for training a model. It uses an optimizer with a learning rate that can be stepped based on whether it's an iterative step or not. After performing an epoch, it logs the average instances per second processed. The code then evaluates the model by setting it to evaluation mode and collecting test results using a record list. It also records the time taken for testing in 'tic'.",
+        "type": "comment"
+    },
+    "8232": {
+        "file_id": 607,
+        "content": "                            custom_black_list={\"reduce_mean\", \"conv3d\"},\n                            level=amp_level):\n                        outputs = model(data, mode='valid')\n                else:\n                    outputs = model(data, mode='valid')\n                if cfg.MODEL.framework == \"FastRCNN\":\n                    results.extend(outputs)\n                # log_record\n                if cfg.MODEL.framework != \"FastRCNN\":\n                    for name, value in outputs.items():\n                        if name in record_list:\n                            record_list[name].update(value, batch_size)\n                record_list['batch_time'].update(time.time() - tic)\n                tic = time.time()\n                if i % cfg.get(\"log_interval\", 10) == 0:\n                    ips = \"ips: {:.5f} instance/sec.\".format(\n                        valid_batch_size / record_list[\"batch_time\"].val)\n                    log_batch(record_list, i, epoch + 1, cfg.epochs, \"val\", ips)\n            if cfg.MODEL.framework == \"FastRCNN\":",
+        "type": "code",
+        "location": "/paddlevideo/tasks/train.py:307-330"
+    },
+    "8233": {
+        "file_id": 607,
+        "content": "This code snippet is from the PaddleVideo library and appears to be handling model training for a specific framework. It calculates outputs, updates records for non-FastRCNN models, logs batch information, and handles FastRCNN-specific operations. The code also includes functionality for updating batch time and logging progress at regular intervals.",
+        "type": "comment"
+    },
+    "8234": {
+        "file_id": 607,
+        "content": "                if parallel:\n                    results = collect_results_cpu(results, len(valid_dataset))\n                if not parallel or (parallel and rank == 0):\n                    eval_res = valid_dataset.evaluate(results)\n                    for name, value in eval_res.items():\n                        record_list[name].update(value, valid_batch_size)\n            ips = \"avg_ips: {:.5f} instance/sec.\".format(\n                valid_batch_size * record_list[\"batch_time\"].count /\n                record_list[\"batch_time\"].sum)\n            log_epoch(record_list, epoch + 1, \"val\", ips)\n            best_flag = False\n            if cfg.MODEL.framework == \"FastRCNN\" and (not parallel or\n                                                      (parallel and rank == 0)):\n                if record_list[\"mAP@0.5IOU\"].val > best:\n                    best = record_list[\"mAP@0.5IOU\"].val\n                    best_flag = True\n                return best, best_flag\n            if cfg.MODEL.framework == \"YOWOLocalizer\" and (not parallel or",
+        "type": "code",
+        "location": "/paddlevideo/tasks/train.py:331-351"
+    },
+    "8235": {
+        "file_id": 607,
+        "content": "Code section checks if parallel processing is enabled, collects results for CPU, and evaluates the dataset. It calculates average instance processing speed and logs it. If using specific models like FastRCNN or YOWOLocalizer, compares current performance metrics with the best values achieved so far and returns them along with a flag indicating if a new best value was found.",
+        "type": "comment"
+    },
+    "8236": {
+        "file_id": 607,
+        "content": "                                                           (parallel and rank == 0)):\n                if record_list[\"fscore\"].avg > best:\n                    best = record_list[\"fscore\"].avg\n                    best_flag = True\n                return best, best_flag\n            # forbest2, cfg.MODEL.framework != \"FastRCNN\":\n            for top_flag in ['hit_at_one', 'top1', 'rmse', \"F1@0.50\"]:\n                if record_list.get(top_flag):\n                    if top_flag != 'rmse' and record_list[top_flag].avg > best:\n                        best = record_list[top_flag].avg\n                        best_flag = True\n                    elif top_flag == 'rmse' and (\n                            best == 0.0 or record_list[top_flag].avg < best):\n                        best = record_list[top_flag].avg\n                        best_flag = True\n            return best, best_flag\n        # use precise bn to improve acc\n        if cfg.get(\"PRECISEBN\") and (\n                epoch % cfg.PRECISEBN.preciseBN_interval == 0",
+        "type": "code",
+        "location": "/paddlevideo/tasks/train.py:352-373"
+    },
+    "8237": {
+        "file_id": 607,
+        "content": "This code is updating the best value and flag based on various metrics (fscore, hit_at_one, top1, rmse, F1@0.50) in a parallel setting with rank 0. It also checks if using precise batch normalization improves accuracy every 'preciseBN_interval' epochs.",
+        "type": "comment"
+    },
+    "8238": {
+        "file_id": 607,
+        "content": "                or epoch == cfg.epochs - 1):\n            do_preciseBN(model, train_loader, parallel,\n                         min(cfg.PRECISEBN.num_iters_preciseBN,\n                             len(train_loader)), use_amp, amp_level)\n        # 9. Validation\n        if validate and (epoch % cfg.get(\"val_interval\", 1) == 0\n                         or epoch == cfg.epochs - 1):\n            with paddle.no_grad():\n                best, save_best_flag = evaluate(best)\n            # save best\n            if save_best_flag:\n                save(optimizer.state_dict(),\n                     osp.join(output_dir, model_name + \"_best.pdopt\"))\n                save_student_model_flag = True if \"Distillation\" in cfg.MODEL.framework else False\n                save(\n                    model.state_dict(),\n                    osp.join(output_dir, model_name + \"_best.pdparams\"),\n                    save_student_model=save_student_model_flag)\n                if model_name == \"AttentionLstm\":\n                    logger.info(\n                        f\"Already save the best model (hit_at_one){best}\")",
+        "type": "code",
+        "location": "/paddlevideo/tasks/train.py:374-395"
+    },
+    "8239": {
+        "file_id": 607,
+        "content": "This code block is responsible for the precise Batch Normalization and validation steps in a deep learning training process. It applies PreciseBN for specific number of iterations, performs validation every \"val_interval\" epochs or at the last epoch, saves best model state if validation accuracy improves, and handles model saving differently depending on the framework used (Distillation vs others).",
+        "type": "comment"
+    },
+    "8240": {
+        "file_id": 607,
+        "content": "                elif cfg.MODEL.framework == \"FastRCNN\":\n                    logger.info(\n                        f\"Already save the best model (mAP@0.5IOU){int(best * 10000) / 10000}\"\n                    )\n                elif cfg.MODEL.framework == \"DepthEstimator\":\n                    logger.info(\n                        f\"Already save the best model (rmse){int(best * 10000) / 10000}\"\n                    )\n                elif cfg.MODEL.framework in ['MSTCN', 'ASRF']:\n                    logger.info(\n                        f\"Already save the best model (F1@0.50){int(best * 10000) / 10000}\"\n                    )\n                elif cfg.MODEL.framework in ['YOWOLocalizer']:\n                    logger.info(\n                        f\"Already save the best model (fsocre){int(best * 10000) / 10000}\"\n                    )\n                else:\n                    logger.info(\n                        f\"Already save the best model (top1 acc){int(best * 10000) / 10000}\"\n                    )\n        # 10. Save model and optimizer",
+        "type": "code",
+        "location": "/paddlevideo/tasks/train.py:396-417"
+    },
+    "8241": {
+        "file_id": 607,
+        "content": "This code block checks the current model framework and logs the metric used to identify the best model saved, followed by saving the best model and optimizer.",
+        "type": "comment"
+    },
+    "8242": {
+        "file_id": 607,
+        "content": "        if epoch % cfg.get(\"save_interval\", 1) == 0 or epoch == cfg.epochs - 1:\n            save(optimizer.state_dict(),\n                 osp.join(output_dir,\n                          model_name + f\"_epoch_{epoch + 1:05d}.pdopt\"))\n            save(model.state_dict(),\n                 osp.join(output_dir,\n                          model_name + f\"_epoch_{epoch + 1:05d}.pdparams\"))\n    logger.info(f'training {model_name} finished')",
+        "type": "code",
+        "location": "/paddlevideo/tasks/train.py:418-426"
+    },
+    "8243": {
+        "file_id": 607,
+        "content": "This code saves the optimizer and model state dictionaries at specific intervals during training. The optimizer state is saved with a .pdopt extension and the model state is saved with a .pdparams extension. This occurs if the current epoch is either divisible by the save_interval or is the final epoch, to preserve progress during training. Finally, it logs that training for the specified model has finished.",
+        "type": "comment"
+    },
+    "8244": {
+        "file_id": 608,
+        "content": "/paddlevideo/tasks/train_dali.py",
+        "type": "filepath"
+    },
+    "8245": {
+        "file_id": 608,
+        "content": "The code sets up libraries, initializes DALI and TSN model, creates a dataloader, builds solver, trains model with optimization steps, logs performance metrics, updates learning rates, supports resuming training/finetuning, and saves states at intervals.",
+        "type": "summary"
+    },
+    "8246": {
+        "file_id": 608,
+        "content": "# copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport time\nimport os.path as osp\nimport paddle\nfrom ..modeling.builder import build_model\nfrom ..solver import build_lr, build_optimizer\nfrom ..utils import do_preciseBN\nfrom paddlevideo.utils import get_logger, coloring\nfrom paddlevideo.utils import (AverageMeter, build_record, log_batch, log_epoch,\n                               save, load, mkdir)\nfrom paddlevideo.loader import TSN_Dali_loader, get_input_data",
+        "type": "code",
+        "location": "/paddlevideo/tasks/train_dali.py:1-25"
+    },
+    "8247": {
+        "file_id": 608,
+        "content": "This code imports necessary libraries and modules, sets up licenses, and imports functions from other files for model building, solver configuration, and additional utility functions. It also defines a loader for TSN-Dali dataset and functions for input data preparation.",
+        "type": "comment"
+    },
+    "8248": {
+        "file_id": 608,
+        "content": "\"\"\"\nWe only supported DALI training for TSN model now.\n\"\"\"\ndef train_dali(cfg, weights=None, parallel=True):\n    \"\"\"Train model entry\n    Args:\n    \tcfg (dict): configuration.\n        weights (str): weights path for finetuning.\n    \tparallel (bool): Whether multi-cards training. Default: True.\n    \"\"\"\n    logger = get_logger(\"paddlevideo\")\n    batch_size = cfg.DALI_LOADER.get('batch_size', 8)\n    places = paddle.set_device('gpu')\n    model_name = cfg.model_name\n    output_dir = cfg.get(\"output_dir\", f\"./output/{model_name}\")\n    mkdir(output_dir)\n    # 1. Construct model\n    model = build_model(cfg.MODEL)\n    if parallel:\n        model = paddle.DataParallel(model)\n    # 2. Construct dali dataloader\n    train_loader = TSN_Dali_loader(cfg.DALI_LOADER).build_dali_reader()\n    # 3. Construct solver.\n    lr = build_lr(cfg.OPTIMIZER.learning_rate, None)\n    optimizer = build_optimizer(cfg.OPTIMIZER, lr, model=model)\n    # Resume\n    resume_epoch = cfg.get(\"resume_epoch\", 0)\n    if resume_epoch:\n        filename = osp.join(output_dir,",
+        "type": "code",
+        "location": "/paddlevideo/tasks/train_dali.py:26-63"
+    },
+    "8249": {
+        "file_id": 608,
+        "content": "This code snippet initializes and trains a DALI (Data Augmentation and Input Pipeline Library) for the TSN model. It first constructs the model, creates a Dali dataloader, builds a solver with specified optimizer and learning rate, and then resumes training from the last checkpoint if provided.",
+        "type": "comment"
+    },
+    "8250": {
+        "file_id": 608,
+        "content": "                            model_name + f\"_epoch_{resume_epoch:05d}\")\n        resume_model_dict = load(filename + '.pdparams')\n        resume_opt_dict = load(filename + '.pdopt')\n        model.set_state_dict(resume_model_dict)\n        optimizer.set_state_dict(resume_opt_dict)\n    # Finetune:\n    if weights:\n        assert resume_epoch == 0, f\"Conflict occurs when finetuning, please switch resume function off by setting resume_epoch to 0 or not indicating it.\"\n        model_dict = load(weights)\n        model.set_state_dict(model_dict)\n    # 4. Train Model\n    for epoch in range(0, cfg.epochs):\n        if epoch < resume_epoch:\n            logger.info(\n                f\"| epoch: [{epoch+1}] <= resume_epoch: [{ resume_epoch}], continue... \"\n            )\n            continue\n        model.train()\n        record_list = build_record(cfg.MODEL)\n        tic = time.time()\n        for i, data in enumerate(train_loader):\n            data = get_input_data(data)\n            record_list['reader_time'].update(time.time() - tic)",
+        "type": "code",
+        "location": "/paddlevideo/tasks/train_dali.py:64-88"
+    },
+    "8251": {
+        "file_id": 608,
+        "content": "This code snippet is part of a model training pipeline. It first checks if the resume_epoch is 0 or if weights are provided for finetuning, then loads and sets the corresponding state dictionaries for the model and optimizer. The model is trained for specified epochs, with the option to continue from a previous epoch or start from scratch depending on the resume_epoch and weights inputs. It also records reader time during training loop iterations.",
+        "type": "comment"
+    },
+    "8252": {
+        "file_id": 608,
+        "content": "            # 4.1 forward\n            outputs = model(data, mode='train')\n            # 4.2 backward\n            avg_loss = outputs['loss']\n            avg_loss.backward()\n            # 4.3 minimize\n            optimizer.step()\n            optimizer.clear_grad()\n            # log record\n            record_list['lr'].update(optimizer._global_learning_rate(),\n                                     batch_size)\n            for name, value in outputs.items():\n                record_list[name].update(value, batch_size)\n            record_list['batch_time'].update(time.time() - tic)\n            tic = time.time()\n            if i % cfg.get(\"log_interval\", 10) == 0:\n                ips = \"ips: {:.5f} instance/sec.\".format(\n                    batch_size / record_list[\"batch_time\"].val)\n                log_batch(record_list, i, epoch + 1, cfg.epochs, \"train\", ips)\n            # learning rate iter step\n            if cfg.OPTIMIZER.learning_rate.get(\"iter_step\"):\n                lr.step()\n        # learning rate epoch step",
+        "type": "code",
+        "location": "/paddlevideo/tasks/train_dali.py:89-116"
+    },
+    "8253": {
+        "file_id": 608,
+        "content": "This code is training a model. It performs forward, backward pass, and optimization steps before logging performance metrics and updating learning rates. The model takes input data and calculates outputs in 'train' mode. Then, it calculates the average loss from the outputs. Next, it updates gradients using backward propagation, optimizes the model with step and clears gradients. It records log information such as learning rate and batch time for later analysis. The code also checks if there is an interval in the training to log current metrics and provides an instance per second rate (ips) as performance indicator. Lastly, it updates learning rates using both iteration steps and epoch steps, based on configuration settings.",
+        "type": "comment"
+    },
+    "8254": {
+        "file_id": 608,
+        "content": "        if not cfg.OPTIMIZER.learning_rate.get(\"iter_step\"):\n            lr.step()\n        ips = \"ips: {:.5f} instance/sec.\".format(\n            batch_size * record_list[\"batch_time\"].count /\n            record_list[\"batch_time\"].sum)\n        log_epoch(record_list, epoch + 1, \"train\", ips)\n        # use precise bn to improve acc\n        if cfg.get(\"PRECISEBN\") and (epoch % cfg.PRECISEBN.preciseBN_interval\n                                     == 0 or epoch == cfg.epochs - 1):\n            do_preciseBN(\n                model, train_loader, parallel,\n                min(cfg.PRECISEBN.num_iters_preciseBN, len(train_loader)))\n        # 5. Save model and optimizer\n        if epoch % cfg.get(\"save_interval\", 1) == 0 or epoch == cfg.epochs - 1:\n            save(\n                optimizer.state_dict(),\n                osp.join(output_dir,\n                         model_name + f\"_epoch_{epoch+1:05d}.pdopt\"))\n            save(\n                model.state_dict(),\n                osp.join(output_dir,\n                         model_name + f\"_epoch_{epoch+1:05d}.pdparams\"))",
+        "type": "code",
+        "location": "/paddlevideo/tasks/train_dali.py:117-141"
+    },
+    "8255": {
+        "file_id": 608,
+        "content": "This code chunk performs the following actions:\n1. Checks if learning rate should be updated based on iteration count.\n2. Calculates and logs the training instance speed (ips).\n3. Optionally applies precise Batch Normalization (bn) to improve accuracy.\n4. Saves the model's and optimizer's state every 'save_interval' epochs.",
+        "type": "comment"
+    },
+    "8256": {
+        "file_id": 608,
+        "content": "    logger.info(f'training {model_name} finished')",
+        "type": "code",
+        "location": "/paddlevideo/tasks/train_dali.py:143-143"
+    },
+    "8257": {
+        "file_id": 608,
+        "content": "This line logs the completion of training a specific model using the \"logger.info\" function, indicating that the training process for the specified \"model_name\" has ended.",
+        "type": "comment"
+    },
+    "8258": {
+        "file_id": 609,
+        "content": "/paddlevideo/tasks/train_multigrid.py",
+        "type": "filepath"
+    },
+    "8259": {
+        "file_id": 609,
+        "content": "The code prepares the environment for training PaddleVideo models, builds a multigrid configuration, handles device and parallelism, trains the model, optimizes it using specified optimizer, logs progress/learning rate updates, evaluates performance, saves state, and saves model & optimizer.",
+        "type": "summary"
+    },
+    "8260": {
+        "file_id": 609,
+        "content": "# copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport time\nimport os.path as osp\nimport paddle\nimport paddle.distributed as dist\nfrom ..loader.builder import build_dataloader, build_dataset\nfrom ..modeling.builder import build_model\nfrom ..solver import build_lr, build_optimizer\nfrom ..utils import do_preciseBN\nfrom paddlevideo.utils import get_logger, coloring\nfrom paddlevideo.utils import (AverageMeter, build_record, log_batch, log_epoch,\n                               save, load, mkdir)",
+        "type": "code",
+        "location": "/paddlevideo/tasks/train_multigrid.py:1-27"
+    },
+    "8261": {
+        "file_id": 609,
+        "content": "The code snippet is the opening section of the file \"train_multigrid.py\" within the PaddleVideo library. It starts by declaring copyright, licensing information, and importing necessary modules. It also includes functions to build datasets, models, loaders, solvers, and utilities for logging, saving, and loading model parameters and progress. This section sets up the environment for training video models in the PaddleVideo framework.",
+        "type": "comment"
+    },
+    "8262": {
+        "file_id": 609,
+        "content": "from paddlevideo.utils.multigrid import MultigridSchedule, aggregate_sub_bn_stats, subn_load, subn_save, is_eval_epoch\ndef construct_loader(cfg, places, validate, precise_bn, num_iters_precise_bn,\n                     world_size):\n    batch_size = cfg.DATASET.get('batch_size', 2)\n    train_dataset = build_dataset((cfg.DATASET.train, cfg.PIPELINE.train))\n    precise_bn_dataloader_setting = dict(\n        batch_size=batch_size,\n        num_workers=cfg.DATASET.get('num_workers', 0),\n        places=places,\n    )\n    if precise_bn:\n        cfg.DATASET.train.num_samples_precise_bn = num_iters_precise_bn * batch_size * world_size\n        precise_bn_dataset = build_dataset((cfg.DATASET.train,\n                                            cfg.PIPELINE.train))\n        precise_bn_loader = build_dataloader(precise_bn_dataset,\n                                             **precise_bn_dataloader_setting)\n        cfg.DATASET.train.num_samples_precise_bn = None\n    else:\n        precise_bn_loader = None\n    if cfg.MULTIGRID.SHORT_CYCLE:",
+        "type": "code",
+        "location": "/paddlevideo/tasks/train_multigrid.py:28-50"
+    },
+    "8263": {
+        "file_id": 609,
+        "content": "This function constructs data loaders for training a model with the multigrid approach. It takes several arguments including configuration (cfg), places to distribute the data, whether to use precise batch normalization (precise_bn), number of iterations for precise BN (num_iters_precise_bn), and world size. If precise BN is enabled, it adjusts the number of samples in the training dataset, creates a separate loader for precise BN, and sets the adjusted number of samples back to None. If not, it sets the precise BN loader to None. The code also checks if a short cycle multigrid approach is being used.",
+        "type": "comment"
+    },
+    "8264": {
+        "file_id": 609,
+        "content": "        # get batch size list in short cycle schedule\n        bs_factor = [\n            int(\n                round((float(cfg.PIPELINE.train.transform[1]['MultiCrop'][\n                    'target_size']) / (s * cfg.MULTIGRID.default_crop_size))\n                      **2)) for s in cfg.MULTIGRID.short_cycle_factors\n        ]\n        batch_sizes = [\n            batch_size * bs_factor[0],\n            batch_size * bs_factor[1],\n            batch_size,\n        ]\n        train_dataloader_setting = dict(\n            batch_size=batch_sizes,\n            multigrid=True,\n            num_workers=cfg.DATASET.get('num_workers', 0),\n            places=places,\n        )\n    else:\n        train_dataloader_setting = precise_bn_dataloader_setting\n    train_loader = build_dataloader(train_dataset, **train_dataloader_setting)\n    if validate:\n        valid_dataset = build_dataset((cfg.DATASET.valid, cfg.PIPELINE.valid))\n        validate_dataloader_setting = dict(\n            batch_size=batch_size,\n            num_workers=cfg.DATASET.get('num_workers', 0),",
+        "type": "code",
+        "location": "/paddlevideo/tasks/train_multigrid.py:51-77"
+    },
+    "8265": {
+        "file_id": 609,
+        "content": "The code adjusts the batch size in a short cycle schedule based on target image size, multi-grid factors and default crop size. It then sets up a train_dataloader with these batch sizes and other parameters. If validate is True, it also builds a valid_dataset and valid_dataloader with the given configurations.",
+        "type": "comment"
+    },
+    "8266": {
+        "file_id": 609,
+        "content": "            places=places,\n            drop_last=False,\n            shuffle=False)\n        valid_loader = build_dataloader(valid_dataset,\n                                        **validate_dataloader_setting)\n    else:\n        valid_loader = None\n    return train_loader, valid_loader, precise_bn_loader\ndef build_trainer(cfg, places, parallel, validate, precise_bn,\n                  num_iters_precise_bn, world_size):\n    \"\"\"\n    Build training model and its associated tools, including optimizer,\n    dataloaders and meters.\n    Args:\n        cfg (CfgNode): configs.\n    Returns:\n        model: training model.\n        optimizer: optimizer.\n        train_loader: training data loader.\n        val_loader: validatoin data loader.\n        precise_bn_loader: training data loader for computing\n            precise BN.\n    \"\"\"\n    model = build_model(cfg.MODEL)\n    if parallel:\n        model = paddle.DataParallel(model)\n    train_loader, valid_loader, precise_bn_loader = \\\n        construct_loader(cfg,\n                         places,",
+        "type": "code",
+        "location": "/paddlevideo/tasks/train_multigrid.py:78-110"
+    },
+    "8267": {
+        "file_id": 609,
+        "content": "This code is creating training and validation data loaders for a PaddleVideo model. It also builds the model, and if parallelization is enabled, it wraps the model with Paddle's DataParallel API to distribute computation across multiple GPUs. The function returns the trained model, its optimizer, and the various data loaders required for training and validation.",
+        "type": "comment"
+    },
+    "8268": {
+        "file_id": 609,
+        "content": "                         validate,\n                         precise_bn,\n                         num_iters_precise_bn,\n                         world_size,\n                         )\n    lr = build_lr(cfg.OPTIMIZER.learning_rate, len(train_loader))\n    optimizer = build_optimizer(cfg.OPTIMIZER, lr, model=model)\n    return (\n        model,\n        lr,\n        optimizer,\n        train_loader,\n        valid_loader,\n        precise_bn_loader,\n    )\ndef train_model_multigrid(cfg, world_size=1, validate=True):\n    \"\"\"Train model entry\n    Args:\n    \tcfg (dict): configuration.\n    \tparallel (bool): Whether multi-card training. Default: True\n        validate (bool): Whether to do evaluation. Default: False.\n    \"\"\"\n    # Init multigrid.\n    multigrid = None\n    if cfg.MULTIGRID.LONG_CYCLE or cfg.MULTIGRID.SHORT_CYCLE:\n        multigrid = MultigridSchedule()\n        cfg = multigrid.init_multigrid(cfg)\n        if cfg.MULTIGRID.LONG_CYCLE:\n            cfg, _ = multigrid.update_long_cycle(cfg, cur_epoch=0)\n    multi_save_epoch = [i[-1] - 1 for i in multigrid.schedule]",
+        "type": "code",
+        "location": "/paddlevideo/tasks/train_multigrid.py:111-146"
+    },
+    "8269": {
+        "file_id": 609,
+        "content": "This code initializes a multigrid training configuration and builds the model, learning rate, optimizer, and loaders for training, validation, and precise Batch Normalization. It also includes an optional multigrid schedule for long or short cycles if specified in the configuration.",
+        "type": "comment"
+    },
+    "8270": {
+        "file_id": 609,
+        "content": "    parallel = world_size != 1\n    logger = get_logger(\"paddlevideo\")\n    batch_size = cfg.DATASET.get('batch_size', 2)\n    if cfg.get('use_npu', False):\n        places = paddle.set_device('npu')\n    elif cfg.get('use_xpu', False):\n        places = paddle.set_device('xpu')\n    else:\n        places = paddle.set_device('gpu')\n    model_name = cfg.model_name\n    output_dir = cfg.get(\"output_dir\", f\"./output/{model_name}\")\n    mkdir(output_dir)\n    local_rank = dist.ParallelEnv().local_rank\n    precise_bn = cfg.get(\"PRECISEBN\")\n    num_iters_precise_bn = cfg.PRECISEBN.num_iters_preciseBN\n    # 1. Construct model\n    model = build_model(cfg.MODEL)\n    if parallel:\n        model = paddle.DataParallel(model)\n    # 2. Construct dataloader\n    train_loader, valid_loader, precise_bn_loader = \\\n        construct_loader(cfg,\n                         places,\n                         validate,\n                         precise_bn,\n                         num_iters_precise_bn,\n                         world_size,\n                         )",
+        "type": "code",
+        "location": "/paddlevideo/tasks/train_multigrid.py:148-179"
+    },
+    "8271": {
+        "file_id": 609,
+        "content": "This code sets the device (npu, xpu or gpu) based on configuration and creates the model, dataloaders for training, validation, and precise BN if needed. It also initializes a logger and handles distributed training using parallel models and dataloaders.",
+        "type": "comment"
+    },
+    "8272": {
+        "file_id": 609,
+        "content": "    # 3. Construct optimizer\n    lr = build_lr(cfg.OPTIMIZER.learning_rate, len(train_loader))\n    optimizer = build_optimizer(\n        cfg.OPTIMIZER, lr, parameter_list=model.parameters())\n    # Resume\n    resume_epoch = cfg.get(\"resume_epoch\", 0)\n    if resume_epoch:\n        filename = osp.join(\n            output_dir,\n            model_name + str(local_rank) + '_' + f\"{resume_epoch:05d}\")\n        subn_load(model, filename, optimizer)\n    # 4. Train Model\n    best = 0.\n    total_epochs = int(cfg.epochs * cfg.MULTIGRID.epoch_factor)\n    for epoch in range(total_epochs):\n        if epoch < resume_epoch:\n            logger.info(\n                f\"| epoch: [{epoch+1}] <= resume_epoch: [{ resume_epoch}], continue... \"\n            )\n            continue\n        if cfg.MULTIGRID.LONG_CYCLE:\n            cfg, changed = multigrid.update_long_cycle(cfg, epoch)\n            if changed:\n                logger.info(\"====== Rebuild model/optimizer/loader =====\")\n                (\n                    model,\n                    lr,",
+        "type": "code",
+        "location": "/paddlevideo/tasks/train_multigrid.py:181-210"
+    },
+    "8273": {
+        "file_id": 609,
+        "content": "Constructing the optimizer, resuming training from a previous checkpoint if specified in the config file, and updating the long cycle configuration for multi-grid training.",
+        "type": "comment"
+    },
+    "8274": {
+        "file_id": 609,
+        "content": "                    optimizer,\n                    train_loader,\n                    valid_loader,\n                    precise_bn_loader,\n                ) = build_trainer(cfg, places, parallel, validate, precise_bn,\n                                  num_iters_precise_bn, world_size)\n                #load checkpoint after re-build model\n                if epoch != 0:\n                    #epoch no need to -1, haved add 1 when save\n                    filename = osp.join(\n                        output_dir,\n                        model_name + str(local_rank) + '_' + f\"{(epoch):05d}\")\n                    subn_load(model, filename, optimizer)\n                #update lr last epoch, not to use saved params\n                lr.last_epoch = epoch\n                lr.step(rebuild=True)\n        model.train()\n        record_list = build_record(cfg.MODEL)\n        tic = time.time()\n        for i, data in enumerate(train_loader):\n            record_list['reader_time'].update(time.time() - tic)\n            # 4.1 forward\n            outputs = model(data, mode='train')",
+        "type": "code",
+        "location": "/paddlevideo/tasks/train_multigrid.py:211-235"
+    },
+    "8275": {
+        "file_id": 609,
+        "content": "The code builds a trainer with specified configurations, optimizer, train and validation loaders. It loads checkpoints if the epoch is not zero and updates the learning rate for the next epoch before training the model on the given data.",
+        "type": "comment"
+    },
+    "8276": {
+        "file_id": 609,
+        "content": "            # 4.2 backward\n            avg_loss = outputs['loss']\n            avg_loss.backward()\n            # 4.3 minimize\n            optimizer.step()\n            optimizer.clear_grad()\n            # log record\n            record_list['lr'].update(\n                float(optimizer._global_learning_rate()), batch_size)\n            for name, value in outputs.items():\n                record_list[name].update(float(value), batch_size)\n            record_list['batch_time'].update(time.time() - tic)\n            tic = time.time()\n            if i % cfg.get(\"log_interval\", 10) == 0:\n                ips = \"ips: {:.5f} instance/sec.\".format(\n                    batch_size / record_list[\"batch_time\"].val)\n                log_batch(record_list, i, epoch + 1, total_epochs, \"train\", ips)\n            # learning rate iter step\n            if cfg.OPTIMIZER.learning_rate.get(\"iter_step\"):\n                lr.step()\n        # learning rate epoch step\n        if not cfg.OPTIMIZER.learning_rate.get(\"iter_step\"):\n            lr.step()",
+        "type": "code",
+        "location": "/paddlevideo/tasks/train_multigrid.py:236-262"
+    },
+    "8277": {
+        "file_id": 609,
+        "content": "Performing backward pass, optimizing using given optimizer, logging progress, and updating learning rate in both iteration step and epoch step.",
+        "type": "comment"
+    },
+    "8278": {
+        "file_id": 609,
+        "content": "        ips = \"ips: {:.5f} instance/sec.\".format(\n            batch_size * record_list[\"batch_time\"].count /\n            record_list[\"batch_time\"].sum)\n        log_epoch(record_list, epoch + 1, \"train\", ips)\n        def evaluate(best):\n            model.eval()\n            record_list = build_record(cfg.MODEL)\n            record_list.pop('lr')\n            tic = time.time()\n            for i, data in enumerate(valid_loader):\n                outputs = model(data, mode='valid')\n                # log_record\n                for name, value in outputs.items():\n                    record_list[name].update(float(value), batch_size)\n                record_list['batch_time'].update(time.time() - tic)\n                tic = time.time()\n                if i % cfg.get(\"log_interval\", 10) == 0:\n                    ips = \"ips: {:.5f} instance/sec.\".format(\n                        batch_size / record_list[\"batch_time\"].val)\n                    log_batch(record_list, i, epoch + 1, total_epochs, \"val\",\n                              ips)",
+        "type": "code",
+        "location": "/paddlevideo/tasks/train_multigrid.py:264-288"
+    },
+    "8279": {
+        "file_id": 609,
+        "content": "This code snippet evaluates the model's performance during training and updates the record list with new values. It also logs the progress at certain intervals, displaying the number of instances processed per second (ips). The function 'evaluate' is called to perform this evaluation for each data batch in the valid_loader, updating the record list accordingly.",
+        "type": "comment"
+    },
+    "8280": {
+        "file_id": 609,
+        "content": "            ips = \"ips: {:.5f} instance/sec.\".format(\n                batch_size * record_list[\"batch_time\"].count /\n                record_list[\"batch_time\"].sum)\n            log_epoch(record_list, epoch + 1, \"val\", ips)\n            best_flag = False\n            if record_list.get('top1') and record_list['top1'].avg > best:\n                best = record_list['top1'].avg\n                best_flag = True\n            return best, best_flag\n        # use precise bn to improve acc\n        if is_eval_epoch(cfg, epoch, total_epochs, multigrid.schedule):\n            logger.info(f\"do precise BN in {epoch+1} ...\")\n            do_preciseBN(model, precise_bn_loader, parallel,\n                         min(num_iters_precise_bn, len(precise_bn_loader)))\n        #  aggregate sub_BN stats\n        logger.info(\"Aggregate sub_BatchNorm stats...\")\n        aggregate_sub_bn_stats(model)\n        # 5. Validation\n        if is_eval_epoch(cfg, epoch, total_epochs, multigrid.schedule):\n            logger.info(f\"eval in {epoch+1} ...\")",
+        "type": "code",
+        "location": "/paddlevideo/tasks/train_multigrid.py:290-313"
+    },
+    "8281": {
+        "file_id": 609,
+        "content": "The code calculates the instantaneous processing speed (ips) and checks if a new best performance has been achieved. It then logs this information. If it's an evaluation epoch, it performs precise batch normalization, aggregates sub-batch normalization stats, and validates the model.",
+        "type": "comment"
+    },
+    "8282": {
+        "file_id": 609,
+        "content": "            with paddle.no_grad():\n                best, save_best_flag = evaluate(best)\n            # save best\n            if save_best_flag:\n                save(optimizer.state_dict(),\n                     osp.join(output_dir, model_name + \"_best.pdopt\"))\n                save(model.state_dict(),\n                     osp.join(output_dir, model_name + \"_best.pdparams\"))\n                logger.info(\n                    f\"Already save the best model (top1 acc){int(best * 10000) / 10000}\"\n                )\n        # 6. Save model and optimizer\n        if is_eval_epoch(\n                cfg, epoch,\n                total_epochs, multigrid.schedule) or epoch % cfg.get(\n                    \"save_interval\", 10) == 0 or epoch in multi_save_epoch:\n            logger.info(\"[Save parameters] ======\")\n            subn_save(output_dir, model_name + str(local_rank) + '_', epoch + 1,\n                      model, optimizer)\n    logger.info(f'training {model_name} finished')",
+        "type": "code",
+        "location": "/paddlevideo/tasks/train_multigrid.py:314-335"
+    },
+    "8283": {
+        "file_id": 609,
+        "content": "The code saves the best model if it outperforms previous results, and periodically saves the current model parameters during training. It uses the evaluate function to measure performance, the save function to store state dictionaries, and the subn_save function for saving models and optimizers at certain epochs. The logger is used for informative messages about saving and training completion.",
+        "type": "comment"
+    },
+    "8284": {
+        "file_id": 610,
+        "content": "/paddlevideo/utils/__init__.py",
+        "type": "filepath"
+    },
+    "8285": {
+        "file_id": 610,
+        "content": "This code imports various functions and classes from different modules within the PaddleVideo library. It also sets up logger and profiler functionality, provides a build function for creating objects, and handles saving and loading data.",
+        "type": "summary"
+    },
+    "8286": {
+        "file_id": 610,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nfrom .registry import Registry\nfrom .build_utils import build\nfrom .config import *\nfrom .logger import setup_logger, coloring, get_logger\nfrom .record import AverageMeter, build_record, log_batch, log_epoch\nfrom .dist_utils import get_dist_info, main_only\nfrom .save_load import save, load, load_ckpt, mkdir\nfrom .precise_bn import do_preciseBN\nfrom .profiler import add_profiler_step\n__all__ = ['Registry', 'build']",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/__init__.py:1-24"
+    },
+    "8287": {
+        "file_id": 610,
+        "content": "This code imports various functions and classes from different modules within the PaddleVideo library. It also sets up logger and profiler functionality, provides a build function for creating objects, and handles saving and loading data.",
+        "type": "comment"
+    },
+    "8288": {
+        "file_id": 611,
+        "content": "/paddlevideo/utils/build_utils.py",
+        "type": "filepath"
+    },
+    "8289": {
+        "file_id": 611,
+        "content": "The \"build\" function takes a config dictionary and registry, constructs an object from the configuration, checks for required keys, retrieves class from the registry, and returns the instance.",
+        "type": "summary"
+    },
+    "8290": {
+        "file_id": 611,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\ndef build(cfg, registry, key='name'):\n    \"\"\"Build a module from config dict.\n    Args:\n        cfg (dict): Config dict. It should at least contain the key.\n        registry (XXX): The registry to search the type from.\n        key (str): the key.\n    Returns:\n        obj: The constructed object.\n    \"\"\"\n    assert isinstance(cfg, dict) and key in cfg\n    cfg_copy = cfg.copy()\n    obj_type = cfg_copy.pop(key)\n    obj_cls = registry.get(obj_type)",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/build_utils.py:1-31"
+    },
+    "8291": {
+        "file_id": 611,
+        "content": "This code defines a function named \"build\" that takes a config dictionary and a registry, builds an object from the given configuration dictionary, and returns it. The function asserts that the input is a valid dictionary and checks if the required key exists. It then retrieves the object type from the dictionary and gets the corresponding class from the registry before returning the constructed object.",
+        "type": "comment"
+    },
+    "8292": {
+        "file_id": 611,
+        "content": "    if obj_cls is None:\n        raise KeyError('{} is not in the {} registry'.format(\n                obj_type, registry.name))\n    return obj_cls(**cfg_copy)",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/build_utils.py:32-35"
+    },
+    "8293": {
+        "file_id": 611,
+        "content": "Checks if an object class is provided, raises a KeyError if not found in the registry, and returns an instance of the found class with provided configuration.",
+        "type": "comment"
+    },
+    "8294": {
+        "file_id": 612,
+        "content": "/paddlevideo/utils/config.py",
+        "type": "filepath"
+    },
+    "8295": {
+        "file_id": 612,
+        "content": "The code imports necessary modules, sets up a logger, creates an AttrDict class for config handling, and defines functions to load, visualize, and override dictionary from YAML file. It also includes 'options' and 'get_config' functions to apply overrides and print or return the updated configuration.",
+        "type": "summary"
+    },
+    "8296": {
+        "file_id": 612,
+        "content": "# copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport os\nimport yaml\nfrom paddlevideo.utils.logger import coloring, get_logger, setup_logger\n__all__ = ['get_config']\nlogger = setup_logger(\"./\", name=\"paddlevideo\", level=\"INFO\")\nclass AttrDict(dict):\n    def __getattr__(self, key):\n        return self[key]\n    def __setattr__(self, key, value):\n        if key in self.__dict__:\n            self.__dict__[key] = value\n        else:\n            self[key] = value\ndef create_attr_dict(yaml_config):",
+        "type": "code",
+        "location": "/paddlevideo/utils/config.py:1-34"
+    },
+    "8297": {
+        "file_id": 612,
+        "content": "The code is importing necessary modules, defining an AttrDict class for config handling and setting up a logger. It also creates a function 'create_attr_dict' that takes in a yaml configuration file as input.",
+        "type": "comment"
+    },
+    "8298": {
+        "file_id": 612,
+        "content": "    from ast import literal_eval\n    for key, value in yaml_config.items():\n        if type(value) is dict:\n            yaml_config[key] = value = AttrDict(value)\n        if isinstance(value, str):\n            try:\n                value = literal_eval(value)\n            except BaseException:\n                pass\n        if isinstance(value, AttrDict):\n            create_attr_dict(yaml_config[key])\n        else:\n            yaml_config[key] = value\ndef parse_config(cfg_file):\n    \"\"\"Load a config file into AttrDict\"\"\"\n    with open(cfg_file, 'r') as fopen:\n        yaml_config = AttrDict(yaml.load(fopen, Loader=yaml.SafeLoader))\n    create_attr_dict(yaml_config)\n    return yaml_config\ndef print_dict(d, delimiter=0):\n    \"\"\"\n    Recursively visualize a dict and\n    indenting acrrording by the relationship of keys.\n    \"\"\"\n    placeholder = \"-\" * 60\n    for k, v in sorted(d.items()):\n        if isinstance(v, dict):\n            logger.info(\"{}{} : \".format(delimiter * \" \", coloring(k,\n                                                                   \"HEADER\")))",
+        "type": "code",
+        "location": "/paddlevideo/utils/config.py:35-67"
+    },
+    "8299": {
+        "file_id": 612,
+        "content": "The code defines two functions: \"parse_config\" and \"print_dict\". The \"parse_config\" function loads a config file into an AttrDict, while the \"print_dict\" function recursively visualizes a dictionary by indenting according to the relationship of keys.",
+        "type": "comment"
+    }
+}

@@ -1,0 +1,548 @@
+{
+    "5300": {
+        "file_id": 444,
+        "content": "        image_location[:num_boxes, :4] = image_location_wp\n        image_location[:, 4] = (image_location[:, 3] - image_location[:, 1]) * (\n            image_location[:, 2] - image_location[:, 0]) / (float(image_w) *\n                                                            float(image_h))\n        image_location[:, 0] = image_location[:, 0] / float(image_w)\n        image_location[:, 1] = image_location[:, 1] / float(image_h)\n        image_location[:, 2] = image_location[:, 2] / float(image_w)\n        image_location[:, 3] = image_location[:, 3] / float(image_h)\n        image_feature = copy.deepcopy(image_feature)\n        image_target = copy.deepcopy(image_target)\n        num_actions = int(num_actions)\n        action_feature[:num_actions] = action_feature_wp\n        action_target[:num_actions] = action_target_wp\n        action_feature = copy.deepcopy(action_feature)\n        action_target = copy.deepcopy(action_target)\n        results = dict(image_feat=image_feature,\n                       image_target=image_target,",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/multimodal.py:60-81"
+    },
+    "5301": {
+        "file_id": 444,
+        "content": "This code segment is responsible for resizing and normalizing the image and action feature coordinates, as well as deep copying the features. It also initializes the results dictionary with keys for image_feat and image_target. This appears to be part of a data preprocessing step in a multimodal pipeline.",
+        "type": "comment"
+    },
+    "5302": {
+        "file_id": 444,
+        "content": "                       caption=caption,\n                       image_loc=image_location,\n                       num_boxes=int(num_boxes),\n                       action_feat=action_feature,\n                       action_target=action_target,\n                       num_actions=int(num_actions),\n                       tokenizer=tokenizer)\n        return results\n@PIPELINES.register()\nclass RandomCap(object):\n    def __init__(self, caption_path):\n        \"\"\"\n        Random Caption for NSP task\n        \"\"\"\n        self.caption_path = caption_path\n    def select_caption(self, caption):\n        captions = caption.split('!')\n        rind = random.randint(0, len(captions) - 1)\n        caption = captions[rind]\n        return caption\n    def get_random_caption(self, all_captions):\n        num_caps = len(all_captions)\n        rand_doc_idx = random.randint(0, num_caps - 1)\n        caption = all_captions[rand_doc_idx]\n        caption = self.select_caption(caption)\n        return caption\n    def random_cap(self, caption, all_captions):",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/multimodal.py:82-113"
+    },
+    "5303": {
+        "file_id": 444,
+        "content": "The code defines a pipeline that randomly selects captions for the NSP task. It takes caption paths as input and returns random captions. The class has an `__init__` method to initialize the caption path, a `select_caption` method to randomly choose one from multiple captions, a `get_random_caption` method to select a random caption from all provided captions, and finally a `random_cap` method that combines these functionalities.",
+        "type": "comment"
+    },
+    "5304": {
+        "file_id": 444,
+        "content": "        if random.random() > 0.5:\n            label = 0\n        else:\n            caption = self.get_random_caption(all_captions)\n            label = 1\n        return caption, label\n    def __call__(self, results):\n        caption = results['caption']\n        all_captions = list(json.load(open(self.caption_path, 'r')))\n        caption = self.select_caption(caption)\n        caption, label = self.random_cap(caption, all_captions)\n        results['caption'] = caption\n        results['is_next'] = label\n        return results\n@PIPELINES.register()\nclass Tokenize(object):\n    def __init__(self, ):\n        \"\"\"\n        Tokenize caption\n        \"\"\"\n        pass\n    def __call__(self, results):\n        caption = results['caption']\n        tokenizer = results['tokenizer']\n        tokens_caption = tokenizer.tokenize(caption)\n        results['caption'] = tokens_caption\n        return results\n@PIPELINES.register()\nclass RandomMask(object):\n    def __init__(self,\n                 max_seq_length=36,\n                 max_action_length=5,",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/multimodal.py:114-151"
+    },
+    "5305": {
+        "file_id": 444,
+        "content": "The code is part of a multi-modal pipeline, where it randomly generates labels (0 or 1) and selects captions from a list. It also includes classes for tokenizing captions and applying random masks on the text data.",
+        "type": "comment"
+    },
+    "5306": {
+        "file_id": 444,
+        "content": "                 max_region_length=36):\n        self.max_seq_length = max_seq_length\n        self.max_action_length = max_action_length\n        self.max_region_length = max_region_length\n    def get_image_global_feature(self, image_feat, image_loc, image_mask):\n        g_image_feat = np.sum(image_feat, axis=0) / np.sum(\n            image_mask, axis=0, keepdims=True)\n        image_feat = np.concatenate(\n            [np.expand_dims(g_image_feat, axis=0), image_feat],\n            axis=0).astype(\"float32\")\n        g_image_loc = np.array([0, 0, 1, 1, 1]).astype(\"float32\")\n        image_loc = np.concatenate(\n            [np.expand_dims(g_image_loc, axis=0), image_loc], axis=0)\n        g_image_mask = np.array([1])\n        image_mask = np.concatenate([g_image_mask, image_mask], axis=0)\n        return image_feat, image_loc, image_mask\n    def _truncate_seq_pair(self, tokens_b, max_length):\n        \"\"\"Truncates a sequence pair in place to the maximum length.\n        This is a simple heuristic which will always truncate the longer sequence",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/multimodal.py:152-175"
+    },
+    "5307": {
+        "file_id": 444,
+        "content": "This code defines a class for loading multimodal data, including images and text, into TensorFlow datasets. The constructor takes the maximum sequence length, action length, and region length as arguments. It also includes functions to generate global image features and truncate a sequence pair if they exceed the maximum length.",
+        "type": "comment"
+    },
+    "5308": {
+        "file_id": 444,
+        "content": "        one token at a time. This makes more sense than truncating an equal percent\n        of tokens from each, since if one sequence is very short then each token\n        that's truncated likely contains more information than a longer sequence.\n        \"\"\"\n        while True:\n            total_length = len(tokens_b)\n            if total_length <= max_length:\n                break\n            tokens_b.pop()\n    def random_word(self, tokens, tokenizer):\n        \"\"\"\n        Masking some random tokens for Language Model task with probabilities as in the original BERT paper.\n        Args:\n            tokens: list of str, tokenized sentence.\n            tokenizer: Tokenizer, object used for tokenization (we need it's vocab here)\n        Return:\n            (list of str, list of int), masked tokens and related labels for LM prediction\n        \"\"\"\n        output_label = []\n        for i, token in enumerate(tokens):\n            prob = random.random()\n            # mask token with 15% probability\n            if prob < 0.15:",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/multimodal.py:176-201"
+    },
+    "5309": {
+        "file_id": 444,
+        "content": "The code is implementing a method to mask random tokens in a sentence for Language Model (LM) tasks. It first ensures that all sequences have equal length by truncating one token at a time from the longer sequence, then randomly masks 15% of the tokens in each sequence. The method also includes logic to handle tokenizer and produces masked tokens along with their related labels for LM prediction.",
+        "type": "comment"
+    },
+    "5310": {
+        "file_id": 444,
+        "content": "                prob /= 0.15\n                # 80% randomly change token to mask token\n                if prob < 0.8:\n                    tokens[i] = \"[MASK]\"\n                # 10% randomly change token to random token\n                elif prob < 0.9:\n                    #tok = random.choice(list(tokenizer.vocab.items()))[0]\n                    tok = tokenizer.vocab.idx_to_token[random.randint(\n                        0,\n                        tokenizer.vocab_size,\n                    )]\n                    tokens[i] = tok\n                # rest 10% randomly keep current token\n                # append current token to output (we will predict these later)\n                try:\n                    output_label.append(tokenizer.vocab[token])\n                except KeyError:\n                    # For unknown words (should not occur with BPE vocab)\n                    output_label.append(tokenizer.vocab[\"[UNK]\"])\n                    print(\n                        \"Cannot find token '{}' in vocab. Using [UNK] insetad\".",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/multimodal.py:202-225"
+    },
+    "5311": {
+        "file_id": 444,
+        "content": "This code modifies tokens in a given input sequence by randomly replacing them with mask tokens, random tokens from the vocabulary, or keeping them unchanged. The probability of each action is controlled by a variable 'prob', which is normalized to ensure the total probability sums up to 1.0. The resulting modified sequence is appended to 'output_label' for further prediction. Additionally, it handles unknown words by replacing them with '[UNK]'.",
+        "type": "comment"
+    },
+    "5312": {
+        "file_id": 444,
+        "content": "                        format(token))\n            else:\n                # no masking token (will be ignored by loss function later)\n                output_label.append(-1)\n        return tokens, output_label\n    def random_region(self, image_feat, image_loc, num_boxes):\n        output_label = []\n        for i in range(num_boxes):\n            prob = random.random()\n            # mask token with 15% probability\n            if prob < 0.15:\n                prob /= 0.15\n                # 80% randomly change token to mask token\n                if prob < 0.9:\n                    image_feat[i] = 0\n                # rest 20% randomly keep current token\n                # append current token to output (we will predict these later)\n                output_label.append(1)\n            else:\n                # no masking token (will be ignored by loss function later)\n                output_label.append(-1)\n        return image_feat, image_loc, output_label\n    def random_action(self, action_feat, action_target, num_actions):",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/multimodal.py:226-255"
+    },
+    "5313": {
+        "file_id": 444,
+        "content": "The code defines three functions: \"random_region\", \"mask_token\", and \"random_action\". These functions are responsible for randomly masking tokens, selecting a random region from an image feature map, and randomly perturbing action features respectively. The random_region function masks 15% of the tokens in the input, while the random_action function perturbs 20% of the action features.",
+        "type": "comment"
+    },
+    "5314": {
+        "file_id": 444,
+        "content": "        output_label = []\n        for i in range(num_actions):\n            prob = random.random()\n            # mask token with 15% probability\n            if prob < 0.15:\n                prob /= 0.15\n                # 90% randomly change token to mask token\n                if prob < 0.9:\n                    action_feat[i] = 0\n                # rest 10% randomly keep current token\n                # append current token to output (we will predict these later)\n                output_label.append(action_target[i])\n            else:\n                # no masking token (will be ignored by loss function later)\n                output_label.append(-1)\n        return action_feat, output_label\n    def __call__(self, results):\n        caption = results['caption']\n        tokenizer = results['tokenizer']\n        image_feat = results['image_feat']\n        image_loc = results['image_loc']\n        num_boxes = results['num_boxes']\n        action_feat = results['action_feat']\n        action_target = results['action_target']\n        num_actions = results['num_actions']",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/multimodal.py:256-285"
+    },
+    "5315": {
+        "file_id": 444,
+        "content": "This code defines a function that applies random masking to an input sequence of actions. It randomly chooses to either replace 90% of the tokens with mask tokens, keep them unchanged (10%), or ignore them for loss calculation by setting their value to -1. The function takes as input various results from a pipeline and returns the masked action features and labels.",
+        "type": "comment"
+    },
+    "5316": {
+        "file_id": 444,
+        "content": "        is_next = results['is_next']\n        image_target = results['image_target']\n        self._truncate_seq_pair(caption, self.max_seq_length - 2)\n        caption, caption_label = self.random_word(caption, tokenizer)\n        image_feat, image_loc, image_label = self.random_region(\n            image_feat, image_loc, num_boxes)\n        action_feat, action_label = self.random_action(action_feat,\n                                                       action_target,\n                                                       num_actions)\n        # concatenate lm labels and account for CLS, SEP, SEP\n        lm_label_ids = [-1] + caption_label + [-1]\n        # The convention in BERT is:\n        # (a) For sequence pairs:\n        #  tokens:   [CLS] is this jack ##son ##ville ? [SEP] no it is not . [SEP]\n        #  type_ids: 0   0  0    0    0     0       0 0    1  1  1  1   1 1\n        # (b) For single sequences:\n        #  tokens:   [CLS] the dog is hairy . [SEP]\n        #  type_ids: 0   0   0   0  0     0 0\n        #",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/multimodal.py:286-308"
+    },
+    "5317": {
+        "file_id": 444,
+        "content": "This code is part of a multimodal pipeline that randomly selects words from the caption, regions from an image, and actions, then concatenates them using BERT's convention for sequence pairs. It also handles truncating the caption and assigning labels to the input features.",
+        "type": "comment"
+    },
+    "5318": {
+        "file_id": 444,
+        "content": "        # Where \"type_ids\" are used to indicate whether this is the first\n        # sequence or the second sequence. The embedding vectors for `type=0` and\n        # `type=1` were learned during pre-training and are added to the wordpiece\n        # embedding vector (and position vector). This is not *strictly* necessary\n        # since the [SEP] token unambigiously separates the sequences, but it makes\n        # it easier for the model to learn the concept of sequences.\n        #\n        # For classification tasks, the first vector (corresponding to [CLS]) is\n        # used as as the \"sentence vector\". Note that this only makes sense because\n        # the entire model is fine-tuned.\n        tokens = []\n        segment_ids = []\n        tokens.append(\"[CLS]\")\n        segment_ids.append(0)\n        for token in caption:\n            tokens.append(token)\n            segment_ids.append(0)\n        tokens.append(\"[SEP]\")\n        segment_ids.append(0)\n        input_ids = tokenizer.convert_tokens_to_ids(tokens)\n        # The mask has 1 for real tokens and 0 for padding tokens. Only real tokens are attended to.",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/multimodal.py:309-333"
+    },
+    "5319": {
+        "file_id": 444,
+        "content": "This code prepares input data for a multimodal pipeline in PaddleVideo. It appends special tokens \"[CLS]\" and \"[SEP]\" to the token list, assigns segment ID 0 to all tokens (indicating first sequence), converts tokens to input IDs using tokenizer, and creates a mask with 1 for real tokens and 0 for padding tokens. This allows the model to learn sequences and use the [CLS] vector as a \"sentence vector\" for classification tasks.",
+        "type": "comment"
+    },
+    "5320": {
+        "file_id": 444,
+        "content": "        input_mask = [1] * (len(input_ids))\n        image_mask = [1] * (num_boxes)\n        action_mask = [1] * (num_actions)\n        # Zero-pad up to the visual sequence length.\n        while len(image_mask) < self.max_region_length:\n            image_mask.append(0)\n            image_label.append(-1)\n        while len(action_mask) < self.max_action_length:\n            action_mask.append(0)\n            action_label.append(-1)\n        # Zero-pad up to the sequence length.\n        while len(input_ids) < self.max_seq_length:\n            input_ids.append(0)\n            input_mask.append(0)\n            segment_ids.append(0)\n            lm_label_ids.append(-1)\n        assert len(input_ids) == self.max_seq_length\n        assert len(input_mask) == self.max_seq_length\n        assert len(segment_ids) == self.max_seq_length\n        assert len(lm_label_ids) == self.max_seq_length\n        assert len(image_mask) == self.max_region_length\n        assert len(image_label) == self.max_region_length\n        assert len(action_mask) == self.max_action_length",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/multimodal.py:334-359"
+    },
+    "5321": {
+        "file_id": 444,
+        "content": "Zero-padding visual, action, and input sequences to the maximum lengths. Asserting that all lists are of equal length after padding and match their respective max lengths.",
+        "type": "comment"
+    },
+    "5322": {
+        "file_id": 444,
+        "content": "        assert len(action_label) == self.max_action_length\n        image_feat, image_loc, image_mask = self.get_image_global_feature(\n            image_feat, image_loc, np.array(image_mask))\n        features = [\n            np.array(input_ids),\n            action_feat,\n            image_feat,\n            image_loc,\n            np.array(segment_ids),\n            np.array(input_mask),\n            image_mask,\n            np.array(action_mask),\n            np.array(lm_label_ids),\n            np.array(action_label),\n            np.array(is_next),\n            np.array(image_label),\n            image_target,\n        ]\n        results['features'] = features\n        return results",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/multimodal.py:360-380"
+    },
+    "5323": {
+        "file_id": 444,
+        "content": "This code snippet is part of a pipeline function that asserts the length of 'action_label' matches the maximum allowed action length. It then calls another function to get global image features, and forms a list of feature arrays including input ids, action feature, image feature, location, segment ids, input mask, image mask, action label, lm_label_ids, is_next, image label, and image target. The results dictionary is updated with these features before the function returns.",
+        "type": "comment"
+    },
+    "5324": {
+        "file_id": 445,
+        "content": "/paddlevideo/loader/pipelines/sample.py",
+        "type": "filepath"
+    },
+    "5325": {
+        "file_id": 445,
+        "content": "The code utilizes PaddleVideo's image processing pipeline for efficient frame sampling, defines a sampler class for video decoding and data conversion, and calculates sampling positions, offsets, and generates frame indices for video sequences.",
+        "type": "summary"
+    },
+    "5326": {
+        "file_id": 445,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport os\nimport random\nimport numpy as np\nfrom PIL import Image\ntry:\n    import SimpleITK as sitk\nexcept ImportError as e:\n    print(\n        f\"Warning! {e}, [SimpleITK] package and it's dependencies is required for PP-Care.\"\n    )\nimport cv2\nfrom ..registry import PIPELINES\ntry:\n    import cPickle as pickle\n    from cStringIO import StringIO\nexcept ImportError:\n    import pickle\n    from io import BytesIO\n@PIPELINES.register()",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/sample.py:1-38"
+    },
+    "5327": {
+        "file_id": 445,
+        "content": "This code is a Python module that imports various libraries and defines an image processing pipeline for PaddleVideo. It checks if SimpleITK is installed, handles pickling, and registers the pipeline using PaddleVideo's registry.",
+        "type": "comment"
+    },
+    "5328": {
+        "file_id": 445,
+        "content": "class Sampler(object):\n    \"\"\"\n    Sample frames id.\n    NOTE: Use PIL to read image here, has diff with CV2\n    Args:\n        num_seg(int): number of segments.\n        seg_len(int): number of sampled frames in each segment.\n        valid_mode(bool): True or False.\n        select_left: Whether to select the frame to the left in the middle when the sampling interval is even in the test mode.\n    Returns:\n        frames_idx: the index of sampled #frames.\n    \"\"\"\n    def __init__(self,\n                 num_seg,\n                 seg_len,\n                 frame_interval=None,\n                 valid_mode=False,\n                 select_left=False,\n                 dense_sample=False,\n                 linspace_sample=False,\n                 use_pil=True):\n        self.num_seg = num_seg\n        self.seg_len = seg_len\n        self.frame_interval = frame_interval\n        self.valid_mode = valid_mode\n        self.select_left = select_left\n        self.dense_sample = dense_sample\n        self.linspace_sample = linspace_sample",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/sample.py:39-66"
+    },
+    "5329": {
+        "file_id": 445,
+        "content": "The `Sampler` class is used to sample frames based on various parameters such as number of segments, length of each segment, frame interval, valid mode, select left flag and whether to use PIL for reading images. It returns the index of sampled frames.",
+        "type": "comment"
+    },
+    "5330": {
+        "file_id": 445,
+        "content": "        self.use_pil = use_pil\n    def _get(self, frames_idx, results):\n        data_format = results['format']\n        if data_format == \"frame\":\n            frame_dir = results['frame_dir']\n            imgs = []\n            for idx in frames_idx:\n                img = Image.open(\n                    os.path.join(frame_dir,\n                                 results['suffix'].format(idx))).convert('RGB')\n                imgs.append(img)\n        elif data_format == \"MRI\":\n            frame_dir = results['frame_dir']\n            imgs = []\n            MRI = sitk.GetArrayFromImage(sitk.ReadImage(frame_dir))\n            for idx in frames_idx:\n                item = MRI[idx]\n                item = cv2.resize(item, (224, 224))\n                imgs.append(item)\n        elif data_format == \"video\":\n            if results['backend'] == 'cv2':\n                frames = np.array(results['frames'])\n                imgs = []\n                for idx in frames_idx:\n                    imgbuf = frames[idx]\n                    img = Image.fromarray(imgbuf, mode='RGB')",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/sample.py:67-96"
+    },
+    "5331": {
+        "file_id": 445,
+        "content": "The code defines a class with an attribute 'use_pil' that determines the image format. The '_get' method retrieves frames based on data format (frame, MRI, or video), applies necessary conversions and resizing, and stores them in 'imgs'. It uses different libraries such as Image, sitk, and cv2 for different formats.",
+        "type": "comment"
+    },
+    "5332": {
+        "file_id": 445,
+        "content": "                    imgs.append(img)\n            elif results['backend'] == 'decord':\n                container = results['frames']\n                if self.use_pil:\n                    frames_select = container.get_batch(frames_idx)\n                    # dearray_to_img\n                    np_frames = frames_select.asnumpy()\n                    imgs = []\n                    for i in range(np_frames.shape[0]):\n                        imgbuf = np_frames[i]\n                        imgs.append(Image.fromarray(imgbuf, mode='RGB'))\n                else:\n                    if frames_idx.ndim != 1:\n                        frames_idx = np.squeeze(frames_idx)\n                    frame_dict = {\n                        idx: container[idx].asnumpy()\n                        for idx in np.unique(frames_idx)\n                    }\n                    imgs = [frame_dict[idx] for idx in frames_idx]\n            elif results['backend'] == 'pyav':\n                imgs = []\n                frames = np.array(results['frames'])\n                for idx in frames_idx:",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/sample.py:97-119"
+    },
+    "5333": {
+        "file_id": 445,
+        "content": "Code is handling video decoding using different backends such as 'opencv', 'decord', and 'pyav'. It appends the frames to imgs list, converts numpy array to image using Image.fromarray method for 'decord' backend, and handles frame indexing and data structures based on backend used.",
+        "type": "comment"
+    },
+    "5334": {
+        "file_id": 445,
+        "content": "                    if self.dense_sample:\n                        idx = idx - 1\n                    imgbuf = frames[idx]\n                    imgs.append(imgbuf)\n                imgs = np.stack(imgs)  # thwc\n            else:\n                raise NotImplementedError\n        else:\n            raise NotImplementedError\n        results['imgs'] = imgs\n        return results\n    def _get_train_clips(self, num_frames):\n        ori_seg_len = self.seg_len * self.frame_interval\n        avg_interval = (num_frames - ori_seg_len + 1) // self.num_seg\n        if avg_interval > 0:\n            base_offsets = np.arange(self.num_seg) * avg_interval\n            clip_offsets = base_offsets + np.random.randint(avg_interval,\n                                                            size=self.num_seg)\n        elif num_frames > max(self.num_seg, ori_seg_len):\n            clip_offsets = np.sort(\n                np.random.randint(num_frames - ori_seg_len + 1,\n                                  size=self.num_seg))\n        elif avg_interval == 0:",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/sample.py:120-144"
+    },
+    "5335": {
+        "file_id": 445,
+        "content": "This code snippet is responsible for sampling frames from a video sequence, and it handles different scenarios based on the input parameters. If `dense_sample` is True, it adjusts the index before accessing the frame. The frames are then appended to a list called `imgs`. If neither of the else conditions are met, it raises a `NotImplementedError`. The function also includes another method, `_get_train_clips`, which calculates clip offsets for training purposes based on the number of frames and other parameters.",
+        "type": "comment"
+    },
+    "5336": {
+        "file_id": 445,
+        "content": "            ratio = (num_frames - ori_seg_len + 1.0) / self.num_seg\n            clip_offsets = np.around(np.arange(self.num_seg) * ratio)\n        else:\n            clip_offsets = np.zeros((self.num_seg, ), dtype=np.int)\n        return clip_offsets\n    def _get_test_clips(self, num_frames):\n        ori_seg_len = self.seg_len * self.frame_interval\n        avg_interval = (num_frames - ori_seg_len + 1) / float(self.num_seg)\n        if num_frames > ori_seg_len - 1:\n            base_offsets = np.arange(self.num_seg) * avg_interval\n            clip_offsets = (base_offsets + avg_interval / 2.0).astype(np.int)\n        else:\n            clip_offsets = np.zeros((self.num_seg, ), dtype=np.int)\n        return clip_offsets\n    def __call__(self, results):\n        \"\"\"\n        Args:\n            frames_len: length of frames.\n        return:\n            sampling id.\n        \"\"\"\n        frames_len = int(results['frames_len'])\n        frames_idx = []\n        if self.frame_interval is not None:\n            assert isinstance(self.frame_interval, int)",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/sample.py:145-171"
+    },
+    "5337": {
+        "file_id": 445,
+        "content": "The code defines a class with methods to determine clip offsets based on the number of frames and segment length. If the number of frames exceeds the original segment length, it calculates clip offsets for each segment. Otherwise, it sets all clip offsets to zero. The class also has a __call__ method that takes frames length as input and returns sampling indices.",
+        "type": "comment"
+    },
+    "5338": {
+        "file_id": 445,
+        "content": "            if not self.valid_mode:\n                offsets = self._get_train_clips(frames_len)\n            else:\n                offsets = self._get_test_clips(frames_len)\n            offsets = offsets[:, None] + np.arange(\n                self.seg_len)[None, :] * self.frame_interval\n            offsets = np.concatenate(offsets)\n            offsets = offsets.reshape((-1, self.seg_len))\n            offsets = np.mod(offsets, frames_len)\n            offsets = np.concatenate(offsets)\n            if results['format'] == 'video':\n                frames_idx = offsets\n            elif results['format'] == 'frame':\n                frames_idx = list(offsets + 1)\n            else:\n                raise NotImplementedError\n            return self._get(frames_idx, results)\n        if self.linspace_sample:\n            if 'start_idx' in results and 'end_idx' in results:\n                offsets = np.linspace(results['start_idx'], results['end_idx'],\n                                      self.num_seg)\n            else:\n                offsets = np.linspace(0, frames_len - 1, self.num_seg)",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/sample.py:172-199"
+    },
+    "5339": {
+        "file_id": 445,
+        "content": "This code determines the sampling method for frames based on the mode (valid or train) and format ('video' or 'frame'). It calculates offsets, handles different formats, and if linspace_sample is True, it generates offsets using linear spacing.",
+        "type": "comment"
+    },
+    "5340": {
+        "file_id": 445,
+        "content": "            offsets = np.clip(offsets, 0, frames_len - 1).astype(np.int64)\n            if results['format'] == 'video':\n                frames_idx = list(offsets)\n                frames_idx = [x % frames_len for x in frames_idx]\n            elif results['format'] == 'frame':\n                frames_idx = list(offsets + 1)\n            elif results['format'] == 'MRI':\n                frames_idx = list(offsets)\n            else:\n                raise NotImplementedError\n            return self._get(frames_idx, results)\n        average_dur = int(frames_len / self.num_seg)\n        if not self.select_left:\n            if self.dense_sample:  # For ppTSM\n                if not self.valid_mode:  # train\n                    sample_pos = max(1, 1 + frames_len - 64)\n                    t_stride = 64 // self.num_seg\n                    start_idx = 0 if sample_pos == 1 else np.random.randint(\n                        0, sample_pos - 1)\n                    offsets = [(idx * t_stride + start_idx) % frames_len + 1\n                               for idx in range(self.num_seg)]",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/sample.py:200-223"
+    },
+    "5341": {
+        "file_id": 445,
+        "content": "This code segment calculates the frames to sample from a video, based on its format (video/frame/MRI). It also handles dense sampling for ppTSM. In non-dense mode, it selects random positions for each segment within the range of 1 to frames_len. For dense sampling in train mode, it generates a set of evenly spaced frame indices between start_idx and sample_pos, which is calculated based on frames_len and 64 (to ensure at least one frame within the window). The offsets are then used to fetch corresponding data using the _get method.",
+        "type": "comment"
+    },
+    "5342": {
+        "file_id": 445,
+        "content": "                    frames_idx = offsets\n                else:\n                    sample_pos = max(1, 1 + frames_len - 64)\n                    t_stride = 64 // self.num_seg\n                    start_list = np.linspace(0,\n                                             sample_pos - 1,\n                                             num=10,\n                                             dtype=int)\n                    offsets = []\n                    for start_idx in start_list.tolist():\n                        offsets += [\n                            (idx * t_stride + start_idx) % frames_len + 1\n                            for idx in range(self.num_seg)\n                        ]\n                    frames_idx = offsets\n            else:\n                for i in range(self.num_seg):\n                    idx = 0\n                    if not self.valid_mode:\n                        if average_dur >= self.seg_len:\n                            idx = random.randint(0, average_dur - self.seg_len)\n                            idx += i * average_dur",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/sample.py:224-245"
+    },
+    "5343": {
+        "file_id": 445,
+        "content": "The code determines the sampling position based on frames length, number of segments, and valid mode. If no offsets are provided, it calculates the starting positions for each segment using a linear space. Then, it generates the offsets by multiplying the stride with the current segment index and adding the start index. Finally, if in valid mode, it randomly selects indices within the average duration per segment and adds them to the offsets list.",
+        "type": "comment"
+    },
+    "5344": {
+        "file_id": 445,
+        "content": "                        elif average_dur >= 1:\n                            idx += i * average_dur\n                        else:\n                            idx = i\n                    else:\n                        if average_dur >= self.seg_len:\n                            idx = (average_dur - 1) // 2\n                            idx += i * average_dur\n                        elif average_dur >= 1:\n                            idx += i * average_dur\n                        else:\n                            idx = i\n                    for jj in range(idx, idx + self.seg_len):\n                        if results['format'] == 'video':\n                            frames_idx.append(int(jj % frames_len))\n                        elif results['format'] == 'frame':\n                            frames_idx.append(jj + 1)\n                        elif results['format'] == 'MRI':\n                            frames_idx.append(jj)\n                        else:\n                            raise NotImplementedError\n            return self._get(frames_idx, results)",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/sample.py:246-268"
+    },
+    "5345": {
+        "file_id": 445,
+        "content": "Code calculates index based on average duration, then appends corresponding frame indices to frames_idx list based on the format specified in results. If the format is not recognized, it raises NotImplementedError. Finally, it returns the frames_idx and results to an unknown method.",
+        "type": "comment"
+    },
+    "5346": {
+        "file_id": 445,
+        "content": "        else:  # for TSM\n            if not self.valid_mode:\n                if average_dur > 0:\n                    offsets = np.multiply(list(range(self.num_seg)),\n                                          average_dur) + np.random.randint(\n                                              average_dur, size=self.num_seg)\n                elif frames_len > self.num_seg:\n                    offsets = np.sort(\n                        np.random.randint(frames_len, size=self.num_seg))\n                else:\n                    offsets = np.zeros(shape=(self.num_seg, ))\n            else:\n                if frames_len > self.num_seg:\n                    average_dur_float = frames_len / self.num_seg\n                    offsets = np.array([\n                        int(average_dur_float / 2.0 + average_dur_float * x)\n                        for x in range(self.num_seg)\n                    ])\n                else:\n                    offsets = np.zeros(shape=(self.num_seg, ))\n            if results['format'] == 'video':\n                frames_idx = list(offsets)",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/sample.py:270-292"
+    },
+    "5347": {
+        "file_id": 445,
+        "content": "This code generates random offsets for selecting frames from a video. If the valid mode is not enabled, it randomly selects frame offsets within the available duration or number of frames. If the valid mode is enabled, it evenly distributes the frames across the video duration. The 'format' variable determines if the selected frames are in video format.",
+        "type": "comment"
+    },
+    "5348": {
+        "file_id": 445,
+        "content": "                frames_idx = [x % frames_len for x in frames_idx]\n            elif results['format'] == 'frame':\n                frames_idx = list(offsets + 1)\n            elif results['format'] == 'MRI':\n                frames_idx = list(offsets)\n            else:\n                raise NotImplementedError\n            return self._get(frames_idx, results)\n@PIPELINES.register()\nclass SamplerPkl(object):\n    \"\"\"\n    Sample frames id.\n    NOTE: Use PIL to read image here, has diff with CV2\n    Args:\n        num_seg(int): number of segments.\n        seg_len(int): number of sampled frames in each segment.\n        mode(str): 'train', 'valid'\n    Returns:\n        frames_idx: the index of sampled #frames.\n    \"\"\"\n    def __init__(self, num_seg, seg_len, backend='pillow', valid_mode=False):\n        self.num_seg = num_seg\n        self.seg_len = seg_len\n        self.valid_mode = valid_mode\n        self.backend = backend\n    def _get(self, buf):\n        if isinstance(buf, str):\n            img = Image.open(StringIO(buf))\n        else:",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/sample.py:293-327"
+    },
+    "5349": {
+        "file_id": 445,
+        "content": "This code snippet defines a SamplerPkl class that samples frames' indices for video loading. It takes arguments num_seg, seg_len, and backend and returns the index of sampled frames. Depending on the results format ('frame', 'MRI', or others), it sets the frames_idx accordingly before returning it.",
+        "type": "comment"
+    },
+    "5350": {
+        "file_id": 445,
+        "content": "            img = Image.open(BytesIO(buf))\n        img = img.convert('RGB')\n        if self.backend != 'pillow':\n            img = np.array(img)\n        return img\n    def __call__(self, results):\n        \"\"\"\n        Args:\n            frames_len: length of frames.\n        return:\n            sampling id.\n        \"\"\"\n        filename = results['frame_dir']\n        data_loaded = pickle.load(open(filename, 'rb'), encoding='bytes')\n        video_name, label, frames = data_loaded\n        if isinstance(label, dict):\n            label = label['动作类型']\n            results['labels'] = label\n        elif len(label) == 1:\n            results['labels'] = int(label[0])\n        else:\n            results['labels'] = int(label[0]) if random.random() < 0.5 else int(\n                label[1])\n        results['frames_len'] = len(frames)\n        frames_len = results['frames_len']\n        average_dur = int(int(frames_len) / self.num_seg)\n        imgs = []\n        for i in range(self.num_seg):\n            idx = 0\n            if not self.valid_mode:",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/sample.py:328-358"
+    },
+    "5351": {
+        "file_id": 445,
+        "content": "This code is part of a pipeline for image sampling in video processing. It loads data from disk, converts images to RGB format, and handles labels. The `__call__` method takes results as input, retrieves the video name, label, and frames from the loaded data. If the label is a dictionary or has multiple elements, it assigns the label to '动作类型' or randomly chooses between the first two elements. It sets the 'frames_len' based on the length of frames and calculates the average duration per segment. Then, it initializes an empty list for the images and loops through the segments to create image samples. If valid mode is not enabled, it also resets the index variable.",
+        "type": "comment"
+    },
+    "5352": {
+        "file_id": 445,
+        "content": "                if average_dur >= self.seg_len:\n                    idx = random.randint(0, average_dur - self.seg_len)\n                    idx += i * average_dur\n                elif average_dur >= 1:\n                    idx += i * average_dur\n                else:\n                    idx = i\n            else:\n                if average_dur >= self.seg_len:\n                    idx = (average_dur - 1) // 2\n                    idx += i * average_dur\n                elif average_dur >= 1:\n                    idx += i * average_dur\n                else:\n                    idx = i\n            for jj in range(idx, idx + self.seg_len):\n                imgbuf = frames[int(jj % results['frames_len'])]\n                img = self._get(imgbuf)\n                imgs.append(img)\n        results['backend'] = self.backend\n        results['imgs'] = imgs\n        return results",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/sample.py:359-382"
+    },
+    "5353": {
+        "file_id": 445,
+        "content": "The code calculates the index for a segment of frames based on average duration and frame length. It then retrieves images from the frames list, appends them to imgs, sets backend type, and returns the results including the imgs and backend information.",
+        "type": "comment"
+    },
+    "5354": {
+        "file_id": 446,
+        "content": "/paddlevideo/loader/pipelines/sample_ava.py",
+        "type": "filepath"
+    },
+    "5355": {
+        "file_id": 446,
+        "content": "This code introduces SampleFrames class for PaddleVideo's loader pipelines using OpenCV, supports various modes and training, includes storage backend classes, converts images to numpy arrays, defines pipeline, and provides SampleAVAFrames class for sampling video frames.",
+        "type": "summary"
+    },
+    "5356": {
+        "file_id": 446,
+        "content": "# Copyright (c) 2021  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport random\nfrom PIL import Image\nfrom ..registry import PIPELINES\nimport os\nimport numpy as np\nimport io\nimport os.path as osp\nfrom abc import ABCMeta, abstractmethod\nimport cv2\nfrom cv2 import IMREAD_COLOR, IMREAD_GRAYSCALE, IMREAD_UNCHANGED\nimport inspect\nimread_backend = 'cv2'\nimread_flags = {\n    'color': IMREAD_COLOR,\n    'grayscale': IMREAD_GRAYSCALE,\n    'unchanged': IMREAD_UNCHANGED\n}\n@PIPELINES.register()\nclass SampleFrames:",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/sample_ava.py:1-35"
+    },
+    "5357": {
+        "file_id": 446,
+        "content": "This code is importing necessary libraries and registering a class SampleFrames under PaddleVideo's loader pipelines. The class appears to sample frames from video, supporting different reading modes (color/grayscale/unchanged). It uses OpenCV (cv2) as the image processing backend.",
+        "type": "comment"
+    },
+    "5358": {
+        "file_id": 446,
+        "content": "    \"\"\"Sample frames from the video. \"\"\"\n    def __init__(self,\n                 clip_len,\n                 frame_interval=1,\n                 num_clips=1,\n                 temporal_jitter=False,\n                 twice_sample=False,\n                 out_of_bound_opt='loop',\n                 test_mode=False):\n        self.clip_len = clip_len\n        self.frame_interval = frame_interval\n        self.num_clips = num_clips\n        self.temporal_jitter = temporal_jitter\n        self.twice_sample = twice_sample\n        self.out_of_bound_opt = out_of_bound_opt\n        self.test_mode = test_mode\n        assert self.out_of_bound_opt in ['loop', 'repeat_last']\n    def _get_train_clips(self, num_frames):\n        \"\"\"Get clip offsets in train mode. \"\"\"\n        ori_clip_len = self.clip_len * self.frame_interval\n        avg_interval = (num_frames - ori_clip_len + 1) // self.num_clips\n        if avg_interval > 0:\n            base_offsets = np.arange(self.num_clips) * avg_interval\n            clip_offsets = base_offsets + np.random.randint(",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/sample_ava.py:36-61"
+    },
+    "5359": {
+        "file_id": 446,
+        "content": "The function `__init__` initializes the parameters for sampling frames from a video, including clip length, frame interval, number of clips, temporal jittering options, and out-of-bound handling. The `_get_train_clips` function calculates the clip offsets in training mode by determining the average interval between clips based on the total number of frames. It then generates random base offsets and adds random offsets to create the final clip offsets.",
+        "type": "comment"
+    },
+    "5360": {
+        "file_id": 446,
+        "content": "                avg_interval, size=self.num_clips)\n        elif num_frames > max(self.num_clips, ori_clip_len):\n            clip_offsets = np.sort(\n                np.random.randint(\n                    num_frames - ori_clip_len + 1, size=self.num_clips))\n        elif avg_interval == 0:\n            ratio = (num_frames - ori_clip_len + 1.0) / self.num_clips\n            clip_offsets = np.around(np.arange(self.num_clips) * ratio)\n        else:\n            clip_offsets = np.zeros((self.num_clips, ), dtype=np.int)\n        return clip_offsets\n    def _get_test_clips(self, num_frames):\n        \"\"\"Get clip offsets in test mode. \"\"\"\n        ori_clip_len = self.clip_len * self.frame_interval\n        avg_interval = (num_frames - ori_clip_len + 1) / float(self.num_clips)\n        if num_frames > ori_clip_len - 1:\n            base_offsets = np.arange(self.num_clips) * avg_interval\n            clip_offsets = (base_offsets + avg_interval / 2.0).astype(np.int)\n            if self.twice_sample:\n                clip_offsets = np.concatenate([clip_offsets, base_offsets])",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/sample_ava.py:62-82"
+    },
+    "5361": {
+        "file_id": 446,
+        "content": "This code calculates clip offsets for video sampling based on the number of frames and other parameters. It handles different scenarios, such as when the number of frames exceeds or equals the original clip length, when average interval is 0, and in test mode. The clip_offsets are returned at the end.",
+        "type": "comment"
+    },
+    "5362": {
+        "file_id": 446,
+        "content": "        else:\n            clip_offsets = np.zeros((self.num_clips, ), dtype=np.int)\n        return clip_offsets\n    def _sample_clips(self, num_frames):\n        \"\"\"Choose clip offsets for the video in a given mode. \"\"\"\n        if self.test_mode:\n            clip_offsets = self._get_test_clips(num_frames)\n        else:\n            clip_offsets = self._get_train_clips(num_frames)\n        return clip_offsets\n    def __call__(self, results):\n        \"\"\"Perform the SampleFrames loading. \"\"\"\n        total_frames = results['total_frames']\n        clip_offsets = self._sample_clips(total_frames)\n        frame_inds = clip_offsets[:, None] + np.arange(\n            self.clip_len)[None, :] * self.frame_interval\n        frame_inds = np.concatenate(frame_inds)\n        if self.temporal_jitter:\n            perframe_offsets = np.random.randint(\n                self.frame_interval, size=len(frame_inds))\n            frame_inds += perframe_offsets\n        frame_inds = frame_inds.reshape((-1, self.clip_len))\n        if self.out_of_bound_opt == 'loop':",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/sample_ava.py:83-107"
+    },
+    "5363": {
+        "file_id": 446,
+        "content": "This code defines a class that samples video clips and loads frames based on different modes, such as testing or training. It takes the total number of frames in a video and returns the corresponding clip offsets and frame indices for loading. The sampling mode, temporal jitter, and out-of-bound options can be specified to customize the sampling process.",
+        "type": "comment"
+    },
+    "5364": {
+        "file_id": 446,
+        "content": "            frame_inds = np.mod(frame_inds, total_frames)\n        elif self.out_of_bound_opt == 'repeat_last':\n            safe_inds = frame_inds < total_frames\n            unsafe_inds = 1 - safe_inds\n            last_ind = np.max(safe_inds * frame_inds, axis=1)\n            new_inds = (safe_inds * frame_inds + (unsafe_inds.T * last_ind).T)\n            frame_inds = new_inds\n        else:\n            raise ValueError('Illegal out_of_bound option.')\n        start_index = results['start_index']\n        frame_inds = np.concatenate(frame_inds) + start_index\n        results['frame_inds'] = frame_inds.astype(np.int)\n        results['clip_len'] = self.clip_len\n        results['frame_interval'] = self.frame_interval\n        results['num_clips'] = self.num_clips\n        return results\n    def __repr__(self):\n        repr_str = (f'{self.__class__.__name__}('\n                    f'clip_len={self.clip_len}, '\n                    f'frame_interval={self.frame_interval}, '\n                    f'num_clips={self.num_clips}, '",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/sample_ava.py:108-129"
+    },
+    "5365": {
+        "file_id": 446,
+        "content": "Code handles out-of-bound frame indices by wrapping them around, repeating the last frame, or throwing an error. It then updates results with frame indices, clip length, and number of clips.",
+        "type": "comment"
+    },
+    "5366": {
+        "file_id": 446,
+        "content": "                    f'temporal_jitter={self.temporal_jitter}, '\n                    f'twice_sample={self.twice_sample}, '\n                    f'out_of_bound_opt={self.out_of_bound_opt}, '\n                    f'test_mode={self.test_mode})')\n        return repr_str\nclass BaseStorageBackend(metaclass=ABCMeta):\n    \"\"\"Abstract class of storage backends. \"\"\"\n    @abstractmethod\n    def get(self, filepath):\n        pass\n    @abstractmethod\n    def get_text(self, filepath):\n        pass\nclass HardDiskBackend(BaseStorageBackend):\n    \"\"\"Raw hard disks storage backend.\"\"\"\n    def get(self, filepath):\n        filepath = str(filepath)\n        with open(filepath, 'rb') as f:\n            value_buf = f.read()\n        return value_buf\n    def get_text(self, filepath):\n        filepath = str(filepath)\n        with open(filepath, 'r') as f:\n            value_buf = f.read()\n        return value_buf\nclass FileClient:\n    \"\"\"A general file client to access files in different backend. \"\"\"\n    _backends = {\n        'disk': HardDiskBackend,",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/sample_ava.py:130-166"
+    },
+    "5367": {
+        "file_id": 446,
+        "content": "This code defines three classes: `BaseStorageBackend` (abstract class), `HardDiskBackend`, and a generic file client called `FileClient`. The `BaseStorageBackend` is an abstract class that provides two methods, `get()` and `get_text()`, which are expected to be implemented by subclasses. The `HardDiskBackend` implements these methods for handling files stored on the hard disk. Finally, the `FileClient` serves as a generic file client to access files in different backends.",
+        "type": "comment"
+    },
+    "5368": {
+        "file_id": 446,
+        "content": "    }\n    def __init__(self, backend='disk', **kwargs):\n        if backend not in self._backends:\n            raise ValueError(\n                f'Backend {backend} is not supported. Currently supported ones'\n                f' are {list(self._backends.keys())}')\n        self.backend = backend\n        self.client = self._backends[backend](**kwargs)\n    @classmethod\n    def _register_backend(cls, name, backend, force=False):\n        if not isinstance(name, str):\n            raise TypeError('the backend name should be a string, '\n                            f'but got {type(name)}')\n        if not inspect.isclass(backend):\n            raise TypeError(\n                f'backend should be a class but got {type(backend)}')\n        if not issubclass(backend, BaseStorageBackend):\n            raise TypeError(\n                f'backend {backend} is not a subclass of BaseStorageBackend')\n        if not force and name in cls._backends:\n            raise KeyError(\n                f'{name} is already registered as a storage backend, '",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/sample_ava.py:167-190"
+    },
+    "5369": {
+        "file_id": 446,
+        "content": "This code defines a class with an initializer and a class method for registering backends. The initializer takes a backend argument, checks if it is supported, and initializes the client object with that backend. If the name or backend type is incorrect, it raises TypeError. The _register_backend method allows for backend registration by name, checking if it is a string and if the backend is a subclass of BaseStorageBackend. Raises KeyError if already registered.",
+        "type": "comment"
+    },
+    "5370": {
+        "file_id": 446,
+        "content": "                'add \"force=True\" if you want to override it')\n        cls._backends[name] = backend\n    @classmethod\n    def register_backend(cls, name, backend=None, force=False):\n        \"\"\"Register a backend to FileClient. \"\"\"\n        if backend is not None:\n            cls._register_backend(name, backend, force=force)\n            return\n        def _register(backend_cls):\n            cls._register_backend(name, backend_cls, force=force)\n            return backend_cls\n        return _register\n    def get(self, filepath):\n        return self.client.get(filepath)\n    def get_text(self, filepath):\n        return self.client.get_text(filepath)\n@PIPELINES.register()\nclass RawFrameDecode:\n    \"\"\"Load and decode frames with given indices. \"\"\"\n    def __init__(self, io_backend='disk', decoding_backend='cv2', **kwargs):\n        self.io_backend = io_backend\n        self.decoding_backend = decoding_backend\n        self.kwargs = kwargs\n        self.file_client = None\n    def _pillow2array(self,img, flag='color', channel_order='bgr'):",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/sample_ava.py:191-225"
+    },
+    "5371": {
+        "file_id": 446,
+        "content": "This code defines a class called FileClient, which handles file operations like registration and retrieval. It also registers a pipeline named RawFrameDecode for loading and decoding frames using specified backends for I/O and decoding. The class has an _pillow2array method to convert PIL image to numpy array in specific channel order.",
+        "type": "comment"
+    },
+    "5372": {
+        "file_id": 446,
+        "content": "        \"\"\"Convert a pillow image to numpy array. \"\"\"\n        channel_order = channel_order.lower()\n        if channel_order not in ['rgb', 'bgr']:\n            raise ValueError('channel order must be either \"rgb\" or \"bgr\"')\n        if flag == 'unchanged':\n            array = np.array(img)\n            if array.ndim >= 3 and array.shape[2] >= 3:  # color image\n                array[:, :, :3] = array[:, :, (2, 1, 0)]  # RGB to BGR\n        else:\n            # If the image mode is not 'RGB', convert it to 'RGB' first.\n            if img.mode != 'RGB':\n                if img.mode != 'LA':\n                    # Most formats except 'LA' can be directly converted to RGB\n                    img = img.convert('RGB')\n                else:\n                    # When the mode is 'LA', the default conversion will fill in\n                    #  the canvas with black, which sometimes shadows black objects\n                    #  in the foreground.\n                    #\n                    # Therefore, a random color (124, 117, 104) is used for canvas",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/sample_ava.py:226-247"
+    },
+    "5373": {
+        "file_id": 446,
+        "content": "This code converts a Pillow image to a numpy array. It checks the channel order and flag, then either keeps the array unchanged or converts it from RGB to BGR if necessary. If the image mode is not RGB, it converts it to RGB first using convert('RGB'). If the mode is LA, a random color is used for the canvas to avoid shadowing black objects in the foreground.",
+        "type": "comment"
+    },
+    "5374": {
+        "file_id": 446,
+        "content": "                    img_rgba = img.convert('RGBA')\n                    img = Image.new('RGB', img_rgba.size, (124, 117, 104))\n                    img.paste(img_rgba, mask=img_rgba.split()[3])  # 3 is alpha\n            if flag == 'color':\n                array = np.array(img)\n                if channel_order != 'rgb':\n                    array = array[:, :, ::-1]  # RGB to BGR\n            elif flag == 'grayscale':\n                img = img.convert('L')\n                array = np.array(img)\n            else:\n                raise ValueError(\n                    'flag must be \"color\", \"grayscale\" or \"unchanged\", '\n                    f'but got {flag}')\n        return array\n    def _imfrombytes(self,content, flag='color', channel_order='bgr'):#, backend=None):\n        \"\"\"Read an image from bytes. \"\"\"\n        img_np = np.frombuffer(content, np.uint8)\n        flag = imread_flags[flag] if isinstance(flag, str) else flag\n        img = cv2.imdecode(img_np, flag)\n        if flag == IMREAD_COLOR and channel_order == 'rgb':",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/sample_ava.py:248-270"
+    },
+    "5375": {
+        "file_id": 446,
+        "content": "The code reads an image from bytes and converts it into a numpy array based on the provided flag (color or grayscale) and channel order. It first checks if the flag is valid, then decodes the image using OpenCV's imdecode function. If the flag is color and channel order is rgb, it returns the image as is. For other combinations, it converts the image to RGB or grayscale before returning the numpy array.",
+        "type": "comment"
+    },
+    "5376": {
+        "file_id": 446,
+        "content": "            cv2.cvtColor(img, cv2.COLOR_BGR2RGB, img)\n        return img\n    def __call__(self, results):\n        \"\"\"Perform the ``RawFrameDecode`` to pick frames given indices.\n        Args:\n            results (dict): The resulting dict to be modified and passed\n                to the next transform in pipeline.\n        \"\"\"\n        # mmcv.use_backend(self.decoding_backend)\n        directory = results['frame_dir']\n        suffix = results['suffix']\n        #modality = results['modality']\n        if self.file_client is None:\n            self.file_client = FileClient(self.io_backend, **self.kwargs)\n        imgs = list()\n        if results['frame_inds'].ndim != 1:\n            results['frame_inds'] = np.squeeze(results['frame_inds'])\n        offset = results.get('offset', 0)\n        for frame_idx in results['frame_inds']:\n            frame_idx += offset\n            filepath = osp.join(directory, suffix.format(frame_idx))\n            img_bytes = self.file_client.get(filepath) #以二进制方式读取图片\n            # Get frame with channel order RGB directly.",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/sample_ava.py:271-301"
+    },
+    "5377": {
+        "file_id": 446,
+        "content": "This code defines a pipeline for decoding frames using the RawFrameDecode transform. It reads image files from the specified directory and suffix, handles different frame indices, and utilizes a file client to retrieve images in binary format. The cv2.cvtColor function is used to convert the color of images from BGR to RGB. The code also checks if the frame indices have the correct dimensions and squeezes them if necessary.",
+        "type": "comment"
+    },
+    "5378": {
+        "file_id": 446,
+        "content": "            cur_frame = self._imfrombytes(img_bytes, channel_order='rgb')\n            imgs.append(cur_frame)\n        results['imgs'] = imgs\n        results['original_shape'] = imgs[0].shape[:2]\n        results['img_shape'] = imgs[0].shape[:2]\n        # we resize the gt_bboxes and proposals to their real scale\n        h, w = results['img_shape']\n        scale_factor = np.array([w, h, w, h])\n        if 'gt_bboxes' in results:\n            gt_bboxes = results['gt_bboxes']\n            gt_bboxes_new = (gt_bboxes * scale_factor).astype(np.float32)\n            results['gt_bboxes'] = gt_bboxes_new\n        if 'proposals' in results and results['proposals'] is not None:\n            proposals = results['proposals']\n            proposals = (proposals * scale_factor).astype(np.float32)\n            results['proposals'] = proposals\n        return results\n    def __repr__(self):\n        repr_str = (f'{self.__class__.__name__}('\n                    f'io_backend={self.io_backend}, '\n                    f'decoding_backend={self.decoding_backend})')",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/sample_ava.py:303-326"
+    },
+    "5379": {
+        "file_id": 446,
+        "content": "Function applies image processing and resizing to input, appends frames to a list, and scales gt_bboxes and proposals accordingly. It then returns the results. The __repr__ function provides a string representation of the object's class and arguments.",
+        "type": "comment"
+    },
+    "5380": {
+        "file_id": 446,
+        "content": "        return repr_str\n@PIPELINES.register()\nclass SampleAVAFrames(SampleFrames):\n    def __init__(self, clip_len, frame_interval=2, test_mode=False):\n        super().__init__(clip_len, frame_interval, test_mode=test_mode)\n    def _get_clips(self, center_index, skip_offsets, shot_info):\n        start = center_index - (self.clip_len // 2) * self.frame_interval\n        end = center_index + ((self.clip_len + 1) // 2) * self.frame_interval\n        frame_inds = list(range(start, end, self.frame_interval))\n        frame_inds = frame_inds + skip_offsets\n        frame_inds = np.clip(frame_inds, shot_info[0], shot_info[1] - 1)\n        return frame_inds\n    def __call__(self, results):\n        fps = results['fps']\n        timestamp = results['timestamp']\n        timestamp_start = results['timestamp_start']\n        shot_info = results['shot_info']\n        #delta=(timestamp - timestamp_start) 为该帧距离15min视频开头有几秒\n        #center_index=fps*delta为该帧距离15min视频开头有几帧\n        #center_index+1是为了避免后续采样时出现负数? \n        #后续需要以center_index为中心前后采样视频帧片段",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/sample_ava.py:327-354"
+    },
+    "5381": {
+        "file_id": 446,
+        "content": "The code defines a class called SampleAVAFrames, which inherits from SampleFrames. It takes clip length, frame interval, and test mode as arguments during initialization. The _get_clips method calculates the start and end indices for a given center index, taking into account skip offsets and shot information. The __call__ method retrieves fps, timestamp, timestamp_start, and shot_info from the results dictionary, and then calculates the center index to sample video frames around that index.",
+        "type": "comment"
+    },
+    "5382": {
+        "file_id": 446,
+        "content": "        center_index = fps * (timestamp - timestamp_start) + 1\n        skip_offsets = np.random.randint(\n            -self.frame_interval // 2, (self.frame_interval + 1) // 2,\n            size=self.clip_len)\n        frame_inds = self._get_clips(center_index, skip_offsets, shot_info)\n        results['frame_inds'] = np.array(frame_inds, dtype=np.int)\n        results['clip_len'] = self.clip_len\n        results['frame_interval'] = self.frame_interval\n        results['num_clips'] = 1\n        results['crop_quadruple'] = np.array([0, 0, 1, 1], dtype=np.float32)\n        return results\n    def __repr__(self):\n        repr_str = (f'{self.__class__.__name__}('\n                    f'clip_len={self.clip_len}, '\n                    f'frame_interval={self.frame_interval}, '\n                    f'test_mode={self.test_mode})')\n        return repr_str",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/sample_ava.py:355-374"
+    },
+    "5383": {
+        "file_id": 446,
+        "content": "This function samples a video clip by calculating the center index and generating random skip offsets to select frames. It returns frame indices, clip length, frame interval, number of clips, and crop quadruple in a dictionary format for further processing. The `__repr__` method provides a concise string representation of the object's attributes.",
+        "type": "comment"
+    },
+    "5384": {
+        "file_id": 447,
+        "content": "/paddlevideo/loader/pipelines/sample_ucf24.py",
+        "type": "filepath"
+    },
+    "5385": {
+        "file_id": 447,
+        "content": "The \"SamplerUCF24\" class samples frames from videos using parameters like frame count and interval, utilizes PIL library, initializes pipeline, generates frame indices, returns sampled frames.",
+        "type": "summary"
+    },
+    "5386": {
+        "file_id": 447,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport os\nimport random\nfrom PIL import Image\nfrom ..registry import PIPELINES\n@PIPELINES.register()\nclass SamplerUCF24(object):\n    \"\"\"\n    Sample frames id.\n    NOTE: Use PIL to read image here, has diff with CV2\n    Args:\n        num_frames(int): The amount of frames used in a video\n        frame_interval(int): Sampling rate\n        valid_mode(bool): True or False.\n    Returns:\n        frames_idx: the index of sampled #frames.",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/sample_ucf24.py:1-33"
+    },
+    "5387": {
+        "file_id": 447,
+        "content": "This code defines a class \"SamplerUCF24\" for sampling frames in videos, taking parameters such as num_frames and frame_interval. It uses PIL instead of OpenCV to read images and returns the index of sampled frames.",
+        "type": "comment"
+    },
+    "5388": {
+        "file_id": 447,
+        "content": "    \"\"\"\n    def __init__(self,\n                 num_frames=16,\n                 frame_interval=1,\n                 valid_mode=False):\n        self.num_frames = num_frames\n        self.frame_interval = frame_interval if valid_mode else random.randint(1, 2)\n        self.valid_mode = valid_mode\n    def _get(self, frames_idxs, img_folder, results):\n        imgs = []\n        for idx in frames_idxs:\n            img = Image.open(\n                os.path.join(img_folder, '{:05d}.jpg'.format(idx))).convert('RGB')\n            imgs.append(img)\n        results['imgs'] = imgs\n        return results\n    def _make_clip(self, im_ind, max_num):\n        frame_idxs = []\n        for i in reversed(range(self.num_frames)):\n            # make it as a loop\n            i_temp = im_ind - i * self.frame_interval\n            if i_temp < 1:\n                i_temp = 1\n            elif i_temp > max_num:\n                i_temp = max_num\n            frame_idxs.append(i_temp)\n        return frame_idxs\n    def __call__(self, results):\n        img_folder, key_frame = os.path.split(results['filename'])",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/sample_ucf24.py:34-65"
+    },
+    "5389": {
+        "file_id": 447,
+        "content": "This code defines a pipeline for loading and creating clips from video files. The `__init__` method initializes the number of frames, frame interval (randomly determined if valid mode is False), and valid mode flag. The `_get` method retrieves images in order, converts them to RGB, and appends them to a list. The `_make_clip` method generates a set of frame indices that create a looped clip. The pipeline is called with the results as input, extracting the image folder and filename for further processing.",
+        "type": "comment"
+    },
+    "5390": {
+        "file_id": 447,
+        "content": "        frame_len = len(os.listdir(img_folder))\n        key_idx = int(key_frame[0:5])\n        frame_idxs = self._make_clip(key_idx, frame_len)\n        return self._get(frame_idxs, img_folder, results)",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/sample_ucf24.py:66-69"
+    },
+    "5391": {
+        "file_id": 447,
+        "content": "This code retrieves the number of frames in a folder, assigns a key frame index based on the input, generates frame indices for a video clip, and returns the requested frames from their folder.",
+        "type": "comment"
+    },
+    "5392": {
+        "file_id": 448,
+        "content": "/paddlevideo/loader/pipelines/segmentation.py",
+        "type": "filepath"
+    },
+    "5393": {
+        "file_id": 448,
+        "content": "The code enables image resizing, flipping, multi-scale segmentation in PaddleVideo's pipeline, with metadata addition and normalization. It performs image normalization and transposition before storing the result in a samples data structure.",
+        "type": "summary"
+    },
+    "5394": {
+        "file_id": 448,
+        "content": "# copyright (c) 2021 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport numpy as np\nfrom PIL import Image\nimport copy\nimport cv2\nfrom ..registry import PIPELINES\n@PIPELINES.register()\nclass MultiRestrictSize(object):\n    def __init__(self,\n                 min_size=None,\n                 max_size=800,\n                 flip=False,\n                 multi_scale=[1.3]):\n        self.min_size = min_size\n        self.max_size = max_size\n        self.multi_scale = multi_scale\n        self.flip = flip",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/segmentation.py:1-32"
+    },
+    "5395": {
+        "file_id": 448,
+        "content": "This code is for PaddleVideo's segmentation pipeline. It includes the class definition MultiRestrictSize, which can be used with minimum and maximum size limits, flipping option, and multiple scales for image resizing.",
+        "type": "comment"
+    },
+    "5396": {
+        "file_id": 448,
+        "content": "        assert ((min_size is None)) or ((max_size is None))\n    def __call__(self, sample):\n        samples = []\n        image = sample['current_img']\n        h, w = image.shape[:2]\n        for scale in self.multi_scale:\n            # Fixed range of scales\n            sc = None\n            # Align short edge\n            if not (self.min_size is None):\n                if h > w:\n                    short_edge = w\n                else:\n                    short_edge = h\n                if short_edge > self.min_size:\n                    sc = float(self.min_size) / short_edge\n            else:\n                if h > w:\n                    long_edge = h\n                else:\n                    long_edge = w\n                if long_edge > self.max_size:\n                    sc = float(self.max_size) / long_edge\n            if sc is None:\n                new_h = h\n                new_w = w\n            else:\n                new_h = sc * h\n                new_w = sc * w\n            new_h = int(new_h * scale)\n            new_w = int(new_w * scale)",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/segmentation.py:33-65"
+    },
+    "5397": {
+        "file_id": 448,
+        "content": "This code is a function that applies image segmentation using multi-scale technique. It scales the input image based on a fixed range of scales and aligns short or long edges to meet minimum or maximum size requirements, respectively. The scaled images are stored in a list for further processing.",
+        "type": "comment"
+    },
+    "5398": {
+        "file_id": 448,
+        "content": "            if (new_h - 1) % 16 != 0:\n                new_h = int(np.around((new_h - 1) / 16.) * 16 + 1)\n            if (new_w - 1) % 16 != 0:\n                new_w = int(np.around((new_w - 1) / 16.) * 16 + 1)\n            if new_h == h and new_w == w:\n                samples.append(sample)\n            else:\n                new_sample = {}\n                for elem in sample.keys():\n                    if 'meta' in elem:\n                        new_sample[elem] = sample[elem]\n                        continue\n                    tmp = sample[elem]\n                    if 'label' in elem:\n                        new_sample[elem] = sample[elem]\n                        continue\n                    else:\n                        flagval = cv2.INTER_CUBIC\n                        tmp = cv2.resize(tmp,\n                                         dsize=(new_w, new_h),\n                                         interpolation=flagval)\n                        new_sample[elem] = tmp\n                samples.append(new_sample)\n            if self.flip:",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/segmentation.py:67-92"
+    },
+    "5399": {
+        "file_id": 448,
+        "content": "Code resizes input images to a multiple of 16x16, appends samples with matching metadata, and optionally flips the image if enabled.",
+        "type": "comment"
+    }
+}

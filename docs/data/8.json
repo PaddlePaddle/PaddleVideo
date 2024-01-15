@@ -1,0 +1,539 @@
+{
+    "800": {
+        "file_id": 69,
+        "content": "        self.fmt = fmt\n        self.need_avg = need_avg\n        self.reset()\n    def reset(self):\n        \"\"\" reset \"\"\"\n        self.val = 0\n        self.avg = 0\n        self.sum = 0\n        self.count = 0\n    def update(self, val, n=1):\n        \"\"\" update \"\"\"\n        if isinstance(val, paddle.Tensor):\n            val = float(val)\n        self.val = val\n        self.sum += val * n\n        self.count += n\n        self.avg = self.sum / self.count\n    @property\n    def total(self):\n        return '{self.name}_sum: {self.sum:{self.fmt}}'.format(self=self)\n    @property\n    def total_minute(self):\n        return '{self.name}_sum: {s:{self.fmt}} min'.format(s=self.sum / 60,\n                                                            self=self)\n    @property\n    def mean(self):\n        return '{self.name}_avg: {self.avg:{self.fmt}}'.format(\n            self=self) if self.need_avg else ''\n    @property\n    def value(self):\n        return '{self.name}: {self.val:{self.fmt}}'.format(self=self)\ndef log_batch(metric_list,\n              batch_id,",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/record.py:73-113"
+    },
+    "801": {
+        "file_id": 69,
+        "content": "This code defines a class for tracking metrics such as sum, count, average, and total values. The `update` method allows updating the metric with a new value, while the `total`, `total_minute`, `mean`, and `value` properties retrieve the current metric value in different formats. The `log_batch` function logs batch metrics for a list of metrics at a specified batch ID.",
+        "type": "comment"
+    },
+    "802": {
+        "file_id": 69,
+        "content": "              epoch_id,\n              total_epoch,\n              mode,\n              ips,\n              tot_step=None,\n              max_iters=None):\n    batch_cost = str(metric_list['batch_time'].value) + ' sec,'\n    reader_cost = str(metric_list['reader_time'].value) + ' sec,'\n    metric_values = []\n    for m in metric_list:\n        if not (m == 'batch_time' or m == 'reader_time'):\n            metric_values.append(metric_list[m].value)\n    metric_str = ' '.join([str(v) for v in metric_values])\n    if max_iters:\n        epoch_str = \"iter:[{:>3d}/{:<3d}]\".format(tot_step, max_iters)\n    else:\n        epoch_str = \"epoch:[{:>3d}/{:<3d}]\".format(epoch_id, total_epoch)\n    step_str = \"{:s} step:{:<4d}\".format(mode, batch_id)\n    logger.info(\"{:s} {:s} {:s} {:s} {:s} {}\".format(\n        coloring(epoch_str, \"HEADER\") if batch_id == 0 else epoch_str,\n        coloring(step_str, \"PURPLE\"), coloring(metric_str, 'OKGREEN'),\n        coloring(batch_cost, \"OKGREEN\"), coloring(reader_cost, 'OKGREEN'),\n        ips))\ndef log_epoch(metric_list, epoch, mode, ips):",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/record.py:114-141"
+    },
+    "803": {
+        "file_id": 69,
+        "content": "This function logs epoch metrics and step information for a video processing task. It formats the log string with different colors for each section: epoch or iteration, step number, metric values, batch time, reader time, and ips (images per second). The logger outputs this formatted string to provide an informative summary of the task's progress.",
+        "type": "comment"
+    },
+    "804": {
+        "file_id": 69,
+        "content": "    batch_cost = 'avg_' + str(metric_list['batch_time'].value) + ' sec,'\n    reader_cost = 'avg_' + str(metric_list['reader_time'].value) + ' sec,'\n    batch_sum = str(metric_list['batch_time'].total) + ' sec,'\n    metric_values = []\n    for m in metric_list:\n        if not (m == 'batch_time' or m == 'reader_time'):\n            metric_values.append(metric_list[m].mean)\n    metric_str = ' '.join([str(v) for v in metric_values])\n    end_epoch_str = \"END epoch:{:<3d}\".format(epoch)\n    logger.info(\"{:s} {:s} {:s} {:s} {:s} {:s} {}\".format(\n        coloring(end_epoch_str, \"RED\"), coloring(mode, \"PURPLE\"),\n        coloring(metric_str, \"OKGREEN\"), coloring(batch_cost, \"OKGREEN\"),\n        coloring(reader_cost, \"OKGREEN\"), coloring(batch_sum, \"OKGREEN\"), ips))",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/record.py:142-157"
+    },
+    "805": {
+        "file_id": 69,
+        "content": "This code is formatting and logging information at the end of an epoch. It calculates various metric values, constructs a formatted string with different colors, and then logs this information using logger.info(). The metrics include batch time, reader time, total cost, mode, and inference per second. The strings are color-coded for visual clarity.",
+        "type": "comment"
+    },
+    "806": {
+        "file_id": 70,
+        "content": "/applications/EIVideo/EIVideo/paddlevideo/utils/registry.py",
+        "type": "filepath"
+    },
+    "807": {
+        "file_id": 70,
+        "content": "The code defines a Registry class for mapping names to objects and provides methods for registering, getting, and unregistering objects. It utilizes the @BACKBONES.register() decorator or BACKBONES.register(ResNet) function for registration, and also verifies if an object with a given name exists in the registry using the `get` method.",
+        "type": "summary"
+    },
+    "808": {
+        "file_id": 70,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nclass Registry(object):\n    \"\"\"\n    The registry that provides name -> object mapping, to support third-party users' custom modules.\n    To register an object:\n    .. code-block:: python\n        BACKBONES = Registry('backbone')\n        @BACKBONES.register()\n        class ResNet:\n            pass\n    Or:\n    .. code-block:: python\n        BACKBONES = Registry('backbone')\n        class ResNet:\n            pass\n        BACKBONES.register(ResNet)",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/registry.py:1-34"
+    },
+    "809": {
+        "file_id": 70,
+        "content": "This code defines a Registry class that provides name to object mapping, allowing third-party users to register their custom modules. Users can register their objects by using the @BACKBONES.register() decorator or by calling BACKBONES.register(ResNet).",
+        "type": "comment"
+    },
+    "810": {
+        "file_id": 70,
+        "content": "    Usage: To build a module.\n    .. code-block:: python\n        backbone_name = \"ResNet\"\n        b = BACKBONES.get(backbone_name)()\n    \"\"\"\n    def __init__(self, name):\n        \"\"\"\n        Args:\n            name (str): the name of this registry\n        \"\"\"\n        self._name = name\n        self._obj_map = {}\n    def __contains__(self, key):\n        return self._obj_map.get(key) is not None\n    def _do_register(self, name, obj):\n        assert (\n            name not in self._obj_map\n        ), \"An object named '{}' was already registered in '{}' registry!\".format(\n            name, self._name)\n        self._obj_map[name] = obj\n    def register(self, obj=None, name=None):\n        \"\"\"\n        Register the given object under the the name `obj.__name__`.\n        Can be used as either a decorator or not. See docstring of this class for usage.\n        \"\"\"\n        if obj is None:\n            # used as a decorator\n            def deco(func_or_class, name=name):\n                if name is None:\n                    name = func_or_class.__name__",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/registry.py:36-70"
+    },
+    "811": {
+        "file_id": 70,
+        "content": "This code is a registry class for storing and managing objects. It allows registering objects under their names or using decorators, and provides functions to check if an object with a given name exists in the registry.",
+        "type": "comment"
+    },
+    "812": {
+        "file_id": 70,
+        "content": "                self._do_register(name, func_or_class)\n                return func_or_class\n            return deco\n        # used as a function call\n        if name is None:\n            name = obj.__name__\n        self._do_register(name, obj)\n    def get(self, name):\n        \"\"\"Get the registry record.\n        Args:\n            name (str): The class name.\n        Returns:\n            ret: The class.\n        \"\"\"\n        ret = self._obj_map.get(name)\n        if ret is None:\n            raise KeyError(\n                \"No object named '{}' found in '{}' registry!\".format(\n                    name, self._name))\n        return ret",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/registry.py:71-96"
+    },
+    "813": {
+        "file_id": 70,
+        "content": "The code defines a class with methods for registering, getting and unregistering objects in a registry. The `_do_register` method is used to store the object's name and function or class into a dictionary. If no name is provided when calling the function, it defaults to the object's name. The `get` method retrieves an object from the registry using its name. If the object is not found, it raises a KeyError with an error message.",
+        "type": "comment"
+    },
+    "814": {
+        "file_id": 71,
+        "content": "/applications/EIVideo/EIVideo/paddlevideo/utils/save_load.py",
+        "type": "filepath"
+    },
+    "815": {
+        "file_id": 71,
+        "content": "This code adapts ViT model parameters, modifies pos_embed and time_embed for compatibility, and includes functions for loading/saving PaddlePaddle models with parallel/non-parallel handling and progress bar.",
+        "type": "summary"
+    },
+    "816": {
+        "file_id": 71,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport os\nimport os.path as osp\nimport time\nfrom tqdm import tqdm\nimport paddle\nimport paddle.nn.functional as F\nfrom EIVideo.paddlevideo.utils import get_logger\nfrom EIVideo.paddlevideo.utils import main_only\ndef pretrain_vit_param_trans(model, state_dicts, num_patches, seg_num,\n                             attention_type):\n    \"\"\"\n    Convert ViT's pre-trained model parameters to a parameter dictionary that matches the existing model",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/save_load.py:1-28"
+    },
+    "817": {
+        "file_id": 71,
+        "content": "The code is a function that converts pre-trained ViT model parameters to match the existing model. It takes in the model, state_dicts, num_patches, seg_num, and attention_type as arguments. The function adapts the ViT's pre-trained model parameters for better compatibility with the existing model structure.",
+        "type": "comment"
+    },
+    "818": {
+        "file_id": 71,
+        "content": "    \"\"\"\n    if 'head' + '.weight' in state_dicts:\n        del state_dicts['head' + '.weight']\n    if 'head' + '.bias' in state_dicts:\n        del state_dicts['head' + '.bias']\n    total_len = len(model.state_dict())\n    if num_patches + 1 != state_dicts['pos_embed'].shape[1]:\n        pos_embed = state_dicts['pos_embed']\n        cls_pos_embed = pos_embed[0, 0, :].unsqueeze(0).unsqueeze(1)\n        other_pos_embed = pos_embed[0,\n                                    1:, :].unsqueeze(0).unsqueeze(1).transpose(\n                                        (0, 1, 3, 2))\n        new_pos_embed = F.interpolate(other_pos_embed,\n                                      size=(other_pos_embed.shape[-2],\n                                            num_patches),\n                                      mode='nearest')\n        new_pos_embed = new_pos_embed.squeeze(0).transpose((0, 2, 1))\n        new_pos_embed = paddle.concat((cls_pos_embed, new_pos_embed), axis=1)\n        state_dicts['pos_embed'] = new_pos_embed\n        time.sleep(0.01)",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/save_load.py:29-49"
+    },
+    "819": {
+        "file_id": 71,
+        "content": "This code modifies the 'pos_embed' tensor in state_dicts if its shape doesn't match the expected shape. It interpolates the other_pos_embed to fit the desired size, then concatenates the cls_pos_embed and new_pos_embed and updates the state_dicts['pos_embed']. This allows the code to maintain consistency in the 'pos_embed' tensor.",
+        "type": "comment"
+    },
+    "820": {
+        "file_id": 71,
+        "content": "    if 'time_embed' in state_dicts and seg_num != state_dicts[\n            'time_embed'].shape[1]:\n        time_embed = state_dicts['time_embed'].transpose((0, 2, 1)).unsqueeze(0)\n        new_time_embed = F.interpolate(time_embed,\n                                       size=(time_embed.shape[-2], seg_num),\n                                       mode='nearest')\n        state_dicts['time_embed'] = new_time_embed.squeeze(0).transpose(\n            (0, 2, 1))\n        time.sleep(0.01)\n    with tqdm(total=total_len,\n              position=1,\n              bar_format='{desc}',\n              desc=\"Loading weights\") as desc:\n        if attention_type == 'divided_space_time':\n            new_state_dicts = state_dicts.copy()\n            for key in tqdm(state_dicts):\n                if 'blocks' in key and 'attn' in key:\n                    desc.set_description(\"Loading %s\" % key)\n                    new_key = key.replace('attn', 'temporal_attn')\n                    if not new_key in state_dicts:\n                        new_state_dicts[new_key] = state_dicts[key]",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/save_load.py:51-71"
+    },
+    "821": {
+        "file_id": 71,
+        "content": "The code checks if a specific key 'time_embed' exists in the state_dicts and adjusts its shape accordingly. It then interpolates the time_embed using nearest mode and transposes it to fit into the new shape. After that, it creates a progress bar \"Loading weights\" using tqdm for the total length of data and sets the description as the current key being processed. If 'attn' is present in the key and 'blocks', it replaces 'attn' with 'temporal_attn' if not already present in state_dicts and adds it to new_state_dicts.",
+        "type": "comment"
+    },
+    "822": {
+        "file_id": 71,
+        "content": "                    else:\n                        new_state_dicts[new_key] = state_dicts[new_key]\n                if 'blocks' in key and 'norm1' in key:\n                    desc.set_description(\"Loading %s\" % key)\n                    new_key = key.replace('norm1', 'temporal_norm1')\n                    if not new_key in state_dicts:\n                        new_state_dicts[new_key] = state_dicts[key]\n                    else:\n                        new_state_dicts[new_key] = state_dicts[new_key]\n                time.sleep(0.01)\n    ret_str = \"loading {:<20d} weights completed.\".format(\n        len(model.state_dict()))\n    desc.set_description(ret_str)\n    return new_state_dicts\ndef pretrain_resnet18_param_trans(model, loaded_dict):\n    encoder_dict = model.encoder.state_dict()\n    pose_encoder_dict = model.pose_encoder.state_dict()\n    names = ['encoder.', 'encoder_day.', 'encoder_night.']\n    for name in names:\n        for key, value in loaded_dict.items():\n            key = str(name + key)\n            if key in encoder_dict:",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/save_load.py:72-96"
+    },
+    "823": {
+        "file_id": 71,
+        "content": "This code is checking if a certain key exists in the state_dict and creating a new key with 'temporal' added to it. It is also updating the description for loading weights and returning the updated state_dicts. The function pretrain_resnet18_param_trans compares loaded dict with encoder and pose_encoder dictionaries in the model, possibly for parameter transfer learning.",
+        "type": "comment"
+    },
+    "824": {
+        "file_id": 71,
+        "content": "                encoder_dict[key] = value\n    num_input_images = 2\n    loaded_dict['conv1.weight'] = paddle.concat(\n        [loaded_dict['conv1.weight']] * num_input_images, 1) / num_input_images\n    for name, value in loaded_dict.items():\n        name = str('encoder.' + name)\n        if name in pose_encoder_dict:\n            pose_encoder_dict[name] = value\n    return encoder_dict, pose_encoder_dict\n#XXX(shipping): maybe need load N times because of different cards have different params.\n@main_only\ndef load_ckpt(model, weight_path, **kargs):\n    \"\"\"\n    1. Load pre-trained model parameters\n    2. Extract and convert from the pre-trained model to the parameters\n    required by the existing model\n    3. Load the converted parameters of the existing model\n    \"\"\"\n    #model.set_state_dict(state_dict)\n    if not osp.isfile(weight_path):\n        raise IOError(f'{weight_path} is not a checkpoint file')\n    #state_dicts = load(weight_path)\n    logger = get_logger(\"paddlevideo\")\n    state_dicts = paddle.load(weight_path)",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/save_load.py:97-127"
+    },
+    "825": {
+        "file_id": 71,
+        "content": "The code is defining a function to load pre-trained model parameters, which requires converting the parameters of the pre-trained model into the parameters needed for the current model. The function first checks if the weight path exists and raises an IOError if it does not. Then, it loads the state_dicts from the given weight_path using paddle.load().",
+        "type": "comment"
+    },
+    "826": {
+        "file_id": 71,
+        "content": "    if 'ResnetEncoder' in str(model):\n        encoder_dict, pose_encoder_dict = pretrain_resnet18_param_trans(\n            model, state_dicts)\n        tmp = model.state_dict()\n        tmp.update(\n            {'backbone.encoder.' + k: v\n             for (k, v) in encoder_dict.items()})\n        tmp.update({\n            'backbone.pose_encoder.' + k: v\n            for (k, v) in pose_encoder_dict.items()\n        })\n    elif \"VisionTransformer\" in str(model):  # For TimeSformer case\n        tmp = pretrain_vit_param_trans(model, state_dicts, kargs['num_patches'],\n                                       kargs['seg_num'],\n                                       kargs['attention_type'])\n    else:\n        tmp = {}\n        total_len = len(model.state_dict())\n        with tqdm(total=total_len,\n                  position=1,\n                  bar_format='{desc}',\n                  desc=\"Loading weights\") as desc:\n            for item in tqdm(model.state_dict(), total=total_len, position=0):\n                name = item\n                desc.set_description('Loading %s' % name)",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/save_load.py:128-152"
+    },
+    "827": {
+        "file_id": 71,
+        "content": "This code is used to load weights for a model, specifically handling Resnet Encoder and Vision Transformer cases. For Resnet Encoder, it updates the state dictionary with separate dictionaries for encoder and pose_encoder. For Vision Transformer (TimeSformer), it uses pretrain_vit_param_trans function. If the model is neither of these types, it initializes an empty dictionary. The code also includes a tqdm progress bar to show the loading progress.",
+        "type": "comment"
+    },
+    "828": {
+        "file_id": 71,
+        "content": "                if name not in state_dicts:  # Convert from non-parallel model\n                    if str('backbone.' + name) in state_dicts:\n                        tmp[name] = state_dicts['backbone.' + name]\n                else:  # Convert from parallel model\n                    tmp[name] = state_dicts[name]\n                time.sleep(0.01)\n        ret_str = \"loading {:<20d} weights completed.\".format(\n            len(model.state_dict()))\n        desc.set_description(ret_str)\n    model.set_state_dict(tmp)\ndef mkdir(dir):\n    if not os.path.exists(dir):\n        # avoid error when train with multiple gpus\n        try:\n            os.makedirs(dir)\n        except:\n            pass\n@main_only\ndef save(obj, path):\n    paddle.save(obj, path)\ndef load(file_name):\n    if not osp.isfile(file_name):\n        raise IOError(f'{file_name} not exist')\n    return paddle.load(file_name)",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/save_load.py:153-182"
+    },
+    "829": {
+        "file_id": 71,
+        "content": "This code snippet defines functions for loading and saving PaddlePaddle models. It checks if the model is parallel or non-parallel, converts the state dictionaries accordingly, and updates the model's state dictionary. The `mkdir` function creates a directory if it doesn't exist already, and there are separate save and load functions defined for ease of use.",
+        "type": "comment"
+    },
+    "830": {
+        "file_id": 72,
+        "content": "/applications/EIVideo/EIVideo/paddlevideo/version.py",
+        "type": "filepath"
+    },
+    "831": {
+        "file_id": 72,
+        "content": "This code contains the version information for PaddleVideo, licensed under the Apache License 2.0, and defines the current version as \"0.0.1\".",
+        "type": "summary"
+    },
+    "832": {
+        "file_id": 72,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n__all__ = [\"paddlevideo_version\"]\npaddlevideo_version = \"0.0.1\"",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/version.py:1-16"
+    },
+    "833": {
+        "file_id": 72,
+        "content": "This code contains the version information for PaddleVideo, licensed under the Apache License 2.0, and defines the current version as \"0.0.1\".",
+        "type": "comment"
+    },
+    "834": {
+        "file_id": 73,
+        "content": "/applications/EIVideo/EIVideo/setup.py",
+        "type": "filepath"
+    },
+    "835": {
+        "file_id": 73,
+        "content": "These comments provide author, date, and copyright information, indicating the source should be cited if the code is reprinted.",
+        "type": "summary"
+    },
+    "836": {
+        "file_id": 73,
+        "content": "# Author: Acer Zhang\n# Datetime: 2022/1/11\n# Copyright belongs to the author.\n# Please indicate the source for reprinting.",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/setup.py:1-4"
+    },
+    "837": {
+        "file_id": 73,
+        "content": "These comments provide author, date, and copyright information, indicating the source should be cited if the code is reprinted.",
+        "type": "comment"
+    },
+    "838": {
+        "file_id": 74,
+        "content": "/applications/EIVideo/EIVideo/version.py",
+        "type": "filepath"
+    },
+    "839": {
+        "file_id": 74,
+        "content": "This code snippet is the version information for the EIVideo application, created by Acer Zhang on January 11th, 2022. It has a version number \"0.1a\" and the author requests proper attribution if reusing the code.",
+        "type": "summary"
+    },
+    "840": {
+        "file_id": 74,
+        "content": "# Author: Acer Zhang\n# Datetime: 2022/1/11 \n# Copyright belongs to the author.\n# Please indicate the source for reprinting.\n__version__ = \"0.1a\"",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/version.py:1-6"
+    },
+    "841": {
+        "file_id": 74,
+        "content": "This code snippet is the version information for the EIVideo application, created by Acer Zhang on January 11th, 2022. It has a version number \"0.1a\" and the author requests proper attribution if reusing the code.",
+        "type": "comment"
+    },
+    "842": {
+        "file_id": 75,
+        "content": "/applications/EIVideo/QEIVideo/__init__.py",
+        "type": "filepath"
+    },
+    "843": {
+        "file_id": 75,
+        "content": "Code sets the QEI_VIDEO_ROOT variable to the absolute path of the directory containing the current file. It also imports the version module from QEIVideo and assigns its __version__ attribute to a variable. This may be used for identifying the version of the QEIVideo application.",
+        "type": "summary"
+    },
+    "844": {
+        "file_id": 75,
+        "content": "# Author: Acer Zhang\n# Datetime: 2022/1/6 \n# Copyright belongs to the author.\n# Please indicate the source for reprinting.\nimport os\nQEI_VIDEO_ROOT = os.path.abspath(os.path.dirname(__file__))\nimport os\nfrom QEIVideo.version import __version__\nQEI_VIDEO_ROOT = os.path.abspath(os.path.dirname(__file__))",
+        "type": "code",
+        "location": "/applications/EIVideo/QEIVideo/__init__.py:1-13"
+    },
+    "845": {
+        "file_id": 75,
+        "content": "Code sets the QEI_VIDEO_ROOT variable to the absolute path of the directory containing the current file. It also imports the version module from QEIVideo and assigns its __version__ attribute to a variable. This may be used for identifying the version of the QEIVideo application.",
+        "type": "comment"
+    },
+    "846": {
+        "file_id": 76,
+        "content": "/applications/EIVideo/QEIVideo/build_gui.py",
+        "type": "filepath"
+    },
+    "847": {
+        "file_id": 76,
+        "content": "The script uses PyQt5 to create a video processing GUI with functions for initializing variables, opening file dialogs, handling combo box indexing, and pen color changes. It also includes a `open_frame` function that updates the progress slider and stops the video at the last frame.",
+        "type": "summary"
+    },
+    "848": {
+        "file_id": 76,
+        "content": "# Author: Acer Zhang\n# Datetime:2022/1/11 \n# Copyright belongs to the author.\n# Please indicate the source for reprinting.\nimport json\nimport os\nimport numpy as np\nfrom PIL import Image\nfrom PyQt5 import QtCore, QtWidgets\nfrom PyQt5.QtGui import *\nfrom PyQt5.QtWidgets import *\nfrom PyQt5.QtCore import *\nimport cv2\nfrom EIVideo.api import json2frame, png2json, load_video\nfrom EIVideo.main import main\n# ToDo To AP-kai: 这是定义前端临时保存用于推理的json的地点之类的，因为是固定的，所以声明为全局常量是最好的\nfrom EIVideo import TEMP_JSON_SAVE_PATH, TEMP_IMG_SAVE_PATH, TEMP_JSON_FINAL_PATH\nfrom QEIVideo.gui.ui_main_window import Ui_MainWindow\nclass BuildGUI(QMainWindow, Ui_MainWindow):\n    def __init__(self):\n        super(BuildGUI, self).__init__()\n        # ToDo To AP-kai: 这里定义当前选择的视频路径的占位符，相当于全局变量\n        self.select_video_path = None\n        # ToDo To AP-kai: 未来为用户提供个保存路径的入口哈，这里先随意定义了个路径\n        self.save_path = \"./result\"\n        os.makedirs(self.save_path, exist_ok=True)\n        self.setupUi(self)\n    def infer(self):\n        self.label.setText(\"Start infer\")",
+        "type": "code",
+        "location": "/applications/EIVideo/QEIVideo/build_gui.py:1-36"
+    },
+    "849": {
+        "file_id": 76,
+        "content": "This code is the initial part of a Python script for building a GUI (Graphical User Interface) application using PyQt5 library. It defines a class called BuildGUI that inherits from QMainWindow and Ui_MainWindow, which likely contains the layout and design elements of the GUI. The __init__ method sets up some initial variables such as the selected video path and save path for results. The infer method is meant to start an inference process.",
+        "type": "comment"
+    },
+    "850": {
+        "file_id": 76,
+        "content": "        self.progressBar.setProperty(\"value\", 0)\n        image = self.paintBoard.get_content_as_q_image()\n        image.save(TEMP_IMG_SAVE_PATH)\n        print(self.slider_frame_num)\n        self.progressBar.setProperty(\"value\", 25)\n        # ToDo To AP-kai:相同的文件路径，直接定义一个常量就好\n        png2json(TEMP_IMG_SAVE_PATH, self.slider_frame_num, TEMP_JSON_SAVE_PATH)\n        self.progressBar.setProperty(\"value\", 50)\n        # ToDo To AP-kai:打印的信息，需要注意首字母大写\n        # ToDo To AP-kai: 此处传入保存路径以及当前选择的视频路径，最后会在manet_stage1.py里通过cfg来传入\n        out = main(video_path=self.select_video_path, save_path=self.save_path)\n        print('Infer ok')\n        self.progressBar.setProperty(\"value\", 75)\n        self.all_frames = json2frame(TEMP_JSON_FINAL_PATH)\n        print(\"Success get submit_masks\")\n        self.open_frame()\n        self.progressBar.setProperty(\"value\", 100)\n        self.label.setText(\"Infer succeed\")\n    def btn_func(self, btn):\n        if btn == self.playbtn:\n            self.label.setText(\"Play video\")\n            if self.progress_slider.value() == self.cap.get(7) - 1:",
+        "type": "code",
+        "location": "/applications/EIVideo/QEIVideo/build_gui.py:37-59"
+    },
+    "851": {
+        "file_id": 76,
+        "content": "The code snippet sets the progress bar value, saves an image, prints frame numbers, calls a main function to perform inference, loads JSON frames, opens a frame, and updates a label when play button is clicked.",
+        "type": "comment"
+    },
+    "852": {
+        "file_id": 76,
+        "content": "                self.slider_frame_num = 0\n                self.progress_slider.setValue(self.slider_frame_num)\n                self.time_label.setText('{}/{}'.format(self.slider_frame_num, self.cap.get(7)))\n            self.timer_camera = QTimer()  # 定义定时器\n            self.timer_camera.start(1000 / self.cap.get(cv2.CAP_PROP_FPS))\n            self.slider_frame_num = self.progress_slider.value()\n            self.timer_camera.timeout.connect(self.open_frame)\n        elif btn == self.pushButton_2:\n            self.label.setText(\"Stop video\")\n            self.slot_stop()\n        elif btn == self.pushButton_4:\n            self.label.setText(\"Choose video\")\n            self.select_video_path, _ = QFileDialog.getOpenFileName(self.frame, \"Open\", \"\", \"*.mp4;;All Files(*)\")\n            print(\"-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-\")\n            print(\"Select video file path:\\t\" + self.select_video_path)\n            # ToDo To AP-kai:下断点来看一下，如果不选择的时候返回值是什么样的，然后再做判断，目前这个if没有生效\n            if self.select_video_path != \"\":",
+        "type": "code",
+        "location": "/applications/EIVideo/QEIVideo/build_gui.py:60-78"
+    },
+    "853": {
+        "file_id": 76,
+        "content": "The code above contains three elif conditions for button press events. If the self.pushButton_1 is pressed, it initializes variables and starts a timer to update the video frame. If self.pushButton_2 is pressed, it stops the video and sets the label text to \"Stop video\". If self.pushButton_4 is pressed, it opens a file dialog for choosing a video file, and if a file is chosen, it prints the selected video file path. The current code is checking if there is a non-empty selected video file path after the file dialog is closed.",
+        "type": "comment"
+    },
+    "854": {
+        "file_id": 76,
+        "content": "                self.cap = cv2.VideoCapture(self.select_video_path)\n                # 存所有frame\n                self.save_temp_frame()\n                print(\"save temp frame done\")\n                self.progress_slider.setRange(0, self.cap.get(cv2.CAP_PROP_FRAME_COUNT))\n                self.slider_frame_num = 0\n                self.open_frame()\n            # ToDo To AP-kai: 未来这个地方增加提示框，告诉他没有选择文件\n    def on_cbtn_eraser_clicked(self):\n        self.label.setText(\"Eraser On\")\n        if self.cbtn_Eraser.isChecked():\n            self.paintBoard.EraserMode = True  # 进入橡皮擦模式\n        else:\n            self.paintBoard.EraserMode = False  # 退出橡皮擦模式\n    def fill_color_list(self, combo_box):\n        index_black = 0\n        index = 0\n        for color in self.colorList:\n            if color == \"black\":\n                index_black = index\n            index += 1\n            pix = QPixmap(70, 20)\n            pix.fill(QColor(color))\n            combo_box.addItem(QIcon(pix), None)\n            combo_box.setIconSize(QSize(70, 20))\n            combo_box.setSizeAdjustPolicy(QComboBox.AdjustToContents)",
+        "type": "code",
+        "location": "/applications/EIVideo/QEIVideo/build_gui.py:79-107"
+    },
+    "855": {
+        "file_id": 76,
+        "content": "The code snippet creates a GUI for video processing. It sets up a VideoCapture object, stores all frames, and initializes a progress slider with the total number of frames. The Eraser button toggles between EraserMode on/off in the paintBoard. The fill_color_list function populates a color combo box with predefined colors, including black at a specific index.",
+        "type": "comment"
+    },
+    "856": {
+        "file_id": 76,
+        "content": "        combo_box.setCurrentIndex(index_black)\n    def on_pen_color_change(self):\n        self.label.setText(\"Change pen color\")\n        color_index = self.comboBox_penColor.currentIndex()\n        color_str = self.colorList[color_index]\n        self.paintBoard.change_pen_color(color_str)\n    # 拖拽进度条\n    def update_video_position_func(self):\n        self.label.setText(\"Change slider position\")\n        self.slider_frame_num = self.progress_slider.value()\n        self.slot_stop()\n        self.open_frame()\n        self.progress_slider.setValue(self.slider_frame_num)\n        self.time_label.setText('{}/{}'.format(self.slider_frame_num, self.cap.get(7)))\n    def save_temp_frame(self):\n        _, self.all_frames = load_video(self.select_video_path, 480)\n    def slot_stop(self):\n        if self.cap != []:\n            self.timer_camera.stop()  # 停止计时器\n        else:\n            # ToDo To AP-kai: QMessageBox.warning没有返回值，这里我把Warming = QMessageBox.warning的Warming删去了\n            QMessageBox.warning(self, \"Warming\", \"Push the left upper corner button to Quit.\",",
+        "type": "code",
+        "location": "/applications/EIVideo/QEIVideo/build_gui.py:109-135"
+    },
+    "857": {
+        "file_id": 76,
+        "content": "This code defines several functions for a GUI application. It sets the current index of a combo box, handles pen color changes by updating the paintBoard's color, updates the video position based on progress slider input, saves a temporary frame from a video file, and stops the timer if it is running.",
+        "type": "comment"
+    },
+    "858": {
+        "file_id": 76,
+        "content": "                                QMessageBox.Yes)\n    def open_frame(self):\n        self.progress_slider.setValue(self.slider_frame_num)\n        self.slider_frame_num = self.progress_slider.value()\n        self.frame = self.all_frames[self.slider_frame_num]\n        frame = self.frame\n        height, width, bytes_per_component = frame.shape\n        bytes_per_line = bytes_per_component * width\n        q_image = QImage(frame.data, width, height, bytes_per_line,\n                         QImage.Format_RGB888).scaled(self.picturelabel.width(), self.picturelabel.height())\n        self.picturelabel.setPixmap(QPixmap.fromImage(q_image))\n        self.slider_frame_num = self.slider_frame_num + 1\n        self.time_label.setText('{}/{}'.format(self.slider_frame_num, self.cap.get(7)))\n        if self.progress_slider.value() == self.cap.get(7) - 1:\n            self.slot_stop()",
+        "type": "code",
+        "location": "/applications/EIVideo/QEIVideo/build_gui.py:136-151"
+    },
+    "859": {
+        "file_id": 76,
+        "content": "This code defines a function `open_frame` which updates the progress slider, displays the current frame using QImage and QPixmap, increments the slider value, sets the time label, and stops the video if at the last frame.",
+        "type": "comment"
+    },
+    "860": {
+        "file_id": 77,
+        "content": "/applications/EIVideo/QEIVideo/gui/__init__.py",
+        "type": "filepath"
+    },
+    "861": {
+        "file_id": 77,
+        "content": "This code block appears to be a comment section at the beginning of the file, indicating the author's name, date of creation, copyright information, and request for proper citation in case of reuse. The code seems to belong to PaddleVideo's EIVideo application, specifically within QEIVideo's gui module.",
+        "type": "summary"
+    },
+    "862": {
+        "file_id": 77,
+        "content": "# Author: Acer Zhang\n# Datetime: 2022/1/6 \n# Copyright belongs to the author.\n# Please indicate the source for reprinting.",
+        "type": "code",
+        "location": "/applications/EIVideo/QEIVideo/gui/__init__.py:1-4"
+    },
+    "863": {
+        "file_id": 77,
+        "content": "This code block appears to be a comment section at the beginning of the file, indicating the author's name, date of creation, copyright information, and request for proper citation in case of reuse. The code seems to belong to PaddleVideo's EIVideo application, specifically within QEIVideo's gui module.",
+        "type": "comment"
+    },
+    "864": {
+        "file_id": 78,
+        "content": "/applications/EIVideo/QEIVideo/gui/demo.py",
+        "type": "filepath"
+    },
+    "865": {
+        "file_id": 78,
+        "content": "The code defines a `DrawFrame` class, which is a QWidget for drawing paths and responding to mouse events. It is used in conjunction with other classes such as `DemoUI`. The 'export' function converts painter's polygon to fill polygon and is triggered by the 'start_btn'. The code initializes the application and starts the event loop.",
+        "type": "summary"
+    },
+    "866": {
+        "file_id": 78,
+        "content": "# Author: Acer Zhang\n# Datetime: 2022/1/6 \n# Copyright belongs to the author.\n# Please indicate the source for reprinting.\nimport sys\nfrom PyQt5.QtWidgets import QApplication, QMainWindow, QFrame, QWidget\nfrom PyQt5.QtGui import QPainter, QPixmap, QPen, QColor, QPainterPath\nfrom PyQt5.QtCore import Qt, QPoint\nfrom PyQt5 import QtCore, QtGui, QtWidgets\nfrom QEIVideo.ui.demo import Ui_MainWindow as DemoUIRoot\nclass DrawFrame(QWidget):\n    def __init__(self, painter, *args, **kwargs):\n        super(DrawFrame, self).__init__(*args, **kwargs)\n        self.painter = painter\n    def paintEvent(self, event):\n        painter = QPainter(self)\n        pen = QPen(QColor(\"orange\"))\n        pen.setWidth(5)\n        pen.setCapStyle(Qt.RoundCap)\n        pen.setJoinStyle(Qt.RoundJoin)\n        painter.setPen(pen)\n        painter.drawPath(self.painter)\n    def mousePressEvent(self, event):\n        self.painter.moveTo(event.pos())\n        self.update()\n    def mouseMoveEvent(self, event):\n        self.painter.lineTo(event.pos())\n        self.update()",
+        "type": "code",
+        "location": "/applications/EIVideo/QEIVideo/gui/demo.py:1-36"
+    },
+    "867": {
+        "file_id": 78,
+        "content": "This code defines a class called DrawFrame, which is a QWidget that can be drawn on. It overrides the paintEvent method to draw paths using a QPainter, and responds to mouse events for line drawing. The class takes a painter object in its constructor, suggesting it could be used in conjunction with other classes or methods.",
+        "type": "comment"
+    },
+    "868": {
+        "file_id": 78,
+        "content": "class DemoUI(QMainWindow, DemoUIRoot):\n    def __init__(self):\n        super(DemoUI, self).__init__()\n        self.setupUi(self)\n        self.painter = QPainterPath()\n        self.draw_frame = DrawFrame(self.painter, self.video_frame)\n        self.draw_frame.setGeometry(QtCore.QRect(0, 10, 751, 301))\n        self.draw_frame.setObjectName(\"draw_frame\")\n        self.draw_frame.raise_()\n        self.draw_frame.setAttribute(QtCore.Qt.WA_TranslucentBackground)\n        self.start_btn.clicked.connect(self.export)\n    def export(self):\n        a = self.painter.toFillPolygon()\n        pass\nif __name__ == '__main__':\n    app = QApplication(sys.argv)\n    gui_class = DemoUI()\n    gui_class.show()\n    sys.exit(app.exec_())",
+        "type": "code",
+        "location": "/applications/EIVideo/QEIVideo/gui/demo.py:39-62"
+    },
+    "869": {
+        "file_id": 78,
+        "content": "This code initializes a `DemoUI` class with a `DrawFrame` object that draws video frames. The `export` function converts the painter's polygon to a fill polygon and is triggered by the 'start_btn'. The code also sets up the application, creates an instance of the `DemoUI` class, and starts the event loop.",
+        "type": "comment"
+    },
+    "870": {
+        "file_id": 79,
+        "content": "/applications/EIVideo/QEIVideo/gui/ui_main_window.py",
+        "type": "filepath"
+    },
+    "871": {
+        "file_id": 79,
+        "content": "This code initializes a video/painting app with UI elements, connects events to functions for smooth operation, and displays \"Hi, This is EIVideo\" on stop.",
+        "type": "summary"
+    },
+    "872": {
+        "file_id": 79,
+        "content": "# -*- coding: utf-8 -*-\n# Form implementation generated from reading ui file 'GUI.ui'\n#\n# Created by: PyQt5 UI code generator 5.15.2\n#\n# WARNING: Any manual changes made to this file will be lost when pyuic5 is\n# run again.  Do not edit this file unless you know what you are doing.\nfrom PyQt5 import QtCore, QtWidgets\nfrom PyQt5.QtGui import *\nfrom PyQt5.QtWidgets import *\nfrom PyQt5.QtCore import *\nfrom QEIVideo.widget.PaintBoard import PaintBoard\nclass Ui_MainWindow(object):\n    def setupUi(self, MainWindow):\n        MainWindow.setObjectName(\"EIVideo\")\n        MainWindow.resize(1101, 751)\n        self.centralwidget = QtWidgets.QWidget(MainWindow)\n        self.centralwidget.setObjectName(\"centralwidget\")\n        self.frame = QtWidgets.QFrame(self.centralwidget)\n        self.frame.setGeometry(QtCore.QRect(20, 20, 1271, 771))\n        self.frame.setFrameShadow(QtWidgets.QFrame.Raised)\n        self.frame.setObjectName(\"frame\")\n        self.cap = []\n        self.all_frames = []\n        self.fps = None\n        self.timer = QTimer(self.frame)",
+        "type": "code",
+        "location": "/applications/EIVideo/QEIVideo/gui/ui_main_window.py:1-32"
+    },
+    "873": {
+        "file_id": 79,
+        "content": "This code initializes the main window of a video application, sets its size and geometry, creates an empty list for capturing frames, and starts a timer.",
+        "type": "comment"
+    },
+    "874": {
+        "file_id": 79,
+        "content": "        self.time_label = QLabel('--/--', self.frame)\n        self.progress_slider = QSlider(self.frame)\n        self.progress_slider.setEnabled(True)\n        self.progress_slider.setOrientation(Qt.Horizontal)\n        self.progress_slider.setFixedWidth(710)\n        self.progress_slider.setFixedHeight(20)\n        self.progress_slider.setSingleStep(1)  # 设置变化步长\n        self.progress_slider.setValue(0)\n        self.progress_slider.sliderReleased.connect(self.update_video_position_func)  # 拖拽进度条\n        self.picturelabel = QtWidgets.QLabel(self.frame)\n        self.picturelabel.setGeometry(30, 30, 810, 458)\n        self.picturelabel.setText(\"\")\n        self.picturelabel.setObjectName(\"picturelabel\")\n        self.paintBoard = PaintBoard(self.frame)\n        self.paintBoard.setGeometry(30, 30, 810, 458)\n        self.cbtn_Eraser = QCheckBox(\"橡皮擦\")\n        self.cbtn_Eraser.setParent(self.frame)\n        self.cbtn_Eraser.move(950, 40)\n        self.cbtn_Eraser.clicked.connect(self.on_cbtn_eraser_clicked)\n        self.btn_Clear = QPushButton(\"清空画板\")",
+        "type": "code",
+        "location": "/applications/EIVideo/QEIVideo/gui/ui_main_window.py:33-56"
+    },
+    "875": {
+        "file_id": 79,
+        "content": "This code is initializing UI elements in a window, setting up progress slider for video position tracking, adding a picture label and paint board for drawing, and enabling interaction with eraser checkbox and clear button.",
+        "type": "comment"
+    },
+    "876": {
+        "file_id": 79,
+        "content": "        self.btn_Clear.setParent(self.frame)  # 设置父对象为本界面\n        self.btn_Clear.move(950, 60)\n        self.btn_Clear.clicked.connect(self.paintBoard.clear)\n        self.label_penColor = QLabel(self.frame)\n        self.label_penColor.setText(\"画笔颜色\")\n        self.label_penColor.move(990, 100)\n        # 获取颜色列表(字符串类型)\n        self.colorList = QColor.colorNames()\n        self.comboBox_penColor = QComboBox(self.frame)\n        self.fill_color_list(self.comboBox_penColor)  # 用各种颜色填充下拉列表\n        self.comboBox_penColor.move(1080, 80)\n        self.comboBox_penColor.currentIndexChanged.connect(\n            self.on_pen_color_change)  # 关联下拉列表的当前索引变更信号与函数on_PenColorChange\n        self.helplabel = QLabel()\n        self.helplabel.setText(\"Hi,Welcome to use EIVideo\\n\"\n                               \"This is a guide for EIVideo,\\n\"\n                               \"please check\\n\"\n                               \"1. Choose 'Add' for a video\\n\"\n                               \"2. Click 'Play' to start playing\\n\"\n                               \"3. At this point, all functions \\n\"",
+        "type": "code",
+        "location": "/applications/EIVideo/QEIVideo/gui/ui_main_window.py:57-77"
+    },
+    "877": {
+        "file_id": 79,
+        "content": "The code sets the parent object of btn_Clear to self.frame, moves the btn_Clear and label_penColor widgets to specific positions, connects a button click event to clear the paintBoard, fills a comboBox_penColor with color options, places it at a particular location, links its currentIndexChanged signal to on_pen_color_change function, and provides guidance for using EIVideo.",
+        "type": "comment"
+    },
+    "878": {
+        "file_id": 79,
+        "content": "                               \"are unlocked\\n\"\n                               \"4. Paint and enjoy it!\\n\")\n        self.widget2 = QtWidgets.QWidget(self.frame)\n        self.widget2.setGeometry(860, 60, 200, 300)\n        self.widget2.setObjectName(\"widget2\")\n        self.rightLayout = QtWidgets.QVBoxLayout(self.widget2)\n        self.rightLayout.setContentsMargins(0, 0, 0, 0)\n        self.rightLayout.setObjectName(\"rightLayout\")\n        self.rightLayout.addWidget(self.helplabel)\n        self.rightLayout.addSpacing(50)\n        self.rightLayout.addWidget(self.cbtn_Eraser)\n        self.rightLayout.addWidget(self.btn_Clear)\n        self.colorLayout = QtWidgets.QHBoxLayout(self.widget2)\n        self.colorLayout.setContentsMargins(0, 0, 0, 0)\n        self.colorLayout.setObjectName('colorLayout')\n        self.colorLayout.addWidget(self.label_penColor)\n        self.colorLayout.addWidget(self.comboBox_penColor)\n        self.rightLayout.addLayout(self.colorLayout)\n        # pushButton_6 -> GO\n        self.pushButton_6 = QtWidgets.QPushButton(self.frame)",
+        "type": "code",
+        "location": "/applications/EIVideo/QEIVideo/gui/ui_main_window.py:78-101"
+    },
+    "879": {
+        "file_id": 79,
+        "content": "This code sets up a user interface layout for a painting application. It includes a help label, buttons to clear and switch the eraser, a color picker, and a 'GO' push button. The layout is organized in a vertical box and horizontal box arrangement.",
+        "type": "comment"
+    },
+    "880": {
+        "file_id": 79,
+        "content": "        self.pushButton_6.setGeometry(870, 600, 150, 90)\n        self.pushButton_6.setObjectName(\"pushButton_6\")\n        self.pushButton_6.clicked.connect(self.infer)\n        self.widget1 = QtWidgets.QWidget(self.frame)\n        self.widget1.move(60, 520)\n        self.widget1.setObjectName(\"widget1\")\n        self.barLayout = QtWidgets.QVBoxLayout(self.widget1)\n        self.barLayout.setContentsMargins(0, 0, 0, 0)\n        self.barLayout.setObjectName(\"barLayout\")\n        self.horizontalLayout = QtWidgets.QHBoxLayout(self.widget1)\n        self.horizontalLayout.setContentsMargins(0, 0, 0, 0)\n        self.horizontalLayout.setObjectName(\"horizontalLayout\")\n        self.timeLayout = QtWidgets.QHBoxLayout(self.widget1)\n        self.timeLayout.setContentsMargins(0, 0, 0, 0)\n        self.timeLayout.setObjectName(\"horizontalLayout\")\n        self.playbtn = QtWidgets.QPushButton(self.widget1)\n        self.playbtn.setObjectName(\"playbtn\")\n        self.playbtn.clicked.connect(lambda: self.btn_func(self.playbtn))\n        self.horizontalLayout.addWidget(self.playbtn)",
+        "type": "code",
+        "location": "/applications/EIVideo/QEIVideo/gui/ui_main_window.py:102-122"
+    },
+    "881": {
+        "file_id": 79,
+        "content": "This code is creating a UI for a video player. It sets the position and function of a play button, as well as defining layouts for other UI elements such as time display. The play button's click event is connected to a method called \"btn_func\" which takes the play button as an argument.",
+        "type": "comment"
+    },
+    "882": {
+        "file_id": 79,
+        "content": "        self.pushButton_2 = QtWidgets.QPushButton(self.widget1)\n        self.pushButton_2.setObjectName(\"pushButton_2\")\n        self.pushButton_2.clicked.connect(lambda: self.btn_func(self.pushButton_2))\n        self.horizontalLayout.addWidget(self.pushButton_2)\n        self.pushButton_4 = QtWidgets.QPushButton(self.widget1)\n        self.pushButton_4.setObjectName(\"pushButton_4\")\n        self.pushButton_4.clicked.connect(lambda: self.btn_func(self.pushButton_4))\n        self.horizontalLayout.addWidget(self.pushButton_4)\n        self.timeLayout.addWidget(self.progress_slider)\n        self.timeLayout.addWidget(self.time_label)\n        self.barLayout.addSpacing(20)\n        self.barLayout.addLayout(self.timeLayout)\n        self.barLayout.addSpacing(30)\n        self.barLayout.addLayout(self.horizontalLayout)\n        self.splitter = QtWidgets.QSplitter(self.frame)\n        self.splitter.setGeometry(QtCore.QRect(71, 670, 750, 20))\n        self.splitter.setOrientation(QtCore.Qt.Horizontal)\n        self.splitter.setObjectName(\"splitter\")",
+        "type": "code",
+        "location": "/applications/EIVideo/QEIVideo/gui/ui_main_window.py:123-142"
+    },
+    "883": {
+        "file_id": 79,
+        "content": "This code initializes two push buttons, connects their click events to a function, adds them to a horizontal layout, and adds the layout to a splitter. It also adds time-related widgets to another layout, and adds both layouts to the splitter.",
+        "type": "comment"
+    },
+    "884": {
+        "file_id": 79,
+        "content": "        self.label = QtWidgets.QLabel(self.splitter)\n        self.label.setObjectName(\"label\")\n        self.progressBar = QtWidgets.QProgressBar(self.splitter)\n        self.progressBar.setProperty(\"value\", 0)\n        self.progressBar.setObjectName(\"progressBar\")\n        MainWindow.setCentralWidget(self.centralwidget)\n        self.menubar = QtWidgets.QMenuBar(MainWindow)\n        self.menubar.setGeometry(QtCore.QRect(0, 0, 1327, 23))\n        self.menubar.setObjectName(\"menubar\")\n        MainWindow.setMenuBar(self.menubar)\n        self.statusbar = QtWidgets.QStatusBar(MainWindow)\n        self.statusbar.setObjectName(\"statusbar\")\n        MainWindow.setStatusBar(self.statusbar)\n        self.retranslateUi(MainWindow)\n        QtCore.QMetaObject.connectSlotsByName(MainWindow)\n    def retranslateUi(self, MainWindow):\n        _translate = QtCore.QCoreApplication.translate\n        MainWindow.setWindowTitle(_translate(\"MainWindow\", \"MainWindow\"))\n        self.pushButton_6.setText(_translate(\"MainWindow\", \"GO\"))\n        self.playbtn.setText(_translate(\"MainWindow\", \"Play\"))",
+        "type": "code",
+        "location": "/applications/EIVideo/QEIVideo/gui/ui_main_window.py:143-164"
+    },
+    "885": {
+        "file_id": 79,
+        "content": "This code is creating a user interface for a main window of an application. It includes a label, progress bar, menu bar, and status bar. The window has a title and two buttons: \"GO\" and \"Play\". The `retranslateUi` function is used to set the window title and button labels.",
+        "type": "comment"
+    },
+    "886": {
+        "file_id": 79,
+        "content": "        self.pushButton_2.setText(_translate(\"MainWindow\", \"Stop\"))\n        self.pushButton_4.setText(_translate(\"MainWindow\", \"Add\"))\n        self.label.setText(_translate(\"MainWindow\", \"Hi, This is EIVideo\"))",
+        "type": "code",
+        "location": "/applications/EIVideo/QEIVideo/gui/ui_main_window.py:165-167"
+    },
+    "887": {
+        "file_id": 79,
+        "content": "This code updates the text on three GUI elements in the \"MainWindow\" class. The first button is labeled \"Stop,\" the second button is labeled \"Add,\" and a label displays \"Hi, This is EIVideo.\"",
+        "type": "comment"
+    },
+    "888": {
+        "file_id": 80,
+        "content": "/applications/EIVideo/QEIVideo/start.py",
+        "type": "filepath"
+    },
+    "889": {
+        "file_id": 80,
+        "content": "The code is a Python script that initializes a QApplication object, creates an instance of the BuildGUI class from the QEIVideo module, displays it, and executes the application's event loop. It is likely used to launch a graphical user interface (GUI) for a video processing or analysis application. The author is credited, and the code includes a copyright notice requesting proper attribution if reused.",
+        "type": "summary"
+    },
+    "890": {
+        "file_id": 80,
+        "content": "# Author: AP-Kai\n# Datetime: 2022/1/7\n# Copyright belongs to the author.\n# Please indicate the source for reprinting.\nimport sys\nfrom QEIVideo.build_gui import BuildGUI\nfrom PyQt5.QtWidgets import QApplication\ndef run():\n    app = QApplication(sys.argv)\n    demo = BuildGUI()\n    demo.show()\n    sys.exit(app.exec())\nif __name__ == '__main__':\n    run()",
+        "type": "code",
+        "location": "/applications/EIVideo/QEIVideo/start.py:1-20"
+    },
+    "891": {
+        "file_id": 80,
+        "content": "The code is a Python script that initializes a QApplication object, creates an instance of the BuildGUI class from the QEIVideo module, displays it, and executes the application's event loop. It is likely used to launch a graphical user interface (GUI) for a video processing or analysis application. The author is credited, and the code includes a copyright notice requesting proper attribution if reused.",
+        "type": "comment"
+    },
+    "892": {
+        "file_id": 81,
+        "content": "/applications/EIVideo/QEIVideo/tools/__init__.py",
+        "type": "filepath"
+    },
+    "893": {
+        "file_id": 81,
+        "content": "This code block appears to be a comment section at the beginning of the file, indicating the author's name, date of creation, copyright information, and request for proper citation in case of reuse. The code seems to belong to PaddleVideo's EIVideo application, specifically within QEIVideo's gui module.",
+        "type": "summary"
+    },
+    "894": {
+        "file_id": 81,
+        "content": "# Author: Acer Zhang\n# Datetime: 2022/1/6 \n# Copyright belongs to the author.\n# Please indicate the source for reprinting.",
+        "type": "code",
+        "location": "/applications/EIVideo/QEIVideo/gui/__init__.py:1-4"
+    },
+    "895": {
+        "file_id": 81,
+        "content": "This code block appears to be a comment section at the beginning of the file, indicating the author's name, date of creation, copyright information, and request for proper citation in case of reuse. The code seems to belong to PaddleVideo's EIVideo application, specifically within QEIVideo's gui module.",
+        "type": "comment"
+    },
+    "896": {
+        "file_id": 82,
+        "content": "/applications/EIVideo/QEIVideo/ui/__init__.py",
+        "type": "filepath"
+    },
+    "897": {
+        "file_id": 82,
+        "content": "This code block appears to be a comment section at the beginning of the file, indicating the author's name, date of creation, copyright information, and request for proper citation in case of reuse. The code seems to belong to PaddleVideo's EIVideo application, specifically within QEIVideo's gui module.",
+        "type": "summary"
+    },
+    "898": {
+        "file_id": 82,
+        "content": "# Author: Acer Zhang\n# Datetime: 2022/1/6 \n# Copyright belongs to the author.\n# Please indicate the source for reprinting.",
+        "type": "code",
+        "location": "/applications/EIVideo/QEIVideo/gui/__init__.py:1-4"
+    },
+    "899": {
+        "file_id": 82,
+        "content": "This code block appears to be a comment section at the beginning of the file, indicating the author's name, date of creation, copyright information, and request for proper citation in case of reuse. The code seems to belong to PaddleVideo's EIVideo application, specifically within QEIVideo's gui module.",
+        "type": "comment"
+    }
+}

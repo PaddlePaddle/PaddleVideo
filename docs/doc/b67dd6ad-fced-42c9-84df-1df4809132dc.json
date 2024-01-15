@@ -1,0 +1,10 @@
+{
+    "summary": "This code imports various functions and classes from different modules in the PaddleVideo library. The __all__ list specifies the exported public symbols including MultigridSchedule, get_norm, aggregate_sub_bn_stats, DistributedShortSampler, subn_save, subn_load, and is_eval_epoch.",
+    "details": [
+        {
+            "comment": "This code imports various functions and classes from different modules in the PaddleVideo library. The __all__ list specifies the exported public symbols including MultigridSchedule, get_norm, aggregate_sub_bn_stats, DistributedShortSampler, subn_save, subn_load, and is_eval_epoch.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/paddlevideo/utils/multigrid/__init__.py\":0-9",
+            "content": "from .multigrid import MultigridSchedule\nfrom .batchnorm_helper import get_norm, aggregate_sub_bn_stats\nfrom .short_sampler import DistributedShortSampler\nfrom .save_load_helper import subn_save, subn_load\nfrom .interval_helper import is_eval_epoch\n__all__ = [\n    'MultigridSchedule', 'get_norm', 'aggregate_sub_bn_stats',\n    'DistributedShortSampler', 'subn_save', 'subn_load', 'is_eval_epoch'\n]"
+        }
+    ]
+}

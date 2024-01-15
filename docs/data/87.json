@@ -1,0 +1,547 @@
+{
+    "8700": {
+        "file_id": 641,
+        "content": "#!/bin/bash\nsource test_tipc/common_func.sh\nFILENAME=$1\n# MODE be one of ['lite_train_lite_infer' 'lite_train_whole_infer' 'whole_train_whole_infer', 'whole_infer']\nMODE=$2\ndataline=$(cat ${FILENAME})\n# parser params\nIFS=$'\\n'\nlines=(${dataline})\n# The training params\nmodel_name=$(func_parser_value \"${lines[1]}\")\npython=$(func_parser_value \"${lines[2]}\")\ngpu_list=$(func_parser_value \"${lines[3]}\")\ntrain_use_gpu_key=$(func_parser_key \"${lines[4]}\")\ntrain_use_gpu_value=$(func_parser_value \"${lines[4]}\")\nautocast_list=$(func_parser_value \"${lines[5]}\")\nautocast_key=$(func_parser_key \"${lines[5]}\")\nepoch_key=$(func_parser_key \"${lines[6]}\")\nepoch_num=$(func_parser_value \"${lines[6]}\")\nsave_model_key=$(func_parser_key \"${lines[7]}\")\ntrain_batch_key=$(func_parser_key \"${lines[8]}\")\ntrain_batch_value=$(func_parser_value \"${lines[8]}\")\npretrain_model_key=$(func_parser_key \"${lines[9]}\")\npretrain_model_value=$(func_parser_value \"${lines[9]}\")\ntrain_model_name=$(func_parser_value \"${lines[10]}\")\ntrain_param_key1=$(func_parser_key \"${lines[12]}\")",
+        "type": "code",
+        "location": "/test_tipc/test_train_inference_python.sh:1-30"
+    },
+    "8701": {
+        "file_id": 641,
+        "content": "The code reads a file containing training parameters and parses the values using different functions. These parameters include the model name, Python version, GPU list, auto-cast settings, epoch number, batch size, pre-trained model, and training model name. The parsed values will be used for further processing in the script.",
+        "type": "comment"
+    },
+    "8702": {
+        "file_id": 641,
+        "content": "train_param_value1=$(func_parser_value \"${lines[12]}\")\ntrain_param_key2=$(func_parser_key \"${lines[11]}\")\ntrain_param_value2=$(func_parser_value \"${lines[11]}\")\ntrainer_list=$(func_parser_value \"${lines[14]}\")\ntrainer_norm=$(func_parser_key \"${lines[15]}\")\nnorm_trainer=$(func_parser_value \"${lines[15]}\")\npact_key=$(func_parser_key \"${lines[16]}\")\npact_trainer=$(func_parser_value \"${lines[16]}\")\nfpgm_key=$(func_parser_key \"${lines[17]}\")\nfpgm_trainer=$(func_parser_value \"${lines[17]}\")\ndistill_key=$(func_parser_key \"${lines[18]}\")\ndistill_trainer=$(func_parser_value \"${lines[18]}\")\namp_key=$(func_parser_key \"${lines[19]}\")\namp_trainer=$(func_parser_value \"${lines[19]}\")\ntrainer_key2=$(func_parser_key \"${lines[20]}\")\ntrainer_value2=$(func_parser_value \"${lines[20]}\")\neval_py=$(func_parser_value \"${lines[23]}\")\neval_key1=$(func_parser_key \"${lines[24]}\")\neval_value1=$(func_parser_value \"${lines[24]}\")\nsave_infer_key=$(func_parser_key \"${lines[27]}\")\nsave_infer_value=$(func_parser_value \"${lines[27]}\")\nexport_weight=$(func_parser_key \"${lines[28]}\")",
+        "type": "code",
+        "location": "/test_tipc/test_train_inference_python.sh:31-56"
+    },
+    "8703": {
+        "file_id": 641,
+        "content": "This code is parsing key-value pairs from different lines and assigning them to specific variables. The variables are used for trainer, pact, fpgm, distill, amp, evaluator, save_infer, and export weight configurations. This information will likely be utilized in subsequent parts of the script or program.",
+        "type": "comment"
+    },
+    "8704": {
+        "file_id": 641,
+        "content": "norm_export=$(func_parser_value \"${lines[29]}\")\npact_export=$(func_parser_value \"${lines[30]}\")\nfpgm_export=$(func_parser_value \"${lines[31]}\")\ndistill_export=$(func_parser_value \"${lines[32]}\")\nexport_key1=$(func_parser_key \"${lines[33]}\")\nexport_value1=$(func_parser_value \"${lines[33]}\")\nexport_key2=$(func_parser_key \"${lines[34]}\")\nexport_value2=$(func_parser_value \"${lines[34]}\")\ninference_dir=$(func_parser_value \"${lines[35]}\")\n# parser inference model\ninfer_model_dir_list=$(func_parser_value \"${lines[36]}\")\ninfer_export_list=$(func_parser_value \"${lines[37]}\")\ninfer_is_quant=$(func_parser_value \"${lines[38]}\")\n# parser inference\ninference_py=$(func_parser_value \"${lines[39]}\")\nuse_gpu_key=$(func_parser_key \"${lines[40]}\")\nuse_gpu_list=$(func_parser_value \"${lines[40]}\")\nuse_mkldnn_key=$(func_parser_key \"${lines[41]}\")\nuse_mkldnn_list=$(func_parser_value \"${lines[41]}\")\ncpu_threads_key=$(func_parser_key \"${lines[42]}\")\ncpu_threads_list=$(func_parser_value \"${lines[42]}\")\nbatch_size_key=$(func_parser_key \"${lines[43]}\")",
+        "type": "code",
+        "location": "/test_tipc/test_train_inference_python.sh:57-79"
+    },
+    "8705": {
+        "file_id": 641,
+        "content": "The code parses various configuration values and keys from the lines of a script. It extracts normalization, quantization, and distillation settings; inference directory path; model directories for inference; whether to use GPU, MKLDNN, specify CPU threads, and batch size. The variables are assigned with these parsed values.",
+        "type": "comment"
+    },
+    "8706": {
+        "file_id": 641,
+        "content": "batch_size_list=$(func_parser_value \"${lines[43]}\")\nuse_trt_key=$(func_parser_key \"${lines[44]}\")\nuse_trt_list=$(func_parser_value \"${lines[44]}\")\nprecision_key=$(func_parser_key \"${lines[45]}\")\nprecision_list=$(func_parser_value \"${lines[45]}\")\ninfer_model_key=$(func_parser_key \"${lines[46]}\")\ninfer_model_value=$(func_parser_value \"${lines[46]}\")\nvideo_dir_key=$(func_parser_key \"${lines[47]}\")\ninfer_video_dir=$(func_parser_value \"${lines[47]}\")\nsave_log_key=$(func_parser_key \"${lines[48]}\")\nbenchmark_key=$(func_parser_key \"${lines[49]}\")\nbenchmark_value=$(func_parser_value \"${lines[49]}\")\ninfer_key1=$(func_parser_key \"${lines[50]}\")\ninfer_value1=$(func_parser_value \"${lines[50]}\")\nline_num=`grep -n -w \"to_static_train_benchmark_params\" $FILENAME  | cut -d \":\" -f 1`\nto_static_key=$(func_parser_key \"${lines[line_num]}\")\nto_static_trainer=$(func_parser_value \"${lines[line_num]}\")\n# parser klquant_infer\nif [ ${MODE} = \"klquant_whole_infer\" ]; then\n    dataline=$(awk 'NR==1 NR==17{print}'  $FILENAME)\n    lines=(${dataline})",
+        "type": "code",
+        "location": "/test_tipc/test_train_inference_python.sh:80-104"
+    },
+    "8707": {
+        "file_id": 641,
+        "content": "This code is parsing the function parameters from a configuration file. The batch size, use_trt, precision, infer model value, video directory path, log saving flag, and benchmark are being assigned to respective variables. A specific line number is obtained using grep command for a keyword \"to_static_train_benchmark_params\". Then it checks if the mode is set to \"klquant_whole_infer\" and processes the first and 17th lines of the configuration file.",
+        "type": "comment"
+    },
+    "8708": {
+        "file_id": 641,
+        "content": "    model_name=$(func_parser_value \"${lines[1]}\")\n    python=$(func_parser_value \"${lines[2]}\")\n    # parser inference model\n    infer_model_dir_list=$(func_parser_value \"${lines[3]}\")\n    infer_export_list=$(func_parser_value \"${lines[4]}\")\n    infer_is_quant=$(func_parser_value \"${lines[5]}\")\n    # parser inference\n    inference_py=$(func_parser_value \"${lines[6]}\")\n    use_gpu_key=$(func_parser_key \"${lines[7]}\")\n    use_gpu_list=$(func_parser_value \"${lines[7]}\")\n    use_mkldnn_key=$(func_parser_key \"${lines[8]}\")\n    use_mkldnn_list=$(func_parser_value \"${lines[8]}\")\n    cpu_threads_key=$(func_parser_key \"${lines[9]}\")\n    cpu_threads_list=$(func_parser_value \"${lines[9]}\")\n    batch_size_key=$(func_parser_key \"${lines[10]}\")\n    batch_size_list=$(func_parser_value \"${lines[10]}\")\n    use_trt_key=$(func_parser_key \"${lines[11]}\")\n    use_trt_list=$(func_parser_value \"${lines[11]}\")\n    precision_key=$(func_parser_key \"${lines[12]}\")\n    precision_list=$(func_parser_value \"${lines[12]}\")\n    infer_model_key=$(func_parser_key \"${lines[13]}\")",
+        "type": "code",
+        "location": "/test_tipc/test_train_inference_python.sh:105-125"
+    },
+    "8709": {
+        "file_id": 641,
+        "content": "The code is parsing the configuration file to extract specific values for different variables like model name, python version, inference model directory list, and more. These values are used later in the script to execute specific commands related to the test and train operations.",
+        "type": "comment"
+    },
+    "8710": {
+        "file_id": 641,
+        "content": "    video_dir_key=$(func_parser_key \"${lines[14]}\")\n    infer_video_dir=$(func_parser_value \"${lines[14]}\")\n    save_log_key=$(func_parser_key \"${lines[15]}\")\n    benchmark_key=$(func_parser_key \"${lines[16]}\")\n    benchmark_value=$(func_parser_value \"${lines[16]}\")\n    infer_key1=$(func_parser_key \"${lines[17]}\")\n    infer_value1=$(func_parser_value \"${lines[17]}\")\nfi\nLOG_PATH=\"./test_tipc/output/${model_name}/${MODE}\"\nmkdir -p ${LOG_PATH}\nstatus_log=\"${LOG_PATH}/results_python.log\"\nfunction func_inference(){\n    IFS='|'\n    _python=$1\n    _script=$2\n    _model_dir=$3\n    _log_path=$4\n    _video_dir=$5\n    _flag_quant=$6\n    _gpu=$7\n    # inference\n    for use_gpu in ${use_gpu_list[*]}; do\n        if [ ${use_gpu} = \"False\" ] || [ ${use_gpu} = \"cpu\" ]; then\n            for use_mkldnn in ${use_mkldnn_list[*]}; do\n                if [[ ${use_mkldnn} = \"False\" ]] && [[ ${_flag_quant} = \"True\" ]]; then\n                    continue\n                fi\n                for threads in ${cpu_threads_list[*]}; do\n                    for batch_size in ${batch_size_list[*]}; do",
+        "type": "code",
+        "location": "/test_tipc/test_train_inference_python.sh:126-157"
+    },
+    "8711": {
+        "file_id": 641,
+        "content": "This code sets variables for video directory, log path, inference functions, and other parameters. It then loops through various conditions to perform inferences with different combinations of GPU and MKLDNN usage, while keeping track of the results in the specified log file.",
+        "type": "comment"
+    },
+    "8712": {
+        "file_id": 641,
+        "content": "                        for precision in ${precision_list[*]}; do\n                            if [[ ${use_mkldnn} = \"False\" ]] && [[ ${precision} = \"fp16\" ]]; then\n                                continue\n                            fi # skip when enable fp16 but disable mkldnn\n                            if [[ ${_flag_quant} = \"True\" ]] && [[ ${precision} != \"int8\" ]]; then\n                                continue\n                            fi # skip when quant model inference but precision is not int8\n                            set_precision=$(func_set_params \"${precision_key}\" \"${precision}\")\n                            _save_log_path=\"${_log_path}/python_infer_cpu_gpus_${_gpu}_usemkldnn_${use_mkldnn}_threads_${threads}_precision_${precision}_batchsize_${batch_size}.log\"\n                            mkdir -p ${_log_path}\n                            set_infer_data=$(func_set_params \"${video_dir_key}\" \"${infer_video_dir}\")\n                            set_benchmark=$(func_set_params \"${benchmark_key}\" \"${benchmark_value}\")",
+        "type": "code",
+        "location": "/test_tipc/test_train_inference_python.sh:158-170"
+    },
+    "8713": {
+        "file_id": 641,
+        "content": "This code is iterating over a list of precision values, checking conditions to decide whether to continue or skip the current iteration. It sets the appropriate log path, creates directories if needed, and calls functions to set parameters for inference data and benchmarking.",
+        "type": "comment"
+    },
+    "8714": {
+        "file_id": 641,
+        "content": "                            set_batchsize=$(func_set_params \"${batch_size_key}\" \"${batch_size}\")\n                            set_cpu_threads=$(func_set_params \"${cpu_threads_key}\" \"${threads}\")\n                            set_model_dir=$(func_set_params \"${infer_model_key}\" \"${_model_dir}/${infer_model_value}\")\n                            set_infer_params1=$(func_set_params \"${infer_key1}\" \"${_model_dir}/${infer_value1}\")\n                            command=\"${_python} ${_script} ${use_gpu_key}=${use_gpu} ${use_mkldnn_key}=${use_mkldnn} ${set_cpu_threads} ${set_model_dir} ${set_batchsize} ${set_infer_data} ${set_benchmark} ${set_precision} ${set_infer_params1} > ${_save_log_path} 2>&1 \"\n                            eval $command\n                            last_status=${PIPESTATUS[0]}\n                            eval \"cat ${_save_log_path}\"\n                            status_check $last_status \"${command}\" \"${status_log}\" \"${model_name}\" \"${_save_log_path}\"\n                        done\n                    done",
+        "type": "code",
+        "location": "/test_tipc/test_train_inference_python.sh:171-181"
+    },
+    "8715": {
+        "file_id": 641,
+        "content": "The code is setting variables, constructing a command using environment variables, and executing it. It then checks the status of the execution and logs the output for later inspection. This appears to be part of a loop that's running multiple tests or experiments with varying parameters.",
+        "type": "comment"
+    },
+    "8716": {
+        "file_id": 641,
+        "content": "                done\n            done\n        elif [ ${use_gpu} = \"True\" ] || [ ${use_gpu} = \"gpu\" ]; then\n            for use_trt in ${use_trt_list[*]}; do\n                for precision in ${precision_list[*]}; do\n                    if [[ ${_flag_quant} = \"False\" ]] && [[ ${precision} =~ \"int8\" ]]; then\n                        continue\n                    fi\n                    if [[ ${precision} =~ \"fp16\" || ${precision} =~ \"int8\" ]] && [[ ${use_trt} = \"False\" ]]; then\n                        continue\n                    fi\n                    if [[ ${use_trt} = \"False\" || ${precision} =~ \"int8\" ]] && [[ ${_flag_quant} = \"True\" ]]; then\n                        continue\n                    fi\n                    for batch_size in ${batch_size_list[*]}; do\n                        _save_log_path=\"${_log_path}/python_infer_gpu_gpus_${_gpu}_usetrt_${use_trt}_precision_${precision}_batchsize_${batch_size}.log\"\n                        set_infer_data=$(func_set_params \"${video_dir_key}\" \"${infer_video_dir}\")",
+        "type": "code",
+        "location": "/test_tipc/test_train_inference_python.sh:182-198"
+    },
+    "8717": {
+        "file_id": 641,
+        "content": "This code snippet is checking various conditions for model inference using different parameters like GPU usage, precision, and batch size. It iterates through a list of options to set up the necessary configurations for logging and execution. The purpose seems to be running inference tests with varying settings to optimize performance.",
+        "type": "comment"
+    },
+    "8718": {
+        "file_id": 641,
+        "content": "                        set_benchmark=$(func_set_params \"${benchmark_key}\" \"${benchmark_value}\")\n                        set_batchsize=$(func_set_params \"${batch_size_key}\" \"${batch_size}\")\n                        set_tensorrt=$(func_set_params \"${use_trt_key}\" \"${use_trt}\")\n                        set_precision=$(func_set_params \"${precision_key}\" \"${precision}\")\n                        set_model_dir=$(func_set_params \"${infer_model_key}\" \"${_model_dir}/${infer_model_value}\")\n                        set_infer_params1=$(func_set_params \"${infer_key1}\" \"${_model_dir}/${infer_value1}\")\n                        command=\"${_python} ${_script} ${use_gpu_key}=${use_gpu} ${set_tensorrt} ${set_precision} ${set_model_dir} ${set_batchsize} ${set_infer_data} ${set_benchmark} ${set_infer_params1} > ${_save_log_path} 2>&1 \"\n                        eval $command\n                        last_status=${PIPESTATUS[0]}\n                        eval \"cat ${_save_log_path}\"\n                        status_check $last_status \"${command}\" \"${status_log}\" \"${model_name}\" \"${_save_log_path}\"",
+        "type": "code",
+        "location": "/test_tipc/test_train_inference_python.sh:200-212"
+    },
+    "8719": {
+        "file_id": 641,
+        "content": "This code sets parameters for benchmark, batch size, tensorrt usage, precision, model directory, and infer params1. It then executes a command with these parameters to run inference, saves the log, and checks the status of the execution.",
+        "type": "comment"
+    },
+    "8720": {
+        "file_id": 641,
+        "content": "                    done\n                done\n            done\n        else\n            echo \"Does not support hardware other than CPU and GPU Currently!\"\n        fi\n    done\n}\nif [ ${MODE} = \"whole_infer\" ] || [ ${MODE} = \"klquant_whole_infer\" ]; then\n    GPUID=$3\n    if [ ${#GPUID} -le 0 ];then\n        env=\" \"\n    else\n        env=\"export CUDA_VISIBLE_DEVICES=${GPUID}\"\n    fi\n    set CUDA_VISIBLE_DEVICES\n    eval $env\n    export Count=0\n    IFS=\"|\"\n    infer_run_exports=(${infer_export_list})\n    infer_quant_flag=(${infer_is_quant})\n    for infer_model in ${infer_model_dir_list[*]}; do\n        # run export\n        if [ ${infer_run_exports[Count]} != \"null\" ];then\n            save_infer_dir=$(dirname $infer_model)\n            set_export_weight=$(func_set_params \"${export_weight}\" \"${infer_model}\")\n            set_save_infer_key=$(func_set_params \"${save_infer_key}\" \"${save_infer_dir}\")\n            export_log_path=\"${LOG_PATH}_export_${Count}.log\"\n            export_cmd=\"${python} ${infer_run_exports[Count]} ${set_export_weight} ${set_save_infer_key} > ${export_log_path} 2>&1 \"",
+        "type": "code",
+        "location": "/test_tipc/test_train_inference_python.sh:214-243"
+    },
+    "8721": {
+        "file_id": 641,
+        "content": "This code is part of a script that tests and runs inference models using PaddleVideo. It checks the hardware being used (CPU or GPU) and sets appropriate environment variables accordingly. It then iterates through each inference model, running them with specific exported weights and saving the output logs for further analysis.",
+        "type": "comment"
+    },
+    "8722": {
+        "file_id": 641,
+        "content": "            echo ${infer_run_exports[Count]}\n            eval $export_cmd\n            echo $export_cmd\n            status_export=$?\n            status_check $status_export \"${export_cmd}\" \"${status_log}\" \"${model_name}\" \"${export_log_path}\"\n        else\n            save_infer_dir=${infer_model}\n        fi\n        #run inference\n        is_quant=${infer_quant_flag[Count]}\n        if [ ${MODE} = \"klquant_infer\" ]; then\n            is_quant=\"True\"\n        fi\n        func_inference \"${python}\" \"${inference_py}\" \"${save_infer_dir}\" \"${LOG_PATH}\" \"${infer_video_dir}\" ${is_quant} \"${gpu}\"\n        Count=$(($Count + 1))\n    done\nelse\n    IFS=\"|\"\n    export Count=0\n    USE_GPU_KEY=(${train_use_gpu_value})\n    for gpu in ${gpu_list[*]}; do\n        train_use_gpu=${USE_GPU_KEY[Count]}\n        Count=$(($Count + 1))\n        ips=\"\"\n        if [ ${gpu} = \"-1\" ];then\n            env=\"\"\n        elif [ ${#gpu} -le 1 ];then\n            env=\"export CUDA_VISIBLE_DEVICES=${gpu}\"\n            eval ${env}\n        elif [ ${#gpu} -le 15 ];then",
+        "type": "code",
+        "location": "/test_tipc/test_train_inference_python.sh:244-274"
+    },
+    "8723": {
+        "file_id": 641,
+        "content": "This code is iterating through a list of GPUs, setting the visible CUDA devices accordingly and running inference for each GPU. It also checks if exporting is needed, saves the infer directory, runs quantized inference if it's a klquant_infer mode, and keeps track of the count to ensure all GPUs are considered. If a GPU list item is -1, it uses no GPU, otherwise, it sets the environment for that specific GPU. The code block also checks whether the GPU count is less than or equal to 15 to avoid potential issues with larger lists.",
+        "type": "comment"
+    },
+    "8724": {
+        "file_id": 641,
+        "content": "            IFS=\",\"\n            array=(${gpu})\n            env=\"export CUDA_VISIBLE_DEVICES=${array[0]}\"\n            IFS=\"|\"\n        else\n            IFS=\";\"\n            array=(${gpu})\n            ips=${array[0]}\n            gpu=${array[1]}\n            IFS=\"|\"\n            env=\" \"\n        fi\n        for autocast in ${autocast_list[*]}; do\n            if [ ${autocast} = \"fp16\" ]; then\n                set_amp_config=\"--amp --amp_level 'O2'\"\n            else\n                set_amp_config=\" \"\n            fi\n            for trainer in ${trainer_list[*]}; do\n                flag_quant=False\n                if [ ${trainer} = ${pact_key} ]; then\n                    run_train=${pact_trainer}\n                    run_export=${pact_export}\n                    flag_quant=True\n                elif [ ${trainer} = \"${fpgm_key}\" ]; then\n                    run_train=${fpgm_trainer}\n                    run_export=${fpgm_export}\n                elif [ ${trainer} = \"${distill_key}\" ]; then\n                    run_train=${distill_trainer}",
+        "type": "code",
+        "location": "/test_tipc/test_train_inference_python.sh:275-303"
+    },
+    "8725": {
+        "file_id": 641,
+        "content": "This code is setting up environment variables for parallel GPU usage, iterating through different autocast and trainer configurations to execute training or export tasks based on the provided key values. The flag_quant variable tracks whether quantization is required for a particular configuration.",
+        "type": "comment"
+    },
+    "8726": {
+        "file_id": 641,
+        "content": "                    run_export=${distill_export}\n                elif [ ${trainer} = ${amp_key} ]; then\n                    run_train=${amp_trainer}\n                    run_export=${norm_export}\n                elif [[ ${trainer} = ${trainer_key2} ]]; then\n                    run_train=${trainer_value2}\n                    run_export=${export_value2}\n                # In case of @to_static, we re-used norm_traier,\n                # but append \"-o to_static=True\" for config\n                # to trigger \"to_static\" logic in 'train.py'\n                elif [ ${trainer} = \"${to_static_key}\" ]; then\n                    run_train=\"${norm_trainer}  ${to_static_trainer}\"\n                    run_export=${norm_export}\n                else\n                    run_train=${norm_trainer}\n                    run_export=${norm_export}\n                fi\n                if [ ${run_train} = \"null\" ]; then\n                    continue\n                fi\n                if [[ ${MODE} != \"benchmark_train\" ]] && [[ ! ${MODE} =~ \"whole_train\" ]]; then",
+        "type": "code",
+        "location": "/test_tipc/test_train_inference_python.sh:304-325"
+    },
+    "8727": {
+        "file_id": 641,
+        "content": "This code uses conditional statements to assign values to `run_train` and `run_export` variables based on the value of `trainer`. It handles multiple scenarios, including cases with specific keys, and triggers \"to_static\" logic in 'train.py' when needed. If `run_train` is assigned as null, it continues without executing further.",
+        "type": "comment"
+    },
+    "8728": {
+        "file_id": 641,
+        "content": "                    # 训练参数末尾加上--max_iters=30和--log_interval=1，以便运行并输出足量数据\n                    run_train=${run_train}\" --max_iters=30\"\n                fi\n                set_autocast=$(func_set_params \"${autocast_key}\" \"${autocast}\")\n                set_epoch=$(func_set_params \"${epoch_key}\" \"${epoch_num}\")\n                if [[ $MODE =~ \"whole_train\" ]]; then\n                    set_epoch=\"\"\n                fi\n                set_pretrain=$(func_set_params \"${pretrain_model_key}\" \"${pretrain_model_value}\")\n                if [[ $MODE =~ \"whole_train\" ]]; then\n                    train_batch_key=\"\"\n                    train_batch_value=\"\"\n                fi\n                set_batchsize=$(func_set_params \"${train_batch_key}\" \"${train_batch_value}\")\n                if [[ $MODE =~ \"whole_train\" ]]; then\n                    train_param_key1=\"\"\n                    train_param_value1=\"\"\n                fi\n                set_train_params1=$(func_set_params \"${train_param_key1}\" \"${train_param_value1}\")\n                if [[ $MODE =~ \"whole_train\" ]]; then",
+        "type": "code",
+        "location": "/test_tipc/test_train_inference_python.sh:326-347"
+    },
+    "8729": {
+        "file_id": 641,
+        "content": "This code is setting up parameters for model training and inference. It appends --max_iters=30 and --log_interval=1 to the run_train string for better data output, sets autocast, epoch, pretrain values, and checks if MODE includes \"whole_train\" to set certain variables to empty strings or nulls. The code also uses func_set_params to set batch size and train parameters.",
+        "type": "comment"
+    },
+    "8730": {
+        "file_id": 641,
+        "content": "                    train_param_key2=\"\"\n                    train_param_value2=\"\"\n                fi\n                set_train_params2=$(func_set_params \"${train_param_key2}\" \"${train_param_value2}\")\n                set_use_gpu=$(func_set_params \"${train_use_gpu_key}\" \"${train_use_gpu}\")\n                if [ ${#ips} -le 15 ];then\n                    # len(ips)<=15, single machine\n                    nodes=1\n                    save_log=\"${LOG_PATH}/${trainer}_gpus_${gpu}_autocast_${autocast}_nodes_${nodes}\"\n                else\n                    # if length of ips > 15, then it is seen as multi-machine\n                    # 15 is the min length of ips info for multi-machine: 0.0.0.0,0.0.0.0\n                    IFS=\",\"\n                    ips_array=(${ips})\n                    IFS=\"|\"\n                    nodes=${#ips_array[@]}\n                    save_log=\"${LOG_PATH}/${trainer}_gpus_${gpu}_autocast_${autocast}_nodes_${nodes}\"\n                fi\n                # load pretrain from norm training if current trainer is pact or fpgm trainer",
+        "type": "code",
+        "location": "/test_tipc/test_train_inference_python.sh:348-367"
+    },
+    "8731": {
+        "file_id": 641,
+        "content": "This code sets up parameters for training and inference of a PaddleVideo model. It determines whether the training is on a single machine or multiple machines based on the number of IPs provided. Depending on this, it sets the number of nodes, logs information accordingly, and loads pre-training from normal training if the current trainer is PACT or FPGM.",
+        "type": "comment"
+    },
+    "8732": {
+        "file_id": 641,
+        "content": "                if ([ ${trainer} = ${pact_key} ] || [ ${trainer} = ${fpgm_key} ]) && [ ${nodes} -le 1 ]; then\n                    set_pretrain=\"${load_norm_train_model}\"\n                fi\n                set_save_model=$(func_set_params \"${save_model_key}\" \"${save_log}\")\n                if [ ${#gpu} -le 2 ];then  # train with cpu or single gpu\n                    cmd=\"${python} ${run_train} ${set_amp_config} ${set_use_gpu}  ${set_save_model} ${set_epoch} ${set_pretrain} ${set_batchsize} ${set_train_params1} ${set_train_params2} > ${LOG_PATH}/train.log 2>&1\"\n                elif [ ${#ips} -le 15 ];then  # train with multi-gpu\n                    cmd=\"${python} -B -m paddle.distributed.launch --devices=\\\"${gpu}\\\" ${run_train} ${set_amp_config} ${set_use_gpu} ${set_save_model} ${set_epoch} ${set_pretrain} ${set_batchsize} ${set_train_params1} ${set_train_params2} > ${LOG_PATH}/train.log 2>&1\"\n                else     # train with multi-machine\n                    cmd=\"${python} -B -m paddle.distr",
+        "type": "code",
+        "location": "/test_tipc/test_train_inference_python.sh:368-378"
+    },
+    "8733": {
+        "file_id": 641,
+        "content": "This code checks if the trainer is either 'pact_key' or 'fpgm_key', and if the number of nodes is less than or equal to 1. If true, it sets the 'set_pretrain' variable to 'load_norm_train_model'. The code then determines the appropriate command based on whether the number of GPUs is 2 or less (train with CPU or single GPU), up to 15 (train with multi-GPU), or more than 15 (train with multiple machines). The command uses PaddlePaddle's distributed training capabilities.",
+        "type": "comment"
+    },
+    "8734": {
+        "file_id": 641,
+        "content": "ibuted.launch --ips=${ips} --devices=\\\"${gpu}\\\" ${run_train} ${set_amp_config} ${set_use_gpu} ${set_save_model} ${set_pretrain} ${set_epoch} ${set_batchsize} ${set_train_params1} ${set_train_params2} > ${LOG_PATH}/train.log 2>&1\"\n                fi\n                # run train\n                eval $cmd\n                # display log for benchmark train\n                eval \"cat ${LOG_PATH}/train.log\"\n                eval \"cat ${LOG_PATH}/train.log >> ${save_log}.log\"\n                status_check $? \"${cmd}\" \"${status_log}\" \"${model_name}\" \"${save_log}.log\"\n                # set_eval_pretrain=$(func_set_params \"${pretrain_model_key}\" \"${save_log}/${train_model_name}\")\n                # save norm trained models to set pretrain for pact training and fpgm training\n                if [ [${trainer} = ${trainer_norm}] ] && [ [${nodes} -le 1] ]; then\n                    load_norm_train_model=${set_eval_pretrain}\n                fi\n                # run eval\n                if [ ${eval_py} != \"null\" ]; then\n                    real_model_name=${model_name/PP-/pp}",
+        "type": "code",
+        "location": "/test_tipc/test_train_inference_python.sh:378-395"
+    },
+    "8735": {
+        "file_id": 641,
+        "content": "This code snippet is running a training script for a PaddleVideo model. It sets parameters, evaluates pre-trained models, and saves the trained models. The script also displays logs for benchmarking and checks the status of the operation. If there's a single node and trainer, it loads a norm-train model for further usage. Finally, it runs an evaluation script if specified.",
+        "type": "comment"
+    },
+    "8736": {
+        "file_id": 641,
+        "content": "                    set_eval_params1=$(func_set_params \"${eval_key1}\" \"${save_log}/${real_model_name}_epoch_00001.pdparams\")\n                    eval_log_path=\"${LOG_PATH}/${trainer}_gpus_${gpu}_autocast_${autocast}_nodes_${nodes}_eval.log\"\n                    if [[ $MODE =~ \"lite_infer\" ]] && [[ ${train_param_key1} != \"null\" ]]; then\n                        eval_cmd=\"${python} ${eval_py} ${set_use_gpu} ${set_eval_params1} ${train_param_key1}=${train_param_value1} > ${eval_log_path} 2>&1 \"\n                    else\n                        eval_cmd=\"${python} ${eval_py} ${set_use_gpu} ${set_eval_params1} > ${eval_log_path} 2>&1 \"\n                    fi\n                    eval $eval_cmd\n                    status_check $? \"${eval_cmd}\" \"${status_log}\" \"${model_name}\" \"${eval_log_path}\"\n                fi\n                # run export model\n                if [ ${run_export} != \"null\" ]; then\n                    save_infer_path=\"${save_log}\"\n                    real_model_name=${model_name/PP-/pp}\n     ",
+        "type": "code",
+        "location": "/test_tipc/test_train_inference_python.sh:396-410"
+    },
+    "8737": {
+        "file_id": 641,
+        "content": "The code sets the evaluation parameters and prepares a command to evaluate a model using specified inputs. If the MODE includes \"lite_infer\" and train_param_key1 is not null, it appends additional parameters to the command. Finally, it runs the command and checks the status of the evaluation.",
+        "type": "comment"
+    },
+    "8738": {
+        "file_id": 641,
+        "content": "               set_export_weight=$(func_set_params \"${export_weight}\" \"${save_log}/${real_model_name}_epoch_00001.pdparams\")\n                    set_save_infer_key=$(func_set_params \"${save_infer_key}\" \"${save_log}\")\n                    export_log_path=\"${LOG_PATH}/${trainer}_gpus_${gpu}_autocast_${autocast}_nodes_${nodes}_export.log\"\n                    export_cmd=\"${python} ${run_export} ${set_export_weight} ${set_save_infer_key} > ${export_log_path} 2>&1 \"\n                    eval $export_cmd\n                    status_check $? \"${export_cmd}\" \"${status_log}\" \"${model_name}\" \"${export_log_path}\"\n                    #run inference\n                    eval $env\n                    save_infer_path=\"${save_log}\"\n                    if [ ${inference_dir} != \"null\" ] && [ ${inference_dir} != '##' ]; then\n                        infer_model_dir=${save_infer_path}\n                    else\n                        infer_model_dir=${save_infer_path}\n                    fi\n                    func_inference ",
+        "type": "code",
+        "location": "/test_tipc/test_train_inference_python.sh:410-426"
+    },
+    "8739": {
+        "file_id": 641,
+        "content": "This code is setting up variables for exporting weights, saving inference key, and defining the export command. It then executes the export command and checks its status before running inference. If an inference directory is provided, it sets the inference model directory accordingly. Finally, it calls a function for inference processing.",
+        "type": "comment"
+    },
+    "8740": {
+        "file_id": 641,
+        "content": "\"${python}\" \"${inference_py}\" \"${infer_model_dir}\" \"${LOG_PATH}\" \"${infer_video_dir}\" \"${flag_quant}\" \"${gpu}\"\n                    eval \"unset CUDA_VISIBLE_DEVICES\"\n                fi\n            done  # done with:    for trainer in ${trainer_list[*]}; do\n        done      # done with:    for autocast in ${autocast_list[*]}; do\n    done          # done with:    for gpu in ${gpu_list[*]}; do\nfi  # end if [ ${MODE} = \"infer\" ]; then",
+        "type": "code",
+        "location": "/test_tipc/test_train_inference_python.sh:426-433"
+    },
+    "8741": {
+        "file_id": 641,
+        "content": "This code snippet is a bash script that iterates through trainers, autocast options, and GPUs. It sets CUDA_VISIBLE_DEVICES to empty if the current mode is inference. The purpose is likely to set up an environment for training or inference based on different configurations.",
+        "type": "comment"
+    },
+    "8742": {
+        "file_id": 642,
+        "content": "/test_tipc/test_train_inference_python_npu.sh",
+        "type": "filepath"
+    },
+    "8743": {
+        "file_id": 642,
+        "content": "The script updates a configuration file for NPU use, disables MKLDNN on non-x86_64, sets Python to 3.9 for NPU support, and changes the execution script from \"gpu\" to \"npu\". It executes a bash script using eval with the command stored in variable 'cmd'.",
+        "type": "summary"
+    },
+    "8744": {
+        "file_id": 642,
+        "content": "#!/bin/bash\nsource test_tipc/common_func.sh\nfunction readlinkf() {\n    perl -MCwd -e \"print Cwd::abs_path shift\" \"$1\";\n}\nfunction func_parser_config() {\n    strs=$1\n    IFS=\" \"\n    array=(${strs})\n    tmp=${array[2]}\n    echo ${tmp}\n}\nBASEDIR=$(dirname \"$0\")\nREPO_ROOT_PATH=$(readlinkf ${BASEDIR}/../)\nFILENAME=$1\n# disable mkldnn on non x86_64 env\narch=$(uname -i)\nif [ $arch != \"x86_64\" ]; then\n    sed -i \"s/--enable_mkldnn:True|False/--enable_mkldnn:False/g\" $FILENAME\n    sed -i \"s/--enable_mkldnn:True/--enable_mkldnn:False/g\" $FILENAME\nfi\n# change gpu to npu in tipc txt configs\nsed -i \"s/use_gpu/use_npu/g\" $FILENAME\n# disable benchmark as AutoLog required nvidia-smi command\nsed -i \"s/--enable_benchmark:True/--enable_benchmark:False/g\" $FILENAME\n# python has been updated to version 3.9 for npu backend\nsed -i \"s/python3.7/python3.9/g\" $FILENAME\ndataline=`cat $FILENAME`\n# change gpu to npu in execution script\nsed -i \"s/\\\"gpu\\\"/\\\"npu\\\"/g\" test_tipc/test_train_inference_python.sh\n# pass parameters to test_train_inference_python.sh",
+        "type": "code",
+        "location": "/test_tipc/test_train_inference_python_npu.sh:1-39"
+    },
+    "8745": {
+        "file_id": 642,
+        "content": "This script modifies a configuration file to use NPU instead of GPU, disables MKLDNN on non-x86_64 environments, and updates the Python version to 3.9 for NPU backend support. It also changes the execution script from using \"gpu\" to \"npu\".",
+        "type": "comment"
+    },
+    "8746": {
+        "file_id": 642,
+        "content": "cmd=\"bash test_tipc/test_train_inference_python.sh ${FILENAME} $2\"\necho -e \"\\033[1;32m Started to run command: ${cmd}!  \\033[0m\"\neval $cmd",
+        "type": "code",
+        "location": "/test_tipc/test_train_inference_python_npu.sh:40-42"
+    },
+    "8747": {
+        "file_id": 642,
+        "content": "The code is executing a bash script, storing the command in variable 'cmd', printing its execution status, and then running it using eval.",
+        "type": "comment"
+    },
+    "8748": {
+        "file_id": 643,
+        "content": "/test_tipc/test_train_inference_python_xpu.sh",
+        "type": "filepath"
+    },
+    "8749": {
+        "file_id": 643,
+        "content": "The script modifies PaddleVideo configuration to use XPU, disables benchmarking, and updates the execution script for Python 3.9 NPU backend. The code logs the execution start after running a bash command with specified parameters.",
+        "type": "summary"
+    },
+    "8750": {
+        "file_id": 643,
+        "content": "#!/bin/bash\nsource test_tipc/common_func.sh\nfunction readlinkf() {\n    perl -MCwd -e \"print Cwd::abs_path shift\" \"$1\";\n}\nfunction func_parser_config() {\n    strs=$1\n    IFS=\" \"\n    array=(${strs})\n    tmp=${array[2]}\n    echo ${tmp}\n}\nBASEDIR=$(dirname \"$0\")\nREPO_ROOT_PATH=$(readlinkf ${BASEDIR}/../)\nFILENAME=$1\n# disable mkldnn on non x86_64 env\narch=$(uname -i)\nif [ $arch != \"x86_64\" ]; then\n    sed -i \"s/--enable_mkldnn:True|False/--enable_mkldnn:False/g\" $FILENAME\n    sed -i \"s/--enable_mkldnn:True/--enable_mkldnn:False/g\" $FILENAME\nfi\n# change gpu to xpu in tipc txt configs\nsed -i \"s/use_gpu/use_xpu/g\" $FILENAME\n# disable benchmark as AutoLog required nvidia-smi command\nsed -i \"s/--enable_benchmark:True/--enable_benchmark:False/g\" $FILENAME\n# python has been updated to version 3.9 for npu backend\nsed -i \"s/python3.7/python3.9/g\" $FILENAME\ndataline=`cat $FILENAME`\n# change gpu to xpu in execution script\nsed -i \"s/\\\"gpu\\\"/\\\"xpu\\\"/g\" test_tipc/test_train_inference_python.sh\n# pass parameters to test_train_inference_python.sh",
+        "type": "code",
+        "location": "/test_tipc/test_train_inference_python_xpu.sh:1-39"
+    },
+    "8751": {
+        "file_id": 643,
+        "content": "This script changes the configuration file for PaddleVideo to use XPU instead of GPU, disables benchmarking and uses Python 3.9 for NPU backend, and updates the test_train_inference_python.sh execution script to use \"xpu\" instead of \"gpu\".",
+        "type": "comment"
+    },
+    "8752": {
+        "file_id": 643,
+        "content": "cmd=\"bash test_tipc/test_train_inference_python.sh ${FILENAME} $2\"\necho -e \"\\033[1;32m Started to run command: ${cmd}!  \\033[0m\"\neval $cmd",
+        "type": "code",
+        "location": "/test_tipc/test_train_inference_python_xpu.sh:40-42"
+    },
+    "8753": {
+        "file_id": 643,
+        "content": "This code executes a bash command with specified parameters, logging the start of execution.",
+        "type": "comment"
+    },
+    "8754": {
+        "file_id": 644,
+        "content": "/tools/__init__.py",
+        "type": "filepath"
+    },
+    "8755": {
+        "file_id": 644,
+        "content": "This code block is importing modules and defining the contents of the package. It sets __all__ to include 'utils', 'PaddleVideo', and 'ava_predict'. The code block also includes copyright, license information, and imports from different . files within the package.",
+        "type": "summary"
+    },
+    "8756": {
+        "file_id": 644,
+        "content": "# Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n__all__ = ['utils', 'PaddleVideo', 'ava_predict']\nfrom . import utils\nfrom .wheel import PaddleVideo\nfrom . import ava_predict",
+        "type": "code",
+        "location": "/tools/__init__.py:1-19"
+    },
+    "8757": {
+        "file_id": 644,
+        "content": "This code block is importing modules and defining the contents of the package. It sets __all__ to include 'utils', 'PaddleVideo', and 'ava_predict'. The code block also includes copyright, license information, and imports from different . files within the package.",
+        "type": "comment"
+    },
+    "8758": {
+        "file_id": 645,
+        "content": "/tools/ava_predict.py",
+        "type": "filepath"
+    },
+    "8759": {
+        "file_id": 645,
+        "content": "The code establishes paths, defines functions for AVA model in PaddleVideo with OpenCV, creates a video analysis model, extracts frames, predicts label scores, detects humans, performs inference, and identifies spatio-temporal actions.",
+        "type": "summary"
+    },
+    "8760": {
+        "file_id": 645,
+        "content": "# copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport argparse\nimport paddle\nimport os, sys\nimport copy as cp\nimport cv2\nimport math\ntry:\n    import ppdet\nexcept ImportError as e:\n    print(\n        f\"Warning! {e}, [paddledet] package and it's dependencies is required for AVA.\"\n    )\n__dir__ = os.path.dirname(os.path.abspath(__file__))\nsys.path.append(os.path.abspath(os.path.join(__dir__, '../')))\nfrom paddlevideo.modeling.builder import build_model\nfrom paddlevideo.utils import get_config",
+        "type": "code",
+        "location": "/tools/ava_predict.py:1-32"
+    },
+    "8761": {
+        "file_id": 645,
+        "content": "This code is a Python script for the AVA (Action Unit Detection) model in PaddleVideo. It imports necessary libraries, checks for missing dependencies, and sets up paths for model building.",
+        "type": "comment"
+    },
+    "8762": {
+        "file_id": 645,
+        "content": "from paddlevideo.loader.builder import build_dataloader, build_dataset, build_pipeline\nfrom paddlevideo.metrics.ava_utils import read_labelmap\nimport time\nfrom os import path as osp\nimport numpy as np\nfrom paddlevideo.utils import get_config\nimport pickle\nfrom paddlevideo.utils import (get_logger, load, mkdir, save)\nimport shutil\nFONTFACE = cv2.FONT_HERSHEY_DUPLEX\nFONTSCALE = 0.5\nFONTCOLOR = (255, 255, 255)  # BGR, white\nMSGCOLOR = (128, 128, 128)  # BGR, gray\nTHICKNESS = 1\nLINETYPE = 1\ndef hex2color(h):\n    \"\"\"Convert the 6-digit hex string to tuple of 3 int value (RGB)\"\"\"\n    return (int(h[:2], 16), int(h[2:4], 16), int(h[4:], 16))\nplate_blue = '03045e-023e8a-0077b6-0096c7-00b4d8-48cae4'\nplate_blue = plate_blue.split('-')\nplate_blue = [hex2color(h) for h in plate_blue]\nplate_green = '004b23-006400-007200-008000-38b000-70e000'\nplate_green = plate_green.split('-')\nplate_green = [hex2color(h) for h in plate_green]\ndef abbrev(name):\n    \"\"\"Get the abbreviation of label name:\n    'take (an object) from (a person)' -> 'take ... from ...'",
+        "type": "code",
+        "location": "/tools/ava_predict.py:33-68"
+    },
+    "8763": {
+        "file_id": 645,
+        "content": "This code snippet is a part of the PaddleVideo library. It defines several color schemes and abbreviation functions related to video analysis tasks. The color schemes are used for annotations, while the abbreviation function is for simplifying label names in the AVA dataset.",
+        "type": "comment"
+    },
+    "8764": {
+        "file_id": 645,
+        "content": "    \"\"\"\n    while name.find('(') != -1:\n        st, ed = name.find('('), name.find(')')\n        name = name[:st] + '...' + name[ed + 1:]\n    return name\n# annotations is pred results\ndef visualize(frames, annotations, plate=plate_blue, max_num=5):\n    \"\"\"Visualize frames with predicted annotations.\n    Args:\n        frames (list[np.ndarray]): Frames for visualization, note that\n            len(frames) % len(annotations) should be 0.\n        annotations (list[list[tuple]]): The predicted results.\n        plate (str): The plate used for visualization. Default: plate_blue.\n        max_num (int): Max number of labels to visualize for a person box.\n            Default: 5，目前不能大于5.\n    Returns:\n        list[np.ndarray]: Visualized frames.\n    \"\"\"\n    assert max_num + 1 <= len(plate)\n    plate = [x[::-1] for x in plate]\n    frames_ = cp.deepcopy(frames)\n    nf, na = len(frames), len(annotations)\n    assert nf % na == 0\n    nfpa = len(frames) // len(annotations)\n    anno = None\n    h, w, _ = frames[0].shape\n    # proposals被归一化需要还原真实坐标值",
+        "type": "code",
+        "location": "/tools/ava_predict.py:69-98"
+    },
+    "8765": {
+        "file_id": 645,
+        "content": "This function visualizes frames with predicted annotations, requiring the number of frames and annotations to be multiples. It asserts that the max_num is less than or equal to the length of the plate used for visualization and ensures that frames are a deep copy before processing. The assertions check if the number of frames is divisible by the number of annotations, and calculates the number of frames per annotation. The function also initializes the annotation variable and stores the image height and width for later use.",
+        "type": "comment"
+    },
+    "8766": {
+        "file_id": 645,
+        "content": "    scale_ratio = np.array([w, h, w, h])\n    for i in range(na):\n        anno = annotations[i]\n        if anno is None:\n            continue\n        for j in range(nfpa):\n            ind = i * nfpa + j\n            frame = frames_[ind]\n            for ann in anno:\n                box = ann[0]\n                label = ann[1]\n                if not len(label):\n                    continue\n                score = ann[2]\n                box = (box * scale_ratio).astype(np.int64)\n                st, ed = tuple(box[:2]), tuple(box[2:])\n                cv2.rectangle(frame, st, ed, plate[0], 2)\n                for k, lb in enumerate(label):\n                    if k >= max_num:\n                        break\n                    text = abbrev(lb)\n                    text = ': '.join([text, str(score[k])])\n                    location = (0 + st[0], 18 + k * 18 + st[1])\n                    textsize = cv2.getTextSize(text, FONTFACE, FONTSCALE,\n                                               THICKNESS)[0]\n                    textwidth = textsize[0]",
+        "type": "code",
+        "location": "/tools/ava_predict.py:99-125"
+    },
+    "8767": {
+        "file_id": 645,
+        "content": "This code is iterating through annotations and frames, scaling box coordinates based on image size, drawing rectangles around objects in frames using OpenCV, and displaying labels above the rectangles with their corresponding scores.",
+        "type": "comment"
+    },
+    "8768": {
+        "file_id": 645,
+        "content": "                    diag0 = (location[0] + textwidth, location[1] - 14)\n                    diag1 = (location[0], location[1] + 2)\n                    cv2.rectangle(frame, diag0, diag1, plate[k + 1], -1)\n                    cv2.putText(frame, text, location, FONTFACE, FONTSCALE,\n                                FONTCOLOR, THICKNESS, LINETYPE)\n    return frames_\ndef frame_extraction(video_path, target_dir):\n    \"\"\"Extract frames given video_path.\n    Args:\n        video_path (str): The video_path.\n    \"\"\"\n    if not os.path.exists(target_dir):\n        os.makedirs(target_dir, exist_ok=True)\n    # Should be able to handle videos up to several hours\n    frame_tmpl = osp.join(target_dir, '{:05d}.jpg')\n    vid = cv2.VideoCapture(video_path)\n    FPS = int(vid.get(5))\n    frames = []\n    frame_paths = []\n    flag, frame = vid.read()\n    index = 1\n    while flag:\n        frames.append(frame)\n        frame_path = frame_tmpl.format(index)\n        frame_paths.append(frame_path)\n        cv2.imwrite(frame_path, frame)\n        index += 1",
+        "type": "code",
+        "location": "/tools/ava_predict.py:126-160"
+    },
+    "8769": {
+        "file_id": 645,
+        "content": "This code is part of the \"ava_predict.py\" file in the PaddleVideo library. It defines a function called \"frame_extraction\" that takes a video path and target directory as arguments. The function extracts frames from the given video_path and saves them to the specified target directory. It reads each frame of the video, appends it to the \"frames\" list, writes it to disk using cv2.imwrite, and increments the index for frame naming. The target directory is created if it doesn't exist already. This function handles videos with a maximum length of several hours, as indicated by the FPS (Frames Per Second) value obtained from the video.",
+        "type": "comment"
+    },
+    "8770": {
+        "file_id": 645,
+        "content": "        flag, frame = vid.read()\n    return frame_paths, frames, FPS\ndef parse_args():\n    def str2bool(v):\n        return v.lower() in (\"true\", \"t\", \"1\")\n    # general params\n    parser = argparse.ArgumentParser(\"PaddleVideo Inference model script\")\n    parser.add_argument('-c',\n                        '--config',\n                        type=str,\n                        default='configs/example.yaml',\n                        help='config file path')\n    parser.add_argument('--video_path', help='video file/url')\n    parser.add_argument('-o',\n                        '--override',\n                        action='append',\n                        default=[],\n                        help='config options to be overridden')\n    parser.add_argument('-w',\n                        '--weights',\n                        type=str,\n                        help='weights for finetuning or testing')\n    #detection_model_name\n    parser.add_argument('--detection_model_name',\n                        help='the name of detection model ')",
+        "type": "code",
+        "location": "/tools/ava_predict.py:161-191"
+    },
+    "8771": {
+        "file_id": 645,
+        "content": "This code is for running PaddleVideo inference model. It takes a video file or URL, config file path, and overrides options as input parameters. The model can be finetuned or tested using specified weights. The detection model name is also an optional parameter.",
+        "type": "comment"
+    },
+    "8772": {
+        "file_id": 645,
+        "content": "    # detection_model_weights\n    parser.add_argument('--detection_model_weights',\n                        help='the weights path of detection model ')\n    # params for predict\n    parser.add_argument('--out-filename',\n                        default='ava_det_demo.mp4',\n                        help='output filename')\n    parser.add_argument('--predict-stepsize',\n                        default=8,\n                        type=int,\n                        help='give out a prediction per n frames')\n    parser.add_argument(\n        '--output-stepsize',\n        default=4,\n        type=int,\n        help=('show one frame per n frames in the demo, we should have: '\n              'predict_stepsize % output_stepsize == 0'))\n    parser.add_argument('--output-fps',\n                        default=6,\n                        type=int,\n                        help='the fps of demo video output')\n    return parser.parse_args()\n# 一帧的结果。根据概率大小进行排序\ndef pack_result(human_detection, result):\n    \"\"\"Short summary.\n    Args:\n        human_detection (np.ndarray): Human detection result.",
+        "type": "code",
+        "location": "/tools/ava_predict.py:192-222"
+    },
+    "8773": {
+        "file_id": 645,
+        "content": "This code is parsing arguments for the ava_predict function, including detection model weights path, output filename, predict step size, output step size, and output FPS. The pack_result function combines human detection results with a given result, sorting them by probability size.",
+        "type": "comment"
+    },
+    "8774": {
+        "file_id": 645,
+        "content": "        result (type): The predicted label of each human proposal.\n    Returns:\n        tuple: Tuple of human proposal, label name and label score.\n    \"\"\"\n    results = []\n    if result is None:\n        return None\n    for prop, res in zip(human_detection, result):\n        res.sort(key=lambda x: -x[1])\n        results.append((prop, [x[0] for x in res], [x[1] for x in res]))\n    return results\n# 构造数据处理需要的results\ndef get_timestep_result(frame_dir, timestamp, clip_len, frame_interval, FPS):\n    result = {}\n    result[\"frame_dir\"] = frame_dir\n    frame_num = len(os.listdir(frame_dir))\n    dir_name = frame_dir.split(\"/\")[-1]\n    result[\"video_id\"] = dir_name\n    result['timestamp'] = timestamp\n    timestamp_str = '{:04d}'.format(timestamp)\n    img_key = dir_name + \",\" + timestamp_str\n    result['img_key'] = img_key\n    result['shot_info'] = (1, frame_num)\n    result['fps'] = FPS\n    result['suffix'] = '{:05}.jpg'\n    result['timestamp_start'] = 1\n    result['timestamp_end'] = int(frame_num / result['fps'])\n    return result",
+        "type": "code",
+        "location": "/tools/ava_predict.py:223-264"
+    },
+    "8775": {
+        "file_id": 645,
+        "content": "This function takes the predicted label of each human proposal and returns a tuple containing the human proposal, label name, and label score. It also constructs data processing results for frame directory, timestamp, clip length, frame interval, and frames per second.",
+        "type": "comment"
+    },
+    "8776": {
+        "file_id": 645,
+        "content": "def detection_inference(frame_paths, output_dir, model_name, weights_path):\n    \"\"\"Detect human boxes given frame paths.\n    Args:\n        frame_paths (list[str]): The paths of frames to do detection inference.\n    Returns:\n        list[np.ndarray]: The human detection results.\n    \"\"\"\n    detection_cfg = ppdet.model_zoo.get_config_file(model_name)\n    detection_cfg = ppdet.core.workspace.load_config(detection_cfg)\n    detection_trainer = ppdet.engine.Trainer(detection_cfg, mode='test')\n    detection_trainer.load_weights(weights_path)\n    print('Performing Human Detection for each frame')\n    detection_trainer.predict(frame_paths, output_dir=output_dir, save_txt=True)\n    print(\"finish object detection\")\n    results = []\n    for frame_path in frame_paths:\n        (file_dir, file_name) = os.path.split(frame_path)\n        (file_path, ext) = os.path.splitext(frame_path)\n        txt_file_name = file_name.replace(ext, \".txt\")\n        txt_path = os.path.join(output_dir, txt_file_name)\n        results.append(txt_path)",
+        "type": "code",
+        "location": "/tools/ava_predict.py:267-294"
+    },
+    "8777": {
+        "file_id": 645,
+        "content": "This function performs human detection on a list of frame paths using a specified model and weight file. It uses the trainer object to predict human boxes in each frame, saving the results as text files in the specified output directory. The function then returns a list of paths for these detection results.",
+        "type": "comment"
+    },
+    "8778": {
+        "file_id": 645,
+        "content": "    return results\ndef get_detection_result(txt_file_path, img_h, img_w, person_det_score_thr):\n    \"\"\"\n    根据检测结果文件得到图像中人的检测框(proposals)和置信度（scores）\n    txt_file_path:检测结果存放路径\n    img_h:图像高度\n    img_w:图像宽度\n    \"\"\"\n    proposals = []\n    scores = []\n    with open(txt_file_path, 'r') as detection_file:\n        lines = detection_file.readlines()\n        for line in lines:  # person 0.9842637181282043 0.0 469.1407470703125 944.7770385742188 831.806396484375\n            items = line.split(\" \")\n            if items[0] != 'person':  #只要人\n                continue\n            score = items[1]\n            if (float)(score) < person_det_score_thr:\n                continue\n            x1 = (float(items[2])) / img_w\n            y1 = ((float)(items[3])) / img_h\n            box_w = ((float)(items[4]))\n            box_h = ((float)(items[5]))\n            x2 = (float(items[2]) + box_w) / img_w\n            y2 = (float(items[3]) + box_h) / img_h\n            scores.append(score)\n            proposals.append([x1, y1, x2, y2])\n    return np.array(proposals), np.array(scores)",
+        "type": "code",
+        "location": "/tools/ava_predict.py:296-334"
+    },
+    "8779": {
+        "file_id": 645,
+        "content": "This function reads a detection result file and returns the bounding box proposals (proposals) and corresponding scores for people in the image. It takes the path to the txt file, image height, and image width as input parameters. The function first splits the lines of the file and then checks each line to see if it corresponds to a person detection result. If so, it extracts the score and bounding box coordinates (x1, y1, x2, y2) for that object and adds them to separate lists, scores and proposals. Finally, it returns numpy arrays of the extracted proposals and scores.",
+        "type": "comment"
+    },
+    "8780": {
+        "file_id": 645,
+        "content": "@paddle.no_grad()\ndef main(args):\n    config = get_config(args.config, show=False)  #parse config file\n    # extract frames from video\n    video_path = args.video_path\n    frame_dir = 'tmp_frames'\n    frame_paths, frames, FPS = frame_extraction(video_path, frame_dir)\n    num_frame = len(frame_paths)  #视频秒数*FPS\n    assert num_frame != 0\n    print(\"Frame Number：\", num_frame)\n    # 帧图像高度和宽度\n    h, w, _ = frames[0].shape\n    # Get clip_len, frame_interval and calculate center index of each clip\n    data_process_pipeline = build_pipeline(config.PIPELINE.test)  #测试时输出处理流水配置\n    clip_len = config.PIPELINE.test.sample['clip_len']\n    assert clip_len % 2 == 0, 'We would like to have an even clip_len'\n    frame_interval = config.PIPELINE.test.sample['frame_interval']\n    # 此处关键帧每秒取一个\n    clip_len = config.PIPELINE.test.sample['clip_len']\n    assert clip_len % 2 == 0, 'We would like to have an even clip_len'\n    frame_interval = config.PIPELINE.test.sample['frame_interval']\n    window_size = clip_len * frame_interval\n    timestamps = np.arange(window_size // 2, (num_frame + 1 - window_size // 2),",
+        "type": "code",
+        "location": "/tools/ava_predict.py:337-365"
+    },
+    "8781": {
+        "file_id": 645,
+        "content": "This code function is extracting frames from a video, parsing config files, and setting up processing pipelines for testing. The frame extraction process involves specifying the input video path and output directory for storing frames. It calculates the number of frames in the video and ensures it's not zero. It asserts that clip_len and frame_interval are even numbers to create equal-sized clips. Finally, it calculates the window size based on these parameters.",
+        "type": "comment"
+    },
+    "8782": {
+        "file_id": 645,
+        "content": "                           args.predict_stepsize)\n    print(\"timetamps number:\", len(timestamps))\n    # get selected frame list according to timestamps\n    selected_frame_list = []\n    for timestamp in timestamps:\n        selected_frame_list.append(frame_paths[timestamp - 1])\n    # Load label_map\n    label_map_path = config.DATASET.test['label_file']\n    categories, class_whitelist = read_labelmap(open(label_map_path))\n    label_map = {}\n    for item in categories:\n        id = item['id']\n        name = item['name']\n        label_map[id] = name\n    # Construct model.\n    if config.MODEL.backbone.get('pretrained'):\n        config.MODEL.backbone.pretrained = ''  # disable pretrain model init\n    model = build_model(config.MODEL)\n    model.eval()\n    state_dicts = load(args.weights)\n    model.set_state_dict(state_dicts)\n    detection_result_dir = 'tmp_detection'\n    detection_model_name = args.detection_model_name\n    detection_model_weights = args.detection_model_weights\n    detection_txt_list = detection_inference(selected_frame_list,",
+        "type": "code",
+        "location": "/tools/ava_predict.py:366-395"
+    },
+    "8783": {
+        "file_id": 645,
+        "content": "This code snippet is parsing timestamps from a file, selecting frames based on those timestamps, loading a label map, constructing a model, and setting its state dictionary. The selected frames are passed to the `detection_inference` function which performs inference using the specified detection model with given weights.",
+        "type": "comment"
+    },
+    "8784": {
+        "file_id": 645,
+        "content": "                                             detection_result_dir,\n                                             detection_model_name,\n                                             detection_model_weights)\n    assert len(detection_txt_list) == len(timestamps)\n    print('Performing SpatioTemporal Action Detection for each clip')\n    human_detections = []\n    predictions = []\n    index = 0\n    for timestamp, detection_txt_path in zip(timestamps, detection_txt_list):\n        proposals, scores = get_detection_result(\n            detection_txt_path, h, w,\n            (float)(config.DATASET.test['person_det_score_thr']))\n        if proposals.shape[0] == 0:\n            predictions.append(None)\n            human_detections.append(None)\n            continue\n        human_detections.append(proposals)\n        result = get_timestep_result(frame_dir,\n                                     timestamp,\n                                     clip_len,\n                                     frame_interval,\n                                     FPS=FPS)",
+        "type": "code",
+        "location": "/tools/ava_predict.py:396-421"
+    },
+    "8785": {
+        "file_id": 645,
+        "content": "This code performs SpatioTemporal Action Detection for each clip. It first retrieves detection results from various txt files, ensuring their lengths match the timestamps. Then, it extracts human detections and predictions for each timestamp using get_detection_result() and get_timestep_result(). If there are no detections in a frame, None values are appended to the lists.",
+        "type": "comment"
+    },
+    "8786": {
+        "file_id": 645,
+        "content": "        result[\"proposals\"] = proposals\n        result[\"scores\"] = scores\n        new_result = data_process_pipeline(result)\n        proposals = new_result['proposals']\n        img_slow = new_result['imgs'][0]\n        img_slow = img_slow[np.newaxis, :]\n        img_fast = new_result['imgs'][1]\n        img_fast = img_fast[np.newaxis, :]\n        proposals = proposals[np.newaxis, :]\n        scores = scores[np.newaxis, :]\n        img_shape = np.asarray(new_result['img_shape'])\n        img_shape = img_shape[np.newaxis, :]\n        data = [\n            paddle.to_tensor(img_slow, dtype='float32'),\n            paddle.to_tensor(img_fast, dtype='float32'),\n            paddle.to_tensor(proposals, dtype='float32'), scores,\n            paddle.to_tensor(img_shape, dtype='int32')\n        ]\n        with paddle.no_grad():\n            result = model(data, mode='infer')\n            result = result[0]\n            prediction = []\n            person_num = proposals.shape[1]\n            # N proposals\n            for i in range(person_num):",
+        "type": "code",
+        "location": "/tools/ava_predict.py:422-455"
+    },
+    "8787": {
+        "file_id": 645,
+        "content": "This code prepares input data for a model by converting images, proposals, and shapes to tensors. It then feeds the prepared data into the model in order mode='infer'. The output is stored in 'result' and used to generate predictions based on number of proposals.",
+        "type": "comment"
+    },
+    "8788": {
+        "file_id": 645,
+        "content": "                prediction.append([])\n            # Perform action score thr\n            for i in range(len(result)):\n                if i + 1 not in class_whitelist:\n                    continue\n                for j in range(person_num):\n                    if result[i][j, 4] > config.MODEL.head['action_thr']:\n                        prediction[j].append((label_map[i + 1], result[i][j,\n                                                                          4]))\n            predictions.append(prediction)\n        index = index + 1\n        if index % 10 == 0:\n            print(index, \"/\", len(timestamps))\n    results = []\n    for human_detection, prediction in zip(human_detections, predictions):\n        results.append(pack_result(human_detection, prediction))\n    def dense_timestamps(timestamps, n):\n        \"\"\"Make it nx frames.\"\"\"\n        old_frame_interval = (timestamps[1] - timestamps[0])\n        start = timestamps[0] - old_frame_interval / n * (n - 1) / 2\n        new_frame_inds = np.arange(\n            len(timestamps) * n) * old_frame_interval / n + start",
+        "type": "code",
+        "location": "/tools/ava_predict.py:456-481"
+    },
+    "8789": {
+        "file_id": 645,
+        "content": "This code performs action score thresholding for each detected person in the video. It appends labels and corresponding scores to a prediction list, then appends the predictions to a list of lists for all detected humans. The code also prints progress updates every 10 iterations, and finally, it creates denser timestamps using an older frame interval.",
+        "type": "comment"
+    },
+    "8790": {
+        "file_id": 645,
+        "content": "        return new_frame_inds.astype(np.int)\n    dense_n = int(args.predict_stepsize / args.output_stepsize)  #30\n    frames = [\n        cv2.imread(frame_paths[i - 1])\n        for i in dense_timestamps(timestamps, dense_n)\n    ]\n    vis_frames = visualize(frames, results)\n    try:\n        import moviepy.editor as mpy\n    except ImportError:\n        raise ImportError('Please install moviepy to enable output file')\n    vid = mpy.ImageSequenceClip([x[:, :, ::-1] for x in vis_frames],\n                                fps=args.output_fps)\n    vid.write_videofile(args.out_filename)\n    print(\"finish write !\")\n    # delete tmp files and dirs\n    shutil.rmtree(frame_dir)\n    shutil.rmtree(detection_result_dir)\nif __name__ == '__main__':\n    args = parse_args()  #解析参数\n    main(args)",
+        "type": "code",
+        "location": "/tools/ava_predict.py:482-509"
+    },
+    "8791": {
+        "file_id": 645,
+        "content": "The code reads video frames, performs visualization, and writes the processed frames into a new video file. It requires moviepy to be installed for output functionality and deletes temporary files after use.",
+        "type": "comment"
+    },
+    "8792": {
+        "file_id": 646,
+        "content": "/tools/export_model.py",
+        "type": "filepath"
+    },
+    "8793": {
+        "file_id": 646,
+        "content": "This code defines functions for setting up imports, parsing command line arguments, and exporting PaddleVideo models. It includes model building, loading pretrained parameters, evaluating the model, providing input specifications, converting to static, saving, and printing saved model location.",
+        "type": "summary"
+    },
+    "8794": {
+        "file_id": 646,
+        "content": "# Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport argparse\nimport os\nimport os.path as osp\nimport sys\nimport paddle\nfrom paddle.jit import to_static\nfrom paddle.static import InputSpec\n__dir__ = os.path.dirname(os.path.abspath(__file__))\nsys.path.append(os.path.abspath(os.path.join(__dir__, '../')))\nfrom paddlevideo.modeling.builder import build_model\nfrom paddlevideo.utils import get_config\ndef parse_args():\n    parser = argparse.ArgumentParser(\"PaddleVideo export model script\")",
+        "type": "code",
+        "location": "/tools/export_model.py:1-32"
+    },
+    "8795": {
+        "file_id": 646,
+        "content": "This code snippet is the first 31 lines of the \"export_model.py\" file in PaddleVideo's tools directory. It sets up imports and defines a function parse_args(). This function uses argparse to create an argument parser for the script. The script seems to be part of a model exporting tool designed for PaddleVideo, possibly used for command line arguments.",
+        "type": "comment"
+    },
+    "8796": {
+        "file_id": 646,
+        "content": "    parser.add_argument('-c',\n                        '--config',\n                        type=str,\n                        default='configs/example.yaml',\n                        help='config file path')\n    parser.add_argument('--override',\n                        action='append',\n                        default=[],\n                        help='config options to be overridden')\n    parser.add_argument(\"-p\",\n                        \"--pretrained_params\",\n                        default='./best.pdparams',\n                        type=str,\n                        help='params path')\n    parser.add_argument(\"-o\",\n                        \"--output_path\",\n                        type=str,\n                        default=\"./inference\",\n                        help='output path')\n    parser.add_argument('--save_name',\n                        type=str,\n                        default=None,\n                        help='specify the exported inference \\\n                             files(pdiparams and pdmodel) name,\\",
+        "type": "code",
+        "location": "/tools/export_model.py:33-57"
+    },
+    "8797": {
+        "file_id": 646,
+        "content": "This code block is parsing command line arguments to specify the config file path, pre-trained parameters path, override options, and output path for exporting a model. The exported files will include pdiparams and pdmodel.",
+        "type": "comment"
+    },
+    "8798": {
+        "file_id": 646,
+        "content": "                             only used in TIPC')\n    return parser.parse_args()\ndef trim_config(cfg):\n    \"\"\"\n    Reuse the trainging config will bring useless attributes, such as: backbone.pretrained model.\n    and some build phase attributes should be overrided, such as: backbone.num_seg.\n    Trim it here.\n    \"\"\"\n    model_name = cfg.model_name\n    if cfg.MODEL.get('backbone') and cfg.MODEL.backbone.get('pretrained'):\n        cfg.MODEL.backbone.pretrained = \"\"  # not ued when inference\n    # for distillation\n    if cfg.MODEL.get('models'):\n        if cfg.MODEL.models[0]['Teacher']['backbone'].get('pretrained'):\n            cfg.MODEL.models[0]['Teacher']['backbone']['pretrained'] = \"\"\n        if cfg.MODEL.models[1]['Student']['backbone'].get('pretrained'):\n            cfg.MODEL.models[1]['Student']['backbone']['pretrained'] = \"\"\n    return cfg, model_name\ndef get_input_spec(cfg, model_name):\n    if model_name in ['ppTSM', 'TSM', 'MoViNet', 'ppTSMv2']:\n        input_spec = [[\n            InputSpec(\n                shape=[None, cfg.num_seg, 3, cfg.target_size, cfg.target_size],",
+        "type": "code",
+        "location": "/tools/export_model.py:58-87"
+    },
+    "8799": {
+        "file_id": 646,
+        "content": "This code appears to be involved in model exporting and configuration trimming. It defines three functions: \"export_model\" parses command line arguments, \"trim_config\" removes unused or unnecessary attributes from the configuration, and \"get_input_spec\" sets the input specification based on the given model name. The code seems to be a part of PaddleVideo library and involves several specific models such as TSM, MoViNet, ppTSM, and ppTSMv2.",
+        "type": "comment"
+    }
+}

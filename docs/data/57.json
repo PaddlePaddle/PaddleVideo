@@ -1,0 +1,545 @@
+{
+    "5700": {
+        "file_id": 460,
+        "content": "            tp_fp_labels[~is_matched_to_difficult_box\n                         & ~is_matched_to_group_of_box],\n        )\n    def _get_ith_class_arrays(\n        self,\n        detected_boxes,\n        detected_scores,\n        detected_masks,\n        detected_class_labels,\n        groundtruth_boxes,\n        groundtruth_masks,\n        groundtruth_class_labels,\n        class_index,\n    ):\n        \"\"\"Returns numpy arrays belonging to class with index `class_index`.\n        Args:\n            detected_boxes: A numpy array containing detected boxes.\n            detected_scores: A numpy array containing detected scores.\n            detected_masks: A numpy array containing detected masks.\n            detected_class_labels: A numpy array containing detected class\n                labels.\n            groundtruth_boxes: A numpy array containing groundtruth boxes.\n            groundtruth_masks: A numpy array containing groundtruth masks.\n            groundtruth_class_labels: A numpy array containing groundtruth\n                class labels.",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_evaluation/per_image_evaluation.py:345-371"
+    },
+    "5701": {
+        "file_id": 460,
+        "content": "This function, _get_ith_class_arrays, takes in various numpy arrays of detected and ground truth boxes, masks, and class labels. It then returns the corresponding numpy arrays for a specific class index.",
+        "type": "comment"
+    },
+    "5702": {
+        "file_id": 460,
+        "content": "            class_index: An integer index.\n        Returns:\n            gt_boxes_at_ith_class: A numpy array containing groundtruth boxes\n                labeled as ith class.\n            gt_masks_at_ith_class: A numpy array containing groundtruth masks\n                labeled as ith class.\n            detected_boxes_at_ith_class: A numpy array containing detected\n                boxes corresponding to the ith class.\n            detected_scores_at_ith_class: A numpy array containing detected\n                scores corresponding to the ith class.\n            detected_masks_at_ith_class: A numpy array containing detected\n                masks corresponding to the ith class.\n        \"\"\"\n        selected_groundtruth = groundtruth_class_labels == class_index\n        gt_boxes_at_ith_class = groundtruth_boxes[selected_groundtruth]\n        if groundtruth_masks is not None:\n            gt_masks_at_ith_class = groundtruth_masks[selected_groundtruth]\n        else:\n            gt_masks_at_ith_class = None\n        selected_detections = detected_class_labels == class_index",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_evaluation/per_image_evaluation.py:372-392"
+    },
+    "5703": {
+        "file_id": 460,
+        "content": "This function returns ground truth boxes, masks (if provided), detected boxes, scores, and masks for a given class index. It selects the data corresponding to the class index from input arrays and returns them in separate numpy arrays.",
+        "type": "comment"
+    },
+    "5704": {
+        "file_id": 460,
+        "content": "        detected_boxes_at_ith_class = detected_boxes[selected_detections]\n        detected_scores_at_ith_class = detected_scores[selected_detections]\n        if detected_masks is not None:\n            detected_masks_at_ith_class = detected_masks[selected_detections]\n        else:\n            detected_masks_at_ith_class = None\n        return (\n            gt_boxes_at_ith_class,\n            gt_masks_at_ith_class,\n            detected_boxes_at_ith_class,\n            detected_scores_at_ith_class,\n            detected_masks_at_ith_class,\n        )\n    def _remove_invalid_boxes(\n        self,\n        detected_boxes,\n        detected_scores,\n        detected_class_labels,\n        detected_masks=None,\n    ):\n        \"\"\"Removes entries with invalid boxes.\n        A box is invalid if either its xmax is smaller than its xmin, or its\n        ymax is smaller than its ymin.\n        Args:\n            detected_boxes: A float numpy array of size [num_boxes, 4]\n                containing box coordinates in [ymin, xmin, ymax, xmax] format.",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_evaluation/per_image_evaluation.py:393-421"
+    },
+    "5705": {
+        "file_id": 460,
+        "content": "This code defines two functions: \n1. _get_class_specific_results: Extracts class-specific results from the given data and returns them in a tuple.\n2. _remove_invalid_boxes: Removes entries with invalid boxes from the given data. An invalid box is one where xmax < xmin or ymax < ymin.",
+        "type": "comment"
+    },
+    "5706": {
+        "file_id": 460,
+        "content": "            detected_scores: A float numpy array of size [num_boxes].\n            detected_class_labels: A int32 numpy array of size [num_boxes].\n            detected_masks: A uint8 numpy array of size\n                [num_boxes, height, width].\n        Returns:\n            valid_detected_boxes: A float numpy array of size\n                [num_valid_boxes, 4] containing box coordinates in\n                [ymin, xmin, ymax, xmax] format.\n            valid_detected_scores: A float numpy array of size\n                [num_valid_boxes].\n            valid_detected_class_labels: A int32 numpy array of size\n                [num_valid_boxes].\n            valid_detected_masks: A uint8 numpy array of size\n                [num_valid_boxes, height, width].\n        \"\"\"\n        valid_indices = np.logical_and(\n            detected_boxes[:, 0] < detected_boxes[:, 2],\n            detected_boxes[:, 1] < detected_boxes[:, 3],\n        )\n        detected_boxes = detected_boxes[valid_indices]\n        detected_scores = detected_scores[valid_indices]",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_evaluation/per_image_evaluation.py:422-443"
+    },
+    "5707": {
+        "file_id": 460,
+        "content": "This function performs a filtering operation on the input arrays (detected_boxes, detected_scores, detected_class_labels, and detected_masks). It keeps only those elements where the first element of the detected_box is less than its fourth element, and the second element of detected_box is less than its third element. The resulting valid indices are used to slice the input arrays into their valid subsets (valid_detected_boxes, valid_detected_scores, valid_detected_class_labels, and valid_detected_masks).",
+        "type": "comment"
+    },
+    "5708": {
+        "file_id": 460,
+        "content": "        detected_class_labels = detected_class_labels[valid_indices]\n        if detected_masks is not None:\n            detected_masks = detected_masks[valid_indices]\n        return [\n            detected_boxes,\n            detected_scores,\n            detected_class_labels,\n            detected_masks,\n        ]",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_evaluation/per_image_evaluation.py:444-452"
+    },
+    "5709": {
+        "file_id": 460,
+        "content": "Function returns detected bounding boxes, scores, class labels, and masks (if available) for valid indices only.",
+        "type": "comment"
+    },
+    "5710": {
+        "file_id": 461,
+        "content": "/paddlevideo/metrics/ava_evaluation/standard_fields.py",
+        "type": "filepath"
+    },
+    "5711": {
+        "file_id": 461,
+        "content": "This code sets naming conventions for object detection, defines fields and variables for efficient communication between decoder and model, and improves dataset evaluation. It also establishes conventions for video object detector output storage and standard metrics for field evaluation.",
+        "type": "summary"
+    },
+    "5712": {
+        "file_id": 461,
+        "content": "# Copyright 2017 The TensorFlow Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n# =============================================================================\n\"\"\"Contains classes specifying naming conventions used for object detection.\nSpecifies:\n  InputDataFields: standard fields used by reader/preprocessor/batcher.\n  DetectionResultFields: standard fields returned by object detector.\n\"\"\"\nclass InputDataFields:\n    \"\"\"Names for the input tensors.\n    Holds the standard data field names to use for identifying input tensors.",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_evaluation/standard_fields.py:1-26"
+    },
+    "5713": {
+        "file_id": 461,
+        "content": "This code is defining classes for standard naming conventions in object detection. It provides InputDataFields for input tensors and DetectionResultFields for results returned by the object detector.",
+        "type": "comment"
+    },
+    "5714": {
+        "file_id": 461,
+        "content": "    This should be used by the decoder to identify keys for the returned\n    tensor_dict containing input tensors. And it should be used by the model to\n    identify the tensors it needs.\n    Attributes:\n        image: image.\n        original_image: image in the original input size.\n        key: unique key corresponding to image.\n        source_id: source of the original image.\n        filename: original filename of the dataset (without common path).\n        groundtruth_image_classes: image-level class labels.\n        groundtruth_boxes: coordinates of the ground truth boxes in the image.\n        groundtruth_classes: box-level class labels.\n        groundtruth_label_types: box-level label types (e.g. explicit\n            negative).\n        groundtruth_is_crowd: [DEPRECATED, use groundtruth_group_of instead]\n            is the groundtruth a single object or a crowd.\n        groundtruth_area: area of a groundtruth segment.\n        groundtruth_difficult: is a `difficult` object\n        groundtruth_group_of: is a `group_of` objects, e.g. multiple objects of",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_evaluation/standard_fields.py:27-46"
+    },
+    "5715": {
+        "file_id": 461,
+        "content": "This code defines standard fields used by the decoder and model for identifying keys in returned tensor_dict. Fields include image, original_image, source_id, filename, groundtruth_image_classes, groundtruth_boxes, groundtruth_classes, groundtruth_label_types, groundtruth_is_crowd, groundtruth_area, and groundtruth_difficult. It is used by the decoder to identify keys for returned tensor_dict and by model to identify necessary tensors.",
+        "type": "comment"
+    },
+    "5716": {
+        "file_id": 461,
+        "content": "            the same class, forming a connected group, where instances are\n            heavily occluding each other.\n        proposal_boxes: coordinates of object proposal boxes.\n        proposal_objectness: objectness score of each proposal.\n        groundtruth_instance_masks: ground truth instance masks.\n        groundtruth_instance_boundaries: ground truth instance boundaries.\n        groundtruth_instance_classes: instance mask-level class labels.\n        groundtruth_keypoints: ground truth keypoints.\n        groundtruth_keypoint_visibilities: ground truth keypoint visibilities.\n        groundtruth_label_scores: groundtruth label scores.\n        groundtruth_weights: groundtruth weight factor for bounding boxes.\n        num_groundtruth_boxes: number of groundtruth boxes.\n        true_image_shapes: true shapes of images in the resized images, as\n            resized images can be padded with zeros.\n    \"\"\"\n    image = 'image'\n    original_image = 'original_image'\n    key = 'key'\n    source_id = 'source_id'",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_evaluation/standard_fields.py:47-66"
+    },
+    "5717": {
+        "file_id": 461,
+        "content": "This code defines a dictionary of variables used for AVA evaluation, including image and original image keys, source IDs, and other metrics such as proposal boxes, ground truth instance masks, and more. These variables are necessary for accurately evaluating the performance of video object detection models.",
+        "type": "comment"
+    },
+    "5718": {
+        "file_id": 461,
+        "content": "    filename = 'filename'\n    groundtruth_image_classes = 'groundtruth_image_classes'\n    groundtruth_boxes = 'groundtruth_boxes'\n    groundtruth_classes = 'groundtruth_classes'\n    groundtruth_label_types = 'groundtruth_label_types'\n    groundtruth_is_crowd = 'groundtruth_is_crowd'\n    groundtruth_area = 'groundtruth_area'\n    groundtruth_difficult = 'groundtruth_difficult'\n    groundtruth_group_of = 'groundtruth_group_of'\n    proposal_boxes = 'proposal_boxes'\n    proposal_objectness = 'proposal_objectness'\n    groundtruth_instance_masks = 'groundtruth_instance_masks'\n    groundtruth_instance_boundaries = 'groundtruth_instance_boundaries'\n    groundtruth_instance_classes = 'groundtruth_instance_classes'\n    groundtruth_keypoints = 'groundtruth_keypoints'\n    groundtruth_keypoint_visibilities = 'groundtruth_keypoint_visibilities'\n    groundtruth_label_scores = 'groundtruth_label_scores'\n    groundtruth_weights = 'groundtruth_weights'\n    num_groundtruth_boxes = 'num_groundtruth_boxes'\n    true_image_shape = 'true_image_shape'",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_evaluation/standard_fields.py:67-86"
+    },
+    "5719": {
+        "file_id": 461,
+        "content": "This code defines various field names for the AWA dataset, which includes attributes like ground truth image classes, bounding boxes, class labels, label types, object crowding status, and more. The fields cover aspects such as instance masks, boundaries, keypoints, visibilities, label scores, and weights. These field definitions are likely used to organize and manage data in the dataset for further processing or evaluation tasks.",
+        "type": "comment"
+    },
+    "5720": {
+        "file_id": 461,
+        "content": "class DetectionResultFields:\n    \"\"\"Naming conventions for storing the output of the detector.\n    Attributes:\n        source_id: source of the original image.\n        key: unique key corresponding to image.\n        detection_boxes: coordinates of the detection boxes in the image.\n        detection_scores: detection scores for the detection boxes in the\n            image.\n        detection_classes: detection-level class labels.\n        detection_masks: contains a segmentation mask for each detection box.\n        detection_boundaries: contains an object boundary for each detection\n            box.\n        detection_keypoints: contains detection keypoints for each detection\n            box.\n        num_detections: number of detections in the batch.\n    \"\"\"\n    source_id = 'source_id'\n    key = 'key'\n    detection_boxes = 'detection_boxes'\n    detection_scores = 'detection_scores'\n    detection_classes = 'detection_classes'\n    detection_masks = 'detection_masks'\n    detection_boundaries = 'detection_boundaries'",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_evaluation/standard_fields.py:89-113"
+    },
+    "5721": {
+        "file_id": 461,
+        "content": "This class defines the standard naming conventions for storing the output of a video object detector. It includes attributes like source_id, key, detection boxes coordinates, scores, classes, masks, boundaries, keypoints, and number of detections in a batch.",
+        "type": "comment"
+    },
+    "5722": {
+        "file_id": 461,
+        "content": "    detection_keypoints = 'detection_keypoints'\n    num_detections = 'num_detections'",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_evaluation/standard_fields.py:114-115"
+    },
+    "5723": {
+        "file_id": 461,
+        "content": "These two variables, detection_keypoints and num_detections, represent metrics for storing the keypoints of detected objects and the number of detections respectively in the standard fields evaluation.",
+        "type": "comment"
+    },
+    "5724": {
+        "file_id": 462,
+        "content": "/paddlevideo/metrics/ava_metric.py",
+        "type": "filepath"
+    },
+    "5725": {
+        "file_id": 462,
+        "content": "The code imports libraries, defines AVAMetric class for PaddleVideo and prepares metrics for video object detection. It also includes methods for logging during iterations, setting dataset info, and calculating final results.",
+        "type": "summary"
+    },
+    "5726": {
+        "file_id": 462,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nimport numpy as np\nimport paddle\nfrom collections import OrderedDict\nfrom paddlevideo.utils import get_logger, load, log_batch, AverageMeter\nfrom .registry import METRIC\nfrom .base import BaseMetric\nimport time\nfrom datetime import datetime\nfrom .ava_utils import ava_evaluate_results\nlogger = get_logger(\"paddlevideo\")\n\"\"\" An example for metrics class.\n    MultiCropMetric for slowfast.\n\"\"\"\n@METRIC.register\nclass AVAMetric(BaseMetric):\n    def __init__(self,\n                 data_size,\n                 batch_size,\n                 file_path,",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_metric.py:1-34"
+    },
+    "5727": {
+        "file_id": 462,
+        "content": "This code imports necessary libraries and registers a class called AVAMetric as a metric for PaddleVideo. It initializes the AVAMetric with specified data size, batch size, and file path. The class inherits from BaseMetric and has an __init__ method which sets instance variables for data_size, batch_size, file_path, result_filename, and other properties.",
+        "type": "comment"
+    },
+    "5728": {
+        "file_id": 462,
+        "content": "                 exclude_file,\n                 label_file,\n                 custom_classes,\n                 log_interval=1):\n        \"\"\"prepare for metrics\n        \"\"\"\n        super().__init__(data_size, batch_size, log_interval)\n        self.file_path = file_path\n        self.exclude_file = exclude_file\n        self.label_file = label_file\n        self.custom_classes = custom_classes\n        self.results = []\n        record_list = [\n            (\"loss\", AverageMeter('loss', '7.5f')),\n            (\"recall@thr=0.5\", AverageMeter(\"recall@thr=0.5\", '.5f')),\n            (\"prec@thr=0.5\", AverageMeter(\"prec@thr=0.5\", '.5f')),\n            (\"recall@top3\", AverageMeter(\"recall@top3\", '.5f')),\n            (\"prec@top3\", AverageMeter(\"prec@top3\", '.5f')),\n            (\"recall@top5\", AverageMeter(\"recall@top5\", '.5f')),\n            (\"prec@top5\", AverageMeter(\"prec@top5\", '.5f')),\n            (\"mAP@0.5IOU\", AverageMeter(\"mAP@0.5IOU\", '.5f')),\n            (\"batch_time\", AverageMeter('batch_cost', '.5f')),\n            (\"reader_time\", AverageMeter('reader_cost', '.5f')),",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_metric.py:35-60"
+    },
+    "5729": {
+        "file_id": 462,
+        "content": "The code initializes a class for preparing metrics in video object detection. It takes various parameters like file path, exclude file, label file, custom classes, and log interval for initialization. The class uses AverageMeter to store metrics such as loss, recall@thr=0.5, prec@thr=0.5, recall@top3, prec@top3, recall@top5, prec@top5, mAP@0.5IOU, batch time, and reader time.",
+        "type": "comment"
+    },
+    "5730": {
+        "file_id": 462,
+        "content": "        ]\n        self.record_list = OrderedDict(record_list)\n        self.tic = time.time()\n    def update(self, batch_id, data, outputs):\n        \"\"\"update metrics during each iter\n        \"\"\"\n        self.results.extend(outputs)\n        self.record_list['batch_time'].update(time.time() - self.tic)\n        tic = time.time()\n        ips = \"ips: {:.5f} instance/sec.\".format(\n            self.batch_size / self.record_list[\"batch_time\"].val)\n        log_batch(self.record_list, batch_id, 0, 0, \"test\", ips)\n    def set_dataset_info(self, info, dataset_len):\n        self.info = info\n        self.dataset_len = dataset_len\n    def accumulate(self):\n        \"\"\"accumulate metrics when finished all iters.\n        \"\"\"\n        test_res = ava_evaluate_results(self.info, self.dataset_len,\n                                        self.results, None, self.label_file,\n                                        self.file_path, self.exclude_file)\n        for name, value in test_res.items():\n            self.record_list[name].update(value, self.batch_size)",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_metric.py:61-90"
+    },
+    "5731": {
+        "file_id": 462,
+        "content": "This code defines a class for metrics calculation and logging, with methods for updating metrics during iterations, setting dataset information, and accumulating final results. The update method extends the results list, updates batch time, logs batch time, and logs instance per second (ips). The accumulate method calculates final test results using ava_evaluate_results function and updates the record list with the final values.",
+        "type": "comment"
+    },
+    "5732": {
+        "file_id": 462,
+        "content": "        return self.record_list",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_metric.py:92-92"
+    },
+    "5733": {
+        "file_id": 462,
+        "content": "The code snippet is returning the record list from a class method. It seems that this method might have been responsible for recording or storing some data in the `record_list` attribute of the class instance, and now it's returning that data.",
+        "type": "comment"
+    },
+    "5734": {
+        "file_id": 463,
+        "content": "/paddlevideo/metrics/ava_utils.py",
+        "type": "filepath"
+    },
+    "5735": {
+        "file_id": 463,
+        "content": "This code handles video sequence object detection, converting results to CSV format and evaluating AVA metrics using error handling, utility functions, and GPU-based processing.",
+        "type": "summary"
+    },
+    "5736": {
+        "file_id": 463,
+        "content": "# copyright (c) 2021 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport csv\nimport heapq\nimport logging\nimport time\nfrom collections import defaultdict\nfrom .ava_evaluation import object_detection_evaluation as det_eval\nfrom .ava_evaluation import standard_fields\nfrom .recall import eval_recalls\nimport shutil\nimport pickle\nimport time\nimport os\nimport os.path as osp\nfrom paddlevideo.utils import get_logger, get_dist_info\nimport paddle.distributed as dist\nimport sys\nimport numpy as np",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_utils.py:1-31"
+    },
+    "5737": {
+        "file_id": 463,
+        "content": "This code imports necessary libraries and modules for evaluating AVA (Activity-driven Visual Attention) metrics. It also includes a license notice, time management functions, and error handling measures. The code uses defaultdict from collections and eval_recalls function from the same repository to perform evaluation tasks related to object detection in video sequences. Additionally, it incorporates paddlevideo's get_logger() function for logging, dist library for distributed processing, and numpy for numerical operations.",
+        "type": "comment"
+    },
+    "5738": {
+        "file_id": 463,
+        "content": "from pathlib import Path\nfrom datetime import datetime\nimport paddle\ndef det2csv(info, dataset_len, results, custom_classes):\n    csv_results = []\n    for idx in range(dataset_len):\n        video_id = info[idx]['video_id']\n        timestamp = info[idx]['timestamp']\n        result = results[idx]\n        for label, _ in enumerate(result):\n            for bbox in result[label]:\n                if type(bbox) == paddle.Tensor:\n                    bbox = bbox.numpy()\n                bbox_ = tuple(bbox.tolist())\n                if custom_classes is not None:\n                    actual_label = custom_classes[label + 1]\n                else:\n                    actual_label = label + 1\n                csv_results.append((\n                    video_id,\n                    timestamp,\n                ) + bbox_[:4] + (actual_label, ) + bbox_[4:])\n    return csv_results\n# results is organized by class\ndef results2csv(info, dataset_len, results, out_file, custom_classes=None):\n    if isinstance(results[0], list):\n        csv_results = det2csv(info, dataset_len, results, custom_classes)",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_utils.py:32-64"
+    },
+    "5739": {
+        "file_id": 463,
+        "content": "The code defines two functions: \"det2csv\" and \"results2csv\". \"det2csv\" takes in information, dataset length, results, and custom classes (if any), and returns a list of tuples representing the results in CSV format. It loops through each entry, extracts relevant data, converts tensors to numpy arrays if needed, and appends the information to the csv_results list. \"results2csv\" checks if the results are organized by class or not, then calls either \"det2csv\" or performs CSV conversion directly using it.",
+        "type": "comment"
+    },
+    "5740": {
+        "file_id": 463,
+        "content": "    # save space for float\n    def tostr(item):\n        if isinstance(item, float):\n            return f'{item:.3f}'\n        return str(item)\n    with open(out_file, 'w') as f:\n        for csv_result in csv_results:\n            f.write(','.join(map(lambda x: tostr(x), csv_result)))\n            f.write('\\n')\ndef print_time(message, start):\n    print('==> %g seconds to %s' % (time.time() - start, message))\ndef make_image_key(video_id, timestamp):\n    \"\"\"Returns a unique identifier for a video id & timestamp.\"\"\"\n    return f'{video_id},{int(timestamp):04d}'\ndef read_csv(csv_file, class_whitelist=None, capacity=0):\n    \"\"\"Loads boxes and class labels from a CSV file in the AVA format.\n    CSV file format described at https://research.google.com/ava/download.html.\n    Args:\n        csv_file: A file object.\n        class_whitelist: If provided, boxes corresponding to (integer) class\n        labels not in this set are skipped.\n        capacity: Maximum number of labeled boxes allowed for each example.\n        Default is 0 where there is no limit.",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_utils.py:66-97"
+    },
+    "5741": {
+        "file_id": 463,
+        "content": "This code snippet contains several utility functions used for video analysis. The \"tostr\" function converts a float to a string representation with 3 decimal places, while the \"print_time\" function calculates and prints the time elapsed since a given start point. The \"make_image_key\" function generates a unique identifier for a video ID and timestamp, and \"read_csv\" function loads boxes and class labels from a CSV file in AVA format.",
+        "type": "comment"
+    },
+    "5742": {
+        "file_id": 463,
+        "content": "    Returns:\n        boxes: A dictionary mapping each unique image key (string) to a list of\n        boxes, given as coordinates [y1, x1, y2, x2].\n        labels: A dictionary mapping each unique image key (string) to a list\n        of integer class lables, matching the corresponding box in `boxes`.\n        scores: A dictionary mapping each unique image key (string) to a list\n        of score values lables, matching the corresponding label in `labels`.\n        If scores are not provided in the csv, then they will default to 1.0.\n    \"\"\"\n    start = time.time()\n    entries = defaultdict(list)\n    boxes = defaultdict(list)\n    labels = defaultdict(list)\n    scores = defaultdict(list)\n    reader = csv.reader(csv_file)\n    for row in reader:\n        assert len(row) in [7, 8], 'Wrong number of columns: ' + row\n        image_key = make_image_key(row[0], row[1])\n        x1, y1, x2, y2 = [float(n) for n in row[2:6]]\n        action_id = int(row[6])\n        if class_whitelist and action_id not in class_whitelist:\n            continue",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_utils.py:99-120"
+    },
+    "5743": {
+        "file_id": 463,
+        "content": "This code reads a CSV file with video frame data, and for each row, it creates dictionaries for boxes, labels, and scores. It checks the class whitelist before adding the data to the respective lists. If scores are not provided in the CSV, they default to 1.0. The time taken for this process is measured at the beginning with start = time.time().",
+        "type": "comment"
+    },
+    "5744": {
+        "file_id": 463,
+        "content": "        score = 1.0\n        if len(row) == 8:\n            score = float(row[7])\n        if capacity < 1 or len(entries[image_key]) < capacity:\n            heapq.heappush(entries[image_key],\n                           (score, action_id, y1, x1, y2, x2))\n        elif score > entries[image_key][0][0]:\n            heapq.heapreplace(entries[image_key],\n                              (score, action_id, y1, x1, y2, x2))\n    for image_key in entries:\n        # Evaluation API assumes boxes with descending scores\n        entry = sorted(entries[image_key], key=lambda tup: -tup[0])\n        for item in entry:\n            score, action_id, y1, x1, y2, x2 = item\n            boxes[image_key].append([y1, x1, y2, x2])\n            labels[image_key].append(action_id)\n            scores[image_key].append(score)\n    print_time('read file ' + csv_file.name, start)\n    return boxes, labels, scores\ndef read_exclusions(exclusions_file):\n    \"\"\"Reads a CSV file of excluded timestamps.\n    Args:\n        exclusions_file: A file object containing a csv of video-id,timestamp.",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_utils.py:122-147"
+    },
+    "5745": {
+        "file_id": 463,
+        "content": "This code reads a CSV file containing object detection results and stores them in three lists: boxes, labels, and scores. The code also handles exclusions by reading a separate CSV file that contains excluded timestamps. The score is determined based on the length of each row in the CSV file and added to the corresponding image key's entry in the entries dictionary if the capacity allows or if the score is higher than the current highest score for that image key. The code then sorts the entries by descending scores and appends them to the boxes, labels, and scores lists for each image key.",
+        "type": "comment"
+    },
+    "5746": {
+        "file_id": 463,
+        "content": "    Returns:\n        A set of strings containing excluded image keys, e.g.\n        \"aaaaaaaaaaa,0904\",\n        or an empty set if exclusions file is None.\n    \"\"\"\n    excluded = set()\n    if exclusions_file:\n        reader = csv.reader(exclusions_file)\n    for row in reader:\n        assert len(row) == 2, 'Expected only 2 columns, got: ' + row\n        excluded.add(make_image_key(row[0], row[1]))\n    return excluded\ndef read_labelmap(labelmap_file):\n    \"\"\"Reads a labelmap without the dependency on protocol buffers.\n    Args:\n        labelmap_file: A file object containing a label map protocol buffer.\n    Returns:\n        labelmap: The label map in the form used by the\n        object_detection_evaluation\n        module - a list of {\"id\": integer, \"name\": classname } dicts.\n        class_ids: A set containing all of the valid class id integers.\n    \"\"\"\n    labelmap = []\n    class_ids = set()\n    name = ''\n    class_id = ''\n    for line in labelmap_file:\n        if line.startswith('  name:'):\n            name = line.split('\"')[1]",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_utils.py:149-181"
+    },
+    "5747": {
+        "file_id": 463,
+        "content": "Function `read_excluded_images` reads an exclusions file and returns a set of image keys to exclude. The input file is read row by row, and for each row the function checks that there are exactly two columns and adds the image key (combination of column 1 and column 2) to the excluded set.\n\nFunction `read_labelmap` reads a labelmap file without using protocol buffers. It iterates over the file line by line. When it encounters a line starting with 'name:', it extracts the class name, and when it encounters a line starting with 'id:' it extracts the class id. The function then appends a dictionary containing the id and name to the labelmap list and adds the id to the set of valid class ids.",
+        "type": "comment"
+    },
+    "5748": {
+        "file_id": 463,
+        "content": "        elif line.startswith('  id:') or line.startswith('  label_id:'):\n            class_id = int(line.strip().split(' ')[-1])\n            labelmap.append({'id': class_id, 'name': name})\n            class_ids.add(class_id)\n    return labelmap, class_ids\n# Seems there is at most 100 detections for each image\ndef ava_eval(result_file,\n             result_type,\n             label_file,\n             ann_file,\n             exclude_file,\n             max_dets=(100, ),\n             verbose=True,\n             custom_classes=None):\n    assert result_type in ['mAP']\n    start = time.time()\n    categories, class_whitelist = read_labelmap(open(label_file))\n    if custom_classes is not None:\n        custom_classes = custom_classes[1:]\n        assert set(custom_classes).issubset(set(class_whitelist))\n        class_whitelist = custom_classes\n        categories = [cat for cat in categories if cat['id'] in custom_classes]\n    # loading gt, do not need gt score\n    gt_boxes, gt_labels, _ = read_csv(open(ann_file), class_whitelist, 0)",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_utils.py:182-210"
+    },
+    "5749": {
+        "file_id": 463,
+        "content": "This function ava_eval() takes several file paths as input and evaluates the results using mean average precision (mAP). It uses a label map to convert class labels from detections to their corresponding IDs. The code checks for 'id' or 'label_id' in each line of the label file, appends the ID and name to the label map, and adds the ID to a set of class_ids. The function also handles custom classes by excluding any category whose ID is not in the custom_classes list. The gt_boxes, gt_labels, and _ are loaded from the ann_file for evaluation.",
+        "type": "comment"
+    },
+    "5750": {
+        "file_id": 463,
+        "content": "    if verbose:\n        print_time('Reading detection results', start)\n    if exclude_file is not None:\n        excluded_keys = read_exclusions(open(exclude_file))\n    else:\n        excluded_keys = list()\n    start = time.time()\n    boxes, labels, scores = read_csv(open(result_file), class_whitelist, 0)\n    if verbose:\n        print_time('Reading detection results', start)\n    if result_type == 'proposal':\n        gts = [\n            np.array(gt_boxes[image_key], dtype=float) for image_key in gt_boxes\n        ]\n        proposals = []\n        for image_key in gt_boxes:\n            if image_key in boxes:\n                proposals.append(\n                    np.concatenate(\n                        (np.array(boxes[image_key], dtype=float),\n                         np.array(scores[image_key], dtype=float)[:, None]),\n                        axis=1))\n            else:\n                # if no corresponding proposal, add a fake one\n                proposals.append(np.array([0, 0, 1, 1, 1]))\n        # Proposals used here are with scores",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_utils.py:211-240"
+    },
+    "5751": {
+        "file_id": 463,
+        "content": "The code reads detection results from a file, excludes certain keys if specified in an exclude file, and measures the time taken to read the results. It then checks if the result type is 'proposal' and creates proposals based on the gt_boxes for each image key present in boxes or adds a fake one if no corresponding proposal exists. Proposals include scores.",
+        "type": "comment"
+    },
+    "5752": {
+        "file_id": 463,
+        "content": "        recalls = eval_recalls(gts, proposals, np.array(max_dets),\n                               np.arange(0.5, 0.96, 0.05))\n        ar = recalls.mean(axis=1)\n        ret = {}\n        for i, num in enumerate(max_dets):\n            print(f'Recall@0.5@{num}\\t={recalls[i, 0]:.4f}')\n            print(f'AR@{num}\\t={ar[i]:.4f}')\n            ret[f'Recall@0.5@{num}'] = recalls[i, 0]\n            ret[f'AR@{num}'] = ar[i]\n        return ret\n    if result_type == 'mAP':\n        pascal_evaluator = det_eval.PascalDetectionEvaluator(categories)\n        start = time.time()\n        for image_key in gt_boxes:\n            if verbose and image_key in excluded_keys:\n                logging.info(\n                    'Found excluded timestamp in detections: %s.'\n                    'It will be ignored.', image_key)\n                continue\n            pascal_evaluator.add_single_ground_truth_image_info(\n                image_key, {\n                    standard_fields.InputDataFields.groundtruth_boxes:\n                    np.array(gt_boxes[image_key], dtype=float),",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_utils.py:241-265"
+    },
+    "5753": {
+        "file_id": 463,
+        "content": "This code calculates the Average Recall (AR) and Recall@0.5 (R@0.5) for different detection numbers using the eval_recalls function. It then prints the results and stores them in a dictionary. If the result type is 'mAP', it initializes a PascalDetectionEvaluator, adds ground truth information for each image key, and calculates the mean average precision (mAP).",
+        "type": "comment"
+    },
+    "5754": {
+        "file_id": 463,
+        "content": "                    standard_fields.InputDataFields.groundtruth_classes:\n                    np.array(gt_labels[image_key], dtype=int),\n                    standard_fields.InputDataFields.groundtruth_difficult:\n                    np.zeros(len(gt_boxes[image_key]), dtype=bool)\n                })\n        if verbose:\n            print_time('Convert groundtruth', start)\n        start = time.time()\n        for image_key in boxes:\n            if verbose and image_key in excluded_keys:\n                logging.info(\n                    'Found excluded timestamp in detections: %s.'\n                    'It will be ignored.', image_key)\n                continue\n            pascal_evaluator.add_single_detected_image_info(\n                image_key, {\n                    standard_fields.DetectionResultFields.detection_boxes:\n                    np.array(boxes[image_key], dtype=float),\n                    standard_fields.DetectionResultFields.detection_classes:\n                    np.array(labels[image_key], dtype=int),",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_utils.py:266-286"
+    },
+    "5755": {
+        "file_id": 463,
+        "content": "This code adds single detected image information to a Pascal evaluator. It converts groundtruth labels and boxes into appropriate data structures, handles excluded timestamps, and processes detection boxes and classes for evaluation.",
+        "type": "comment"
+    },
+    "5756": {
+        "file_id": 463,
+        "content": "                    standard_fields.DetectionResultFields.detection_scores:\n                    np.array(scores[image_key], dtype=float)\n                })\n        if verbose:\n            print_time('convert detections', start)\n        start = time.time()\n        metrics = pascal_evaluator.evaluate()\n        if verbose:\n            print_time('run_evaluator', start)\n        for display_name in metrics:\n            print(f'{display_name}=\\t{metrics[display_name]}')\n        ret = {\n            display_name: metrics[display_name]\n            for display_name in metrics if 'ByCategory' not in display_name\n        }\n        return ret\ndef mkdir_or_exist(dir_name, mode=0o777):\n    if dir_name == '':\n        return\n    dir_name = osp.expanduser(dir_name)\n    os.makedirs(dir_name, mode=mode, exist_ok=True)\ndef dump_to_fileobj(obj, file, **kwargs):\n    kwargs.setdefault('protocol', 2)\n    pickle.dump(obj, file, **kwargs)\ndef dump_to_path(obj, filepath, mode='wb'):\n    with open(filepath, mode) as f:\n        dump_to_fileobj(obj, f)",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_utils.py:287-320"
+    },
+    "5757": {
+        "file_id": 463,
+        "content": "Code snippet performs AVA evaluation for detection results, and prints or returns specific metrics. It also includes functions for creating directories, dumping objects to files using pickle library, and has a function for time measurement called print_time.",
+        "type": "comment"
+    },
+    "5758": {
+        "file_id": 463,
+        "content": "def load_from_fileobj(file, **kwargs):\n    return pickle.load(file, **kwargs)\ndef load_from_path(filepath, mode='rb'):\n    with open(filepath, mode) as f:\n        return load_from_fileobj(f)\ndef collect_results_cpu(result_part, size):\n    \"\"\"Collect results in cpu mode.\n    It saves the results on different gpus to 'tmpdir' and collects\n    them by the rank 0 worker.\n    \"\"\"\n    tmpdir = osp.join('./', 'collect_results_cpu')\n    #1. load results of all parts from tmp dir\n    mkdir_or_exist(tmpdir)\n    rank, world_size = get_dist_info()\n    dump_to_path(result_part, osp.join(tmpdir, f'part_{rank}.pkl'))\n    dist.barrier()\n    if rank != 0:\n        return None\n    #2. collect all parts\n    while 1:\n        all_exist = True\n        for i in range(world_size):\n            part_file = osp.join(tmpdir, f'part_{i}.pkl')\n            if not Path(part_file).exists():\n                all_exist = False\n        if all_exist:\n            break\n        else:\n            time.sleep(60)\n    time.sleep(120)\n    #3. load results of all parts from tmp dir",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_utils.py:323-357"
+    },
+    "5759": {
+        "file_id": 463,
+        "content": "This code defines three functions: `load_from_fileobj`, `load_from_path`, and `collect_results_cpu`. The first two are used to load data from files or file paths, respectively. The third function, `collect_results_cpu`, is a CPU-based method for collecting results across multiple GPUs by saving them in a temporary directory ('tmpdir') and having the rank 0 worker collect them. It checks if all parts exist, waits if not, then loads and returns the collected results once they are all available.",
+        "type": "comment"
+    },
+    "5760": {
+        "file_id": 463,
+        "content": "    part_list = []\n    for i in range(world_size):\n        part_file = osp.join(tmpdir, f'part_{i}.pkl')\n        part_list.append(load_from_path(part_file))\n    #4. sort the results\n    ordered_results = []\n    for res in zip(*part_list):\n        ordered_results.extend(list(res))\n    ordered_results = ordered_results[:\n                                      size]  #the dataloader may pad some samples\n    #5. remove results of all parts from tmp dir, avoid dump_file fail to tmp dir when dir not exists.\n    for i in range(world_size):\n        part_file = osp.join(tmpdir, f'part_{i}.pkl')\n        os.remove(part_file)\n    return ordered_results\ndef ava_evaluate_results(info, dataset_len, results, custom_classes, label_file,\n                         file_path, exclude_file):\n    # need to create a temp result file\n    time_now = datetime.now().strftime('%Y%m%d_%H%M%S')\n    temp_file = f'AVA_{time_now}_result.csv'\n    results2csv(info, dataset_len, results, temp_file)\n    ret = {}\n    eval_result = ava_eval(\n        temp_file,",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_utils.py:358-384"
+    },
+    "5761": {
+        "file_id": 463,
+        "content": "This code is used for evaluating AVA results by splitting the computation across multiple processes, then combining and ordering the partial results before deleting temporary files. It takes in information about the dataset, the evaluation results, custom class labels, and file paths for input and exclusion lists. The code creates a temporary result file, converts the results to a CSV format, performs AVA evaluation on the temporary file, and returns an evaluation result.",
+        "type": "comment"
+    },
+    "5762": {
+        "file_id": 463,
+        "content": "        'mAP',\n        label_file,\n        file_path,  #ann_file,\n        exclude_file,\n        custom_classes=custom_classes)\n    ret.update(eval_result)\n    os.remove(temp_file)\n    return ret",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_utils.py:385-394"
+    },
+    "5763": {
+        "file_id": 463,
+        "content": "This code is computing the mean average precision (mAP) for object detection metrics. It reads from a label file, file path, and excludes certain classes as specified. The results are stored in the 'ret' dictionary before removing a temporary file and returning the final results.",
+        "type": "comment"
+    },
+    "5764": {
+        "file_id": 464,
+        "content": "/paddlevideo/metrics/base.py",
+        "type": "filepath"
+    },
+    "5765": {
+        "file_id": 464,
+        "content": "This code defines a base class for metrics in the PaddleVideo library, initializing with data size, batch size, world size, and log interval. It includes all-gather and concatenation methods, along with abstract update and accumulate functions to be implemented by subclasses.",
+        "type": "summary"
+    },
+    "5766": {
+        "file_id": 464,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nfrom abc import abstractmethod\nimport paddle\nfrom paddlevideo.utils import get_dist_info\nfrom .registry import METRIC\nclass BaseMetric(object):\n    def __init__(self, data_size, batch_size, log_interval=1, **kwargs):\n        self.data_size = data_size\n        self.batch_size = batch_size\n        _, self.world_size = get_dist_info()\n        self.log_interval = log_interval\n    def gather_from_gpu(self,\n                        gather_object: paddle.Tensor,\n                        concat_axis=0) -> paddle.Tensor:\n        \"\"\"gather Tensor from all gpus into a list and concatenate them on `concat_axis`.",
+        "type": "code",
+        "location": "/paddlevideo/metrics/base.py:1-31"
+    },
+    "5767": {
+        "file_id": 464,
+        "content": "This code is part of the PaddleVideo library and defines a base class for metrics. It initializes the metric with data size, batch size, world size, and log interval. The gather_from_gpu method gathers Tensors from all GPUs into a list and concatenates them on a specified axis.",
+        "type": "comment"
+    },
+    "5768": {
+        "file_id": 464,
+        "content": "        Args:\n            gather_object (paddle.Tensor): gather object Tensor\n            concat_axis (int, optional): axis for concatenation. Defaults to 0.\n        Returns:\n            paddle.Tensor: gatherd & concatenated Tensor\n        \"\"\"\n        gather_object_list = []\n        paddle.distributed.all_gather(gather_object_list, gather_object.cuda())\n        return paddle.concat(gather_object_list, axis=concat_axis)\n    @abstractmethod\n    def update(self):\n        raise NotImplementedError(\n            \"'update' method must be implemented in subclass\")\n    @abstractmethod\n    def accumulate(self):\n        raise NotImplementedError(\n            \"'accumulate' method must be implemented in subclass\")",
+        "type": "code",
+        "location": "/paddlevideo/metrics/base.py:33-52"
+    },
+    "5769": {
+        "file_id": 464,
+        "content": "Function that performs all-gather and concatenation on the gather object Tensor. Abstract methods for update and accumulate that must be implemented in subclasses.",
+        "type": "comment"
+    },
+    "5770": {
+        "file_id": 465,
+        "content": "/paddlevideo/metrics/bmn_metric.py",
+        "type": "filepath"
+    },
+    "5771": {
+        "file_id": 465,
+        "content": "This code calculates BMN metric for object detection in computer vision frameworks, supports batch_size and world_size as 1, initializes class variables, processes video data, logs progress, saves results, performs soft NMS, calculates proposal lists, evaluates performance using the \"cal_metrics\" function.",
+        "type": "summary"
+    },
+    "5772": {
+        "file_id": 465,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nimport os\nimport json\nimport numpy as np\nimport pandas as pd\nimport multiprocessing as mp\nfrom .registry import METRIC\nfrom .base import BaseMetric\nfrom .ActivityNet import ANETproposal\nfrom paddlevideo.utils import get_logger\nlogger = get_logger(\"paddlevideo\")\ndef iou_with_anchors(anchors_min, anchors_max, box_min, box_max):\n    \"\"\"Compute jaccard score between a box and the anchors.\n    \"\"\"\n    len_anchors = anchors_max - anchors_min\n    int_xmin = np.maximum(anchors_min, box_min)\n    int_xmax = np.minimum(anchors_max, box_max)",
+        "type": "code",
+        "location": "/paddlevideo/metrics/bmn_metric.py:1-32"
+    },
+    "5773": {
+        "file_id": 465,
+        "content": "This code imports necessary libraries and defines a function to compute the Intersection over Union (IoU) between a box and anchors. It appears to be related to object detection or proposal generation within a computer vision framework.",
+        "type": "comment"
+    },
+    "5774": {
+        "file_id": 465,
+        "content": "    inter_len = np.maximum(int_xmax - int_xmin, 0.)\n    union_len = len_anchors - inter_len + box_max - box_min\n    jaccard = np.divide(inter_len, union_len)\n    return jaccard\ndef boundary_choose(score_list):\n    \"\"\"Choose start and end boundary from score.\n    \"\"\"\n    max_score = max(score_list)\n    mask_high = (score_list > max_score * 0.5)\n    score_list = list(score_list)\n    score_middle = np.array([0.0] + score_list + [0.0])\n    score_front = np.array([0.0, 0.0] + score_list)\n    score_back = np.array(score_list + [0.0, 0.0])\n    mask_peak = ((score_middle > score_front) & (score_middle > score_back))\n    mask_peak = mask_peak[1:-1]\n    mask = (mask_high | mask_peak).astype('float32')\n    return mask\ndef soft_nms(df, alpha, t1, t2):\n    '''\n    df: proposals generated by network;\n    alpha: alpha value of Gaussian decaying function;\n    t1, t2: threshold for soft nms.\n    '''\n    df = df.sort_values(by=\"score\", ascending=False)\n    tstart = list(df.xmin.values[:])\n    tend = list(df.xmax.values[:])\n    tscore = list(df.score.values[:])",
+        "type": "code",
+        "location": "/paddlevideo/metrics/bmn_metric.py:33-63"
+    },
+    "5775": {
+        "file_id": 465,
+        "content": "inter_len calculates the intersection length between two bounding boxes. union_len computes the total length of both boxes and jaccard index is calculated by dividing inter_len with union_len. This function returns the Jaccard index.\nThe boundary_choose() function selects start and end boundaries based on a given score list. It identifies the highest score and creates three arrays - score_list, score_front, score_back for comparison. mask_peak is created by comparing these arrays, followed by generating a binary mask of True values.\nSoft_nms function sorts proposals generated by network based on scores in descending order. It takes alpha value (Gaussian decaying function), and two threshold values t1, t2.",
+        "type": "comment"
+    },
+    "5776": {
+        "file_id": 465,
+        "content": "    rstart = []\n    rend = []\n    rscore = []\n    while len(tscore) > 1 and len(rscore) < 101:\n        max_index = tscore.index(max(tscore))\n        tmp_iou_list = iou_with_anchors(np.array(tstart), np.array(tend),\n                                        tstart[max_index], tend[max_index])\n        for idx in range(0, len(tscore)):\n            if idx != max_index:\n                tmp_iou = tmp_iou_list[idx]\n                tmp_width = tend[max_index] - tstart[max_index]\n                if tmp_iou > t1 + (t2 - t1) * tmp_width:\n                    tscore[idx] = tscore[idx] * np.exp(\n                        -np.square(tmp_iou) / alpha)\n        rstart.append(tstart[max_index])\n        rend.append(tend[max_index])\n        rscore.append(tscore[max_index])\n        tstart.pop(max_index)\n        tend.pop(max_index)\n        tscore.pop(max_index)\n    newDf = pd.DataFrame()\n    newDf['score'] = rscore\n    newDf['xmin'] = rstart\n    newDf['xmax'] = rend\n    return newDf\n@METRIC.register\nclass BMNMetric(BaseMetric):\n    \"\"\"\n    Metrics for BMN. Two Stages in this metric:",
+        "type": "code",
+        "location": "/paddlevideo/metrics/bmn_metric.py:65-98"
+    },
+    "5777": {
+        "file_id": 465,
+        "content": "The code calculates BMN metric for object detection by iterating through a list of scores and appending the maximum score, along with its corresponding start and end positions, to new lists. It then creates a new DataFrame using these lists before returning it as the final output.",
+        "type": "comment"
+    },
+    "5778": {
+        "file_id": 465,
+        "content": "    (1) Get test results using trained model, results will be saved in BMNMetric.result_path;\n    (2) Calculate metrics using results file from stage (1).\n    \"\"\"\n    def __init__(self,\n                 data_size,\n                 batch_size,\n                 tscale,\n                 dscale,\n                 file_path,\n                 ground_truth_filename,\n                 subset,\n                 output_path,\n                 result_path,\n                 get_metrics=True,\n                 log_interval=1):\n        \"\"\"\n        Init for BMN metrics.\n        Params:\n            get_metrics: whether to calculate AR@N and AUC metrics or not, default True.\n        \"\"\"\n        super().__init__(data_size, batch_size, log_interval)\n        assert self.batch_size == 1, \" Now we just support batch_size==1 test\"\n        assert self.world_size == 1, \" Now we just support single-card test\"\n        self.tscale = tscale\n        self.dscale = dscale\n        self.file_path = file_path\n        self.ground_truth_filename = ground_truth_filename",
+        "type": "code",
+        "location": "/paddlevideo/metrics/bmn_metric.py:99-127"
+    },
+    "5779": {
+        "file_id": 465,
+        "content": "This code initializes an instance of BMNMetric class with various parameters such as data_size, batch_size, tscale, dscale, file_path, ground_truth_filename, subset, output_path, result_path, get_metrics, and log_interval. It also performs assertions to ensure batch_size is 1 and world_size is 1, as the code currently supports only these conditions. The class is a part of PaddleVideo library for video analysis tasks.",
+        "type": "comment"
+    },
+    "5780": {
+        "file_id": 465,
+        "content": "        self.subset = subset\n        self.output_path = output_path\n        self.result_path = result_path\n        self.get_metrics = get_metrics\n        if not os.path.isdir(self.output_path):\n            os.makedirs(self.output_path)\n        if not os.path.isdir(self.result_path):\n            os.makedirs(self.result_path)\n        self.video_dict, self.video_list = self.get_dataset_dict(\n            self.file_path, self.subset)\n    def get_dataset_dict(self, file_path, subset):\n        annos = json.load(open(file_path))\n        video_dict = {}\n        for video_name in annos.keys():\n            video_subset = annos[video_name][\"subset\"]\n            if subset in video_subset:\n                video_dict[video_name] = annos[video_name]\n        video_list = list(video_dict.keys())\n        video_list.sort()\n        return video_dict, video_list\n    def update(self, batch_id, data, outputs):\n        \"\"\"update metrics during each iter\n        \"\"\"\n        fid = data[4].numpy()\n        pred_bm, pred_start, pred_end = outputs",
+        "type": "code",
+        "location": "/paddlevideo/metrics/bmn_metric.py:128-156"
+    },
+    "5781": {
+        "file_id": 465,
+        "content": "The code initializes the class variables and checks if the output and result directories exist, creating them if not. It then calls a method to get the dataset dictionary and list based on the provided file path and subset. The update method takes batch ID, data, and outputs as inputs to update metrics during each iteration.",
+        "type": "comment"
+    },
+    "5782": {
+        "file_id": 465,
+        "content": "        pred_bm = pred_bm.numpy()\n        pred_start = pred_start[0].numpy()\n        pred_end = pred_end[0].numpy()\n        snippet_xmins = [1.0 / self.tscale * i for i in range(self.tscale)]\n        snippet_xmaxs = [\n            1.0 / self.tscale * i for i in range(1, self.tscale + 1)\n        ]\n        cols = [\"xmin\", \"xmax\", \"score\"]\n        video_name = self.video_list[fid[0]]\n        pred_bm = pred_bm[0, 0, :, :] * pred_bm[0, 1, :, :]\n        start_mask = boundary_choose(pred_start)\n        start_mask[0] = 1.\n        end_mask = boundary_choose(pred_end)\n        end_mask[-1] = 1.\n        score_vector_list = []\n        for idx in range(self.dscale):\n            for jdx in range(self.tscale):\n                start_index = jdx\n                end_index = start_index + idx\n                if end_index < self.tscale and start_mask[\n                        start_index] == 1 and end_mask[end_index] == 1:\n                    xmin = snippet_xmins[start_index]\n                    xmax = snippet_xmaxs[end_index]\n                    xmin_score = pred_start[start_index]",
+        "type": "code",
+        "location": "/paddlevideo/metrics/bmn_metric.py:157-182"
+    },
+    "5783": {
+        "file_id": 465,
+        "content": "Code snippet performs boundary detection and creates a score vector list for each detection. It uses the provided prediction, start and end values to calculate the xmin and xmax values within the defined time scale. Then it checks if the start and end mask conditions are met and adds the corresponding score value to the score vector list. This information is used for further analysis or evaluation of video frames.",
+        "type": "comment"
+    },
+    "5784": {
+        "file_id": 465,
+        "content": "                    xmax_score = pred_end[end_index]\n                    bm_score = pred_bm[idx, jdx]\n                    conf_score = xmin_score * xmax_score * bm_score\n                    score_vector_list.append([xmin, xmax, conf_score])\n        score_vector_list = np.stack(score_vector_list)\n        video_df = pd.DataFrame(score_vector_list, columns=cols)\n        video_df.to_csv(os.path.join(self.output_path, \"%s.csv\" % video_name),\n                        index=False)\n        if batch_id % self.log_interval == 0:\n            logger.info(\"Processing................ batch {}\".format(batch_id))\n    def accumulate(self):\n        \"\"\"accumulate metrics when finished all iters.\n        \"\"\"\n        # check clip index of each video\n        #Stage1\n        self.bmn_post_processing(self.video_dict, self.subset, self.output_path,\n                                 self.result_path)\n        if self.get_metrics:\n            logger.info(\"[TEST] calculate metrics...\")\n            #Stage2\n            uniform_average_nr_proposals_valid, uniform_average_recall_valid, uniform_recall_valid = self.cal_metrics(",
+        "type": "code",
+        "location": "/paddlevideo/metrics/bmn_metric.py:183-206"
+    },
+    "5785": {
+        "file_id": 465,
+        "content": "This code snippet performs post-processing on video data and calculates metrics. It first processes the video data, then accumulates the metrics for each batch during processing. The code uses numpy arrays to handle score vectors, Pandas DataFrame to store and manipulate data, and logging to provide progress updates. The results are saved in a CSV file at the specified output path.",
+        "type": "comment"
+    },
+    "5786": {
+        "file_id": 465,
+        "content": "                self.ground_truth_filename,\n                os.path.join(self.result_path, \"bmn_results_validation.json\"),\n                max_avg_nr_proposals=100,\n                tiou_thresholds=np.linspace(0.5, 0.95, 10),\n                subset='validation')\n            logger.info(\"AR@1; AR@5; AR@10; AR@100\")\n            logger.info(\"%.02f %.02f %.02f %.02f\" %\n                        (100 * np.mean(uniform_recall_valid[:, 0]),\n                         100 * np.mean(uniform_recall_valid[:, 4]),\n                         100 * np.mean(uniform_recall_valid[:, 9]),\n                         100 * np.mean(uniform_recall_valid[:, -1])))\n    def bmn_post_processing(self, video_dict, subset, output_path, result_path):\n        video_list = list(video_dict.keys())\n        global result_dict\n        result_dict = mp.Manager().dict()\n        pp_num = 12\n        num_videos = len(video_list)\n        num_videos_per_thread = int(num_videos / pp_num)\n        processes = []\n        for tid in range(pp_num - 1):\n            tmp_video_list = video_list[tid * num_videos_per_thread:(tid + 1) *",
+        "type": "code",
+        "location": "/paddlevideo/metrics/bmn_metric.py:207-229"
+    },
+    "5787": {
+        "file_id": 465,
+        "content": "This code is initializing a bmn_post_processing function that will process multiple videos in parallel using multiple processes. It creates a result dictionary and divides the video list into equal parts to assign each part to a separate process. It also logs the average recall at different thresholds for different numbers of detections.",
+        "type": "comment"
+    },
+    "5788": {
+        "file_id": 465,
+        "content": "                                        num_videos_per_thread]\n            p = mp.Process(target=self.video_process,\n                           args=(tmp_video_list, video_dict, output_path,\n                                 result_dict))\n            p.start()\n            processes.append(p)\n        tmp_video_list = video_list[(pp_num - 1) * num_videos_per_thread:]\n        p = mp.Process(target=self.video_process,\n                       args=(tmp_video_list, video_dict, output_path,\n                             result_dict))\n        p.start()\n        processes.append(p)\n        for p in processes:\n            p.join()\n        result_dict = dict(result_dict)\n        output_dict = {\n            \"version\": \"VERSION 1.3\",\n            \"results\": result_dict,\n            \"external_data\": {}\n        }\n        outfile = open(\n            os.path.join(result_path, \"bmn_results_%s.json\" % subset), \"w\")\n        # json.dump(output_dict, outfile)\n        # in case of file name in chinese\n        json.dump(output_dict, outfile, ensure_ascii=False)",
+        "type": "code",
+        "location": "/paddlevideo/metrics/bmn_metric.py:230-256"
+    },
+    "5789": {
+        "file_id": 465,
+        "content": "The code creates multiple processes to handle video processing tasks in parallel, using multiprocessing. It then joins all the results together into a single output dictionary before writing it to a JSON file. This approach allows for efficient and concurrent processing of large numbers of videos.",
+        "type": "comment"
+    },
+    "5790": {
+        "file_id": 465,
+        "content": "        outfile.close()\n    def video_process(self,\n                      video_list,\n                      video_dict,\n                      output_path,\n                      result_dict,\n                      snms_alpha=0.4,\n                      snms_t1=0.55,\n                      snms_t2=0.9):\n        for video_name in video_list:\n            logger.info(\"Processing video........\" + video_name)\n            df = pd.read_csv(os.path.join(output_path, video_name + \".csv\"))\n            if len(df) > 1:\n                df = soft_nms(df, snms_alpha, snms_t1, snms_t2)\n            video_duration = video_dict[video_name][\"duration_second\"]\n            proposal_list = []\n            for idx in range(min(100, len(df))):\n                tmp_prop={\"score\":df.score.values[idx], \\\n                          \"segment\":[max(0,df.xmin.values[idx])*video_duration, \\\n                                     min(1,df.xmax.values[idx])*video_duration]}\n                proposal_list.append(tmp_prop)\n            video_name = video_name[2:] if video_name[:2] == 'v_' else video_name",
+        "type": "code",
+        "location": "/paddlevideo/metrics/bmn_metric.py:257-282"
+    },
+    "5791": {
+        "file_id": 465,
+        "content": "This function takes a list of video names, corresponding metadata dictionaries, output path, and result dictionary. It processes each video by reading its CSV file, performs soft NMS if the dataframe has more than one row, calculates proposal list for each video, and appends them to the result dictionary.",
+        "type": "comment"
+    },
+    "5792": {
+        "file_id": 465,
+        "content": "            result_dict[video_name] = proposal_list\n    def cal_metrics(self,\n                    ground_truth_filename,\n                    proposal_filename,\n                    max_avg_nr_proposals=100,\n                    tiou_thresholds=np.linspace(0.5, 0.95, 10),\n                    subset='validation'):\n        anet_proposal = ANETproposal(ground_truth_filename,\n                                     proposal_filename,\n                                     tiou_thresholds=tiou_thresholds,\n                                     max_avg_nr_proposals=max_avg_nr_proposals,\n                                     subset=subset,\n                                     verbose=True,\n                                     check_status=False)\n        anet_proposal.evaluate()\n        recall = anet_proposal.recall\n        average_recall = anet_proposal.avg_recall\n        average_nr_proposals = anet_proposal.proposals_per_video\n        return (average_nr_proposals, average_recall, recall)",
+        "type": "code",
+        "location": "/paddlevideo/metrics/bmn_metric.py:283-304"
+    },
+    "5793": {
+        "file_id": 465,
+        "content": "The code defines a function \"cal_metrics\" that takes in ground truth and proposal filenames, calculates the average recall, average proposals per video, and overall recall using ANETproposal class. This function is used to evaluate performance based on given thresholds and subsets of data.",
+        "type": "comment"
+    },
+    "5794": {
+        "file_id": 466,
+        "content": "/paddlevideo/metrics/build.py",
+        "type": "filepath"
+    },
+    "5795": {
+        "file_id": 466,
+        "content": "Copyright notice, Apache License v2.0, software distributed as is without warranties or conditions. Imports registry and utils modules, defines build_metric function that builds metric using provided configuration.",
+        "type": "summary"
+    },
+    "5796": {
+        "file_id": 466,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nfrom .registry import METRIC\nfrom ..utils import build\ndef build_metric(cfg):\n    return build(cfg, METRIC)",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/metrics/build.py:1-20"
+    },
+    "5797": {
+        "file_id": 466,
+        "content": "Copyright notice, Apache License v2.0, software distributed as is without warranties or conditions. Imports registry and utils modules, defines build_metric function that builds metric using provided configuration.",
+        "type": "comment"
+    },
+    "5798": {
+        "file_id": 467,
+        "content": "/paddlevideo/metrics/center_crop_metric.py",
+        "type": "filepath"
+    },
+    "5799": {
+        "file_id": 467,
+        "content": "The code initializes a metric class for PaddleVideo, handling batch updates and GPU data to mitigate resampling effects while managing output accumulation, concatenation, top-k accuracy, and logging.",
+        "type": "summary"
+    }
+}

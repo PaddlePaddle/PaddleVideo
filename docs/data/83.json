@@ -1,0 +1,544 @@
+{
+    "8300": {
+        "file_id": 612,
+        "content": "            print_dict(v, delimiter + 4)\n        elif isinstance(v, list) and len(v) >= 1 and isinstance(v[0], dict):\n            logger.info(\"{}{} : \".format(delimiter * \" \",\n                                         coloring(str(k), \"HEADER\")))\n            for value in v:\n                print_dict(value, delimiter + 4)\n        else:\n            logger.info(\"{}{} : {}\".format(delimiter * \" \",\n                                           coloring(k, \"HEADER\"),\n                                           coloring(v, \"OKGREEN\")))\n        if k.isupper():\n            logger.info(placeholder)\ndef print_config(config):\n    \"\"\"\n    visualize configs\n    Arguments:\n        config: configs\n    \"\"\"\n    print_dict(config)\ndef check_config(config):\n    \"\"\"\n    Check config\n    \"\"\"\n    pass\ndef override(dl, ks, v):\n    \"\"\"\n    Recursively replace dict of list\n    Args:\n        dl(dict or list): dict or list to be replaced\n        ks(list): list of keys\n        v(str): value to be replaced\n    \"\"\"\n    def str2num(v):\n        try:\n            return eval(v)",
+        "type": "code",
+        "location": "/paddlevideo/utils/config.py:68-109"
+    },
+    "8301": {
+        "file_id": 612,
+        "content": "The code defines several functions related to handling and manipulating configurations. The \"print_config\" function visualizes the configs, while \"check_config\" checks the validity of the configs. The \"override\" function recursively replaces values in a dictionary or list using a provided key and value.",
+        "type": "comment"
+    },
+    "8302": {
+        "file_id": 612,
+        "content": "        except Exception:\n            return v\n    assert isinstance(dl, (list, dict)), (\"{} should be a list or a dict\")\n    assert len(ks) > 0, ('lenght of keys should larger than 0')\n    if isinstance(dl, list):\n        k = str2num(ks[0])\n        if len(ks) == 1:\n            assert k < len(dl), ('index({}) out of range({})'.format(k, dl))\n            dl[k] = str2num(v)\n        else:\n            override(dl[k], ks[1:], v)\n    else:\n        if len(ks) == 1:\n            #assert ks[0] in dl, ('{} is not exist in {}'.format(ks[0], dl))\n            if not ks[0] in dl:\n                logger.warning('A new filed ({}) detected!'.format(ks[0], dl))\n            dl[ks[0]] = str2num(v)\n        else:\n            assert ks[0] in dl, (\n                '({}) doesn\\'t exist in {}, a new dict field is invalid'.format(\n                    ks[0], dl))\n            override(dl[ks[0]], ks[1:], v)\ndef override_config(config, options=None):\n    \"\"\"\n    Recursively override the config\n    Args:\n        config(dict): dict to be replaced",
+        "type": "code",
+        "location": "/paddlevideo/utils/config.py:110-139"
+    },
+    "8303": {
+        "file_id": 612,
+        "content": "This code is part of a function `override_config` that recursively overrides the given config with new options. The function first checks if the data `dl` is a list or dictionary, and then proceeds accordingly. If `dl` is a list, it extracts the first key from `ks`, converts it to an integer, and ensures that the index is within range of `dl`. It then updates the corresponding element in `dl` with the value `v`. If `ks` has more than one key, it calls the `override` function to update a specific field in `dl`. \n\nIf `dl` is a dictionary, it again handles two scenarios: when there's only one key and when there are multiple keys. In the single-key scenario, it checks if the key exists in `dl` (and warns if not) and updates its value. If there are multiple keys, it first asserts that the first key exists in `dl`, then calls the `override` function to update a specific field in `dl`.\n\nThe code also includes an exception handling block which simply returns the original value `v` in case of any error or exception.",
+        "type": "comment"
+    },
+    "8304": {
+        "file_id": 612,
+        "content": "        options(list): list of pairs(key0.key1.idx.key2=value)\n            such as: [\n                epochs=20',\n                'PIPELINE.train.transform.1.ResizeImage.resize_short=300'\n            ]\n    Returns:\n        config(dict): replaced config\n    \"\"\"\n    if options is not None:\n        for opt in options:\n            assert isinstance(opt,\n                              str), (\"option({}) should be a str\".format(opt))\n            assert \"=\" in opt, (\n                \"option({}) should contain a =\"\n                \"to distinguish between key and value\".format(opt))\n            pair = opt.split('=')\n            assert len(pair) == 2, (\"there can be only a = in the option\")\n            key, value = pair\n            keys = key.split('.')\n            override(config, keys, value)\n    return config\ndef get_config(fname, overrides=None, show=True):\n    \"\"\"\n    Read config from file\n    \"\"\"\n    assert os.path.exists(fname), ('config file({}) is not exist'.format(fname))\n    config = parse_config(fname)\n    override_config(config, overrides)",
+        "type": "code",
+        "location": "/paddlevideo/utils/config.py:140-170"
+    },
+    "8305": {
+        "file_id": 612,
+        "content": "This code defines two functions, `options(list)` and `get_config(fname, overrides=None, show=True)`. The `options(list)` function takes a list of pairs (key-value) as input and replaces the config with new values. The `get_config(fname, overrides=None, show=True)` function reads the config from a file, applies any overrides, and if 'show' is True, prints the updated configuration.",
+        "type": "comment"
+    },
+    "8306": {
+        "file_id": 612,
+        "content": "    if show:\n        print_config(config)\n    check_config(config)\n    return config",
+        "type": "code",
+        "location": "/paddlevideo/utils/config.py:171-174"
+    },
+    "8307": {
+        "file_id": 612,
+        "content": "This code block checks if the 'show' variable is set to True, and if so, it calls a function named 'print_config' with the 'config' parameter. It then always executes another function called 'check_config' with the same 'config' argument before returning the 'config' variable.",
+        "type": "comment"
+    },
+    "8308": {
+        "file_id": 613,
+        "content": "/paddlevideo/utils/dist_utils.py",
+        "type": "filepath"
+    },
+    "8309": {
+        "file_id": 613,
+        "content": "This code is from PaddleVideo's EIVideo module and includes util functions for distributed computing. It defines a function get_dist_info() to retrieve the current rank and world size, and main_only() is a decorator that only runs the wrapped function if the rank is 0 (used in distributed environments).",
+        "type": "summary"
+    },
+    "8310": {
+        "file_id": 613,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport functools\nimport paddle\nimport paddle.distributed as dist\ndef get_dist_info():\n    world_size = dist.get_world_size()\n    rank = dist.get_rank()\n    return rank, world_size\ndef main_only(func):\n    @functools.wraps(func)\n    def wrapper(*args, **kwargs):\n        rank, _ = get_dist_info()\n        if rank == 0:\n            return func(*args, **kwargs)\n    return wrapper",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/dist_utils.py:1-30"
+    },
+    "8311": {
+        "file_id": 613,
+        "content": "This code is from PaddleVideo's EIVideo module and includes util functions for distributed computing. It defines a function get_dist_info() to retrieve the current rank and world size, and main_only() is a decorator that only runs the wrapped function if the rank is 0 (used in distributed environments).",
+        "type": "comment"
+    },
+    "8312": {
+        "file_id": 614,
+        "content": "/paddlevideo/utils/logger.py",
+        "type": "filepath"
+    },
+    "8313": {
+        "file_id": 614,
+        "content": "This code sets up a colorful logging function for PaddleVideo, initializes logger with verbosity levels, and ensures non-propagation of logs. It configures logger for Python's logging module using different formats and handlers based on local rank.",
+        "type": "summary"
+    },
+    "8314": {
+        "file_id": 614,
+        "content": "#   Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport logging\nimport os\nimport sys\nimport datetime\nfrom paddle.distributed import ParallelEnv\nColor = {\n    'RED': '\\033[31m',\n    'HEADER': '\\033[35m',  # deep purple\n    'PURPLE': '\\033[95m',  # purple\n    'OKBLUE': '\\033[94m',\n    'OKGREEN': '\\033[92m',\n    'WARNING': '\\033[93m',\n    'FAIL': '\\033[91m',\n    'ENDC': '\\033[0m'\n}\ndef coloring(message, color=\"OKGREEN\"):\n    assert color in Color.keys()\n    if os.environ.get('COLORING', True):",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/logger.py:1-38"
+    },
+    "8315": {
+        "file_id": 614,
+        "content": "This code is from the \"logger.py\" file in the PaddleVideo project, and it sets up a coloring function for logging messages with optional colors using ANSI escape sequences. The function takes a message and an optional color parameter, which should be one of the defined colors in the Color dictionary. It asserts that the provided color is indeed a key in the dictionary, and then returns the message with the specified color applied. The function also checks the environment variable \"COLORING\" to determine whether coloring should be enabled or not (default is True).",
+        "type": "comment"
+    },
+    "8316": {
+        "file_id": 614,
+        "content": "        return Color[color] + str(message) + Color[\"ENDC\"]\n    else:\n        return message\nlogger_initialized = []\ndef setup_logger(output=None, name=\"paddlevideo\", level=\"INFO\"):\n    \"\"\"\n    Initialize the paddlevideo logger and set its verbosity level to \"INFO\".\n    Args:\n        output (str): a file name or a directory to save log. If None, will not save log file.\n            If ends with \".txt\" or \".log\", assumed to be a file name.\n            Otherwise, logs will be saved to `output/log.txt`.\n        name (str): the root module name of this logger\n    Returns:\n        logging.Logger: a logger\n    \"\"\"\n    def time_zone(sec, fmt):\n        real_time = datetime.datetime.now()\n        return real_time.timetuple()\n    logging.Formatter.converter = time_zone\n    logger = logging.getLogger(name)\n    if level == \"INFO\":\n        logger.setLevel(logging.INFO)\n    elif level==\"DEBUG\":\n        logger.setLevel(logging.DEBUG)\n    logger.propagate = False\n    if level == \"DEBUG\":\n        plain_formatter = logging.Formatter(",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/logger.py:39-71"
+    },
+    "8317": {
+        "file_id": 614,
+        "content": "This code initializes the PaddleVideo logger and sets its verbosity level to \"INFO\" or \"DEBUG\", depending on the input argument. It also defines a custom time zone converter for logging, and ensures that the logger does not propagate logs to its parent loggers.",
+        "type": "comment"
+    },
+    "8318": {
+        "file_id": 614,
+        "content": "            \"[%(asctime)s] %(name)s %(levelname)s: %(message)s\",\n            datefmt=\"%m/%d %H:%M:%S\")\n    else:\n        plain_formatter = logging.Formatter(\n            \"[%(asctime)s] %(message)s\",\n            datefmt=\"%m/%d %H:%M:%S\")\n    # stdout logging: master only\n    local_rank = ParallelEnv().local_rank\n    if local_rank == 0:\n        ch = logging.StreamHandler(stream=sys.stdout)\n        ch.setLevel(logging.DEBUG)\n        formatter = plain_formatter\n        ch.setFormatter(formatter)\n        logger.addHandler(ch)\n    # file logging: all workers\n    if output is not None:\n        if output.endswith(\".txt\") or output.endswith(\".log\"):\n            filename = output\n        else:\n            filename = os.path.join(output, \".log.txt\")\n        if local_rank > 0:\n            filename = filename + \".rank{}\".format(local_rank)\n        # PathManager.mkdirs(os.path.dirname(filename))\n        os.makedirs(os.path.dirname(filename), exist_ok=True)\n        # fh = logging.StreamHandler(_cached_log_stream(filename)\n        fh = logging.FileHandler(filename, mode='a')",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/logger.py:72-100"
+    },
+    "8319": {
+        "file_id": 614,
+        "content": "This code configures a logger for Python's logging module. It uses different formats and handlers (stdout, file) based on the local rank of the process, creating separate log files for each worker ranked greater than 0. If the output is a .txt or .log file, it will be used as-is; otherwise, a .log.txt file with optional rank appended will be created. The code also ensures that missing directories for the log file are created beforehand.",
+        "type": "comment"
+    },
+    "8320": {
+        "file_id": 614,
+        "content": "        fh.setLevel(logging.DEBUG)\n        fh.setFormatter(plain_formatter)\n        logger.addHandler(fh)\n    logger_initialized.append(name)\n    return logger\ndef get_logger(name, output=None):\n    logger = logging.getLogger(name)\n    if name in logger_initialized:\n        return logger\n    return setup_logger(name=name, output=name)",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/logger.py:101-113"
+    },
+    "8321": {
+        "file_id": 614,
+        "content": "This code initializes a logger object and sets its level to DEBUG, adds a file handler with a plain formatter, and appends the logger's name to an initialized list. The function returns the logger if it has been previously initialized for the given name; otherwise, it sets up the logger using the provided name and optional output.",
+        "type": "comment"
+    },
+    "8322": {
+        "file_id": 615,
+        "content": "/paddlevideo/utils/multigrid/__init__.py",
+        "type": "filepath"
+    },
+    "8323": {
+        "file_id": 615,
+        "content": "This code imports various functions and classes from different modules in the PaddleVideo library. The __all__ list specifies the exported public symbols including MultigridSchedule, get_norm, aggregate_sub_bn_stats, DistributedShortSampler, subn_save, subn_load, and is_eval_epoch.",
+        "type": "summary"
+    },
+    "8324": {
+        "file_id": 615,
+        "content": "from .multigrid import MultigridSchedule\nfrom .batchnorm_helper import get_norm, aggregate_sub_bn_stats\nfrom .short_sampler import DistributedShortSampler\nfrom .save_load_helper import subn_save, subn_load\nfrom .interval_helper import is_eval_epoch\n__all__ = [\n    'MultigridSchedule', 'get_norm', 'aggregate_sub_bn_stats',\n    'DistributedShortSampler', 'subn_save', 'subn_load', 'is_eval_epoch'\n]",
+        "type": "code",
+        "location": "/paddlevideo/utils/multigrid/__init__.py:1-10"
+    },
+    "8325": {
+        "file_id": 615,
+        "content": "This code imports various functions and classes from different modules in the PaddleVideo library. The __all__ list specifies the exported public symbols including MultigridSchedule, get_norm, aggregate_sub_bn_stats, DistributedShortSampler, subn_save, subn_load, and is_eval_epoch.",
+        "type": "comment"
+    },
+    "8326": {
+        "file_id": 616,
+        "content": "/paddlevideo/utils/multigrid/batchnorm_helper.py",
+        "type": "filepath"
+    },
+    "8327": {
+        "file_id": 616,
+        "content": "This code defines a PyTorch class for batch normalization, initializing a BatchNorm3D layer and including methods to compute mean and standard deviation. It also supports aggregating statistics from multiple splits and performs forward pass for training or evaluation.",
+        "type": "summary"
+    },
+    "8328": {
+        "file_id": 616,
+        "content": "from functools import partial\nimport paddle\ndef get_norm(bn_norm_type, bn_num_splits):\n    \"\"\"\n    Args:\n        cfg (CfgNode): model building configs, details are in the comments of\n            the config file.\n    Returns:\n        nn.Layer: the normalization layer.\n    \"\"\"\n    if bn_norm_type == \"batchnorm\":\n        return paddle.nn.BatchNorm3D\n    elif bn_norm_type == \"sub_batchnorm\":\n        return partial(SubBatchNorm3D, num_splits=bn_num_splits)\n    else:\n        raise NotImplementedError(\n            \"Norm type {} is not supported\".format(bn_norm_type))\ndef aggregate_sub_bn_stats(model):\n    \"\"\"\n    Recursively find all SubBN modules and aggregate sub-BN stats.\n    Args:\n        model (nn.Layer): model to be aggregate sub-BN stats\n    Returns:\n        count (int): number of SubBN module found.\n    \"\"\"\n    count = 0\n    for child in model.children():\n        if isinstance(child, SubBatchNorm3D):\n            child.aggregate_stats()\n            count += 1\n        else:\n            count += aggregate_sub_bn_stats(child)",
+        "type": "code",
+        "location": "/paddlevideo/utils/multigrid/batchnorm_helper.py:1-36"
+    },
+    "8329": {
+        "file_id": 616,
+        "content": "This code defines a function `get_norm` that returns the normalization layer based on the provided bn_norm_type and bn_num_splits. If bn_norm_type is 'batchnorm', it returns paddle.nn.BatchNorm3D, otherwise if it's 'sub_batchnorm', it returns a partially applied SubBatchNorm3D function with num_splits parameter set to bn_num_splits. If the norm type isn't supported, it raises a NotImplementedError. It also defines `aggregate_sub_bn_stats` function that recursively finds all SubBN modules in the given model and aggregates sub-BN stats by calling aggregate_stats() on each found SubBatchNorm3D module. It returns the count of SubBN modules found.",
+        "type": "comment"
+    },
+    "8330": {
+        "file_id": 616,
+        "content": "    return count\nclass SubBatchNorm3D(paddle.nn.Layer):\n    \"\"\"\n    Implement based on paddle2.0.\n    The standard BN layer computes stats across all examples in a GPU. In some\n    cases it is desirable to compute stats across only a subset of examples\n    SubBatchNorm3D splits the batch dimension into N splits, and run BN on\n    each of them separately (so that the stats are computed on each subset of\n    examples (1/N of batch) independently. During evaluation, it aggregates\n    the stats from all splits into one BN.\n    \"\"\"\n    def __init__(self, num_splits, **args):\n        \"\"\"\n        Args:\n            num_splits (int): number of splits.\n            args (list): list of args\n        \"\"\"\n        super(SubBatchNorm3D, self).__init__()\n        self.num_splits = num_splits\n        self.num_features = args[\"num_features\"]\n        self.weight_attr = args[\"weight_attr\"]\n        self.bias_attr = args[\"bias_attr\"]\n        # Keep only one set of weight and bias (outside).\n        if self.weight_attr == False:\n            self.weight = self.create_parameter(",
+        "type": "code",
+        "location": "/paddlevideo/utils/multigrid/batchnorm_helper.py:37-64"
+    },
+    "8331": {
+        "file_id": 616,
+        "content": "The code defines a SubBatchNorm3D class that implements Batch Normalization with the option to split the batch dimension into N splits. It computes stats for each subset of examples independently during training and aggregates them during evaluation. The class takes num_splits as an argument and other parameters such as num_features, weight_attr, and bias_attr are set in its constructor.",
+        "type": "comment"
+    },
+    "8332": {
+        "file_id": 616,
+        "content": "                attr=None,\n                shape=[self.num_features],\n                default_initializer=paddle.nn.initializer.Constant(1.0))\n            self.weight.stop_gradient = True\n        else:\n            self.weight = self.create_parameter(\n                attr=self.weight_attr,\n                shape=[self.num_features],\n                default_initializer=paddle.nn.initializer.Constant(1.0))\n            self.weight.stop_gradient = self.weight_attr is not None \\\n                                        and self.weight_attr.learning_rate == 0.\n        if self.bias_attr == False:\n            self.bias = self.create_parameter(attr=None,\n                                              shape=[self.num_features],\n                                              is_bias=True)\n            self.bias.stop_gradient = True\n        else:\n            self.bias = self.create_parameter(attr=self.bias_attr,\n                                              shape=[self.num_features],\n                                              is_bias=True)",
+        "type": "code",
+        "location": "/paddlevideo/utils/multigrid/batchnorm_helper.py:65-85"
+    },
+    "8333": {
+        "file_id": 616,
+        "content": "This code initializes the weight and bias parameters of a BatchNorm layer in PaddlePaddle. If learning rate is 0, it sets weight to have no gradient update, and if `bias_attr` is False, it sets the bias to True and stops its gradients from being updated.",
+        "type": "comment"
+    },
+    "8334": {
+        "file_id": 616,
+        "content": "            self.bias.stop_gradient = self.bias_attr is not None \\\n                                      and self.bias_attr.learning_rate == 0.\n        # set weights and bias fixed (inner).\n        args[\"weight_attr\"] = False\n        args[\"bias_attr\"] = False\n        self.bn = paddle.nn.BatchNorm3D(**args)\n        # update number of features used in split_bn\n        args[\"num_features\"] = self.num_features * self.num_splits\n        self.split_bn = paddle.nn.BatchNorm3D(**args)\n    def _get_aggregated_mean_std(self, means, stds, n):\n        \"\"\"\n        Calculate the aggregated mean and stds.\n        Use the method of update mean and std when merge multi-part data.\n        Args:\n            means (tensor): mean values.\n            stds (tensor): standard deviations.\n            n (int): number of sets of means and stds.\n        \"\"\"\n        mean = paddle.sum(paddle.reshape(means, (n, -1)), axis=0) / n\n        std = (paddle.sum(paddle.reshape(stds, (n, -1)), axis=0) / n +\n               paddle.sum(paddle.reshape(",
+        "type": "code",
+        "location": "/paddlevideo/utils/multigrid/batchnorm_helper.py:86-108"
+    },
+    "8335": {
+        "file_id": 616,
+        "content": "Class is initializing a BatchNorm3D layer and storing two instances of it (self.bn and self.split_bn). The first instance has its weights and bias set as fixed (inner), while the second instance handles splitting the features for a specified number of splits. The function _get_aggregated_mean_std calculates the aggregated mean and standard deviation by summing each set's means and stds, then dividing them by the total count to get the average values.",
+        "type": "comment"
+    },
+    "8336": {
+        "file_id": 616,
+        "content": "                   paddle.pow((paddle.reshape(means, (n, -1)) - mean), 2),\n                   (n, -1)),\n                          axis=0) / n)\n        return mean, std\n    def aggregate_stats(self):\n        \"\"\"\n        Synchronize running_mean, and running_var to self.bn.\n        Call this before eval, then call model.eval();\n        When eval, forward function will call self.bn instead of self.split_bn,\n        During this time the running_mean, and running_var of self.bn has been obtained from\n        self.split_bn.\n        \"\"\"\n        if self.split_bn.training:\n            bn_mean_tensor, bn_variance_tensor = self._get_aggregated_mean_std(\n                self.split_bn._mean,\n                self.split_bn._variance,\n                self.num_splits,\n            )\n            self.bn._mean.set_value(bn_mean_tensor)\n            self.bn._variance.set_value(bn_variance_tensor)\n    def forward(self, x):\n        if self.training:\n            n, c, t, h, w = x.shape\n            x = paddle.reshape(\n                x, (n // self.num_splits, c * self.num_splits, t, h, w))",
+        "type": "code",
+        "location": "/paddlevideo/utils/multigrid/batchnorm_helper.py:109-135"
+    },
+    "8337": {
+        "file_id": 616,
+        "content": "This code is defining a class that implements batch normalization in PyTorch. The class has methods to compute the mean and standard deviation, aggregate statistics from multiple splits of batch normalization, and perform forward pass for training or evaluation.",
+        "type": "comment"
+    },
+    "8338": {
+        "file_id": 616,
+        "content": "            x = self.split_bn(x)\n            x = paddle.reshape(x, (n, c, t, h, w))\n        else:\n            x = self.bn(x)\n        x = paddle.multiply(x, paddle.reshape(self.weight, (-1, 1, 1, 1)))\n        x = paddle.add(x, paddle.reshape(self.bias, (-1, 1, 1, 1)))\n        return x",
+        "type": "code",
+        "location": "/paddlevideo/utils/multigrid/batchnorm_helper.py:136-142"
+    },
+    "8339": {
+        "file_id": 616,
+        "content": "The code applies batch normalization to the input tensor and multiplies it by a weight matrix. Then, it adds a bias vector and returns the normalized tensor.",
+        "type": "comment"
+    },
+    "8340": {
+        "file_id": 617,
+        "content": "/paddlevideo/utils/multigrid/interval_helper.py",
+        "type": "filepath"
+    },
+    "8341": {
+        "file_id": 617,
+        "content": "The function `is_eval_epoch` determines whether the model should be evaluated at a given epoch based on the provided configs, current epoch, and multigrid training schedule. If the current epoch is equal to the total number of epochs or if there's a non-null multigrid schedule, it checks if the current epoch is a time for evaluation based on the schedule intervals. The function returns True when an evaluation should occur and False otherwise.",
+        "type": "summary"
+    },
+    "8342": {
+        "file_id": 617,
+        "content": "def is_eval_epoch(cfg, cur_epoch, total_epochs, multigrid_schedule):\n    \"\"\"\n    Determine if the model should be evaluated at the current epoch.\n    Args:\n        cfg (CfgNode): configs. Details can be found in\n            slowfast/config/defaults.py\n        cur_epoch (int): current epoch.\n        multigrid_schedule (List): schedule for multigrid training.\n    \"\"\"\n    if cur_epoch + 1 == total_epochs:\n        return True\n    if multigrid_schedule is not None:\n        prev_epoch = 0\n        for s in multigrid_schedule:\n            if cur_epoch < s[-1]:\n                period = max(\n                    (s[-1] - prev_epoch) // cfg.MULTIGRID.EVAL_FREQ + 1, 1)\n                return (s[-1] - 1 - cur_epoch) % period == 0\n            prev_epoch = s[-1]",
+        "type": "code",
+        "location": "/paddlevideo/utils/multigrid/interval_helper.py:1-19"
+    },
+    "8343": {
+        "file_id": 617,
+        "content": "The function `is_eval_epoch` determines whether the model should be evaluated at a given epoch based on the provided configs, current epoch, and multigrid training schedule. If the current epoch is equal to the total number of epochs or if there's a non-null multigrid schedule, it checks if the current epoch is a time for evaluation based on the schedule intervals. The function returns True when an evaluation should occur and False otherwise.",
+        "type": "comment"
+    },
+    "8344": {
+        "file_id": 618,
+        "content": "/paddlevideo/utils/multigrid/multigrid.py",
+        "type": "filepath"
+    },
+    "8345": {
+        "file_id": 618,
+        "content": "The MultigridSchedule class manages multigrid training schedules, batch sizes, sampling rates, and long cycle updates. The update_long_cycle() function adjusts these parameters based on the epoch in PaddleVideo. It also calculates final learning rate schedules and provides a function for determining long cycle base shape.",
+        "type": "summary"
+    },
+    "8346": {
+        "file_id": 618,
+        "content": "\"\"\"Functions for multigrid training.\"\"\"\nimport numpy as np\nclass MultigridSchedule(object):\n    \"\"\"\n    This class defines multigrid training schedule and update cfg accordingly.\n    \"\"\"\n    def init_multigrid(self, cfg):\n        \"\"\"\n        Update cfg based on multigrid settings.\n        Args:\n            cfg (configs): configs that contains training and multigrid specific\n                hyperparameters.\n        Returns:\n            cfg (configs): the updated cfg.\n        \"\"\"\n        self.schedule = None\n        # We may modify cfg.DATASET.batch_size, cfg.PIPELINE.train.decode_sampler.num_frames, and\n        # cfg.PIPELINE.train.transform[1]['MultiCrop']['target_size'] during training, so we store their original\n        # value in cfg and use them as global variables.\n        cfg.MULTIGRID.default_batch_size = cfg.DATASET.batch_size  # total bs,64\n        cfg.MULTIGRID.default_temporal_size = cfg.PIPELINE.train.decode_sampler.num_frames  # 32\n        cfg.MULTIGRID.default_crop_size = cfg.PIPELINE.train.transform[1][",
+        "type": "code",
+        "location": "/paddlevideo/utils/multigrid/multigrid.py:1-25"
+    },
+    "8347": {
+        "file_id": 618,
+        "content": "This code defines a MultigridSchedule class for multigrid training schedule and updates cfg according to multigrid settings. The init_multigrid function takes in configs (cfg) as input, updates it based on multigrid settings, and returns the updated cfg. It stores original values of batch size, temporal size, and crop size in cfg's MULTIGRID subsection as global variables for later use.",
+        "type": "comment"
+    },
+    "8348": {
+        "file_id": 618,
+        "content": "            'MultiCrop']['target_size']  # 224\n        if cfg.MULTIGRID.LONG_CYCLE:\n            self.schedule = self.get_long_cycle_schedule(cfg)\n            cfg.OPTIMIZER.learning_rate.steps = [0] + [\n                s[-1] for s in self.schedule\n            ]\n            # Fine-tuning phase.\n            cfg.OPTIMIZER.learning_rate.steps[-1] = (\n                cfg.OPTIMIZER.learning_rate.steps[-2] +\n                cfg.OPTIMIZER.learning_rate.steps[-1]) // 2\n            cfg.OPTIMIZER.learning_rate.lrs = [\n                cfg.OPTIMIZER.learning_rate.gamma**s[0] * s[1][0]\n                for s in self.schedule\n            ]\n            # Fine-tuning phase.\n            cfg.OPTIMIZER.learning_rate.lrs = cfg.OPTIMIZER.learning_rate.lrs[:-1] + [\n                cfg.OPTIMIZER.learning_rate.lrs[-2],\n                cfg.OPTIMIZER.learning_rate.lrs[-1],\n            ]\n            cfg.OPTIMIZER.learning_rate.max_epoch = self.schedule[-1][-1]\n        elif cfg.MULTIGRID.SHORT_CYCLE:\n            cfg.OPTIMIZER.learning_rate.steps = [",
+        "type": "code",
+        "location": "/paddlevideo/utils/multigrid/multigrid.py:26-50"
+    },
+    "8349": {
+        "file_id": 618,
+        "content": "The code initializes the multi-grid training schedule for the given configuration (cfg). If a long cycle is enabled, it sets learning rate steps and adjusts them for fine-tuning. It also updates the maximum epoch count based on the schedule.",
+        "type": "comment"
+    },
+    "8350": {
+        "file_id": 618,
+        "content": "                int(s * cfg.MULTIGRID.epoch_factor)\n                for s in cfg.OPTIMIZER.learning_rate.steps\n            ]\n            cfg.OPTIMIZER.learning_rate.max_epoch = int(\n                cfg.OPTIMIZER.learning_rate.max_epoch *\n                cfg.OPTIMIZER.learning_rate.max_epoch)\n        return cfg\n    def update_long_cycle(self, cfg, cur_epoch):\n        \"\"\"\n        Before every epoch, check if long cycle shape should change. If it\n            should, update cfg accordingly.\n        Args:\n            cfg (configs): configs that contains training and multigrid specific\n                hyperparameters.\n            cur_epoch (int): current epoch index.\n        Returns:\n            cfg (configs): the updated cfg.\n            changed (bool): whether to change long cycle shape at this epoch\n        \"\"\"\n        base_b, base_t, base_s = get_current_long_cycle_shape(\n            self.schedule, cur_epoch)\n        if base_s != cfg.PIPELINE.train.transform[1]['MultiCrop'][\n                'target_size'] or base_t != cfg.PIPELINE.train.decode_sampler.num_frames:",
+        "type": "code",
+        "location": "/paddlevideo/utils/multigrid/multigrid.py:51-74"
+    },
+    "8351": {
+        "file_id": 618,
+        "content": "This function, update_long_cycle(), checks if the long cycle shape should change before every epoch. If it should, it updates cfg accordingly. It takes in configs (cfg) and current epoch index (cur_epoch), and returns the updated cfg and a boolean indicating whether the long cycle shape changed. The function also retrieves the base_b, base_t, and base_s using get_current_long_cycle_shape(). If these values differ from the target size or number of frames in the cfg, it implies that the long cycle shape should change.",
+        "type": "comment"
+    },
+    "8352": {
+        "file_id": 618,
+        "content": "            #NOTE Modify\n            # no need to modify, used by pool_size in head, None when multigrid\n            # cfg.MODEL.head.num_frames = base_t\n            # cfg.MODEL.head.crop_size  = base_s\n            cfg.PIPELINE.train.decode_sampler.num_frames = base_t\n            cfg.PIPELINE.train.transform[1]['MultiCrop']['target_size'] = base_s\n            cfg.DATASET.batch_size = base_b * cfg.MULTIGRID.default_batch_size  #change bs\n            bs_factor = (float(cfg.DATASET.batch_size) /\n                         cfg.MULTIGRID.bn_base_size)\n            if bs_factor == 1:  #single bs == bn_base_size (== 8)\n                cfg.MODEL.backbone.bn_norm_type = \"batchnorm\"\n            else:\n                cfg.MODEL.backbone.bn_norm_type = \"sub_batchnorm\"\n                cfg.MODEL.backbone.bn_num_splits = int(bs_factor)\n            cfg.MULTIGRID.long_cycle_sampling_rate = cfg.PIPELINE.train.decode_sampler.sampling_rate * (\n                cfg.MULTIGRID.default_temporal_size // base_t)\n            print(\"Long cycle updates:\")",
+        "type": "code",
+        "location": "/paddlevideo/utils/multigrid/multigrid.py:75-94"
+    },
+    "8353": {
+        "file_id": 618,
+        "content": "This code sets the number of frames and crop size for the head and transform, adjusts batch size based on multigrid configuration, determines whether to use \"batchnorm\" or \"sub_batchnorm\", and sets the long cycle sampling rate. The output is a message stating if long cycle updates are enabled.",
+        "type": "comment"
+    },
+    "8354": {
+        "file_id": 618,
+        "content": "            print(\"\\tbn_norm_type: {}\".format(cfg.MODEL.backbone.bn_norm_type))\n            if cfg.MODEL.backbone.bn_norm_type == \"sub_batchnorm\":\n                print(\"\\tbn_num_splits: {}\".format(\n                    cfg.MODEL.backbone.bn_num_splits))\n            print(\"\\tTRAIN.batch_size[single card]: {}\".format(\n                cfg.DATASET.batch_size))\n            print(\"\\tDATA.NUM_FRAMES x LONG_CYCLE_SAMPLING_RATE: {}x{}\".format(\n                cfg.PIPELINE.train.decode_sampler.num_frames,\n                cfg.MULTIGRID.long_cycle_sampling_rate))\n            print(\"\\tDATA.train_crop_size: {}\".format(\n                cfg.PIPELINE.train.transform[1]['MultiCrop']['target_size']))\n            return cfg, True\n        else:\n            return cfg, False\n    def get_long_cycle_schedule(self, cfg):\n        \"\"\"\n        Based on multigrid hyperparameters, define the schedule of a long cycle.\n        Args:\n            cfg (configs): configs that contains training and multigrid specific\n                hyperparameters.",
+        "type": "code",
+        "location": "/paddlevideo/utils/multigrid/multigrid.py:95-115"
+    },
+    "8355": {
+        "file_id": 618,
+        "content": "The code is a function that checks the configuration for certain parameters related to multigrid training. It prints specific values and returns two values: a boolean indicating if the long cycle schedule should be used, and the original config unchanged.",
+        "type": "comment"
+    },
+    "8356": {
+        "file_id": 618,
+        "content": "        Returns:\n            schedule (list): Specifies a list long cycle base shapes and their\n                corresponding training epochs.\n        \"\"\"\n        steps = cfg.OPTIMIZER.learning_rate.steps\n        default_size = float(\n            cfg.PIPELINE.train.decode_sampler.num_frames *\n            cfg.PIPELINE.train.transform[1]['MultiCrop']['target_size']**\n            2)  # 32 * 224 * 224  C*H*W\n        default_iters = steps[-1]  # 196\n        # Get shapes and average batch size for each long cycle shape.\n        avg_bs = []\n        all_shapes = []\n        #        for t_factor, s_factor in cfg.MULTIGRID.long_cycle_factors:\n        for item in cfg.MULTIGRID.long_cycle_factors:\n            t_factor, s_factor = item[\"value\"]\n            base_t = int(\n                round(cfg.PIPELINE.train.decode_sampler.num_frames * t_factor))\n            base_s = int(\n                round(\n                    cfg.PIPELINE.train.transform[1]['MultiCrop']['target_size']\n                    * s_factor))\n            if cfg.MULTIGRID.SHORT_CYCLE:",
+        "type": "code",
+        "location": "/paddlevideo/utils/multigrid/multigrid.py:116-141"
+    },
+    "8357": {
+        "file_id": 618,
+        "content": "This code calculates the schedule for multi-grid training, iterating over long cycle factor pairs in `cfg.MULTIGRID.long_cycle_factors`. It determines base shapes for each cycle, calculating `base_t` based on `cfg.PIPELINE.train.decode_sampler.num_frames` and `t_factor`, and `base_s` based on target size from `cfg.PIPELINE.train.transform[1]['MultiCrop']['target_size']` and `s_factor`. It also considers short cycle training flag, `cfg.MULTIGRID.SHORT_CYCLE`.",
+        "type": "comment"
+    },
+    "8358": {
+        "file_id": 618,
+        "content": "                shapes = [\n                    [\n                        base_t,\n                        cfg.MULTIGRID.default_crop_size *\n                        cfg.MULTIGRID.short_cycle_factors[0],\n                    ],\n                    [\n                        base_t,\n                        cfg.MULTIGRID.default_crop_size *\n                        cfg.MULTIGRID.short_cycle_factors[1],\n                    ],\n                    [base_t, base_s],\n                ]  #first two is short_cycle, last is the base long_cycle\n            else:\n                shapes = [[base_t, base_s]]\n            # (T, S) -> (B, T, S)\n            shapes = [[\n                int(round(default_size / (s[0] * s[1] * s[1]))), s[0], s[1]\n            ] for s in shapes]\n            avg_bs.append(np.mean([s[0] for s in shapes]))\n            all_shapes.append(shapes)\n        # Get schedule regardless of cfg.MULTIGRID.epoch_factor.\n        total_iters = 0\n        schedule = []\n        for step_index in range(len(steps) - 1):\n            step_epochs = steps[step_index + 1] - steps[step_index]",
+        "type": "code",
+        "location": "/paddlevideo/utils/multigrid/multigrid.py:142-169"
+    },
+    "8359": {
+        "file_id": 618,
+        "content": "This code defines the multigrid training schedule for PaddleVideo. It sets the shapes for different grid levels, converts them to batch sizes, and calculates the average batch size. The code then computes the total number of iterations and generates the multigrid training schedule based on the steps provided.",
+        "type": "comment"
+    },
+    "8360": {
+        "file_id": 618,
+        "content": "            for long_cycle_index, shapes in enumerate(all_shapes):\n                #ensure each of 4 sequences run the same num of iters\n                cur_epochs = (step_epochs * avg_bs[long_cycle_index] /\n                              sum(avg_bs))\n                # get cur_iters from cur_epochs\n                cur_iters = cur_epochs / avg_bs[long_cycle_index]\n                total_iters += cur_iters\n                schedule.append((step_index, shapes[-1], cur_epochs))\n        iter_saving = default_iters / total_iters  # ratio between default iters and real iters\n        final_step_epochs = cfg.OPTIMIZER.learning_rate.max_epoch - steps[-1]\n        # We define the fine-tuning phase to have the same amount of iteration\n        # saving as the rest of the training.\n        #final_step_epochs / iter_saving make fine-tune having the same iters as training\n        ft_epochs = final_step_epochs / iter_saving * avg_bs[-1]\n        #        schedule.append((step_index + 1, all_shapes[-1][2], ft_epochs))\n        schedule.append((step_index + 1, all_shapes[-1][-1], ft_epochs))",
+        "type": "code",
+        "location": "/paddlevideo/utils/multigrid/multigrid.py:171-191"
+    },
+    "8361": {
+        "file_id": 618,
+        "content": "This code calculates the number of iterations for each sequence based on average batch sizes, and then appends the schedule with corresponding step index, shape, and epochs. It also ensures that the fine-tuning phase has the same number of iterations as the rest of the training.",
+        "type": "comment"
+    },
+    "8362": {
+        "file_id": 618,
+        "content": "        # Obtrain final schedule given desired cfg.MULTIGRID.epoch_factor.\n        x = (cfg.OPTIMIZER.learning_rate.max_epoch *\n             cfg.MULTIGRID.epoch_factor / sum(s[-1] for s in schedule))\n        final_schedule = []\n        total_epochs = 0\n        for s in schedule:\n            epochs = s[2] * x\n            total_epochs += epochs\n            final_schedule.append((s[0], s[1], int(round(total_epochs))))\n        print_schedule(final_schedule)\n        return final_schedule\ndef print_schedule(schedule):\n    \"\"\"\n    Log schedule.\n    \"\"\"\n    print(\n        \"Long_cycle_index\\tBase_shape(bs_factor,temporal_size,crop_size)\\tEpochs\"\n    )\n    for s in schedule:\n        print(\"{}\\t\\t\\t{}\\t\\t\\t\\t\\t{}\".format(s[0], s[1], s[2]))\ndef get_current_long_cycle_shape(schedule, epoch):\n    \"\"\"\n    Given a schedule and epoch index, return the long cycle base shape.\n    Args:\n        schedule (configs): configs that contains training and multigrid specific\n            hyperparameters.\n        cur_epoch (int): current epoch index.",
+        "type": "code",
+        "location": "/paddlevideo/utils/multigrid/multigrid.py:193-224"
+    },
+    "8363": {
+        "file_id": 618,
+        "content": "This code calculates the final learning rate schedule for multigrid training based on a provided schedule, max_epoch, and epoch_factor. It then prints this new schedule. The function get_current_long_cycle_shape takes in this same schedule and current epoch index to return the long cycle base shape for the given epoch.",
+        "type": "comment"
+    },
+    "8364": {
+        "file_id": 618,
+        "content": "    Returns:\n        shapes (list): A list describing the base shape in a long cycle:\n            [batch size relative to default,\n            number of frames, spatial dimension].\n    \"\"\"\n    for s in schedule:\n        if epoch < s[-1]:\n            return s[1]\n    return schedule[-1][1]",
+        "type": "code",
+        "location": "/paddlevideo/utils/multigrid/multigrid.py:225-233"
+    },
+    "8365": {
+        "file_id": 618,
+        "content": "This function returns a list describing the base shape in a long cycle based on the current epoch and a given schedule. It iterates through the schedule, returning the appropriate shape if the current epoch is less than the scheduled value, otherwise it returns the last shape in the schedule.",
+        "type": "comment"
+    },
+    "8366": {
+        "file_id": 619,
+        "content": "/paddlevideo/utils/multigrid/save_load_helper.py",
+        "type": "filepath"
+    },
+    "8367": {
+        "file_id": 619,
+        "content": "This function ensures state dict consistency by comparing optimizer and model parameters, saving/loading checkpoints, and converting sub-bn to normal bn. It checks if certain layers are set to load and prints a message for unloaded weights before loading pre-trained weights and setting the optimizer's state dictionary.",
+        "type": "summary"
+    },
+    "8368": {
+        "file_id": 619,
+        "content": "import os\nimport numpy as np\nimport paddle\nimport copy\ndef sub_to_normal_bn(sd):\n    \"\"\"\n    When save, Convert the Sub-BN paprameters to normal BN parameters in a state dict.\n    There are two copies of BN layers in a Sub-BN implementation: `bn.bn` and\n    `bn.split_bn`. `bn.split_bn` is used during training and\n    \"compute_precise_bn\". Before saving or evaluation, its stats are copied to\n    `bn.bn`. We rename `bn.bn` to `bn` and store it to be consistent with normal\n    BN layers.\n    Args:\n        sd (OrderedDict): a dict of parameters which might contain Sub-BN\n        parameters.\n    Returns:\n        new_sd (OrderedDict): a dict with Sub-BN parameters reshaped to\n        normal parameters.\n    \"\"\"\n    modifications = [\n        (\"bn.bn._mean\", \"bn._mean\"),\n        (\"bn.bn._variance\", \"bn._variance\"),\n    ]\n    to_remove = [\"bn.bn.\", \".split_bn.\"]\n    key_list = list(sd.keys())  #odict_keys to list\n    for key in key_list:\n        for before, after in modifications:\n            if key.endswith(before):\n                new_key = key.split(before)[0] + after",
+        "type": "code",
+        "location": "/paddlevideo/utils/multigrid/save_load_helper.py:1-31"
+    },
+    "8369": {
+        "file_id": 619,
+        "content": "This function converts Sub-BN parameters to normal BN parameters in a state dict. It renames `bn.bn` to `bn`, and modifies `_mean` and `_variance` accordingly. This is done before saving or evaluation to maintain consistency with normal BN layers. The modifications are made by iterating through the dictionary and checking if the key ends with the appropriate string, then updating it accordingly.",
+        "type": "comment"
+    },
+    "8370": {
+        "file_id": 619,
+        "content": "                sd[new_key] = sd.pop(key)\n        for rm in to_remove:\n            if rm in key and key in sd:\n                del sd[key]\ndef normal_to_sub_bn(checkpoint_sd, model_sd):\n    \"\"\"\n    When load, Convert BN parameters to Sub-BN parameters if model contains Sub-BNs.\n    Args:\n        checkpoint_sd (OrderedDict): source dict of parameters.\n        model_sd (OrderedDict): target dict of parameters.\n    Returns:\n        new_sd (OrderedDict): converted dict of parameters.\n    \"\"\"\n    for key in model_sd:\n        if key not in checkpoint_sd:\n            # not to replace bn.weight and bn.bias\n            if \"bn.split_bn.\" in key and \"bn.weight\" not in key and \"bn.bias\" not in key:\n                load_key = key.replace(\"bn.split_bn.\", \"bn.\")\n                bn_key = key.replace(\"bn.split_bn.\", \"bn.bn.\")\n                checkpoint_sd[key] = checkpoint_sd.pop(load_key)\n                checkpoint_sd[bn_key] = checkpoint_sd[key]\n    # match the shape of bn.split_bn._xx\n    # model_sd: split_bn.rm.shape = num_feature*num_split",
+        "type": "code",
+        "location": "/paddlevideo/utils/multigrid/save_load_helper.py:32-58"
+    },
+    "8371": {
+        "file_id": 619,
+        "content": "This function converts BN parameters to Sub-BN parameters when loading a checkpoint into a model containing Sub-BNs. It loops through the model's parameters, if a parameter has the \"bn.split_bn.\" prefix and is not the weight or bias of BN, it renames and moves the corresponding value from the checkpoint dict to the bn.bn key in the same subdict. Finally, it adjusts the shape of the Sub-BN parameters to match the original BN parameters' shape.",
+        "type": "comment"
+    },
+    "8372": {
+        "file_id": 619,
+        "content": "    # checkpoint_sd: split_bn.rm.shape = bn.rm.shape = num_feature\n    for key in model_sd:\n        if key in checkpoint_sd:\n            model_blob_shape = model_sd[key].shape  #bn.split_bn\n            c2_blob_shape = checkpoint_sd[key].shape  #bn.bn\n            if (len(model_blob_shape) == 1 and len(c2_blob_shape) == 1\n                    and model_blob_shape[0] > c2_blob_shape[0]\n                    and model_blob_shape[0] % c2_blob_shape[0] == 0):\n                before_shape = checkpoint_sd[key].shape\n                checkpoint_sd[key] = np.concatenate(\n                    [checkpoint_sd[key]] *\n                    (model_blob_shape[0] // c2_blob_shape[0]))\n                if 'split_bn' not in key:  #split_bn is excepted\n                    print(\"{} {} -> {}\".format(key, before_shape,\n                                               checkpoint_sd[key].shape))\n    return checkpoint_sd\ndef mapping_opt_dict(opt_dict, model_key_list):\n    \"\"\"\n    Paddle Name schedule: conv_1.w -> conv_2.w\n    Sometimes: sub_bn -> bn",
+        "type": "code",
+        "location": "/paddlevideo/utils/multigrid/save_load_helper.py:59-81"
+    },
+    "8373": {
+        "file_id": 619,
+        "content": "This code is comparing the shape of certain keys in the model and checkpoint dictionaries. If they match certain criteria, it will concatenate the checkpoint key to expand its size based on the model's shape. This is done for specific keys in the dictionary, except 'split_bn'. The function prints out the before and after shapes of the affected keys.",
+        "type": "comment"
+    },
+    "8374": {
+        "file_id": 619,
+        "content": "    when re-build model, we desire the parameter name to be coincident,\n    but the parameters name index will be added, as conv_1 to conv_2, not conv_1.\n    It will raise error if we set old saved parameters to new created optimizer.\n    as conv_2 cannot find in state_dict(only conv_1).\n    Args:\n        opt_dict: optimizer state dict, including the name and value of parameters gradient.\n        model_key_list: the parameters name list of re-build model.\n    Return: optimizer state dict with modified keys\n    \"\"\"\n    def get_name_info(PNAME, PN_key_list, key_list):\n        min_index = float('inf')\n        max_index = 0\n        for name in PN_key_list[1:]:\n            for key in key_list:\n                if name in key:\n                    index = int(key.split('.')[0].split(name)[-1])\n                    if index < min_index:\n                        min_index = index\n                    if index > max_index:\n                        max_index = index\n            num_name = max_index - min_index + 1\n            PNAME[name].append((min_index, max_index, num_name))",
+        "type": "code",
+        "location": "/paddlevideo/utils/multigrid/save_load_helper.py:82-103"
+    },
+    "8375": {
+        "file_id": 619,
+        "content": "This function takes an optimizer state dict and a list of parameter names from a rebuilt model. It aims to modify the keys in the optimizer state dict to match the new parameters' names, while also considering any added index for better compatibility. The function then returns the modified optimizer state dict.",
+        "type": "comment"
+    },
+    "8376": {
+        "file_id": 619,
+        "content": "            min_index = float('inf')\n            max_index = 0\n    PNAME = {\n        \"LR_Scheduler\": [],\n        \"conv3d_\": [],\n        \"linear_\": [],\n        \"sub_batch_norm3d_\": [],\n        \"batch_norm3d_\": [],\n    }\n    pd_key_list = list(opt_dict.keys())\n    print(\"The number of parameters in saved optimizer state dict = {}\".format(\n        len(pd_key_list)))\n    print(\"The number of parameters in re-build model list = {}\".format(\n        len(model_key_list)))\n    # 1 may be LR_Scheduler\n    PN_key_list = list(PNAME.keys())\n    # get the number of each PNAME\n    get_name_info(PNAME, PN_key_list, pd_key_list)\n    get_name_info(PNAME, PN_key_list, model_key_list)\n    print(\"[Parameters info] prefix: min_index, max_index, number_params: \\n\",\n          PNAME)\n    # whether to change name of bn layer\n    change_name = False\n    if PNAME[\"sub_batch_norm3d_\"][0][-1] == -float('inf'):\n        PN_key_list.remove(\"sub_batch_norm3d_\")\n        if PNAME[\"sub_batch_norm3d_\"][1][-1] != -float('inf'):\n            print(\n                \"Optimizer state dict saved bn, but Re-build model use sub_bn, changed name!\"",
+        "type": "code",
+        "location": "/paddlevideo/utils/multigrid/save_load_helper.py:104-135"
+    },
+    "8377": {
+        "file_id": 619,
+        "content": "This code appears to be a part of a larger program that compares the parameters in an optimizer state dict with those in a re-built model. It calculates and prints information about the number of parameters associated with each prefix, checks if batch normalization layers need their names changed, and potentially removes the \"sub_batch_norm3d_\" prefix from consideration. The code assumes that the \"opt_dict\" and \"model\" variables have already been defined elsewhere.",
+        "type": "comment"
+    },
+    "8378": {
+        "file_id": 619,
+        "content": "            )\n            change_name = True\n        else:\n            print(\"Optimizer state dict saved bn, and Re-build model use bn\")\n    else:\n        PN_key_list.remove(\"batch_norm3d_\")\n        if PNAME[\"sub_batch_norm3d_\"][1][-1] == -float('inf'):\n            print(\n                \"Optimizer state dict saved sub_bn, but Re-build model use bn, changed name!\"\n            )\n            change_name = True\n        else:\n            print(\n                \"Optimizer state dict saved sub_bn, Re-build model use sub_bn\")\n    #update key name\n    # sub_bn -> bn name mapping, pre-define dict\n    change_dict = {\n        \"sub_batch_norm3d_\": \"batch_norm3d_\",\n        \"batch_norm3d_\": \"sub_batch_norm3d_\"\n    }\n    for key in pd_key_list:\n        for name in PN_key_list[1:]:\n            if key.startswith(name):\n                start = change_dict[name] if (\n                    change_name and \"batch_norm\" in name) else name\n                str_index = key.split('.')[0].split(name)[-1]\n                index = int(str_index)",
+        "type": "code",
+        "location": "/paddlevideo/utils/multigrid/save_load_helper.py:136-163"
+    },
+    "8379": {
+        "file_id": 619,
+        "content": "The code checks if the optimizer state dict saved batch normalization (bn) or sub_batch_normalization and updates the key names accordingly. If the state dict saved bn but the model uses sub_bn, it prints a message and changes the name. If the state dict saved sub_bn and the model also uses sub_bn, it prints a separate message. The code then defines a change_dict mapping and iterates over the key list to update the names if required.",
+        "type": "comment"
+    },
+    "8380": {
+        "file_id": 619,
+        "content": "                new_index = str(index +\n                                (PNAME[start][1][0] - PNAME[name][0][0]))\n                end = key.split('.')[-1]\n                update_key = start + new_index + '.' + end\n                opt_dict[update_key] = opt_dict.pop(key)\n    return opt_dict\ndef subn_save(save_dir, name_prefix, epoch, video_model, optimizer):\n    if not os.path.isdir(save_dir):\n        os.makedirs(save_dir)\n    model_path = os.path.join(save_dir, name_prefix + \"{:05d}\".format(epoch))\n    model_dict = video_model.state_dict()\n    sub_to_normal_bn(model_dict)\n    opti_dict = optimizer.state_dict()\n    paddle.save(model_dict, model_path + '.pdparams')\n    paddle.save(opti_dict, model_path + '.pdopt')\n    print('[Saved Epoch {} parameters and optimizer state ]'.format(epoch))\ndef subn_load(model, ck_path, optimizer=None):\n    \"\"\"\n    Load the checkpoint from the given file.\n    Args:\n        model (model): model to load the weights from the checkpoint.\n        optimizer (optim, optional): optimizer to load the historical state.",
+        "type": "code",
+        "location": "/paddlevideo/utils/multigrid/save_load_helper.py:164-190"
+    },
+    "8381": {
+        "file_id": 619,
+        "content": "This code defines two functions: \"subn_save\" and \"subn_load\". \"subn_save\" saves a model's state dictionary along with the optimizer's state dictionary to specified directories in a specific format. It also converts sub-bn to normal bn before saving, and prints a message confirming the save operation. \"subn_load\" loads checkpoints from given files into the specified model and optionally an optimizer.",
+        "type": "comment"
+    },
+    "8382": {
+        "file_id": 619,
+        "content": "        ck_path (str): checkpoint path\n    Returns:\n        (int): the number of training epoch of the checkpoint.\n    \"\"\"\n    assert os.path.exists(ck_path + \".pdparams\"), \\\n        \"Given dir {}.pdparams not exist.\".format(ck_path)\n    print(\"load checkpint from {}.pdparams\".format(ck_path))\n    model_dict = model.state_dict()\n    checkpoint_dict = paddle.load(ck_path + \".pdparams\")\n    #    checkpoint_dict = copy.deepcopy(checkpoint_dict_orig)  #not modify when multi card\n    pre_train_dict = normal_to_sub_bn(checkpoint_dict, model_dict)\n    # Match pre-trained weights that have same shape as current model.\n    pre_train_dict_match = {\n        k: v\n        for k, v in pre_train_dict.items()\n        if k in model_dict and tuple(v.shape) == tuple(model_dict[k].shape)\n    }\n    # Weights that do not have match from the pre-trained model.\n    not_load_layers = [\n        k for k in model_dict.keys() if k not in pre_train_dict_match.keys()\n    ]\n    # Log weights that are not loaded with the pre-trained weights.",
+        "type": "code",
+        "location": "/paddlevideo/utils/multigrid/save_load_helper.py:191-216"
+    },
+    "8383": {
+        "file_id": 619,
+        "content": "This function loads checkpoints from a specific path and returns the number of training epochs. It ensures that the given directory has .pdparams file, prints the checkpoint loading information, copies model state dictionary, and compares the shapes of pre-trained weights to current model weights for matching. It also identifies layers that are not loaded with pre-trained weights.",
+        "type": "comment"
+    },
+    "8384": {
+        "file_id": 619,
+        "content": "    if not_load_layers:\n        for k in not_load_layers:\n            if 'bn.weight' not in k and 'bn.bias' not in k:\n                print(\"Network weights {} not loaded.\".format(k))\n    # Load pre-trained weights.\n    model.set_state_dict(pre_train_dict_match)\n    if optimizer:\n        assert os.path.exists(ck_path + \".pdopt\"), \\\n            \"Given dir {}.pdopt not exist.\".format(ck_path)\n        print(\"load checkpint from {}.pdopt\".format(ck_path))\n        opt_dict = paddle.load(ck_path + \".pdopt\")\n        # get parameters that required gradient from re-build model\n        model_key_list = []\n        for param in model.parameters():\n            if param.stop_gradient == False:\n                model_key_list.append(param.name)\n        new_opt_dict = mapping_opt_dict(opt_dict, model_key_list)\n        optimizer.set_state_dict(new_opt_dict)",
+        "type": "code",
+        "location": "/paddlevideo/utils/multigrid/save_load_helper.py:217-237"
+    },
+    "8385": {
+        "file_id": 619,
+        "content": "This code block checks if certain layers in the model are not set to load, and prints a message if those weights are not loaded. It then loads the pre-trained weights for the model and checks if a specific file exists before loading the optimizer's state dictionary from that file. The function mapping_opt_dict is called to create a new dictionary containing only parameters that require gradient, which is then set as the state dictionary of the optimizer.",
+        "type": "comment"
+    },
+    "8386": {
+        "file_id": 620,
+        "content": "/paddlevideo/utils/multigrid/short_sampler.py",
+        "type": "filepath"
+    },
+    "8387": {
+        "file_id": 620,
+        "content": "DistributedShortSampler streamlines distributed data loading, dynamic batch sizes, and GPU support for PaddleVideo's multigrid. It efficiently calculates average batch size and offers sample dropping options.",
+        "type": "summary"
+    },
+    "8388": {
+        "file_id": 620,
+        "content": "from __future__ import print_function\nfrom __future__ import division\nimport numpy as np\nimport math\nimport paddle\n__all__ = [\"DistributedShortSampler\"]\nclass DistributedShortSampler(paddle.io.BatchSampler):\n    \"\"\"Sampler that restricts data loading to a subset of the dataset.\n    In such case, each process can pass a DistributedBatchSampler instance\n    as a DataLoader sampler, and load a subset of the original dataset that\n    is exclusive to it.\n    .. note::\n        Batch size is dynamic changed following short cycle schedule.\n    Args:\n        dataset(paddle.io.Dataset): this could be a `paddle.io.Dataset` implement\n                     or other python object which implemented\n                     `__len__` for BatchSampler to get sample\n                     number of data source.\n        batch_sizes(list): batch size list of one cycle.\n        num_replicas(int, optional): porcess number in distributed training.\n            If :attr:`num_replicas` is None, :attr:`num_replicas` will be\n            retrieved from :code:`paddle.fluid.dygraph.parallel.ParallenEnv`.",
+        "type": "code",
+        "location": "/paddlevideo/utils/multigrid/short_sampler.py:1-28"
+    },
+    "8389": {
+        "file_id": 620,
+        "content": "The code defines a DistributedShortSampler class which is a sampler for restricting data loading to a subset of the dataset in distributed training. It allows each process to load exclusive subsets by passing the DistributedBatchSampler as a DataLoader sampler and supports dynamic batch size changes following short cycle schedules. The class takes in a dataset, batch_sizes list, and optionally num_replicas (process number in distributed training).",
+        "type": "comment"
+    },
+    "8390": {
+        "file_id": 620,
+        "content": "            Default None.\n        rank(int, optional): the rank of the current process among :attr:`num_replicas`\n            processes. If :attr:`rank` is None, :attr:`rank` is retrieved from\n            :code:`paddle.fluid.dygraph.parallel.ParallenEnv`. Default None.\n        shuffle(bool): whther to shuffle indices order before genrating\n            batch indices. Default False.\n        drop_last(bool): whether drop the last incomplete batch dataset size\n            is not divisible by the batch size. Default False\n    \"\"\"\n    def __init__(self,\n                 dataset,\n                 batch_sizes,\n                 num_replicas=None,\n                 rank=None,\n                 shuffle=False,\n                 drop_last=False):\n        self.dataset = dataset\n        assert any(isinstance(batch_size, int) and batch_size > 0 for batch_size in batch_sizes), \\\n            \"batch_size should be a positive integer\"\n        self.batch_sizes = batch_sizes\n        self.len_batch_sizes = len(self.batch_sizes)\n        assert isinstance(shuffle, bool), \\",
+        "type": "code",
+        "location": "/paddlevideo/utils/multigrid/short_sampler.py:29-51"
+    },
+    "8391": {
+        "file_id": 620,
+        "content": "The `__init__` method initializes an instance of the class with a dataset, batch sizes, number of replicas (optional), rank (optional), whether to shuffle indices (optional), and whether to drop last incomplete batch (optional). The batch_sizes should be positive integers. The method performs assertions on the inputs to ensure validity.",
+        "type": "comment"
+    },
+    "8392": {
+        "file_id": 620,
+        "content": "            \"shuffle should be a boolean value\"\n        self.shuffle = shuffle\n        assert isinstance(drop_last, bool), \\\n            \"drop_last should be a boolean number\"\n        if num_replicas is not None:\n            assert isinstance(num_replicas, int) and num_replicas > 0, \\\n                \"num_replicas should be a positive integer\"\n            self.nranks = num_replicas\n        else:\n            self.nranks = paddle.distributed.ParallelEnv().nranks\n        if rank is not None:\n            assert isinstance(rank, int) and rank >= 0, \\\n                \"rank should be a non-negative integer\"\n            self.local_rank = rank\n        else:\n            self.local_rank = paddle.distributed.ParallelEnv().local_rank\n        self.drop_last = drop_last\n        self.epoch = 0\n        self.num_samples = int(math.ceil(len(self.dataset) * 1.0 / self.nranks))\n        self.total_size = self.num_samples * self.nranks\n    def __iter__(self):\n        num_samples = len(self.dataset)\n        indices = np.arange(num_samples).tolist()",
+        "type": "code",
+        "location": "/paddlevideo/utils/multigrid/short_sampler.py:52-79"
+    },
+    "8393": {
+        "file_id": 620,
+        "content": "The code initializes a MultigridSampler object, which manages the sampling of data across multiple ranks in distributed training. It checks for valid input values (boolean for shuffle and drop_last) and ensures positive integer for num_replicas. It determines the number of ranks and local rank based on provided values or environment. The total number of samples is calculated based on the dataset size and number of ranks, and an array of indices is created.",
+        "type": "comment"
+    },
+    "8394": {
+        "file_id": 620,
+        "content": "        indices += indices[:(self.total_size -\n                             len(indices))]  #completion last iter\n        assert len(indices) == self.total_size\n        if self.shuffle:\n            np.random.RandomState(self.epoch).shuffle(indices)\n            self.epoch += 1\n        # subsample\n        def _get_indices_by_batch_size(indices):\n            total_batch_size = sum(self.batch_sizes)\n            subsampled_indices = []\n            last_batch_size = self.total_size % (\n                total_batch_size * self.nranks)  #number samples of last batch\n            assert last_batch_size % self.nranks == 0\n            last_local_batch_size = last_batch_size // self.nranks\n            for i in range(self.local_rank * total_batch_size,\n                           len(indices) - last_batch_size,\n                           total_batch_size * self.nranks):\n                subsampled_indices.extend(indices[i:i + total_batch_size])\n            indices = indices[len(indices) - last_batch_size:]\n            subsampled_indices.extend(",
+        "type": "code",
+        "location": "/paddlevideo/utils/multigrid/short_sampler.py:80-102"
+    },
+    "8395": {
+        "file_id": 620,
+        "content": "This code ensures that the number of samples selected is equal to the total size, and then subsamples them by batch sizes. It handles the last batch with potentially fewer samples due to modulo operations and shuffles the indices if desired.",
+        "type": "comment"
+    },
+    "8396": {
+        "file_id": 620,
+        "content": "                indices[self.local_rank *\n                        last_local_batch_size:(self.local_rank + 1) *\n                        last_local_batch_size])\n            return subsampled_indices\n        if self.nranks > 1:\n            indices = _get_indices_by_batch_size(indices)\n        assert len(indices) == self.num_samples  #index length in each card\n        _sample_iter = iter(indices)\n        batch_indices = []\n        counter = 0\n        batch_size = self.batch_sizes[0]\n        for idx in _sample_iter:\n            batch_indices.append(\n                (idx, counter %\n                 self.len_batch_sizes))  #to be used in dataloader get_item\n            if len(batch_indices) == batch_size:\n                yield batch_indices\n                counter += 1\n                batch_size = self.batch_sizes[counter % self.len_batch_sizes]\n                batch_indices = []\n        if not self.drop_last and len(batch_indices) > 0:\n            yield batch_indices\n    def __len__(self):\n        avg_batch_size = sum(self.batch_sizes) / float(self.len_batch_sizes)",
+        "type": "code",
+        "location": "/paddlevideo/utils/multigrid/short_sampler.py:103-130"
+    },
+    "8397": {
+        "file_id": 620,
+        "content": "This code is responsible for creating a sampler that supports dynamic batch sizes. It first sub-samples the input indices based on the local rank and local batch size. Then, it handles cases with multiple GPUs (ranks > 1), dividing the indices into batches of uniform size. Finally, it yields these batches until all samples have been used, or if the drop_last flag is set to False, it yields remaining samples even if they don't form a full batch. The average batch size is also calculated and stored in the class variable avg_batch_size.",
+        "type": "comment"
+    },
+    "8398": {
+        "file_id": 620,
+        "content": "        if self.drop_last:\n            return int(np.floor(self.num_samples / avg_batch_size))\n        else:\n            return int(np.ceil(self.num_samples / avg_batch_size))\n    def set_epoch(self, epoch):\n        \"\"\"\n        Sets the epoch number. When :attr:`shuffle=True`, this number is used\n        as seeds of random numbers. By default, users may not set this, all\n        replicas (workers) use a different random ordering for each epoch.\n        If set same number at each epoch, this sampler will yield the same\n        ordering at all epoches.\n        Arguments:\n            epoch (int): Epoch number.\n        \"\"\"\n        self.epoch = epoch",
+        "type": "code",
+        "location": "/paddlevideo/utils/multigrid/short_sampler.py:131-146"
+    },
+    "8399": {
+        "file_id": 620,
+        "content": "This code defines a class for a sampler that can be used with PaddleVideo's multigrid. It calculates the number of samples to return based on batch size and either rounds down or up depending on whether drop_last is set. The set_epoch method sets the epoch number and, when shuffle is True, uses it as seeds for random numbers. This can result in the same ordering being yielded at all epochs if the same number is set each time.",
+        "type": "comment"
+    }
+}

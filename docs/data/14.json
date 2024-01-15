@@ -1,0 +1,549 @@
+{
+    "1400": {
+        "file_id": 129,
+        "content": "                    lablist[0].split('.')[-1]))\n            ref_scribble_label = np.array(ref_scribble_label, dtype=np.int64)\n        ref_img = os.path.join('JPEGImages/480p/', seqname, ref_img)\n        ref_img = cv2.imread(os.path.join(self.db_root_dir, ref_img))\n        ref_img = np.array(ref_img, dtype=np.float32)\n        ####\n        ###################\n        if self.rgb:\n            img1 = img1[:, :, [2, 1, 0]]\n            img2 = img2[:, :, [2, 1, 0]]\n            ref_img = ref_img[:, :, [2, 1, 0]]\n        obj_num = self.seq_dict[seqname][-1]\n        sample = {\n            'ref_img': ref_img,\n            'img1': img1,\n            'img2': img2,\n            'ref_scribble_label': ref_scribble_label,\n            'label1': label1,\n            'label2': label2\n        }\n        sample['meta'] = {\n            'seq_name': seqname,\n            'frame_num': frame_num,\n            'obj_num': obj_num\n        }\n        if self.transform is not None:\n            sample = self.transform(sample)\n        sample['ref_scribble_label'] = paddle.to_tensor(",
+        "type": "code",
+        "location": "/applications/Ma-Net/dataloaders/davis_2017_f.py:345-374"
+    },
+    "1401": {
+        "file_id": 129,
+        "content": "This code reads an image, splits it into RGB channels if required, and stores it in a dictionary along with other images and labels. It also assigns metadata to the sample. The transform is applied if not None.",
+        "type": "comment"
+    },
+    "1402": {
+        "file_id": 129,
+        "content": "            sample['ref_scribble_label'], dtype='int64')\n        sample['label1'] = paddle.to_tensor(sample['label1'], dtype='int64')\n        sample['label2'] = paddle.to_tensor(sample['label2'], dtype='int64')\n        return sample\n    ########################\n    def _check_preprocess(self):\n        _seq_list_file = self.seq_list_file\n        if not os.path.isfile(_seq_list_file):\n            return False\n        else:\n            self.seq_dict = json.load(open(self.seq_list_file, 'r'))\n            return True\n    def _preprocess(self):\n        self.seq_dict = {}\n        for seq in self.seqs:\n            # Read object masks and get number of objects\n            name_label = np.sort(\n                os.listdir(\n                    os.path.join(self.db_root_dir, 'Annotations/480p/', seq)))\n            label_path = os.path.join(self.db_root_dir, 'Annotations/480p/',\n                                      seq, name_label[0])\n            _mask = np.array(Image.open(label_path))\n            _mask_ids = np.unique(_mask)",
+        "type": "code",
+        "location": "/applications/Ma-Net/dataloaders/davis_2017_f.py:375-400"
+    },
+    "1403": {
+        "file_id": 129,
+        "content": "The code defines a function that loads and preprocesses data from a specific source. It checks if the sequence list file exists and then proceeds to read object masks, getting the number of objects in each sequence.",
+        "type": "comment"
+    },
+    "1404": {
+        "file_id": 129,
+        "content": "            n_obj = _mask_ids[-1]\n            self.seq_dict[seq] = list(range(1, n_obj + 1))\n        with open(self.seq_list_file, 'w') as outfile:\n            outfile.write('{{\\n\\t\"{:s}\": {:s}'.format(\n                self.seqs[0], json.dumps(self.seq_dict[self.seqs[0]])))\n            for ii in range(1, len(self.seqs)):\n                outfile.write(',\\n\\t\"{:s}\": {:s}'.format(\n                    self.seqs[ii], json.dumps(self.seq_dict[self.seqs[ii]])))\n            outfile.write('\\n}\\n')\n        print('Preprocessing finished')\nclass DAVIS2017_Train(Dataset):\n    \"\"\"DAVIS2017 dataset for training\n    Return: imgs: N*2*3*H*W,label: N*2*1*H*W, seq-name: N, frame_num:N\n    \"\"\"\n    def __init__(self,\n                 split='train',\n                 root=cfg.DATA_ROOT,\n                 transform=None,\n                 rgb=False):\n        self.split = split\n        self.db_root_dir = root\n        self.rgb = rgb\n        self.transform = transform\n        self.seq_list_file = os.path.join(\n            self.db_root_dir, 'ImageSets', '2017',",
+        "type": "code",
+        "location": "/applications/Ma-Net/dataloaders/davis_2017_f.py:401-431"
+    },
+    "1405": {
+        "file_id": 129,
+        "content": "This code defines a class for the DAVIS2017 dataset used in training. It initializes the dataset object based on specified parameters, writes a sequence list file containing frame numbers for each sequence, and provides the functionality to load images, masks, and other data required for training.",
+        "type": "comment"
+    },
+    "1406": {
+        "file_id": 129,
+        "content": "            '_'.join(self.split) + '_instances.txt')\n        self.seqs = []\n        for splt in self.split:\n            with open(\n                    os.path.join(self.db_root_dir, 'ImageSets', '2017',\n                                 self.split + '.txt')) as f:\n                seqs_tmp = f.readlines()\n            seqs_tmp = list(map(lambda elem: elem.strip(), seqs_tmp))\n            self.seqs.extend(seqs_tmp)\n        if not self._check_preprocess():\n            self._preprocess()\n        self.sample_list = []\n        for seq_name in self.seqs:\n            images = np.sort(\n                os.listdir(\n                    os.path.join(self.db_root_dir, 'JPEGImages/480p/',\n                                 seq_name.strip())))\n            images_path = list(\n                map(\n                    lambda x: os.path.join('JPEGImages/480p/', seq_name.strip(),\n                                           x), images))\n            lab = np.sort(\n                os.listdir(\n                    os.path.join(self.db_root_dir, 'Annotations/480p/',",
+        "type": "code",
+        "location": "/applications/Ma-Net/dataloaders/davis_2017_f.py:432-456"
+    },
+    "1407": {
+        "file_id": 129,
+        "content": "This code is creating a custom dataloader for the DAVIS dataset. It loads the image and annotation files, sorts them by name, checks if preprocessing needs to be done, and then forms a sample list containing the image paths and labels. The result will be used for training or testing purposes in the Ma-Net application.",
+        "type": "comment"
+    },
+    "1408": {
+        "file_id": 129,
+        "content": "                                 seq_name.strip())))\n            lab_path = list(\n                map(\n                    lambda x: os.path.join('Annotations/480p/', seq_name.strip(\n                    ), x), lab))\n            for img_path, label_path in zip(images_path[:-1], lab_path[:-1]):\n                tmp_dic = {\n                    'img': img_path,\n                    'label': label_path,\n                    'seq_name': seq_name,\n                    'frame_num': img_path.split('/')[-1].split('.')[0]\n                }\n                self.sample_list.append(tmp_dic)\n    def __len__(self):\n        return len(self.sample_list)\n    def __getitem__(self, idx):\n        tmp_sample = self.sample_list[idx]\n        imgpath = tmp_sample['img']\n        labelpath = tmp_sample['label']\n        seqname = tmp_sample['seq_name']\n        frame_num = int(tmp_sample['frame_num']) + 1\n        next_frame = str(frame_num)\n        while len(next_frame) != 5:\n            next_frame = '0' + next_frame\n        ###############################Processing two adjacent frames and labels",
+        "type": "code",
+        "location": "/applications/Ma-Net/dataloaders/davis_2017_f.py:457-485"
+    },
+    "1409": {
+        "file_id": 129,
+        "content": "The code creates a custom dataloader for a dataset with two adjacent frames and their corresponding labels. It takes the images and label paths, appends them to a list of dictionaries, and handles any necessary padding to ensure frame numbers have 5 digits. The length of the dataloader is determined by the number of samples in the sample_list, and the __getitem__ method retrieves specific samples based on their index.",
+        "type": "comment"
+    },
+    "1410": {
+        "file_id": 129,
+        "content": "        img2path = os.path.join('JPEGImages/480p/', seqname,\n                                next_frame + '.' + imgpath.split('.')[-1])\n        img2 = cv2.imread(os.path.join(self.db_root_dir, img2path))\n        img2 = np.array(img2, dtype=np.float32)\n        img1 = cv2.imread(os.path.join(self.db_root_dir, imgpath))\n        img1 = np.array(img1, dtype=np.float32)\n        ###############\n        label1 = Image.open(os.path.join(self.db_root_dir, labelpath))\n        label2path = os.path.join('Annotations/480p/', seqname,\n                                  next_frame + '.' + labelpath.split('.')[-1])\n        label2 = Image.open(os.path.join(self.db_root_dir, label2path))\n        label1 = np.array(\n            label1, dtype=np.int32\n        )  # fixed, uint8->int32, because layers.stack does not support uint8\n        label2 = np.array(\n            label2, dtype=np.int32\n        )  # fixed, uint8->int32, because layers.stack does not support uint8\n        ###################\n        ref_tmp_dic = self.ref_frame_dic[seqname]",
+        "type": "code",
+        "location": "/applications/Ma-Net/dataloaders/davis_2017_f.py:486-506"
+    },
+    "1411": {
+        "file_id": 129,
+        "content": "The code reads image and label files for a video sequence from their respective directories, converts them to numpy arrays of dtype float32 and int32 respectively for compatibility with the model's stack function. It also retrieves reference frame information from ref_frame_dic for the given sequence.",
+        "type": "comment"
+    },
+    "1412": {
+        "file_id": 129,
+        "content": "        ref_img = ref_tmp_dic['ref_frame']\n        ref_scribble_label = ref_tmp_dic['scribble_label']\n        ref_img = cv2.imread(os.path.join(self.db_root_dir, ref_img))\n        ref_img = np.array(ref_img, dtype=np.float32)\n        ref_frame_gt = ref_tmp_dic['ref_frame_gt']\n        ref_frame_gt = Image.open(os.path.join(self.db_root_dir, ref_frame_gt))\n        ref_frame_gt = np.array(\n            ref_frame_gt, dtype=np.int32\n        )  # fixed, uint8->int32, because layers.stack does not support uint8\n        ref_frame_num = ref_tmp_dic['ref_frame_num']\n        ###################\n        if self.rgb:\n            img1 = img1[:, :, [2, 1, 0]]\n            img2 = img2[:, :, [2, 1, 0]]\n            ref_img = ref_img[:, :, [2, 1, 0]]\n        obj_num = self.seq_dict[seqname][-1]\n        sample = {\n            'ref_img': ref_img,\n            'img1': img1,\n            'img2': img2,\n            'ref_scribble_label': ref_scribble_label,\n            'label1': label1,\n            'label2': label2,\n            'ref_frame_gt': ref_frame_gt",
+        "type": "code",
+        "location": "/applications/Ma-Net/dataloaders/davis_2017_f.py:507-531"
+    },
+    "1413": {
+        "file_id": 129,
+        "content": "This code reads the reference image, scribble label, and ground truth frame from a dictionary. It then converts them to appropriate data types for processing. If rgb=True, it changes the color order. It also gets the total number of objects in the sequence. Finally, it creates a sample dictionary with all these elements.",
+        "type": "comment"
+    },
+    "1414": {
+        "file_id": 129,
+        "content": "        }\n        if 'prev_round_label' in ref_tmp_dic:\n            prev_round_label = ref_tmp_dic['prev_round_label']\n            prev_round_label = prev_round_label.squeeze()\n            prev_round_label = prev_round_label.numpy()\n            sample = {\n                'ref_img': ref_img,\n                'img1': img1,\n                'img2': img2,\n                'ref_scribble_label': ref_scribble_label,\n                'label1': label1,\n                'label2': label2,\n                'ref_frame_gt': ref_frame_gt,\n                'prev_round_label': prev_round_label\n            }\n        sample['meta'] = {\n            'seq_name': seqname,\n            'frame_num': frame_num,\n            'obj_num': obj_num,\n            'ref_frame_num': ref_frame_num\n        }\n        if self.transform is not None:\n            sample = self.transform(sample)\n        return sample\n    def update_ref_frame_and_label(self,\n                                   round_scribble=None,\n                                   frame_num=None,\n                                   prev_round_label_dic=None):",
+        "type": "code",
+        "location": "/applications/Ma-Net/dataloaders/davis_2017_f.py:532-562"
+    },
+    "1415": {
+        "file_id": 129,
+        "content": "This code defines a function that creates a sample containing images, labels, and metadata for the Ma-Net model. It also includes a separate function to update the reference frame and label based on user input. The sample is then transformed using a specified transform if one is provided.",
+        "type": "comment"
+    },
+    "1416": {
+        "file_id": 129,
+        "content": "        ##########Update reference frame and scribbles\n        for seq in self.seqs:\n            scribble = round_scribble[seq]\n            if frame_num is None:\n                scr_frame = annotated_frames(scribble)[0]\n            else:\n                scr_frame = frame_num[seq]\n                scr_frame = int(scr_frame)\n            scr_f = str(scr_frame)\n            while len(scr_f) != 5:\n                scr_f = '0' + scr_f\n            ref_frame_path = os.path.join('JPEGImages/480p', seq,\n                                          scr_f + '.jpg')\n            #######################\n            ref_frame_gt = os.path.join('Annotations/480p/', seq,\n                                        scr_f + '.png')\n            #########################\n            ref_tmp = cv2.imread(os.path.join(self.db_root_dir, ref_frame_path))\n            h_, w_ = ref_tmp.shape[:2]\n            scribble_masks = scribbles2mask(scribble, (h_, w_))\n            if frame_num is None:\n                scribble_label = scribble_masks[scr_frame]",
+        "type": "code",
+        "location": "/applications/Ma-Net/dataloaders/davis_2017_f.py:563-585"
+    },
+    "1417": {
+        "file_id": 129,
+        "content": "Updating the reference frame and scribbles for each sequence in the dataset. If no frame number is given, uses the first frame from annotated_frames list. Ensures frame number is 5 digits long. Retrieves the corresponding reference image path and ground truth mask path. Reads the reference image. Resizes the image based on its height and width. Generates scribble masks for each frame using the provided scribble. If no frame number given, selects the first frame's scribble mask.",
+        "type": "comment"
+    },
+    "1418": {
+        "file_id": 129,
+        "content": "            else:\n                scribble_label = scribble_masks[0]\n            self.ref_frame_dic[seq] = {\n                'ref_frame': ref_frame_path,\n                'scribble_label': scribble_label,\n                'ref_frame_gt': ref_frame_gt,\n                'ref_frame_num': scr_frame\n            }\n            if prev_round_label_dic is not None:\n                self.ref_frame_dic[seq] = {\n                    'ref_frame': ref_frame_path,\n                    'scribble_label': scribble_label,\n                    'ref_frame_gt': ref_frame_gt,\n                    'ref_frame_num': scr_frame,\n                    'prev_round_label': prev_round_label_dic[seq]\n                }\n    def init_ref_frame_dic(self):\n        self.ref_frame_dic = {}\n        scribbles_path = os.path.join(self.db_root_dir, 'Scribbles')\n        for seq in self.seqs:\n            selected_json = np.random.choice(\n                ['001.json', '002.json', '003.json'], 1)\n            selected_json = selected_json[0]\n            scribble = os.path.join(self.db_root_dir, 'Scribbles', seq,",
+        "type": "code",
+        "location": "/applications/Ma-Net/dataloaders/davis_2017_f.py:586-610"
+    },
+    "1419": {
+        "file_id": 129,
+        "content": "The code initializes a dictionary for reference frames, storing information such as reference frame path, scribble label, and ground truth data. If there is a previous round's label dictionary, it also includes the previous round's label in the current dictionary entry. It uses the database root directory to find the Scribbles folder and selects a random JSON file for each sequence.",
+        "type": "comment"
+    },
+    "1420": {
+        "file_id": 129,
+        "content": "                                    selected_json)\n            with open(scribble) as f:\n                scribble = json.load(f)\n                #    print(scribble)\n                scr_frame = annotated_frames(scribble)[0]\n                scr_f = str(scr_frame)\n                while len(scr_f) != 5:\n                    scr_f = '0' + scr_f\n                ref_frame_path = os.path.join('JPEGImages/480p', seq,\n                                              scr_f + '.jpg')\n                ref_tmp = cv2.imread(\n                    os.path.join(self.db_root_dir, ref_frame_path))\n                h_, w_ = ref_tmp.shape[:2]\n                scribble_masks = scribbles2mask(scribble, (h_, w_))\n                ########################\n                ref_frame_gt = os.path.join('Annotations/480p/', seq,\n                                            scr_f + '.png')\n                ########################\n                scribble_label = scribble_masks[scr_frame]\n                self.ref_frame_dic[seq] = {\n                    'ref_frame': ref_frame_path,",
+        "type": "code",
+        "location": "/applications/Ma-Net/dataloaders/davis_2017_f.py:611-633"
+    },
+    "1421": {
+        "file_id": 129,
+        "content": "Reading JSON file for annotated frame, extracting frame path and loading reference image using OpenCV, determining the shape of the reference image, extracting the mask from the scribble, storing reference frame path in ref_frame_dic.",
+        "type": "comment"
+    },
+    "1422": {
+        "file_id": 129,
+        "content": "                    'scribble_label': scribble_label,\n                    'ref_frame_gt': ref_frame_gt,\n                    'ref_frame_num': scr_frame\n                }\n    ########################\n    def _check_preprocess(self):\n        _seq_list_file = self.seq_list_file\n        if not os.path.isfile(_seq_list_file):\n            return False\n        else:\n            self.seq_dict = json.load(open(self.seq_list_file, 'r'))\n            return True\n    def _preprocess(self):\n        self.seq_dict = {}\n        for seq in self.seqs:\n            # Read object masks and get number of objects\n            name_label = np.sort(\n                os.listdir(\n                    os.path.join(self.db_root_dir, 'Annotations/480p/', seq)))\n            label_path = os.path.join(self.db_root_dir, 'Annotations/480p/',\n                                      seq, name_label[0])\n            _mask = np.array(Image.open(label_path))\n            _mask_ids = np.unique(_mask)\n            n_obj = _mask_ids[-1]\n            self.seq_dict[seq] = list(range(1, n_obj + 1))",
+        "type": "code",
+        "location": "/applications/Ma-Net/dataloaders/davis_2017_f.py:634-662"
+    },
+    "1423": {
+        "file_id": 129,
+        "content": "The code reads a list of sequences from the sequence_list file and checks if it exists. If the file does not exist, it returns False; otherwise, it loads the sequence dictionary using json.load() and then proceeds to preprocess each sequence by reading object masks and finding the number of objects in the masks. The code stores this information in a dictionary format for later use.",
+        "type": "comment"
+    },
+    "1424": {
+        "file_id": 129,
+        "content": "        with open(self.seq_list_file, 'w') as outfile:\n            outfile.write('{{\\n\\t\"{:s}\": {:s}'.format(\n                self.seqs[0], json.dumps(self.seq_dict[self.seqs[0]])))\n            for ii in range(1, len(self.seqs)):\n                outfile.write(',\\n\\t\"{:s}\": {:s}'.format(\n                    self.seqs[ii], json.dumps(self.seq_dict[self.seqs[ii]])))\n            outfile.write('\\n}\\n')\n        print('Preprocessing finished')",
+        "type": "code",
+        "location": "/applications/Ma-Net/dataloaders/davis_2017_f.py:664-672"
+    },
+    "1425": {
+        "file_id": 129,
+        "content": "The code writes a JSON file containing video sequences and their corresponding dictionaries, which will be used for the dataset. It iterates over each sequence, formats the output as JSON strings in the file, and finishes by printing \"Preprocessing finished\".",
+        "type": "comment"
+    },
+    "1426": {
+        "file_id": 130,
+        "content": "/applications/Ma-Net/dataloaders/helpers.py",
+        "type": "filepath"
+    },
+    "1427": {
+        "file_id": 130,
+        "content": "The code defines functions for converting tensors to images, applying masks, normalizing images, and constructing model names. It also includes functions for computing foreground and nocare area using OpenCV's dilation operation with optional parameters, returning the 'nocare' along with the original foreground image.",
+        "type": "summary"
+    },
+    "1428": {
+        "file_id": 130,
+        "content": "import numpy as np\nimport cv2\ndef tens2image(im):\n    tmp = np.squeeze(im.numpy())\n    if tmp.ndim == 2:\n        return tmp\n    else:\n        return tmp.transpose((1, 2, 0))\ndef overlay_mask(im, ma, color=np.array([255, 0, 0]) / 255.0):\n    assert np.max(im) <= 1.0\n    ma = ma.astype(np.bool)\n    im = im.astype(np.float32)\n    alpha = 0.5\n    fg = im * alpha + np.ones(\n        im.shape) * (1 - alpha) * color  # np.array([0,0,255])/255.0\n    # Whiten background\n    alpha = 1.0\n    bg = im.copy()\n    bg[ma == 0] = im[ma == 0] * alpha + np.ones(im[ma == 0].shape) * (1 - alpha)\n    bg[ma == 1] = fg[ma == 1]\n    # [-2:] is s trick to be compatible both with opencv 2 and 3\n    contours = cv2.findContours(ma.copy().astype(np.uint8), cv2.RETR_TREE,\n                                cv2.CHAIN_APPROX_SIMPLE)[-2:]\n    cv2.drawContours(bg, contours[0], -1, (0.0, 0.0, 0.0), 1)\n    return bg\ndef im_normalize(im):\n    \"\"\"\n    Normalize image\n    \"\"\"\n    imn = (im - im.min()) / max((im.max() - im.min()), 1e-8)\n    return imn\ndef construct_name(p, prefix):",
+        "type": "code",
+        "location": "/applications/Ma-Net/dataloaders/helpers.py:1-46"
+    },
+    "1429": {
+        "file_id": 130,
+        "content": "ens2image: Converts a tensor to an image by removing dimensions and transposing if necessary.\n\noverlay_mask: Applies a mask on top of an image, allowing for color overlay and background adjustment.\n\nim_normalize: Normalizes an image by scaling pixel values between 0 and 1 based on the range of values.",
+        "type": "comment"
+    },
+    "1430": {
+        "file_id": 130,
+        "content": "    \"\"\"\n    Construct the name of the model\n    p: dictionary of parameters\n    prefix: the prefix\n    name: the name of the model - manually add \".pth\" to follow the convention\n    \"\"\"\n    name = prefix\n    for key in p.keys():\n        if (type(p[key]) != tuple) and (type(p[key]) != list):\n            name = name + '_' + str(key) + '-' + str(p[key])\n        else:\n            name = name + '_' + str(key) + '-' + str(p[key][0])\n    return name\ndef gt_from_scribble(scr, dilation=11, nocare_area=21):\n    # Compute foreground\n    if scr.max() == 1:\n        kernel_fg = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,\n                                              (dilation, dilation))\n        fg = cv2.dilate(scr.astype(np.uint8),\n                        kernel=kernel_fg).astype(scr.dtype)\n    else:\n        fg = scr\n    # Compute nocare area\n    if nocare_area is None:\n        nocare = None\n    else:\n        kernel_nc = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,\n                                              (nocare_area, nocare_area))",
+        "type": "code",
+        "location": "/applications/Ma-Net/dataloaders/helpers.py:47-78"
+    },
+    "1431": {
+        "file_id": 130,
+        "content": "The code defines a function to construct the name of a model by concatenating keys and values from the input dictionary. It also includes two additional functions: one for computing foreground based on a given scribble image, and another for computing a nocare area with optional dilation and size parameters.",
+        "type": "comment"
+    },
+    "1432": {
+        "file_id": 130,
+        "content": "        nocare = cv2.dilate(fg, kernel=kernel_nc) - fg\n    return fg, nocare",
+        "type": "code",
+        "location": "/applications/Ma-Net/dataloaders/helpers.py:79-81"
+    },
+    "1433": {
+        "file_id": 130,
+        "content": "The code uses OpenCV's dilation operation to enhance the background care region by dilating the foreground image with a given kernel. The resulting 'nocare' is then returned along with the original foreground image.",
+        "type": "comment"
+    },
+    "1434": {
+        "file_id": 131,
+        "content": "/applications/Ma-Net/dataloaders/samplers.py",
+        "type": "filepath"
+    },
+    "1435": {
+        "file_id": 131,
+        "content": "The code defines a RandomIdentitySampler class that randomly samples N identities and K instances from a dataset, generating a random sample of identities and instances with the ability to replace or not while selecting new instances.",
+        "type": "summary"
+    },
+    "1436": {
+        "file_id": 131,
+        "content": "from __future__ import absolute_import\nfrom collections import defaultdict\nimport numpy as np\nimport paddle\nfrom paddle.io import Sampler\nclass RandomIdentitySampler(Sampler):\n    \"\"\"\n    Randomly sample N identities, then for each identity,\n    randomly sample K instances, therefore batch size is N*K.\n    Code imported from https://github.com/Cysu/open-reid/blob/master/reid/utils/data/sampler.py.\n    Args:\n        data_source (Dataset): dataset to sample from.\n        num_instances (int): number of instances per identity.\n    \"\"\"\n    def __init__(self, sample_list, num_instances=1):\n        self.sample_list = sample_list\n        self.num_instances = num_instances\n        self.index_dic = defaultdict(list)\n        for index, tmp_dic in enumerate(self.sample_list):\n            pid = tmp_dic['seq_name']\n            self.index_dic[pid].append(index)\n        self.pids = list(self.index_dic.keys())\n        self.num_identities = len(self.pids)\n    def __iter__(self):\n        indices = np.random.permutation(self.num_identities)",
+        "type": "code",
+        "location": "/applications/Ma-Net/dataloaders/samplers.py:1-31"
+    },
+    "1437": {
+        "file_id": 131,
+        "content": "This code defines a RandomIdentitySampler class that randomly samples N identities and then K instances from a given dataset, resulting in a batch size of N*K. It imports necessary libraries and initializes class variables. The __iter__ method generates a random permutation of the identities.",
+        "type": "comment"
+    },
+    "1438": {
+        "file_id": 131,
+        "content": "        ret = []\n        for i in indices:\n            pid = self.pids[i]\n            t = self.index_dic[pid]\n            replace = False if len(t) >= self.num_instances else True\n            t = np.random.choice(t, size=self.num_instances, replace=replace)\n            ret.extend(t)\n        return iter(ret)\n    def __len__(self):\n        return self.num_identities * self.num_instances",
+        "type": "code",
+        "location": "/applications/Ma-Net/dataloaders/samplers.py:32-42"
+    },
+    "1439": {
+        "file_id": 131,
+        "content": "This code generates a random sample of identities and instances from a given list of indices. It checks if the length of the current index is greater than or equal to the number of desired instances, and then chooses either to replace or not while selecting new instances. The selected instances are stored in a list and returned as an iterator. The method also provides the total number of samples by multiplying the number of identities with the number of instances.",
+        "type": "comment"
+    },
+    "1440": {
+        "file_id": 132,
+        "content": "/applications/Ma-Net/networks/IntVOS.py",
+        "type": "filepath"
+    },
+    "1441": {
+        "file_id": 132,
+        "content": "The model employs PaddlePaddle for object matching, k-nearest neighbor search, SpatialCorrelationSampler for pairwise distances, and a neural network with separable convolutional layers for semantic segmentation. The Ma-Net's int_seghead updates global and local maps for sequence processing and performs tensor operations for video object segmentation.",
+        "type": "summary"
+    },
+    "1442": {
+        "file_id": 132,
+        "content": "import os\nimport numpy as np\nimport paddle\nimport paddle.nn as nn\nimport sys\nsys.path.append(\"..\")\nfrom config import cfg\nimport time\nimport paddle.nn.functional as F\nfrom utils.api import int_, float_, long_\nfrom utils.api import kaiming_normal_\n#############################################################GLOBAL_DIST_MAP\nMODEL_UNFOLD = True\nWRONG_LABEL_PADDING_DISTANCE = 1e20\ndef _pairwise_distances(x, y, ys=None):\n    \"\"\"Computes pairwise squared l2 distances between tensors x and y.\n    Args:\n    x: Tensor of shape [n, feature_dim].\n    y: Tensor of shape [m, feature_dim].\n    Returns:\n    Float32 distances tensor of shape [n, m].\n    \"\"\"\n    xs = paddle.sum(x * x, 1)\n    xs = xs.unsqueeze(1)\n    if ys is None:\n        ys = paddle.sum(y * y, 1)\n        ys = ys.unsqueeze(0)\n    else:\n        ys = ys\n    d = xs + ys - 2. * paddle.matmul(x, paddle.t(y))\n    return d, ys\n##################\ndef _flattened_pairwise_distances(reference_embeddings, query_embeddings, ys):\n    \"\"\"Calculates flattened tensor of pairwise distances between ref and query.",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/IntVOS.py:1-42"
+    },
+    "1443": {
+        "file_id": 132,
+        "content": "This code snippet is from a PaddlePaddle-based video object detection model. It defines functions for calculating pairwise distances between embeddings and initializes some global variables. The model is designed to take reference and query embeddings as input, compute pairwise squared L2 distances, and returns the flattened tensor of distances. This distance calculation is likely used in the matching process of objects in the video frames.",
+        "type": "comment"
+    },
+    "1444": {
+        "file_id": 132,
+        "content": "    Args:\n    reference_embeddings: Tensor of shape [..., embedding_dim],\n      the embedding vectors for the reference frame\n    query_embeddings: Tensor of shape [n_query_images, height, width,\n      embedding_dim], the embedding vectors for the query frames.\n    Returns:\n    A distance tensor of shape [reference_embeddings.size / embedding_dim,\n    query_embeddings.size / embedding_dim]\n    \"\"\"\n    embedding_dim = query_embeddings.shape[-1]\n    reference_embeddings = reference_embeddings.reshape([-1, embedding_dim])\n    first_dim = -1\n    query_embeddings = query_embeddings.reshape([first_dim, embedding_dim])\n    dists, ys = _pairwise_distances(query_embeddings, reference_embeddings, ys)\n    return dists, ys\ndef _nn_features_per_object_for_chunk(reference_embeddings, query_embeddings,\n                                      wrong_label_mask, k_nearest_neighbors,\n                                      ys):\n    \"\"\"Extracts features for each object using nearest neighbor attention.\n  Args:\n    reference_embeddings: Tensor of shape [n_chunk, embedding_dim],",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/IntVOS.py:43-65"
+    },
+    "1445": {
+        "file_id": 132,
+        "content": "The code calculates the distance between reference and query embeddings, performing pairwise distances calculations using the _pairwise_distances function. The result is a distance tensor with shape [reference_embeddings.size / embedding_dim, query_embeddings.size / embedding_dim]. This function also includes _nn_features_per_object_for_chunk which extracts features for each object using nearest neighbor attention.",
+        "type": "comment"
+    },
+    "1446": {
+        "file_id": 132,
+        "content": "      the embedding vectors for the reference frame.\n    query_embeddings: Tensor of shape [m_chunk, embedding_dim], the embedding\n      vectors for the query frames.\n    wrong_label_mask:\n    k_nearest_neighbors: Integer, the number of nearest neighbors to use.\n  Returns:\n    nn_features: A float32 tensor of nearest neighbor features of shape\n      [m_chunk, n_objects, feature_dim].\n    \"\"\"\n    #    reference_embeddings_key = reference_embeddings\n    #    query_embeddings_key = query_embeddings\n    dists, ys = _flattened_pairwise_distances(reference_embeddings,\n                                              query_embeddings, ys)\n    dists = (paddle.unsqueeze(dists, 1) +\n             paddle.unsqueeze(float_(wrong_label_mask), 0) *\n             WRONG_LABEL_PADDING_DISTANCE)\n    if k_nearest_neighbors == 1:\n        features = paddle.min(dists, 2, keepdim=True)\n    else:\n        dists, _ = paddle.topk(-dists, k=k_nearest_neighbors, axis=2)\n        dists = -dists\n        valid_mask = (dists < WRONG_LABEL_PADDING_DISTANCE)",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/IntVOS.py:66-88"
+    },
+    "1447": {
+        "file_id": 132,
+        "content": "This code calculates pairwise distances between reference and query embedding vectors, selects the k-nearest neighbors, and returns the nearest neighbor features. It takes into account a wrong_label_mask and padding distance, which helps handle incorrect labels and avoid noisy data.",
+        "type": "comment"
+    },
+    "1448": {
+        "file_id": 132,
+        "content": "        masked_dists = dists * valid_mask.float()\n        pad_dist = paddle.max(masked_dists, axis=2, keepdim=True)[0].tile(\n            (1, 1, masked_dists.shape[-1]))\n        dists = paddle.where(valid_mask, dists, pad_dist)\n        # take mean of distances\n        features = paddle.mean(dists, axis=2, keepdim=True)\n    return features, ys\n###\ndef _selected_pixel(ref_labels_flat, ref_emb_flat):\n    index_list = paddle.arange(len(ref_labels_flat))\n    index_list = index_list\n    index_ = paddle.masked_select(index_list, ref_labels_flat != -1)\n    index_ = long_(index_)\n    ref_labels_flat = paddle.index_select(ref_labels_flat, index_, 0)\n    ref_emb_flat = paddle.index_select(ref_emb_flat, index_, 0)\n    return ref_labels_flat, ref_emb_flat\n###\ndef _nearest_neighbor_features_per_object_in_chunks(\n        reference_embeddings_flat, query_embeddings_flat, reference_labels_flat,\n        ref_obj_ids, k_nearest_neighbors, n_chunks):\n    \"\"\"Calculates the nearest neighbor features per object in chunks to save mem.",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/IntVOS.py:89-118"
+    },
+    "1449": {
+        "file_id": 132,
+        "content": "The code calculates the nearest neighbor features for each object in chunks to save memory. It starts by masking and averaging distances between reference and query embeddings, then selects relevant indices from flattened arrays to calculate nearest neighbors for objects. The function takes `reference_embeddings_flat`, `query_embeddings_flat`, `reference_labels_flat`, `ref_obj_ids`, `k_nearest_neighbors`, and `n_chunks` as input and returns the features and labels.",
+        "type": "comment"
+    },
+    "1450": {
+        "file_id": 132,
+        "content": "    Uses chunking to bound the memory use.\n    Args:\n    reference_embeddings_flat: Tensor of shape [n, embedding_dim],\n      the embedding vectors for the reference frame.\n    query_embeddings_flat: Tensor of shape [m, embedding_dim], the embedding\n      vectors for the query frames.\n    reference_labels_flat: Tensor of shape [n], the class labels of the\n      reference frame.\n    ref_obj_ids: int tensor of unique object ids in the reference labels.\n    k_nearest_neighbors: Integer, the number of nearest neighbors to use.\n    n_chunks: Integer, the number of chunks to use to save memory\n      (set to 1 for no chunking).\n    Returns:\n    nn_features: A float32 tensor of nearest neighbor features of shape\n      [m, n_objects, feature_dim].\n    \"\"\"\n    chunk_size = int_(\n        np.ceil((float_(query_embeddings_flat.shape[0]) / n_chunks).numpy()))\n    if cfg.TEST_MODE:\n        reference_labels_flat, reference_embeddings_flat = _selected_pixel(\n            reference_labels_flat, reference_embeddings_flat)\n    wrong_label_mask = (reference_labels_flat != paddle.unsqueeze(",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/IntVOS.py:119-141"
+    },
+    "1451": {
+        "file_id": 132,
+        "content": "This code performs k-nearest neighbor search using chunking to save memory. It takes embedding vectors for reference and query frames, their class labels, object ids, the number of nearest neighbors, and the number of chunks as input. It calculates the chunk size based on the number of query frames and the specified number of chunks. If TEST_MODE is enabled, it selects some pixels from the input. Then, it checks if the reference labels are equal to unsqueezed object ids for each query frame and creates a mask for wrong labels. It returns nearest neighbor features of shape [m, n_objects, feature_dim].",
+        "type": "comment"
+    },
+    "1452": {
+        "file_id": 132,
+        "content": "        ref_obj_ids, 1))\n    all_features = []\n    for n in range(n_chunks):\n        if n == 0:\n            ys = None\n        if n_chunks == 1:\n            query_embeddings_flat_chunk = query_embeddings_flat\n        else:\n            chunk_start = n * chunk_size\n            chunk_end = (n + 1) * chunk_size\n            query_embeddings_flat_chunk = query_embeddings_flat[\n                chunk_start:chunk_end]\n        features, ys = _nn_features_per_object_for_chunk(\n            reference_embeddings_flat, query_embeddings_flat_chunk,\n            wrong_label_mask, k_nearest_neighbors, ys)\n        all_features.append(features)\n    if n_chunks == 1:\n        nn_features = all_features[0]\n    else:\n        nn_features = paddle.concat(all_features, axis=0)\n    return nn_features\ndef nearest_neighbor_features_per_object(reference_embeddings,\n                                         query_embeddings,\n                                         reference_labels,\n                                         k_nearest_neighbors,\n                                         gt_ids=None,",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/IntVOS.py:142-169"
+    },
+    "1453": {
+        "file_id": 132,
+        "content": "This code calculates nearest neighbor features for each object across multiple chunks. It splits the query embeddings into different chunks, then computes the features for each chunk individually. If there is only one chunk, it returns the features directly. Otherwise, it concatenates all the computed features along axis 0 and returns them as nearest neighbor features.",
+        "type": "comment"
+    },
+    "1454": {
+        "file_id": 132,
+        "content": "                                         n_chunks=100):\n    \"\"\"Calculates the distance to the nearest neighbor per object.\n    For every pixel of query_embeddings calculate the distance to the\n    nearest neighbor in the (possibly subsampled) reference_embeddings per object.\n    Args:\n    reference_embeddings: Tensor of shape [height, width, embedding_dim],\n      the embedding vectors for the reference frame.\n    query_embeddings: Tensor of shape [n_query_images, height, width,\n      embedding_dim], the embedding vectors for the query frames.\n    reference_labels: Tensor of shape [height, width, 1], the class labels of\n      the reference frame.\n    max_neighbors_per_object: Integer, the maximum number of candidates\n      for the nearest neighbor query per object after subsampling,\n      or 0 for no subsampling.\n    k_nearest_neighbors: Integer, the number of nearest neighbors to use.\n    gt_ids: Int tensor of shape [n_objs] of the sorted unique ground truth\n      ids in the first frame. If None, it will be derived from",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/IntVOS.py:170-186"
+    },
+    "1455": {
+        "file_id": 132,
+        "content": "This function calculates the distance between nearest neighbors in reference_embeddings and query_embeddings for each object. It uses the provided reference_labels to determine objects, subsamples if max_neighbors_per_object is specified, and considers k_nearest_neighbors. The gt_ids are used for determining unique ground truth ids in the first frame.",
+        "type": "comment"
+    },
+    "1456": {
+        "file_id": 132,
+        "content": "      reference_labels.\n    n_chunks: Integer, the number of chunks to use to save memory\n      (set to 1 for no chunking).\n    Returns:\n    nn_features: A float32 tensor of nearest neighbor features of shape\n      [n_query_images, height, width, n_objects, feature_dim].\n    gt_ids: An int32 tensor of the unique sorted object ids present\n      in the reference labels.\n    \"\"\"\n    assert (reference_embeddings.shape[:2] == reference_labels.shape[:2])\n    h, w, _ = query_embeddings.shape\n    reference_labels_flat = reference_labels.reshape([-1])\n    if gt_ids is None:\n        ref_obj_ids = paddle.unique(reference_labels_flat)[-1]\n        ref_obj_ids = np.arange(0, ref_obj_ids + 1)\n        gt_ids = paddle.to_tensor(ref_obj_ids)\n        gt_ids = int_(gt_ids)\n    else:\n        gt_ids = int_(paddle.arange(0, gt_ids + 1))\n    embedding_dim = query_embeddings.shape[-1]\n    query_embeddings_flat = query_embeddings.reshape([-1, embedding_dim])\n    reference_embeddings_flat = reference_embeddings.reshape(\n        [-1, embedding_dim])",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/IntVOS.py:187-211"
+    },
+    "1457": {
+        "file_id": 132,
+        "content": "This function calculates the nearest neighbor features for query images using reference embeddings and labels. It first asserts that the shape of reference embeddings matches the shape of reference labels. Then, it flattens the reference labels and checks if gt_ids (ground truth ids) are provided. If not, it finds unique object ids in the reference labels, creates a tensor with those ids, and converts them to integer type. Else, it converts the given gt_ids to integers. The function reshapes the query and reference embeddings, calculates embedding dimensions, and returns the nearest neighbor features and gt_ids.",
+        "type": "comment"
+    },
+    "1458": {
+        "file_id": 132,
+        "content": "    nn_features = _nearest_neighbor_features_per_object_in_chunks(\n        reference_embeddings_flat, query_embeddings_flat, reference_labels_flat,\n        gt_ids, k_nearest_neighbors, n_chunks)\n    nn_features_dim = nn_features.shape[-1]\n    nn_features = nn_features.reshape(\n        [1, h, w, gt_ids.shape[0], nn_features_dim])\n    return nn_features.cuda(), gt_ids\n########################################################################LOCAL_DIST_MAP\ndef local_pairwise_distances(x, y, max_distance=9):\n    \"\"\"Computes pairwise squared l2 distances using a local search window.\n    Optimized implementation using correlation_cost.\n    Args:\n    x: Float32 tensor of shape [height, width, feature_dim].\n    y: Float32 tensor of shape [height, width, feature_dim].\n    max_distance: Integer, the maximum distance in pixel coordinates\n      per dimension which is considered to be in the search window.\n    Returns:\n    Float32 distances tensor of shape\n      [height, width, (2 * max_distance + 1) ** 2].\n    \"\"\"\n    if cfg.MODEL_LOCAL_DOWNSAMPLE:",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/IntVOS.py:212-235"
+    },
+    "1459": {
+        "file_id": 132,
+        "content": "This code chunk performs nearest neighbor feature extraction for each object in the image, reshapes it, and then returns it along with gt_ids. The local_pairwise_distances function computes pairwise squared l2 distances using a local search window. It is used to compare features between different points in an optimized manner, considering a maximum distance per dimension.",
+        "type": "comment"
+    },
+    "1460": {
+        "file_id": 132,
+        "content": "        #####\n        ori_h, ori_w, _ = x.shape\n        x = x.transpose([2, 0, 1]).unsqueeze(0)\n        x = F.avg_pool2d(x, (2, 2), (2, 2))\n        y = y.transpose([2, 0, 1]).unsqueeze(0)\n        y = F.avg_pool2d(y, (2, 2), (2, 2))\n        x = x.squeeze(0).transpose([1, 2, 0])\n        y = y.squeeze(0).transpose([1, 2, 0])\n        corr = cross_correlate(x, y, max_distance=max_distance)\n        xs = paddle.sum(x * x, 2, keepdim=True)\n        ys = paddle.sum(y * y, 2, keepdim=True)\n        ones_ys = paddle.ones_like(ys)\n        ys = cross_correlate(ones_ys, ys, max_distance=max_distance)\n        d = xs + ys - 2 * corr\n        # Boundary should be set to Inf.\n        tmp = paddle.zeros_like(d)\n        boundary = paddle.equal(\n            cross_correlate(ones_ys, ones_ys, max_distance=max_distance), 0)\n        d = paddle.where(boundary, tmp.fill_(float_('inf')), d)\n        d = (paddle.nn.functional.sigmoid(d) - 0.5) * 2\n        d = d.transpose([2, 0, 1]).unsqueeze(0)\n        d = F.interpolate(d,\n                          size=(ori_h, ori_w),",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/IntVOS.py:236-261"
+    },
+    "1461": {
+        "file_id": 132,
+        "content": "This code is performing cross-correlation between two input tensors and applying a boundary condition to the resulting tensor. It then applies sigmoid activation, resizes the tensor to original dimensions, and transposes it back to the original shape before unsqueezing the last dimension.",
+        "type": "comment"
+    },
+    "1462": {
+        "file_id": 132,
+        "content": "                          mode='bilinear',\n                          align_corners=True)\n        d = d.squeeze(0).transpose([1, 2, 0])\n    else:\n        corr = cross_correlate(x, y, max_distance=max_distance)\n        xs = paddle.sum(x * x, 2, keepdim=True)\n        ys = paddle.sum(y * y, 2, keepdim=True)\n        ones_ys = paddle.ones_like(ys)\n        ys = cross_correlate(ones_ys, ys, max_distance=max_distance)\n        d = xs + ys - 2 * corr\n        # Boundary should be set to Inf.\n        tmp = paddle.zeros_like(d)\n        boundary = paddle.equal(\n            cross_correlate(ones_ys, ones_ys, max_distance=max_distance), 0)\n        d = paddle.where(boundary, tmp.fill_(float_('inf')), d)\n    return d\ndef local_pairwise_distances2(x, y, max_distance=9):\n    \"\"\"Computes pairwise squared l2 distances using a local search window.\n    Naive implementation using map_fn.\n    Used as a slow fallback for when correlation_cost is not available.\n    Args:\n    x: Float32 tensor of shape [height, width, feature_dim].\n    y: Float32 tensor of shape [height, width, feature_dim].",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/IntVOS.py:262-287"
+    },
+    "1463": {
+        "file_id": 132,
+        "content": "This code calculates the pairwise squared l2 distances between two tensors using either correlation or cross-correlation method, depending on the mode. In correlation mode, it uses bilinear interpolation and aligns corners. Otherwise, it uses cross-correlate function with a max_distance parameter. It also handles boundary cases by setting values to infinity where necessary.",
+        "type": "comment"
+    },
+    "1464": {
+        "file_id": 132,
+        "content": "    max_distance: Integer, the maximum distance in pixel coordinates\n      per dimension which is considered to be in the search window.\n    Returns:\n    Float32 distances tensor of shape\n      [height, width, (2 * max_distance + 1) ** 2].\n    \"\"\"\n    if cfg.MODEL_LOCAL_DOWNSAMPLE:\n        ori_h, ori_w, _ = x.shape\n        x = paddle.transpose(x, [2, 0, 1]).unsqueeze(0)\n        x = F.avg_pool2d(x, (2, 2), (2, 2))\n        y = paddle.transpose(y, [2, 0, 1]).unsqueeze(0)\n        y = F.avg_pool2d(y, (2, 2), (2, 2))\n        _, channels, height, width = x.shape\n        padding_val = 1e20\n        padded_y = F.pad(\n            y, (max_distance, max_distance, max_distance, max_distance),\n            mode='constant',\n            value=padding_val)\n        offset_y = F.unfold(padded_y, kernel_sizes=[height, width]).reshape(\n            [1, channels, height, width, -1])\n        x = x.reshape([1, channels, height, width, 1])\n        minus = x - offset_y\n        dists = paddle.sum(paddle.multiply(minus, minus),\n                           axis=1).reshape([1, height, width,",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/IntVOS.py:288-312"
+    },
+    "1465": {
+        "file_id": 132,
+        "content": "This code section performs local downsampling on the input tensors x and y. It first transposes the tensors and applies average pooling with a 2x2 kernel to reduce their size. Then, it pads the result of y with a large value, calculates offsets using unfolding, subtracts them from x, and sums squared differences across channels. The result is a distances tensor of shape [height, width, (2 * max_distance + 1) ** 2].",
+        "type": "comment"
+    },
+    "1466": {
+        "file_id": 132,
+        "content": "                                            -1]).transpose([0, 3, 1, 2])\n        dists = (paddle.nn.functional.sigmoid(dists) - 0.5) * 2\n        dists = F.interpolate(dists,\n                              size=[ori_h, ori_w],\n                              mode='bilinear',\n                              align_corners=True)\n        dists = dists.squeeze(0).transpose([1, 2, 0])\n    else:\n        padding_val = 1e20\n        padded_y = nn.functional.pad(\n            y, (0, 0, max_distance, max_distance, max_distance, max_distance),\n            mode='constant',\n            value=padding_val)\n        height, width, _ = x.shape\n        dists = []\n        for y_start in range(2 * max_distance + 1):\n            y_end = y_start + height\n            y_slice = padded_y[y_start:y_end]\n            for x_start in range(2 * max_distance + 1):\n                x_end = x_start + width\n                offset_y = y_slice[:, x_start:x_end]\n                dist = paddle.sum(paddle.pow((x - offset_y), 2), dim=2)\n                dists.append(dist)",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/IntVOS.py:313-336"
+    },
+    "1467": {
+        "file_id": 132,
+        "content": "This code calculates the distance between a set of 2D points and another point, in a sliding window manner. It handles two cases: when the first point set has been divided into smaller blocks for faster computation, and when it hasn't. The result is stored in dists as a list of distance matrices.",
+        "type": "comment"
+    },
+    "1468": {
+        "file_id": 132,
+        "content": "        dists = paddle.stack(dists, dim=2)\n    return dists\nclass SpatialCorrelationSampler:\n    pass\ndef cross_correlate(x, y, max_distance=9):\n    \"\"\"Efficiently computes the cross correlation of x and y.\n  Optimized implementation using correlation_cost.\n  Note that we do not normalize by the feature dimension.\n  Args:\n    x: Float32 tensor of shape [height, width, feature_dim].\n    y: Float32 tensor of shape [height, width, feature_dim].\n    max_distance: Integer, the maximum distance in pixel coordinates\n      per dimension which is considered to be in the search window.\n  Returns:\n    Float32 tensor of shape [height, width, (2 * max_distance + 1) ** 2].\n    \"\"\"\n    corr_op = SpatialCorrelationSampler(kernel_size=1,\n                                        patch_size=2 * max_distance + 1,\n                                        stride=1,\n                                        dilation_patch=1,\n                                        padding=0)\n    xs = x.transpose(2, 0, 1)\n    xs = paddle.unsqueeze(xs, 0)",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/IntVOS.py:337-365"
+    },
+    "1469": {
+        "file_id": 132,
+        "content": "This code defines the SpatialCorrelationSampler class and a function called cross_correlate. The cross_correlate function takes two tensors, x and y, of shape [height, width, feature_dim] as inputs. It computes the cross correlation of these tensors using an optimized implementation from the SpatialCorrelationSampler class. The output tensor has a shape of [height, width, (2 * max_distance + 1) ** 2].",
+        "type": "comment"
+    },
+    "1470": {
+        "file_id": 132,
+        "content": "    ys = y.transpose(2, 0, 1)\n    ys = paddle.unsqueeze(ys, 0)\n    corr = corr_op(xs, ys)\n    bs, _, _, hh, ww = corr.shape\n    corr = corr.reshape([bs, -1, hh, ww])\n    corr = paddle.squeeze(corr, 0)\n    corr = corr.transpose(1, 2, 0)\n    return corr\ndef local_previous_frame_nearest_neighbor_features_per_object(\n        prev_frame_embedding,\n        query_embedding,\n        prev_frame_labels,\n        gt_ids,\n        max_distance=12):\n    \"\"\"Computes nearest neighbor features while only allowing local matches.\n  Args:\n    prev_frame_embedding: Tensor of shape [height, width, embedding_dim],\n      the embedding vectors for the last frame.\n    query_embedding: Tensor of shape [height, width, embedding_dim],\n      the embedding vectors for the query frames.\n    prev_frame_labels: Tensor of shape [height, width, 1], the class labels of\n      the previous frame.\n    gt_ids: Int Tensor of shape [n_objs] of the sorted unique ground truth\n      ids in the first frame.\n    max_distance: Integer, the maximum distance allowed for local matching.",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/IntVOS.py:366-392"
+    },
+    "1471": {
+        "file_id": 132,
+        "content": "This code is part of the IntVOS model and defines a function that computes nearest neighbor features, allowing only local matches. It takes previous frame embedding, query embedding, previous frame labels, ground truth IDs and maximum distance as input. It transposes and reshapes the tensors before returning the computed correlations.",
+        "type": "comment"
+    },
+    "1472": {
+        "file_id": 132,
+        "content": "  Returns:\n    nn_features: A float32 np.array of nearest neighbor features of shape\n      [1, height, width, n_objects, 1].\n    \"\"\"\n    d = local_pairwise_distances2(query_embedding,\n                                  prev_frame_embedding,\n                                  max_distance=max_distance)\n    height, width = prev_frame_embedding.shape[:2]\n    if MODEL_UNFOLD:\n        labels = float_(prev_frame_labels).transpose([2, 0, 1]).unsqueeze(0)\n        padded_labels = F.pad(labels, (\n            2 * max_distance,\n            2 * max_distance,\n            2 * max_distance,\n            2 * max_distance,\n        ))\n        offset_labels = F.unfold(padded_labels,\n                                 kernel_sizes=[height, width],\n                                 strides=[2, 2]).reshape([height, width, -1, 1])\n        offset_masks = paddle.equal(\n            offset_labels,\n            float_(gt_ids).unsqueeze(0).unsqueeze(0).unsqueeze(0))\n    else:\n        masks = paddle.equal(prev_frame_labels,\n                             gt_ids.unsqueeze(0).unsqueeze(0))",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/IntVOS.py:393-421"
+    },
+    "1473": {
+        "file_id": 132,
+        "content": "This function calculates the nearest neighbor features using local pairwise distances. If MODEL_UNFOLD is set, it pads and unfolds the labels for offset masks generation. Else, it directly creates masks by comparing prev_frame_labels to gt_ids.",
+        "type": "comment"
+    },
+    "1474": {
+        "file_id": 132,
+        "content": "        padded_masks = nn.functional.pad(masks, (\n            0,\n            0,\n            max_distance,\n            max_distance,\n            max_distance,\n            max_distance,\n        ))\n        offset_masks = []\n        for y_start in range(2 * max_distance + 1):\n            y_end = y_start + height\n            masks_slice = padded_masks[y_start:y_end]\n            for x_start in range(2 * max_distance + 1):\n                x_end = x_start + width\n                offset_mask = masks_slice[:, x_start:x_end]\n                offset_masks.append(offset_mask)\n        offset_masks = paddle.stack(offset_masks, axis=2)\n    d_tiled = d.unsqueeze(-1).tile((1, 1, 1, gt_ids.shape[0]))\n    pad = paddle.ones_like(d_tiled)\n    d_masked = paddle.where(offset_masks, d_tiled, pad)\n    dists = paddle.min(d_masked, axis=2)\n    dists = dists.reshape([1, height, width, gt_ids.shape[0], 1])\n    return dists\n##############################################################\n#################\nclass _res_block(nn.Layer):\n    def __init__(self, in_dim, out_dim):",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/IntVOS.py:422-454"
+    },
+    "1475": {
+        "file_id": 132,
+        "content": "This code applies padding to masks and creates offset masks by slicing the padded masks. It then constructs a 3D tensor of offset masks using Paddle's stack function. It also tiles the input data 'd' along the gt_ids dimension and creates a padding tensor. The code then computes the minimum distance between the tiled input and the masked data, resulting in distances tensor. Finally, it reshapes the distances tensor to have a specific shape and returns it.\nThe _res_block class is a layer that takes an input dimension (in_dim) and an output dimension (out_dim).",
+        "type": "comment"
+    },
+    "1476": {
+        "file_id": 132,
+        "content": "        super(_res_block, self).__init__()\n        self.conv1 = nn.Conv2D(in_dim,\n                               out_dim,\n                               kernel_size=3,\n                               stride=1,\n                               padding=1)\n        self.relu1 = nn.ReLU()\n        self.bn1 = paddle.nn.BatchNorm2D(out_dim, momentum=cfg.TRAIN_BN_MOM)\n        self.conv2 = nn.Conv2D(out_dim,\n                               out_dim,\n                               kernel_size=3,\n                               stride=1,\n                               padding=1)\n        self.relu2 = nn.ReLU()\n        self.bn2 = paddle.nn.BatchNorm2D(out_dim, momentum=cfg.TRAIN_BN_MOM)\n    def forward(self, x):\n        res = x\n        x = self.conv1(x)\n        x = self.bn1(x)\n        x = self.relu1(x)\n        x = self.conv2(x)\n        x = self.bn2(x)\n        x = self.relu2(x)\n        x += res\n        return x\n####################\nclass IntSegHead(nn.Layer):\n    def __init__(self,\n                 in_dim=(cfg.MODEL_SEMANTIC_EMBEDDING_DIM + 3),",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/IntVOS.py:455-486"
+    },
+    "1477": {
+        "file_id": 132,
+        "content": "This code defines a Residual Block and an Instance Segmentation Head for the Ma-Net model. The Residual Block consists of two 3x3 convolutions, batch normalization, and ReLU activations, while the IntSegHead layer takes in a specific input dimension for instance segmentation tasks.",
+        "type": "comment"
+    },
+    "1478": {
+        "file_id": 132,
+        "content": "                 emb_dim=cfg.MODEL_HEAD_EMBEDDING_DIM):\n        super(IntSegHead, self).__init__()\n        self.conv1 = nn.Conv2D(in_dim,\n                               emb_dim,\n                               kernel_size=7,\n                               stride=1,\n                               padding=3)\n        self.bn1 = paddle.nn.BatchNorm2D(emb_dim, momentum=cfg.TRAIN_BN_MOM)\n        self.relu1 = nn.ReLU(True)\n        self.res1 = _res_block(emb_dim, emb_dim)\n        self.res2 = _res_block(emb_dim, emb_dim)\n        self.conv2 = nn.Conv2D(256, emb_dim, kernel_size=3, stride=1, padding=1)\n        self.bn2 = paddle.nn.BatchNorm2D(emb_dim, momentum=cfg.TRAIN_BN_MOM)\n        self.relu2 = nn.ReLU(True)\n        self.conv3 = nn.Conv2D(emb_dim, 1, 1, 1)\n    def forward(self, x):\n        x = self.conv1(x)\n        x = self.bn1(x)\n        x = self.relu1(x)\n        x = self.res1(x)\n        x = self.res2(x)\n        x = self.conv2(x)\n        x = self.bn2(x)\n        x = self.relu2(x)\n        x = self.conv3(x)\n        return x",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/IntVOS.py:487-513"
+    },
+    "1479": {
+        "file_id": 132,
+        "content": "This code defines a neural network class called \"IntSegHead\" for segmentation tasks. It consists of multiple convolutional and batch normalization layers, followed by ReLU activations. The output is passed through another convolutional layer before being fed into the final convolutional layer to produce the result.",
+        "type": "comment"
+    },
+    "1480": {
+        "file_id": 132,
+        "content": "class _split_separable_conv2d(nn.Layer):\n    def __init__(self, in_dim, out_dim, kernel_size=7):\n        super(_split_separable_conv2d, self).__init__()\n        self.conv1 = nn.Conv2D(in_dim,\n                               in_dim,\n                               kernel_size=kernel_size,\n                               stride=1,\n                               padding=int((kernel_size - 1) / 2),\n                               groups=in_dim)\n        self.relu1 = nn.ReLU(True)\n        self.bn1 = paddle.nn.BatchNorm2D(in_dim, momentum=cfg.TRAIN_BN_MOM)\n        self.conv2 = nn.Conv2D(in_dim, out_dim, kernel_size=1, stride=1)\n        self.relu2 = nn.ReLU(True)\n        self.bn2 = paddle.nn.BatchNorm2D(out_dim, momentum=cfg.TRAIN_BN_MOM)\n        kaiming_normal_(self.conv1.weight, mode='fan_out', nonlinearity='relu')\n        kaiming_normal_(self.conv2.weight, mode='fan_out', nonlinearity='relu')\n    def forward(self, x):\n        x = self.conv1(x)\n        x = self.bn1(x)\n        x = self.relu1(x)\n        x = self.conv2(x)",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/IntVOS.py:516-537"
+    },
+    "1481": {
+        "file_id": 132,
+        "content": "This code defines a custom layer \"_split_separable_conv2d\" that performs separable convolution using two consecutive 2D convolutions. It consists of two 2D convolutions separated by Batch Normalization and ReLU activation functions. The first convolution is followed by Batch Normalization and ReLU, while the second convolution is also followed by another Batch Normalization and ReLU. Weights are initialized using Kaiming Normal initialization for both convolutions.",
+        "type": "comment"
+    },
+    "1482": {
+        "file_id": 132,
+        "content": "        x = self.bn2(x)\n        x = self.relu2(x)\n        return x\nclass DynamicSegHead(nn.Layer):\n    def __init__(self,\n                 in_dim=(cfg.MODEL_SEMANTIC_EMBEDDING_DIM + 3),\n                 embed_dim=cfg.MODEL_HEAD_EMBEDDING_DIM,\n                 kernel_size=1):\n        super(DynamicSegHead, self).__init__()\n        self.layer1 = _split_separable_conv2d(in_dim, embed_dim)\n        self.layer2 = _split_separable_conv2d(embed_dim, embed_dim)\n        self.layer3 = _split_separable_conv2d(embed_dim, embed_dim)\n        self.layer4 = _split_separable_conv2d(embed_dim, embed_dim)\n        self.conv = nn.Conv2D(embed_dim, 1, 1, 1)\n        kaiming_normal_(self.conv.weight, mode='fan_out', nonlinearity='relu')\n    def forward(self, x):\n        x = self.layer1(x)\n        x = self.layer2(x)\n        x = self.layer3(x)\n        x = self.layer4(x)\n        x = self.conv(x)\n        return x\n##################\n###############\nclass IntVOS(nn.Layer):\n    def __init__(self, cfg, feature_extracter):\n        super(IntVOS, self).__init__()",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/IntVOS.py:538-571"
+    },
+    "1483": {
+        "file_id": 132,
+        "content": "The code defines a DynamicSegHead class with four split separable convolutional layers, followed by a 1x1 convolution. It also initializes an IntVOS class that takes in the configuration and feature extractor as parameters. The classes are used for semantic segmentation tasks.",
+        "type": "comment"
+    },
+    "1484": {
+        "file_id": 132,
+        "content": "        self.feature_extracter = feature_extracter  ##embedding extractor\n        self.feature_extracter.cls_conv = nn.Sequential()\n        self.feature_extracter.upsample4 = nn.Sequential()\n        self.semantic_embedding = None\n        self.seperate_conv = nn.Conv2D(cfg.MODEL_ASPP_OUTDIM,\n                                       cfg.MODEL_ASPP_OUTDIM,\n                                       kernel_size=3,\n                                       stride=1,\n                                       padding=1,\n                                       groups=cfg.MODEL_ASPP_OUTDIM)\n        self.bn1 = paddle.nn.BatchNorm2D(cfg.MODEL_ASPP_OUTDIM,\n                                         momentum=cfg.TRAIN_BN_MOM)\n        self.relu1 = nn.ReLU(True)\n        self.embedding_conv = nn.Conv2D(cfg.MODEL_ASPP_OUTDIM,\n                                        cfg.MODEL_SEMANTIC_EMBEDDING_DIM, 1, 1)\n        self.relu2 = nn.ReLU(True)\n        self.bn2 = paddle.nn.BatchNorm2D(cfg.MODEL_SEMANTIC_EMBEDDING_DIM,\n                                         momentum=cfg.TRAIN_BN_MOM)",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/IntVOS.py:572-589"
+    },
+    "1485": {
+        "file_id": 132,
+        "content": "The code initializes components for a network architecture. It creates feature extractors, convolutional layers, batch normalization layers, and ReLU activation functions to process and extract semantic features from input data. These features will be used for tasks such as object detection or image classification.",
+        "type": "comment"
+    },
+    "1486": {
+        "file_id": 132,
+        "content": "        self.semantic_embedding = nn.Sequential(*[\n            self.seperate_conv, self.bn1, self.relu1, self.embedding_conv,\n            self.bn2, self.relu2\n        ])\n        for m in self.semantic_embedding:\n            if isinstance(m, nn.Conv2D):\n                kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')\n        self.dynamic_seghead = DynamicSegHead()  # propagation segm head\n        if cfg.MODEL_USEIntSeg:\n            self.inter_seghead = IntSegHead(\n                in_dim=cfg.MODEL_SEMANTIC_EMBEDDING_DIM + 3)\n        else:\n            self.inter_seghead = DynamicSegHead(\n                in_dim=cfg.MODEL_SEMANTIC_EMBEDDING_DIM +\n                2)  # interaction segm head\n    def forward(self,\n                x=None,\n                ref_scribble_label=None,\n                previous_frame_mask=None,\n                normalize_nearest_neighbor_distances=True,\n                use_local_map=True,\n                seq_names=None,\n                gt_ids=None,\n                k_nearest_neighbors=1,",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/IntVOS.py:590-616"
+    },
+    "1487": {
+        "file_id": 132,
+        "content": "The code initializes the network's semantic embedding layer, consisting of a sequence of convolutional layers, and applies Kaiming initialization to the weights. It also creates a dynamic segmentation head (seghead) for propagation and an interaction segmentation head based on the configuration flag MODEL_USEIntSeg. The function defines the forward pass for the network, taking in various inputs such as image data, reference labels, and masks.",
+        "type": "comment"
+    },
+    "1488": {
+        "file_id": 132,
+        "content": "                global_map_tmp_dic=None,\n                local_map_dics=None,\n                interaction_num=None,\n                start_annotated_frame=None,\n                frame_num=None):\n        x = self.extract_feature(x)\n        #         print('extract_feature:', x.mean().item())\n        ref_frame_embedding, previous_frame_embedding, current_frame_embedding = paddle.split(\n            x, num_or_sections=3, axis=0)\n        if global_map_tmp_dic is None:\n            dic = self.prop_seghead(\n                ref_frame_embedding, previous_frame_embedding,\n                current_frame_embedding, ref_scribble_label,\n                previous_frame_mask, normalize_nearest_neighbor_distances,\n                use_local_map, seq_names, gt_ids, k_nearest_neighbors,\n                global_map_tmp_dic, local_map_dics, interaction_num,\n                start_annotated_frame, frame_num, self.dynamic_seghead)\n            return dic\n        else:\n            dic, global_map_tmp_dic = self.prop_seghead(\n                ref_frame_embedding, previous_frame_embedding,",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/IntVOS.py:617-640"
+    },
+    "1489": {
+        "file_id": 132,
+        "content": "This code splits the input feature into three parts, then if `global_map_tmp_dic` is None, it passes these parts and other parameters to `prop_seghead()`, which returns a dictionary. If `global_map_tmp_dic` is not None, it also passes `global_map_tmp_dic` as an additional parameter before calling `prop_seghead()`. The function then returns the returned dictionary and updates `global_map_tmp_dic`.",
+        "type": "comment"
+    },
+    "1490": {
+        "file_id": 132,
+        "content": "                current_frame_embedding, ref_scribble_label,\n                previous_frame_mask, normalize_nearest_neighbor_distances,\n                use_local_map, seq_names, gt_ids, k_nearest_neighbors,\n                global_map_tmp_dic, local_map_dics, interaction_num,\n                start_annotated_frame, frame_num, self.dynamic_seghead)\n            return dic, global_map_tmp_dic\n    def extract_feature(self, x):\n        x = self.feature_extracter(x)\n        x = self.semantic_embedding(x)\n        return x\n    def prop_seghead(self,\n                     ref_frame_embedding=None,\n                     previous_frame_embedding=None,\n                     current_frame_embedding=None,\n                     ref_scribble_label=None,\n                     previous_frame_mask=None,\n                     normalize_nearest_neighbor_distances=True,\n                     use_local_map=True,\n                     seq_names=None,\n                     gt_ids=None,\n                     k_nearest_neighbors=1,\n                     global_map_tmp_dic=None,",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/IntVOS.py:641-664"
+    },
+    "1491": {
+        "file_id": 132,
+        "content": "The code defines a function that takes various inputs including frame embeddings, scribble labels, and masked frames. It performs feature extraction using a predefined feature extractor and semantic embedding. The function then returns the extracted features and temporary global map dictionaries.",
+        "type": "comment"
+    },
+    "1492": {
+        "file_id": 132,
+        "content": "                     local_map_dics=None,\n                     interaction_num=None,\n                     start_annotated_frame=None,\n                     frame_num=None,\n                     dynamic_seghead=None):\n        \"\"\"return: feature_embedding,global_match_map,local_match_map,previous_frame_mask\"\"\"\n        ###############\n        global_map_tmp_dic = global_map_tmp_dic\n        dic_tmp = {}\n        bs, c, h, w = current_frame_embedding.shape\n        if cfg.TEST_MODE:\n            scale_ref_scribble_label = float_(ref_scribble_label)\n        else:\n            scale_ref_scribble_label = paddle.nn.functional.interpolate(\n                float_(ref_scribble_label), size=(h, w), mode='nearest')\n        scale_ref_scribble_label = int_(scale_ref_scribble_label)\n        scale_previous_frame_label = paddle.nn.functional.interpolate(\n            float_(previous_frame_mask), size=(h, w), mode='nearest')\n        #         print(scale_previous_frame_label.sum())  # xx\n        #         print(previous_frame_mask.sum().item())  # xx",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/IntVOS.py:665-685"
+    },
+    "1493": {
+        "file_id": 132,
+        "content": "This code defines a function that takes various inputs and returns feature_embedding, global_match_map, local_match_map, and previous_frame_mask. It performs interpolation on the ref_scribble_label and previous_frame_mask using nearest mode to resize them to the same size as current_frame_embedding.",
+        "type": "comment"
+    },
+    "1494": {
+        "file_id": 132,
+        "content": "        scale_previous_frame_label = int_(scale_previous_frame_label)\n        #         print(scale_previous_frame_label.sum().item())  # xx\n        for n in range(bs):\n            seq_current_frame_embedding = current_frame_embedding[n]\n            seq_ref_frame_embedding = ref_frame_embedding[n]\n            seq_prev_frame_embedding = previous_frame_embedding[n]\n            seq_ref_frame_embedding = seq_ref_frame_embedding.transpose(\n                [1, 2, 0])\n            seq_current_frame_embedding = seq_current_frame_embedding.transpose(\n                [1, 2, 0])\n            seq_ref_scribble_label = scale_ref_scribble_label[n].transpose(\n                [1, 2, 0])\n            #########Global Map\n            nn_features_n, ref_obj_ids = nearest_neighbor_features_per_object(\n                reference_embeddings=seq_ref_frame_embedding,\n                query_embeddings=seq_current_frame_embedding,\n                reference_labels=seq_ref_scribble_label,\n                k_nearest_neighbors=k_nearest_neighbors,",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/IntVOS.py:686-704"
+    },
+    "1495": {
+        "file_id": 132,
+        "content": "In this code snippet, we see the process of extracting nearest neighbor features per object for each batch of frames. The frames are transposed and labeled before finding the k_nearest_neighbors. These operations are performed within a loop for every frame in the batch (bs).",
+        "type": "comment"
+    },
+    "1496": {
+        "file_id": 132,
+        "content": "                gt_ids=gt_ids[n],\n                n_chunks=10)\n            if normalize_nearest_neighbor_distances:\n                nn_features_n = (paddle.nn.functional.sigmoid(nn_features_n) -\n                                 0.5) * 2\n            if global_map_tmp_dic is not None:  ###when testing, use global map memory\n                if seq_names[n] not in global_map_tmp_dic:\n                    global_map_tmp_dic[seq_names[n]] = paddle.ones_like(\n                        nn_features_n).tile([104, 1, 1, 1, 1])\n                nn_features_n = paddle.where(\n                    nn_features_n <=\n                    global_map_tmp_dic[seq_names[n]][frame_num[n]].unsqueeze(0),\n                    nn_features_n,\n                    global_map_tmp_dic[seq_names[n]][frame_num[n]].unsqueeze(0))\n                global_map_tmp_dic[seq_names[n]][\n                    frame_num[n]] = nn_features_n.detach()[0]\n            #########################Local dist map\n            seq_prev_frame_embedding = seq_prev_frame_embedding.transpose(",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/IntVOS.py:705-725"
+    },
+    "1497": {
+        "file_id": 132,
+        "content": "This code segment checks if the current sequence name exists in the global map temporary dictionary. If it does not exist, a paddle.ones_like(nn_features_n) is created and assigned to the dictionary with shape [104, 1, 1, 1, 1]. Then, the code performs a where operation using nn_features_n, comparing it to the global map value for the current sequence name and frame number. If nn_features_n is less than or equal to the global map value, it remains unchanged; otherwise, the global map value overwrites nn_features_n. The last line transposes seq_prev_frame_embedding before continuing with the next chunk of code.",
+        "type": "comment"
+    },
+    "1498": {
+        "file_id": 132,
+        "content": "                [1, 2, 0])\n            seq_previous_frame_label = scale_previous_frame_label[n].transpose(\n                [1, 2, 0])\n            if use_local_map:\n                prev_frame_nn_features_n = local_previous_frame_nearest_neighbor_features_per_object(\n                    prev_frame_embedding=seq_prev_frame_embedding,\n                    query_embedding=seq_current_frame_embedding,\n                    prev_frame_labels=seq_previous_frame_label,\n                    gt_ids=ref_obj_ids,\n                    max_distance=cfg.MODEL_MAX_LOCAL_DISTANCE)\n            else:\n                prev_frame_nn_features_n, _ = nearest_neighbor_features_per_object(\n                    reference_embeddings=seq_prev_frame_embedding,\n                    query_embeddings=seq_current_frame_embedding,\n                    reference_labels=seq_previous_frame_label,\n                    k_nearest_neighbors=k_nearest_neighbors,\n                    gt_ids=gt_ids[n],\n                    n_chunks=20)\n                prev_frame_nn_features_n = (",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/IntVOS.py:726-745"
+    },
+    "1499": {
+        "file_id": 132,
+        "content": "The code is performing nearest neighbor feature extraction for previous frames in a video sequence. It checks if the use_local_map flag is set, and depending on its value, either uses local_previous_frame_nearest_neighbor_features_per_object function or nearest_neighbor_features_per_object function to extract features. If use_local_map is true, it takes previous frame embedding, current frame embedding, previous frame labels, reference object IDs and max distance as inputs. Otherwise, it takes previous frame embeddings, current frame embeddings, previous frame labels, k-nearest neighbors, gt_ids (for current iteration), and number of chunks as inputs. The code then assigns the extracted features to prev_frame_nn_features_n variable.",
+        "type": "comment"
+    }
+}

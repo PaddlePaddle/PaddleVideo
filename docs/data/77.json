@@ -1,0 +1,546 @@
+{
+    "7700": {
+        "file_id": 564,
+        "content": "/paddlevideo/modeling/heads/agcn2s_head.py",
+        "type": "filepath"
+    },
+    "7701": {
+        "file_id": 564,
+        "content": "The AGCN2sHead class is a head for the AGCN2s model in PaddleVideo, with input arguments defining channels, classes, people, and dropout ratio. It registers under HEADS registry, inherits from BaseHead class, initializes base class, sets instance variables, creates a linear layer, and reshapes input for forward pass. The code takes the input tensor x, averages along axes, passes through a fully connected layer (self.fc) to produce output.",
+        "type": "summary"
+    },
+    "7702": {
+        "file_id": 564,
+        "content": "# Copyright (c) 2021  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport math\nimport paddle\nimport paddle.nn as nn\nfrom .base import BaseHead\nfrom ..registry import HEADS\nfrom ..weight_init import weight_init_\n@HEADS.register()\nclass AGCN2sHead(BaseHead):\n    \"\"\"\n    Head for AGCN2s model.\n    Args:\n        in_channels: int, input feature channels. Default: 64.\n        num_classes: int, output the number of classes.\n        M: int, number of people.\n        drop_out: float, dropout ratio of layer. Default: 0.",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/agcn2s_head.py:1-32"
+    },
+    "7703": {
+        "file_id": 564,
+        "content": "The code defines the AGCN2sHead class, a head for the AGCN2s model in PaddleVideo. It has input feature channels, number of classes, number of people, and dropout ratio as arguments. This head is registered under HEADS registry and inherits from BaseHead class.",
+        "type": "comment"
+    },
+    "7704": {
+        "file_id": 564,
+        "content": "    \"\"\"\n    def __init__(self, in_channels=64, num_classes=10, M=2, **kwargs):\n        super().__init__(num_classes, in_channels, **kwargs)\n        self.in_channels = in_channels\n        self.M = M\n        weight_attr = paddle.ParamAttr(\n            name=\"linear_weight\",\n            initializer=paddle.nn.initializer.Normal(mean=0.0,\n                                                     std=math.sqrt(\n                                                         2. / num_classes)))\n        self.fc = nn.Linear(self.in_channels * 4,\n                            self.num_classes,\n                            weight_attr=weight_attr)\n    def forward(self, x):\n        \"\"\"Define how the head is going to run.\n        \"\"\"\n        assert x.shape[\n            0] % self.M == 0, f'The first dimension of the output must be an integer multiple of the number of people M, but recieved shape[0]={x.shape[0]}, M={self.M}'\n        # N*M,C,T,V\n        N = x.shape[0] // self.M\n        c_new = x.shape[1]\n        x = x.reshape([N, self.M, c_new, -1])",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/agcn2s_head.py:33-56"
+    },
+    "7705": {
+        "file_id": 564,
+        "content": "Class constructor takes in_channels, num_classes, and M as parameters, initializes base class, sets instance variables, creates a linear layer with specified weights using paddle's Normal initializer, and reshapes input for forward pass.",
+        "type": "comment"
+    },
+    "7706": {
+        "file_id": 564,
+        "content": "        x = x.mean(3).mean(1)\n        return self.fc(x)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/agcn2s_head.py:57-59"
+    },
+    "7707": {
+        "file_id": 564,
+        "content": "This code takes the input tensor x, averages it along the third and first axes respectively, then passes it through a fully connected layer (self.fc) to produce an output.",
+        "type": "comment"
+    },
+    "7708": {
+        "file_id": 565,
+        "content": "/paddlevideo/modeling/heads/asrf_head.py",
+        "type": "filepath"
+    },
+    "7709": {
+        "file_id": 565,
+        "content": "The ASRFHead class is a model for action recognition using convolutional layers, and computes precision, recall, F1 score. It creates an ASRF head class for video processing with label retrieval, Levenshtein distance methods, edit scores, true positives, false positives, IoU measures, and selects the best scoring segment.",
+        "type": "summary"
+    },
+    "7710": {
+        "file_id": 565,
+        "content": "# Copyright (c) 2021  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n# https://github.com/yiskw713/asrf/libs/models/tcn.py\nimport paddle\nimport paddle.nn as nn\nimport paddle.nn.functional as F\nimport numpy as np\nfrom paddle import ParamAttr\nfrom ..backbones.ms_tcn import SingleStageModel\nfrom .base import BaseHead\nfrom ..registry import HEADS\nfrom ..weight_init import weight_init_\nfrom ..framework.segmenters.utils import init_bias, KaimingUniform_like_torch\n@HEADS.register()\nclass ASRFHead(BaseHead):",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/asrf_head.py:1-32"
+    },
+    "7711": {
+        "file_id": 565,
+        "content": "The code defines a class for the ASRFHead, which is an instance of BaseHead and registered in HEADS registry. It imports necessary libraries, defines several models including SingleStageModel, and includes various utility functions from other modules. It also initializes weights with KaimingUniform_like_torch method.",
+        "type": "comment"
+    },
+    "7712": {
+        "file_id": 565,
+        "content": "    def __init__(self,\n                 num_classes,\n                 num_features,\n                 num_stages,\n                 num_layers,\n                 num_stages_asb=None,\n                 num_stages_brb=None):\n        super().__init__(num_classes=num_classes, in_channels=num_features)\n        if not isinstance(num_stages_asb, int):\n            num_stages_asb = num_stages\n        if not isinstance(num_stages_brb, int):\n            num_stages_brb = num_stages\n        self.num_layers = num_layers\n        self.num_stages_asb = num_stages_asb\n        self.num_stages_brb = num_stages_brb\n        self.num_features = num_features\n        # cls score\n        self.overlap = 0.5\n        self.conv_cls = nn.Conv1D(self.num_features, self.num_classes, 1)\n        self.conv_boundary = nn.Conv1D(self.num_features, 1, 1)\n        # action segmentation branch\n        asb = [\n            SingleStageModel(self.num_layers, self.num_features,\n                             self.num_classes, self.num_classes)\n            for _ in range(self.num_stages_asb - 1)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/asrf_head.py:34-63"
+    },
+    "7713": {
+        "file_id": 565,
+        "content": "The code above initializes an object of a class representing a feature extraction and classification model for action recognition. It takes several parameters such as the number of classes, features, stages in the action segmentation branch (ASB), stages in the boundary refinement branch (BRB), and layers per stage. The object is initialized by first calling the superclass constructor and then setting up the necessary components like the convolutional layers for class scores and boundary prediction, as well as multiple SingleStageModel instances for the action segmentation branch if needed.",
+        "type": "comment"
+    },
+    "7714": {
+        "file_id": 565,
+        "content": "        ]\n        # boundary regression branch\n        brb = [\n            SingleStageModel(self.num_layers, self.num_features, 1, 1)\n            for _ in range(self.num_stages_brb - 1)\n        ]\n        self.brb = nn.LayerList(brb)\n        self.asb = nn.LayerList(asb)\n        self.activation_asb = nn.Softmax(axis=1)\n        self.activation_brb = nn.Sigmoid()\n    def init_weights(self):\n        \"\"\"\n        initialize model layers' weight\n        \"\"\"\n        # init weight\n        for layer in self.sublayers():\n            if isinstance(layer, nn.Conv1D):\n                layer.weight.set_value(\n                    KaimingUniform_like_torch(layer.weight).astype('float32'))\n                if layer.bias is not None:\n                    layer.bias.set_value(\n                        init_bias(layer.weight, layer.bias).astype('float32'))\n    def forward(self, x):\n        \"\"\"\n        ASRF head\n        \"\"\"\n        out_cls = self.conv_cls(x)\n        out_boundary = self.conv_boundary(x)\n        outputs_cls = [out_cls]\n        outputs_boundary = [out_boundary]",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/asrf_head.py:64-98"
+    },
+    "7715": {
+        "file_id": 565,
+        "content": "This code defines a ASRF head model, initializes its weights and performs forward pass for classification and boundary regression tasks. It uses Conv1D layers and LayerList for flexibility. The weight initialization follows Kaiming uniform distribution and applies bias if present. The outputs of both tasks are stored separately in lists.",
+        "type": "comment"
+    },
+    "7716": {
+        "file_id": 565,
+        "content": "        for as_stage in self.asb:\n            out_cls = as_stage(self.activation_asb(out_cls))\n            outputs_cls.append(out_cls)\n        for br_stage in self.brb:\n            out_boundary = br_stage(self.activation_brb(out_boundary))\n            outputs_boundary.append(out_boundary)\n        return outputs_cls, outputs_boundary\n    def get_F1_score(self, predicted, groundTruth):\n        recog_content = list(predicted.numpy())\n        gt_content = list(groundTruth[0].numpy())\n        # cls score\n        correct = 0\n        total = 0\n        edit = 0\n        for i in range(len(gt_content)):\n            total += 1\n            if gt_content[i] == recog_content[i]:\n                correct += 1\n        edit_num = self.edit_score(recog_content, gt_content)\n        edit += edit_num\n        tp, fp, fn = self.f_score(recog_content, gt_content, self.overlap)\n        # cls metric\n        precision = tp / float(tp + fp)\n        recall = tp / float(fp + fn)\n        if precision + recall > 0.0:\n            f1 = 2.0 * (precision * recall) / (precision + recall)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/asrf_head.py:100-136"
+    },
+    "7717": {
+        "file_id": 565,
+        "content": "This code implements an ASRF head for a model, which takes in input and outputs classified classes and boundary scores. It also includes a get_F1_score function to calculate precision, recall, and F1 score for classification tasks. The F1 score is calculated based on the correctness of predicted class labels compared to ground truth labels.",
+        "type": "comment"
+    },
+    "7718": {
+        "file_id": 565,
+        "content": "        else:\n            f1 = 0.0\n        f1 = np.nan_to_num(f1)\n        return f1\n    def get_labels_start_end_time(self, frame_wise_labels):\n        labels = []\n        starts = []\n        ends = []\n        last_label = frame_wise_labels[0]\n        labels.append(frame_wise_labels[0])\n        starts.append(0)\n        for i in range(len(frame_wise_labels)):\n            if frame_wise_labels[i] != last_label:\n                labels.append(frame_wise_labels[i])\n                starts.append(i)\n                ends.append(i)\n                last_label = frame_wise_labels[i]\n        ends.append(i + 1)\n        return labels, starts, ends\n    def levenstein(self, p, y, norm=False):\n        m_row = len(p)\n        n_col = len(y)\n        D = np.zeros([m_row + 1, n_col + 1], np.float)\n        for i in range(m_row + 1):\n            D[i, 0] = i\n        for i in range(n_col + 1):\n            D[0, i] = i\n        for j in range(1, n_col + 1):\n            for i in range(1, m_row + 1):\n                if y[j - 1] == p[i - 1]:\n                    D[i, j] = D[i - 1, j - 1]",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/asrf_head.py:137-170"
+    },
+    "7719": {
+        "file_id": 565,
+        "content": "The code defines an ASRF head class that seems to be related to video processing and includes methods for retrieving label information and calculating the Levenshtein distance between two sequences. The get_labels_start_end_time method converts frame-wise labels into a list of labels, their respective start times, and end times. The levenstein method calculates the Levenshtein distance, which is used to compare two sequences of characters.",
+        "type": "comment"
+    },
+    "7720": {
+        "file_id": 565,
+        "content": "                else:\n                    D[i, j] = min(D[i - 1, j] + 1, D[i, j - 1] + 1,\n                                  D[i - 1, j - 1] + 1)\n        if norm:\n            score = (1 - D[-1, -1] / max(m_row, n_col)) * 100\n        else:\n            score = D[-1, -1]\n        return score\n    def edit_score(self, recognized, ground_truth, norm=True):\n        P, _, _ = self.get_labels_start_end_time(recognized)\n        Y, _, _ = self.get_labels_start_end_time(ground_truth)\n        return self.levenstein(P, Y, norm)\n    def f_score(self, recognized, ground_truth, overlap):\n        p_label, p_start, p_end = self.get_labels_start_end_time(recognized)\n        y_label, y_start, y_end = self.get_labels_start_end_time(ground_truth)\n        tp = 0\n        fp = 0\n        hits = np.zeros(len(y_label))\n        for j in range(len(p_label)):\n            intersection = np.minimum(p_end[j], y_end) - np.maximum(\n                p_start[j], y_start)\n            union = np.maximum(p_end[j], y_end) - np.minimum(\n                p_start[j], y_start)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/asrf_head.py:171-200"
+    },
+    "7721": {
+        "file_id": 565,
+        "content": "The code contains a function to calculate the edit score between two sequences. It uses the Levenshtein distance algorithm to compare recognized and ground truth labels, considering insertions, deletions, and substitutions. The f_score function calculates true positive (tp) and false positive (fp) values based on label overlaps, and normalizes the edit score if required.",
+        "type": "comment"
+    },
+    "7722": {
+        "file_id": 565,
+        "content": "            IoU = (1.0 * intersection / union) * (\n                [p_label[j] == y_label[x] for x in range(len(y_label))])\n            # Get the best scoring segment\n            idx = np.array(IoU).argmax()\n            if IoU[idx] >= overlap and not hits[idx]:\n                tp += 1\n                hits[idx] = 1\n            else:\n                fp += 1\n        fn = len(y_label) - sum(hits)\n        return float(tp), float(fp), float(fn)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/asrf_head.py:201-212"
+    },
+    "7723": {
+        "file_id": 565,
+        "content": "This code calculates true positives (tp), false positives (fp) and false negatives (fn). It measures IoU between predicted and actual labels, selects best scoring segment and tracks hits and misses. The method returns tp, fp, fn as float values.",
+        "type": "comment"
+    },
+    "7724": {
+        "file_id": 566,
+        "content": "/paddlevideo/modeling/heads/attention_lstm_head.py",
+        "type": "filepath"
+    },
+    "7725": {
+        "file_id": 566,
+        "content": "The code defines the AttentionLstmHead class for LSTM-based attention mechanism in PaddleVideo, performing feature extraction and softmax normalization for video and audio classification tasks.",
+        "type": "summary"
+    },
+    "7726": {
+        "file_id": 566,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport paddle\nfrom paddle import ParamAttr\nfrom paddle.nn.initializer import Normal\nfrom paddle.regularizer import L2Decay\nimport paddle.nn.functional as F\nfrom ...metrics.youtube8m import eval_util as youtube8m_metrics\nfrom ..registry import HEADS\nfrom ..weight_init import weight_init_\nfrom .base import BaseHead\n@HEADS.register()\nclass AttentionLstmHead(BaseHead):\n    \"\"\"AttentionLstmHead.\n    Args: TODO\n    \"\"\"\n    def __init__(self,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/attention_lstm_head.py:1-32"
+    },
+    "7727": {
+        "file_id": 566,
+        "content": "This code defines a class called AttentionLstmHead, which is a type of head used in a neural network. It is part of the PaddleVideo library and inherits from the BaseHead class. The class uses LSTM for attention, has its own parameters (specified by ParamAttr), and utilizes weight initialization. This code also includes license information, documentation on arguments, and registration in the HEADS registry.",
+        "type": "comment"
+    },
+    "7728": {
+        "file_id": 566,
+        "content": "                 num_classes=3862,\n                 feature_num=2,\n                 feature_dims=[1024, 128],\n                 embedding_size=512,\n                 lstm_size=1024,\n                 in_channels=2048,\n                 loss_cfg=dict(name='CrossEntropyLoss')):\n        super(AttentionLstmHead, self).__init__(num_classes, in_channels,\n                                                loss_cfg)\n        self.num_classes = num_classes\n        self.feature_dims = feature_dims\n        self.embedding_size = embedding_size\n        self.lstm_size = lstm_size\n        self.feature_num = len(self.feature_dims)\n        for i in range(self.feature_num):  # 0:rgb, 1:audio\n            fc_feature = paddle.nn.Linear(in_features=self.feature_dims[i],\n                                          out_features=self.embedding_size)\n            self.add_sublayer(\"fc_feature{}\".format(i), fc_feature)\n            bi_lstm = paddle.nn.LSTM(input_size=self.embedding_size,\n                                     hidden_size=self.lstm_size,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/attention_lstm_head.py:33-53"
+    },
+    "7729": {
+        "file_id": 566,
+        "content": "This code initializes an AttentionLstmHead object with specified parameters. It creates a Linear layer for each feature dimension (rgb, audio) and adds a bi-directional LSTM layer with specified sizes. The AttentionLstmHead will be used to process video frames and audio data in parallel for classification tasks.",
+        "type": "comment"
+    },
+    "7730": {
+        "file_id": 566,
+        "content": "                                     direction=\"bidirectional\")\n            self.add_sublayer(\"bi_lstm{}\".format(i), bi_lstm)\n            drop_rate = 0.5\n            self.dropout = paddle.nn.Dropout(drop_rate)\n            att_fc = paddle.nn.Linear(in_features=self.lstm_size * 2,\n                                      out_features=1)\n            self.add_sublayer(\"att_fc{}\".format(i), att_fc)\n            self.softmax = paddle.nn.Softmax()\n        self.fc_out1 = paddle.nn.Linear(in_features=self.lstm_size * 4,\n                                        out_features=8192,\n                                        bias_attr=ParamAttr(\n                                            regularizer=L2Decay(0.0),\n                                            initializer=Normal()))\n        self.relu = paddle.nn.ReLU()\n        self.fc_out2 = paddle.nn.Linear(in_features=8192,\n                                        out_features=4096,\n                                        bias_attr=ParamAttr(\n                                            regularizer=L2Decay(0.0),",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/attention_lstm_head.py:54-74"
+    },
+    "7731": {
+        "file_id": 566,
+        "content": "The code initializes an LSTM layer with bidirectional capability and adds dropout for regularization. It defines a linear layer (att_fc) to map the output of the LSTM layer to 1 feature, applies softmax activation, and then defines two fully connected layers (fc_out1 and fc_out2) for further processing with specific activations and parameters.",
+        "type": "comment"
+    },
+    "7732": {
+        "file_id": 566,
+        "content": "                                            initializer=Normal()))\n        self.fc_logit = paddle.nn.Linear(in_features=4096,\n                                         out_features=self.num_classes,\n                                         bias_attr=ParamAttr(\n                                             regularizer=L2Decay(0.0),\n                                             initializer=Normal()))\n        self.sigmoid = paddle.nn.Sigmoid()\n    def init_weights(self):\n        pass\n    def forward(self, inputs):\n        # inputs = [(rgb_data, rgb_len, rgb_mask), (audio_data, audio_len, audio_mask)]\n        # deal with features with different length\n        # 1. padding to same lenght, make a tensor\n        # 2. make a mask tensor with the same shpae with 1\n        # 3. compute output using mask tensor, s.t. output is nothing todo with padding\n        assert (len(inputs) == self.feature_num\n                ), \"Input tensor does not contain {} features\".format(\n                    self.feature_num)\n        att_outs = []",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/attention_lstm_head.py:75-95"
+    },
+    "7733": {
+        "file_id": 566,
+        "content": "The code defines a class for an attention LSTM head in PaddleVideo. It initializes two linear layers and a sigmoid activation function. The `init_weights` method is currently empty, and the `forward` method takes inputs of different lengths and processes them before storing the results in the `att_outs` list.",
+        "type": "comment"
+    },
+    "7734": {
+        "file_id": 566,
+        "content": "        for i in range(len(inputs)):\n            # 1. fc\n            m = getattr(self, \"fc_feature{}\".format(i))\n            output_fc = m(inputs[i][0])\n            output_fc = paddle.tanh(output_fc)\n            # 2. bi_lstm\n            m = getattr(self, \"bi_lstm{}\".format(i))\n            lstm_out, _ = m(inputs=output_fc, sequence_length=inputs[i][1])\n            lstm_dropout = self.dropout(lstm_out)\n            # 3. att_fc\n            m = getattr(self, \"att_fc{}\".format(i))\n            lstm_weight = m(lstm_dropout)\n            # 4. softmax replace start, for it's relevant to sum in time step\n            lstm_exp = paddle.exp(lstm_weight)\n            lstm_mask = paddle.mean(inputs[i][2], axis=2)\n            lstm_mask = paddle.unsqueeze(lstm_mask, axis=2)\n            lstm_exp_with_mask = paddle.multiply(x=lstm_exp, y=lstm_mask)\n            lstm_sum_with_mask = paddle.sum(lstm_exp_with_mask, axis=1)\n            exponent = -1\n            lstm_denominator = paddle.pow(lstm_sum_with_mask, exponent)\n            lstm_denominator = paddle.unsqueeze(lstm_denominator, axis=2)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/attention_lstm_head.py:96-120"
+    },
+    "7735": {
+        "file_id": 566,
+        "content": "The code performs feature extraction, bi-directional LSTM processing, attention weight calculation, and finally softmax normalization on each input in a list. It uses dropout to prevent overfitting, applies masking for attention calculations, and calculates the denominator using power function.",
+        "type": "comment"
+    },
+    "7736": {
+        "file_id": 566,
+        "content": "            lstm_softmax = paddle.multiply(x=lstm_exp, y=lstm_denominator)\n            lstm_weight = lstm_softmax\n            # softmax replace end\n            lstm_scale = paddle.multiply(x=lstm_dropout, y=lstm_weight)\n            # 5. sequence_pool's replace start, for it's relevant to sum in time step\n            lstm_scale_with_mask = paddle.multiply(x=lstm_scale, y=lstm_mask)\n            fea_lens = inputs[i][1]\n            fea_len = int(fea_lens[0])\n            lstm_pool = paddle.sum(lstm_scale_with_mask, axis=1)\n            # sequence_pool's replace end\n            att_outs.append(lstm_pool)\n        att_out = paddle.concat(att_outs, axis=1)\n        fc_out1 = self.fc_out1(att_out)\n        fc_out1_act = self.relu(fc_out1)\n        fc_out2 = self.fc_out2(fc_out1_act)\n        fc_out2_act = paddle.tanh(fc_out2)\n        fc_logit = self.fc_logit(fc_out2_act)\n        output = self.sigmoid(fc_logit)\n        return fc_logit, output\n    def loss(self, lstm_logit, labels, **kwargs):\n        labels.stop_gradient = True",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/attention_lstm_head.py:121-144"
+    },
+    "7737": {
+        "file_id": 566,
+        "content": "This code performs LSTM-based attention mechanism for a sequence modeling task. It applies softmax, dropout, and mask operations on the LSTM outputs to compute the attention weights. The attention weights are then used to generate an attentive pooling of the sequence, which is passed through fully connected layers and sigmoid activation for the final output. The loss function uses labels with stop_gradient=True for training the model.",
+        "type": "comment"
+    },
+    "7738": {
+        "file_id": 566,
+        "content": "        losses = dict()\n        bce_logit_loss = paddle.nn.BCEWithLogitsLoss(reduction='sum')\n        sum_cost = bce_logit_loss(lstm_logit, labels)\n        return sum_cost\n    def metric(self, lstm_output, labels):\n        pred = lstm_output.numpy()\n        label = labels.numpy()\n        hit_at_one = youtube8m_metrics.calculate_hit_at_one(pred, label)\n        perr = youtube8m_metrics.calculate_precision_at_equal_recall_rate(\n            pred, label)\n        gap = youtube8m_metrics.calculate_gap(pred, label)\n        return hit_at_one, perr, gap\n@HEADS.register()\nclass ActionAttentionLstmHead(BaseHead):\n    \"\"\"AttentionLstmHead for FootballAction\n    Args: TODO\n    \"\"\"\n    def __init__(self,\n                 num_classes=8,\n                 feature_num=2,\n                 feature_dims=[2048, 1024],\n                 embedding_size=512,\n                 lstm_size=1024,\n                 in_channels=2048,\n                 loss_cfg=dict(name='CrossEntropyLoss')):\n        super(ActionAttentionLstmHead, self).__init__(num_classes, in_channels,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/attention_lstm_head.py:145-173"
+    },
+    "7739": {
+        "file_id": 566,
+        "content": "This code defines an ActionAttentionLstmHead class which is a type of BaseHead. It uses LSTM for attention and takes in various arguments like num_classes, feature_num, feature_dims, embedding_size, lstm_size, in_channels, and loss_cfg. The metric function calculates hit_at_one, perr (precision at equal recall rate), and gap values from the LSTM output and labels. The sum_cost function calculates the loss using BCEWithLogitsLoss.",
+        "type": "comment"
+    },
+    "7740": {
+        "file_id": 566,
+        "content": "                                                      loss_cfg)\n        self.num_classes = num_classes\n        self.feature_dims = feature_dims\n        self.embedding_size = embedding_size\n        self.lstm_size = lstm_size\n        self.feature_num = len(self.feature_dims)\n        for i in range(self.feature_num):  # 0:rgb, 1:audio\n            bi_lstm = paddle.nn.LSTM(input_size=self.feature_dims[i],\n                                     hidden_size=self.feature_dims[i],\n                                     direction=\"bidirectional\")\n            self.add_sublayer(\"bi_lstm{}\".format(i), bi_lstm)\n            drop_rate = 0.5\n            self.dropout = paddle.nn.Dropout(drop_rate)\n            att_fc = paddle.nn.Linear(in_features=self.feature_dims[i] * 2,\n                                      out_features=1)\n            self.add_sublayer(\"att_fc{}\".format(i), att_fc)\n            self.softmax = paddle.nn.Softmax()\n        self.fc1 = paddle.nn.Linear(in_features=2 * sum(self.feature_dims),\n                                    out_features=8192,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/attention_lstm_head.py:174-195"
+    },
+    "7741": {
+        "file_id": 566,
+        "content": "This code initializes a LSTM network for feature processing and attention mechanism. It defines bidirectional LSTM layers for each feature dimension (RGB, audio), followed by dropout and fully connected layers. The model has 8192 output features and is used for multimodal fusion in a video understanding task.",
+        "type": "comment"
+    },
+    "7742": {
+        "file_id": 566,
+        "content": "                                    bias_attr=ParamAttr(\n                                        regularizer=L2Decay(0.0),\n                                        initializer=Normal()))\n        self.bn1 = paddle.nn.BatchNorm(num_channels=8192)\n        self.dropout1 = paddle.nn.Dropout(0.5)\n        self.fc2 = paddle.nn.Linear(in_features=8192,\n                                    out_features=4096,\n                                    bias_attr=ParamAttr(\n                                        regularizer=L2Decay(0.0),\n                                        initializer=Normal()))\n        self.bn2 = paddle.nn.BatchNorm(num_channels=4096)\n        self.dropout2 = paddle.nn.Dropout(0.5)\n        self.fc3 = paddle.nn.Linear(\n            in_features=4096,\n            out_features=self.num_classes,\n        )\n        self.fc4 = paddle.nn.Linear(\n            in_features=4096,\n            out_features=1,\n        )\n    def init_weights(self):\n        pass\n    def forward(self, inputs):\n        # inputs = [(rgb_data, rgb_len, rgb_mask), (audio_data, audio_len, audio_mask)]",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/attention_lstm_head.py:196-221"
+    },
+    "7743": {
+        "file_id": 566,
+        "content": "This code defines a class for an attention-based LSTM head in PaddleVideo. It includes several fully connected layers, batch normalization, dropout, and two linear layers. The `init_weights` function is not implemented, and the `forward` method takes input data as a tuple of (rgb_data, rgb_len, rgb_mask) and (audio_data, audio_len, audio_mask).",
+        "type": "comment"
+    },
+    "7744": {
+        "file_id": 566,
+        "content": "        # deal with features with different length\n        # 1. padding to same lenght, make a tensor\n        # 2. make a mask tensor with the same shpae with 1\n        # 3. compute output using mask tensor, s.t. output is nothing todo with padding\n        assert (len(inputs) == self.feature_num\n                ), \"Input tensor does not contain {} features\".format(\n                    self.feature_num)\n        att_outs = []\n        for i in range(len(inputs)):\n            m = getattr(self, \"bi_lstm{}\".format(i))\n            lstm_out, _ = m(inputs=inputs[i][0], sequence_length=inputs[i][1])\n            lstm_dropout = self.dropout(lstm_out)\n            # 3. att_fc\n            m = getattr(self, \"att_fc{}\".format(i))\n            lstm_weight = m(lstm_dropout)\n            # 4. softmax replace start, for it's relevant to sum in time step\n            lstm_exp = paddle.exp(lstm_weight)\n            lstm_mask = paddle.mean(inputs[i][2], axis=2)\n            lstm_mask = paddle.unsqueeze(lstm_mask, axis=2)\n            lstm_exp_with_mask = paddle.multiply(x=lstm_exp, y=lstm_mask)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/attention_lstm_head.py:222-244"
+    },
+    "7745": {
+        "file_id": 566,
+        "content": "This code handles features with varying lengths. It pads features to the same length, creates a mask tensor, and computes the output using the mask tensor, effectively ignoring padding values. It asserts that the input tensor contains the expected number of features. It iterates over each feature, performs bi-directional LSTM, applies dropout, calculates weighted sum using attention mechanism, applies softmax to the weights, multiplies by a mask, and stores the results in att_outs.",
+        "type": "comment"
+    },
+    "7746": {
+        "file_id": 566,
+        "content": "            lstm_sum_with_mask = paddle.sum(lstm_exp_with_mask, axis=1)\n            exponent = -1\n            lstm_denominator = paddle.pow(lstm_sum_with_mask, exponent)\n            lstm_denominator = paddle.unsqueeze(lstm_denominator, axis=2)\n            lstm_softmax = paddle.multiply(x=lstm_exp, y=lstm_denominator)\n            lstm_weight = lstm_softmax\n            # softmax replace end\n            lstm_scale = paddle.multiply(x=lstm_dropout, y=lstm_weight)\n            # 5. sequence_pool's replace start, for it's relevant to sum in time step\n            lstm_scale_with_mask = paddle.multiply(x=lstm_scale, y=lstm_mask)\n            # fea_lens = inputs[i][1]\n            # fea_len = int(fea_lens[0])\n            lstm_pool = paddle.sum(lstm_scale_with_mask, axis=1)\n            # sequence_pool's replace end\n            att_outs.append(lstm_pool)\n        att_out = paddle.concat(att_outs, axis=1)\n        y = self.fc1(att_out)\n        y = self.bn1(y)\n        y = F.relu(y)\n        y = self.dropout1(y)\n        y = self.fc2(y)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/attention_lstm_head.py:245-267"
+    },
+    "7747": {
+        "file_id": 566,
+        "content": "This code segment calculates the attention scores using LSTM and applies them to sequence pooling. It then passes the output through multiple layers of neural networks, including fully connected layers, batch normalization, ReLU activation, and dropout. The final result is stored in `att_out` for further processing.",
+        "type": "comment"
+    },
+    "7748": {
+        "file_id": 566,
+        "content": "        y = self.bn2(y)\n        y = F.relu(y)\n        y = self.dropout2(y)\n        out1 = self.fc3(y)\n        out1 = F.softmax(out1)\n        out2 = self.fc4(y)\n        out2 = F.sigmoid(out2)\n        return out1, out2\n    def loss(self, logits, iou, labels, labels_iou, **kwargs):\n        alpha = 10\n        softmax_loss = F.cross_entropy(logits, labels)\n        labels_iou = labels_iou.astype('float32')\n        mse_loss = paddle.sum(F.square_error_cost(iou, labels_iou), axis=-1)\n        sum_loss = softmax_loss + alpha * mse_loss\n        return sum_loss\n    def metric(self, scores, labels):\n        top1 = paddle.metric.accuracy(input=scores, label=labels, k=1)\n        top5 = paddle.metric.accuracy(input=scores, label=labels, k=5)\n        return top1, top5",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/attention_lstm_head.py:268-288"
+    },
+    "7749": {
+        "file_id": 566,
+        "content": "The code contains two main components: a LSTM attention head and loss/metric functions. The LSTM attention head computes attention weights for the input sequence, followed by softmax and sigmoid activation functions. The loss function calculates cross-entropy and mean squared error losses, with alpha as a weight parameter. The metric function computes top1 and top5 accuracy.",
+        "type": "comment"
+    },
+    "7750": {
+        "file_id": 567,
+        "content": "/paddlevideo/modeling/heads/base.py",
+        "type": "filepath"
+    },
+    "7751": {
+        "file_id": 567,
+        "content": "The code defines a PaddleVideo classification head base class and function for loss/accuracy calculation, supporting binary, multi-class, and specific MRI scenarios with label smoothing. It also calculates top5 accuracy, hard/soft labels, and performs all-reduce operation in distributed training.",
+        "type": "summary"
+    },
+    "7752": {
+        "file_id": 567,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport numpy as np\nfrom abc import abstractmethod\nimport paddle\nimport paddle.nn as nn\nimport paddle.nn.functional as F\nfrom ..builder import build_loss\nfrom paddlevideo.utils import get_logger, get_dist_info\nlogger = get_logger(\"paddlevideo\")\nclass BaseHead(nn.Layer):\n    \"\"\"Base class for head part.\n    All head should subclass it.\n    All subclass should overwrite:\n    - Methods: ```init_weights```, initializing weights.",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/base.py:1-34"
+    },
+    "7753": {
+        "file_id": 567,
+        "content": "Base class for head part, all subclass should overwrite init_weights method for initializing weights.",
+        "type": "comment"
+    },
+    "7754": {
+        "file_id": 567,
+        "content": "    - Methods: ```forward```, forward function.\n    Args:\n        num_classes (int): The number of classes to be classified.\n        in_channels (int): The number of channels in input feature.\n        loss_cfg (dict): Config for building loss. Default: dict(type='CrossEntropyLoss').\n        ls_eps (float): label smoothing epsilon. Default: 0. .\n    \"\"\"\n    def __init__(\n        self,\n        num_classes=None,\n        in_channels=None,\n        loss_cfg=dict(\n            name=\"CrossEntropyLoss\"\n        ),  #TODO(shipping): only pass a name or standard build cfg format.\n        #multi_class=False, NOTE(shipping): not supported now.\n        ls_eps=0.):\n        super().__init__()\n        self.num_classes = num_classes\n        self.in_channels = in_channels\n        self.loss_func = build_loss(loss_cfg)\n        #self.multi_class = multi_class NOTE(shipping): not supported now\n        self.ls_eps = ls_eps\n    @abstractmethod\n    def forward(self, x):\n        \"\"\"Define how the head is going to run.\n        \"\"\"\n        raise NotImplemented",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/base.py:35-65"
+    },
+    "7755": {
+        "file_id": 567,
+        "content": "This code is defining a base class for a classification head in PaddleVideo. It has an `__init__` method that sets the number of classes, input channels, and loss configuration. It also builds the loss function using the provided configuration. The `forward` method must be implemented by any subclasses, as it defines how the head will run during model inference.",
+        "type": "comment"
+    },
+    "7756": {
+        "file_id": 567,
+        "content": "    def loss(self, scores, labels, valid_mode=False, if_top5=True, **kwargs):\n        \"\"\"Calculate the loss accroding to the model output ```scores```,\n           and the target ```labels```.\n        Args:\n            scores (paddle.Tensor): The output of the model.\n            labels (paddle.Tensor): The target output of the model.\n        Returns:\n            losses (dict): A dict containing field 'loss'(mandatory) and 'top1_acc', 'top5_acc'(optional).\n        \"\"\"\n        if len(labels) == 1:  #commonly case\n            labels = labels[0]\n            losses = dict()\n            if self.ls_eps != 0. and not valid_mode:  # label_smooth\n                loss = self.label_smooth_loss(scores, labels, **kwargs)\n            else:\n                loss = self.loss_func(scores, labels, **kwargs)\n            if if_top5:\n                top1, top5 = self.get_acc(scores, labels, valid_mode)\n                losses['top1'] = top1\n                losses['top5'] = top5\n                losses['loss'] = loss\n            else:",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/base.py:67-91"
+    },
+    "7757": {
+        "file_id": 567,
+        "content": "This function calculates the loss based on model output (scores) and target output (labels). It returns a dictionary containing 'loss', 'top1_acc', and 'top5_acc'. If labels are single, they are expanded. Label smoothing is applied if ls_eps is non-zero and not in valid mode. The loss function is used if label smoothing is not applicable. Top-1 and top-5 accuracy are also calculated if top-5 is set to True.",
+        "type": "comment"
+    },
+    "7758": {
+        "file_id": 567,
+        "content": "                top1 = self.get_acc(scores, labels, valid_mode, if_top5)\n                losses['top1'] = top1\n                losses['loss'] = loss\n            return losses\n        # MRI目前二分类无top5\n        elif len(labels) == 3:  # mix_up\n            labels_a, labels_b, lam = labels\n            lam = lam[0]  # get lam value\n            losses = dict()\n            if self.ls_eps != 0:\n                loss_a = self.label_smooth_loss(scores, labels_a, **kwargs)\n                loss_b = self.label_smooth_loss(scores, labels_b, **kwargs)\n            else:\n                loss_a = self.loss_func(scores, labels_a, **kwargs)\n                loss_b = self.loss_func(scores, labels_b, **kwargs)\n            loss = lam * loss_a + (1 - lam) * loss_b\n            if if_top5:\n                top1a, top5a = self.get_acc(scores, labels_a, valid_mode)\n                top1b, top5b = self.get_acc(scores, labels_b, valid_mode)\n                top1 = lam * top1a + (1 - lam) * top1b\n                top5 = lam * top5a + (1 - lam) * top5b",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/base.py:92-113"
+    },
+    "7759": {
+        "file_id": 567,
+        "content": "This code handles different cases for classification tasks. For binary and multi-class tasks, it calculates top1 accuracy and loss, while for the specific case of MRI with three labels (mix_up), it applies label smoothing or regular loss function and averages results for each sample to get the final loss and top1 accuracy.",
+        "type": "comment"
+    },
+    "7760": {
+        "file_id": 567,
+        "content": "                losses['top1'] = top1\n                losses['top5'] = top5\n                losses['loss'] = loss\n            else:\n                top1a = self.get_acc(scores, labels_a, valid_mode, if_top5)\n                top1b = self.get_acc(scores, labels_b, valid_mode, if_top5)\n                top1 = lam * top1a + (1 - lam) * top1b\n                losses['top1'] = top1\n                losses['loss'] = loss\n            return losses\n        else:\n            raise NotImplemented\n    def label_smooth_loss(self, scores, labels, **kwargs):\n        \"\"\"\n        Args:\n            scores (paddle.Tensor): [N, num_classes]\n            labels (paddle.Tensor): [N, ]\n        Returns:\n            paddle.Tensor: [1,]\n        \"\"\"\n        if paddle.is_compiled_with_custom_device('npu'):\n            \"\"\"\n            Designed for the lack of temporary operators of NPU,\n            main idea is to split smooth loss into uniform distribution loss\n            and hard label calculation\n            \"\"\"\n            hard_loss = (1.0 - self.ls_eps) * F.cross_entropy(scores, labels)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/base.py:114-143"
+    },
+    "7761": {
+        "file_id": 567,
+        "content": "Function defines a loss function for classification tasks, returning a dictionary of losses including top1 and overall loss. If valid_mode is True, calculates accuracy on validation set, otherwise on training set. Top1 accuracies for two sets are combined with specified lambda value to calculate final top1.",
+        "type": "comment"
+    },
+    "7762": {
+        "file_id": 567,
+        "content": "            uniform_loss = (self.ls_eps / self.num_classes) * (\n                -F.log_softmax(scores, -1).sum(-1).mean(0))\n            loss = hard_loss + uniform_loss\n        else:\n            labels = F.one_hot(labels, self.num_classes)\n            labels = F.label_smooth(labels, epsilon=self.ls_eps)\n            labels = paddle.squeeze(labels, axis=1)\n            loss = self.loss_func(scores, labels, soft_label=True, **kwargs)\n        return loss\n    def get_acc(self, scores, labels, valid_mode, if_top5=True):\n        if if_top5:\n            top1 = paddle.metric.accuracy(input=scores, label=labels, k=1)\n            top5 = paddle.metric.accuracy(input=scores, label=labels, k=5)\n            _, world_size = get_dist_info()\n            #NOTE(shipping): deal with multi cards validate\n            if world_size > 1 and valid_mode:  #reduce sum when valid\n                paddle.distributed.all_reduce(\n                    top1, op=paddle.distributed.ReduceOp.SUM)\n                top1 = top1 / world_size\n                paddle.distributed.all_reduce(",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/base.py:144-164"
+    },
+    "7763": {
+        "file_id": 567,
+        "content": "Code is for computing loss and accuracy in a classification model. If the hard label is given, it calculates uniform_loss based on scores and adds it to hard_loss for total loss. Otherwise, it computes soft labels using one-hot encoding and label smoothing, then calculates loss using the provided loss function with soft_label set to True. The get_acc function computes top1 and top5 accuracy, averages them across all cards if valid mode is on, and returns the accuracy.",
+        "type": "comment"
+    },
+    "7764": {
+        "file_id": 567,
+        "content": "                    top5, op=paddle.distributed.ReduceOp.SUM)\n                top5 = top5 / world_size\n            return top1, top5\n        else:\n            top1 = paddle.metric.accuracy(input=scores, label=labels, k=1)\n            _, world_size = get_dist_info()\n            #NOTE(shipping): deal with multi cards validate\n            if world_size > 1 and valid_mode:  #reduce sum when valid\n                paddle.distributed.all_reduce(\n                    top1, op=paddle.distributed.ReduceOp.SUM)\n                top1 = top1 / world_size\n            return top1",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/base.py:165-178"
+    },
+    "7765": {
+        "file_id": 567,
+        "content": "This code calculates the top1 and optionally top5 accuracy for a classification task. If distributed training is enabled, it performs all-reduce operation on the calculated metrics to ensure consistency across multiple cards/devices. The reduction operation used is sum, and the results are divided by the total number of devices (world_size) to obtain an average value.",
+        "type": "comment"
+    },
+    "7766": {
+        "file_id": 568,
+        "content": "/paddlevideo/modeling/heads/bbox_head.py",
+        "type": "filepath"
+    },
+    "7767": {
+        "file_id": 568,
+        "content": "The BBoxHeadAVA class generates classification targets, handles dropout, constructs labels, calculates recall/precision, computes losses, and uses a bbox_head for object detection. The code defines \"get_det_bboxes\" and \"multilabel_accuracy\" functions for detecting boxes and computing recall/precision, respectively. Loss is computed using binary cross-entropy with sigmoid activation.",
+        "type": "summary"
+    },
+    "7768": {
+        "file_id": 568,
+        "content": "# copyright (c) 2021 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport paddle \nimport paddle.nn as nn\nimport paddle.nn.functional as F\nimport numpy as np\nfrom .. import builder\nfrom ..registry import HEADS\n@HEADS.register()\nclass BBoxHeadAVA(nn.Layer):\n    \"\"\"Simplest RoI head, with only two fc layers for classification and\n    regression respectively.  \"\"\"\n    def __init__(\n            self,\n            temporal_pool_type='avg',\n            spatial_pool_type='max',\n            in_channels=2048,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/bbox_head.py:1-32"
+    },
+    "7769": {
+        "file_id": 568,
+        "content": "This code defines a BBoxHeadAVA class, which is the simplest RoI (region of interest) head with two fully connected layers for classification and regression. The temporal_pool_type and spatial_pool_type parameters allow users to choose different pooling methods, while in_channels specifies the number of input channels for the network.",
+        "type": "comment"
+    },
+    "7770": {
+        "file_id": 568,
+        "content": "            num_classes=81,# The first class is reserved, to classify bbox as pos / neg\n            dropout_ratio=0,\n            dropout_before_pool=True,\n            topk=(3, 5),\n            multilabel=True):\n        super(BBoxHeadAVA, self).__init__()\n        assert temporal_pool_type in ['max', 'avg']\n        assert spatial_pool_type in ['max', 'avg']\n        self.temporal_pool_type = temporal_pool_type\n        self.spatial_pool_type = spatial_pool_type\n        self.in_channels = in_channels\n        self.num_classes = num_classes\n        self.dropout_ratio = dropout_ratio\n        self.dropout_before_pool = dropout_before_pool\n        self.multilabel = multilabel\n        if topk is None:\n            self.topk = ()\n        elif isinstance(topk, int):\n            self.topk = (topk, )\n        elif isinstance(topk, tuple):\n            assert all([isinstance(k, int) for k in topk])\n            self.topk = topk\n        else:\n            raise TypeError('topk should be int or tuple[int], '\n                            f'but get {type(topk)}')",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/bbox_head.py:33-61"
+    },
+    "7771": {
+        "file_id": 568,
+        "content": "Class BBoxHeadAVA is being initialized with specified parameters including in_channels, num_classes, dropout_ratio, temporal and spatial pool types, topk values for pooling results, and multilabel flag. The code performs checks on the provided parameters to ensure their validity before assigning them to instance variables.",
+        "type": "comment"
+    },
+    "7772": {
+        "file_id": 568,
+        "content": "        # Class 0 is ignored when calculaing multilabel accuracy,\n        # so topk cannot be equal to num_classes\n        assert all([k < num_classes for k in self.topk])\n        assert self.multilabel\n        in_channels = self.in_channels\n        if self.temporal_pool_type == 'avg':\n            self.temporal_pool = nn.AdaptiveAvgPool3D((1, None, None))\n        else:\n            self.temporal_pool = nn.AdaptiveMaxPool3D((1, None, None))\n        if self.spatial_pool_type == 'avg':\n            self.spatial_pool = nn.AdaptiveAvgPool3D((None, 1, 1))\n        else:\n            self.spatial_pool = nn.AdaptiveMaxPool3D((None, 1, 1))\n        if dropout_ratio > 0:\n            self.dropout = nn.Dropout(dropout_ratio)\n        weight_attr = paddle.framework.ParamAttr(name=\"weight\",\n                                                 initializer=paddle.nn.initializer.Normal(mean=0.0, std=0.01))\n        bias_attr = paddle.ParamAttr(name=\"bias\",\n                                     initializer=paddle.nn.initializer.Constant(value=0.0))",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/bbox_head.py:62-83"
+    },
+    "7773": {
+        "file_id": 568,
+        "content": "This code initializes the BBoxHead model, which is a part of PaddleVideo. It sets up different layers such as temporal and spatial pooling layers, and dropout layer if needed. The code also specifies the parameters for weights and biases in these layers.",
+        "type": "comment"
+    },
+    "7774": {
+        "file_id": 568,
+        "content": "        self.fc_cls = nn.Linear(in_channels, num_classes, weight_attr=weight_attr, bias_attr=bias_attr)\n        self.debug_imgs = None\n    def forward(self, x,rois, rois_num):\n        roi = paddle.concat(rois)\n        roi_x1 = paddle.index_select(roi, index=paddle.to_tensor(0), axis=1)\n        roi_x2 = paddle.index_select(roi, index=paddle.to_tensor(2), axis=1)\n        roi_w = roi_x2 - roi_x1\n        roi_y1 = paddle.index_select(roi, index=paddle.to_tensor(1), axis=1)\n        roi_y2 = paddle.index_select(roi, index=paddle.to_tensor(3), axis=1)\n        roi_h = roi_y2 - roi_y1\n        roi_area = paddle.multiply(roi_w, roi_h)\n        A = roi_area\n        A1 = paddle.full(A.shape, 1, dtype='int32')\n        A2 = paddle.where(A == 0, paddle.zeros_like(A1), A1)\n        AE = paddle.expand(A2, [A.shape[0], x.shape[1]])\n        rois_num = paddle.to_tensor(rois_num, dtype='int32')\n        if self.dropout_before_pool and self.dropout_ratio > 0 :\n            x = self.dropout(x)\n        x = self.temporal_pool(x)\n        x = self.spatial_pool(x)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/bbox_head.py:85-106"
+    },
+    "7775": {
+        "file_id": 568,
+        "content": "This code defines a bbox_head with a linear layer (fc_cls) for classification and initializes debug images. It also performs forward pass by computing ROI features, applying dropout if enabled, and pooling the features.",
+        "type": "comment"
+    },
+    "7776": {
+        "file_id": 568,
+        "content": "        if not self.dropout_before_pool and self.dropout_ratio > 0 :\n            x = self.dropout(x)\n        x = paddle.reshape(x, [x.shape[0], -1])\n        x = paddle.multiply(x, paddle.cast(AE,\"float32\"))\n        cls_score = self.fc_cls(x)\n        # We do not predict bbox, so return None\n        return cls_score, None\n    def get_targets(self, sampling_results, gt_bboxes, gt_labels, pos_weight):\n        pos_proposals = [res.pos_bboxes for res in sampling_results]\n        neg_proposals = [res.neg_bboxes for res in sampling_results]\n        pos_gt_labels = [res.pos_gt_labels for res in sampling_results]\n        cls_reg_targets = self.bbox_target(pos_proposals, neg_proposals,\n                                      pos_gt_labels, pos_weight)\n        return cls_reg_targets\n    def bbox_target(self, pos_bboxes_list, neg_bboxes_list, gt_labels, pos_weight):\n        \"\"\"Generate classification targets for bboxes.  \"\"\"\n        labels, label_weights = [], []\n        pos_weight = 1.0 if pos_weight <= 0 else pos_weight",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/bbox_head.py:107-126"
+    },
+    "7777": {
+        "file_id": 568,
+        "content": "Code snippet is part of a Bounding Box (BBox) head in PaddleVideo, responsible for generating classification targets and handling dropout before pooling. The code also includes functions to generate bbox targets based on positive and negative proposals, ground truth labels, and a positional weight.",
+        "type": "comment"
+    },
+    "7778": {
+        "file_id": 568,
+        "content": "        assert len(pos_bboxes_list) == len(neg_bboxes_list) == len(gt_labels)\n        length = len(pos_bboxes_list)\n        for i in range(length):\n            pos_bboxes = pos_bboxes_list[i]\n            neg_bboxes = neg_bboxes_list[i]\n            gt_label = gt_labels[i]\n            num_pos = pos_bboxes.shape[0]\n            if neg_bboxes is not None:\n                num_neg = neg_bboxes.shape[0]\n            else:\n                num_neg = 0\n            num_samples = num_pos + num_neg\n            neg_label = paddle.zeros([num_neg, gt_label.shape[1]])\n            label = paddle.concat([gt_label,neg_label])\n            labels.append(label)\n        labels = paddle.concat(labels, 0)\n        return labels\n    def recall_prec(self, pred_vec, target_vec):\n        correct = paddle.to_tensor(np.logical_and(pred_vec.numpy(), target_vec.numpy()))\n        correct = paddle.where(correct, \n                                    paddle.full(correct.shape,1,dtype='int32'),\n                                    paddle.full(correct.shape,0,dtype='int32'))",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/bbox_head.py:128-152"
+    },
+    "7779": {
+        "file_id": 568,
+        "content": "This code snippet is part of the PaddleVideo library's bbox_head module. It asserts that three lists have equal lengths and then iterates over each list, counting positive (pos) and negative (neg) bounding boxes. It constructs a label by concatenating ground truth labels with zero-filled negatives. The function returns the generated labels for training. The recall_prec function compares prediction vectors to target vectors, creating a correct vector before filling it with 1s or 0s based on their logical AND operation.",
+        "type": "comment"
+    },
+    "7780": {
+        "file_id": 568,
+        "content": "        recall_correct = paddle.cast(paddle.sum(correct, axis=1), 'float32')\n        target_vec = paddle.where(target_vec, \n                                    paddle.full(target_vec.shape,1,dtype='int32'),\n                                    paddle.full(target_vec.shape,0,dtype='int32'))\n        recall_target = paddle.cast(paddle.sum(target_vec, axis=1),'float32')\n        recall = recall_correct / recall_target\n        pred_vec = paddle.where(pred_vec, \n                                    paddle.full(pred_vec.shape,1,dtype='int32'),\n                                    paddle.full(pred_vec.shape,0,dtype='int32'))\n        prec_target = paddle.cast(paddle.sum(pred_vec, axis=1) + 1e-6, 'float32')\n        prec = recall_correct / prec_target\n        recall_mean = paddle.mean(recall)\n        prec_mean = paddle.mean(prec)\n        return recall_mean, prec_mean\n    def multilabel_accuracy(self, pred, target, thr=0.5):\n        pred = paddle.nn.functional.sigmoid(pred)\n        pred_vec = pred > thr\n        target_vec = target > 0.5",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/bbox_head.py:153-171"
+    },
+    "7781": {
+        "file_id": 568,
+        "content": "This code calculates recall and precision for multi-label classification tasks. It first computes recall and precision for each sample, then calculates the mean recall and precision across all samples. The function uses threshold values of 0.5 and 1e-6 for target and prediction vectors to ensure numerical stability.",
+        "type": "comment"
+    },
+    "7782": {
+        "file_id": 568,
+        "content": "        recall_thr, prec_thr = self.recall_prec(pred_vec, target_vec)\n        recalls, precs = [], []\n        for k in self.topk:\n            _, pred_label = paddle.topk(pred, k, 1, True, True)\n            pred_vec = paddle.full(pred.shape,0,dtype='bool')\n            num_sample = pred.shape[0]\n            for i in range(num_sample):\n                pred_vec[i, pred_label[i].numpy()] = 1  \n            recall_k, prec_k = self.recall_prec(pred_vec, target_vec)\n            recalls.append(recall_k)\n            precs.append(prec_k)\n        return recall_thr, prec_thr, recalls, precs\n    def loss(self,\n             cls_score,\n             labels):\n        losses = dict()\n        if cls_score is not None:\n            # Only use the cls_score\n            labels = labels[:, 1:]\n            pos_inds_bool = paddle.sum(labels, axis=-1) > 0\n            pos_inds = paddle.where(paddle.sum(labels, axis=-1) > 0,\n                                    paddle.full([labels.shape[0]],1,dtype='int32'),\n                                    paddle.full([labels.shape[0]],0,dtype='int32'))",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/bbox_head.py:172-195"
+    },
+    "7783": {
+        "file_id": 568,
+        "content": "Code creates a bbox_head for object detection. It computes recall and precision given predicted and target vectors, and returns the results. In loss function, it only considers cls_score if available and computes losses based on pos_inds (positive indices) and labels.",
+        "type": "comment"
+    },
+    "7784": {
+        "file_id": 568,
+        "content": "            pos_inds = paddle.nonzero(pos_inds, as_tuple=False)\n            cls_score = paddle.index_select(cls_score, pos_inds, axis=0)\n            cls_score = cls_score[:, 1:] \n            labels = paddle.index_select(labels, pos_inds, axis=0)\n            bce_loss = F.binary_cross_entropy_with_logits\n            loss = bce_loss(cls_score, labels, reduction='none')\n            losses['loss'] = paddle.mean(loss)\n            recall_thr, prec_thr, recall_k, prec_k = self.multilabel_accuracy(\n                cls_score, labels, thr=0.5)\n            losses['recall@thr=0.5'] = recall_thr\n            losses['prec@thr=0.5'] = prec_thr\n            for i, k in enumerate(self.topk):\n                losses[f'recall@top{k}'] = recall_k[i]\n                losses[f'prec@top{k}'] = prec_k[i]\n        return losses\n    def get_det_bboxes(self,\n                       rois,\n                       cls_score,\n                       img_shape,\n                       flip=False,\n                       crop_quadruple=None,\n                       cfg=None):",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/bbox_head.py:196-218"
+    },
+    "7785": {
+        "file_id": 568,
+        "content": "This code defines two functions: \"get_det_bboxes\" and \"multilabel_accuracy\". The \"get_det_bboxes\" function takes ROIs, cls_score, img_shape, flip, and crop_quadruple as inputs to calculate detection boxes for each bounding box. The \"multilabel_accuracy\" function calculates recall and precision for different thresholds and top-k values from the given cls_score and labels arrays. The code also computes loss using binary cross-entropy with logits and adds it to the losses dictionary.",
+        "type": "comment"
+    },
+    "7786": {
+        "file_id": 568,
+        "content": "        if isinstance(cls_score, list):\n            cls_score = sum(cls_score) / float(len(cls_score))\n        assert self.multilabel\n        m = paddle.nn.Sigmoid()\n        scores = m(cls_score)\n        bboxes = rois\n        return bboxes, scores",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/bbox_head.py:219-225"
+    },
+    "7787": {
+        "file_id": 568,
+        "content": "The code checks if cls_score is a list, calculates the mean of its elements if it's a list, asserts that self.multilabel is True, applies sigmoid activation to cls_score, and assigns resulting scores to variable 'scores'. It also assigns rois to bboxes and returns both bboxes and scores.",
+        "type": "comment"
+    },
+    "7788": {
+        "file_id": 569,
+        "content": "/paddlevideo/modeling/heads/cfbi_head.py",
+        "type": "filepath"
+    },
+    "7789": {
+        "file_id": 569,
+        "content": "The code introduces new layers, initializes Bottleneck with GCT, defines Convolutional Feature Fusion Block and Atrous Spatial Pyramid Pooling modules. The CollaborativeEnsemblerMS class is a neural network architecture with multiple input dimensions, transformer stages, convolutional layers, ReLU activation, and outputs foreground/background logits using ASPP modules.",
+        "type": "summary"
+    },
+    "7790": {
+        "file_id": 569,
+        "content": "# Copyright (c) 2021  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport paddle\nimport paddle.nn as nn\nimport paddle.nn.functional as F\nfrom .base import BaseHead\nfrom ..registry import HEADS\nfrom ..weight_init import weight_init_\nclass IA_gate(nn.Layer):\n    def __init__(self, in_dim, out_dim):\n        super(IA_gate, self).__init__()\n        self.IA = nn.Linear(in_dim, out_dim)\n    def forward(self, x, IA_head):\n        a = self.IA(IA_head)\n        a = 1. + paddle.tanh(a)\n        a = paddle.unsqueeze(paddle.unsqueeze(a, axis=-1), axis=-1)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/cfbi_head.py:1-32"
+    },
+    "7791": {
+        "file_id": 569,
+        "content": "This code defines a class for the IA_gate layer, which is a part of a computer vision model. It has an input and output dimension and includes a linear layer and a forward function. The forward function calculates the activation (a) by applying a tanh function to the linear layer's output and then unsqueezing it along the axis for multiplication. The result is used in the model's computation.",
+        "type": "comment"
+    },
+    "7792": {
+        "file_id": 569,
+        "content": "        x = a * x\n        return x\nclass GCT(nn.Layer):\n    def __init__(self, num_channels, epsilon=1e-5, mode='l2', after_relu=False):\n        super(GCT, self).__init__()\n        x1 = paddle.zeros([1, num_channels, 1, 1])\n        x2 = paddle.ones([1, num_channels, 1, 1])\n        self.alpha = paddle.create_parameter(\n            shape=x2.shape,\n            dtype=x2.dtype,\n            default_initializer=nn.initializer.Assign(x2))\n        self.alpha.stop_gradient = False\n        self.gamma = paddle.create_parameter(\n            shape=x1.shape,\n            dtype=x1.dtype,\n            default_initializer=nn.initializer.Assign(x1))\n        self.gamma.stop_gradient = False\n        self.beta = paddle.create_parameter(\n            shape=x1.shape,\n            dtype=x1.dtype,\n            default_initializer=nn.initializer.Assign(x1))\n        self.beta.stop_gradient = False\n        self.epsilon = epsilon\n        self.mode = mode\n        self.after_relu = after_relu\n    def forward(self, x):\n        if self.mode == 'l2':\n            embedding = paddle.pow(",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/cfbi_head.py:33-65"
+    },
+    "7793": {
+        "file_id": 569,
+        "content": "This code defines a GCT layer, which is a type of normalization layer for neural networks. It initializes parameters alpha, gamma and beta with specific shapes and default values. The layer also takes in an input x, applies the mode 'l2' operation (pow) on it, and returns the result.",
+        "type": "comment"
+    },
+    "7794": {
+        "file_id": 569,
+        "content": "                paddle.sum(paddle.pow(x, 2), axis=[2, 3], keepdim=True) +\n                self.epsilon, 0.5) * self.alpha\n            norm = self.gamma / paddle.pow(\n                (paddle.mean(paddle.pow(embedding, 2), axis=1, keepdim=True) +\n                 self.epsilon), 0.5)\n        elif self.mode == 'l1':\n            if not self.after_relu:\n                _x = paddle.abs(x)\n            else:\n                _x = x\n            embedding = paddle.sum(_x, axis=(2, 3), keepdim=True) * self.alpha\n            norm = self.gamma / (paddle.mean(\n                paddle.abs(embedding), axis=1, keepdim=True) + self.epsilon)\n        else:\n            print('Unknown mode!')\n            exit()\n        gate = 1. + paddle.tanh(embedding * norm + self.beta)\n        return x * gate\nclass Bottleneck(nn.Layer):\n    def __init__(self, inplanes, outplanes, stride=1, dilation=1):\n        super(Bottleneck, self).__init__()\n        expansion = 4\n        planes = int(outplanes / expansion)\n        self.GCT1 = GCT(inplanes)\n        self.conv1 = nn.Conv2D(inplanes, planes, kernel_size=1, bias_attr=False)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/cfbi_head.py:66-95"
+    },
+    "7795": {
+        "file_id": 569,
+        "content": "The code initializes a Bottleneck layer in the PaddleVideo model, with GCT and convolutional layers for feature extraction. It also includes adjustable normalization and activation based on the mode parameter.",
+        "type": "comment"
+    },
+    "7796": {
+        "file_id": 569,
+        "content": "        self.bn1 = nn.GroupNorm(num_groups=32, num_channels=planes)\n        self.conv2 = nn.Conv2D(planes,\n                               planes,\n                               kernel_size=3,\n                               stride=stride,\n                               dilation=dilation,\n                               padding=dilation,\n                               bias_attr=False)\n        self.bn2 = nn.GroupNorm(num_groups=32, num_channels=planes)\n        self.conv3 = nn.Conv2D(planes,\n                               planes * expansion,\n                               kernel_size=1,\n                               bias_attr=False)\n        self.bn3 = nn.GroupNorm(num_groups=32, num_channels=planes * expansion)\n        self.relu = nn.ReLU()\n        if stride != 1 or inplanes != planes * expansion:\n            downsample = nn.Sequential(\n                nn.Conv2D(inplanes,\n                          planes * expansion,\n                          kernel_size=1,\n                          stride=stride,\n                          bias_attr=False),",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/cfbi_head.py:96-119"
+    },
+    "7797": {
+        "file_id": 569,
+        "content": "This code defines a neural network layer that includes batch normalization and convolutional layers, as well as ReLU activation. It has the option for downsampling if necessary.",
+        "type": "comment"
+    },
+    "7798": {
+        "file_id": 569,
+        "content": "                nn.GroupNorm(num_groups=32, num_channels=planes * expansion),\n            )\n        else:\n            downsample = None\n        self.downsample = downsample\n        self.stride = stride\n        self.dilation = dilation\n        for m in self.sublayers():\n            if isinstance(m, nn.Conv2D):\n                nn.initializer.KaimingNormal()\n    def forward(self, x):\n        residual = x\n        out = self.GCT1(x)\n        out = self.conv1(out)\n        out = self.bn1(out)\n        out = self.relu(out)\n        out = self.conv2(out)\n        out = self.bn2(out)\n        out = self.relu(out)\n        out = self.conv3(out)\n        out = self.bn3(out)\n        if self.downsample is not None:\n            residual = self.downsample(x)\n        out += residual\n        out = self.relu(out)\n        return out\nclass _ASPPModule(nn.Layer):\n    def __init__(self, inplanes, planes, kernel_size, padding, dilation):\n        super(_ASPPModule, self).__init__()\n        self.GCT = GCT(inplanes)\n        self.atrous_conv = nn.Conv2D(inplanes,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/cfbi_head.py:120-160"
+    },
+    "7799": {
+        "file_id": 569,
+        "content": "Code initializes a module with 3 Conv2D layers and BatchNorm2D layers. It also includes a GroupNorm layer if num_groups and num_channels are specified, otherwise sets downsample to None. Initializes sublayers and applies Kaiming Normal initialization. Forward function performs convolutions, adds residual connection if applicable, and applies ReLU activation. _ASPPModule has GCT and AtrousConv2D layers.",
+        "type": "comment"
+    }
+}

@@ -1,0 +1,543 @@
+{
+    "2300": {
+        "file_id": 178,
+        "content": "            # Due to the fast runtime/slow HDD combination, modeling can dominate\n            # the total training time, so we optionally skip models for some of\n            # the first epochs\n            if epoch < self.skip_first_n_saves and not self.save_only_best:\n                msg = f\"Skipping model save at epoch {epoch} <= {self.skip_first_n_saves}\"\n                self.logger.info(msg)\n                continue\n            if epoch % self.save_period == 0 and save_best:\n                self._save_model(epoch, save_best=best)\n                print(\"This epoch, the save best :{}\".format(best))\n                if best:\n                    for key, cached in cached_preds.items():\n                        log_dir = Path(self.config.log_dir)\n                        prediction_path = log_dir / f\"{key}_preds.txt\"\n                        prediction_logits_path = log_dir / f\"{key}_preds_logits.npy\"\n                        np.save(prediction_logits_path, cached[\"preds\"])\n                        gt_logits_path = log_dir / f\"{key}_gt_logits.npy\"",
+        "type": "code",
+        "location": "/applications/T2VLAD/base/base_trainer.py:153-170"
+    },
+    "2301": {
+        "file_id": 178,
+        "content": "This code snippet is used to control the frequency and conditions of model saving during training. It checks if the current epoch is less than a specified number (`self.skip_first_n_saves`) and if `self.save_only_best` is set to False. If either condition is true, it skips saving the model at that epoch. If both conditions are false or the first condition is false but the second one is true, it saves the model every `self.save_period` epochs when `save_best` is set to True. Additionally, if this epoch's save is considered the best (`best` is True), it logs all predictions for each key in `cached_preds`.",
+        "type": "comment"
+    },
+    "2302": {
+        "file_id": 178,
+        "content": "                        np.save(gt_logits_path, cached[\"labels\"].cpu().numpy())\n                        vid_names = []\n                        sort_predict = np.argsort(cached[\"preds\"])[:, ::-1]\n                        with open(str(prediction_path), 'w') as f:\n                            for kk in range(cached[\"preds\"].shape[0]):\n                                pred_classes = [str(v) for v in sort_predict[kk, :]]\n                                vid_name = cached[\"vid_name\"][kk]\n                                if key == \"test\":\n                                    vid_name = vid_name[kk].split('/')[-1] + '.mp4'\n                                row = f\"{vid_name} {' '.join(pred_classes)}\"\n                                print(row, file=f)\n                                vid_names.append(vid_name)\n                        save_name_path = log_dir / f\"{key}_vid_name.pkl\"\n                        with open(save_name_path, 'wb') as f:\n                            pickle.dump(vid_names, f)\n                        self.logger.info(f\"All {key} preds saved\")",
+        "type": "code",
+        "location": "/applications/T2VLAD/base/base_trainer.py:171-186"
+    },
+    "2303": {
+        "file_id": 178,
+        "content": "Saves the ground-truth labels and predicted classes for each video, writing them to disk in a specified format. It also saves the video names associated with these predictions and logs a message when all preds have been saved.",
+        "type": "comment"
+    },
+    "2304": {
+        "file_id": 178,
+        "content": "                        self.logger.info(f\"Wrote result to: {str(prediction_path)}\")\n            if epoch > self.num_keep_ckpts:\n                self.purge_stale_models()\n    def purge_stale_models(self):\n        \"\"\"Remove models that are no longer neededself.\n        NOTE: This function assumes that the `best` model has already been renamed\n        to have a format that differs from `model-epoch<num>.pth`\n        \"\"\"\n        all_ckpts = list(self.model_dir.glob(\"*.pdparams\"))\n        found_epoch_ckpts = list(self.model_dir.glob(\"model-epoch*.pdparams\"))\n        if len(all_ckpts) <= self.num_keep_ckpts:\n            return\n        msg = \"Expected at the best model to have been renamed to a different format\"\n        if not len(all_ckpts) > len(found_epoch_ckpts):\n            print(\"Warning, purging model, but the best epoch was not saved!\")\n        # assert len(all_ckpts) > len(found_epoch_ckpts), msg\n        # purge the oldest models\n        regex = r\".*model-epoch(\\d+)[.pdparams$\"\n        epochs = [int(re.search(regex, str(x)).groups()[0]) for x in found_epoch_ckpts]",
+        "type": "code",
+        "location": "/applications/T2VLAD/base/base_trainer.py:187-210"
+    },
+    "2305": {
+        "file_id": 178,
+        "content": "This code is responsible for managing the storage of model checkpoints and purging old or unnecessary models. It keeps track of the number of models to keep (`num_keep_ckpts`) and removes older ones if necessary. The `purge_stale_models()` function checks if all the checkpoints follow the expected format, then purges the oldest models by removing them from storage.",
+        "type": "comment"
+    },
+    "2306": {
+        "file_id": 178,
+        "content": "        sorted_ckpts = sorted(list(zip(epochs, found_epoch_ckpts)), key=lambda x: -x[0])\n        for epoch, stale_ckpt in sorted_ckpts[self.num_keep_ckpts:]:\n            tic = time.time()\n            stale_ckpt.unlink()\n            msg = f\"removing stale model [epoch {epoch}] [took {time.time() - tic:.2f}s]\"\n            self.logger.info(msg)\n    def _save_model(self, epoch, save_best=False):\n        \"\"\"Saving models\n        :param epoch: current epoch number\n        :param log: logging information of the epoch\n        :param save_best: if True, rename the saved model to 'trained_model.pdparams'\n        \"\"\"\n        arch = type(self.model).__name__\n        state = {\n            'arch': arch,\n            'epoch': epoch,\n            'state_dict': self.model.state_dict(),\n            'monitor_best': self.mnt_best,\n            'config': self.config\n        }\n        if self.include_optim_in_save_model:\n            state[\"optimizer\"] = self.optimizer.state_dict()\n        filename = str(self.model_dir /\n                       'model-epoch{}.pdparams'.format(epoch))",
+        "type": "code",
+        "location": "/applications/T2VLAD/base/base_trainer.py:211-238"
+    },
+    "2307": {
+        "file_id": 178,
+        "content": "This code snippet is responsible for saving and removing stale models during the training process. It saves model checkpoints at each epoch, keeps a specified number of the most recent ones, and deletes older checkpoints. The _save_model function saves the model state along with its architecture, current epoch, optimizer state if included, and configuration details into a .pdparams file in the specified directory.",
+        "type": "comment"
+    },
+    "2308": {
+        "file_id": 178,
+        "content": "        tic = time.time()\n        self.logger.info(\"Saving model: {} ...\".format(filename))\n        paddle.save(state, filename)\n        self.logger.info(f\"Done in {time.time() - tic:.3f}s\")\n        if save_best:\n            self.logger.info(\"Updating 'best' model: {} ...\".format(filename))\n            best_path = str(self.model_dir / 'trained_model.pdparams')\n            paddle.save(state, best_path)\n            self.logger.info(f\"Done in {time.time() - tic:.3f}s\")\n    def _resume_model(self, resume_path):\n        \"\"\" Resume from saved models\n        :param resume_path: model path to be resumed\n        \"\"\"\n        resume_path = str(resume_path)\n        self.logger.info(\"Loading model: {} ...\".format(resume_path))\n        model = paddle.load(resume_path)\n        self.model.load_dict(model)\n        self.logger.info(f\"model loaded. Resume training from epoch {self.start_epoch}\")",
+        "type": "code",
+        "location": "/applications/T2VLAD/base/base_trainer.py:239-258"
+    },
+    "2309": {
+        "file_id": 178,
+        "content": "Saves model with optional best model update after training completion. Allows resuming training from a previously saved state.",
+        "type": "comment"
+    },
+    "2310": {
+        "file_id": 179,
+        "content": "/applications/T2VLAD/data/download_features.sh",
+        "type": "filepath"
+    },
+    "2311": {
+        "file_id": 179,
+        "content": "Downloading and extracting datasets for MSRVTT dataset from remote server.",
+        "type": "summary"
+    },
+    "2312": {
+        "file_id": 179,
+        "content": "mkdir MSRVTT\ncd MSRVTT\nwget https://videotag.bj.bcebos.com/Data/MSRVTT/aggregated_text_feats.tar\nwget https://videotag.bj.bcebos.com/Data/MSRVTT/mmt_feats.tar\nwget https://videotag.bj.bcebos.com/Data/MSRVTT/raw-captions.pkl\nwget https://videotag.bj.bcebos.com/Data/MSRVTT/train_list_jsfusion.txt\nwget https://videotag.bj.bcebos.com/Data/MSRVTT/val_list_jsfusion.txt\ntar -xvf aggregated_text_feats.tar\ntar -xvf mmt_feats.tar",
+        "type": "code",
+        "location": "/applications/T2VLAD/data/download_features.sh:1-9"
+    },
+    "2313": {
+        "file_id": 179,
+        "content": "Downloading and extracting datasets for MSRVTT dataset from remote server.",
+        "type": "comment"
+    },
+    "2314": {
+        "file_id": 180,
+        "content": "/applications/T2VLAD/data_loader/MSRVTT_dataset.py",
+        "type": "filepath"
+    },
+    "2315": {
+        "file_id": 180,
+        "content": "This code defines MSR-Vtt dataset paths, performs type checking, and loads features for a specific expert, handling aggregation, caching, and saving raw captions. It also checks text features, verifies format, size, and number of test captions, calculates missing queries, and raises errors for incorrect query mask sum.",
+        "type": "summary"
+    },
+    "2316": {
+        "file_id": 180,
+        "content": "# Copyright (c) 2021  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nimport copy\nfrom pathlib import Path\nfrom utils import memory_summary\nfrom typeguard import typechecked\nfrom typing import Dict, Union, List\nfrom base.base_dataset import BaseDataset\nfrom zsvision.zs_utils import memcache, concat_features\nclass MSRVTT(BaseDataset):\n    @staticmethod\n    @typechecked\n    def dataset_paths() -> Dict[str, Union[str, List[str], Path, Dict]]:\n        subset_paths = {}\n        split_name = \"jsfusion\"\n        train_list_path = \"train_list_jsfusion.txt\"\n        test_list_path = \"val_list_jsfusion.txt\"",
+        "type": "code",
+        "location": "/applications/T2VLAD/data_loader/MSRVTT_dataset.py:1-29"
+    },
+    "2317": {
+        "file_id": 180,
+        "content": "The code snippet is part of the MSRVTT class in the PaddleVideo library. It defines a dataset for MSR-Vtt, a large-scale video description dataset. The dataset_paths method returns the paths to train and test data splits. This method is typechecked to ensure that input types match expected data structures.",
+        "type": "comment"
+    },
+    "2318": {
+        "file_id": 180,
+        "content": "        # NOTE: The JSFusion split (referred to as 1k-A in the paper) uses all\n        # videos, but randomly samples a single caption per video from the test\n        # set for evaluation. To reproduce this evaluation, we use the indices\n        # of the test captions, and restrict to this subset during eval.\n        js_test_cap_idx_path = \"jsfusion_val_caption_idx.pkl\"\n        subset_paths[split_name] = {\"train\": train_list_path, \"val\": test_list_path}\n        custom_paths = {\n            \"features_audio\": [\"mmt_feats/features.audio.pkl\"],\n            \"features_flow\": [\"mmt_feats/features.flow_agg.pkl\"],\n            \"features_rgb\": [\"mmt_feats/features.rgb_agg.pkl\"],\n            \"features_scene\": [\"mmt_feats/features.scene.pkl\"],\n            \"features_face\": [\"mmt_feats/features.face_agg.pkl\"],\n            \"features_ocr\": [\"mmt_feats/features.ocr.pkl\"],\n            \"features_s3d\": [\"mmt_feats/features.s3d.pkl\"],\n            \"features_speech\": [\"mmt_feats/features.speech.pkl\"],\n        }\n        text_feat_paths = {",
+        "type": "code",
+        "location": "/applications/T2VLAD/data_loader/MSRVTT_dataset.py:30-46"
+    },
+    "2319": {
+        "file_id": 180,
+        "content": "This code defines the data split paths for training and validation sets, as well as custom feature paths for different types of features. The JSFusion test caption indices path is also specified to reproduce a specific evaluation subset.",
+        "type": "comment"
+    },
+    "2320": {
+        "file_id": 180,
+        "content": "            \"openai\": \"w2v_MSRVTT_openAIGPT.pickle\",\n        }\n        text_feat_paths = {key: Path(\"aggregated_text_feats\") / fname\n                           for key, fname in text_feat_paths.items()}\n        feature_info = {\n            \"custom_paths\": custom_paths,\n            \"subset_list_paths\": subset_paths,\n            \"text_feat_paths\": text_feat_paths,\n            \"raw_captions_path\": \"raw-captions.pkl\",\n            \"js_test_cap_idx_path\": js_test_cap_idx_path,\n        }\n        return feature_info\n    def load_features(self):\n        root_feat = Path(self.root_feat)\n        feat_names = {}\n        custom_path_key = \"custom_paths\"\n        feat_names.update(self.paths[custom_path_key])\n        features = {}\n        for expert, rel_names in feat_names.items():\n            if expert not in self.ordered_experts:\n                continue\n            feat_paths = tuple([root_feat / rel_name for rel_name in rel_names])\n            if len(feat_paths) == 1:\n                features[expert] = memcache(feat_paths[0])",
+        "type": "code",
+        "location": "/applications/T2VLAD/data_loader/MSRVTT_dataset.py:47-71"
+    },
+    "2321": {
+        "file_id": 180,
+        "content": "This code is loading features from the MSRVTT dataset. It defines paths for text features and raw captions, and then updates a dictionary with custom paths, subset list paths, text feature paths, raw caption path, and JS test caption index path. The load_features method retrieves these paths and loads the features accordingly.",
+        "type": "comment"
+    },
+    "2322": {
+        "file_id": 180,
+        "content": "            else:\n                # support multiple forms of feature (e.g. max and avg pooling). For\n                # now, we only support direct concatenation\n                msg = f\"{expert}: Only direct concatenation of muliple feats is possible\"\n                print(f\"Concatenating aggregates for {expert}....\")\n                is_concat = self.feat_aggregation[expert][\"aggregate\"] == \"concat\"\n                self.log_assert(is_concat, msg=msg)\n                axis = self.feat_aggregation[expert][\"aggregate-axis\"]\n                x = concat_features.cache_info()  # pylint: disable=no-value-for-parameter\n                print(f\"concat cache info: {x}\")\n                features_ = concat_features(feat_paths, axis=axis)\n                memory_summary()\n                # Make separate feature copies for each split to allow in-place filtering\n                features[expert] = copy.deepcopy(features_)\n        self.features = features\n        self.raw_captions = memcache(root_feat / self.paths[\"raw_captions_path\"])",
+        "type": "code",
+        "location": "/applications/T2VLAD/data_loader/MSRVTT_dataset.py:72-89"
+    },
+    "2323": {
+        "file_id": 180,
+        "content": "This code is handling feature aggregation for a specific expert. It checks if the aggregation method is \"concat\" and then concatenates the features based on the given axis. If not, it throws an error message. The code also caches information about the concatenated features, copies the features for each split, and stores them in the 'features' dictionary. Finally, it saves raw captions using memcache and updates self.raw_captions.",
+        "type": "comment"
+    },
+    "2324": {
+        "file_id": 180,
+        "content": "        text_feat_path = root_feat / self.paths[\"text_feat_paths\"][self.text_feat]\n        self.text_features = memcache(text_feat_path)\n        if self.restrict_train_captions:\n            # hash the video names to avoid O(n) lookups in long lists\n            train_list = set(self.partition_lists[\"train\"])\n            for key, val in self.text_features.items():\n                if key not in train_list:\n                    continue\n                if not self.split_name == \"full-test\":\n                    # Note that we do not perform this sanity check for the full-test\n                    # split, because the text features in the cached dataset will\n                    # already have been cropped to the specified\n                    # `resstrict_train_captions`\n                    expect = {19, 20}\n                    msg = f\"expected train text feats as lists with length {expect}\"\n                    has_expected_feats = isinstance(val, list) and len(val) in expect\n                    self.log_assert(has_expected_feats, msg=msg)",
+        "type": "code",
+        "location": "/applications/T2VLAD/data_loader/MSRVTT_dataset.py:90-108"
+    },
+    "2325": {
+        "file_id": 180,
+        "content": "This code retrieves text features from the cache and checks if they belong to a specific training set. It also verifies that the train text features are in the expected format (a list with length 19 or 20).",
+        "type": "comment"
+    },
+    "2326": {
+        "file_id": 180,
+        "content": "                # restrict to the first N captions (deterministic)\n                self.text_features[key] = val[:self.restrict_train_captions]\n        self.summary_stats()\n    def sanity_checks(self):\n        if self.num_test_captions == 20:\n            if len(self.partition_lists[\"val\"]) == 2990:\n                missing = 6\n            elif len(self.partition_lists[\"val\"]) == 1000:\n                missing = 2\n            elif len(self.partition_lists[\"val\"]) == 497:\n                missing = 0\n            else:\n                raise ValueError(\"unrecognised test set\")\n            msg = \"Expected to find two missing queries in MSRVTT for full eval\"\n            correct_missing = self.query_masks.sum() == self.query_masks.size - missing\n            self.log_assert(correct_missing, msg=msg)",
+        "type": "code",
+        "location": "/applications/T2VLAD/data_loader/MSRVTT_dataset.py:110-126"
+    },
+    "2327": {
+        "file_id": 180,
+        "content": "The code checks if the number of test captions is set to 20 and verifies that the corresponding validation list size matches expected values. It calculates the missing queries based on the validation list size and raises a ValueError for unrecognized test sets. The code asserts that the difference between query mask sum and its size should be equal to the number of missing queries, with an error message if not correct.",
+        "type": "comment"
+    },
+    "2328": {
+        "file_id": 181,
+        "content": "/applications/T2VLAD/data_loader/data_loaders.py",
+        "type": "filepath"
+    },
+    "2329": {
+        "file_id": 181,
+        "content": "Creates a data loader class with LRU caching, PaddlePaddle library, and MSRVTT dataset for efficient training data access. Supports refreshing, clearing caches, setting args, creating datasets, printing cache info, and storing dataloader in an instance variable.",
+        "type": "summary"
+    },
+    "2330": {
+        "file_id": 181,
+        "content": "# Copyright (c) 2021  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nimport paddle\nimport logging\nimport functools\nfrom pathlib import Path\nfrom typing import Dict, List\nfrom typeguard import typechecked\nfrom zsvision.zs_utils import memcache\nfrom data_loader.MSRVTT_dataset import MSRVTT\nfrom utils import HashableDict, HashableOrderedDict\n@functools.lru_cache(maxsize=64, typed=False)\ndef dataset_loader(\n        use_zeros_for_missing: bool,\n        eval_only: bool,\n        data_dir: str,\n        text_agg: str,\n        text_feat: str,\n        split_name: str,\n        dataset_name: str,\n        cls_partition: str,",
+        "type": "code",
+        "location": "/applications/T2VLAD/data_loader/data_loaders.py:1-36"
+    },
+    "2331": {
+        "file_id": 181,
+        "content": "This code is a function for loading datasets, using LRU caching and PaddlePaddle library. It takes parameters like `use_zeros_for_missing`, `eval_only`, `data_dir`, `text_agg`, `text_feat`, `split_name`, `dataset_name`, and `cls_partition`. It imports MSRVTT dataset for loading specific datasets.",
+        "type": "comment"
+    },
+    "2332": {
+        "file_id": 181,
+        "content": "        root_feat_folder: str,\n        text_dim: int,\n        num_test_captions: int,\n        restrict_train_captions: int,\n        logger: logging.Logger,\n        max_tokens: Dict[str, int],\n        raw_input_dims: HashableOrderedDict,\n        feat_aggregation: HashableDict,\n):\n    print(f\"refreshing cache for {dataset_name} data loader [{split_name}]\")\n    kwargs = dict(\n        data_dir=Path(data_dir),\n        text_dim=text_dim,\n        logger=logger,\n        eval_only=eval_only,\n        text_agg=text_agg,\n        text_feat=text_feat,\n        max_tokens=max_tokens,\n        split_name=split_name,\n        cls_partition=cls_partition,\n        raw_input_dims=raw_input_dims,\n        root_feat_folder=root_feat_folder,\n        feat_aggregation=feat_aggregation,\n        num_test_captions=num_test_captions,\n        use_zeros_for_missing=use_zeros_for_missing,\n        restrict_train_captions=restrict_train_captions,\n    )\n    if dataset_name == \"MSRVTT\":\n        dataset = MSRVTT(**kwargs)\n    return dataset\nclass ExpertDataLoader:",
+        "type": "code",
+        "location": "/applications/T2VLAD/data_loader/data_loaders.py:37-69"
+    },
+    "2333": {
+        "file_id": 181,
+        "content": "Function `create_dataset` takes parameters to create an instance of a specific dataset class (MSRVTT in this case) with specified options. The function returns the created dataset object.",
+        "type": "comment"
+    },
+    "2334": {
+        "file_id": 181,
+        "content": "    @typechecked\n    def __init__(\n            self,\n            eval_only: bool,\n            use_zeros_for_missing: bool,\n            text_dim: int,\n            batch_size: int,\n            num_workers: int,\n            num_test_captions: int,\n            data_dir: str,\n            text_agg: str,\n            text_feat: str,\n            split_name: str,\n            dataset_name: str,\n            root_feat_folder: str,\n            max_tokens: Dict[str, int],\n            raw_input_dims: Dict[str, int],\n            feat_aggregation: Dict[str, Dict],\n            logger: logging.Logger,\n            restrict_train_captions: int = 0,\n            drop_last: bool = False,\n            refresh_lru_cache: bool = False,\n    ):\n        # Ensure that the dictionaries are hashable to allow use of caching\n        raw_input_dims = HashableOrderedDict(raw_input_dims)\n        feat_aggregation = HashableDict(feat_aggregation)\n        max_tokens = HashableDict(max_tokens)\n        if refresh_lru_cache:\n            logger.info(\"Explicitly refreshing dataloader and cuda cache\")",
+        "type": "code",
+        "location": "/applications/T2VLAD/data_loader/data_loaders.py:71-101"
+    },
+    "2335": {
+        "file_id": 181,
+        "content": "This code is a constructor for a data loader class that takes various parameters like eval_only, use_zeros_for_missing, text_dim, batch_size, etc. It initializes the object and ensures dictionaries are hashable to enable caching, and provides an optional refresh of dataloader and cuda cache.",
+        "type": "comment"
+    },
+    "2336": {
+        "file_id": 181,
+        "content": "            dataset_loader.cache_clear()\n            memcache.cache_clear()\n        common_kwargs = dict(\n            logger=logger,\n            data_dir=data_dir,\n            text_dim=text_dim,\n            text_agg=text_agg,\n            eval_only=eval_only,\n            text_feat=text_feat,\n            max_tokens=max_tokens,\n            dataset_name=dataset_name,\n            split_name=split_name,\n            root_feat_folder=root_feat_folder,\n            use_zeros_for_missing=use_zeros_for_missing,\n            num_test_captions=num_test_captions,\n            raw_input_dims=raw_input_dims,\n            feat_aggregation=feat_aggregation,\n            restrict_train_captions=restrict_train_captions,\n        )\n        dataset = dataset_loader(cls_partition=\"train\", **common_kwargs)\n        x = dataset_loader.cache_info()  # pylint: disable=no-value-for-parameter\n        logger.info(f\"cache info {x}\")\n        self.dataloaders = {\"dataset\": dataset}\n        self.dataloaders[\"retrieval\"] = dataset.get_retrieval_data()",
+        "type": "code",
+        "location": "/applications/T2VLAD/data_loader/data_loaders.py:102-127"
+    },
+    "2337": {
+        "file_id": 181,
+        "content": "This code clears dataset and memory caches, sets common arguments for a specific dataset loader function, creates the dataset with these args, prints cache information, and stores the created dataloader in an instance variable.",
+        "type": "comment"
+    },
+    "2338": {
+        "file_id": 181,
+        "content": "        if not eval_only:\n            train_loader = paddle.io.DataLoader(\n                dataset=dataset,\n                batch_size=batch_size,\n                num_workers=num_workers,\n                collate_fn=dataset.collate_data,\n                drop_last=drop_last,\n                shuffle=True,\n            )\n            self.dataloaders[\"train\"] = train_loader\n        logger.info(f\"Loading data loaders with {num_workers} workers\")\n        self.num_test_captions = num_test_captions\n        self.dataset_name = dataset_name\n    def __getitem__(self, key):\n        return self.dataloaders[key]",
+        "type": "code",
+        "location": "/applications/T2VLAD/data_loader/data_loaders.py:129-145"
+    },
+    "2339": {
+        "file_id": 181,
+        "content": "This function creates a DataLoader for training data with specified parameters and stores it in the self.dataloaders dictionary. It also logs the number of workers used and sets num_test_captions and dataset_name variables. The __getitem__ method returns the dataloader based on the provided key from the self.dataloaders dictionary.",
+        "type": "comment"
+    },
+    "2340": {
+        "file_id": 182,
+        "content": "/applications/T2VLAD/logger/__init__.py",
+        "type": "filepath"
+    },
+    "2341": {
+        "file_id": 182,
+        "content": "This code imports all functions and classes from the logger and log_parser modules in the T2VLAD application of PaddleVideo.",
+        "type": "summary"
+    },
+    "2342": {
+        "file_id": 182,
+        "content": "from .logger import *\nfrom .log_parser import *",
+        "type": "code",
+        "location": "/applications/T2VLAD/logger/__init__.py:1-2"
+    },
+    "2343": {
+        "file_id": 182,
+        "content": "This code imports all functions and classes from the logger and log_parser modules in the T2VLAD application of PaddleVideo.",
+        "type": "comment"
+    },
+    "2344": {
+        "file_id": 183,
+        "content": "/applications/T2VLAD/logger/log_parser.py",
+        "type": "filepath"
+    },
+    "2345": {
+        "file_id": 183,
+        "content": "The `log_summary` function gathers performance stats, identifies seeds, searches metrics, and calculates scores for epochs. If evaluation mode is \"fixed_num_epochs,\" it logs the fixed training length, then calculates mean and standard deviation for each metric in aggregated scores using numpy functions.",
+        "type": "summary"
+    },
+    "2346": {
+        "file_id": 183,
+        "content": "import re\nimport scipy.stats\nimport logging\nimport numpy as np\nfrom collections import defaultdict\ndef log_summary(logger, log_path, eval_mode=\"test_run\", fixed_num_epochs=None):\n    \"\"\"Extract performace statistics from experiment log files.\n    Args:\n        logger (logger): reference to primary logging instance\n        log_path (Path): the path to the log file\n        eval_mode (str): the method use to collect the statistics. Can be one of:\n            `test_run`, `fixed_num_epochs` or `geometric_mean`\n    NOTE: The `eval_mode` argument differs by dataset: for datasets which provide a\n    validation set, we use validation set performance to complete a single test run.  For\n    datasets where no validation set is available, we aim to match prior work by either\n    fixing the number of training epochs, or selecting directly from validation set\n    performance (Details can be found in the supplementary material of the paper.)\n    \"\"\"\n    with open(str(log_path), \"r\") as f:\n        log = f.read().splitlines()",
+        "type": "code",
+        "location": "/applications/T2VLAD/logger/log_parser.py:1-24"
+    },
+    "2347": {
+        "file_id": 183,
+        "content": "The function `log_summary` extracts performance statistics from log files and takes arguments such as a logger reference, log file path, evaluation mode (test run, fixed number of epochs or geometric mean), and optional fixed number of epochs. The log is read, and the performance statistics are extracted based on the given evaluation mode.",
+        "type": "comment"
+    },
+    "2348": {
+        "file_id": 183,
+        "content": "    # keep track of the random seed used for the part of the logfile being processed\n    current_seed = None\n    # Regex tag for finding the seed\n    seed_tag = \"Setting experiment random seed to\"\n    if eval_mode == \"test_run\":\n        subset = \"test\"\n    else:\n        subset = \"val\"\n    for mode in \"t2v\", \"v2t\":\n        logger.info(\"\")\n        logger.info(\"----------------------------------------------------\")\n        logger.info(f\"[{mode}] loaded log file with {len(log)} lines....\")\n        logger.info(\"----------------------------------------------------\")\n        # Search for the following metrics\n        scores = {\n            \"R1\": defaultdict(list),\n            \"R5\": defaultdict(list),\n            \"R10\": defaultdict(list),\n            \"R50\": defaultdict(list),\n            \"MedR\": defaultdict(list),\n            \"MeanR\": defaultdict(list),\n        }\n        for row in log:\n            if seed_tag in row:\n                # Search for the log file entry describing the current random seed\n                match = re.search(seed_tag + \" (\\d+)$\", row)  # NOQA",
+        "type": "code",
+        "location": "/applications/T2VLAD/logger/log_parser.py:26-56"
+    },
+    "2349": {
+        "file_id": 183,
+        "content": "This code is parsing a log file, identifying the random seed used for each part of the log. It searches for specific metrics and extracts information related to \"R1\", \"R5\", \"R10\", \"R50\", \"MedR\", and \"MeanR\" in two modes: \"t2v\" and \"v2t\". It also differentiates between evaluation modes like \"test_run\" and \"val\".",
+        "type": "comment"
+    },
+    "2350": {
+        "file_id": 183,
+        "content": "                assert len(match.groups()) == 1, \"expected a single regex match\"\n                current_seed = match.groups()[0]\n            if f\"{subset}_{mode}_metrics\" in row:\n                tokens = row.split(\" \")\n                for key in scores:\n                    tag = f\"{subset}_{mode}_metrics_{key}:\"\n                    if tag in tokens:\n                        pos = tokens.index(tag) + 1\n                        val = tokens[pos]\n                        val = float(val)\n                        assert current_seed is not None, \"failed to determine the seed\"\n                        scores[key][current_seed].append(val)\n        agg_scores = {\"R1\": [], \"R5\": [], \"R10\": [], \"R50\": [], \"MedR\": [], \"MeanR\": []}\n        # compute the best performance for a single epoch (i.e. sharing the same model\n        # to compute all stats)\n        geometric_stats = defaultdict(list)\n        best_epochs = {}\n        if eval_mode == \"geometric_mean\":\n            raise NotImplementedError(\"Need to fix this for new log format\")",
+        "type": "code",
+        "location": "/applications/T2VLAD/logger/log_parser.py:57-78"
+    },
+    "2351": {
+        "file_id": 183,
+        "content": "This code is parsing log data, extracting relevant metrics and scores for a specific seed. It asserts that the log matches the expected format and then populates a dictionary of scores for each seed. If the log contains a specific tag, it extracts the corresponding value and adds it to the appropriate score list. Finally, it defines an empty dictionary for aggregation and raises a NotImplementedError if evaluating in geometric mean mode as it needs to be fixed for new log format.",
+        "type": "comment"
+    },
+    "2352": {
+        "file_id": 183,
+        "content": "            consider = [\"R1\", \"R5\", \"R10\"]\n            seeds = list(scores[\"R1\"].keys())\n            for seed in seeds:\n                for metric, subdict in scores.items():\n                    if metric in consider:\n                        geometric_stats[seed].append(subdict[seed])\n                gms_raw = np.array(geometric_stats[seed])\n                geo_means = scipy.stats.mstats.gmean(gms_raw, axis=0)\n                best_epochs[seed] = np.argmax(geo_means)\n        for metric, subdict in scores.items():\n            for seed, values in subdict.items():\n                if eval_mode == \"test_run\":\n                    stat = values[0]\n                elif eval_mode == \"fixed_num_epochs\":\n                    stat = values[fixed_num_epochs - 1]\n                elif \"LSMDC\" in log_path and eval_mode == \"geometric_mean\":\n                    stat = values[best_epochs[seed]]\n                else:\n                    raise ValueError(f\"unrecognised eval_mode: {eval_mode}\")\n                agg_scores[metric].append(stat)",
+        "type": "code",
+        "location": "/applications/T2VLAD/logger/log_parser.py:79-99"
+    },
+    "2353": {
+        "file_id": 183,
+        "content": "Code calculates scores for different seeds and metrics, then selects the best epochs based on geometric means. It then determines the final score statistic for each metric depending on the eval_mode, and appends it to agg_scores.",
+        "type": "comment"
+    },
+    "2354": {
+        "file_id": 183,
+        "content": "        if eval_mode == \"fixed_num_epochs\":\n            logger.info(f\"Reporting stats with fixed training length: {fixed_num_epochs}\")\n        for metric, values in agg_scores.items():\n            logger.info(f\"{metric}: {np.mean(values):.1f}, {np.std(values, ddof=1):.1f}\")",
+        "type": "code",
+        "location": "/applications/T2VLAD/logger/log_parser.py:101-104"
+    },
+    "2355": {
+        "file_id": 183,
+        "content": "This code snippet checks if the evaluation mode is set to \"fixed_num_epochs\". If so, it logs a message indicating the fixed training length. Then, for each metric in the aggregated scores, it calculates the mean and standard deviation using numpy's `np.mean()` and `np.std()`, respectively, and logs the values.",
+        "type": "comment"
+    },
+    "2356": {
+        "file_id": 184,
+        "content": "/applications/T2VLAD/logger/logger.py",
+        "type": "filepath"
+    },
+    "2357": {
+        "file_id": 184,
+        "content": "This code sets up the logging configuration based on a provided JSON file. If the file is found, it modifies the filename paths in the configuration according to the save_dir and then uses logging.config.dictConfig() to configure the logging system. If the file is not found, it uses basicConfig() with default level to set up logging. The function returns the filename for the \"info_file_handler\".",
+        "type": "summary"
+    },
+    "2358": {
+        "file_id": 184,
+        "content": "import os\nimport logging\nimport logging.config\nfrom pathlib import Path\nfrom utils import read_json\ndef setup_logging(save_dir, log_config='logger/logger_config.json',\n                  default_level=logging.INFO):\n    \"\"\"Setup logging configuration.\"\"\"\n    print(os.getcwd())\n    log_config = Path(log_config)\n    print(f\"log config: {log_config} exists: {log_config.exists()}\")\n    if log_config.is_file():\n        config = read_json(log_config)\n        # modify logging paths based on run config\n        for _, handler in config['handlers'].items():\n            if 'filename' in handler:\n                handler['filename'] = str(save_dir / handler['filename'])\n        logging.config.dictConfig(config)\n    else:\n        print(f\"Warning: logging configuration file is not found in {log_config}.\")\n        logging.basicConfig(level=default_level)\n    return config[\"handlers\"][\"info_file_handler\"][\"filename\"]",
+        "type": "code",
+        "location": "/applications/T2VLAD/logger/logger.py:1-25"
+    },
+    "2359": {
+        "file_id": 184,
+        "content": "This code sets up the logging configuration based on a provided JSON file. If the file is found, it modifies the filename paths in the configuration according to the save_dir and then uses logging.config.dictConfig() to configure the logging system. If the file is not found, it uses basicConfig() with default level to set up logging. The function returns the filename for the \"info_file_handler\".",
+        "type": "comment"
+    },
+    "2360": {
+        "file_id": 185,
+        "content": "/applications/T2VLAD/model/loss.py",
+        "type": "filepath"
+    },
+    "2361": {
+        "file_id": 185,
+        "content": "The code implements max margin ranking loss and calculates cosine similarity between images and sentences, including a ContrastiveLoss class for contrastive learning. It also computes the cost for contrastive learning and video-level loss in T2VLAD models with masks, comparisons, and scalings.",
+        "type": "summary"
+    },
+    "2362": {
+        "file_id": 185,
+        "content": "\"\"\"This module contains an implementation of the max margin ranking loss, slightly\nmodified from this code:\nhttps://github.com/antoine77340/Mixture-of-Embedding-Experts/blob/master/loss.py\nThe modification is the `fix_norm` conditional, which removes zero terms from the\ndiagonal when performing the averaging calculation.\nOriginal licence below.\n\"\"\"\n# Copyright 2021 Antoine Miech All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#      http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS-IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport paddle\nimport paddle.nn as nn\nimport paddle.nn.functional as F\ndef cosine_sim(im, s):",
+        "type": "code",
+        "location": "/applications/T2VLAD/model/loss.py:1-28"
+    },
+    "2363": {
+        "file_id": 185,
+        "content": "This code snippet contains an implementation of the max margin ranking loss, modified from a source code, and includes functions to calculate cosine similarity between images and sentences. The original code is licensed under the Apache License 2.0.",
+        "type": "comment"
+    },
+    "2364": {
+        "file_id": 185,
+        "content": "  '''cosine similarity between all the image and sentence pairs\n  '''\n  inner_prod = im.mm(s.t())\n  im_norm = paddle.sqrt((im ** 2).sum(axis=1).reshape([-1, 1]) + 1e-18) \n  s_norm = paddle.sqrt((s ** 2).sum(axis=1).reshape([-1, 1]) + 1e-18)\n  sim = inner_prod / (im_norm * s_norm)\n  return sim\nclass ContrastiveLoss(nn.Layer):\n  '''compute contrastive loss\n  '''\n  def __init__(self, margin=0, max_violation=True, direction='bi', topk=1):\n    '''Args:\n      direction: i2t for negative sentence, t2i for negative image, bi for both\n    '''\n    super().__init__()\n    self.margin = margin\n    self.max_violation = max_violation\n    self.direction = direction\n    self.topk = topk\n  def forward(self, scores, margin=None, average_batch=True):\n    '''\n    Args:\n      scores: image-sentence score matrix, (batch, batch)\n        the same row of im and s are positive pairs, different rows are negative pairs\n    '''\n    if margin is None:\n      margin = self.margin\n    batch_size = scores.shape[0] \n    diagonal = paddle.diagonal(scores).reshape([batch_size, 1])",
+        "type": "code",
+        "location": "/applications/T2VLAD/model/loss.py:29-61"
+    },
+    "2365": {
+        "file_id": 185,
+        "content": "This code calculates cosine similarity between image and sentence pairs, and defines a ContrastiveLoss class to compute contrastive loss for contrastive learning.",
+        "type": "comment"
+    },
+    "2366": {
+        "file_id": 185,
+        "content": "    # mask to clear diagonals which are positive pairs\n    pos_masks = paddle.eye(batch_size).astype('bool') \n    batch_topk = min(batch_size, self.topk)\n    if self.direction == 'i2t' or self.direction == 'bi':\n      d1 = diagonal.expand_as(scores) # same collumn for im2s (negative sentence)\n      # compare every diagonal score to scores in its collumn\n      # caption retrieval\n      cost_s = (margin + scores - d1).clip(min=0)\n      cost_s[pos_masks] =  0 \n      if self.max_violation:\n        cost_s, _ = paddle.topk(cost_s, batch_topk, axis=1)\n        cost_s = cost_s / batch_topk\n        if average_batch:\n          cost_s = cost_s / batch_size\n      else:\n        if average_batch:\n          cost_s = cost_s / (batch_size * (batch_size - 1))\n      cost_s = paddle.sum(cost_s)\n    if self.direction == 't2i' or self.direction == 'bi':\n      d2 = diagonal.t().expand_as(scores) # same row for s2im (negative image)\n      # compare every diagonal score to scores in its row\n      cost_im = (margin + scores - d2).clip(min=0)",
+        "type": "code",
+        "location": "/applications/T2VLAD/model/loss.py:62-85"
+    },
+    "2367": {
+        "file_id": 185,
+        "content": "This code segment calculates the cost for negative pairs in a contrastive learning task. It first creates masks to clear diagonal values, then compares each diagonal score with scores within its column or row (depending on direction), and applies a margin to create positive pairs. The cost is calculated based on the max violation method and averaged according to specific conditions.",
+        "type": "comment"
+    },
+    "2368": {
+        "file_id": 185,
+        "content": "      cost_im[pos_masks] = 0 \n      if self.max_violation:\n        cost_im, _ = paddle.topk(cost_im, batch_topk, axis=0)\n        cost_im = cost_im / batch_topk\n        if average_batch:\n          cost_im = cost_im / batch_size\n      else:\n        if average_batch:\n          cost_im = cost_im / (batch_size * (batch_size - 1))\n      cost_im = paddle.sum(cost_im)\n    if self.direction == 'i2t':\n      return cost_s\n    elif self.direction == 't2i':\n      return cost_im\n    else:\n      return cost_s + cost_im",
+        "type": "code",
+        "location": "/applications/T2VLAD/model/loss.py:86-102"
+    },
+    "2369": {
+        "file_id": 185,
+        "content": "This code calculates the video-level loss in a T2VLAD model. It first sets the positions of the correct matches to 0, then applies various scaling operations based on parameters. Finally, it sums the resulting cost and returns the appropriate value depending on the direction (i2t or t2i).",
+        "type": "comment"
+    },
+    "2370": {
+        "file_id": 186,
+        "content": "/applications/T2VLAD/model/metric.py",
+        "type": "filepath"
+    },
+    "2371": {
+        "file_id": 186,
+        "content": "This code calculates retrieval metrics, offers sorting and visualization options, handles tie-breaking efficiently, and computes ranking metrics for input data using NumPy, SciPy, and Matplotlib.",
+        "type": "summary"
+    },
+    "2372": {
+        "file_id": 186,
+        "content": "# Copyright 2021 Antoine Miech All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#      http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS-IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport math\nimport paddle\nimport numbers\nimport scipy.stats\nimport numpy as np\nfrom pathlib import Path\nfrom sklearn.metrics import average_precision_score\ndef t2v_metrics(sims, query_masks=None):\n    \"\"\"Compute retrieval metrics from a similiarity matrix.\n    Args:\n        sims (th.Tensor): N x M matrix of similarities between embeddings, where\n             x_{i,j} = <text_embd[i], vid_embed[j]>\n        query_masks (th.Tensor): mask any missing queries from the dataset (two videos",
+        "type": "code",
+        "location": "/applications/T2VLAD/model/metric.py:1-30"
+    },
+    "2373": {
+        "file_id": 186,
+        "content": "This code is computing retrieval metrics from a similarity matrix. It takes two tensors as inputs, sims and query_masks. The sims tensor contains NxM matrix of similarities between embeddings, where x_{i,j} = <text_embd[i], vid_embed[j]>. The query_masks tensor is optional and is used to mask any missing queries from the dataset. It then calculates various retrieval metrics such as average precision score, mean average precision, and other related statistics.",
+        "type": "comment"
+    },
+    "2374": {
+        "file_id": 186,
+        "content": "             in MSRVTT only have 19, rather than 20 captions)\n    Returns:\n        (dict[str:float]): retrieval metrics\n    \"\"\"\n    assert sims.ndim == 2, \"expected a matrix\"\n    num_queries, num_vids = sims.shape\n    dists = -sims\n    sorted_dists = np.sort(dists, axis=1)\n    if False:\n        import sys\n        import matplotlib\n        from pathlib import Path\n        matplotlib.use(\"Agg\")\n        import matplotlib.pyplot as plt\n        sys.path.insert(0, str(Path.home() / \"coding/src/zsvision/python\"))\n        from zsvision.zs_iterm import zs_dispFig # NOQA\n        plt.matshow(dists)\n        zs_dispFig()\n        import ipdb; ipdb.set_trace()\n    # The indices are computed such that they slice out the ground truth distances\n    # from the psuedo-rectangular dist matrix\n    queries_per_video = num_queries // num_vids\n    gt_idx = [[np.ravel_multi_index([ii, jj], (num_queries, num_vids))\n              for ii in range(jj * queries_per_video, (jj + 1) * queries_per_video)]\n              for jj in range(num_vids)]",
+        "type": "code",
+        "location": "/applications/T2VLAD/model/metric.py:31-58"
+    },
+    "2375": {
+        "file_id": 186,
+        "content": "This function calculates retrieval metrics for a given similarity matrix, and it ensures the matrix has two dimensions. It sorts the distances in the matrix and provides an option to visualize it using matplotlib. The code also computes the ground truth indices for each video, given the number of queries and videos.",
+        "type": "comment"
+    },
+    "2376": {
+        "file_id": 186,
+        "content": "    gt_idx = np.array(gt_idx)\n    gt_dists = dists.reshape(-1)[gt_idx.reshape(-1)]\n    gt_dists = gt_dists[:, np.newaxis]\n    rows, cols = np.where((sorted_dists - gt_dists) == 0)  # find column position of GT\n    # --------------------------------\n    # NOTE: Breaking ties\n    # --------------------------------\n    # We sometimes need to break ties (in general, these should occur extremely rarely,\n    # but there are pathological cases when they can distort the scores, such as when\n    # the similarity matrix is all zeros). Previous implementations (e.g. the t2i\n    # evaluation function used\n    # here: https://github.com/niluthpol/multimodal_vtt/blob/master/evaluation.py and\n    # here: https://github.com/linxd5/VSE_Pytorch/blob/master/evaluation.py#L87) generally\n    # break ties \"optimistically\".  However, if the similarity matrix is constant this\n    # can evaluate to a perfect ranking. A principled option is to average over all\n    # possible partial orderings implied by the ties. See # this paper for a discussion:",
+        "type": "code",
+        "location": "/applications/T2VLAD/model/metric.py:59-75"
+    },
+    "2377": {
+        "file_id": 186,
+        "content": "This section is handling tie-breaking in the similarity matrix, ensuring that it evaluates correctly even when there are ties. It averages over all possible partial orderings implied by the ties for a principled approach. This should occur extremely rarely but can distort scores if not handled properly.",
+        "type": "comment"
+    },
+    "2378": {
+        "file_id": 186,
+        "content": "    #    McSherry, Frank, and Marc Najork,\n    #    \"Computing information retrieval performance measures efficiently in the presence\n    #    of tied scores.\" European conference on information retrieval. Springer, Berlin, \n    #    Heidelberg, 2008.\n    # http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.145.8892&rep=rep1&type=pdf\n    # break_ties = \"optimistically\"\n    break_ties = \"averaging\"\n    if rows.size > num_queries:\n        assert np.unique(rows).size == num_queries, \"issue in metric evaluation\"\n        if break_ties == \"optimistically\":\n            _, idx = np.unique(rows, return_index=True)\n            cols = cols[idx]\n        elif break_ties == \"averaging\":\n            # fast implementation, based on this code:\n            # https://stackoverflow.com/a/49239335\n            locs = np.argwhere((sorted_dists - gt_dists) == 0)\n            # Find the split indices\n            steps = np.diff(locs[:, 0])\n            splits = np.nonzero(steps)[0] + 1\n            splits = np.insert(splits, 0, 0)",
+        "type": "code",
+        "location": "/applications/T2VLAD/model/metric.py:76-98"
+    },
+    "2379": {
+        "file_id": 186,
+        "content": "This code is computing information retrieval performance measures efficiently in the presence of tied scores, following McSherry et al. (2008). It handles ties optimistically or by averaging, and checks if the number of unique rows matches the number of queries.",
+        "type": "comment"
+    },
+    "2380": {
+        "file_id": 186,
+        "content": "            # Compute the result columns\n            summed_cols = np.add.reduceat(locs[:, 1], splits)\n            counts = np.diff(np.append(splits, locs.shape[0]))\n            avg_cols = summed_cols / counts\n            if False:\n                print(\"Running slower code to verify rank averaging across ties\")\n                # slow, but more interpretable version, used for testing\n                avg_cols_slow = [np.mean(cols[rows == idx]) for idx in range(num_queries)]\n                assert np.array_equal(avg_cols, avg_cols_slow), \"slow vs fast difference\"\n                print(\"passed num check\")\n            cols = avg_cols\n    msg = \"expected ranks to match queries ({} vs {}) \"\n    if cols.size != num_queries:\n        import ipdb; ipdb.set_trace()\n    assert cols.size == num_queries, msg\n    if False:\n        # overload mask to check that we can recover the scores for single-query\n        # retrieval\n        print(\"DEBUGGING MODE\")\n        query_masks = np.zeros_like(query_masks)\n        query_masks[:, 0] = 1  # recover single query score",
+        "type": "code",
+        "location": "/applications/T2VLAD/model/metric.py:100-122"
+    },
+    "2381": {
+        "file_id": 186,
+        "content": "This code calculates the average rank of each query by dividing the summed ranks by their respective counts. It also provides a slower, more interpretable version for testing and asserts that the size of the calculated results matches the expected number of queries. The code includes optional debugging features to verify rank averaging across ties and recover single-query scores.",
+        "type": "comment"
+    },
+    "2382": {
+        "file_id": 186,
+        "content": "    if query_masks is not None:\n        # remove invalid queries\n        assert query_masks.size == num_queries, \"invalid query mask shape\"\n        cols = cols[query_masks.reshape(-1).astype(np.bool)]\n        assert cols.size == query_masks.sum(), \"masking was not applied correctly\"\n        # update number of queries to account for those that were missing\n        num_queries = query_masks.sum()\n    if False:\n        # sanity check against old logic for square matrices\n        gt_dists_old = np.diag(dists)\n        gt_dists_old = gt_dists_old[:, np.newaxis]\n        _, cols_old = np.where((sorted_dists - gt_dists_old) == 0)\n        assert np.array_equal(cols_old, cols), \"new metric doesn't match\"\n    return cols2metrics(cols, num_queries)\ndef v2t_metrics(sims, query_masks=None):\n    \"\"\"Compute retrieval metrics from a similiarity matrix.\n    Args:\n        sims (th.Tensor): N x M matrix of similarities between embeddings, where\n             x_{i,j} = <text_embd[i], vid_embed[j]>\n        query_masks (th.Tensor): mask any missing captions from the dataset",
+        "type": "code",
+        "location": "/applications/T2VLAD/model/metric.py:124-148"
+    },
+    "2383": {
+        "file_id": 186,
+        "content": "This function computes retrieval metrics from a similarity matrix and handles invalid queries by checking if query_masks are not None, removing invalid queries, updating the number of queries, and returning the results. It also includes a sanity check against old logic for square matrices.",
+        "type": "comment"
+    },
+    "2384": {
+        "file_id": 186,
+        "content": "    Returns:\n        (dict[str:float]): retrieval metrics\n    NOTES: We find the closest \"GT caption\" in the style of VSE, which corresponds\n    to finding the rank of the closest relevant caption in embedding space:\n    github.com/ryankiros/visual-semantic-embedding/blob/master/evaluation.py#L52-L56\n    \"\"\"\n    # switch axes of text and video\n    sims = sims.T\n    if False:\n        # experiment with toy example\n        sims = np.ones((3, 3))\n        sims[0, 0] = 2\n        sims[1, 1:2] = 2\n        sims[2, :] = 2\n        query_masks = None\n    assert sims.ndim == 2, \"expected a matrix\"\n    num_queries, num_caps = sims.shape\n    dists = -sims\n    caps_per_video = num_caps // num_queries\n    break_ties = \"averaging\"\n    MISSING_VAL = 1E8\n    query_ranks = []\n    for ii in range(num_queries):\n        row_dists = dists[ii, :]\n        if query_masks is not None:\n            # Set missing queries to have a distance of infinity.  A missing query\n            # refers to a query position `n` for a video that had less than `n`",
+        "type": "code",
+        "location": "/applications/T2VLAD/model/metric.py:150-180"
+    },
+    "2385": {
+        "file_id": 186,
+        "content": "This code calculates retrieval metrics for finding the closest \"GT caption\" in embedding space. It first switches axes of text and video, then applies various operations to compute distances between queries and captions. The code handles missing values by setting them to have a distance of infinity. The result is a dictionary of retrieval metrics.",
+        "type": "comment"
+    },
+    "2386": {
+        "file_id": 186,
+        "content": "            # captions (for example, a few MSRVTT videos only have 19 queries)\n            row_dists[np.logical_not(query_masks.reshape(-1))] = MISSING_VAL\n        # NOTE: Using distance subtraction to perform the ranking is easier to make\n        # deterministic than using argsort, which suffers from the issue of defining\n        # \"stability\" for equal distances.  Example of distance subtraction code:\n        # github.com/antoine77340/Mixture-of-Embedding-Experts/blob/master/train.py\n        sorted_dists = np.sort(row_dists)\n        min_rank = np.inf\n        for jj in range(ii * caps_per_video, (ii + 1) * caps_per_video):\n            if row_dists[jj] == MISSING_VAL:\n                # skip rankings of missing captions\n                continue\n            ranks = np.where((sorted_dists - row_dists[jj]) == 0)[0]\n            if break_ties == \"optimistically\":\n                rank = ranks[0]\n            elif break_ties == \"averaging\":\n                # NOTE: If there is more than one caption per video, its possible for the",
+        "type": "code",
+        "location": "/applications/T2VLAD/model/metric.py:181-199"
+    },
+    "2387": {
+        "file_id": 186,
+        "content": "The code performs ranking of captions based on distances and handles missing values. It uses distance subtraction instead of argsort for better deterministic results. The code skips rankings of missing captions, and when ties occur, it provides options to break them optimistically or by averaging.",
+        "type": "comment"
+    },
+    "2388": {
+        "file_id": 186,
+        "content": "                # method to do \"worse than chance\" in the degenerate case when all\n                # similarities are tied.  TODO(Samuel): Address this case.\n                rank = ranks.mean()\n            if rank < min_rank:\n                min_rank = rank\n        query_ranks.append(min_rank)\n    query_ranks = np.array(query_ranks)\n    # sanity check against old version of code\n    if False:\n        sorted_dists = np.sort(dists, axis=1)\n        gt_dists_old = np.diag(dists)\n        gt_dists_old = gt_dists_old[:, np.newaxis]\n        rows_old, cols_old = np.where((sorted_dists - gt_dists_old) == 0)\n        if rows_old.size > num_queries:\n            _, idx = np.unique(rows_old, return_index=True)\n            cols_old = cols_old[idx]\n        num_diffs = (1 - (cols_old == query_ranks)).sum()\n        msg = f\"new metric doesn't match in {num_diffs} places\"\n        assert np.array_equal(cols_old, query_ranks), msg\n        # visualise the distance matrix\n        import sys\n        import matplotlib\n        matplotlib.use(\"Agg\")",
+        "type": "code",
+        "location": "/applications/T2VLAD/model/metric.py:200-224"
+    },
+    "2389": {
+        "file_id": 186,
+        "content": "This code snippet calculates the average rank of similarities in a matrix and checks if it's lower than the minimum rank. It also includes a sanity check against an older version of the code by comparing the calculated ranks with the diagonal elements of the distance matrix and asserts that they are equal using NumPy's array_equal function. If the assertion fails, it prints a message with the number of differences and uses matplotlib to visualize the distance matrix for debugging purposes.",
+        "type": "comment"
+    },
+    "2390": {
+        "file_id": 186,
+        "content": "        import matplotlib.pyplot as plt\n        sys.path.insert(0, str(Path.home() / \"coding/src/zsvision/python\"))\n        from zsvision.zs_iterm import zs_dispFig # NOQA\n        plt.matshow(dists)\n        zs_dispFig()\n    return cols2metrics(query_ranks, num_queries)\ndef cols2metrics(cols, num_queries):\n    metrics = {}\n    metrics[\"R1\"] = 100 * float(np.sum(cols == 0)) / num_queries\n    metrics[\"R5\"] = 100 * float(np.sum(cols < 5)) / num_queries\n    metrics[\"R10\"] = 100 * float(np.sum(cols < 10)) / num_queries\n    metrics[\"R50\"] = 100 * float(np.sum(cols < 50)) / num_queries\n    metrics[\"MedR\"] = np.median(cols) + 1\n    metrics[\"MeanR\"] = np.mean(cols) + 1\n    stats = [metrics[x] for x in (\"R1\", \"R5\", \"R10\")]\n    metrics[\"geometric_mean_R1-R5-R10\"] = scipy.stats.mstats.gmean(stats)\n    return metrics",
+        "type": "code",
+        "location": "/applications/T2VLAD/model/metric.py:225-243"
+    },
+    "2391": {
+        "file_id": 186,
+        "content": "This code is using matplotlib to display a matrix of distances and then calculates various ranking metrics such as R1, R5, R10, MedR and MeanR for the input data. The function cols2metrics takes in two parameters: 'cols', which represents the input data, and 'num_queries', representing the total number of queries. It computes these ranking metrics using numpy and scipy libraries. Finally, it returns a dictionary containing all calculated metrics.",
+        "type": "comment"
+    },
+    "2392": {
+        "file_id": 187,
+        "content": "/applications/T2VLAD/model/model.py",
+        "type": "filepath"
+    },
+    "2393": {
+        "file_id": 187,
+        "content": "The code combines T2VLAD and BERT in a CENet model for video analysis, initializes MOE with Transformer layers, extracts visual features, and uses VLAD for cross-view localization. The function calculates video-text similarity scores, includes batch normalization, global pooling, and availability masking, reshapes weights, normalizes embeddings, computes text-video similarity with weighting, checks for NaN values, and raises ValueError if found.",
+        "type": "summary"
+    },
+    "2394": {
+        "file_id": 187,
+        "content": "# Copyright 2021 Antoine Miech All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#      http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS-IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport copy\nimport time\nimport itertools\nimport paddle\nimport numpy as np\nimport paddle.nn as nn\nimport paddle.nn.functional as F\nfrom paddle import Tensor\nfrom typing import Optional\nfrom collections import OrderedDict\nfrom base import BaseModel\nfrom model.net_vlad import NetVLAD\ntry:\n    from paddlenlp.transformers import BertModel\nexcept ImportError as e:\n    print(\n        f\"{e}, [paddlenlp] package and it's dependencies is required for T2VLAD.\"",
+        "type": "code",
+        "location": "/applications/T2VLAD/model/model.py:1-34"
+    },
+    "2395": {
+        "file_id": 187,
+        "content": "This code snippet is importing necessary libraries and models for the T2VLAD model. It includes copyright and license information, as well as imports from base, net_vlad, paddlenlp, and various other modules. The code aims to create a T2VLAD model using PaddlePaddle framework with potential dependencies on BertModel and paddlenlp packages.",
+        "type": "comment"
+    },
+    "2396": {
+        "file_id": 187,
+        "content": "    )\nclass Mish(nn.Layer):\n    '''\n    Applies the mish function element-wise:\n    mish(x) = x * tanh(softplus(x)) = x * tanh(ln(1 + exp(x)))\n    SRC: https://github.com/digantamisra98/Mish/blob/master/Mish/Torch/mish.py\n    '''\n    def forward(self, input):\n        '''\n        Forward pass of the function.\n        '''\n        return input * paddle.tanh(F.softplus(input))\ndef kronecker_prod(t1, t2):\n    # kronecker is performed along the last dim\n    kron = paddle.bmm(t1.reshape([-1, t1.size(-1)], 1),\n                      t2.reshape([-1, 1, t2.size(-1)]))\n    return kron.reshape[(t1.shape[0], t1.shape[1], -1)]\ndef drop_nans(x, ind, validate_missing):\n    \"\"\"Remove nans, which we expect to find at missing indices.\n    Args:\n        x (paddle.Tensor): features\n        ind (paddle.Tensor): binary values denoting whether or not a given feature is present\n        validate_missing (bool): whether to validate that the missing location contains a nan.\n    Returns:\n        (paddle.tensor): the features, with the missing values masked to zero.",
+        "type": "code",
+        "location": "/applications/T2VLAD/model/model.py:35-66"
+    },
+    "2397": {
+        "file_id": 187,
+        "content": "The code defines three functions: 'Mish', 'kronecker_prod', and 'drop_nans'. The 'Mish' function implements the mish activation function, which applies the mish formula element-wise. The 'kronecker_prod' function performs a Kronecker product of two tensors along the last dimension. Finally, the 'drop_nans' function removes NaN values from input features, considering any missing indices as containing NaN.",
+        "type": "comment"
+    },
+    "2398": {
+        "file_id": 187,
+        "content": "    \"\"\"\n    missing = paddle.nonzero(ind == 0).flatten()\n    if missing.numel():\n        if validate_missing:\n            vals = x[missing[0]]\n            assert paddle.isnan(vals.reshape(\n                [-1])[0]), \"expected nans at missing locations\"\n        #Prevent overwrite of the original tensor\n        x_ = x\n        x_[missing] = 0\n        x = x_\n    if paddle.isnan(x).sum() > 0:\n        raise ValueError(\"Still find nans after removing it!\")\n    return x\nclass CENet(BaseModel):\n    def __init__(self, text_dim, expert_dims, vlad_clusters, ghost_clusters,\n                 feat_aggregation, ce_shared_dim, use_mish, mimic_ce_dims):\n        super().__init__()\n        self.expert_dims = expert_dims\n        self.feat_aggregation = feat_aggregation\n        vlad_feat_sizes = {key: val for key, val in vlad_clusters.items()}\n        if vlad_clusters[\"text\"] == 0:\n            self.text_pooling = nn.Sequential()\n        else:\n            self.text_pooling = NetVLAD(\n                feature_size=text_dim,\n                cluster_size=vlad_clusters[\"text\"],",
+        "type": "code",
+        "location": "/applications/T2VLAD/model/model.py:67-98"
+    },
+    "2399": {
+        "file_id": 187,
+        "content": "The code defines a CENet model and checks for any NaN values in the input tensor 'x'. It sets missing locations to 0 and raises a ValueError if there are still NaN values after removing them. The model consists of expert_dims, vlad_clusters, feat_aggregation, ce_shared_dim, use_mish, and mimic_ce_dims. The text_pooling layer is implemented as NetVLAD for feature extraction if the vlad_clusters[\"text\"] is non-zero.",
+        "type": "comment"
+    }
+}

@@ -1,0 +1,549 @@
+{
+    "5600": {
+        "file_id": 458,
+        "content": "/paddlevideo/metrics/ava_evaluation/np_box_ops.py",
+        "type": "filepath"
+    },
+    "5601": {
+        "file_id": 458,
+        "content": "The code defines functions for numpy array operations on bounding boxes, including area calculation and intersection-over-union scores useful in computer vision tasks. It computes pairwise IoU scores using numpy arrays by dividing the intersection by the second set's box areas.",
+        "type": "summary"
+    },
+    "5602": {
+        "file_id": 458,
+        "content": "# Copyright 2017 The TensorFlow Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n# ==============================================================================\n\"\"\"Operations for [N, 4] numpy arrays representing bounding boxes.\nExample box operations that are supported:\n    * Areas: compute bounding box areas\n    * IOU: pairwise intersection-over-union scores\n\"\"\"\nimport numpy as np\ndef area(boxes):\n    \"\"\"Computes area of boxes.\n    Args:\n        boxes: Numpy array with shape [N, 4] holding N boxes",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_evaluation/np_box_ops.py:1-29"
+    },
+    "5603": {
+        "file_id": 458,
+        "content": "The code defines functions for performing operations on numpy arrays of bounding boxes. It includes functionality to compute areas and intersection-over-union scores between pairs of boxes. The array holds N boxes and is expected to have shape [N, 4]. These operations are useful in computer vision tasks like object detection and tracking.",
+        "type": "comment"
+    },
+    "5604": {
+        "file_id": 458,
+        "content": "    Returns:\n        a numpy array with shape [N*1] representing box areas\n    \"\"\"\n    return (boxes[:, 2] - boxes[:, 0]) * (boxes[:, 3] - boxes[:, 1])\ndef intersection(boxes1, boxes2):\n    \"\"\"Compute pairwise intersection areas between boxes.\n    Args:\n        boxes1: a numpy array with shape [N, 4] holding N boxes\n        boxes2: a numpy array with shape [M, 4] holding M boxes\n    Returns:\n        a numpy array with shape [N*M] representing pairwise intersection area\n    \"\"\"\n    [y_min1, x_min1, y_max1, x_max1] = np.split(boxes1, 4, axis=1)\n    [y_min2, x_min2, y_max2, x_max2] = np.split(boxes2, 4, axis=1)\n    all_pairs_min_ymax = np.minimum(y_max1, np.transpose(y_max2))\n    all_pairs_max_ymin = np.maximum(y_min1, np.transpose(y_min2))\n    intersect_heights = np.maximum(\n        np.zeros(all_pairs_max_ymin.shape),\n        all_pairs_min_ymax - all_pairs_max_ymin)\n    all_pairs_min_xmax = np.minimum(x_max1, np.transpose(x_max2))\n    all_pairs_max_xmin = np.maximum(x_min1, np.transpose(x_min2))\n    intersect_widths = np.maximum(",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_evaluation/np_box_ops.py:31-57"
+    },
+    "5605": {
+        "file_id": 458,
+        "content": "Computes box areas by multiplying width and height (lines 30-34).\nCalculates pairwise intersection areas between boxes (lines 36-51).",
+        "type": "comment"
+    },
+    "5606": {
+        "file_id": 458,
+        "content": "        np.zeros(all_pairs_max_xmin.shape),\n        all_pairs_min_xmax - all_pairs_max_xmin)\n    return intersect_heights * intersect_widths\ndef iou(boxes1, boxes2):\n    \"\"\"Computes pairwise intersection-over-union between box collections.\n    Args:\n        boxes1: a numpy array with shape [N, 4] holding N boxes.\n        boxes2: a numpy array with shape [M, 4] holding N boxes.\n    Returns:\n        a numpy array with shape [N, M] representing pairwise iou scores.\n    \"\"\"\n    intersect = intersection(boxes1, boxes2)\n    area1 = area(boxes1)\n    area2 = area(boxes2)\n    union = (\n        np.expand_dims(area1, axis=1) + np.expand_dims(area2, axis=0) -\n        intersect)\n    return intersect / union\ndef ioa(boxes1, boxes2):\n    \"\"\"Computes pairwise intersection-over-area between box collections.\n    Intersection-over-area (ioa) between two boxes box1 and box2 is defined as\n    their intersection area over box2's area. Note that ioa is not symmetric,\n    that is, IOA(box1, box2) != IOA(box2, box1).\n    Args:\n        boxes1: a numpy array with shape [N, 4] holding N boxes.",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_evaluation/np_box_ops.py:58-90"
+    },
+    "5607": {
+        "file_id": 458,
+        "content": "The code defines functions for computing pairwise intersection-over-union (iou) and intersection-over-area (ioa) between box collections. The iou function takes two numpy arrays of boxes, computes their intersection using the intersection function, calculates the union by adding the areas of both boxes and subtracting the intersection, and finally returns the pairwise iou scores. The ioa function also takes two numpy arrays of boxes, defines intersection-over-area as the intersection area divided by box2's area, and does not consider symmetry between box1 and box2.",
+        "type": "comment"
+    },
+    "5608": {
+        "file_id": 458,
+        "content": "        boxes2: a numpy array with shape [M, 4] holding N boxes.\n    Returns:\n        a numpy array with shape [N, M] representing pairwise ioa scores.\n    \"\"\"\n    intersect = intersection(boxes1, boxes2)\n    areas = np.expand_dims(area(boxes2), axis=0)\n    return intersect / areas",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_evaluation/np_box_ops.py:91-98"
+    },
+    "5609": {
+        "file_id": 458,
+        "content": "This code calculates pairwise Intersection over Union (IoU) scores between two sets of bounding boxes represented by numpy arrays. It first computes the intersection of the two sets, then calculates the area of each box in the second set, and finally divides the intersection by the areas to obtain the IoU scores.",
+        "type": "comment"
+    },
+    "5610": {
+        "file_id": 459,
+        "content": "/paddlevideo/metrics/ava_evaluation/object_detection_evaluation.py",
+        "type": "filepath"
+    },
+    "5611": {
+        "file_id": 459,
+        "content": "PaddleVideo's \"object_detection_evaluation\" module offers `ObjectDetectionEvaluator` for evaluating object detection outcomes, including metrics like mAP and mean correct localization, considering IOU threshold. It handles AVA dataset and computes AVA metrics for average precision and mean average precision.",
+        "type": "summary"
+    },
+    "5612": {
+        "file_id": 459,
+        "content": "# copyright (c) 2021 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n# =============================================================================\n\"\"\"object_detection_evaluation module.\nObjectDetectionEvaluation is a class which manages ground truth information of\na object detection dataset, and computes frequently used detection metrics such\nas Precision, Recall, CorLoc of the provided detection results.\nIt supports the following operations:\n1) Add ground truth information of images sequentially.",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_evaluation/object_detection_evaluation.py:1-21"
+    },
+    "5613": {
+        "file_id": 459,
+        "content": "The provided code is a part of the \"object_detection_evaluation\" module in the PaddleVideo library. This module provides a class called \"ObjectDetectionEvaluation\" that manages ground truth information for object detection datasets, computes frequently used metrics like Precision, Recall, and CorLoc from detection results. The class supports adding ground truth information sequentially and various operations for evaluation.",
+        "type": "comment"
+    },
+    "5614": {
+        "file_id": 459,
+        "content": "2) Add detection result of images sequentially.\n3) Evaluate detection metrics on already inserted detection results.\n4) Write evaluation result into a pickle file for future processing or\n   visualization.\nNote: This module operates on numpy boxes and box lists.\n\"\"\"\nimport collections\nimport logging\nfrom abc import ABCMeta, abstractmethod\nimport numpy as np\nfrom . import metrics, per_image_evaluation, standard_fields\nclass DetectionEvaluator:\n    \"\"\"Interface for object detection evalution classes.\n    Example usage of the Evaluator:\n    ------------------------------\n    evaluator = DetectionEvaluator(categories)\n    # Detections and groundtruth for image 1.\n    evaluator.add_single_groundtruth_image_info(...)\n    evaluator.add_single_detected_image_info(...)\n    # Detections and groundtruth for image 2.\n    evaluator.add_single_groundtruth_image_info(...)\n    evaluator.add_single_detected_image_info(...)\n    metrics_dict = evaluator.evaluate()\n    \"\"\"\n    __metaclass__ = ABCMeta\n    def __init__(self, categories):",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_evaluation/object_detection_evaluation.py:22-58"
+    },
+    "5615": {
+        "file_id": 459,
+        "content": "This code defines an abstract class `DetectionEvaluator` for evaluating object detection results. It takes categories as input and allows adding single ground truth and detected image information. After adding all the data, it can be evaluated to get a metrics dictionary. This evaluation is done on numpy boxes and box lists.",
+        "type": "comment"
+    },
+    "5616": {
+        "file_id": 459,
+        "content": "        \"\"\"Constructor.\n        Args:\n            categories: A list of dicts, each of which has the following keys -\n                'id': (required) an integer id uniquely identifying this\n                    category.\n                'name': (required) string representing category name e.g.,\n                    'cat', 'dog'.\n        \"\"\"\n        self._categories = categories\n    @abstractmethod\n    def add_single_ground_truth_image_info(self, image_id, groundtruth_dict):\n        \"\"\"Adds groundtruth for a single image to be used for evaluation.\n        Args:\n            image_id: A unique string/integer identifier for the image.\n            groundtruth_dict: A dictionary of groundtruth numpy arrays required\n                for evaluations.\n        \"\"\"\n    @abstractmethod\n    def add_single_detected_image_info(self, image_id, detections_dict):\n        \"\"\"Adds detections for a single image to be used for evaluation.\n        Args:\n            image_id: A unique string/integer identifier for the image.\n            detections_dict: A dictionary of detection numpy arrays required",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_evaluation/object_detection_evaluation.py:59-86"
+    },
+    "5617": {
+        "file_id": 459,
+        "content": "This code defines a class constructor that takes categories as input and provides two abstract methods for adding ground truth and detected image information for evaluation. The categories are used to uniquely identify different objects in the images.",
+        "type": "comment"
+    },
+    "5618": {
+        "file_id": 459,
+        "content": "                for evaluation.\n        \"\"\"\n    @abstractmethod\n    def evaluate(self):\n        \"\"\"Evaluates detections and returns a dictionary of metrics.\"\"\"\n    @abstractmethod\n    def clear(self):\n        \"\"\"Clears the state to prepare for a fresh evaluation.\"\"\"\nclass ObjectDetectionEvaluator(DetectionEvaluator):\n    \"\"\"A class to evaluate detections.\"\"\"\n    def __init__(\n        self,\n        categories,\n        matching_iou_threshold=0.5,\n        evaluate_corlocs=False,\n        metric_prefix=None,\n        use_weighted_mean_ap=False,\n        evaluate_masks=False,\n    ):\n        \"\"\"Constructor.\n        Args:\n            categories: A list of dicts, each of which has the following keys -\n                'id': (required) an integer id uniquely identifying this\n                    category.\n                'name': (required) string representing category name e.g.,\n                    'cat', 'dog'.\n            matching_iou_threshold: IOU threshold to use for matching\n                groundtruth boxes to detection boxes.",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_evaluation/object_detection_evaluation.py:87-120"
+    },
+    "5619": {
+        "file_id": 459,
+        "content": "This code defines an `ObjectDetectionEvaluator` class that evaluates object detection results. It takes categories, IOU threshold, options for evaluating corner localizations and masks. The `evaluate()` method returns a dictionary of metrics, while the `clear()` method clears the state for a new evaluation.",
+        "type": "comment"
+    },
+    "5620": {
+        "file_id": 459,
+        "content": "            evaluate_corlocs: (optional) boolean which determines if corloc\n                scores are to be returned or not.\n            metric_prefix: (optional) string prefix for metric name; if None,\n                no prefix is used.\n            use_weighted_mean_ap: (optional) boolean which determines if the\n                mean average precision is computed directly from the scores and\n                tp_fp_labels of all classes.\n            evaluate_masks: If False, evaluation will be performed based on\n                boxes. If True, mask evaluation will be performed instead.\n        Raises:\n            ValueError: If the category ids are not 1-indexed.\n        \"\"\"\n        super(ObjectDetectionEvaluator, self).__init__(categories)\n        self._num_classes = max([cat['id'] for cat in categories])\n        if min(cat['id'] for cat in categories) < 1:\n            raise ValueError('Classes should be 1-indexed.')\n        self._matching_iou_threshold = matching_iou_threshold\n        self._use_weighted_mean_ap = use_weighted_mean_ap",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_evaluation/object_detection_evaluation.py:121-139"
+    },
+    "5621": {
+        "file_id": 459,
+        "content": "This code is initializing the ObjectDetectionEvaluator class, which evaluates object detection performance. It takes in optional parameters for corloc scores, metric prefix, and weighted mean AP computation. It checks if category IDs are 1-indexed and raises a ValueError if not.",
+        "type": "comment"
+    },
+    "5622": {
+        "file_id": 459,
+        "content": "        self._label_id_offset = 1\n        self._evaluate_masks = evaluate_masks\n        self._evaluation = ObjectDetectionEvaluation(\n            num_groundtruth_classes=self._num_classes,\n            matching_iou_threshold=self._matching_iou_threshold,\n            use_weighted_mean_ap=self._use_weighted_mean_ap,\n            label_id_offset=self._label_id_offset,\n        )\n        self._image_ids = set([])\n        self._evaluate_corlocs = evaluate_corlocs\n        self._metric_prefix = (metric_prefix + '_') if metric_prefix else ''\n    def add_single_ground_truth_image_info(self, image_id, groundtruth_dict):\n        \"\"\"Adds groundtruth for a single image to be used for evaluation.\n        Args:\n            image_id: A unique string/integer identifier for the image.\n            groundtruth_dict: A dictionary containing -\n                standard_fields.InputDataFields.groundtruth_boxes: float32\n                    numpy array of shape [num_boxes, 4] containing `num_boxes`\n                    groundtruth boxes of the format [ymin, xmin, ymax, xmax] in",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_evaluation/object_detection_evaluation.py:140-160"
+    },
+    "5623": {
+        "file_id": 459,
+        "content": "This code is initializing an object detection evaluation module, specifically for the Aggregated Average Precision metric. The module takes in parameters such as the number of ground truth classes, matching IOU threshold, and a label offset. It also adds a single image's ground truth information for evaluation purposes. The function expects an image ID and a dictionary containing ground truth boxes information.",
+        "type": "comment"
+    },
+    "5624": {
+        "file_id": 459,
+        "content": "                    absolute image coordinates.\n                standard_fields.InputDataFields.groundtruth_classes: integer\n                    numpy array of shape [num_boxes] containing 1-indexed\n                    groundtruth classes for the boxes.\n                standard_fields.InputDataFields.groundtruth_difficult: Optional\n                    length M numpy boolean array denoting whether a ground\n                    truth box is a difficult instance or not. This field is\n                    optional to support the case that no boxes are difficult.\n                standard_fields.InputDataFields.groundtruth_instance_masks:\n                    Optional numpy array of shape [num_boxes, height, width]\n                    with values in {0, 1}.\n        Raises:\n            ValueError: On adding groundtruth for an image more than once. Will\n                also raise error if instance masks are not in groundtruth\n                dictionary.\n        \"\"\"\n        if image_id in self._image_ids:\n            raise ValueError(",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_evaluation/object_detection_evaluation.py:161-179"
+    },
+    "5625": {
+        "file_id": 459,
+        "content": "The code is defining the `add_groundtruth` function that takes in an image ID and a groundtruth dictionary. It checks if the image ID has been added before, and raises a ValueError if it has. The groundtruth dictionary should contain 'boxes', 'groundtruth_classes', 'groundtruth_difficult' (optional), and 'groundtruth_instance_masks' (if difficult instances). If the groundtruth is valid, it adds the information to the _image_ids set and initializes corresponding arrays for that image ID. If instance masks are not in the groundtruth dictionary, it raises a ValueError.",
+        "type": "comment"
+    },
+    "5626": {
+        "file_id": 459,
+        "content": "                'Image with id {} already added.'.format(image_id))\n        groundtruth_classes = (\n            groundtruth_dict[\n                standard_fields.InputDataFields.groundtruth_classes] -\n            self._label_id_offset)\n        # If the key is not present in the groundtruth_dict or the array is\n        # empty (unless there are no annotations for the groundtruth on this\n        # image) use values from the dictionary or insert None otherwise.\n        if (standard_fields.InputDataFields.groundtruth_difficult\n                in groundtruth_dict.keys()) and (groundtruth_dict[\n                    standard_fields.InputDataFields.groundtruth_difficult].size\n                                                 or\n                                                 not groundtruth_classes.size):\n            groundtruth_difficult = groundtruth_dict[\n                standard_fields.InputDataFields.groundtruth_difficult]\n        else:\n            groundtruth_difficult = None\n            if not len(self._image_ids) % 1000:",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_evaluation/object_detection_evaluation.py:180-198"
+    },
+    "5627": {
+        "file_id": 459,
+        "content": "This code is checking if an image with a specific id already exists. If not, it retrieves the groundtruth classes and difficult labels from the dictionary, either from existing keys or by setting them to None if not present or empty. It also checks if the image_id is already added to avoid duplicates.",
+        "type": "comment"
+    },
+    "5628": {
+        "file_id": 459,
+        "content": "                logging.warn(('image %s does not have groundtruth difficult '\n                              'flag specified'), image_id)\n        groundtruth_masks = None\n        if self._evaluate_masks:\n            if (standard_fields.InputDataFields.groundtruth_instance_masks\n                    not in groundtruth_dict):\n                raise ValueError(\n                    'Instance masks not in groundtruth dictionary.')\n            groundtruth_masks = groundtruth_dict[\n                standard_fields.InputDataFields.groundtruth_instance_masks]\n        self._evaluation.add_single_ground_truth_image_info(\n            image_key=image_id,\n            groundtruth_boxes=groundtruth_dict[\n                standard_fields.InputDataFields.groundtruth_boxes],\n            groundtruth_class_labels=groundtruth_classes,\n            groundtruth_is_difficult_list=groundtruth_difficult,\n            groundtruth_masks=groundtruth_masks,\n        )\n        self._image_ids.update([image_id])\n    def add_single_detected_image_info(self, image_id, detections_dict):",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_evaluation/object_detection_evaluation.py:199-219"
+    },
+    "5629": {
+        "file_id": 459,
+        "content": "This code block checks if the ground truth difficult flag is specified for an image and raises a warning if not. It then adds single ground truth image information, including bounding boxes, class labels, and mask (if available), to the evaluation object. This allows for evaluating the performance of the object detection model on the given image.",
+        "type": "comment"
+    },
+    "5630": {
+        "file_id": 459,
+        "content": "        \"\"\"Adds detections for a single image to be used for evaluation.\n        Args:\n            image_id: A unique string/integer identifier for the image.\n            detections_dict: A dictionary containing -\n                standard_fields.DetectionResultFields.detection_boxes: float32\n                    numpy array of shape [num_boxes, 4] containing `num_boxes`\n                    detection boxes of the format [ymin, xmin, ymax, xmax] in\n                    absolute image coordinates.\n                standard_fields.DetectionResultFields.detection_scores: float32\n                    numpy array of shape [num_boxes] containing detection\n                    scores for the boxes.\n                standard_fields.DetectionResultFields.detection_classes:\n                    integer numpy array of shape [num_boxes] containing\n                    1-indexed detection classes for the boxes.\n                standard_fields.DetectionResultFields.detection_masks: uint8\n                    numpy array of shape [num_boxes, height, width] containing",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_evaluation/object_detection_evaluation.py:220-236"
+    },
+    "5631": {
+        "file_id": 459,
+        "content": "This code snippet adds detections for a single image to be used in evaluation. It takes in image_id and a dictionary containing detection boxes, scores, classes, and masks as input. The detection boxes are represented by a float32 numpy array of shape [num_boxes, 4] with the format [ymin, xmin, ymax, xmax] in absolute image coordinates. Detection scores and classes are integer numpy arrays representing the scores and classes for each box respectively, while detection masks are represented by a uint8 numpy array of shape [num_boxes, height, width].",
+        "type": "comment"
+    },
+    "5632": {
+        "file_id": 459,
+        "content": "                    `num_boxes` masks of values ranging between 0 and 1.\n        Raises:\n            ValueError: If detection masks are not in detections dictionary.\n        \"\"\"\n        detection_classes = (\n            detections_dict[\n                standard_fields.DetectionResultFields.detection_classes] -\n            self._label_id_offset)\n        detection_masks = None\n        if self._evaluate_masks:\n            if (standard_fields.DetectionResultFields.detection_masks\n                    not in detections_dict):\n                raise ValueError(\n                    'Detection masks not in detections dictionary.')\n            detection_masks = detections_dict[\n                standard_fields.DetectionResultFields.detection_masks]\n        self._evaluation.add_single_detected_image_info(\n            image_key=image_id,\n            detected_boxes=detections_dict[\n                standard_fields.DetectionResultFields.detection_boxes],\n            detected_scores=detections_dict[\n                standard_fields.DetectionResultFields.detection_scores],",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_evaluation/object_detection_evaluation.py:237-259"
+    },
+    "5633": {
+        "file_id": 459,
+        "content": "This code block retrieves detection classes and masks from the \"detections_dict\" dictionary. If _evaluate_Masks is True, it checks if detection masks are present in detections_dict. If not, it raises a ValueError. Then, it adds single detected image information to _evaluation using detected boxes, scores, and (optionally) detection masks.",
+        "type": "comment"
+    },
+    "5634": {
+        "file_id": 459,
+        "content": "            detected_class_labels=detection_classes,\n            detected_masks=detection_masks,\n        )\n    def create_category_index(self, categories):\n        \"\"\"Creates dictionary of COCO compatible categories keyed by category\n        id.\n        Args:\n            categories: a list of dicts, each of which has the following keys:\n                'id': (required) an integer id uniquely identifying this\n                    category.\n                'name': (required) string representing category name\n                    e.g., 'cat', 'dog', 'pizza'.\n        Returns:\n            category_index: a dict containing the same entries as categories,\n                but keyed by the 'id' field of each category.\n        \"\"\"\n        category_index = {}\n        for cat in categories:\n            category_index[cat['id']] = cat\n        return category_index\n    def evaluate(self):\n        \"\"\"Compute evaluation result.\n        Returns:\n            A dictionary of metrics with the following fields -\n            1. summary_metrics:",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_evaluation/object_detection_evaluation.py:260-290"
+    },
+    "5635": {
+        "file_id": 459,
+        "content": "This code is related to object detection evaluation in the AVA dataset. The `create_category_index` function creates a dictionary of COCO compatible categories, keyed by category id. The `evaluate` function computes the evaluation results, returning a dictionary of metrics including summary_metrics. The code also uses `detection_classes` and `detection_masks` for evaluation.",
+        "type": "comment"
+    },
+    "5636": {
+        "file_id": 459,
+        "content": "                'Precision/mAP@<matching_iou_threshold>IOU': mean average\n                precision at the specified IOU threshold\n            2. per_category_ap: category specific results with keys of the form\n               'PerformanceByCategory/mAP@<matching_iou_threshold>IOU/category'\n        \"\"\"\n        (\n            per_class_ap,\n            mean_ap,\n            _,\n            _,\n            per_class_corloc,\n            mean_corloc,\n        ) = self._evaluation.evaluate()\n        metric = f'mAP@{self._matching_iou_threshold}IOU'\n        pascal_metrics = {self._metric_prefix + metric: mean_ap}\n        if self._evaluate_corlocs:\n            pascal_metrics[self._metric_prefix +\n                           'Precision/meanCorLoc@{}IOU'.format(\n                               self._matching_iou_threshold)] = mean_corloc\n        category_index = self.create_category_index(self._categories)\n        for idx in range(per_class_ap.size):\n            if idx + self._label_id_offset in category_index:\n                display_name = (",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_evaluation/object_detection_evaluation.py:291-315"
+    },
+    "5637": {
+        "file_id": 459,
+        "content": "This code calculates the mean average precision (mAP) and optionally, the mean correct localization score (meanCorLoc), at a specified IOU threshold for object detection evaluation. It creates metrics under different categories using category-specific results. The calculated values are then stored in the pascal_metrics dictionary.",
+        "type": "comment"
+    },
+    "5638": {
+        "file_id": 459,
+        "content": "                    self._metric_prefix +\n                    'PerformanceByCategory/AP@{}IOU/{}'.format(\n                        self._matching_iou_threshold,\n                        category_index[idx + self._label_id_offset]['name'],\n                    ))\n                pascal_metrics[display_name] = per_class_ap[idx]\n                # Optionally add CorLoc metrics.classes\n                if self._evaluate_corlocs: #False\n                    display_name = (\n                        self._metric_prefix +\n                        'PerformanceByCategory/CorLoc@{}IOU/{}'.format(\n                            self._matching_iou_threshold,\n                            category_index[idx +\n                                           self._label_id_offset]['name'],\n                        ))\n                    pascal_metrics[display_name] = per_class_corloc[idx]\n        return pascal_metrics\n    def clear(self):\n        \"\"\"Clears the state to prepare for a fresh evaluation.\"\"\"\n        self._evaluation = ObjectDetectionEvaluation(",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_evaluation/object_detection_evaluation.py:316-338"
+    },
+    "5639": {
+        "file_id": 459,
+        "content": "This code calculates average precision (AP) and optional correct localization (CorLoc) metrics for object detection by category. It appends these metrics to the pascal_metrics dictionary based on the matching IOU threshold and category names from the category_index. The clear() function resets the evaluation state for a new evaluation.",
+        "type": "comment"
+    },
+    "5640": {
+        "file_id": 459,
+        "content": "            num_groundtruth_classes=self._num_classes,\n            matching_iou_threshold=self._matching_iou_threshold,\n            use_weighted_mean_ap=self._use_weighted_mean_ap,\n            label_id_offset=self._label_id_offset,\n        )\n        self._image_ids.clear()\nclass PascalDetectionEvaluator(ObjectDetectionEvaluator):\n    \"\"\"A class to evaluate detections using PASCAL metrics.\"\"\"\n    def __init__(self, categories, matching_iou_threshold=0.5):\n        super(PascalDetectionEvaluator, self).__init__(\n            categories,\n            matching_iou_threshold=matching_iou_threshold,\n            evaluate_corlocs=False,\n            use_weighted_mean_ap=False,\n        )\nObjectDetectionEvalMetrics = collections.namedtuple(\n    'ObjectDetectionEvalMetrics',\n    [\n        'average_precisions',\n        'mean_ap',\n        'precisions',\n        'recalls',\n        'corlocs',\n        'mean_corloc',\n    ],\n)\nclass ObjectDetectionEvaluation:\n    \"\"\"Internal implementation of Pascal object detection metrics.\"\"\"\n    def __init__(",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_evaluation/object_detection_evaluation.py:339-375"
+    },
+    "5641": {
+        "file_id": 459,
+        "content": "The given code is a part of an object detection evaluation module in PaddleVideo. It defines classes and functions to evaluate detections using PASCAL metrics. The ObjectDetectionEvaluator class initializes with categories, matching IoU threshold, evaluating corlocs flag, and use weighted mean AP flag. PascalDetectionEvaluator is a subclass of ObjectDetectionEvaluator specifically for PASCAL evaluation. The code also defines the ObjectDetectionEvalMetrics namedtuple which includes average_precisions, mean_ap, precisions, recalls, corlocs, and mean_corloc attributes.",
+        "type": "comment"
+    },
+    "5642": {
+        "file_id": 459,
+        "content": "        self,\n        num_groundtruth_classes,\n        matching_iou_threshold=0.5,\n        nms_iou_threshold=1.0,\n        nms_max_output_boxes=10000,\n        use_weighted_mean_ap=False,\n        label_id_offset=0,\n    ):\n        if num_groundtruth_classes < 1:\n            raise ValueError(\n                'Need at least 1 groundtruth class for evaluation.')\n        self.per_image_eval = per_image_evaluation.PerImageEvaluation(\n            num_groundtruth_classes=num_groundtruth_classes,\n            matching_iou_threshold=matching_iou_threshold,\n        )\n        self.num_class = num_groundtruth_classes\n        self.use_weighted_mean_ap = use_weighted_mean_ap\n        self.label_id_offset = label_id_offset\n        self.groundtruth_boxes = {}\n        self.groundtruth_class_labels = {}\n        self.groundtruth_masks = {}\n        self.groundtruth_is_difficult_list = {}\n        self.groundtruth_is_group_of_list = {}\n        self.num_gt_instances_per_class = np.zeros(self.num_class, dtype=int)\n        self.num_gt_imgs_per_class = np.zeros(self.num_class, dtype=int)",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_evaluation/object_detection_evaluation.py:376-402"
+    },
+    "5643": {
+        "file_id": 459,
+        "content": "This function initializes the necessary attributes for object detection evaluation. It requires 'self', number of ground truth classes, matching and nms iou thresholds, maximum output boxes, whether to use weighted mean AP, label offset, and sets up dictionaries to store ground truth information. It also initializes counters for the number of instances and images per class.",
+        "type": "comment"
+    },
+    "5644": {
+        "file_id": 459,
+        "content": "        self._initialize_detections()\n    def _initialize_detections(self):\n        self.detection_keys = set()\n        self.scores_per_class = [[] for _ in range(self.num_class)]\n        self.tp_fp_labels_per_class = [[] for _ in range(self.num_class)]\n        self.num_images_correctly_detected_per_class = np.zeros(self.num_class)\n        self.average_precision_per_class = np.empty(\n            self.num_class, dtype=float)\n        self.average_precision_per_class.fill(np.nan)\n        self.precisions_per_class = []\n        self.recalls_per_class = []\n        self.corloc_per_class = np.ones(self.num_class, dtype=float)\n    def clear_detections(self):\n        self._initialize_detections()\n    def add_single_ground_truth_image_info(\n        self,\n        image_key,\n        groundtruth_boxes,\n        groundtruth_class_labels,\n        groundtruth_is_difficult_list=None,\n        groundtruth_is_group_of_list=None,\n        groundtruth_masks=None,\n    ):\n        \"\"\"Adds groundtruth for a single image to be used for evaluation.",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_evaluation/object_detection_evaluation.py:404-430"
+    },
+    "5645": {
+        "file_id": 459,
+        "content": "This code initializes the detection variables and provides functions to clear detections, add single ground truth image info, and perform evaluation. The average precision per class is initialized with nan values, and these functions manage the data for object detection evaluation.",
+        "type": "comment"
+    },
+    "5646": {
+        "file_id": 459,
+        "content": "        Args:\n            image_key: A unique string/integer identifier for the image.\n            groundtruth_boxes: float32 numpy array of shape [num_boxes, 4]\n                containing `num_boxes` groundtruth boxes of the format\n                [ymin, xmin, ymax, xmax] in absolute image coordinates.\n            groundtruth_class_labels: integer numpy array of shape [num_boxes]\n                containing 0-indexed groundtruth classes for the boxes.\n            groundtruth_is_difficult_list: A length M numpy boolean array\n                denoting whether a ground truth box is a difficult instance or\n                not. To support the case that no boxes are difficult, it is by\n                default set as None.\n            groundtruth_is_group_of_list: A length M numpy boolean array\n                denoting whether a ground truth box is a group-of box or not.\n                To support the case that no boxes are groups-of, it is by\n                default set as None.\n            groundtruth_masks: uint8 numpy array of shape",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_evaluation/object_detection_evaluation.py:432-447"
+    },
+    "5647": {
+        "file_id": 459,
+        "content": "The function takes in an image identifier, ground truth boxes coordinates, class labels for the boxes, a boolean array denoting difficult instances, and another boolean array for group-of boxes. It calculates average precision and recall for object detection using these inputs. The function also supports cases where no boxes are difficult or groups-of.",
+        "type": "comment"
+    },
+    "5648": {
+        "file_id": 459,
+        "content": "                [num_boxes, height, width] containing `num_boxes` groundtruth\n                masks. The mask values range from 0 to 1.\n        \"\"\"\n        if image_key in self.groundtruth_boxes:\n            logging.warn(('image %s has already been added to the ground '\n                          'truth database.'), image_key)\n            return\n        self.groundtruth_boxes[image_key] = groundtruth_boxes\n        self.groundtruth_class_labels[image_key] = groundtruth_class_labels\n        self.groundtruth_masks[image_key] = groundtruth_masks\n        if groundtruth_is_difficult_list is None:\n            num_boxes = groundtruth_boxes.shape[0]\n            groundtruth_is_difficult_list = np.zeros(num_boxes, dtype=bool)\n        self.groundtruth_is_difficult_list[\n            image_key] = groundtruth_is_difficult_list.astype(dtype=bool)\n        if groundtruth_is_group_of_list is None:\n            num_boxes = groundtruth_boxes.shape[0]\n            groundtruth_is_group_of_list = np.zeros(num_boxes, dtype=bool)\n        self.groundtruth_is_group_of_list[",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_evaluation/object_detection_evaluation.py:448-467"
+    },
+    "5649": {
+        "file_id": 459,
+        "content": "This function adds the ground truth boxes, class labels, and masks to the database for a given image key. If the groundtruth_is_difficult_list or groundtruth_is_group_of_list are None, it creates them with default values. It stores these lists as well in the database for the specified image key.",
+        "type": "comment"
+    },
+    "5650": {
+        "file_id": 459,
+        "content": "            image_key] = groundtruth_is_group_of_list.astype(dtype=bool)\n        self._update_ground_truth_statistics(\n            groundtruth_class_labels,\n            groundtruth_is_difficult_list.astype(dtype=bool),\n            groundtruth_is_group_of_list.astype(dtype=bool),\n        )\n    def add_single_detected_image_info(\n        self,\n        image_key,\n        detected_boxes,\n        detected_scores,\n        detected_class_labels,\n        detected_masks=None,\n    ):\n        \"\"\"Adds detections for a single image to be used for evaluation.\n        Args:\n            image_key: A unique string/integer identifier for the image.\n            detected_boxes: float32 numpy array of shape [num_boxes, 4]\n                containing `num_boxes` detection boxes of the format\n                [ymin, xmin, ymax, xmax] in absolute image coordinates.\n            detected_scores: float32 numpy array of shape [num_boxes]\n                containing detection scores for the boxes.\n            detected_class_labels: integer numpy array of shape [num_boxes]",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_evaluation/object_detection_evaluation.py:468-493"
+    },
+    "5651": {
+        "file_id": 459,
+        "content": "This function adds detections for a single image to be used for evaluation. It requires an image key, detected boxes, detected scores, and detected class labels as input. The detected boxes should be in the format [ymin, xmin, ymax, xmax] and the detected scores and detected class labels should be numpy arrays of the specified shapes. The function calls a _update_ground_truth_statistics method with groundtruth class labels, difficult list, and group of list as input. This method updates the ground truth statistics for evaluation.",
+        "type": "comment"
+    },
+    "5652": {
+        "file_id": 459,
+        "content": "                containing 0-indexed detection classes for the boxes.\n            detected_masks: np.uint8 numpy array of shape\n                [num_boxes, height, width] containing `num_boxes` detection\n                masks with values ranging between 0 and 1.\n        Raises:\n            ValueError: if the number of boxes, scores and class labels differ\n                in length.\n        \"\"\"\n        if len(detected_boxes) != len(detected_scores) or len(\n                detected_boxes) != len(detected_class_labels):\n            raise ValueError(\n                'detected_boxes, detected_scores and '\n                'detected_class_labels should all have same lengths. Got'\n                '[%d, %d, %d]' % len(detected_boxes),\n                len(detected_scores),\n                len(detected_class_labels),\n            )\n        if image_key in self.detection_keys:\n            logging.warn(('image %s has already been added to the ground '\n                          'truth database.'), image_key)\n            return",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_evaluation/object_detection_evaluation.py:494-516"
+    },
+    "5653": {
+        "file_id": 459,
+        "content": "This function creates a numpy array of detection masks based on detected boxes, scores and class labels. It raises a ValueError if the lengths of these lists are not equal. If an image key already exists in the detection keys list, it logs a warning message and returns without adding the image to the database.",
+        "type": "comment"
+    },
+    "5654": {
+        "file_id": 459,
+        "content": "        self.detection_keys.add(image_key)\n        if image_key in self.groundtruth_boxes:\n            groundtruth_boxes = self.groundtruth_boxes[image_key]\n            groundtruth_class_labels = self.groundtruth_class_labels[image_key]\n            # Masks are popped instead of look up. The reason is that we do not\n            # want to keep all masks in memory which can cause memory overflow.\n            groundtruth_masks = self.groundtruth_masks.pop(image_key)\n            groundtruth_is_difficult_list = self.groundtruth_is_difficult_list[\n                image_key]\n            groundtruth_is_group_of_list = self.groundtruth_is_group_of_list[\n                image_key]\n        else:\n            groundtruth_boxes = np.empty(shape=[0, 4], dtype=float)\n            groundtruth_class_labels = np.array([], dtype=int)\n            if detected_masks is None:\n                groundtruth_masks = None\n            else:\n                groundtruth_masks = np.empty(shape=[0, 1, 1], dtype=float)\n            groundtruth_is_difficult_list = np.array([], dtype=bool)",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_evaluation/object_detection_evaluation.py:518-536"
+    },
+    "5655": {
+        "file_id": 459,
+        "content": "This code is initializing ground truth values for object detection evaluation. If an image key exists in the ground truth boxes dictionary, it retrieves the corresponding ground truth values (boxes, class labels, masks) and removes them from their respective dictionaries to avoid memory overflow. If no image key exists, it initializes empty arrays or None values for the ground truth values.",
+        "type": "comment"
+    },
+    "5656": {
+        "file_id": 459,
+        "content": "            groundtruth_is_group_of_list = np.array([], dtype=bool)\n        (\n            scores,\n            tp_fp_labels,\n        ) = self.per_image_eval.compute_object_detection_metrics(\n            detected_boxes=detected_boxes,\n            detected_scores=detected_scores,\n            detected_class_labels=detected_class_labels,\n            groundtruth_boxes=groundtruth_boxes,\n            groundtruth_class_labels=groundtruth_class_labels,\n            groundtruth_is_difficult_list=groundtruth_is_difficult_list,\n            groundtruth_is_group_of_list=groundtruth_is_group_of_list,\n            detected_masks=detected_masks,\n            groundtruth_masks=groundtruth_masks,\n        )\n        for i in range(self.num_class):\n            if scores[i].shape[0] > 0:\n                self.scores_per_class[i].append(scores[i])\n                self.tp_fp_labels_per_class[i].append(tp_fp_labels[i])\n    def _update_ground_truth_statistics(\n        self,\n        groundtruth_class_labels,\n        groundtruth_is_difficult_list,",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_evaluation/object_detection_evaluation.py:537-561"
+    },
+    "5657": {
+        "file_id": 459,
+        "content": "This code is part of the PaddleVideo library and it computes object detection metrics. It takes in detected boxes, scores, class labels, ground truth boxes, class labels, masks etc., and calculates true positive and false positive labels for each image. The computed values are then stored per class in separate lists (scores_per_class and tp_fp_labels_per_class). Additionally, the function updates ground truth statistics by appending new ground truth class labels and difficult list to existing ones.",
+        "type": "comment"
+    },
+    "5658": {
+        "file_id": 459,
+        "content": "        groundtruth_is_group_of_list,\n    ):\n        \"\"\"Update grouth truth statitistics.\n        1. Difficult boxes are ignored when counting the number of ground truth\n        instances as done in Pascal VOC devkit.\n        2. Difficult boxes are treated as normal boxes when computing CorLoc\n        related statitistics.\n        Args:\n            groundtruth_class_labels: An integer numpy array of length M,\n                representing M class labels of object instances in ground truth\n            groundtruth_is_difficult_list: A boolean numpy array of length M\n                denoting whether a ground truth box is a difficult instance or\n                not\n            groundtruth_is_group_of_list: A boolean numpy array of length M\n                denoting whether a ground truth box is a group-of box or not\n        \"\"\"\n        for class_index in range(self.num_class):\n            num_gt_instances = np.sum(groundtruth_class_labels[\n                ~groundtruth_is_difficult_list\n                & ~groundtruth_is_group_of_list] == class_index)",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_evaluation/object_detection_evaluation.py:562-583"
+    },
+    "5659": {
+        "file_id": 459,
+        "content": "This function updates ground truth statistics for object detection by counting instances, excluding difficult boxes and treating them as normal ones for CorLoc computations. It iterates through class indices to determine the number of instances for each class label, excluding difficult or group-of boxes.",
+        "type": "comment"
+    },
+    "5660": {
+        "file_id": 459,
+        "content": "            self.num_gt_instances_per_class[class_index] += num_gt_instances\n            if np.any(groundtruth_class_labels == class_index):\n                self.num_gt_imgs_per_class[class_index] += 1\n    def evaluate(self):\n        \"\"\"Compute evaluation result.\n        Returns:\n            A named tuple with the following fields -\n                average_precision: float numpy array of average precision for\n                    each class.\n                mean_ap: mean average precision of all classes, float scalar\n                precisions: List of precisions, each precision is a float numpy\n                    array\n                recalls: List of recalls, each recall is a float numpy array\n                corloc: numpy float array\n                mean_corloc: Mean CorLoc score for each class, float scalar\n        \"\"\"\n        if (self.num_gt_instances_per_class == 0).any():\n            print(\n                'The following classes have no ground truth examples: %s',\n                np.squeeze(np.argwhere(self.num_gt_instances_per_class == 0)) +",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_evaluation/object_detection_evaluation.py:584-605"
+    },
+    "5661": {
+        "file_id": 459,
+        "content": "The code calculates average precision, mean average precision, precisions, recalls, and CorLoc scores for object detection evaluation. It checks if any ground truth instances exist for each class and returns a named tuple with evaluation results. If there are classes with no ground truth examples, it prints a warning message.",
+        "type": "comment"
+    },
+    "5662": {
+        "file_id": 459,
+        "content": "                self.label_id_offset, \"self.detection_keys:\",self.detection_keys\n            )\n        if self.use_weighted_mean_ap:\n            all_scores = np.array([], dtype=float)\n            all_tp_fp_labels = np.array([], dtype=bool)\n        for class_index in range(self.num_class):\n            if self.num_gt_instances_per_class[class_index] == 0:\n                continue\n            if not self.scores_per_class[class_index]:\n                scores = np.array([], dtype=float)\n                tp_fp_labels = np.array([], dtype=bool)\n            else:\n                scores = np.concatenate(self.scores_per_class[class_index])\n                tp_fp_labels = np.concatenate(\n                    self.tp_fp_labels_per_class[class_index])\n            if self.use_weighted_mean_ap:\n                all_scores = np.append(all_scores, scores)\n                all_tp_fp_labels = np.append(all_tp_fp_labels, tp_fp_labels)\n            precision, recall = metrics.compute_precision_recall(\n                scores,\n                tp_fp_labels,",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_evaluation/object_detection_evaluation.py:606-629"
+    },
+    "5663": {
+        "file_id": 459,
+        "content": "This code is part of a class that performs object detection evaluation using Average Vehicle Accuracy (AVA) metrics. It checks for the number of ground truth instances per class and concatenates scores and true positive/false positive labels per class. If weighted mean average precision (AP) calculation is enabled, it appends the scores and labels to the total arrays. The code uses the compute_precision_recall function from the metrics module to calculate precision and recall values.",
+        "type": "comment"
+    },
+    "5664": {
+        "file_id": 459,
+        "content": "                self.num_gt_instances_per_class[class_index],\n            )\n            self.precisions_per_class.append(precision)\n            self.recalls_per_class.append(recall)\n            average_precision = metrics.compute_average_precision(\n                precision, recall)\n            self.average_precision_per_class[class_index] = average_precision\n        self.corloc_per_class = metrics.compute_cor_loc(\n            self.num_gt_imgs_per_class,\n            self.num_images_correctly_detected_per_class,\n        )\n        if self.use_weighted_mean_ap:\n            num_gt_instances = np.sum(self.num_gt_instances_per_class)\n            precision, recall = metrics.compute_precision_recall(\n                all_scores, all_tp_fp_labels, num_gt_instances)\n            mean_ap = metrics.compute_average_precision(precision, recall)\n        else:\n            mean_ap = np.nanmean(self.average_precision_per_class)\n        mean_corloc = np.nanmean(self.corloc_per_class)\n        return ObjectDetectionEvalMetrics(",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_evaluation/object_detection_evaluation.py:630-651"
+    },
+    "5665": {
+        "file_id": 459,
+        "content": "This function calculates average precision and correlation localization for object detection evaluation. It stores the precision, recall, average precision per class, and correlation localization per class. If weighted mean AP is enabled, it computes precision, recall, mean AP, and mean correlation localization.",
+        "type": "comment"
+    },
+    "5666": {
+        "file_id": 459,
+        "content": "            self.average_precision_per_class,\n            mean_ap,\n            self.precisions_per_class,\n            self.recalls_per_class,\n            self.corloc_per_class,\n            mean_corloc,\n        )",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_evaluation/object_detection_evaluation.py:652-658"
+    },
+    "5667": {
+        "file_id": 459,
+        "content": "This code snippet appears to be part of a class function that returns several evaluation metrics for object detection. The metrics include average precision per class, mean average precision, precisions and recalls per class, and mean corloc values. These metrics are commonly used in evaluating object detection models' performance.",
+        "type": "comment"
+    },
+    "5668": {
+        "file_id": 460,
+        "content": "/paddlevideo/metrics/ava_evaluation/per_image_evaluation.py",
+        "type": "filepath"
+    },
+    "5669": {
+        "file_id": 460,
+        "content": "The code measures object detection performance, handles class labels and non-maximum suppression, and calculates true/false positives using an IoU threshold. It is used for AVA evaluation and contains functions to select class-specific data, remove invalid boxes, and filter input arrays.",
+        "type": "summary"
+    },
+    "5670": {
+        "file_id": 460,
+        "content": "# Copyright 2017 The TensorFlow Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n# =============================================================================\n\"\"\"Evaluate Object Detection result on a single image.\nAnnotate each detected result as true positives or false positive according to\na predefined IOU ratio. Non Maximum Supression is used by default. Multi class\ndetection is supported by default. Based on the settings, per image evaluation\nis either performed on boxes or on object masks.",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_evaluation/per_image_evaluation.py:1-20"
+    },
+    "5671": {
+        "file_id": 460,
+        "content": "This code file is for evaluating object detection results on a single image. It determines true positives or false positives based on a predefined IOU ratio. Non Maximum Supression and multi-class detection are supported. The evaluation can be performed either on boxes or object masks, depending on the settings.",
+        "type": "comment"
+    },
+    "5672": {
+        "file_id": 460,
+        "content": "\"\"\"\nimport numpy as np\nfrom . import np_box_list, np_box_ops\nclass PerImageEvaluation:\n    \"\"\"Evaluate detection result of a single image.\"\"\"\n    def __init__(self, num_groundtruth_classes, matching_iou_threshold=0.5):\n        \"\"\"Initialized PerImageEvaluation by evaluation parameters.\n        Args:\n            num_groundtruth_classes: Number of ground truth object classes\n            matching_iou_threshold: A ratio of area intersection to union,\n                which is the threshold to consider whether a detection is true\n                positive or not\n        \"\"\"\n        self.matching_iou_threshold = matching_iou_threshold\n        self.num_groundtruth_classes = num_groundtruth_classes\n    def compute_object_detection_metrics(\n        self,\n        detected_boxes,\n        detected_scores,\n        detected_class_labels,\n        groundtruth_boxes,\n        groundtruth_class_labels,\n        groundtruth_is_difficult_list,\n        groundtruth_is_group_of_list,\n        detected_masks=None,\n        groundtruth_masks=None,",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_evaluation/per_image_evaluation.py:21-53"
+    },
+    "5673": {
+        "file_id": 460,
+        "content": "This code initializes a class for evaluating detection results of a single image. It takes in parameters such as the number of ground truth classes and matching IOU threshold, and computes object detection metrics using detected boxes, scores, class labels, etc.",
+        "type": "comment"
+    },
+    "5674": {
+        "file_id": 460,
+        "content": "    ):\n        \"\"\"Evaluates detections as being tp, fp or ignored from a single image.\n        The evaluation is done in two stages:\n        1. All detections are matched to non group-of boxes; true positives\n            are determined and detections matched to difficult boxes are\n            ignored.\n        2. Detections that are determined as false positives are matched\n            against group-of boxes and ignored if matched.\n        Args:\n            detected_boxes: A float numpy array of shape [N, 4], representing N\n                regions of detected object regions.\n                Each row is of the format [y_min, x_min, y_max, x_max]\n            detected_scores: A float numpy array of shape [N, 1], representing\n                the confidence scores of the detected N object instances.\n            detected_class_labels: A integer numpy array of shape [N, 1],\n                repreneting the class labels of the detected N object\n                instances.\n            groundtruth_boxes: A float numpy array of shape [M, 4],",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_evaluation/per_image_evaluation.py:54-73"
+    },
+    "5675": {
+        "file_id": 460,
+        "content": "This function evaluates detections as true positives, false positives or ignored based on the detected and ground truth boxes. It works in two stages: 1) matching all detections to non group-of boxes for true positives, ignoring difficult ones; and 2) ignoring detections matched to group-of boxes. The inputs are numpy arrays of detected boxes, scores, class labels, and ground truth boxes.",
+        "type": "comment"
+    },
+    "5676": {
+        "file_id": 460,
+        "content": "                representing M regions of object instances in ground truth\n            groundtruth_class_labels: An integer numpy array of shape [M, 1],\n                representing M class labels of object instances in ground truth\n            groundtruth_is_difficult_list: A boolean numpy array of length M\n                denoting whether a ground truth box is a difficult instance or\n                not\n            groundtruth_is_group_of_list: A boolean numpy array of length M\n                denoting whether a ground truth box has group-of tag\n            detected_masks: (optional) A uint8 numpy array of shape\n                [N, height, width]. If not None, the metrics will be computed\n                based on masks.\n            groundtruth_masks: (optional) A uint8 numpy array of shape\n                [M, height, width].\n        Returns:\n            scores: A list of C float numpy arrays. Each numpy array is of\n                shape [K, 1], representing K scores detected with object class\n                label c",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_evaluation/per_image_evaluation.py:74-91"
+    },
+    "5677": {
+        "file_id": 460,
+        "content": "This code function accepts multiple parameters including ground truth regions, class labels, difficult instances, group-of tags, optional detected masks and ground truth masks. It returns a list of scores representing K scores detected with object class label c.",
+        "type": "comment"
+    },
+    "5678": {
+        "file_id": 460,
+        "content": "            tp_fp_labels: A list of C boolean numpy arrays. Each numpy array\n                is of shape [K, 1], representing K True/False positive label of\n                object instances detected with class label c\n        \"\"\"\n        (\n            detected_boxes,\n            detected_scores,\n            detected_class_labels,\n            detected_masks,\n        ) = self._remove_invalid_boxes(\n            detected_boxes,\n            detected_scores,\n            detected_class_labels,\n            detected_masks,\n        )\n        scores, tp_fp_labels = self._compute_tp_fp(\n            detected_boxes=detected_boxes,\n            detected_scores=detected_scores,\n            detected_class_labels=detected_class_labels,\n            groundtruth_boxes=groundtruth_boxes,\n            groundtruth_class_labels=groundtruth_class_labels,\n            groundtruth_is_difficult_list=groundtruth_is_difficult_list,\n            groundtruth_is_group_of_list=groundtruth_is_group_of_list,\n            detected_masks=detected_masks,",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_evaluation/per_image_evaluation.py:92-115"
+    },
+    "5679": {
+        "file_id": 460,
+        "content": "This function is part of the AvaEvaluation class, which evaluates object detection performance in videos. It computes true positive and false positive labels for detected object instances based on ground truth information. The function removes invalid detection boxes before computing the tp_fp_labels. This helps in evaluating the accuracy of detected objects.",
+        "type": "comment"
+    },
+    "5680": {
+        "file_id": 460,
+        "content": "            groundtruth_masks=groundtruth_masks,\n        )\n        return scores, tp_fp_labels\n    def _compute_tp_fp(\n        self,\n        detected_boxes,\n        detected_scores,\n        detected_class_labels,\n        groundtruth_boxes,\n        groundtruth_class_labels,\n        groundtruth_is_difficult_list,\n        groundtruth_is_group_of_list,\n        detected_masks=None,\n        groundtruth_masks=None,\n    ):\n        \"\"\"Labels true/false positives of detections of an image across all\n        classes.\n        Args:\n            detected_boxes: A float numpy array of shape [N, 4], representing N\n                regions of detected object regions.\n                Each row is of the format [y_min, x_min, y_max, x_max]\n            detected_scores: A float numpy array of shape [N, 1], representing\n                the confidence scores of the detected N object instances.\n            detected_class_labels: A integer numpy array of shape [N, 1],\n                repreneting the class labels of the detected N object",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_evaluation/per_image_evaluation.py:116-143"
+    },
+    "5681": {
+        "file_id": 460,
+        "content": "This code calculates true/false positives for object detection in an image across all classes. It takes detected boxes, scores, class labels, ground truth boxes, class labels, and optional masks as input, returning the computed scores and tp_fp_labels. The separate function computes tp_fp for a single image given the above inputs.",
+        "type": "comment"
+    },
+    "5682": {
+        "file_id": 460,
+        "content": "                instances.\n            groundtruth_boxes: A float numpy array of shape [M, 4],\n                representing M regions of object instances in ground truth\n            groundtruth_class_labels: An integer numpy array of shape [M, 1],\n                representing M class labels of object instances in ground truth\n            groundtruth_is_difficult_list: A boolean numpy array of length M\n                denoting whether a ground truth box is a difficult instance or\n                not\n            groundtruth_is_group_of_list: A boolean numpy array of length M\n                denoting whether a ground truth box has group-of tag\n            detected_masks: (optional) A np.uint8 numpy array of shape\n                [N, height, width]. If not None, the scores will be computed\n                based on masks.\n            groundtruth_masks: (optional) A np.uint8 numpy array of shape\n                [M, height, width].\n        Returns:\n            result_scores: A list of float numpy arrays. Each numpy array is of",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_evaluation/per_image_evaluation.py:144-161"
+    },
+    "5683": {
+        "file_id": 460,
+        "content": "The function takes input parameters like instances, groundtruth_boxes, groundtruth_class_labels, groundtruth_is_difficult_list, groundtruth_is_group_of_list, detected_masks and groundtruth_masks. It returns a list of float numpy arrays representing result scores based on these inputs. The function computes scores considering masks if detected_masks is not None and groundtruth_masks if it's not None.",
+        "type": "comment"
+    },
+    "5684": {
+        "file_id": 460,
+        "content": "                shape [K, 1], representing K scores detected with object class\n                label c\n            result_tp_fp_labels: A list of boolean numpy array. Each numpy\n                array is of shape [K, 1], representing K True/False positive\n                label of object instances detected with class label c\n        Raises:\n            ValueError: If detected masks is not None but groundtruth masks are\n                None, or the other way around.\n        \"\"\"\n        if detected_masks is not None and groundtruth_masks is None:\n            raise ValueError(\n                'Detected masks is available but groundtruth masks is not.')\n        if detected_masks is None and groundtruth_masks is not None:\n            raise ValueError(\n                'Groundtruth masks is available but detected masks is not.')\n        result_scores = []\n        result_tp_fp_labels = []\n        for i in range(self.num_groundtruth_classes):\n            groundtruth_is_difficult_list_at_ith_class = (\n                groundtruth_is_difficult_list[groundtruth_class_labels == i])",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_evaluation/per_image_evaluation.py:162-183"
+    },
+    "5685": {
+        "file_id": 460,
+        "content": "This function checks if both detected_masks and groundtruth_masks are not null. It then initializes result_scores and result_tp_fp_labels lists for storing scores and True/False positive labels of object instances respectively. If only one of the masks is available, it raises a ValueError. This function seems to be part of an AVA evaluation process where it deals with class label c, groundtruth_class_labels, detected_masks, and groundtruth_masks.",
+        "type": "comment"
+    },
+    "5686": {
+        "file_id": 460,
+        "content": "            groundtruth_is_group_of_list_at_ith_class = (\n                groundtruth_is_group_of_list[groundtruth_class_labels == i])\n            (\n                gt_boxes_at_ith_class,\n                gt_masks_at_ith_class,\n                detected_boxes_at_ith_class,\n                detected_scores_at_ith_class,\n                detected_masks_at_ith_class,\n            ) = self._get_ith_class_arrays(detected_boxes, detected_scores,\n                                           detected_masks,\n                                           detected_class_labels,\n                                           groundtruth_boxes,\n                                           groundtruth_masks,\n                                           groundtruth_class_labels, i)\n            scores, tp_fp_labels = self._compute_tp_fp_for_single_class(\n                detected_boxes=detected_boxes_at_ith_class,\n                detected_scores=detected_scores_at_ith_class,\n                groundtruth_boxes=gt_boxes_at_ith_class,\n                groundtruth_is_difficult_list=(",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_evaluation/per_image_evaluation.py:184-202"
+    },
+    "5687": {
+        "file_id": 460,
+        "content": "The code is extracting per-class arrays for detected and ground truth objects. It separates the data into specific classes, computes true positive and false positive labels using a single class function, and assigns them to their respective variables.",
+        "type": "comment"
+    },
+    "5688": {
+        "file_id": 460,
+        "content": "                    groundtruth_is_difficult_list_at_ith_class),\n                groundtruth_is_group_of_list=(\n                    groundtruth_is_group_of_list_at_ith_class),\n                detected_masks=detected_masks_at_ith_class,\n                groundtruth_masks=gt_masks_at_ith_class,\n            )\n            result_scores.append(scores)\n            result_tp_fp_labels.append(tp_fp_labels)\n        return result_scores, result_tp_fp_labels\n    def _get_overlaps_and_scores_box_mode(\n        self,\n        detected_boxes,\n        detected_scores,\n        groundtruth_boxes,\n        groundtruth_is_group_of_list,\n    ):\n        \"\"\"Computes overlaps and scores between detected and groudntruth boxes.\n        Args:\n            detected_boxes: A numpy array of shape [N, 4] representing detected\n                box coordinates\n            detected_scores: A 1-d numpy array of length N representing\n                classification score\n            groundtruth_boxes: A numpy array of shape [M, 4] representing\n                ground truth box coordinates",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_evaluation/per_image_evaluation.py:203-228"
+    },
+    "5689": {
+        "file_id": 460,
+        "content": "This code is calculating overlapping regions and scores between detected and ground truth boxes. It's taking in arrays of detected box coordinates, classification scores, ground truth box coordinates, and ground truth group indicators. The code then returns the resultant scores and true positive/false positive labels for each image. This seems to be part of an object detection or instance segmentation evaluation metric.",
+        "type": "comment"
+    },
+    "5690": {
+        "file_id": 460,
+        "content": "            groundtruth_is_group_of_list: A boolean numpy array of length M\n                denoting whether a ground truth box has group-of tag. If a\n                groundtruth box is group-of box, every detection matching this\n                box is ignored.\n        Returns:\n            iou: A float numpy array of size [num_detected_boxes,\n                num_gt_boxes]. If gt_non_group_of_boxlist.num_boxes() == 0 it\n                will be None.\n            ioa: A float numpy array of size [num_detected_boxes,\n                num_gt_boxes]. If gt_group_of_boxlist.num_boxes() == 0 it will\n                be None.\n            scores: The score of the detected boxlist.\n            num_boxes: Number of non-maximum suppressed detected boxes.\n        \"\"\"\n        detected_boxlist = np_box_list.BoxList(detected_boxes)\n        detected_boxlist.add_field('scores', detected_scores)\n        gt_non_group_of_boxlist = np_box_list.BoxList(\n            groundtruth_boxes[~groundtruth_is_group_of_list])\n        iou = np_box_ops.iou(detected_boxlist.get(),",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_evaluation/per_image_evaluation.py:229-249"
+    },
+    "5691": {
+        "file_id": 460,
+        "content": "Code computes intersection over union (IoU) and intersection over area (IoA) between detected boxlists and ground truth boxlists. It also returns the scores of the detected boxes and the number of non-maximum suppressed detected boxes. The ground truth is_group_of_list is used to ignore group-of boxes during calculation.",
+        "type": "comment"
+    },
+    "5692": {
+        "file_id": 460,
+        "content": "                             gt_non_group_of_boxlist.get())\n        scores = detected_boxlist.get_field('scores')\n        num_boxes = detected_boxlist.num_boxes()\n        return iou, None, scores, num_boxes\n    def _compute_tp_fp_for_single_class(\n        self,\n        detected_boxes,\n        detected_scores,\n        groundtruth_boxes,\n        groundtruth_is_difficult_list,\n        groundtruth_is_group_of_list,\n        detected_masks=None,\n        groundtruth_masks=None,\n    ):\n        \"\"\"Labels boxes detected with the same class from the same image as\n        tp/fp.\n        Args:\n            detected_boxes: A numpy array of shape [N, 4] representing detected\n                box coordinates\n            detected_scores: A 1-d numpy array of length N representing\n                classification score\n            groundtruth_boxes: A numpy array of shape [M, 4] representing\n                groundtruth box coordinates\n            groundtruth_is_difficult_list: A boolean numpy array of length M\n                denoting whether a ground truth box is a difficult instance or",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_evaluation/per_image_evaluation.py:250-276"
+    },
+    "5693": {
+        "file_id": 460,
+        "content": "This function labels boxes detected with the same class from the same image as true positives or false positives. It takes in the detected boxes, scores, ground truth boxes, and other relevant information to perform this labeling task. The output is determined based on the intersection-over-union (IoU) threshold between detected and ground truth boxes. If a detected box has an IoU greater than 0.5 with any ground truth box in the same class and image, it is considered a true positive (tp). Otherwise, it's considered a false positive (fp). The function also computes the number of detected boxes.",
+        "type": "comment"
+    },
+    "5694": {
+        "file_id": 460,
+        "content": "                not. If a groundtruth box is difficult, every detection\n                matching this box is ignored.\n            groundtruth_is_group_of_list: A boolean numpy array of length M\n                denoting whether a ground truth box has group-of tag. If a\n                groundtruth box is group-of box, every detection matching this\n                box is ignored.\n            detected_masks: (optional) A uint8 numpy array of shape\n                [N, height, width]. If not None, the scores will be computed\n                based on masks.\n            groundtruth_masks: (optional) A uint8 numpy array of shape\n                [M, height, width].\n        Returns:\n            Two arrays of the same size, containing all boxes that were\n            evaluated as being true positives or false positives; if a box\n            matched to a difficult box or to a group-of box, it is ignored.\n            scores: A numpy array representing the detection scores.\n            tp_fp_labels: a boolean numpy array indicating whether a detection",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_evaluation/per_image_evaluation.py:277-295"
+    },
+    "5695": {
+        "file_id": 460,
+        "content": "This function computes true positive (TP) and false positive (FP) labels for detected boxes based on whether they match difficult or group-of ground truth boxes. It returns scores and TP/FP labels, ignoring any detections that match these challenging boxes. Optional mask inputs are also supported to compute scores based on pixel-wise comparisons instead of bounding box overlaps.",
+        "type": "comment"
+    },
+    "5696": {
+        "file_id": 460,
+        "content": "                is a true positive.\n        \"\"\"\n        if detected_boxes.size == 0:\n            return np.array([], dtype=float), np.array([], dtype=bool)\n        (\n            iou,\n            _,\n            scores,\n            num_detected_boxes,\n        ) = self._get_overlaps_and_scores_box_mode(\n            detected_boxes=detected_boxes,\n            detected_scores=detected_scores,\n            groundtruth_boxes=groundtruth_boxes,\n            groundtruth_is_group_of_list=groundtruth_is_group_of_list,\n        )\n        if groundtruth_boxes.size == 0:\n            return scores, np.zeros(num_detected_boxes, dtype=bool)\n        tp_fp_labels = np.zeros(num_detected_boxes, dtype=bool)\n        is_matched_to_difficult_box = np.zeros(num_detected_boxes, dtype=bool)\n        is_matched_to_group_of_box = np.zeros(num_detected_boxes, dtype=bool)\n        # The evaluation is done in two stages:\n        # 1. All detections are matched to non group-of boxes; true positives\n        #    are determined and detections matched to difficult boxes are",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_evaluation/per_image_evaluation.py:296-322"
+    },
+    "5697": {
+        "file_id": 460,
+        "content": "This code checks for true positive detections by first obtaining the Intersection over Union (IoU) and scores between detected boxes and ground truth boxes. If there are no detected or ground truth boxes, it returns empty arrays. Then, it initializes variables to keep track of whether a detection is matched to a difficult box or a group-of box. The code proceeds in two stages: first, all detections are matched to non-group-of boxes, determining true positives, and then detections matched to difficult boxes are identified.",
+        "type": "comment"
+    },
+    "5698": {
+        "file_id": 460,
+        "content": "        #    ignored.\n        # 2. Detections that are determined as false positives are matched\n        #    against group-of boxes and ignored if matched.\n        # Tp-fp evaluation for non-group of boxes (if any).\n        if iou.shape[1] > 0:\n            groundtruth_nongroup_of_is_difficult_list = (\n                groundtruth_is_difficult_list[~groundtruth_is_group_of_list])\n            max_overlap_gt_ids = np.argmax(iou, axis=1)\n            is_gt_box_detected = np.zeros(iou.shape[1], dtype=bool)\n            for i in range(num_detected_boxes):\n                gt_id = max_overlap_gt_ids[i]\n                if iou[i, gt_id] >= self.matching_iou_threshold:\n                    if not groundtruth_nongroup_of_is_difficult_list[gt_id]:\n                        if not is_gt_box_detected[gt_id]:\n                            tp_fp_labels[i] = True\n                            is_gt_box_detected[gt_id] = True\n                    else:\n                        is_matched_to_difficult_box[i] = True\n        return (\n            scores[~is_matched_to_difficult_box & ~is_matched_to_group_of_box],",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ava_evaluation/per_image_evaluation.py:323-344"
+    },
+    "5699": {
+        "file_id": 460,
+        "content": "This code performs a TP-FP evaluation for non-group of boxes, ignoring difficult ground truth boxes and false positives matched to group-of boxes. It checks the IOU between detected boxes and ground truth boxes, and assigns labels accordingly.",
+        "type": "comment"
+    }
+}

@@ -1,0 +1,544 @@
+{
+    "4900": {
+        "file_id": 422,
+        "content": "# copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport copy\nimport json\nfrom ..registry import DATASETS\nfrom .base import BaseDataset\nfrom ...utils import get_logger\nlogger = get_logger(\"paddlevideo\")\n@DATASETS.register()\nclass BMNDataset(BaseDataset):\n    \"\"\"Video dataset for action localization.\n    \"\"\"\n    def __init__(\n        self,\n        file_path,\n        pipeline,\n        subset,\n        **kwargs,\n    ):\n        self.subset = subset\n        super().__init__(file_path, pipeline, **kwargs)",
+        "type": "code",
+        "location": "/paddlevideo/loader/dataset/bmn_dataset.py:1-36"
+    },
+    "4901": {
+        "file_id": 422,
+        "content": "This code snippet defines the BMNDataset class for video datasets used in action localization. It imports necessary modules, registers the class with the DATASETS registry, and initializes the dataset with file path, pipeline, and subset information. Logger is also defined for logging purposes.",
+        "type": "comment"
+    },
+    "4902": {
+        "file_id": 422,
+        "content": "    def load_file(self):\n        \"\"\"Load index file to get video information.\"\"\"\n        info = []\n        annos = json.load(open(self.file_path))\n        for video_name in annos.keys():\n            video_subset = annos[video_name][\"subset\"]\n            if self.subset in video_subset:\n                info.append(\n                    dict(\n                        video_name=video_name,\n                        video_info=annos[video_name],\n                    ))\n        #sort by video_name\n        sort_f = lambda elem: elem['video_name']\n        info.sort(key=sort_f)\n        #add video_idx to info\n        for idx, elem in enumerate(info):\n            info[idx]['video_idx'] = idx\n        logger.info(\"{} subset video numbers: {}\".format(\n            self.subset, len(info)))\n        return info\n    def prepare_train(self, idx):\n        \"\"\"TRAIN & VALID: Prepare data for training/valid given the index.\"\"\"\n        results = copy.deepcopy(self.info[idx])\n        results = self.pipeline(results)\n        return results['video_feat'], results['gt_iou_map'], results['gt_start'],\\",
+        "type": "code",
+        "location": "/paddlevideo/loader/dataset/bmn_dataset.py:38-64"
+    },
+    "4903": {
+        "file_id": 422,
+        "content": "This function is loading an index file to get video information and then sorts the data by video name. It also adds a video_idx attribute to each element in the list and returns the video features, ground truth IOU map, and start frame indices for training purposes.",
+        "type": "comment"
+    },
+    "4904": {
+        "file_id": 422,
+        "content": "               results['gt_end']\n    def prepare_test(self, idx):\n        \"\"\"TEST: Prepare the data for test given the index.\"\"\"\n        results = copy.deepcopy(self.info[idx])\n        results = self.pipeline(results)\n        return results['video_feat'], results['gt_iou_map'], results['gt_start'], \\\n               results['gt_end'], results['video_idx']",
+        "type": "code",
+        "location": "/paddlevideo/loader/dataset/bmn_dataset.py:65-72"
+    },
+    "4905": {
+        "file_id": 422,
+        "content": "This function prepares test data given an index by copying the dataset info, processing it through the pipeline, and returning selected results (video_feat, gt_iou_map, gt_start, gt_end, video_idx).",
+        "type": "comment"
+    },
+    "4906": {
+        "file_id": 423,
+        "content": "/paddlevideo/loader/dataset/davis_dataset.py",
+        "type": "filepath"
+    },
+    "4907": {
+        "file_id": 423,
+        "content": "The Python class VOS_Test extends BaseDataset for video object segmentation tasks and supports pipeline mode, color type options, and resizing. The Davis 2017 dataset is initialized in PaddleVideo and returns a sequence dataset with images, labels, and fixed resolution of 480 pixels.",
+        "type": "summary"
+    },
+    "4908": {
+        "file_id": 423,
+        "content": "# copyright (c) 2021 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport os\nimport os.path as osp\nimport copy\nimport random\nimport numpy as np\nimport shutil\nfrom PIL import Image\nimport cv2\nfrom paddle.io import Dataset\nfrom ..registry import DATASETS\nfrom .base import BaseDataset\nfrom ...utils import get_logger\nlogger = get_logger(\"paddlevideo\")\nclass VOS_Test(Dataset):\n    \"\"\"process frames in each video\n    \"\"\"\n    def __init__(self,\n                 image_root,\n                 label_root,",
+        "type": "code",
+        "location": "/paddlevideo/loader/dataset/davis_dataset.py:1-37"
+    },
+    "4909": {
+        "file_id": 423,
+        "content": "This code snippet is from PaddleVideo's davis_dataset.py file and it appears to be a Python class named VOS_Test, which extends the BaseDataset class from the same module. The class is used for processing frames in each video of a dataset. It takes image_root and label_root as input parameters for accessing the required data. The logger is imported from paddle.utils to log any relevant information during execution. This dataset seems to be designed for video object segmentation (VOS) tasks, commonly used in computer vision applications.",
+        "type": "comment"
+    },
+    "4910": {
+        "file_id": 423,
+        "content": "                 seq_name,\n                 images,\n                 labels,\n                 pipeline=None,\n                 rgb=False,\n                 resolution=None):\n        self.image_root = image_root\n        self.label_root = label_root\n        self.seq_name = seq_name\n        self.images = images  # image file list\n        self.labels = labels\n        self.obj_num = 1\n        self.num_frame = len(self.images)\n        self.pipeline = pipeline\n        self.rgb = rgb\n        self.resolution = resolution\n        self.obj_nums = []\n        temp_obj_num = 0\n        for img_name in self.images:\n            self.obj_nums.append(temp_obj_num)\n            current_label_name = img_name.split('.')[0] + '.png'\n            if current_label_name in self.labels:\n                current_label = self.read_label(current_label_name)\n                if temp_obj_num < np.unique(\n                        current_label)[-1]:  #get object number from label_id\n                    temp_obj_num = np.unique(current_label)[-1]\n    def __len__(self):",
+        "type": "code",
+        "location": "/paddlevideo/loader/dataset/davis_dataset.py:38-66"
+    },
+    "4911": {
+        "file_id": 423,
+        "content": "This code initializes the dataset with image and label file lists, image root and label root paths. It sets object number, total frames, pipeline mode, color type, resolution, creates an object numbers list, and assigns object numbers from labels.",
+        "type": "comment"
+    },
+    "4912": {
+        "file_id": 423,
+        "content": "        return len(self.images)\n    def read_image(self, idx):\n        img_name = self.images[idx]\n        img_path = os.path.join(self.image_root, self.seq_name, img_name)\n        img = cv2.imread(img_path)\n        img = np.array(img, dtype=np.float32)\n        if self.rgb:\n            img = img[:, :, [2, 1, 0]]\n        return img\n    def read_label(self, label_name):\n        label_path = os.path.join(self.label_root, self.seq_name, label_name)\n        label = Image.open(label_path)\n        label = np.array(label, dtype=np.uint8)\n        return label\n    def __getitem__(self, idx):\n        img_name = self.images[idx]\n        current_img = self.read_image(idx)\n        current_img = np.array(current_img)\n        height, width, channels = current_img.shape\n        if self.resolution is not None:\n            width = int(np.ceil(float(width) * self.resolution / float(height)))\n            height = int(self.resolution)\n        current_label_name = img_name.split('.')[0] + '.png'\n        obj_num = self.obj_nums[idx]",
+        "type": "code",
+        "location": "/paddlevideo/loader/dataset/davis_dataset.py:67-94"
+    },
+    "4913": {
+        "file_id": 423,
+        "content": "This code defines a class that loads data from the DAVIS dataset. It first returns the number of images in the dataset, then reads an image at a given index, and finally reads a corresponding label for the image. The class also allows resizing the images to a specified resolution if needed.",
+        "type": "comment"
+    },
+    "4914": {
+        "file_id": 423,
+        "content": "        if current_label_name in self.labels:\n            current_label = self.read_label(current_label_name)\n            current_label = np.array(current_label)\n            sample = {\n                'current_img': current_img,\n                'current_label': current_label\n            }\n        else:\n            sample = {\n                'current_img': current_img\n            }  #only the first frame contains label\n        sample['meta'] = {\n            'seq_name': self.seq_name,\n            'frame_num': self.num_frame,\n            'obj_num': obj_num,\n            'current_name': img_name,\n            'height': height,\n            'width': width,\n            'flip': False\n        }\n        if self.pipeline is not None:\n            sample = self.pipeline(sample)\n        for s in sample:\n            s['current_img'] = np.array(s['current_img'])\n            if 'current_label' in s.keys():\n                s['current_label'] = s['current_label']\n        return sample\n@DATASETS.register()\nclass DavisDataset(BaseDataset):",
+        "type": "code",
+        "location": "/paddlevideo/loader/dataset/davis_dataset.py:96-127"
+    },
+    "4915": {
+        "file_id": 423,
+        "content": "The function generates a sample for a dataset, including image and label data. It checks if the current_label_name is in labels, reads the label if present, creates a sample dictionary, adds metadata to the sample, applies a pipeline if one is specified, and converts 'current_img' to numpy array format.",
+        "type": "comment"
+    },
+    "4916": {
+        "file_id": 423,
+        "content": "    \"\"\"Davis 2017 dataset.\n    \"\"\"\n    def __init__(\n        self,\n        file_path,\n        result_root,\n        pipeline,\n        data_prefix=None,\n        test_mode=False,\n        year=2017,\n        rgb=False,\n        resolution='480p',\n    ):\n        self.rgb = rgb\n        self.result_root = result_root\n        self.resolution = resolution\n        self.year = year\n        self.spt = 'val' if test_mode else 'train'\n        super().__init__(file_path, pipeline, data_prefix, test_mode)\n    def load_file(self):\n        self.image_root = os.path.join(self.file_path, 'JPEGImages',\n                                       self.resolution)\n        self.label_root = os.path.join(self.file_path, 'Annotations',\n                                       self.resolution)\n        seq_names = []\n        with open(\n                os.path.join(self.file_path, 'ImageSets', str(self.year),\n                             self.spt + '.txt')) as f:\n            seqs_tmp = f.readlines()\n        seqs_tmp = list(map(lambda elem: elem.strip(), seqs_tmp))",
+        "type": "code",
+        "location": "/paddlevideo/loader/dataset/davis_dataset.py:128-158"
+    },
+    "4917": {
+        "file_id": 423,
+        "content": "The code represents the initialization and file loading process for the Davis 2017 dataset in PaddleVideo. The constructor takes various parameters like file path, result root, pipeline, data prefix, test mode, year, rgb, and resolution to initialize the class attributes. The load_file() method sets image and label roots based on the provided resolution and reads the sequence names from a specified file.",
+        "type": "comment"
+    },
+    "4918": {
+        "file_id": 423,
+        "content": "        seq_names.extend(seqs_tmp)\n        self.info = list(np.unique(seq_names))\n        return self.info\n    def prepare_test(self, idx):\n        seq_name = self.info[idx]  #video name\n        images = list(\n            np.sort(os.listdir(os.path.join(self.image_root, seq_name))))\n        labels = [images[0].replace('jpg', 'png')]  #we have first frame target\n        # copy first frame target\n        if not os.path.isfile(\n                os.path.join(self.result_root, seq_name, labels[0])):\n            if not os.path.exists(os.path.join(self.result_root, seq_name)):\n                os.makedirs(os.path.join(self.result_root, seq_name))\n            source_label_path = os.path.join(self.label_root, seq_name,\n                                             labels[0])\n            result_label_path = os.path.join(self.result_root, seq_name,\n                                             labels[0])\n            shutil.copy(source_label_path, result_label_path)\n        seq_dataset = VOS_Test(self.image_root,\n                               self.label_root,",
+        "type": "code",
+        "location": "/paddlevideo/loader/dataset/davis_dataset.py:159-182"
+    },
+    "4919": {
+        "file_id": 423,
+        "content": "This function prepares a test dataset for the VOS task. It retrieves the video name from the info list, then lists all image files in the corresponding directory and adds the first frame as the target label. If the target label does not exist in the result directory, it creates the necessary directories and copies the target label file to the correct location.",
+        "type": "comment"
+    },
+    "4920": {
+        "file_id": 423,
+        "content": "                               seq_name,\n                               images,\n                               labels,\n                               self.pipeline,\n                               rgb=self.rgb,\n                               resolution=480)\n        return seq_dataset",
+        "type": "code",
+        "location": "/paddlevideo/loader/dataset/davis_dataset.py:183-189"
+    },
+    "4921": {
+        "file_id": 423,
+        "content": "This code is returning a sequence dataset named seq_name with associated images and labels, processed by the pipeline function specified, potentially using RGB format if self.rgb is True, and a fixed resolution of 480 pixels.",
+        "type": "comment"
+    },
+    "4922": {
+        "file_id": 424,
+        "content": "/paddlevideo/loader/dataset/feature.py",
+        "type": "filepath"
+    },
+    "4923": {
+        "file_id": 424,
+        "content": "The Python class FeatureDataset, part of the PaddleVideo library, initializes attributes and provides methods for action recognition tasks. The code also includes a prepare_test function to prepare data for testing by applying a pipeline and checking 'iou_norm' results.",
+        "type": "summary"
+    },
+    "4924": {
+        "file_id": 424,
+        "content": "# copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport copy\nimport os.path as osp\nfrom ..registry import DATASETS\nfrom .base import BaseDataset\n@DATASETS.register()\nclass FeatureDataset(BaseDataset):\n    \"\"\"Feature dataset for action recognition\n       Example:(TODO)\n       Args:(TODO)\n    \"\"\"\n    def __init__(\n        self,\n        file_path,\n        pipeline,\n        data_prefix=None,\n        test_mode=False,\n        suffix=None,\n    ):\n        self.suffix = suffix\n        super().__init__(file_path, pipeline, data_prefix, test_mode)",
+        "type": "code",
+        "location": "/paddlevideo/loader/dataset/feature.py:1-36"
+    },
+    "4925": {
+        "file_id": 424,
+        "content": "This code is a Python class named FeatureDataset, which is a subclass of BaseDataset. It appears to be part of the PaddleVideo library and is used for action recognition tasks. The class has an __init__ method that initializes various attributes such as file_path, pipeline, data_prefix, test_mode, and suffix. The class is registered in the DATASETS registry.",
+        "type": "comment"
+    },
+    "4926": {
+        "file_id": 424,
+        "content": "    def load_file(self):\n        \"\"\"Load index file to get video information.\"\"\"\n        info = []\n        with open(self.file_path, 'r') as fin:\n            for line in fin:\n                filename = line.strip().split()[0]\n                if self.data_prefix is not None:\n                    filename = osp.join(self.data_prefix, filename)\n                if self.suffix is not None:\n                    filename = filename + self.suffix\n                info.append(dict(filename=filename))\n        return info\n    def prepare_train(self, idx):\n        \"\"\"TRAIN & VALID. Prepare the data for training/valid given the index.\"\"\"\n        results = copy.deepcopy(self.info[idx])\n        results = self.pipeline(results)\n        if 'iou_norm' in results:\n            return results['rgb_data'], results['rgb_len'], results[\n                'rgb_mask'], results['audio_data'], results[\n                    'audio_len'], results['audio_mask'], results[\n                        'labels'], results['iou_norm']\n        else:\n            return results['rgb_data'], results['rgb_len'], results[",
+        "type": "code",
+        "location": "/paddlevideo/loader/dataset/feature.py:38-63"
+    },
+    "4927": {
+        "file_id": 424,
+        "content": "The code defines two methods. The `load_file` method reads an index file and retrieves video information by parsing each line, stripping whitespace, splitting the filename, and optionally appending a specified suffix or joining with a data prefix. It returns a list of dictionaries containing the filenames. The `prepare_train` method takes an index and prepares training/validation data using a specified pipeline function. If 'iou_norm' is present in the results, it returns multiple data types (e.g., rgb_data, rgb_len, rgb_mask, audio_data, audio_len, audio_mask) along with labels.",
+        "type": "comment"
+    },
+    "4928": {
+        "file_id": 424,
+        "content": "                'rgb_mask'], results['audio_data'], results[\n                    'audio_len'], results['audio_mask'], results['labels']\n    def prepare_test(self, idx):\n        \"\"\"TEST. Prepare the data for testing given the index.\"\"\"\n        results = copy.deepcopy(self.info[idx])\n        results = self.pipeline(results)\n        if 'iou_norm' in results:\n            return results['rgb_data'], results['rgb_len'], results[\n                'rgb_mask'], results['audio_data'], results[\n                    'audio_len'], results['audio_mask'], results[\n                        'labels'], results['iou_norm']\n        else:\n            return results['rgb_data'], results['rgb_len'], results[\n                'rgb_mask'], results['audio_data'], results[\n                    'audio_len'], results['audio_mask'], results['labels']",
+        "type": "code",
+        "location": "/paddlevideo/loader/dataset/feature.py:64-80"
+    },
+    "4929": {
+        "file_id": 424,
+        "content": "The code defines a function prepare_test that prepares data for testing. It creates a deep copy of the dataset information at the given index, applies a pipeline to it and then checks if 'iou_norm' is in the results. If it is, it returns 7 elements including 'rgb_data', 'audio_data', 'labels' and 'iou_norm'. Otherwise, it returns 6 elements without 'iou_norm'.",
+        "type": "comment"
+    },
+    "4930": {
+        "file_id": 425,
+        "content": "/paddlevideo/loader/dataset/frame.py",
+        "type": "filepath"
+    },
+    "4931": {
+        "file_id": 425,
+        "content": "The PaddleVideo library's FrameDataset and FrameDataset_Sport classes load, transform, and process video data with error handling for missing or corrupted files under Apache License 2.0.",
+        "type": "summary"
+    },
+    "4932": {
+        "file_id": 425,
+        "content": "# copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport os.path as osp\nimport copy\nimport random\nimport numpy as np\nfrom ..registry import DATASETS\nfrom .base import BaseDataset\nfrom ...utils import get_logger\nlogger = get_logger(\"paddlevideo\")\n@DATASETS.register()\nclass FrameDataset(BaseDataset):\n    \"\"\"Rawframe dataset for action recognition.\n    The dataset loads raw frames from frame files, and apply specified transform operatation them.\n    The indecx file ",
+        "type": "code",
+        "location": "/paddlevideo/loader/dataset/frame.py:1-31"
+    },
+    "4933": {
+        "file_id": 425,
+        "content": "This code is a Python class for a FrameDataset, which loads raw frames from frame files and applies specified transform operations. It is part of the PaddleVideo library and follows Apache License 2.0. The dataset index file is used to organize the loaded data. This class inherits from BaseDataset, suggesting it has some common functionalities.",
+        "type": "comment"
+    },
+    "4934": {
+        "file_id": 425,
+        "content": "is a text file with multiple lines, and each line indicates the directory of frames of a video, toatl frames of the video, and its label, which split with a whitespace.\n    Example of an index file:\n    .. code-block:: txt\n        file_path-1 150 1\n        file_path-2 160 1\n        file_path-3 170 2\n        file_path-4 180 2\n    Args:\n        file_path (str): Path to the index file.\n        pipeline(XXX):\n        data_prefix (str): directory path of the data. Default: None.\n        test_mode (bool): Whether to bulid the test dataset. Default: False.\n        suffix (str): suffix of file. Default: 'img_{:05}.jpg'.\n    \"\"\"\n    def __init__(self,\n                 file_path,\n                 pipeline,\n                 num_retries=5,\n                 data_prefix=None,\n                 test_mode=False,\n                 suffix='img_{:05}.jpg'):\n        self.num_retries = num_retries\n        self.suffix = suffix\n        super().__init__(file_path, pipeline, data_prefix, test_mode)\n    def load_file(self):\n        \"\"\"Load index file to get video information.\"\"\"",
+        "type": "code",
+        "location": "/paddlevideo/loader/dataset/frame.py:31-61"
+    },
+    "4935": {
+        "file_id": 425,
+        "content": "This code initializes a class for loading video information from an index file. The index file contains the directory of frames, total frames, and label for each video. It supports pipeline and data_prefix, and has options for test mode and suffix format.",
+        "type": "comment"
+    },
+    "4936": {
+        "file_id": 425,
+        "content": "        info = []\n        with open(self.file_path, 'r') as fin:\n            for line in fin:\n                line_split = line.strip().split()\n                frame_dir, frames_len, labels = line_split\n                if self.data_prefix is not None:\n                    frame_dir = osp.join(self.data_prefix, frame_dir)\n                info.append(\n                    dict(frame_dir=frame_dir,\n                         suffix=self.suffix,\n                         frames_len=frames_len,\n                         labels=int(labels)))\n        return info\n    def prepare_train(self, idx):\n        \"\"\"Prepare the frames for training/valid given index. \"\"\"\n        #Try to catch Exception caused by reading missing frames files\n        for ir in range(self.num_retries):\n            try:\n                results = copy.deepcopy(self.info[idx])\n                results = self.pipeline(results)\n            except Exception as e:\n                #logger.info(e)\n                if ir < self.num_retries - 1:\n                    logger.info(",
+        "type": "code",
+        "location": "/paddlevideo/loader/dataset/frame.py:62-86"
+    },
+    "4937": {
+        "file_id": 425,
+        "content": "This code reads data from a file and returns information related to frames, such as the frame directory, suffix, number of frames, and labels. It also includes a try-catch block that attempts to prepare the frames for training or validation multiple times if an exception occurs while reading the frames files.",
+        "type": "comment"
+    },
+    "4938": {
+        "file_id": 425,
+        "content": "                        \"Error when loading {}, have {} trys, will try again\".\n                        format(results['frame_dir'], ir))\n                idx = random.randint(0, len(self.info) - 1)\n                continue\n            return results['imgs'], np.array([results['labels']])\n    def prepare_test(self, idx):\n        \"\"\"Prepare the frames for test given index. \"\"\"\n        #Try to catch Exception caused by reading missing frames files\n        for ir in range(self.num_retries):\n            try:\n                results = copy.deepcopy(self.info[idx])\n                results = self.pipeline(results)\n            except Exception as e:\n                #logger.info(e)\n                if ir < self.num_retries - 1:\n                    logger.info(\n                        \"Error when loading {}, have {} trys, will try again\".\n                        format(results['frame_dir'], ir))\n                idx = random.randint(0, len(self.info) - 1)\n                continue\n            return results['imgs'], np.array([results['labels']])",
+        "type": "code",
+        "location": "/paddlevideo/loader/dataset/frame.py:87-108"
+    },
+    "4939": {
+        "file_id": 425,
+        "content": "The code handles exceptions for loading missing frames in the dataset. It tries to load frames multiple times within a specified range and logs errors when needed. If an exception occurs, it randomly selects another index and continues the process until successful.",
+        "type": "comment"
+    },
+    "4940": {
+        "file_id": 425,
+        "content": "@DATASETS.register()\nclass FrameDataset_Sport(BaseDataset):\n    \"\"\"Video dataset for action recognition\n       The dataset loads raw videos and apply specified transforms on them.\n       The index file is a file with multiple lines, and each line indicates\n       a sample video with the filepath and label, which are split with a whitesapce.\n       Example of a inde file:\n       .. code-block:: txt\n           path/000.mp4 1\n           path/001.mp4 1\n           path/002.mp4 2\n           path/003.mp4 2\n       Args:\n           file_path(str): Path to the index file.\n           pipeline(XXX): A sequence of data transforms.\n           **kwargs: Keyword arguments for ```BaseDataset```.\n    \"\"\"\n    def __init__(self, file_path, pipeline, num_retries=5, suffix='', **kwargs):\n        self.num_retries = num_retries\n        self.suffix = suffix\n        super().__init__(file_path, pipeline, **kwargs)\n    def load_file(self):\n        \"\"\"Load index file to get video information.\"\"\"\n        info = []\n        with open(self.file_path, 'r') as fin:",
+        "type": "code",
+        "location": "/paddlevideo/loader/dataset/frame.py:111-136"
+    },
+    "4941": {
+        "file_id": 425,
+        "content": "The code defines a FrameDataset_Sport class for loading raw videos and applying specified transforms. It uses an index file containing video file paths and labels, and takes arguments for file path, data transforms pipeline, retry attempts, and other BaseDataset kwargs. The load_file function reads the index file to obtain video information.",
+        "type": "comment"
+    },
+    "4942": {
+        "file_id": 425,
+        "content": "            for line in fin:\n                line_split = line.strip().split()\n                frame_dir = line_split[0]\n                if self.data_prefix is not None:\n                    frame_dir = osp.join(self.data_prefix, frame_dir)\n                info.append(dict(frame_dir=frame_dir, suffix=self.suffix))\n        return info\n    def prepare_train(self, idx):\n        \"\"\"TRAIN & VALID. Prepare the data for training/valid given the index.\"\"\"\n        #Try to catch Exception caused by reading corrupted video file\n        for ir in range(self.num_retries):\n            try:\n                results = copy.deepcopy(self.info[idx])\n                results = self.pipeline(results)\n            except Exception as e:\n                #logger.info(e)\n                if ir < self.num_retries - 1:\n                    logger.info(\n                        \"Error when loading {}, have {} trys, will try again\".\n                        format(results['filename'], ir))\n                idx = random.randint(0, len(self.info) - 1)",
+        "type": "code",
+        "location": "/paddlevideo/loader/dataset/frame.py:137-158"
+    },
+    "4943": {
+        "file_id": 425,
+        "content": "This code reads lines from a file, each representing a frame directory and associated information. It then splits the line into components and appends the frame directory and suffix to the info list. The prepare_train function attempts to process data for training or validation, handling exceptions by retrying up to a specified number of times before selecting another index at random.",
+        "type": "comment"
+    },
+    "4944": {
+        "file_id": 425,
+        "content": "                continue\n            return results['imgs'], np.array([results['labels']])\n    def prepare_test(self, idx):\n        \"\"\"TEST. Prepare the data for test given the index.\"\"\"\n        #Try to catch Exception caused by reading corrupted video file\n        for ir in range(self.num_retries):\n            try:\n                results = copy.deepcopy(self.info[idx])\n                results = self.pipeline(results)\n            except Exception as e:\n                #logger.info(e)\n                if ir < self.num_retries - 1:\n                    logger.info(\n                        \"Error when loading {}, have {} trys, will try again\".\n                        format(results['filename'], ir))\n                idx = random.randint(0, len(self.info) - 1)\n                continue\n            return results['imgs'], np.array([results['labels']])",
+        "type": "code",
+        "location": "/paddlevideo/loader/dataset/frame.py:159-177"
+    },
+    "4945": {
+        "file_id": 425,
+        "content": "The function `prepare_test` is attempting to prepare data for testing by iterating through a certain number of retries in case of exceptions caused by corrupted video files. If an exception occurs, it logs the error and tries again with a different random index from the list of info. Once successful, it returns the images and labels as arrays.",
+        "type": "comment"
+    },
+    "4946": {
+        "file_id": 426,
+        "content": "/paddlevideo/loader/dataset/ms_tcn_dataset.py",
+        "type": "filepath"
+    },
+    "4947": {
+        "file_id": 426,
+        "content": "The code initializes a class for MS-TCN dataset, loads video features and labels for training or testing, and converts label data to integers using a dictionary mapping.",
+        "type": "summary"
+    },
+    "4948": {
+        "file_id": 426,
+        "content": "# copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport copy\nimport os\nimport numpy as np\nfrom ..registry import DATASETS\nfrom .base import BaseDataset\nfrom ...utils import get_logger\nlogger = get_logger(\"paddlevideo\")\n@DATASETS.register()\nclass MSTCNDataset(BaseDataset):\n    \"\"\"Video dataset for action segmentation.\n    \"\"\"\n    def __init__(\n        self,\n        file_path,\n        pipeline,\n        feature_path,\n        gt_path,\n        actions_map_file_path,\n        **kwargs,",
+        "type": "code",
+        "location": "/paddlevideo/loader/dataset/ms_tcn_dataset.py:1-38"
+    },
+    "4949": {
+        "file_id": 426,
+        "content": "Imports required modules and registers a class for the MS-TCN dataset, a video dataset for action segmentation. The class initializes with file paths and other parameters.",
+        "type": "comment"
+    },
+    "4950": {
+        "file_id": 426,
+        "content": "    ):\n        super().__init__(file_path, pipeline, **kwargs)\n        self.gt_path = gt_path\n        self.actions_map_file_path = actions_map_file_path\n        self.feature_path = feature_path\n        # actions dict generate\n        file_ptr = open(self.actions_map_file_path, 'r')\n        actions = file_ptr.read().split('\\n')[:-1]\n        file_ptr.close()\n        self.actions_dict = dict()\n        for a in actions:\n            self.actions_dict[a.split()[1]] = int(a.split()[0])\n        self.num_classes = len(self.actions_dict.keys())\n    def load_file(self):\n        \"\"\"Load index file to get video information.\"\"\"\n        file_ptr = open(self.file_path, 'r')\n        info = file_ptr.read().split('\\n')[:-1]\n        file_ptr.close()\n        return info\n    def prepare_train(self, idx):\n        \"\"\"TRAIN & VALID: Prepare data for training/valid given the index.\"\"\"\n        results = {}\n        video_name = self.info[idx]\n        # load video feature\n        file_name = video_name.split('.')[0] + \".npy\"\n        feat_file_path = os.path.join(self.feature_path, file_name)",
+        "type": "code",
+        "location": "/paddlevideo/loader/dataset/ms_tcn_dataset.py:39-68"
+    },
+    "4951": {
+        "file_id": 426,
+        "content": "This code initializes a class, likely for data loading in a video dataset. It takes file paths as parameters, reads an actions map file to create a dictionary of action classes and their corresponding labels. The class also has a method load_file() to read the index file, and a method prepare_train() to prepare training data given an index.",
+        "type": "comment"
+    },
+    "4952": {
+        "file_id": 426,
+        "content": "        #TODO: check path\n        video_feat = np.load(feat_file_path)\n        # load label\n        target_file_path = os.path.join(self.gt_path, video_name)\n        file_ptr = open(target_file_path, 'r')\n        content = file_ptr.read().split('\\n')[:-1]\n        classes = np.zeros(min(np.shape(video_feat)[1], len(content)), dtype='int64')\n        for i in range(len(classes)):\n            classes[i] = self.actions_dict[content[i]]\n        # classes = classes * (-100)\n        results['video_feat'] = copy.deepcopy(video_feat)\n        results['video_gt'] = copy.deepcopy(classes)\n        results = self.pipeline(results)\n        return results['video_feat'], results['video_gt']\n    def prepare_test(self, idx):\n        \"\"\"TEST: Prepare the data for test given the index.\"\"\"\n        results = {}\n        video_name = self.info[idx]\n        # load video feature\n        file_name = video_name.split('.')[0] + \".npy\"\n        feat_file_path = os.path.join(self.feature_path, file_name)\n        #TODO: check path\n        video_feat = np.load(feat_file_path)",
+        "type": "code",
+        "location": "/paddlevideo/loader/dataset/ms_tcn_dataset.py:69-95"
+    },
+    "4953": {
+        "file_id": 426,
+        "content": "This code is loading video features and labels from a dataset, likely for training or testing purposes. It first checks the path of the feature file, then loads both the video feature and label data from specified paths. The code converts the label data into integer format using a dictionary mapping and performs some potential preprocessing steps (not shown here). Finally, it returns the video feature and label data for further processing.",
+        "type": "comment"
+    },
+    "4954": {
+        "file_id": 426,
+        "content": "        # load label\n        target_file_path = os.path.join(self.gt_path, video_name)\n        file_ptr = open(target_file_path, 'r')\n        content = file_ptr.read().split('\\n')[:-1]\n        classes = np.zeros(min(np.shape(video_feat)[1], len(content)))\n        for i in range(len(classes)):\n            classes[i] = self.actions_dict[content[i]]\n        # classes = classes * (-100)\n        results['video_feat'] = copy.deepcopy(video_feat)\n        results['video_gt'] = copy.deepcopy(classes)\n        results = self.pipeline(results)\n        return results['video_feat'], results['video_gt']",
+        "type": "code",
+        "location": "/paddlevideo/loader/dataset/ms_tcn_dataset.py:97-110"
+    },
+    "4955": {
+        "file_id": 426,
+        "content": "This function loads labels for a video dataset. It reads the label file, converts content to class numbers using actions_dict, assigns class values to classes array, scales the classes, and returns the feature and ground truth data for the video.",
+        "type": "comment"
+    },
+    "4956": {
+        "file_id": 427,
+        "content": "/paddlevideo/loader/dataset/msrvtt.py",
+        "type": "filepath"
+    },
+    "4957": {
+        "file_id": 427,
+        "content": "The Python script prepares MSRVTTDataset by importing libraries, creating a class, tokenizing captions, retrieving features, and preparing sequences for processing. It processes image data, performs array operations, pads, resizes, calculates features, and converts to float32 for training/testing.",
+        "type": "summary"
+    },
+    "4958": {
+        "file_id": 427,
+        "content": "# copyright (c) 2021 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport os.path as osp\nimport copy\nimport random\nimport numpy as np\ntry:\n    import lmdb\nexcept ImportError as e:\n    print(\n        f\"Warning! {e}, [lmdb] package and it's dependencies is required for ActBERT.\"\n    )\nimport pickle\ntry:\n    from paddlenlp.transformers import BertTokenizer\nexcept ImportError as e:\n    print(\n        f\"Warning! {e}, [paddlenlp] package and it's dependencies is required for ActBERT.\"\n    )",
+        "type": "code",
+        "location": "/paddlevideo/loader/dataset/msrvtt.py:1-31"
+    },
+    "4959": {
+        "file_id": 427,
+        "content": "The code is a Python script that imports various libraries and packages, checks for the availability of 'lmdb' library, and tries to import 'BertTokenizer' from 'paddlenlp'. It also includes license information and copyright notice.",
+        "type": "comment"
+    },
+    "4960": {
+        "file_id": 427,
+        "content": "from ..registry import DATASETS\nfrom .base import BaseDataset\nfrom ...utils import get_logger\nlogger = get_logger(\"paddlevideo\")\n@DATASETS.register()\nclass MSRVTTDataset(BaseDataset):\n    \"\"\"MSR-VTT dataset for text-video clip retrieval.\n    \"\"\"\n    def __init__(\n        self,\n        file_path,\n        pipeline,\n        features_path,\n        bert_model=\"bert-base-uncased\",\n        padding_index=0,\n        max_seq_length=36,\n        max_region_num=36,\n        max_action_num=5,\n        vision_feature_dim=2048,\n        action_feature_dim=2048,\n        spatials_dim=5,\n        data_prefix=None,\n        test_mode=False,\n    ):\n        self.features_path = features_path\n        self.bert_model = bert_model\n        self.padding_index = padding_index\n        self.max_seq_length = max_seq_length\n        self.max_region_num = max_region_num\n        self._max_action_num = max_action_num\n        self.vision_feature_dim = vision_feature_dim\n        self.action_feature_dim = action_feature_dim\n        self.spatials_dim = spatials_dim",
+        "type": "code",
+        "location": "/paddlevideo/loader/dataset/msrvtt.py:32-67"
+    },
+    "4961": {
+        "file_id": 427,
+        "content": "The code defines the `MSRVTTDataset` class for text-video clip retrieval from MSR-VTT dataset, registering it in the registry. It takes parameters such as file path, pipeline, and maximum sequence length for initializing the dataset, and provides attributes like bert model, padding index, and other dimensions for processing the dataset.",
+        "type": "comment"
+    },
+    "4962": {
+        "file_id": 427,
+        "content": "        self._tokenizer = BertTokenizer.from_pretrained(bert_model,\n                                                        do_lower_case=True)\n        super().__init__(file_path, pipeline, data_prefix, test_mode)\n        self.tokenize()\n        self.gen_feature()\n    def load_file(self):\n        \"\"\"Load index file to get video information.\"\"\"\n        with open(self.file_path) as fin:\n            self.image_entries = []\n            self.caption_entries = []\n            for line in fin.readlines():\n                line = line.strip()\n                vid_id = line.split(',')[0]\n                self.image_entries.append(vid_id)\n                self.caption_entries.append({\n                    \"caption\": line.split(',')[1],\n                    \"vid_id\": vid_id\n                })\n        self.env = lmdb.open(self.features_path)\n    def tokenize(self):\n        for entry in self.caption_entries:\n            tokens = []\n            tokens.append(\"[CLS]\")\n            for token in self._tokenizer.tokenize(entry[\"caption\"]):",
+        "type": "code",
+        "location": "/paddlevideo/loader/dataset/msrvtt.py:68-93"
+    },
+    "4963": {
+        "file_id": 427,
+        "content": "The code snippet initializes a BertTokenizer object, loads file containing video information, tokenizes each entry's caption using the initialized tokenizer.",
+        "type": "comment"
+    },
+    "4964": {
+        "file_id": 427,
+        "content": "                tokens.append(token)\n            tokens.append(\"[SEP]\")\n            tokens = self._tokenizer.convert_tokens_to_ids(tokens)\n            segment_ids = [0] * len(tokens)\n            input_mask = [1] * len(tokens)\n            if len(tokens) < self.max_seq_length:\n                padding = [self.padding_index\n                           ] * (self.max_seq_length - len(tokens))\n                tokens = tokens + padding\n                input_mask += padding\n                segment_ids += padding\n            entry[\"token\"] = np.array(tokens).astype('int64')\n            entry[\"input_mask\"] = np.array(input_mask)\n            entry[\"segment_ids\"] = np.array(segment_ids).astype('int64')\n    def get_image_feature(self, video_id):\n        video_id = str(video_id).encode()\n        with self.env.begin(write=False) as txn:\n            item = pickle.loads(txn.get(video_id))\n            video_id = item[\"video_id\"]\n            image_h = int(item[\"image_h\"])\n            image_w = int(item[\"image_w\"])\n            features = item[\"features\"].reshape(-1, self.vision_feature_dim)",
+        "type": "code",
+        "location": "/paddlevideo/loader/dataset/msrvtt.py:94-120"
+    },
+    "4965": {
+        "file_id": 427,
+        "content": "This code is part of a class that processes video data. It appends tokens to an entry, converts tokens to ids, creates segment and input masks, and pads the sequence if necessary. The \"get_image_feature\" function retrieves image features from a database for a given video ID.",
+        "type": "comment"
+    },
+    "4966": {
+        "file_id": 427,
+        "content": "            boxes = item[\"boxes\"].reshape(-1, 4)\n            num_boxes = features.shape[0]\n            g_feat = np.sum(features, axis=0) / num_boxes\n            num_boxes = num_boxes + 1\n            features = np.concatenate(\n                [np.expand_dims(g_feat, axis=0), features], axis=0)\n            action_features = item[\"action_features\"].reshape(\n                -1, self.action_feature_dim)\n            image_location = np.zeros((boxes.shape[0], self.spatials_dim),\n                                      dtype=np.float32)\n            image_location[:, :4] = boxes\n            image_location[:,\n                           4] = ((image_location[:, 3] - image_location[:, 1]) *\n                                 (image_location[:, 2] - image_location[:, 0]) /\n                                 (float(image_w) * float(image_h)))\n            image_location[:, 0] = image_location[:, 0] / float(image_w)\n            image_location[:, 1] = image_location[:, 1] / float(image_h)\n            image_location[:, 2] = image_location[:, 2] / float(image_w)",
+        "type": "code",
+        "location": "/paddlevideo/loader/dataset/msrvtt.py:121-142"
+    },
+    "4967": {
+        "file_id": 427,
+        "content": "This code is resizing and calculating the image location for each box in a dataset. It also concatenates the average feature to the start of the features array, and handles reshaping action_features. The code uses numpy functions extensively for array operations.",
+        "type": "comment"
+    },
+    "4968": {
+        "file_id": 427,
+        "content": "            image_location[:, 3] = image_location[:, 3] / float(image_h)\n            g_location = np.array([0, 0, 1, 1, 1])\n            image_location = np.concatenate(\n                [np.expand_dims(g_location, axis=0), image_location], axis=0)\n        return features, num_boxes, image_location, action_features\n    def gen_feature(self):\n        num_inst = len(self.image_entries)  #1000\n        self.features_all = np.zeros(\n            (num_inst, self.max_region_num, self.vision_feature_dim))\n        self.action_features_all = np.zeros(\n            (num_inst, self._max_action_num, self.action_feature_dim))\n        self.spatials_all = np.zeros(\n            (num_inst, self.max_region_num, self.spatials_dim))\n        self.image_mask_all = np.zeros((num_inst, self.max_region_num))\n        self.action_mask_all = np.zeros((num_inst, self._max_action_num))\n        for i, image_id in enumerate(self.image_entries):\n            features, num_boxes, boxes, action_features = self.get_image_feature(\n                image_id)",
+        "type": "code",
+        "location": "/paddlevideo/loader/dataset/msrvtt.py:143-163"
+    },
+    "4969": {
+        "file_id": 427,
+        "content": "The code defines a function that returns features, number of boxes, image location, and action features after processing an input image. It also initializes arrays for all instances of features, action features, spatial locations, and masks. The code then iterates over each image ID and calls another function to get the respective features, num_boxes, boxes, and action_features.",
+        "type": "comment"
+    },
+    "4970": {
+        "file_id": 427,
+        "content": "            mix_num_boxes = min(int(num_boxes), self.max_region_num)\n            mix_boxes_pad = np.zeros((self.max_region_num, self.spatials_dim))\n            mix_features_pad = np.zeros(\n                (self.max_region_num, self.vision_feature_dim))\n            image_mask = [1] * (int(mix_num_boxes))\n            while len(image_mask) < self.max_region_num:\n                image_mask.append(0)\n            action_mask = [1] * (self._max_action_num)\n            while len(action_mask) < self._max_action_num:\n                action_mask.append(0)\n            mix_boxes_pad[:mix_num_boxes] = boxes[:mix_num_boxes]\n            mix_features_pad[:mix_num_boxes] = features[:mix_num_boxes]\n            self.features_all[i] = mix_features_pad\n            x = action_features.shape[0]\n            self.action_features_all[i][:x] = action_features[:]\n            self.image_mask_all[i] = np.array(image_mask)\n            self.action_mask_all[i] = np.array(action_mask)\n            self.spatials_all[i] = mix_boxes_pad\n        self.features_all = self.features_all.astype(\"float32\")",
+        "type": "code",
+        "location": "/paddlevideo/loader/dataset/msrvtt.py:165-187"
+    },
+    "4971": {
+        "file_id": 427,
+        "content": "The code handles the padding of features, boxes and masks for a dataset. It ensures that all sequences have the same length by padding them with zeros if necessary. The mixed features (maximum region number), boxes, and action features are assigned to respective lists. These lists will be used later in the program. The code also converts the features list to float32 data type.",
+        "type": "comment"
+    },
+    "4972": {
+        "file_id": 427,
+        "content": "        self.action_features_all = self.action_features_all.astype(\"float32\")\n        self.image_mask_all = self.image_mask_all.astype(\"int64\")\n        self.action_mask_all = self.action_mask_all.astype(\"int64\")\n        self.spatials_all = self.spatials_all.astype(\"float32\")\n    def prepare_train(self, idx):\n        pass\n    def prepare_test(self, idx):\n        entry = self.caption_entries[idx]\n        caption = entry[\"token\"]\n        input_mask = entry[\"input_mask\"]\n        segment_ids = entry[\"segment_ids\"]\n        target_all = np.zeros(1000)\n        for i, image_id in enumerate(self.image_entries):\n            if image_id == entry[\"vid_id\"]:\n                target_all[i] = 1\n        return (\n            caption,\n            self.action_features_all,\n            self.features_all,\n            self.spatials_all,\n            segment_ids,\n            input_mask,\n            self.image_mask_all,\n            self.action_mask_all,\n            target_all,\n        )\n    def __len__(self):\n        return len(self.caption_entries)",
+        "type": "code",
+        "location": "/paddlevideo/loader/dataset/msrvtt.py:188-220"
+    },
+    "4973": {
+        "file_id": 427,
+        "content": "This code initializes data types and provides methods for preparing training and testing data. The `prepare_train` method is left empty, while `prepare_test` takes an index, retrieves the corresponding entry, creates a target array, and returns various data arrays to be used in testing. The length of the dataset is determined by the number of caption entries.",
+        "type": "comment"
+    },
+    "4974": {
+        "file_id": 428,
+        "content": "/paddlevideo/loader/dataset/oxford.py",
+        "type": "filepath"
+    },
+    "4975": {
+        "file_id": 428,
+        "content": "This Python class defines the \"MonoDataset\" for PaddleVideo, initializes with file path, data prefix, and pipeline support. The code contains `load_file`, `prepare_train`, and `prepare_test` methods for dataset preparation and information retrieval.",
+        "type": "summary"
+    },
+    "4976": {
+        "file_id": 428,
+        "content": "# Copyright Niantic 2019. Patent Pending. All rights reserved.\n#\n# This software is licensed under the terms of the Monodepth2 licence\n# which allows for non-commercial use only, the full terms of which are made\n# available in the LICENSE file.\nfrom __future__ import absolute_import, division, print_function\nimport copy\nfrom os import path as osp\nfrom PIL import Image\nfrom ..registry import DATASETS\nfrom .base import BaseDataset\ndef pil_loader(path):\n    # open path as file to avoid ResourceWarning\n    # (https://github.com/python-pillow/Pillow/issues/835)\n    with open(path, 'rb') as f:\n        with Image.open(f) as img:\n            return img.convert('RGB')\n@DATASETS.register()\nclass MonoDataset(BaseDataset):\n    def __init__(self,\n                 file_path,\n                 data_prefix,\n                 pipeline,\n                 num_retries=0,\n                 suffix='.png',\n                 **kwargs):\n        self.num_retries = num_retries\n        self.suffix = suffix\n        super().__init__(file_path, pipeline, data_prefix, **kwargs)",
+        "type": "code",
+        "location": "/paddlevideo/loader/dataset/oxford.py:1-37"
+    },
+    "4977": {
+        "file_id": 428,
+        "content": "This code is a Python class defining the \"MonoDataset\" dataset for PaddleVideo. It requires file path, data prefix, and pipeline for initialization, supports retries when accessing files, and utilizes the pil_loader function for loading RGB images from file paths with specified suffixes. The code also registers MonoDataset with DATASETS registry.",
+        "type": "comment"
+    },
+    "4978": {
+        "file_id": 428,
+        "content": "    def load_file(self):\n        info = []\n        with open(self.file_path, 'r') as f:\n            for line in f:\n                filename = line.strip() + self.suffix\n                folder = osp.dirname(filename)\n                frame_index = line.strip().split('/')[1]\n                info.append(\n                    dict(data_path=self.data_prefix,\n                         filename=filename,\n                         folder=folder,\n                         frame_index=int(frame_index)))\n        return info\n    def prepare_train(self, idx):\n        results = copy.deepcopy(self.info[idx])\n        results = self.pipeline(results)\n        results['imgs']['idx'] = idx\n        return results['imgs'], results['day_or_night']\n    def prepare_test(self, idx):\n        results = copy.deepcopy(self.info[idx])\n        results = self.pipeline(results)\n        return results['imgs'], results['day_or_night']",
+        "type": "code",
+        "location": "/paddlevideo/loader/dataset/oxford.py:39-62"
+    },
+    "4979": {
+        "file_id": 428,
+        "content": "The code defines three methods: `load_file`, `prepare_train`, and `prepare_test`. The `load_file` method reads a file containing information about image files, stripping off newline characters, and appending the necessary file suffix. It then appends a dictionary to the `info` list with data path, filename, folder location, and frame index. The `prepare_train` and `prepare_test` methods copy an entry from `self.info` and apply a pipeline before returning relevant information (e.g., images, labels).",
+        "type": "comment"
+    },
+    "4980": {
+        "file_id": 429,
+        "content": "/paddlevideo/loader/dataset/skeleton.py",
+        "type": "filepath"
+    },
+    "4981": {
+        "file_id": 429,
+        "content": "The code defines a SkeletonDataset class for action recognition, loading skeleton features and applying normalization operations. It imports libraries, registers the dataset, includes a logger, and has a class for loading skeleton data with optional label path and test mode parameter. The class loads and returns data for training or testing, preparing features based on training/testing needs and considering labels if available.",
+        "type": "summary"
+    },
+    "4982": {
+        "file_id": 429,
+        "content": "# copyright (c) 2021 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport os.path as osp\nimport copy\nimport random\nimport numpy as np\nimport pickle\nfrom ..registry import DATASETS\nfrom .base import BaseDataset\nfrom ...utils import get_logger\nlogger = get_logger(\"paddlevideo\")\n@DATASETS.register()\nclass SkeletonDataset(BaseDataset):\n    \"\"\"\n    Skeleton dataset for action recognition.\n    The dataset loads skeleton feature, and apply norm operatations.\n    Args:\n        file_path (str): Path to the index file.",
+        "type": "code",
+        "location": "/paddlevideo/loader/dataset/skeleton.py:1-34"
+    },
+    "4983": {
+        "file_id": 429,
+        "content": "This code defines a SkeletonDataset class for action recognition. It loads skeleton features and applies normalization operations. It also imports necessary libraries, registers the dataset with DATASETS, and includes a logger for logging purposes.",
+        "type": "comment"
+    },
+    "4984": {
+        "file_id": 429,
+        "content": "        pipeline(obj): Define the pipeline of data preprocessing.\n        data_prefix (str): directory path of the data. Default: None.\n        test_mode (bool): Whether to bulid the test dataset. Default: False.\n    \"\"\"\n    def __init__(self, file_path, pipeline, label_path=None, test_mode=False):\n        self.label_path = label_path\n        super().__init__(file_path, pipeline, test_mode=test_mode)\n    def load_file(self):\n        \"\"\"Load feature file to get skeleton information.\"\"\"\n        logger.info(\"Loading data, it will take some moment...\")\n        self.data = np.load(self.file_path)\n        if self.label_path:\n            if self.label_path.endswith('npy'):\n                self.label = np.load(self.label_path)\n            elif self.label_path.endswith('pkl'):\n                with open(self.label_path, 'rb') as f:\n                    sample_name, self.label = pickle.load(f)\n        else:\n            logger.info(\n                \"Label path not provided when test_mode={}, here just output predictions.\"",
+        "type": "code",
+        "location": "/paddlevideo/loader/dataset/skeleton.py:35-55"
+    },
+    "4985": {
+        "file_id": 429,
+        "content": "This code defines a class for loading skeleton data. It takes file path, pipeline, and label path (optional) as input parameters. It also has an optional test mode parameter. The `__init__` method initializes the class with provided parameters. The `load_file` method loads feature files to get skeleton information and handles different file types for labels. If a label path is given and it ends with 'npy' or 'pkl', it will load the label; otherwise, it just outputs predictions.",
+        "type": "comment"
+    },
+    "4986": {
+        "file_id": 429,
+        "content": "                .format(self.test_mode))\n        logger.info(\"Data Loaded!\")\n        return self.data  # used for __len__\n    def prepare_train(self, idx):\n        \"\"\"Prepare the feature for training/valid given index. \"\"\"\n        results = dict()\n        results['data'] = copy.deepcopy(self.data[idx])\n        results['label'] = copy.deepcopy(self.label[idx])\n        results = self.pipeline(results)\n        return results['data'], results['label']\n    def prepare_test(self, idx):\n        \"\"\"Prepare the feature for test given index. \"\"\"\n        results = dict()\n        results['data'] = copy.deepcopy(self.data[idx])\n        if self.label_path:\n            results['label'] = copy.deepcopy(self.label[idx])\n            results = self.pipeline(results)\n            return results['data'], results['label']\n        else:\n            results = self.pipeline(results)\n            return [results['data']]",
+        "type": "code",
+        "location": "/paddlevideo/loader/dataset/skeleton.py:56-78"
+    },
+    "4987": {
+        "file_id": 429,
+        "content": "The code defines a class for loading, preparing, and returning data for training or testing. The `__getitem__` method loads the data and returns it when accessed by index. The `prepare_train` method prepares the feature for training/validation given an index. The `prepare_test` method prepares the feature for testing given an index, considering label if available.",
+        "type": "comment"
+    },
+    "4988": {
+        "file_id": 430,
+        "content": "/paddlevideo/loader/dataset/slowfast_video.py",
+        "type": "filepath"
+    },
+    "4989": {
+        "file_id": 430,
+        "content": "PaddleVideo's SFVideoDataset is a video dataset for action recognition, which extends BaseDataset with index file information and optional parameters. It prepares data for training by setting random seeds, loading index files, and appending entries before handling corrupted videos through retry mechanisms and calculating dataset size.",
+        "type": "summary"
+    },
+    "4990": {
+        "file_id": 430,
+        "content": "# copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport os.path as osp\nimport copy\nimport random\nimport numpy as np\nfrom ..registry import DATASETS\nfrom .base import BaseDataset\nfrom ...utils import get_logger\nlogger = get_logger(\"paddlevideo\")\n@DATASETS.register()\nclass SFVideoDataset(BaseDataset):\n    \"\"\"Video dataset for action recognition\n       The dataset loads raw videos and apply specified transforms on them.\n       The index file is a file with multiple lines, and each line indicates",
+        "type": "code",
+        "location": "/paddlevideo/loader/dataset/slowfast_video.py:1-31"
+    },
+    "4991": {
+        "file_id": 430,
+        "content": "This code snippet is from the PaddleVideo module and defines a class called SFVideoDataset. It is a video dataset for action recognition, loading raw videos and applying specified transforms on them. The index file contains multiple lines with information about each video. The class extends BaseDataset and registers it in the DATASETS registry. The code also includes license and copyright information.",
+        "type": "comment"
+    },
+    "4992": {
+        "file_id": 430,
+        "content": "       a sample video with the filepath and label, which are split with a whitesapce.\n       Example of a inde file:\n       .. code-block:: txt\n           path/000.mp4 1\n           path/001.mp4 1\n           path/002.mp4 2\n           path/003.mp4 2\n       Args:\n           file_path(str): Path to the index file.\n           pipeline(XXX): A sequence of data transforms.\n           num_ensemble_views(int): temporal segment when multi-crop test\n           num_spatial_crops(int): spatial crop number when multi-crop test\n           **kwargs: Keyword arguments for ```BaseDataset```.\n    \"\"\"\n    def __init__(\n        self,\n        file_path,\n        pipeline,\n        num_ensemble_views=1,\n        num_spatial_crops=1,\n        num_retries=5,\n        num_samples_precise_bn=None,\n        **kwargs,\n    ):\n        self.num_ensemble_views = num_ensemble_views\n        self.num_spatial_crops = num_spatial_crops\n        self.num_retries = num_retries\n        self.num_samples_precise_bn = num_samples_precise_bn\n        super().__init__(file_path, pipeline, **kwargs)",
+        "type": "code",
+        "location": "/paddlevideo/loader/dataset/slowfast_video.py:32-64"
+    },
+    "4993": {
+        "file_id": 430,
+        "content": "The code defines a class that represents an index file containing paths to video files and their corresponding labels. It takes arguments such as the path to the index file, data transforms pipeline, and optional parameters for ensemble views and spatial crops. It also includes keyword arguments for the BaseDataset class. The super() function is used to call the parent class's constructor.",
+        "type": "comment"
+    },
+    "4994": {
+        "file_id": 430,
+        "content": "        #set random seed\n        random.seed(0)\n        np.random.seed(0)\n    def load_file(self):\n        \"\"\"Load index file to get video information.\"\"\"\n        info = []\n        with open(self.file_path, 'r') as fin:\n            for line in fin:\n                line_split = line.strip().split()\n                filename, labels = line_split\n                if self.data_prefix is not None:\n                    filename = osp.join(self.data_prefix, filename)\n                for tidx in range(self.num_ensemble_views):\n                    for sidx in range(self.num_spatial_crops):\n                        info.append(\n                            dict(\n                                filename=filename,\n                                labels=int(labels),\n                                temporal_sample_index=tidx,\n                                spatial_sample_index=sidx,\n                                temporal_num_clips=self.num_ensemble_views,\n                                spatial_num_clips=self.num_spatial_crops,",
+        "type": "code",
+        "location": "/paddlevideo/loader/dataset/slowfast_video.py:65-87"
+    },
+    "4995": {
+        "file_id": 430,
+        "content": "Sets random seed for reproducibility, loads index file to get video information, and appends dictionary entries containing filename, labels, temporal, and spatial sample indices.",
+        "type": "comment"
+    },
+    "4996": {
+        "file_id": 430,
+        "content": "                            ))\n        return info\n    def prepare_train(self, idx):\n        \"\"\"TRAIN & VALID. Prepare the data for training given the index.\"\"\"\n        #Try to catch Exception caused by reading corrupted video file\n        short_cycle = False\n        if isinstance(idx, tuple):\n            idx, short_cycle_idx = idx\n            short_cycle = True\n        for ir in range(self.num_retries):\n            try:\n                #Multi-grid short cycle\n                if short_cycle:\n                    results = copy.deepcopy(self.info[idx])\n                    results['short_cycle_idx'] = short_cycle_idx\n                else:\n                    results = copy.deepcopy(self.info[idx])\n                results = self.pipeline(results)\n            except Exception as e:\n                #logger.info(e)\n                if ir < self.num_retries - 1:\n                    logger.info(\n                        \"Error when loading {}, have {} trys, will try again\".\n                        format(results['filename'], ir))",
+        "type": "code",
+        "location": "/paddlevideo/loader/dataset/slowfast_video.py:88-112"
+    },
+    "4997": {
+        "file_id": 430,
+        "content": "The code is responsible for preparing data for training in the context of a video dataset. It handles potential exceptions caused by reading corrupted video files and allows retries to avoid failures. The function takes an index as input, checks if it's a tuple or not, iterates over a specified number of retries, performs data processing using a pipeline, and handles any exceptions that occur during the process. If there are no exceptions, the results are returned; otherwise, the code logs an error message and tries again.",
+        "type": "comment"
+    },
+    "4998": {
+        "file_id": 430,
+        "content": "                idx = random.randint(0, len(self.info) - 1)\n                continue\n            return results['imgs'][0], results['imgs'][1], np.array(\n                [results['labels']])\n    def prepare_test(self, idx):\n        \"\"\"TEST. Prepare the data for test given the index.\"\"\"\n        #Try to catch Exception caused by reading corrupted video file\n        for ir in range(self.num_retries):\n            try:\n                results = copy.deepcopy(self.info[idx])\n                results = self.pipeline(results)\n            except Exception as e:\n                logger.info(e)\n                if ir < self.num_retries - 1:\n                    logger.info(\n                        \"Error when loading {}, have {} trys, will try again\".\n                        format(results['filename'], ir))\n                idx = random.randint(0, len(self.info) - 1)\n                continue\n            return results['imgs'][0], results['imgs'][1], np.array(\n                [results['labels']]), np.array([idx])\n    def __len__(self):",
+        "type": "code",
+        "location": "/paddlevideo/loader/dataset/slowfast_video.py:113-137"
+    },
+    "4999": {
+        "file_id": 430,
+        "content": "The code is implementing a retry mechanism for loading video files. If a corrupted file is encountered, it will attempt to load another random file up to the specified number of retries. If still unsuccessful, it will return an error. The function also includes a logging system to report exceptions and progress in retry attempts.",
+        "type": "comment"
+    }
+}

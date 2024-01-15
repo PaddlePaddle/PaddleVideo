@@ -1,0 +1,543 @@
+{
+    "7200": {
+        "file_id": 520,
+        "content": "#   Copyright (c) 2021 PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport math\nimport paddle\nimport paddle.nn.functional as F\nimport math\nimport numpy as np\ndef bbox2delta(src_boxes, tgt_boxes, weights):\n    src_w = src_boxes[:, 2] - src_boxes[:, 0]\n    src_h = src_boxes[:, 3] - src_boxes[:, 1]\n    src_ctr_x = src_boxes[:, 0] + 0.5 * src_w\n    src_ctr_y = src_boxes[:, 1] + 0.5 * src_h\n    tgt_w = tgt_boxes[:, 2] - tgt_boxes[:, 0]\n    tgt_h = tgt_boxes[:, 3] - tgt_boxes[:, 1]\n    tgt_ctr_x = tgt_boxes[:, 0] + 0.5 * tgt_w",
+        "type": "code",
+        "location": "/paddlevideo/modeling/bbox_utils.py:1-30"
+    },
+    "7201": {
+        "file_id": 520,
+        "content": "This code calculates the delta between source and target bounding boxes. It first computes the width and height of both source and target boxes, then their center coordinates. The variables are initialized and calculated for further usage in other functions related to bounding box transformation.",
+        "type": "comment"
+    },
+    "7202": {
+        "file_id": 520,
+        "content": "    tgt_ctr_y = tgt_boxes[:, 1] + 0.5 * tgt_h\n    wx, wy, ww, wh = weights\n    dx = wx * (tgt_ctr_x - src_ctr_x) / src_w\n    dy = wy * (tgt_ctr_y - src_ctr_y) / src_h\n    dw = ww * paddle.log(tgt_w / src_w)\n    dh = wh * paddle.log(tgt_h / src_h)\n    deltas = paddle.stack((dx, dy, dw, dh), axis=1)\n    return deltas\ndef delta2bbox(deltas, boxes, weights):\n    clip_scale = math.log(1000.0 / 16)\n    widths = boxes[:, 2] - boxes[:, 0]\n    heights = boxes[:, 3] - boxes[:, 1]\n    ctr_x = boxes[:, 0] + 0.5 * widths\n    ctr_y = boxes[:, 1] + 0.5 * heights\n    wx, wy, ww, wh = weights\n    dx = deltas[:, 0::4] / wx\n    dy = deltas[:, 1::4] / wy\n    dw = deltas[:, 2::4] / ww\n    dh = deltas[:, 3::4] / wh\n    # Prevent sending too large values into paddle.exp()\n    dw = paddle.clip(dw, max=clip_scale)\n    dh = paddle.clip(dh, max=clip_scale)\n    pred_ctr_x = dx * widths.unsqueeze(1) + ctr_x.unsqueeze(1)\n    pred_ctr_y = dy * heights.unsqueeze(1) + ctr_y.unsqueeze(1)\n    pred_w = paddle.exp(dw) * widths.unsqueeze(1)\n    pred_h = paddle.exp(dh) * heights.unsqueeze(1)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/bbox_utils.py:31-63"
+    },
+    "7203": {
+        "file_id": 520,
+        "content": "This code calculates the differentials (deltas) between target and source bounding boxes, then converts those deltas back into new bounding box coordinates. The conversion is done with weighted averages for x, y, width, and height adjustments, ensuring values are clipped to avoid large inputs for paddle.exp().",
+        "type": "comment"
+    },
+    "7204": {
+        "file_id": 520,
+        "content": "    pred_boxes = []\n    pred_boxes.append(pred_ctr_x - 0.5 * pred_w)\n    pred_boxes.append(pred_ctr_y - 0.5 * pred_h)\n    pred_boxes.append(pred_ctr_x + 0.5 * pred_w)\n    pred_boxes.append(pred_ctr_y + 0.5 * pred_h)\n    pred_boxes = paddle.stack(pred_boxes, axis=-1)\n    return pred_boxes\ndef expand_bbox(bboxes, scale):\n    w_half = (bboxes[:, 2] - bboxes[:, 0]) * .5\n    h_half = (bboxes[:, 3] - bboxes[:, 1]) * .5\n    x_c = (bboxes[:, 2] + bboxes[:, 0]) * .5\n    y_c = (bboxes[:, 3] + bboxes[:, 1]) * .5\n    w_half *= scale\n    h_half *= scale\n    bboxes_exp = np.zeros(bboxes.shape, dtype=np.float32)\n    bboxes_exp[:, 0] = x_c - w_half\n    bboxes_exp[:, 2] = x_c + w_half\n    bboxes_exp[:, 1] = y_c - h_half\n    bboxes_exp[:, 3] = y_c + h_half\n    return bboxes_exp\ndef clip_bbox(boxes, im_shape):\n    h, w = im_shape[0], im_shape[1]\n    x1 = boxes[:, 0].clip(0, w)\n    y1 = boxes[:, 1].clip(0, h)\n    x2 = boxes[:, 2].clip(0, w)\n    y2 = boxes[:, 3].clip(0, h)\n    return paddle.stack([x1, y1, x2, y2], axis=1)\ndef nonempty_bbox(boxes, min_size=0, return_mask=False):",
+        "type": "code",
+        "location": "/paddlevideo/modeling/bbox_utils.py:65-102"
+    },
+    "7205": {
+        "file_id": 520,
+        "content": "The code contains three functions: `expand_bbox`, `clip_bbox`, and `nonempty_bbox`. `expand_bbox` takes bbox coordinates, scales them by a factor, and returns the expanded bboxes. `clip_bbox` clips the bbox coordinates to the image shape boundaries. `nonempty_bbox` filters out empty bounding boxes based on a minimum size threshold or returns a mask if return_mask is True.",
+        "type": "comment"
+    },
+    "7206": {
+        "file_id": 520,
+        "content": "    w = boxes[:, 2] - boxes[:, 0]\n    h = boxes[:, 3] - boxes[:, 1]\n    mask = paddle.logical_and(w > min_size, w > min_size)\n    if return_mask:\n        return mask\n    keep = paddle.nonzero(mask).flatten()\n    return keep\ndef bbox_area(boxes):\n    return (boxes[:, 2] - boxes[:, 0]) * (boxes[:, 3] - boxes[:, 1])\ndef bbox_overlaps(boxes1, boxes2):\n    \"\"\"\n    Calculate overlaps between boxes1 and boxes2\n    Args:\n        boxes1 (Tensor): boxes with shape [M, 4]\n        boxes2 (Tensor): boxes with shape [N, 4]\n    Return:\n        overlaps (Tensor): overlaps between boxes1 and boxes2 with shape [M, N]\n    \"\"\"\n    area1 = bbox_area(boxes1)\n    area2 = bbox_area(boxes2)\n    xy_max = paddle.minimum(\n        paddle.unsqueeze(boxes1, 1)[:, :, 2:], boxes2[:, 2:])\n    xy_min = paddle.maximum(\n        paddle.unsqueeze(boxes1, 1)[:, :, :2], boxes2[:, :2])\n    width_height = xy_max - xy_min\n    width_height = width_height.clip(min=0)\n    inter = width_height.prod(axis=2)\n    overlaps = paddle.where(inter > 0, inter /\n                            (paddle.unsqueeze(area1, 1) + area2 - inter),",
+        "type": "code",
+        "location": "/paddlevideo/modeling/bbox_utils.py:103-139"
+    },
+    "7207": {
+        "file_id": 520,
+        "content": "The function `bbox_utils.py` at line 102-138 contains two functions: 'filter_boxes_by_size' and 'bbox_overlaps'.\n'filter_boxes_by_size' filters the bounding boxes by size, only keeping those whose width or height exceeds a specified minimum size. If a mask is also desired, it returns one of true values for the selected bounding boxes.\n'bbox_overlaps' calculates overlaps between two sets of bounding boxes and returns them as a tensor with shape [M, N]. This function uses the areas of the bounding boxes to compute the intersections and unions, applying clipping for valid computations and handling non-intersecting boxes.\n\nExplanation: The code contains functions that filter bounding boxes by size and calculate overlaps between them. The 'filter_boxes_by_size' function filters bounding boxes based on their width or height, while the 'bbox_overlaps' function calculates overlap between two sets of bounding boxes and returns a tensor with shape [M, N].",
+        "type": "comment"
+    },
+    "7208": {
+        "file_id": 520,
+        "content": "                            paddle.zeros_like(inter))\n    return overlaps\ndef xywh2xyxy(box):\n    x, y, w, h = box\n    x1 = x - w * 0.5\n    y1 = y - h * 0.5\n    x2 = x + w * 0.5\n    y2 = y + h * 0.5\n    return [x1, y1, x2, y2]\ndef make_grid(h, w, dtype):\n    yv, xv = paddle.meshgrid([paddle.arange(h), paddle.arange(w)])\n    return paddle.stack((xv, yv), 2).cast(dtype=dtype)\ndef decode_yolo(box, anchor, downsample_ratio):\n    \"\"\"decode yolo box\n    Args:\n        box (list): [x, y, w, h], all have the shape [b, na, h, w, 1]\n        anchor (list): anchor with the shape [na, 2]\n        downsample_ratio (int): downsample ratio, default 32\n        scale (float): scale, default 1.\n    Return:\n        box (list): decoded box, [x, y, w, h], all have the shape [b, na, h, w, 1]\n    \"\"\"\n    x, y, w, h = box\n    na, grid_h, grid_w = x.shape[1:4]\n    grid = make_grid(grid_h, grid_w, x.dtype).reshape((1, 1, grid_h, grid_w, 2))\n    x1 = (x + grid[:, :, :, :, 0:1]) / grid_w\n    y1 = (y + grid[:, :, :, :, 1:2]) / grid_h\n    anchor = paddle.to_tensor(anchor)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/bbox_utils.py:140-176"
+    },
+    "7209": {
+        "file_id": 520,
+        "content": "The code defines functions for converting box coordinates, generating a grid of anchor points, and decoding YOLO bounding boxes. The \"xywh2xyxy\" function transforms (x, y, w, h) to (x1, y1, x2, y2). The \"make_grid\" function generates a grid of coordinates for downsampled images. The \"decode_yolo\" function decodes YOLO bounding boxes using anchor points and downsample ratios.",
+        "type": "comment"
+    },
+    "7210": {
+        "file_id": 520,
+        "content": "    anchor = paddle.cast(anchor, x.dtype)\n    anchor = anchor.reshape((1, na, 1, 1, 2))\n    w1 = paddle.exp(w) * anchor[:, :, :, :, 0:1] / (downsample_ratio * grid_w)\n    h1 = paddle.exp(h) * anchor[:, :, :, :, 1:2] / (downsample_ratio * grid_h)\n    return [x1, y1, w1, h1]\ndef iou_similarity(box1, box2, eps=1e-9):\n    \"\"\"Calculate iou of box1 and box2\n    Args:\n        box1 (Tensor): box with the shape [N, M1, 4]\n        box2 (Tensor): box with the shape [N, M2, 4]\n    Return:\n        iou (Tensor): iou between box1 and box2 with the shape [N, M1, M2]\n    \"\"\"\n    box1 = box1.unsqueeze(2)  # [N, M1, 4] -> [N, M1, 1, 4]\n    box2 = box2.unsqueeze(1)  # [N, M2, 4] -> [N, 1, M2, 4]\n    px1y1, px2y2 = box1[:, :, :, 0:2], box1[:, :, :, 2:4]\n    gx1y1, gx2y2 = box2[:, :, :, 0:2], box2[:, :, :, 2:4]\n    x1y1 = paddle.maximum(px1y1, gx1y1)\n    x2y2 = paddle.minimum(px2y2, gx2y2)\n    overlap = (x2y2 - x1y1).clip(0).prod(-1)\n    area1 = (px2y2 - px1y1).clip(0).prod(-1)\n    area2 = (gx2y2 - gx1y1).clip(0).prod(-1)\n    union = area1 + area2 - overlap + eps",
+        "type": "code",
+        "location": "/paddlevideo/modeling/bbox_utils.py:177-204"
+    },
+    "7211": {
+        "file_id": 520,
+        "content": "Code defines anchor and calculates width (w1) and height (h1) for bounding boxes based on exponential values of w and h, downsample ratio, and grid dimensions. It also includes a function iou_similarity that calculates the intersection over union (IoU) between two sets of bounding boxes.",
+        "type": "comment"
+    },
+    "7212": {
+        "file_id": 520,
+        "content": "    return overlap / union\ndef bbox_iou(box1, box2, giou=False, diou=False, ciou=False, eps=1e-9):\n    \"\"\"calculate the iou of box1 and box2\n    Args:\n        box1 (list): [x, y, w, h], all have the shape [b, na, h, w, 1]\n        box2 (list): [x, y, w, h], all have the shape [b, na, h, w, 1]\n        giou (bool): whether use giou or not, default False\n        diou (bool): whether use diou or not, default False\n        ciou (bool): whether use ciou or not, default False\n        eps (float): epsilon to avoid divide by zero\n    Return:\n        iou (Tensor): iou of box1 and box1, with the shape [b, na, h, w, 1]\n    \"\"\"\n    px1, py1, px2, py2 = box1\n    gx1, gy1, gx2, gy2 = box2\n    x1 = paddle.maximum(px1, gx1)\n    y1 = paddle.maximum(py1, gy1)\n    x2 = paddle.minimum(px2, gx2)\n    y2 = paddle.minimum(py2, gy2)\n    overlap = ((x2 - x1).clip(0)) * ((y2 - y1).clip(0))\n    area1 = (px2 - px1) * (py2 - py1)\n    area1 = area1.clip(0)\n    area2 = (gx2 - gx1) * (gy2 - gy1)\n    area2 = area2.clip(0)\n    union = area1 + area2 - overlap + eps",
+        "type": "code",
+        "location": "/paddlevideo/modeling/bbox_utils.py:205-237"
+    },
+    "7213": {
+        "file_id": 520,
+        "content": "This function calculates the intersection over union (IoU) between two bounding boxes, box1 and box2. It supports various IoU metrics such as Giou, Diou, or Ciou. The calculated IoU is returned as a tensor with the same shape as box1 and box2. This function is used in object detection tasks to measure the overlap between predicted and ground truth bounding boxes.",
+        "type": "comment"
+    },
+    "7214": {
+        "file_id": 520,
+        "content": "    iou = overlap / union\n    if giou or ciou or diou:\n        # convex w, h\n        cw = paddle.maximum(px2, gx2) - paddle.minimum(px1, gx1)\n        ch = paddle.maximum(py2, gy2) - paddle.minimum(py1, gy1)\n        if giou:\n            c_area = cw * ch + eps\n            return iou - (c_area - union) / c_area\n        else:\n            # convex diagonal squared\n            c2 = cw**2 + ch**2 + eps\n            # center distance\n            rho2 = ((px1 + px2 - gx1 - gx2)**2 + (py1 + py2 - gy1 - gy2)**2) / 4\n            if diou:\n                return iou - rho2 / c2\n            else:\n                w1, h1 = px2 - px1, py2 - py1 + eps\n                w2, h2 = gx2 - gx1, gy2 - gy1 + eps\n                delta = paddle.atan(w1 / h1) - paddle.atan(w2 / h2)\n                v = (4 / math.pi**2) * paddle.pow(delta, 2)\n                alpha = v / (1 + eps - iou + v)\n                alpha.stop_gradient = True\n                return iou - (rho2 / c2 + v * alpha)\n    else:\n        return iou\ndef rect2rbox(bboxes):\n    \"\"\"\n    :param bboxes: shape (n, 4) (xmin, ymin, xmax, ymax)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/bbox_utils.py:238-268"
+    },
+    "7215": {
+        "file_id": 520,
+        "content": "This code calculates the Intersection over Union (IoU) between two bounding boxes and applies various forms of IoU calculations depending on the input parameters. It first checks if giou, ciou, or diou is True and then proceeds with the corresponding calculation based on the convex area, diagonal distance, or aspect ratio difference between the bounding boxes. The rect2rbox function transforms a set of bounding boxes from (xmin, ymin, xmax, ymax) format to (cx, cy, w, h) format where cx and cy are center coordinates and w and h are width and height respectively.",
+        "type": "comment"
+    },
+    "7216": {
+        "file_id": 520,
+        "content": "    :return: dbboxes: shape (n, 5) (x_ctr, y_ctr, w, h, angle)\n    \"\"\"\n    bboxes = bboxes.reshape(-1, 4)\n    num_boxes = bboxes.shape[0]\n    x_ctr = (bboxes[:, 2] + bboxes[:, 0]) / 2.0\n    y_ctr = (bboxes[:, 3] + bboxes[:, 1]) / 2.0\n    edges1 = np.abs(bboxes[:, 2] - bboxes[:, 0])\n    edges2 = np.abs(bboxes[:, 3] - bboxes[:, 1])\n    angles = np.zeros([num_boxes], dtype=bboxes.dtype)\n    inds = edges1 < edges2\n    rboxes = np.stack((x_ctr, y_ctr, edges1, edges2, angles), axis=1)\n    rboxes[inds, 2] = edges2[inds]\n    rboxes[inds, 3] = edges1[inds]\n    rboxes[inds, 4] = np.pi / 2.0\n    return rboxes\ndef delta2rbox(Rrois,\n               deltas,\n               means=[0, 0, 0, 0, 0],\n               stds=[1, 1, 1, 1, 1],\n               wh_ratio_clip=1e-6):\n    \"\"\"\n    :param Rrois: (cx, cy, w, h, theta)\n    :param deltas: (dx, dy, dw, dh, dtheta)\n    :param means:\n    :param stds:\n    :param wh_ratio_clip:\n    :return:\n    \"\"\"\n    means = paddle.to_tensor(means)\n    stds = paddle.to_tensor(stds)\n    deltas = paddle.reshape(deltas, [-1, deltas.shape[-1]])",
+        "type": "code",
+        "location": "/paddlevideo/modeling/bbox_utils.py:269-304"
+    },
+    "7217": {
+        "file_id": 520,
+        "content": "This function converts bounding box coordinates and dimensions to rotation-aligned bounding boxes by calculating the center, edge lengths, and angle. It returns a new tensor with reshaped and rotated bounding boxes.",
+        "type": "comment"
+    },
+    "7218": {
+        "file_id": 520,
+        "content": "    denorm_deltas = deltas * stds + means\n    dx = denorm_deltas[:, 0]\n    dy = denorm_deltas[:, 1]\n    dw = denorm_deltas[:, 2]\n    dh = denorm_deltas[:, 3]\n    dangle = denorm_deltas[:, 4]\n    max_ratio = np.abs(np.log(wh_ratio_clip))\n    dw = paddle.clip(dw, min=-max_ratio, max=max_ratio)\n    dh = paddle.clip(dh, min=-max_ratio, max=max_ratio)\n    Rroi_x = Rrois[:, 0]\n    Rroi_y = Rrois[:, 1]\n    Rroi_w = Rrois[:, 2]\n    Rroi_h = Rrois[:, 3]\n    Rroi_angle = Rrois[:, 4]\n    gx = dx * Rroi_w * paddle.cos(Rroi_angle) - dy * Rroi_h * paddle.sin(\n        Rroi_angle) + Rroi_x\n    gy = dx * Rroi_w * paddle.sin(Rroi_angle) + dy * Rroi_h * paddle.cos(\n        Rroi_angle) + Rroi_y\n    gw = Rroi_w * dw.exp()\n    gh = Rroi_h * dh.exp()\n    ga = np.pi * dangle + Rroi_angle\n    ga = (ga + np.pi / 4) % np.pi - np.pi / 4\n    ga = paddle.to_tensor(ga)\n    gw = paddle.to_tensor(gw, dtype='float32')\n    gh = paddle.to_tensor(gh, dtype='float32')\n    bboxes = paddle.stack([gx, gy, gw, gh, ga], axis=-1)\n    return bboxes\ndef rbox2delta(proposals, gt, means=[0, 0, 0, 0, 0], stds=[1, 1, 1, 1, 1]):",
+        "type": "code",
+        "location": "/paddlevideo/modeling/bbox_utils.py:305-339"
+    },
+    "7219": {
+        "file_id": 520,
+        "content": "This code computes the bounding box regression results for each proposed bounding box. It calculates the deltas and applies clipping to ensure they stay within reasonable bounds, then transforms these deltas into actual bounding box coordinates. The resulting bounding boxes are stacked in a tensor and returned as output.",
+        "type": "comment"
+    },
+    "7220": {
+        "file_id": 520,
+        "content": "    \"\"\"\n    Args:\n        proposals:\n        gt:\n        means: 1x5\n        stds: 1x5\n    Returns:\n    \"\"\"\n    proposals = proposals.astype(np.float64)\n    PI = np.pi\n    gt_widths = gt[..., 2]\n    gt_heights = gt[..., 3]\n    gt_angle = gt[..., 4]\n    proposals_widths = proposals[..., 2]\n    proposals_heights = proposals[..., 3]\n    proposals_angle = proposals[..., 4]\n    coord = gt[..., 0:2] - proposals[..., 0:2]\n    dx = (np.cos(proposals[..., 4]) * coord[..., 0] + np.sin(proposals[..., 4])\n          * coord[..., 1]) / proposals_widths\n    dy = (-np.sin(proposals[..., 4]) * coord[..., 0] + np.cos(proposals[..., 4])\n          * coord[..., 1]) / proposals_heights\n    dw = np.log(gt_widths / proposals_widths)\n    dh = np.log(gt_heights / proposals_heights)\n    da = (gt_angle - proposals_angle)\n    da = (da + PI / 4) % PI - PI / 4\n    da /= PI\n    deltas = np.stack([dx, dy, dw, dh, da], axis=-1)\n    means = np.array(means, dtype=deltas.dtype)\n    stds = np.array(stds, dtype=deltas.dtype)\n    deltas = (deltas - means) / stds",
+        "type": "code",
+        "location": "/paddlevideo/modeling/bbox_utils.py:340-378"
+    },
+    "7221": {
+        "file_id": 520,
+        "content": "This code calculates the delta values between ground truth and proposals for bounding boxes, taking into account their widths, heights, angles, and applying normalization based on means and stds. It also ensures that angle differences are within 0 to 2π range before scaling by the inverse of PI.",
+        "type": "comment"
+    },
+    "7222": {
+        "file_id": 520,
+        "content": "    deltas = deltas.astype(np.float32)\n    return deltas\ndef bbox_decode(bbox_preds,\n                anchors,\n                means=[0, 0, 0, 0, 0],\n                stds=[1, 1, 1, 1, 1]):\n    \"\"\"decode bbox from deltas\n    Args:\n        bbox_preds: [N,H,W,5]\n        anchors: [H*W,5]\n    return:\n        bboxes: [N,H,W,5]\n    \"\"\"\n    means = paddle.to_tensor(means)\n    stds = paddle.to_tensor(stds)\n    num_imgs, H, W, _ = bbox_preds.shape\n    bboxes_list = []\n    for img_id in range(num_imgs):\n        bbox_pred = bbox_preds[img_id]\n        # bbox_pred.shape=[5,H,W]\n        bbox_delta = bbox_pred\n        anchors = paddle.to_tensor(anchors)\n        bboxes = delta2rbox(\n            anchors, bbox_delta, means, stds, wh_ratio_clip=1e-6)\n        bboxes = paddle.reshape(bboxes, [H, W, 5])\n        bboxes_list.append(bboxes)\n    return paddle.stack(bboxes_list, axis=0)\ndef poly_to_rbox(polys):\n    \"\"\"\n    poly:[x0,y0,x1,y1,x2,y2,x3,y3]\n    to\n    rotated_boxes:[x_ctr,y_ctr,w,h,angle]\n    \"\"\"\n    rotated_boxes = []\n    for poly in polys:",
+        "type": "code",
+        "location": "/paddlevideo/modeling/bbox_utils.py:379-417"
+    },
+    "7223": {
+        "file_id": 520,
+        "content": "Function `bbox_decode` takes bbox predictions, anchors and means/stds as inputs. It returns decoded bounding boxes. It first converts the means and stds to tensors. Then for each image, it computes the bbox delta from the bbox predictions. It then transforms these deltas to actual bounding box coordinates using `delta2rbox` function. Finally, it reshapes the obtained bounding boxes and stores them in a list. The function returns a stack of all the bounding boxes for each image.",
+        "type": "comment"
+    },
+    "7224": {
+        "file_id": 520,
+        "content": "        poly = np.array(poly[:8], dtype=np.float32)\n        pt1 = (poly[0], poly[1])\n        pt2 = (poly[2], poly[3])\n        pt3 = (poly[4], poly[5])\n        pt4 = (poly[6], poly[7])\n        edge1 = np.sqrt((pt1[0] - pt2[0]) * (pt1[0] - pt2[0]) + (pt1[1] - pt2[\n            1]) * (pt1[1] - pt2[1]))\n        edge2 = np.sqrt((pt2[0] - pt3[0]) * (pt2[0] - pt3[0]) + (pt2[1] - pt3[\n            1]) * (pt2[1] - pt3[1]))\n        width = max(edge1, edge2)\n        height = min(edge1, edge2)\n        rbox_angle = 0\n        if edge1 > edge2:\n            rbox_angle = np.arctan2(\n                np.float(pt2[1] - pt1[1]), np.float(pt2[0] - pt1[0]))\n        elif edge2 >= edge1:\n            rbox_angle = np.arctan2(\n                np.float(pt4[1] - pt1[1]), np.float(pt4[0] - pt1[0]))\n        def norm_angle(angle, range=[-np.pi / 4, np.pi]):\n            return (angle - range[0]) % range[1] + range[0]\n        rbox_angle = norm_angle(rbox_angle)\n        x_ctr = np.float(pt1[0] + pt3[0]) / 2\n        y_ctr = np.float(pt1[1] + pt3[1]) / 2",
+        "type": "code",
+        "location": "/paddlevideo/modeling/bbox_utils.py:418-447"
+    },
+    "7225": {
+        "file_id": 520,
+        "content": "This code calculates the width, height, and angle of a rotated bounding box based on its eight points. It first converts the polyline to a numpy array, then calculates the lengths of two edges. The function then determines the maximum edge length as the width and the minimum edge length as the height. Based on these values, it computes the rotation angle using arctan2. Finally, it normalizes the rotation angle within a specified range using the norm_angle function. It also calculates the x and y coordinates of the box's center.",
+        "type": "comment"
+    },
+    "7226": {
+        "file_id": 520,
+        "content": "        rotated_box = np.array([x_ctr, y_ctr, width, height, rbox_angle])\n        rotated_boxes.append(rotated_box)\n    ret_rotated_boxes = np.array(rotated_boxes)\n    assert ret_rotated_boxes.shape[1] == 5\n    return ret_rotated_boxes\ndef cal_line_length(point1, point2):\n    import math\n    return math.sqrt(\n        math.pow(point1[0] - point2[0], 2) + math.pow(point1[1] - point2[1], 2))\ndef get_best_begin_point_single(coordinate):\n    x1, y1, x2, y2, x3, y3, x4, y4 = coordinate\n    xmin = min(x1, x2, x3, x4)\n    ymin = min(y1, y2, y3, y4)\n    xmax = max(x1, x2, x3, x4)\n    ymax = max(y1, y2, y3, y4)\n    combinate = [[[x1, y1], [x2, y2], [x3, y3], [x4, y4]],\n                 [[x4, y4], [x1, y1], [x2, y2], [x3, y3]],\n                 [[x3, y3], [x4, y4], [x1, y1], [x2, y2]],\n                 [[x2, y2], [x3, y3], [x4, y4], [x1, y1]]]\n    dst_coordinate = [[xmin, ymin], [xmax, ymin], [xmax, ymax], [xmin, ymax]]\n    force = 100000000.0\n    force_flag = 0\n    for i in range(4):\n        temp_force = cal_line_length(combinate[i][0], dst_coordinate[0]) \\",
+        "type": "code",
+        "location": "/paddlevideo/modeling/bbox_utils.py:448-475"
+    },
+    "7227": {
+        "file_id": 520,
+        "content": "This function `get_best_begin_point_single` takes a coordinate as input and calculates the minimum x and y coordinates (xmin, ymin) and maximum x and y coordinates (xmax, ymax). It then defines four different combinations of the four points in the coordinate and compares these combinations to the destination coordinate (dst_coordinate) by calculating the distance using `cal_line_length` function. The combination with the smallest distance is returned as the best begin point. The code also includes a force variable to handle potential edge cases where no valid begin point can be found.",
+        "type": "comment"
+    },
+    "7228": {
+        "file_id": 520,
+        "content": "                     + cal_line_length(combinate[i][1], dst_coordinate[1]) \\\n                     + cal_line_length(combinate[i][2], dst_coordinate[2]) \\\n                     + cal_line_length(combinate[i][3], dst_coordinate[3])\n        if temp_force < force:\n            force = temp_force\n            force_flag = i\n    if force_flag != 0:\n        pass\n    return np.array(combinate[force_flag]).reshape(8)\ndef rbox2poly_single(rrect):\n    \"\"\"\n    rrect:[x_ctr,y_ctr,w,h,angle]\n    to\n    poly:[x0,y0,x1,y1,x2,y2,x3,y3]\n    \"\"\"\n    x_ctr, y_ctr, width, height, angle = rrect[:5]\n    tl_x, tl_y, br_x, br_y = -width / 2, -height / 2, width / 2, height / 2\n    # rect 2x4\n    rect = np.array([[tl_x, br_x, br_x, tl_x], [tl_y, tl_y, br_y, br_y]])\n    R = np.array([[np.cos(angle), -np.sin(angle)],\n                  [np.sin(angle), np.cos(angle)]])\n    # poly\n    poly = R.dot(rect)\n    x0, x1, x2, x3 = poly[0, :4] + x_ctr\n    y0, y1, y2, y3 = poly[1, :4] + y_ctr\n    poly = np.array([x0, y0, x1, y1, x2, y2, x3, y3], dtype=np.float32)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/bbox_utils.py:476-503"
+    },
+    "7229": {
+        "file_id": 520,
+        "content": "This function `rbox2poly_single` takes a rectangle represented by its center coordinates, width, height, and angle, and converts it to a polygon representation. It first calculates the top-left and bottom-right coordinates of the rectangle. Then, it creates a 2x4 matrix representing the four corners of the rectangle. The function applies a rotation matrix to transform the rectangle into a rotated coordinate system. Finally, it shifts the transformed coordinates by the center coordinates and returns the polygon representation as an array.",
+        "type": "comment"
+    },
+    "7230": {
+        "file_id": 520,
+        "content": "    poly = get_best_begin_point_single(poly)\n    return poly\ndef rbox2poly(rrects):\n    \"\"\"\n    rrect:[x_ctr,y_ctr,w,h,angle]\n    to\n    poly:[x0,y0,x1,y1,x2,y2,x3,y3]\n    \"\"\"\n    polys = []\n    for rrect in rrects:\n        x_ctr, y_ctr, width, height, angle = rrect[:5]\n        tl_x, tl_y, br_x, br_y = -width / 2, -height / 2, width / 2, height / 2\n        rect = np.array([[tl_x, br_x, br_x, tl_x], [tl_y, tl_y, br_y, br_y]])\n        R = np.array([[np.cos(angle), -np.sin(angle)],\n                      [np.sin(angle), np.cos(angle)]])\n        poly = R.dot(rect)\n        x0, x1, x2, x3 = poly[0, :4] + x_ctr\n        y0, y1, y2, y3 = poly[1, :4] + y_ctr\n        poly = np.array([x0, y0, x1, y1, x2, y2, x3, y3], dtype=np.float32)\n        poly = get_best_begin_point_single(poly)\n        polys.append(poly)\n    polys = np.array(polys)\n    return polys",
+        "type": "code",
+        "location": "/paddlevideo/modeling/bbox_utils.py:504-528"
+    },
+    "7231": {
+        "file_id": 520,
+        "content": "This function `rbox2poly` converts a list of rotation rectangles (rrects) into polygons (polys). It first calculates the top-left and bottom-right coordinates of each rrect. Then, it rotates the rectangle using the given angle. The function adjusts the poly points by adding the x_ctr and y_ctr values to obtain the final poly. It applies a single best begin point adjustment (`get_best_begin_point_single`) and adds the poly to the list of polys. Finally, it returns the array of polygons.",
+        "type": "comment"
+    },
+    "7232": {
+        "file_id": 521,
+        "content": "/paddlevideo/modeling/builder.py",
+        "type": "filepath"
+    },
+    "7233": {
+        "file_id": 521,
+        "content": "This code imports modules and registers functions for building a video object detection model, as well as dynamically constructing components based on a configuration file.",
+        "type": "summary"
+    },
+    "7234": {
+        "file_id": 521,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nfrom .registry import BACKBONES, HEADS, LOSSES, RECOGNIZERS, LOCALIZERS, ROI_EXTRACTORS, DETECTORS, BBOX_ASSIGNERS, BBOX_SAMPLERS, BBOX_CODERS, PARTITIONERS, MULTIMODAL, SEGMENT, SEGMENTERS\nfrom ..utils import build\nfrom .registry import (BACKBONES, BBOX_ASSIGNERS, BBOX_CODERS, BBOX_SAMPLERS,\n                       DETECTORS, ESTIMATORS, HEADS, LOCALIZERS, LOSSES,\n                       MULTIMODAL, PARTITIONERS, RECOGNIZERS, ROI_EXTRACTORS)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/builder.py:1-19"
+    },
+    "7235": {
+        "file_id": 521,
+        "content": "Imports necessary modules and registers various components for video object detection model building.",
+        "type": "comment"
+    },
+    "7236": {
+        "file_id": 521,
+        "content": "def build_backbone(cfg):\n    \"\"\"Build backbone.\"\"\"\n    return build(cfg, BACKBONES)\ndef build_roi_extractor(cfg):\n    \"\"\"Build roi extractor.\"\"\"\n    return build(cfg, ROI_EXTRACTORS)\ndef build_assigner(cfg, **default_args):\n    \"\"\"Builder of box assigner.\"\"\"\n    return build(cfg, BBOX_ASSIGNERS)\ndef build_sampler(cfg, **default_args):\n    \"\"\"Builder of box sampler.\"\"\"\n    return build(cfg, BBOX_SAMPLERS)\ndef build_roi_extractor(cfg):\n    \"\"\"Build roi extractor.\"\"\"\n    return build(cfg, ROI_EXTRACTORS)\ndef build_assigner(cfg, **default_args):\n    \"\"\"Builder of box assigner.\"\"\"\n    return build(cfg, BBOX_ASSIGNERS)\ndef build_sampler(cfg, **default_args):\n    \"\"\"Builder of box sampler.\"\"\"\n    return build(cfg, BBOX_SAMPLERS)\ndef build_head(cfg):\n    \"\"\"Build head.\"\"\"\n    return build(cfg, HEADS)\ndef build_loss(cfg):\n    \"\"\"Build loss.\"\"\"\n    return build(cfg, LOSSES)\ndef build_recognizer(cfg):\n    \"\"\"Build recognizer.\"\"\"\n    return build(cfg, RECOGNIZERS, key='framework')\ndef build_segmenter(cfg):\n    \"\"\"Build segmenter.\"\"\"",
+        "type": "code",
+        "location": "/paddlevideo/modeling/builder.py:22-73"
+    },
+    "7237": {
+        "file_id": 521,
+        "content": "This code defines various building functions for different parts of a model. The \"build_backbone\" function builds the backbone of the model, while \"build_roi_extractor\", \"build_assigner\", and \"build_sampler\" build the region of interest extractor, box assigner, and box sampler respectively. \"build_head\" builds the head of the model, \"build_loss\" builds the loss function, and \"build_recognizer\" and \"build_segmenter\" build recognizers and segmenters with different frameworks or keys. The functions use the \"build\" method from an unspecified source (\"*\") to perform the actual building process.",
+        "type": "comment"
+    },
+    "7238": {
+        "file_id": 521,
+        "content": "    return build(cfg, SEGMENTERS, key='framework')\ndef build_localizer(cfg):\n    \"\"\"Build localizer.\"\"\"\n    return build(cfg, LOCALIZERS, key='framework')\ndef build_detector(cfg, train_cfg=None, test_cfg=None):\n    \"\"\"Build detector.\"\"\"\n    return build(cfg, DETECTORS, key='framework')\ndef build_partitioner(cfg):\n    \"\"\"Build partitioner.\"\"\"\n    return build(cfg, PARTITIONERS, key='framework')\ndef build_estimator(cfg):\n    \"\"\"Build estimator.\"\"\"\n    return build(cfg, ESTIMATORS, key='framework')\ndef build_multimodal(cfg):\n    \"\"\"Build multimodal.\"\"\"\n    return build(cfg, MULTIMODAL, key='framework')\ndef build_segment(cfg):\n    \"\"\"Build segment.\"\"\"\n    return build(cfg, SEGMENT, key='framework')\ndef build_model(cfg):\n    cfg_copy = cfg.copy()\n    framework_type = cfg_copy.get('framework')\n    if framework_type in RECOGNIZERS:\n        return build_recognizer(cfg)\n    elif framework_type in LOCALIZERS:\n        return build_localizer(cfg)\n    elif framework_type in PARTITIONERS:\n        return build_partitioner(cfg)\n    elif framework_type in DETECTORS:",
+        "type": "code",
+        "location": "/paddlevideo/modeling/builder.py:74-116"
+    },
+    "7239": {
+        "file_id": 521,
+        "content": "The code is a builder function that dynamically builds various components (recognizers, localizers, detectors, partitioners, estimators, and multimodal) based on the specified framework type in the configuration file. It utilizes the 'build' function to return the appropriate component for further processing.",
+        "type": "comment"
+    },
+    "7240": {
+        "file_id": 521,
+        "content": "        return build_detector(cfg)\n    elif framework_type in ESTIMATORS:\n        return build_estimator(cfg)\n    elif framework_type in MULTIMODAL:\n        return build_multimodal(cfg)\n    elif framework_type in SEGMENTERS:\n        return build_segmenter(cfg)\n    elif framework_type in SEGMENT:\n        return build_segment(cfg)\n    else:\n        raise NotImplementedError",
+        "type": "code",
+        "location": "/paddlevideo/modeling/builder.py:117-127"
+    },
+    "7241": {
+        "file_id": 521,
+        "content": "This code selects a specific function to build based on the framework type. It checks if the framework type is in defined lists of detectors, estimators, multimodal models, segmenters, or segments. If none match, it raises NotImplementedError.",
+        "type": "comment"
+    },
+    "7242": {
+        "file_id": 522,
+        "content": "/paddlevideo/modeling/framework/__init__.py",
+        "type": "filepath"
+    },
+    "7243": {
+        "file_id": 522,
+        "content": "This code is part of the PaddleVideo framework, which provides base classes for various model classes like 'BasePartitioner', 'TransNetV2Partitioner', 'BaseEstimator', 'DepthEstimator', and more. The list contains names of these available base classes within the module.",
+        "type": "summary"
+    },
+    "7244": {
+        "file_id": 522,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nfrom .estimators import BaseEstimator, DepthEstimator\nfrom .localizers import BaseLocalizer, BMNLocalizer\nfrom .partitioners import BasePartitioner, TransNetV2Partitioner\nfrom .recognizers import BaseRecognizer, Recognizer2D\nfrom .multimodal import ActBert, BaseMultimodal\nfrom .segment import BaseSegment, CFBI\nfrom .segmenters import MSTCN\n__all__ = [\n    'BaseRecognizer', 'Recognizer2D', 'BaseLocalizer', 'BMNLocalizer',",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/__init__.py:1-24"
+    },
+    "7245": {
+        "file_id": 522,
+        "content": "This code is part of the PaddleVideo framework, which provides several base classes for estimators, localizers, partitioners, recognizers, multimodal models, segments, and segmenters. The commented lines describe the license information and the imported classes from different modules within the framework. The '__all__' list contains the names of the base classes available in this module.",
+        "type": "comment"
+    },
+    "7246": {
+        "file_id": 522,
+        "content": "    'BasePartitioner', 'TransNetV2Partitioner', 'BaseEstimator',\n    'DepthEstimator', 'BaseMultimodal', 'ActBert', 'BaseSegment', 'CFBI',\n    'MSTCN'\n]",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/__init__.py:25-28"
+    },
+    "7247": {
+        "file_id": 522,
+        "content": "This code snippet contains a list of various model classes, including 'BasePartitioner', 'TransNetV2Partitioner', 'BaseEstimator', 'DepthEstimator', 'BaseMultimodal', 'ActBert', 'BaseSegment', 'CFBI', and 'MSTCN'. These models are likely used for different tasks within the PaddleVideo framework.",
+        "type": "comment"
+    },
+    "7248": {
+        "file_id": 523,
+        "content": "/paddlevideo/modeling/framework/detectors/__init__.py",
+        "type": "filepath"
+    },
+    "7249": {
+        "file_id": 523,
+        "content": "This code is part of the PaddleVideo library, specifically defining detectors. It imports three detector classes (BaseDetector, FastRCNN, and TwoStageDetector) from its local directory and lists them in __all__. The comment at the beginning establishes copyright information and licensing.",
+        "type": "summary"
+    },
+    "7250": {
+        "file_id": 523,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nfrom .base import BaseDetector\nfrom .fast_rcnn import FastRCNN\nfrom .two_stage import TwoStageDetector\n__all__ = ['BaseDetector', 'TwoStageDetector', 'FastRCNN']",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/detectors/__init__.py:1-17"
+    },
+    "7251": {
+        "file_id": 523,
+        "content": "This code is part of the PaddleVideo library, specifically defining detectors. It imports three detector classes (BaseDetector, FastRCNN, and TwoStageDetector) from its local directory and lists them in __all__. The comment at the beginning establishes copyright information and licensing.",
+        "type": "comment"
+    },
+    "7252": {
+        "file_id": 524,
+        "content": "/paddlevideo/modeling/framework/detectors/base.py",
+        "type": "filepath"
+    },
+    "7253": {
+        "file_id": 524,
+        "content": "BaseDetector class serves as a parent for detectors, providing common features and abstract train_step method implementation. Abstract base classes are defined for training, validating, and testing steps in machine learning models.",
+        "type": "summary"
+    },
+    "7254": {
+        "file_id": 524,
+        "content": "from abc import abstractmethod\nfrom ... import builder\nimport paddle.nn as nn\nfrom ...registry import DETECTORS\n@DETECTORS.register()\nclass BaseDetector(nn.Layer):\n    \"\"\"Base class for detectors.  \"\"\"\n    def __init__(self, backbone=None, head=None):\n        super().__init__()\n    def init_weights(self):\n        \"\"\"Initialize the model network weights. \"\"\"\n        self.backbone.init_weights()  \n        self.head.init_weights()\n    def extract_feature(self, imgs, iter_num):\n        \"\"\"Extract features through a backbone.  \"\"\"\n        feature = self.backbone(imgs)\n        return feature\n    def forward(self,  data_batch, mode='infer'):\n        if mode == 'train':\n            return self.train_step(data_batch)\n        elif mode == 'valid':\n            return self.val_step(data_batch)\n        elif mode == 'test':\n            return self.test_step(data_batch)\n        elif mode == 'infer':\n            return self.infer_step(data_batch)\n        else:\n            raise NotImplementedError\n    @abstractmethod\n    def train_step(self, data_batch, **kwargs):",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/detectors/base.py:1-36"
+    },
+    "7255": {
+        "file_id": 524,
+        "content": "BaseDetector class is the parent class for detectors, providing common functionality like extracting features and initializing weights. It defines an abstract train_step method that needs to be implemented by subclasses for training. The class also contains methods for feature extraction, model forward pass, and handling different modes (train, valid, test, infer).",
+        "type": "comment"
+    },
+    "7256": {
+        "file_id": 524,
+        "content": "        \"\"\"Training step.\n        \"\"\"\n        raise NotImplementedError\n    @abstractmethod\n    def val_step(self, data_batch, **kwargs):\n        \"\"\"Validating step.\n        \"\"\"\n        raise NotImplementedError\n    @abstractmethod\n    def test_step(self, data_batch, **kwargs):\n        \"\"\"Test step.\n        \"\"\"\n        raise NotImplementedError",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/detectors/base.py:37-51"
+    },
+    "7257": {
+        "file_id": 524,
+        "content": "This code defines abstract base classes for training, validating, and testing steps in a machine learning model. These methods must be implemented by subclasses to perform the specific tasks accordingly.",
+        "type": "comment"
+    },
+    "7258": {
+        "file_id": 525,
+        "content": "/paddlevideo/modeling/framework/detectors/fast_rcnn.py",
+        "type": "filepath"
+    },
+    "7259": {
+        "file_id": 525,
+        "content": "FastRCNN is a two-stage object detection class inheriting from TwoStageDetector, created with specified head, train and test configurations, and optional pretrained weights.",
+        "type": "summary"
+    },
+    "7260": {
+        "file_id": 525,
+        "content": "# copyright (c) 2021 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nfrom .two_stage import TwoStageDetector\nfrom ...registry import DETECTORS\n@DETECTORS.register()\nclass FastRCNN(TwoStageDetector):\n    def __init__(self,\n                 backbone,\n                 head=None,\n                 train_cfg=None,\n                 test_cfg=None,\n                 neck=None,\n                 pretrained=None):\n        super(FastRCNN, self).__init__(\n            backbone=backbone,\n            neck=neck,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/detectors/fast_rcnn.py:1-30"
+    },
+    "7261": {
+        "file_id": 525,
+        "content": "Defines the FastRCNN class, a two-stage detector that inherits from TwoStageDetector. It takes backbone, head, train_cfg, test_cfg, neck, and pretrained as parameters for object detection.",
+        "type": "comment"
+    },
+    "7262": {
+        "file_id": 525,
+        "content": "            roi_head=head,\n            train_cfg=train_cfg,\n            test_cfg=test_cfg,\n            pretrained=pretrained)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/detectors/fast_rcnn.py:31-34"
+    },
+    "7263": {
+        "file_id": 525,
+        "content": "Creates a Fast R-CNN detector with specified head, train and test configurations, and optionally pretrained weights.",
+        "type": "comment"
+    },
+    "7264": {
+        "file_id": 526,
+        "content": "/paddlevideo/modeling/framework/detectors/two_stage.py",
+        "type": "filepath"
+    },
+    "7265": {
+        "file_id": 526,
+        "content": "This code uses the slowfast model for object detection, initializes components and parameters, supports pretrained weights, and provides methods for training, testing, and inference. It also retrieves data from PaddleVideo's two-stage detector with various inputs and entity ID selection using index_select.",
+        "type": "summary"
+    },
+    "7266": {
+        "file_id": 526,
+        "content": "# copyright (c) 2021 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport paddle\nimport paddle.nn as nn\nfrom ... import builder\nimport paddle.distributed as dist\nfrom ...registry import DETECTORS\nfrom .base import BaseDetector\n@DETECTORS.register()\nclass TwoStageDetector(BaseDetector):\n    \"\"\"Base class for two-stage detectors.  \"\"\"\n    def __init__(self,\n                 backbone,\n                 neck=None,\n                 rpn_head=None,\n                 roi_head=None,\n                 train_cfg=None,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/detectors/two_stage.py:1-32"
+    },
+    "7267": {
+        "file_id": 526,
+        "content": "This code is importing necessary libraries, registering a two-stage detector class (TwoStageDetector) within the DETECTORS registry, and initializing its components. The class serves as a base for implementing two-stage object detection algorithms.",
+        "type": "comment"
+    },
+    "7268": {
+        "file_id": 526,
+        "content": "                 test_cfg=None,\n                 pretrained=None):\n        super(TwoStageDetector, self).__init__()\n        self.backbone = builder.build_backbone(backbone)\n        if neck is not None:\n            self.neck = neck  # useless\n        if rpn_head is not None:\n            rpn_train_cfg = train_cfg.rpn if train_cfg is not None else None\n            rpn_head_ = rpn_head.copy()\n            rpn_head_.update(train_cfg=rpn_train_cfg, test_cfg=test_cfg.rpn)\n            self.rpn_head = builder.build_head(rpn_head_)\n        if roi_head is not None:\n            self.roi_head = builder.build_head(roi_head)\n        self.train_cfg = train_cfg\n        self.test_cfg = test_cfg\n        if pretrained is not None:\n            self.init_weights(pretrained=pretrained)\n    @property\n    def with_rpn(self):\n        \"\"\"whether the detector has RPN\"\"\"\n        return hasattr(self, 'rpn_head') and self.rpn_head is not None\n    @property\n    def with_roi_head(self):\n        \"\"\"whether the detector has a RoI head\"\"\"\n        return hasattr(self, 'roi_head') and self.roi_head is not None",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/detectors/two_stage.py:33-64"
+    },
+    "7269": {
+        "file_id": 526,
+        "content": "This code defines a class for a two-stage object detection model. It initializes the backbone, neck (if provided), and heads for RPN and ROI. The constructor also takes optional train_cfg and test_cfg parameters for each head. Additional pretrained weights can be loaded later if provided. The @property methods check whether the detector has RPN or ROI head.",
+        "type": "comment"
+    },
+    "7270": {
+        "file_id": 526,
+        "content": "    def init_weights(self, pretrained=None):\n        \"\"\"Initialize the weights in detector.  \"\"\"\n        super(TwoStageDetector, self).init_weights(pretrained)\n        self.backbone.init_weights(pretrained=pretrained)\n        if self.with_rpn:\n            self.rpn_head.init_weights()\n        if self.with_roi_head:\n            self.roi_head.init_weights(pretrained)\n    def extract_feat(self, img):\n        \"\"\"Directly extract features from the backbone.\"\"\"\n        x = self.backbone(img)\n        return x\n    def train_step(self, data, **kwargs):\n        img_slow = data[0]\n        img_fast = data[1]\n        proposals, gt_bboxes, gt_labels, scores, entity_ids = self.get_unpad_datas(\n            data)\n        img_shape = data[7]\n        img_idx = data[8]\n        img_metas = scores, entity_ids\n        x = self.extract_feat(img=[img_slow, img_fast])\n        roi_losses = self.roi_head.train_step(x, img_metas, proposals,\n                                              gt_bboxes, gt_labels, **kwargs)\n        losses = dict()",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/detectors/two_stage.py:66-91"
+    },
+    "7271": {
+        "file_id": 526,
+        "content": "The code initializes the weights of a two-stage detector and extracts features from its backbone. The train_step function takes input data, extracts features using the extract_feat method, and computes roi_losses using the roi_head's train_step method. These losses are then stored in the losses dictionary.",
+        "type": "comment"
+    },
+    "7272": {
+        "file_id": 526,
+        "content": "        losses.update(roi_losses)\n        return losses\n    def val_step(self, data, rescale=False):\n        img_slow = data[0]\n        img_fast = data[1]\n        proposals, gt_bboxes, gt_labels, scores, entity_ids = self.get_unpad_datas(\n            data)\n        img_shape = data[7]\n        img_metas = scores, entity_ids\n        x = self.extract_feat(img=[img_slow, img_fast])\n        return self.roi_head.simple_test(x,\n                                         proposals[0],\n                                         img_shape,\n                                         rescale=rescale)\n    def test_step(self, data, rescale=False):\n        return self.val_step(data, rescale)\n    def infer_step(self, data, rescale=False):\n        ''' model inference'''\n        img_slow = data[0]\n        img_fast = data[1]\n        proposals = data[2]\n        img_shape = data[3]\n        # using slowfast model to extract spatio-temporal features\n        x = self.extract_feat(img=[img_slow, img_fast])\n        ret = self.roi_head.simple_test(x,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/detectors/two_stage.py:92-124"
+    },
+    "7273": {
+        "file_id": 526,
+        "content": "This code defines three methods, val_step, test_step, and infer_step. All these methods extract features using the slowfast model and then pass them to roi_head for further processing. Val_step is used for validation while test_step is used for testing. Infer_step performs inference using previously obtained data.",
+        "type": "comment"
+    },
+    "7274": {
+        "file_id": 526,
+        "content": "                                        proposals[0],\n                                        img_shape,\n                                        rescale=rescale)\n        return ret\n    def get_unpad_datas(self, data):\n        ''' get original datas padded in dataset '''\n        pad_proposals = data[2]\n        pad_gt_bboxes = data[3]\n        pad_gt_labels = data[4]\n        pad_scores, pad_entity_ids = data[5], data[6]\n        len_proposals = data[9]\n        len_gt_bboxes = data[10]\n        len_gt_labels = data[11]\n        len_scores = data[12]\n        len_entity_ids = data[13]\n        N = pad_proposals.shape[0]\n        proposals = []\n        gt_bboxes = []\n        gt_labels = []\n        scores = []\n        entity_ids = []\n        for bi in range(N):\n            pad_proposal = pad_proposals[bi]\n            len_proposal = len_proposals[bi]\n            index_proposal = paddle.arange(len_proposal)\n            proposal = paddle.index_select(x=pad_proposal,\n                                           index=index_proposal,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/detectors/two_stage.py:125-152"
+    },
+    "7275": {
+        "file_id": 526,
+        "content": "This code snippet is part of the PaddleVideo library's two-stage detector implementation. It defines a function that retrieves original data from padded dataset, and another function for getting unpadded datas. The first function takes in a set of proposals, ground truth bboxes, labels, scores, and entity ids, and returns them as unpadded data based on the number of proposals at each index. The second function retrieves original datas padded in dataset for two-stage detector implementation.",
+        "type": "comment"
+    },
+    "7276": {
+        "file_id": 526,
+        "content": "                                           axis=0)\n            proposals.append(proposal)\n            pad_gt_bbox = pad_gt_bboxes[bi]\n            len_gt_bbox = len_gt_bboxes[bi]\n            index_gt_bbox = paddle.arange(len_gt_bbox)\n            gt_bbox = paddle.index_select(x=pad_gt_bbox,\n                                          index=index_gt_bbox,\n                                          axis=0)\n            gt_bboxes.append(gt_bbox)\n            pad_gt_label = pad_gt_labels[bi]\n            len_gt_label = len_gt_labels[bi]\n            index_gt_label = paddle.arange(len_gt_label)\n            gt_label = paddle.index_select(x=pad_gt_label,\n                                           index=index_gt_label,\n                                           axis=0)\n            gt_labels.append(gt_label)\n            pad_score = pad_scores[bi]\n            len_score = len_scores[bi]\n            index_score = paddle.arange(len_score)\n            score = paddle.index_select(x=pad_score, index=index_score, axis=0)\n            scores.append(score)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/detectors/two_stage.py:153-176"
+    },
+    "7277": {
+        "file_id": 526,
+        "content": "This code creates a list of proposals, and corresponding ground truth bounding boxes (gt_bboxes), labels (gt_labels), and scores. It handles batches by iterating over each batch index (bi) and for each batch, it performs index selection on the padded data based on the indices of the current length of the batch to extract the relevant gt_bbox, gt_label, and score information. These are then appended to their respective lists.",
+        "type": "comment"
+    },
+    "7278": {
+        "file_id": 526,
+        "content": "            pad_entity_id = pad_entity_ids[bi]\n            len_entity_id = len_entity_ids[bi]\n            index_entity_id = paddle.arange(len_entity_id)\n            entity_id = paddle.index_select(x=pad_entity_id,\n                                            index=index_entity_id,\n                                            axis=0)\n            entity_ids.append(entity_id)\n        return proposals, gt_bboxes, gt_labels, scores, entity_ids",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/detectors/two_stage.py:178-186"
+    },
+    "7279": {
+        "file_id": 526,
+        "content": "This code segment is selecting specific entity IDs from a list and appending them to the 'entity_ids' list. It uses Paddle's index_select function to achieve this.",
+        "type": "comment"
+    },
+    "7280": {
+        "file_id": 527,
+        "content": "/paddlevideo/modeling/framework/estimators/__init__.py",
+        "type": "filepath"
+    },
+    "7281": {
+        "file_id": 527,
+        "content": "This code imports necessary classes and defines the publically accessible '__all__' list, containing the DepthEstimator and BaseEstimator classes.",
+        "type": "summary"
+    },
+    "7282": {
+        "file_id": 527,
+        "content": "from .base import BaseEstimator\nfrom .depth_estimator import DepthEstimator\n__all__ = ['DepthEstimator', 'BaseEstimator']",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/estimators/__init__.py:1-4"
+    },
+    "7283": {
+        "file_id": 527,
+        "content": "This code imports necessary classes and defines the publically accessible '__all__' list, containing the DepthEstimator and BaseEstimator classes.",
+        "type": "comment"
+    },
+    "7284": {
+        "file_id": 528,
+        "content": "/paddlevideo/modeling/framework/estimators/base.py",
+        "type": "filepath"
+    },
+    "7285": {
+        "file_id": 528,
+        "content": "The code creates a PaddleVideo BaseEstimator class, inheriting from nn.Layer and utilizing builder for backbone construction. It initializes weights, registers the class, and sets forward modes for validation, testing, and inference, with abstract methods that must be implemented by subclasses.",
+        "type": "summary"
+    },
+    "7286": {
+        "file_id": 528,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nfrom abc import abstractmethod\nimport paddle\nimport paddle.nn as nn\nfrom paddlevideo.modeling.registry import ESTIMATORS\nfrom paddlevideo.utils import get_logger\nfrom ... import builder\nlogger = get_logger(\"paddlevideo\")\n@ESTIMATORS.register()\nclass BaseEstimator(nn.Layer):\n    \"\"\"BaseEstimator\n    \"\"\"\n    def __init__(self, backbone=None, head=None):\n        super().__init__()\n        if backbone is not None:\n            self.backbone = builder.build_backbone(backbone)\n            if hasattr(self.backbone, 'init_weights'):",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/estimators/base.py:1-34"
+    },
+    "7287": {
+        "file_id": 528,
+        "content": "This code is defining a base class for an estimator in PaddleVideo. It inherits from nn.Layer, uses builder to construct the backbone if specified, and initializes the weights of the backbone if it has an init_weights method. The ESTIMATORS registry is used to register this BaseEstimator class.",
+        "type": "comment"
+    },
+    "7288": {
+        "file_id": 528,
+        "content": "                self.backbone.init_weights()\n        else:\n            self.backbone = None\n        if head is not None:\n            self.head_name = head.name\n            self.head = builder.build_head(head)\n            if hasattr(self.head, 'init_weights'):\n                self.head.init_weights()\n        else:\n            self.head = None\n    def forward(self, data_batch, mode='infer'):\n        \"\"\"\n        1. Define how the model is going to run, from input to output.\n        2. Console of train, valid, test or infer step\n        \"\"\"\n        if mode == 'train':\n            return self.train_step(data_batch)\n        elif mode == 'valid':\n            return self.val_step(data_batch)\n        elif mode == 'test':\n            return self.test_step(data_batch)\n        elif mode == 'infer':\n            return self.infer_step(data_batch)\n        else:\n            raise NotImplementedError\n    @abstractmethod\n    def train_step(self, data_batch):\n        \"\"\"Define how the model is going to train, from input to output.\n        \"\"\"",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/estimators/base.py:35-66"
+    },
+    "7289": {
+        "file_id": 528,
+        "content": "The code initializes the backbone and head components of a model depending on their availability. It then defines four forward modes (train, valid, test, infer) to execute the model accordingly. The train_step abstract method must be implemented separately.",
+        "type": "comment"
+    },
+    "7290": {
+        "file_id": 528,
+        "content": "        raise NotImplementedError\n    @abstractmethod\n    def val_step(self, data_batch):\n        \"\"\"Define how the model is going to valid, from input to output.\"\"\"\n        raise NotImplementedError\n    @abstractmethod\n    def test_step(self, data_batch):\n        \"\"\"Define how the model is going to test, from input to output.\"\"\"\n        raise NotImplementedError\n    @abstractmethod\n    def infer_step(self, data_batch):\n        \"\"\"Define how the model is going to infer, from input to output.\"\"\"\n        raise NotImplementedError",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/estimators/base.py:67-82"
+    },
+    "7291": {
+        "file_id": 528,
+        "content": "This code defines abstract methods for model validation, testing, and inference steps. It raises a NotImplementedError to ensure subclasses must implement these methods.",
+        "type": "comment"
+    },
+    "7292": {
+        "file_id": 529,
+        "content": "/paddlevideo/modeling/framework/estimators/depth_estimator.py",
+        "type": "filepath"
+    },
+    "7293": {
+        "file_id": 529,
+        "content": "The DepthEstimator class inherits from BaseEstimator and contains a forward_net method for feature extraction. It has training, validation, testing, and inference methods with loss metrics calculated using the forward_net and head.loss.",
+        "type": "summary"
+    },
+    "7294": {
+        "file_id": 529,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nimport paddle\nfrom paddlevideo.modeling.framework.estimators.base import BaseEstimator\nfrom paddlevideo.modeling.registry import ESTIMATORS\nfrom paddlevideo.utils import get_logger\nfrom ... import builder\nlogger = get_logger(\"paddlevideo\")\n@ESTIMATORS.register()\nclass DepthEstimator(BaseEstimator):\n    \"\"\"DepthEstimator\n    \"\"\"\n    def forward_net(self, inputs, day_or_night='day_and_night'):\n        if self.backbone is not None:\n            outputs = self.backbone(inputs, day_or_night)\n        else:\n            outputs = inputs",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/estimators/depth_estimator.py:1-31"
+    },
+    "7295": {
+        "file_id": 529,
+        "content": "The code defines a DepthEstimator class that inherits from BaseEstimator. It has a forward_net method that takes inputs and optionally applies a backbone network for feature extraction. The results are stored in outputs.",
+        "type": "comment"
+    },
+    "7296": {
+        "file_id": 529,
+        "content": "        return outputs\n    def train_step(self, data_batch):\n        \"\"\"Define how the model is going to train, from input to output.\n        \"\"\"\n        inputs, _ = data_batch\n        outputs = self.forward_net(inputs, day_or_night='day_and_night')\n        loss_metrics = self.head.loss(inputs, outputs)\n        return loss_metrics\n    def val_step(self, data_batch):\n        inputs, day_or_night = data_batch\n        outputs = self.forward_net(inputs, day_or_night=day_or_night)\n        loss_metrics = self.head.loss(inputs, outputs)\n        return loss_metrics\n    def test_step(self, data_batch):\n        \"\"\"Define how the model is going to test, from input to output.\"\"\"\n        inputs, day_or_night = data_batch\n        outputs = self.forward_net(inputs, day_or_night=day_or_night)\n        loss_metrics = self.head.loss(inputs, outputs)\n        return loss_metrics\n    def infer_step(self, data_batch):\n        \"\"\"Define how the model is going to infer, from input to output.\"\"\"\n        inputs = data_batch[0]\n        outputs = self.forward_net(inputs, day_or_night='day')",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/estimators/depth_estimator.py:32-58"
+    },
+    "7297": {
+        "file_id": 529,
+        "content": "The code defines four methods: train_step, val_step, test_step, and infer_step. The main purpose of each step is to calculate the loss metrics from the input data. The 'forward_net' method is used in all steps to process the inputs and generate outputs, which are then passed to the 'head.loss' method to compute the loss metrics for each step.",
+        "type": "comment"
+    },
+    "7298": {
+        "file_id": 529,
+        "content": "        return outputs",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/estimators/depth_estimator.py:59-59"
+    },
+    "7299": {
+        "file_id": 529,
+        "content": "This code snippet returns the output results from a depth estimator model.",
+        "type": "comment"
+    }
+}

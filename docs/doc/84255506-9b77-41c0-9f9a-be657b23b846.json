@@ -1,0 +1,15 @@
+{
+    "summary": "BaseDetector class serves as a parent for detectors, providing common features and abstract train_step method implementation. Abstract base classes are defined for training, validating, and testing steps in machine learning models.",
+    "details": [
+        {
+            "comment": "BaseDetector class is the parent class for detectors, providing common functionality like extracting features and initializing weights. It defines an abstract train_step method that needs to be implemented by subclasses for training. The class also contains methods for feature extraction, model forward pass, and handling different modes (train, valid, test, infer).",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/paddlevideo/modeling/framework/detectors/base.py\":0-35",
+            "content": "from abc import abstractmethod\nfrom ... import builder\nimport paddle.nn as nn\nfrom ...registry import DETECTORS\n@DETECTORS.register()\nclass BaseDetector(nn.Layer):\n    \"\"\"Base class for detectors.  \"\"\"\n    def __init__(self, backbone=None, head=None):\n        super().__init__()\n    def init_weights(self):\n        \"\"\"Initialize the model network weights. \"\"\"\n        self.backbone.init_weights()  \n        self.head.init_weights()\n    def extract_feature(self, imgs, iter_num):\n        \"\"\"Extract features through a backbone.  \"\"\"\n        feature = self.backbone(imgs)\n        return feature\n    def forward(self,  data_batch, mode='infer'):\n        if mode == 'train':\n            return self.train_step(data_batch)\n        elif mode == 'valid':\n            return self.val_step(data_batch)\n        elif mode == 'test':\n            return self.test_step(data_batch)\n        elif mode == 'infer':\n            return self.infer_step(data_batch)\n        else:\n            raise NotImplementedError\n    @abstractmethod\n    def train_step(self, data_batch, **kwargs):"
+        },
+        {
+            "comment": "This code defines abstract base classes for training, validating, and testing steps in a machine learning model. These methods must be implemented by subclasses to perform the specific tasks accordingly.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/paddlevideo/modeling/framework/detectors/base.py\":36-50",
+            "content": "        \"\"\"Training step.\n        \"\"\"\n        raise NotImplementedError\n    @abstractmethod\n    def val_step(self, data_batch, **kwargs):\n        \"\"\"Validating step.\n        \"\"\"\n        raise NotImplementedError\n    @abstractmethod\n    def test_step(self, data_batch, **kwargs):\n        \"\"\"Test step.\n        \"\"\"\n        raise NotImplementedError"
+        }
+    ]
+}

@@ -1,0 +1,545 @@
+{
+    "8000": {
+        "file_id": 589,
+        "content": "            num, cnt = np.unique(label, return_counts=True)\n            for n, c in zip(num, cnt):\n                nums[n] += c\n        class_num = paddle.to_tensor(nums, dtype=\"float32\")\n        total = class_num.sum().item()\n        frequency = class_num / total\n        median = paddle.median(frequency)\n        class_weight = median / frequency\n        return class_weight\n    def forward(self, preds, gts, sim_index):\n        \"\"\"\n        Args:\n            preds: paddle.float (N, C, T).\n            gts: paddle.int64 (N, T).\n            sim_index: paddle.float (N, C', T).\n        \"\"\"\n        loss = 0.0\n        for criterion, weight in zip(self.criterions, self.weights):\n            if isinstance(criterion, GaussianSimilarityTMSE):\n                loss += weight * criterion(preds, gts, sim_index)\n            elif isinstance(criterion, nn.CrossEntropyLoss):\n                preds_t = paddle.transpose(preds, perm=[0, 2, 1])\n                loss += weight * criterion(preds_t, gts)\n            else:\n                loss += weight * criterion(preds, gts)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/losses/asrf_loss.py:222-248"
+    },
+    "8001": {
+        "file_id": 589,
+        "content": "This code defines a class that calculates class weights based on the frequency of occurrence in labels. It also includes a forward function for applying different loss functions to predictions and ground truths, with associated weights. The criterion types include GaussianSimilarityTMSE and nn.CrossEntropyLoss.",
+        "type": "comment"
+    },
+    "8002": {
+        "file_id": 589,
+        "content": "        return loss\nclass BoundaryRegressionLoss(nn.Layer):\n    \"\"\"\n    Boundary Regression Loss\n        bce: Binary Cross Entropy Loss for Boundary Prediction\n        mse: Mean Squared Error\n    \"\"\"\n    def __init__(self,\n                 file_path,\n                 label_path,\n                 bce=True,\n                 focal=False,\n                 mse=False,\n                 weight=None,\n                 pos_weight=None):\n        super().__init__()\n        self.criterions = []\n        self.file_path = file_path\n        self.label_path = label_path\n        pos_weight = self.get_pos_weight()\n        if bce:\n            self.criterions.append(\n                nn.BCEWithLogitsLoss(weight=weight, pos_weight=pos_weight))\n        if focal:\n            self.criterions.append(FocalLoss())\n        if mse:\n            self.criterions.append(nn.MSELoss())\n        if len(self.criterions) == 0:\n            print(\"You have to choose at least one loss function.\")\n            sys.exit(1)\n    def get_pos_weight(self, norm=None):\n        \"\"\"",
+        "type": "code",
+        "location": "/paddlevideo/modeling/losses/asrf_loss.py:250-291"
+    },
+    "8003": {
+        "file_id": 589,
+        "content": "This class defines a boundary regression loss function, which combines different loss types such as Binary Cross Entropy Loss (bce), Mean Squared Error (mse) and Focal Loss (focal). It initializes with file_path, label_path, bce, focal, mse, weight and pos_weight parameters. The get_pos_weight method retrieves a position weight depending on the norm parameter. If at least one loss function is chosen, the criterions list is created. If not, it prints an error message and exits the program.",
+        "type": "comment"
+    },
+    "8004": {
+        "file_id": 589,
+        "content": "        pos_weight for binary cross entropy with logits loss\n        pos_weight is defined as reciprocal of ratio of positive samples in the dataset\n        \"\"\"\n        # load file list\n        file_ptr = open(self.file_path, 'r')\n        info = file_ptr.read().split('\\n')[:-1]\n        file_ptr.close()\n        n_classes = 2  # boundary or not\n        nums = [0 for i in range(n_classes)]\n        for i in range(len(info)):\n            video_name = info[i]\n            file_name = video_name.split('.')[0] + \".npy\"\n            label_file_path = os.path.join(self.label_path, file_name)\n            label = np.load(label_file_path).astype(np.int64)\n            num, cnt = np.unique(label, return_counts=True)\n            for n, c in zip(num, cnt):\n                nums[n] += c\n        pos_ratio = nums[1] / sum(nums)\n        pos_weight = 1 / pos_ratio\n        if norm is not None:\n            pos_weight /= norm\n        return paddle.to_tensor(pos_weight, dtype=\"float32\")\n    def forward(self, preds, gts):\n        \"\"\"\n        Args:",
+        "type": "code",
+        "location": "/paddlevideo/modeling/losses/asrf_loss.py:292-321"
+    },
+    "8005": {
+        "file_id": 589,
+        "content": "This code calculates the positive weight for binary cross-entropy with logits loss. It loads file information from a given path, counts the number of positive and negative samples, then calculates the ratio of positive samples to total samples. The positive weight is set as the reciprocal of this ratio. If a normalization factor is provided, it divides the positive weight by this factor before returning it in float32 tensor format.",
+        "type": "comment"
+    },
+    "8006": {
+        "file_id": 589,
+        "content": "            preds: paddle.float (N, 1, T).\n            gts: paddle.float (N, 1, T).\n        \"\"\"\n        loss = 0.0\n        batch_size = float(preds.shape[0])\n        for criterion in self.criterions:\n            for pred, gt in zip(preds, gts):\n                loss += criterion(pred, gt)\n        return loss / batch_size\n@LOSSES.register()\nclass ASRFLoss(nn.Layer):\n    def __init__(self,\n                 lambda_bound_loss,\n                 num_classes,\n                 file_path,\n                 label_path,\n                 boundary_path,\n                 ce=True,\n                 asl_focal=True,\n                 tmse=False,\n                 gstmse=False,\n                 asl_weight=None,\n                 threshold=4.,\n                 ignore_index=255,\n                 ce_weight=1.0,\n                 focal_weight=1.0,\n                 tmse_weight=0.15,\n                 gstmse_weight=0.15,\n                 bce=True,\n                 brl_focal=False,\n                 mse=False,\n                 brl_weight=None):\n        super().__init__()",
+        "type": "code",
+        "location": "/paddlevideo/modeling/losses/asrf_loss.py:322-359"
+    },
+    "8007": {
+        "file_id": 589,
+        "content": "The ASRFLoss class is an ASR (Automatic Speech Recognition) loss function implemented with various criteria for prediction and ground truth. It uses different weights for CE, Focal, TMSE, GST MSE, BCE, and BR LFocal losses depending on the input parameters. The function returns the average loss across all criterions and samples.",
+        "type": "comment"
+    },
+    "8008": {
+        "file_id": 589,
+        "content": "        self.criterion_cls = ActionSegmentationLoss(ce=ce,\n                                                    focal=asl_focal,\n                                                    tmse=tmse,\n                                                    gstmse=gstmse,\n                                                    weight=asl_weight,\n                                                    threshold=threshold,\n                                                    ignore_index=ignore_index,\n                                                    ce_weight=ce_weight,\n                                                    focal_weight=focal_weight,\n                                                    tmse_weight=tmse_weight,\n                                                    gstmse_weight=gstmse_weight,\n                                                    file_path=file_path,\n                                                    label_path=label_path,\n                                                    num_classes=num_classes)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/losses/asrf_loss.py:360-373"
+    },
+    "8009": {
+        "file_id": 589,
+        "content": "This code initializes an ActionSegmentationLoss object with specified parameters for classification loss, focal loss, and temporal segmentation losses. It also takes weights and file paths as inputs to optimize the model's performance.",
+        "type": "comment"
+    },
+    "8010": {
+        "file_id": 589,
+        "content": "        self.criterion_boundary = BoundaryRegressionLoss(\n            bce=bce,\n            focal=brl_focal,\n            mse=mse,\n            weight=brl_weight,\n            file_path=file_path,\n            label_path=boundary_path)\n        self.lambda_bound_loss = lambda_bound_loss\n    def forward(self, x, output_cls, label, outputs_boundary, boundary):\n        loss = 0.0\n        if isinstance(output_cls, list):\n            n = len(output_cls)\n            for out in output_cls:\n                loss += self.criterion_cls(out, label, x) / n\n        else:\n            loss += self.criterion_cls(output_cls, label, x)\n        if isinstance(outputs_boundary, list):\n            n = len(outputs_boundary)\n            for out in outputs_boundary:\n                loss += self.lambda_bound_loss * self.criterion_boundary(\n                    out, boundary) / n\n        else:\n            loss += self.lambda_bound_loss * self.criterion_boundary(\n                outputs_boundary, boundary)\n        return loss",
+        "type": "code",
+        "location": "/paddlevideo/modeling/losses/asrf_loss.py:374-401"
+    },
+    "8011": {
+        "file_id": 589,
+        "content": "This code defines a custom loss function for a video modeling framework. It initializes a boundary regression loss criterion and takes a weighted average of classification and boundary losses. The forward method calculates the total loss by summing weighted classification and boundary losses, and returns the final loss value.",
+        "type": "comment"
+    },
+    "8012": {
+        "file_id": 590,
+        "content": "/paddlevideo/modeling/losses/base.py",
+        "type": "filepath"
+    },
+    "8013": {
+        "file_id": 590,
+        "content": "This code is a PaddlePaddle base class for loss functions, requiring subclasses to override `_forward()` and supports optional weight scaling. It initializes the loss class and defines forward pass computation.",
+        "type": "summary"
+    },
+    "8014": {
+        "file_id": 590,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nfrom abc import  abstractmethod\nimport paddle\nimport paddle.nn as nn\n#XXX use _forward?? or forward??\nclass BaseWeightedLoss(nn.Layer):\n    \"\"\"Base class for loss.\n    All subclass should overwrite the ``_forward()`` method which returns the\n    normal loss without loss weights.\n    Args:\n        loss_weight (float): Factor scalar multiplied on the loss.\n            Default: 1.0.\n    \"\"\"\n    def __init__(self, loss_weight=1.0):",
+        "type": "code",
+        "location": "/paddlevideo/modeling/losses/base.py:1-31"
+    },
+    "8015": {
+        "file_id": 590,
+        "content": "This code is the base class for a loss function in PaddlePaddle. It requires subclasses to override the `_forward()` method, which returns the normal loss without weights. The `loss_weight` parameter is optional and defaults to 1.0, which can be used to scale the final loss value.",
+        "type": "comment"
+    },
+    "8016": {
+        "file_id": 590,
+        "content": "        super().__init__()\n        self.loss_weight = loss_weight\n    @abstractmethod\n    def _forward(self, *args, **kwargs):\n        pass\n    def forward(self, *args, **kwargs):\n        \"\"\"Defines the computation performed at every call.\n        Args:\n            *args: The positional arguments for the corresponding\n                loss.\n            **kwargs: The keyword arguments for the corresponding\n                loss.\n        Returns:\n            paddle.Tensor: The calculated loss.\n        \"\"\"\n        return self._forward(*args, **kwargs) * self.loss_weight",
+        "type": "code",
+        "location": "/paddlevideo/modeling/losses/base.py:32-49"
+    },
+    "8017": {
+        "file_id": 590,
+        "content": "Initializes the loss class with a weight and defines forward pass for computation.",
+        "type": "comment"
+    },
+    "8018": {
+        "file_id": 591,
+        "content": "/paddlevideo/modeling/losses/bmn_loss.py",
+        "type": "filepath"
+    },
+    "8019": {
+        "file_id": 591,
+        "content": "This code defines a BMN loss function for PaddleVideo, considering time-scale attributes and ratio of positive entries. It also includes a loss function for object detection models with weighted samples, position losses, and ground truth IoU masks. The code further defines a loss function for PEM and TEAM tasks by combining predicted and ground truth values using three loss functions.",
+        "type": "summary"
+    },
+    "8020": {
+        "file_id": 591,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport numpy as np\nimport paddle\nimport paddle.nn.functional as F\nfrom ..registry import LOSSES\nfrom .base import BaseWeightedLoss\n@LOSSES.register()\nclass BMNLoss(BaseWeightedLoss):\n    \"\"\"Loss for BMN model\n    Args:\n        tscale (int): sequence length, default 100.\n        dscale (int): max duration length, default 100.\n    \"\"\"\n    def __init__(self, dscale, tscale):\n        super().__init__()\n        self.dscale = dscale",
+        "type": "code",
+        "location": "/paddlevideo/modeling/losses/bmn_loss.py:1-32"
+    },
+    "8021": {
+        "file_id": 591,
+        "content": "This code defines a BMN loss function for the PaddleVideo library. It is registered in the LOSSES registry and takes two arguments: dscale and tscale, which represent max duration length and sequence length respectively. The class extends BaseWeightedLoss, suggesting it combines multiple weighted losses.",
+        "type": "comment"
+    },
+    "8022": {
+        "file_id": 591,
+        "content": "        self.tscale = tscale\n    def _get_mask(self, dscale, tscale):\n        bm_mask = []\n        for idx in range(dscale):\n            mask_vector = [1 for i in range(tscale - idx)\n                           ] + [0 for i in range(idx)]\n            bm_mask.append(mask_vector)\n        bm_mask = np.array(bm_mask, dtype='float32')\n        bm_mask = paddle.to_tensor(bm_mask)\n        bm_mask.stop_gradient = True\n        return bm_mask\n    def tem_loss_func(self, pred_start, pred_end, gt_start, gt_end):\n        def bi_loss(pred_score, gt_label, datatype):\n            pred_score = paddle.reshape(x=pred_score, shape=[-1])\n            gt_label = paddle.reshape(x=gt_label, shape=[-1])\n            gt_label.stop_gradient = True\n            pmask = paddle.cast(x=(gt_label > 0.5), dtype=datatype)\n            num_entries = paddle.cast(paddle.shape(pmask), dtype=datatype)\n            num_positive = paddle.cast(paddle.sum(pmask), dtype=datatype)\n            ratio = num_entries / num_positive\n            coef_0 = 0.5 * ratio / (ratio - 1)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/losses/bmn_loss.py:33-55"
+    },
+    "8023": {
+        "file_id": 591,
+        "content": "This code defines a class with a time-scale attribute, a method to create binary mask arrays, and a loss function for a specific task. The loss function takes in predicted start and end positions along with ground truth values and calculates a ratio between the number of entries and positive values. This ratio is then used to calculate a coefficient for the loss function.",
+        "type": "comment"
+    },
+    "8024": {
+        "file_id": 591,
+        "content": "            coef_1 = 0.5 * ratio\n            epsilon = 0.000001\n            loss_pos = paddle.multiply(paddle.log(pred_score + epsilon), pmask)\n            loss_pos = coef_1 * paddle.mean(loss_pos)\n            loss_neg = paddle.multiply(paddle.log(1.0 - pred_score + epsilon),\n                                       (1.0 - pmask))\n            loss_neg = coef_0 * paddle.mean(loss_neg)\n            loss = -1 * (loss_pos + loss_neg)\n            return loss\n        loss_start = bi_loss(pred_start, gt_start, pred_start.dtype)\n        loss_end = bi_loss(pred_end, gt_end, pred_start.dtype)\n        loss = loss_start + loss_end\n        return loss\n    def pem_reg_loss_func(self, pred_score, gt_iou_map, mask):\n        gt_iou_map = paddle.multiply(gt_iou_map, mask)\n        u_hmask = paddle.cast(x=gt_iou_map > 0.7, dtype=pred_score.dtype)\n        u_mmask = paddle.logical_and(gt_iou_map <= 0.7, gt_iou_map > 0.3)\n        u_mmask = paddle.cast(x=u_mmask, dtype=pred_score.dtype)\n        u_lmask = paddle.logical_and(gt_iou_map <= 0.3, gt_iou_map >= 0.)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/losses/bmn_loss.py:56-77"
+    },
+    "8025": {
+        "file_id": 591,
+        "content": "The code defines a loss function for object detection models. It calculates the loss by considering positive and negative samples, applying weights to each sample based on their ratio, and then combines them. The bi_loss function is used to calculate losses for start and end positions. In another function, Pem_reg_loss_func, it separates ground truth IoU map into three masks: high (>0.7), medium (<=0.7 & >0.3), and low (<=0.3 & >=0). It then applies these masks to calculate the loss.",
+        "type": "comment"
+    },
+    "8026": {
+        "file_id": 591,
+        "content": "        u_lmask = paddle.cast(x=u_lmask, dtype=pred_score.dtype)\n        u_lmask = paddle.multiply(u_lmask, mask)\n        num_h = paddle.cast(paddle.sum(u_hmask), dtype=pred_score.dtype)\n        num_m = paddle.cast(paddle.sum(u_mmask), dtype=pred_score.dtype)\n        num_l = paddle.cast(paddle.sum(u_lmask), dtype=pred_score.dtype)\n        r_m = num_h / num_m\n        u_smmask = paddle.uniform(shape=[\n            gt_iou_map.shape[1], gt_iou_map.shape[2]\n        ],\n                                  min=0.0,\n                                  max=1.0).astype(pred_score.dtype)\n        u_smmask = paddle.multiply(u_mmask, u_smmask)\n        u_smmask = paddle.cast(x=(u_smmask > (1. - r_m)),\n                               dtype=pred_score.dtype)\n        r_l = num_h / num_l\n        u_slmask = paddle.uniform(shape=[\n            gt_iou_map.shape[1], gt_iou_map.shape[2]\n        ],\n                                  min=0.0,\n                                  max=1.0).astype(pred_score.dtype)\n        u_slmask = paddle.multiply(u_lmask, u_slmask)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/losses/bmn_loss.py:78-101"
+    },
+    "8027": {
+        "file_id": 591,
+        "content": "Calculating the number of elements in different masks and using them to calculate ratios for later mask operations. Creating uniform masks and multiplying them with corresponding existing masks, then casting the results.",
+        "type": "comment"
+    },
+    "8028": {
+        "file_id": 591,
+        "content": "        u_slmask = paddle.cast(x=(u_slmask > (1. - r_l)),\n                               dtype=pred_score.dtype)\n        weights = u_hmask + u_smmask + u_slmask\n        weights.stop_gradient = True\n        loss = F.square_error_cost(pred_score, gt_iou_map)\n        loss = paddle.multiply(loss, weights)\n        loss = 0.5 * paddle.sum(loss) / paddle.sum(weights)\n        return loss\n    def pem_cls_loss_func(self, pred_score, gt_iou_map, mask):\n        gt_iou_map = paddle.multiply(gt_iou_map, mask)\n        gt_iou_map.stop_gradient = True\n        pmask = paddle.cast(x=(gt_iou_map > 0.9), dtype=pred_score.dtype)\n        nmask = paddle.cast(x=(gt_iou_map <= 0.9), dtype=pred_score.dtype)\n        nmask = paddle.multiply(nmask, mask)\n        num_positive = paddle.sum(pmask)\n        num_entries = num_positive + paddle.sum(nmask)\n        ratio = num_entries / num_positive\n        coef_0 = 0.5 * ratio / (ratio - 1)\n        coef_1 = 0.5 * ratio\n        epsilon = 0.000001\n        loss_pos = paddle.multiply(paddle.log(pred_score + epsilon), pmask)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/losses/bmn_loss.py:102-126"
+    },
+    "8029": {
+        "file_id": 591,
+        "content": "In this code, u_slmask is created by comparing r_l with 1 and casting the result to the dtype of pred_score. Then, weights are calculated by adding u_hmask, u_smmask, and u_slmask. The stop_gradient attribute of weights is set to True. Loss is calculated using square error cost between pred_score and gt_iou_map, multiplied by weights, averaged, and returned.\nIn the pem_cls_loss_func, gt_iou_map is multiplied by mask and marked as non-trainable (stop_gradient = True). Pmask and nmask are created based on conditions with gt_iou_map and mask. Num_positive and num_entries are calculated. Ratios are used to determine coef_0 and coef_1. Loss_pos is log(pred_score + epsilon) multiplied by pmask.",
+        "type": "comment"
+    },
+    "8030": {
+        "file_id": 591,
+        "content": "        loss_pos = coef_1 * paddle.sum(loss_pos)\n        loss_neg = paddle.multiply(paddle.log(1.0 - pred_score + epsilon),\n                                   nmask)\n        loss_neg = coef_0 * paddle.sum(loss_neg)\n        loss = -1 * (loss_pos + loss_neg) / num_entries\n        return loss\n    def forward(self, pred_bm, pred_start, pred_end, gt_iou_map, gt_start,\n                gt_end):\n        pred_bm_reg = paddle.squeeze(paddle.slice(pred_bm,\n                                                  axes=[1],\n                                                  starts=[0],\n                                                  ends=[1]),\n                                     axis=[1])\n        pred_bm_cls = paddle.squeeze(paddle.slice(pred_bm,\n                                                  axes=[1],\n                                                  starts=[1],\n                                                  ends=[2]),\n                                     axis=[1])\n        bm_mask = self._get_mask(self.dscale, self.tscale)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/losses/bmn_loss.py:127-147"
+    },
+    "8031": {
+        "file_id": 591,
+        "content": "Function `forward` takes in `pred_bm`, `pred_start`, `pred_end`, `gt_iou_map`, `gt_start`, and `gt_end`. It first extracts `pred_bm_reg` and `pred_bm_cls` by slicing `pred_bm` along the specified axes. Then, it calculates the `bm_mask` using `_get_mask` with given scales. The function returns the calculated loss from the input parameters.",
+        "type": "comment"
+    },
+    "8032": {
+        "file_id": 591,
+        "content": "        pem_reg_loss = self.pem_reg_loss_func(pred_bm_reg, gt_iou_map, bm_mask)\n        pem_cls_loss = self.pem_cls_loss_func(pred_bm_cls, gt_iou_map, bm_mask)\n        tem_loss = self.tem_loss_func(pred_start, pred_end, gt_start, gt_end)\n        loss = tem_loss + 10 * pem_reg_loss + pem_cls_loss\n        return loss",
+        "type": "code",
+        "location": "/paddlevideo/modeling/losses/bmn_loss.py:149-155"
+    },
+    "8033": {
+        "file_id": 591,
+        "content": "This code calculates the loss for PEM and TEAM detection tasks by combining the predicted and ground truth values. It uses three loss functions: `pem_reg_loss_func`, `pem_cls_loss_func`, and `tem_loss_func`. The final loss is the sum of the temporal (TEM) loss, 10 times the PEM regression loss, and the PEM classification loss.",
+        "type": "comment"
+    },
+    "8034": {
+        "file_id": 592,
+        "content": "/paddlevideo/modeling/losses/cross_entropy_loss.py",
+        "type": "filepath"
+    },
+    "8035": {
+        "file_id": 592,
+        "content": "CrossEntropyLoss is a custom loss function in PaddlePaddle, inheriting from BaseWeightedLoss, for classification tasks. It calculates CrossEntropy loss between scores and labels using F.cross_entropy method and returns the result as a tensor.",
+        "type": "summary"
+    },
+    "8036": {
+        "file_id": 592,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport paddle\nimport paddle.nn.functional as F\nfrom ..registry import LOSSES\nfrom .base import BaseWeightedLoss\n@LOSSES.register()\nclass CrossEntropyLoss(BaseWeightedLoss):\n    \"\"\"Cross Entropy Loss.\"\"\"\n    def _forward(self, score, labels, **kwargs):\n        \"\"\"Forward function.\n        Args:\n            score (paddle.Tensor): The class score.\n            labels (paddle.Tensor): The ground truth labels.\n            kwargs: Any keyword argument to be used to calculate",
+        "type": "code",
+        "location": "/paddlevideo/modeling/losses/cross_entropy_loss.py:1-30"
+    },
+    "8037": {
+        "file_id": 592,
+        "content": "CrossEntropyLoss is a custom loss function in PaddlePaddle for classification tasks. It inherits from BaseWeightedLoss and has a forward method that takes class scores and labels as input.",
+        "type": "comment"
+    },
+    "8038": {
+        "file_id": 592,
+        "content": "                CrossEntropy loss.\n        Returns:\n            loss (paddle.Tensor): The returned CrossEntropy loss.\n        \"\"\"\n        loss = F.cross_entropy(score, labels, **kwargs)\n        return loss",
+        "type": "code",
+        "location": "/paddlevideo/modeling/losses/cross_entropy_loss.py:31-36"
+    },
+    "8039": {
+        "file_id": 592,
+        "content": "This function calculates the CrossEntropy loss between score and labels, using Paddle's F.cross_entropy method, and returns the result as a tensor.",
+        "type": "comment"
+    },
+    "8040": {
+        "file_id": 593,
+        "content": "/paddlevideo/modeling/losses/depth_loss.py",
+        "type": "filepath"
+    },
+    "8041": {
+        "file_id": 593,
+        "content": "This code calculates smoothness and reprojection losses for depth estimation tasks, combining identity and reprojection losses to compute disparity loss. It handles day and night scenarios while saving images if necessary. The total loss is stored in the losses dictionary.",
+        "type": "summary"
+    },
+    "8042": {
+        "file_id": 593,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport paddle\nimport paddle.nn as nn\nfrom ..registry import LOSSES\nfrom .base import BaseWeightedLoss\ndef get_smooth_loss(disp, img):\n    \"\"\"Computes the smoothness loss for a disparity image\n    The color image is used for edge-aware smoothness\n    \"\"\"\n    grad_disp_x = paddle.abs(disp[:, :, :, :-1] - disp[:, :, :, 1:])\n    grad_disp_y = paddle.abs(disp[:, :, :-1, :] - disp[:, :, 1:, :])\n    grad_img_x = paddle.mean(paddle.abs(img[:, :, :, :-1] - img[:, :, :, 1:]),",
+        "type": "code",
+        "location": "/paddlevideo/modeling/losses/depth_loss.py:1-29"
+    },
+    "8043": {
+        "file_id": 593,
+        "content": "This code defines a function \"get_smooth_loss\" that calculates the smoothness loss for disparity images using color image gradients and disparity image gradients. It uses PaddlePaddle library functions like paddle.abs() and paddle.mean(). The function is part of the BaseWeightedLoss class in the LOSSES registry.",
+        "type": "comment"
+    },
+    "8044": {
+        "file_id": 593,
+        "content": "                             1,\n                             keepdim=True)\n    grad_img_y = paddle.mean(paddle.abs(img[:, :, :-1, :] - img[:, :, 1:, :]),\n                             1,\n                             keepdim=True)\n    grad_disp_x *= paddle.exp(-grad_img_x)\n    grad_disp_y *= paddle.exp(-grad_img_y)\n    return grad_disp_x.mean() + grad_disp_y.mean()\nclass DiffLoss(nn.Layer):\n    def __init__(self):\n        super(DiffLoss, self).__init__()\n    def forward(self, input1, input2):\n        batch_size = input1.shape[0]\n        input1 = input1.reshape([batch_size, -1])\n        input2 = input2.reshape([batch_size, -1])\n        input1_l2 = input1\n        input2_l2 = input2\n        diff_loss = 0\n        dim = input1.shape[1]\n        for i in range(input1.shape[0]):\n            diff_loss = diff_loss + paddle.mean(\n                ((input1_l2[i:i + 1, :].mm(input2_l2[i:i + 1, :].T)).pow(2)) /\n                dim)\n        diff_loss = diff_loss / input1.shape[0]\n        return diff_loss\nclass MSE(nn.Layer):\n    def __init__(self):",
+        "type": "code",
+        "location": "/paddlevideo/modeling/losses/depth_loss.py:30-67"
+    },
+    "8045": {
+        "file_id": 593,
+        "content": "The code defines two classes: DiffLoss and MSE. DiffLoss calculates the loss between two inputs using L2 norm, while MSE calculates mean squared error loss for a single input. The function on lines 29-66 calculates gradients of disparity maps using image differences, applies exponential decay based on gradient values, and returns their average. This seems to be related to depth estimation or disparity prediction in computer vision tasks.",
+        "type": "comment"
+    },
+    "8046": {
+        "file_id": 593,
+        "content": "        super(MSE, self).__init__()\n    def forward(self, pred, real):\n        diffs = paddle.add(real, -pred)\n        n = paddle.numel(diffs)\n        mse = paddle.sum(diffs.pow(2)) / n\n        return mse\nclass SIMSE(nn.Layer):\n    def __init__(self):\n        super(SIMSE, self).__init__()\n    def forward(self, pred, real):\n        diffs = paddle.add(real, -pred)\n        n = paddle.numel(diffs)\n        simse = paddle.sum(diffs).pow(2) / (n**2)\n        return simse\nclass SSIM(nn.Layer):\n    \"\"\"Layer to compute the SSIM loss between a pair of images\n    \"\"\"\n    def __init__(self):\n        super(SSIM, self).__init__()\n        self.mu_x_pool = nn.AvgPool2D(3, 1, exclusive=False)\n        self.mu_y_pool = nn.AvgPool2D(3, 1, exclusive=False)\n        self.sig_x_pool = nn.AvgPool2D(3, 1, exclusive=False)\n        self.sig_y_pool = nn.AvgPool2D(3, 1, exclusive=False)\n        self.sig_xy_pool = nn.AvgPool2D(3, 1, exclusive=False)\n        self.refl = nn.Pad2D(1, mode='reflect')\n        self.C1 = 0.01**2\n        self.C2 = 0.03**2",
+        "type": "code",
+        "location": "/paddlevideo/modeling/losses/depth_loss.py:68-104"
+    },
+    "8047": {
+        "file_id": 593,
+        "content": "MSE class is a mean squared error loss function for PaddlePaddle, SIMSE class calculates the structured iterative mean squared error loss, and SSIM class computes the structural similarity index (SSIM) loss between a pair of images using various pooling operations and constants.",
+        "type": "comment"
+    },
+    "8048": {
+        "file_id": 593,
+        "content": "    def forward(self, x, y):\n        x = self.refl(x)\n        y = self.refl(y)\n        mu_x = self.mu_x_pool(x)\n        mu_y = self.mu_y_pool(y)\n        sigma_x = self.sig_x_pool(x**2) - mu_x**2\n        sigma_y = self.sig_y_pool(y**2) - mu_y**2\n        sigma_xy = self.sig_xy_pool(x * y) - mu_x * mu_y\n        SSIM_n = (2 * mu_x * mu_y + self.C1) * (2 * sigma_xy + self.C2)\n        SSIM_d = (mu_x**2 + mu_y**2 + self.C1) * (sigma_x + sigma_y + self.C2)\n        return paddle.clip((1 - SSIM_n / SSIM_d) / 2, 0, 1)\n@LOSSES.register()\nclass ADDSLoss(BaseWeightedLoss):\n    def __init__(self, avg_reprojection, disparity_smoothness, no_ssim):\n        super(ADDSLoss, self).__init__()\n        self.avg_reprojection = avg_reprojection\n        self.disparity_smoothness = disparity_smoothness\n        self.no_ssim = no_ssim\n        self.loss_diff = DiffLoss()\n        self.loss_recon1 = MSE()\n        self.loss_recon2 = SIMSE()\n        self.loss_similarity = MSE()\n    def compute_reprojection_loss(self, pred, target):\n        \"\"\"Computes reprojection loss between a batch of predicted and target images",
+        "type": "code",
+        "location": "/paddlevideo/modeling/losses/depth_loss.py:106-137"
+    },
+    "8049": {
+        "file_id": 593,
+        "content": "This code defines a forward function for calculating the SSIM loss, which is used in the ADDSLoss class. The SSIM loss measures the structural similarity between two images and takes into account luminance (mu_x and mu_y) and contrast (sigma_x and sigma_y) for each image. It also considers the covariance of the two images (sigma_xy). The SSIM loss is then used in the ADDSLoss class to compute the reprojection loss between predicted and target images.",
+        "type": "comment"
+    },
+    "8050": {
+        "file_id": 593,
+        "content": "        \"\"\"\n        abs_diff = paddle.abs(target - pred)\n        l1_loss = abs_diff.mean(1, True)\n        if not self.no_ssim:\n            self.ssim = SSIM()\n        if self.no_ssim:\n            reprojection_loss = l1_loss\n        else:\n            ssim_loss = self.ssim(pred, target).mean(1, True)\n            reprojection_loss = 0.85 * ssim_loss + 0.15 * l1_loss\n        return reprojection_loss\n    def compute_losses(self, inputs, outputs, is_night):\n        \"\"\"Compute the reprojection and smoothness losses for a minibatch\n        \"\"\"\n        losses = {}\n        total_loss = 0\n        for scale in outputs['scales']:\n            loss = 0\n            reprojection_losses = []\n            source_scale = 0\n            disp = outputs[(\"disp\", scale)]\n            if is_night:\n                color = inputs[(\"color_n\", 0, scale)]\n                target = inputs[(\"color_n\", 0, source_scale)]\n            else:\n                color = inputs[(\"color\", 0, scale)]\n                target = inputs[(\"color\", 0, source_scale)]\n            for frame_id in outputs['frame_ids'][1:]:",
+        "type": "code",
+        "location": "/paddlevideo/modeling/losses/depth_loss.py:138-173"
+    },
+    "8051": {
+        "file_id": 593,
+        "content": "This code computes the reprojection and smoothness losses for a minibatch by iterating over different scales. It calculates the L1 loss between the predicted depth and the target depth, and optionally computes the SSIM (Structural Similarity Index) loss as well. The reprojection loss is determined based on these two values, with 85% weighted towards the SSIM loss and 15% towards the L1 loss. The total loss for the minibatch is accumulated in the \"total_loss\" variable.",
+        "type": "comment"
+    },
+    "8052": {
+        "file_id": 593,
+        "content": "                pred = outputs[(\"color\", frame_id, scale)]\n                reprojection_losses.append(\n                    self.compute_reprojection_loss(pred, target))\n            reprojection_losses = paddle.concat(reprojection_losses, 1)\n            identity_reprojection_losses = []\n            for frame_id in outputs['frame_ids'][1:]:\n                if is_night:\n                    pred = inputs[(\"color_n\", frame_id, source_scale)]\n                else:\n                    pred = inputs[(\"color\", frame_id, source_scale)]\n                identity_reprojection_losses.append(\n                    self.compute_reprojection_loss(pred, target))\n            identity_reprojection_losses = paddle.concat(\n                identity_reprojection_losses, 1)\n            if self.avg_reprojection:\n                identity_reprojection_loss = identity_reprojection_losses.mean(\n                    1, keepdim=True)\n            else:\n                # save both images, and do min all at once below\n                identity_reprojection_loss = identity_reprojection_losses",
+        "type": "code",
+        "location": "/paddlevideo/modeling/losses/depth_loss.py:174-197"
+    },
+    "8053": {
+        "file_id": 593,
+        "content": "This code computes reprojection losses for day and night scenarios, concatenates them into a single tensor, and then checks if average reprojection loss should be computed. If not, it saves both images and performs minimum operation all at once.",
+        "type": "comment"
+    },
+    "8054": {
+        "file_id": 593,
+        "content": "            if self.avg_reprojection:\n                reprojection_loss = reprojection_losses.mean(1, keepdim=True)\n            else:\n                reprojection_loss = reprojection_losses\n            # add random numbers to break ties\n            identity_reprojection_loss = identity_reprojection_loss + paddle.randn(\n                identity_reprojection_loss.shape) * 0.00001\n            combined = paddle.concat(\n                (identity_reprojection_loss, reprojection_loss), axis=1)\n            if combined.shape[1] == 1:\n                to_optimise = combined\n            else:\n                to_optimise = paddle.min(combined, axis=1)\n            loss = loss + to_optimise.mean()\n            mean_disp = disp.mean(2, True).mean(3, True)\n            norm_disp = disp / (mean_disp + 1e-7)\n            smooth_loss = get_smooth_loss(norm_disp, color)\n            loss = loss + self.disparity_smoothness * smooth_loss / (2**scale)\n            total_loss = total_loss + loss\n            losses[\"loss/{}\".format(scale)] = loss",
+        "type": "code",
+        "location": "/paddlevideo/modeling/losses/depth_loss.py:199-223"
+    },
+    "8055": {
+        "file_id": 593,
+        "content": "This code calculates the depth loss by combining identity and reprojection losses, adds random numbers to break ties, concatenates them, selects minimum values for optimization, and calculates disparity smoothness loss. It then updates the total loss and stores it in the losses dictionary.",
+        "type": "comment"
+    },
+    "8056": {
+        "file_id": 593,
+        "content": "        total_loss /= len(outputs['scales'])\n        losses[\"loss\"] = total_loss\n        return losses\n    def forward(self, inputs, outputs):\n        losses_day = self.compute_losses(inputs, outputs, 'day')\n        losses_night = self.compute_losses(inputs, outputs['outputs_night'],\n                                           'night')\n        loss = 0\n        losses = []\n        # diff\n        target_diff1 = 0.5 * self.loss_diff(\n            outputs['result'][0], outputs['result'][2])  # 10 when batchsize=1\n        target_diff2 = 0.5 * self.loss_diff(outputs['result_night'][0],\n                                            outputs['result_night'][2])\n        losses.append(target_diff1)\n        losses.append(target_diff2)\n        loss = loss + target_diff1\n        loss = loss + target_diff2\n        target_diff3 = 1 * self.loss_diff(\n            outputs['result'][1], outputs['result'][3])  # 10 when batchsize=1\n        target_diff4 = 1 * self.loss_diff(outputs['result_night'][1],\n                                          outputs['result_night'][3])",
+        "type": "code",
+        "location": "/paddlevideo/modeling/losses/depth_loss.py:225-250"
+    },
+    "8057": {
+        "file_id": 593,
+        "content": "This code computes losses for both day and night scenes in a video, using the compute_losses function. It appends two target differences to the 'loss' list and adds them to the total loss. The target_diff1 and target_diff2 are calculated by the loss_diff function, comparing specific elements from the outputs. Target_diff3 and target_diff4 are also computed in a similar manner. The final total loss is divided by the number of scales and stored in the losses dictionary before returning.",
+        "type": "comment"
+    },
+    "8058": {
+        "file_id": 593,
+        "content": "        losses.append(target_diff3)\n        losses.append(target_diff4)\n        loss = loss + target_diff3\n        loss = loss + target_diff4\n        # recon\n        target_mse = 1 * self.loss_recon1(outputs['result'][5],\n                                          inputs[\"color_aug\", 0, 0])\n        loss = loss + target_mse\n        target_simse = 1 * self.loss_recon2(outputs['result'][5],\n                                            inputs[\"color_aug\", 0, 0])\n        loss = loss + target_simse\n        losses.append(target_mse)\n        losses.append(target_simse)\n        target_mse_night = 1 * self.loss_recon1(outputs['result_night'][5],\n                                                inputs[\"color_n_aug\", 0, 0])\n        loss = loss + target_mse_night\n        target_simse_night = 1 * self.loss_recon2(outputs['result_night'][5],\n                                                  inputs[\"color_n_aug\", 0, 0])\n        loss = loss + target_simse_night\n        losses.append(target_mse_night)\n        losses.append(target_simse_night)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/losses/depth_loss.py:251-276"
+    },
+    "8059": {
+        "file_id": 593,
+        "content": "The code calculates multiple losses, including depth and reconstruction, for both daytime and night-time scenes. It then adds these losses to the total loss and appends them to the 'losses' list.",
+        "type": "comment"
+    },
+    "8060": {
+        "file_id": 593,
+        "content": "        # depth loss\n        pseudo_label = outputs[(\"disp\", 0)].detach()\n        depth_loss = 1 * self.loss_similarity(\n            outputs['outputs_night'][(\"disp\", 0)], pseudo_label)\n        loss = loss + depth_loss\n        losses.append(depth_loss)\n        outputs['loss'] = loss + losses_day['loss'] + losses_night['loss']\n        outputs['losses_day'] = losses_day['loss']\n        outputs['losses_night'] = losses_night['loss']\n        return outputs",
+        "type": "code",
+        "location": "/paddlevideo/modeling/losses/depth_loss.py:278-290"
+    },
+    "8061": {
+        "file_id": 593,
+        "content": "This code calculates a depth loss by comparing predicted depths with detached pseudo-labels, then adds it to the overall loss and appends it to the losses list. Finally, it updates the output dictionary with the total loss and separate day/night losses before returning the updated outputs.",
+        "type": "comment"
+    },
+    "8062": {
+        "file_id": 594,
+        "content": "/paddlevideo/modeling/losses/distillation_loss.py",
+        "type": "filepath"
+    },
+    "8063": {
+        "file_id": 594,
+        "content": "This code defines Distillation Entropy Loss and KL divergence loss classes, implementing CrossEntropy loss for single/triple labels and KL divergence respectively, with optional weighted average and activation functions.",
+        "type": "summary"
+    },
+    "8064": {
+        "file_id": 594,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport paddle\nimport paddle.nn.functional as F\nimport paddle.nn as nn\nfrom ..registry import LOSSES\nfrom .base import BaseWeightedLoss\n@LOSSES.register()\nclass DistillationCELoss(BaseWeightedLoss):\n    \"\"\"Distillation Entropy Loss.\"\"\"\n    def _forward(self, score, labels, **kwargs):\n        \"\"\"Forward function.\n        Args:\n            score (paddle.Tensor): The class score.\n            labels (paddle.Tensor): The ground truth labels.",
+        "type": "code",
+        "location": "/paddlevideo/modeling/losses/distillation_loss.py:1-30"
+    },
+    "8065": {
+        "file_id": 594,
+        "content": "Defines a Distillation Entropy Loss class, which inherits from BaseWeightedLoss and takes score and labels as input for its forward function.",
+        "type": "comment"
+    },
+    "8066": {
+        "file_id": 594,
+        "content": "            kwargs: Any keyword argument to be used to calculate\n                CrossEntropy loss.\n        Returns:\n            loss (paddle.Tensor): The returned CrossEntropy loss.\n        \"\"\"\n        if len(labels) == 1:\n            label = labels[0]\n            loss = F.cross_entropy(score, label, **kwargs)\n        # Deal with VideoMix\n        elif len(labels) == 3:\n            label_a, label_b, lam = labels\n            loss_a = F.cross_entropy(score, label_a, **kwargs)\n            loss_b = F.cross_entropy(score, label_b, **kwargs)\n            loss = lam * loss_a + (1 - lam) * loss_b\n            loss = paddle.mean(loss)  #lam shape is bs\n        return loss\n@LOSSES.register()\nclass DistillationDMLLoss(BaseWeightedLoss):\n    \"\"\"\n    DistillationDMLLoss\n    \"\"\"\n    def __init__(self, act=\"softmax\", eps=1e-12, **kargs):\n        super().__init__(**kargs)\n        if act is not None:\n            assert act in [\"softmax\", \"sigmoid\"]\n        if act == \"softmax\":\n            self.act = nn.Softmax(axis=-1)\n        elif act == \"sigmoid\":",
+        "type": "code",
+        "location": "/paddlevideo/modeling/losses/distillation_loss.py:31-60"
+    },
+    "8067": {
+        "file_id": 594,
+        "content": "The code defines a loss function that calculates CrossEntropy loss and supports both single and triple labels. For single label, it directly calculates the CrossEntropy loss. For triple labels, it first calculates two separate CrossEntropy losses, then combines them with a weighted average based on a given lambda value (lam). The DistillationDMLLoss class implements this behavior and also handles the act parameter for specifying different activation functions.",
+        "type": "comment"
+    },
+    "8068": {
+        "file_id": 594,
+        "content": "            self.act = nn.Sigmoid()\n        else:\n            self.act = None\n        self.eps = eps\n    def _kldiv(self, x, target):\n        class_num = x.shape[-1]\n        cost = target * paddle.log(\n            (target + self.eps) / (x + self.eps)) * class_num\n        return cost\n    def _forward(self, x, target):\n        if self.act is not None:\n            x = self.act(x)\n            target = self.act(target)\n        loss = self._kldiv(x, target) + self._kldiv(target, x)\n        loss = loss / 2\n        loss = paddle.mean(loss)\n        return loss",
+        "type": "code",
+        "location": "/paddlevideo/modeling/losses/distillation_loss.py:61-79"
+    },
+    "8069": {
+        "file_id": 594,
+        "content": "This code defines a class for implementing the Kullback-Leibler (KL) divergence loss. The constructor takes an optional activation function and epsilon for numerical stability. The _kldiv method calculates the KL divergence between two vectors, while the _forward method applies the activation function if provided and computes the final loss by averaging the KL divergences in both directions.",
+        "type": "comment"
+    },
+    "8070": {
+        "file_id": 595,
+        "content": "/paddlevideo/modeling/losses/transnetv2_loss.py",
+        "type": "filepath"
+    },
+    "8071": {
+        "file_id": 595,
+        "content": "This code defines a class \"TransNetV2Loss\" for calculating TransNetV2 model loss with transition_weight and many-hot_loss_weight parameters, using weighted binary cross-entropy loss for one-hot and many-hot predictions. The snippet returns the total loss from TransNetV2 components.",
+        "type": "summary"
+    },
+    "8072": {
+        "file_id": 595,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport paddle\nimport paddle.nn.functional as F\nfrom ..registry import LOSSES\nfrom .base import BaseWeightedLoss\n@LOSSES.register()\nclass TransNetV2Loss(BaseWeightedLoss):\n    \"\"\"Loss for TransNetV2 model\n    \"\"\"\n    def __init__(self, transition_weight=5.0, many_hot_loss_weight=0.1):\n        self.transition_weight = transition_weight\n        self.many_hot_loss_weight = many_hot_loss_weight\n        super().__init__()",
+        "type": "code",
+        "location": "/paddlevideo/modeling/losses/transnetv2_loss.py:1-28"
+    },
+    "8073": {
+        "file_id": 595,
+        "content": "This code defines a class called \"TransNetV2Loss\" for calculating the loss in TransNetV2 model. It inherits from BaseWeightedLoss and takes transition_weight and many_hot_loss_weight as parameters for customizing the loss calculation.",
+        "type": "comment"
+    },
+    "8074": {
+        "file_id": 595,
+        "content": "    def _forward(self, one_hot_pred, one_hot_gt,\n                many_hot_pred=None, many_hot_gt=None, reg_losses=None):\n        assert transition_weight != 1\n        one_hot_pred = one_hot_pred[:, :, 0]\n        one_hot_gt = one_hot_gt.astype('float32')\n        one_hot_loss = F.binary_cross_entropy_with_logits(logit=one_hot_pred, label=one_hot_gt, reduction='none')\n        one_hot_loss *= 1 + one_hot_gt * (transition_weight - 1)\n        one_hot_loss = paddle.mean(one_hot_loss)\n        many_hot_loss = 0.\n        if many_hot_loss_weight != 0. and many_hot_pred is not None:\n            many_hot_loss = many_hot_loss_weight * paddle.mean(\n                F.binary_cross_entropy_with_logits(logit=many_hot_pred[:, :, 0],\n                                                   label=many_hot_gt.astype('float32'), reduction='none'))\n        total_loss = one_hot_loss + many_hot_loss\n        if reg_losses is not None:\n            for name, value in reg_losses.items():\n                if value is not None:\n                    total_loss += value",
+        "type": "code",
+        "location": "/paddlevideo/modeling/losses/transnetv2_loss.py:30-54"
+    },
+    "8075": {
+        "file_id": 595,
+        "content": "This code defines a loss function for the TransNetV2 model, taking in one-hot and many-hot predictions and ground truth labels. It calculates the binary cross-entropy loss for both types of predictions, applies a weighted factor based on transition weight, and averages the losses before summing them together.",
+        "type": "comment"
+    },
+    "8076": {
+        "file_id": 595,
+        "content": "        return total_loss",
+        "type": "code",
+        "location": "/paddlevideo/modeling/losses/transnetv2_loss.py:56-56"
+    },
+    "8077": {
+        "file_id": 595,
+        "content": "This code snippet is returning the total loss computed from various components of the TransNetV2 model.",
+        "type": "comment"
+    },
+    "8078": {
+        "file_id": 596,
+        "content": "/paddlevideo/modeling/losses/yowo_loss.py",
+        "type": "filepath"
+    },
+    "8079": {
+        "file_id": 596,
+        "content": "FocalLoss optimizes hard examples in object detection, while YowoLoss and RegionLoss use softmax encoding. Code prepares input with reshaping, sigmoid activation, and anchor parameters. The code calculates YOLOv3-style losses for bounding box location, confidence, and classification on GPU.",
+        "type": "summary"
+    },
+    "8080": {
+        "file_id": 596,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport numpy\nimport paddle\nimport paddle.nn.functional as F\nimport paddle.nn as nn\nfrom paddle.static import Variable\nfrom ..registry import LOSSES\nfrom .base import BaseWeightedLoss\nfrom ..framework.localizers.yowo_utils import build_targets\nclass FocalLoss(nn.Layer):\n    \"\"\"\n        This criterion is a implemenation of Focal Loss, which is proposed in\n        Focal Loss for Dense Object Detection.\n            Loss(x, class) = - \\alpha (1-softmax(x)[class])^gamma \\log(softmax(x)[class])",
+        "type": "code",
+        "location": "/paddlevideo/modeling/losses/yowo_loss.py:1-31"
+    },
+    "8081": {
+        "file_id": 596,
+        "content": "This code snippet defines a FocalLoss class that implements the Focal Loss criterion. It is used for dense object detection and aims to reduce the classification loss for well-classified samples, focusing more on hard examples. The formula for the loss is given as -α(1-softmax(x)[class])^γ * log(softmax(x)[class]).",
+        "type": "comment"
+    },
+    "8082": {
+        "file_id": 596,
+        "content": "        The losses are averaged across observations for each minibatch.\n        Args:\n            alpha(1D Tensor, Variable) : the scalar factor for this criterion\n            gamma(float, double) : gamma > 0; reduces the relative loss for well-classiﬁed examples (p > .5),\n                                   putting more focus on hard, misclassiﬁed examples\n            size_average(bool): size_average(bool): By default, the losses are averaged over observations for each minibatch.\n                                However, if the field size_average is set to False, the losses are\n                                instead summed for each minibatch.\n    \"\"\"\n    def __init__(self, class_num, alpha=None, gamma=2, size_average=True):\n        super(FocalLoss, self).__init__()\n        if alpha is None:\n            self.alpha = paddle.ones(\n                [class_num, 1])\n            self.alpha.stop_gradient = False\n        else:\n            if isinstance(alpha, Variable):\n                self.alpha = alpha\n            else:",
+        "type": "code",
+        "location": "/paddlevideo/modeling/losses/yowo_loss.py:33-55"
+    },
+    "8083": {
+        "file_id": 596,
+        "content": "FocalLoss is a criterion that takes in alpha, gamma, and size_average as arguments. It averages losses across observations for each minibatch by default but can sum the losses if size_average is set to False. Alpha is either a tensor or variable, and gamma should be greater than 0, reducing relative loss for well-classified examples.",
+        "type": "comment"
+    },
+    "8084": {
+        "file_id": 596,
+        "content": "                self.alpha = (alpha)\n                self.alpha.stop_gradient = False\n        self.gamma = gamma\n        self.class_num = class_num\n        self.size_average = size_average\n    def forward(self, inputs, targets):\n        N = inputs.shape[0]\n        C = inputs.shape[1]\n        P = F.softmax(inputs, axis=1)\n        tmp = numpy.zeros((N, C))\n        class_mask = paddle.to_tensor(tmp, place=inputs.place)\n        class_mask.stop_gradient = False\n        ids = paddle.reshape(targets, [-1, 1])\n        class_mask = F.one_hot(ids.squeeze(-1), class_mask.shape[1])\n        if \"Place\" not in str(inputs.place) and \"Place\" not in str(self.alpha.place):\n            self.alpha = self.alpha.cuda()\n        alpha = self.alpha[paddle.reshape(ids.detach(), [-1])]\n        probs = paddle.reshape((P * class_mask).sum(1), [-1, 1])\n        log_p = probs.log()\n        batch_loss = -alpha * (paddle.pow((1 - probs), self.gamma)) * log_p\n        if self.size_average:\n            loss = batch_loss.mean()\n        else:\n            loss = batch_loss.sum()",
+        "type": "code",
+        "location": "/paddlevideo/modeling/losses/yowo_loss.py:56-87"
+    },
+    "8085": {
+        "file_id": 596,
+        "content": "This code defines a class for the Yowo loss function. The constructor sets various attributes like alpha, gamma, class_num, size_average, and stop_gradient. The forward method calculates the loss using softmax, one-hot encoding, and other operations. If inputs or self.alpha are not in GPU, it transfers them to the GPU. It then computes the batch_loss and finally returns either average or sum depending on size_average attribute.",
+        "type": "comment"
+    },
+    "8086": {
+        "file_id": 596,
+        "content": "        return loss\n@LOSSES.register()\nclass RegionLoss(BaseWeightedLoss):\n    # for our model anchors has 10 values and number of anchors is 5\n    # parameters: 24, 10 float values, 24, 5\n    def __init__(self, num_classes, anchors, num_anchors, object_scale, noobject_scale, class_scale, coord_scale):\n        super().__init__()\n        self.num_classes = num_classes\n        self.anchors = [float(x) for x in anchors]\n        self.num_anchors = num_anchors\n        self.anchor_step = len(self.anchors) // self.num_anchors  # each anchor has 2 parameters\n        self.object_scale = object_scale\n        self.noobject_scale = noobject_scale\n        self.class_scale = class_scale\n        self.coord_scale = coord_scale\n        self.focalloss = FocalLoss(class_num=self.num_classes, gamma=2, size_average=False)\n        self.thresh = 0.6\n    def convert2cpu(self, gpu_matrix):\n        # return paddle.to_tensor((gpu_matrix.shape), dtype=\"float32\").copy_(gpu_matrix)\n        return gpu_matrix.cpu()\n    def forward(self, output, target):",
+        "type": "code",
+        "location": "/paddlevideo/modeling/losses/yowo_loss.py:88-112"
+    },
+    "8087": {
+        "file_id": 596,
+        "content": "This code defines a RegionLoss class that inherits from BaseWeightedLoss. It takes parameters such as num_classes, anchors, num_anchors, object_scale, noobject_scale, class_scale, and coord_scale. The class initializes an instance of FocalLoss and sets a threshold. The forward method computes the loss between output and target tensors.",
+        "type": "comment"
+    },
+    "8088": {
+        "file_id": 596,
+        "content": "        # output : B*A*(4+1+num_classes)*H*W            8*5*29*24*24\n        # B: number of batches\n        # A: number of anchors\n        # 4: 4 parameters for each bounding box\n        # 1: confidence score\n        # num_classes\n        # H: height of the image (in grids)\n        # W: width of the image (in grids)\n        # for each grid cell, there are A*(4+1+num_classes) parameters\n        nB = output.detach().shape[0]  # batch\n        nA = self.num_anchors  # anchor_num\n        nC = self.num_classes\n        nH = output.detach().shape[2]\n        nW = output.detach().shape[3]\n        # resize the output (all parameters for each anchor can be reached)\n        output = paddle.reshape(output, [nB, nA, (5 + nC), nH, nW])\n        # anchor's parameter tx\n        x = F.sigmoid(\n            paddle.reshape(paddle.index_select(output, paddle.to_tensor([0], dtype='int64').cuda(), axis=2),\n                           [nB, nA, nH, nW]))\n        x.stop_gradient = False\n        # anchor's parameter ty\n        y = F.sigmoid(",
+        "type": "code",
+        "location": "/paddlevideo/modeling/losses/yowo_loss.py:113-137"
+    },
+    "8089": {
+        "file_id": 596,
+        "content": "This code reshapes the output tensor for each anchor's parameters and applies sigmoid activation to the transformed tensor. The output tensor is of shape B*A*(4+1+num_classes)*H*W, which represents the coordinates (tx, ty), width, height, confidence score, and class probabilities for each anchor box in the image grid. By applying sigmoid activation functions to tx and ty, the code scales the anchor's parameter values between 0 and 1, preparing them for the subsequent operations in the YOLOv4 model.",
+        "type": "comment"
+    },
+    "8090": {
+        "file_id": 596,
+        "content": "            paddle.reshape(paddle.index_select(output, paddle.to_tensor([1], dtype='int64').cuda(), axis=2),\n                           [nB, nA, nH, nW]))\n        y.stop_gradient = False\n        # anchor's parameter tw\n        w = paddle.reshape(paddle.index_select(output, paddle.to_tensor([2], dtype='int64').cuda(), axis=2),\n                           [nB, nA, nH, nW])\n        w.stop_gradient = False\n        # anchor's parameter th\n        h = paddle.reshape(paddle.index_select(output, paddle.to_tensor([3], dtype='int64').cuda(), axis=2),\n                           [nB, nA, nH, nW])\n        h.stop_gradient = False\n        # confidence score for each anchor\n        conf = F.sigmoid(\n            paddle.reshape(paddle.index_select(output, paddle.to_tensor([4], dtype='int64').cuda(), axis=2),\n                           [nB, nA, nH, nW]))\n        conf.stop_gradient = False\n        # anchor's parameter class label\n        cls = paddle.index_select(output, paddle.linspace(5, 5 + nC - 1, nC, 'int64').cuda(), axis=2)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/losses/yowo_loss.py:138-155"
+    },
+    "8091": {
+        "file_id": 596,
+        "content": "The code reshapes and assigns stop_gradient to output slices of the tensor \"output\" corresponding to anchor parameters (paddle, w, h) and a confidence score (conf), as well as class labels (cls). All are assigned stop_gradient=False.",
+        "type": "comment"
+    },
+    "8092": {
+        "file_id": 596,
+        "content": "        cls.stop_gradient = False\n        # resize the data structure so that for every anchor there is a class label in the last dimension\n        cls = paddle.reshape(paddle.transpose(paddle.reshape(cls, [nB * nA, nC, nH * nW]), [0, 2, 1]),\n                             [nB * nA * nH * nW, nC])\n        # for the prediction of localization of each bounding box, there exist 4 parameters (tx, ty, tw, th)\n        # pred_boxes = torch.cuda.FloatTensor(4, nB*nA*nH*nW)\n        pred_boxes = paddle.zeros([4, nB * nA * nH * nW], dtype='float32').cuda()\n        # tx and ty\n        grid_x = paddle.reshape(paddle.tile(paddle.tile(paddle.linspace(0, nW - 1, nW), [nH, 1]), [nB * nA, 1, 1]),\n                                [nB * nA * nH * nW]).cuda()\n        grid_y = paddle.reshape(paddle.tile(paddle.tile(paddle.linspace(0, nH - 1, nH), [nW, 1]).t(), [nB * nA, 1, 1]),\n                                [nB * nA * nH * nW]).cuda()\n        # for each anchor there are anchor_step variables (with the structure num_anchor*anchor_step)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/losses/yowo_loss.py:156-169"
+    },
+    "8093": {
+        "file_id": 596,
+        "content": "This code resizes the data structure to have a class label for each anchor, initializes prediction boxes, and creates grid coordinates for localization. It uses PaddlePaddle's linear algebra functions like paddle.reshape, paddle.transpose, and paddle.linspace. The code aims to prepare the input data for object detection model training.",
+        "type": "comment"
+    },
+    "8094": {
+        "file_id": 596,
+        "content": "        # for each row(anchor), the first variable is anchor's width, second is anchor's height\n        # pw and ph\n        anchor_w = paddle.index_select(paddle.reshape(paddle.to_tensor(self.anchors), [nA, self.anchor_step]),\n                                       paddle.to_tensor([0], dtype='int64'), axis=1).cuda()\n        anchor_h = paddle.index_select(paddle.reshape(paddle.to_tensor(self.anchors), [nA, self.anchor_step]),\n                                       paddle.to_tensor([1], dtype='int64'), axis=1).cuda()\n        # for each pixel (grid) repeat the above process (obtain width and height of each grid)\n        anchor_w = paddle.reshape(paddle.tile(paddle.tile(anchor_w, [nB, 1]), [1, 1, nH * nW]), [nB * nA * nH * nW])\n        anchor_h = paddle.reshape(paddle.tile(paddle.tile(anchor_h, [nB, 1]), [1, 1, nH * nW]), [nB * nA * nH * nW])\n        # prediction of bounding box localization\n        # x.data and y.data: top left corner of the anchor\n        # grid_x, grid_y: tx and ty predictions made by yowo",
+        "type": "code",
+        "location": "/paddlevideo/modeling/losses/yowo_loss.py:170-181"
+    },
+    "8095": {
+        "file_id": 596,
+        "content": "This code is preparing anchor width and height values for the YOWO loss function. It reshapes the anchors, index selects the width and height values, tiles them to match grid dimensions, and assigns the prediction of bounding box localization for each grid cell.",
+        "type": "comment"
+    },
+    "8096": {
+        "file_id": 596,
+        "content": "        x_data = paddle.reshape(x.detach(), [-1])\n        y_data = paddle.reshape(y.detach(), [-1])\n        w_data = paddle.reshape(w.detach(), [-1])\n        h_data = paddle.reshape(h.detach(), [-1])\n        pred_boxes[0] = paddle.cast(x_data, dtype='float32') + paddle.cast(grid_x, dtype='float32')  # bx\n        pred_boxes[1] = paddle.cast(y_data, dtype='float32') + paddle.cast(grid_y, dtype='float32')  # by\n        pred_boxes[2] = paddle.exp(paddle.cast(w_data, dtype='float32')) * paddle.cast(anchor_w, dtype='float32')  # bw\n        pred_boxes[3] = paddle.exp(paddle.cast(h_data, dtype='float32')) * paddle.cast(anchor_h, dtype='float32')  # bh\n        # the size -1 is inferred from other dimensions\n        # pred_boxes (nB*nA*nH*nW, 4)\n        pred_boxes = self.convert2cpu(\n            paddle.cast(paddle.reshape(paddle.transpose(pred_boxes, (1, 0)), [-1, 4]), dtype='float32'))\n        nGT, nCorrect, coord_mask, conf_mask, cls_mask, tx, ty, tw, th, tconf, tcls = build_targets(pred_boxes,\n           ",
+        "type": "code",
+        "location": "/paddlevideo/modeling/losses/yowo_loss.py:183-199"
+    },
+    "8097": {
+        "file_id": 596,
+        "content": "This code reshapes and casts input tensors, calculates predicted bounding box coordinates based on input features, and calls a function to build targets for the model. It then reshapes and transposes the predicted boxes tensor before passing it to the build_targets function. The function is part of the YOLOv3-style loss calculation in PaddleVideo.",
+        "type": "comment"
+    },
+    "8098": {
+        "file_id": 596,
+        "content": "                                                                                         target.detach(),\n                                                                                                    self.anchors, nA,\n                                                                                                    nC, \\\n                                                                                                    nH, nW,\n                                                                                                    self.noobject_scale,\n                                                                                                    self.object_scale,\n                                                                                                    self.thresh)\n        cls_mask = (cls_mask == 1)\n        #  keep those with high box confidence scores (greater than 0.25) as our final predictions\n        nProposals = int((conf > 0.25).sum().detach().item())\n        tx = (tx).cuda()",
+        "type": "code",
+        "location": "/paddlevideo/modeling/losses/yowo_loss.py:199-210"
+    },
+    "8099": {
+        "file_id": 596,
+        "content": "This code is setting up a loss function for object detection. It takes in target values, anchors, number of anchors (nA), number of classes (nC), and the image dimensions (nH, nW). The noobject_scale and object_scale variables control how the loss is applied depending on whether an object is present or not. The cls_mask variable filters out proposals with low box confidence scores. The final predictions are kept if their confidence score is greater than 0.25. The tensor tx is moved to the GPU (cuda).",
+        "type": "comment"
+    }
+}

@@ -1,0 +1,15 @@
+{
+    "summary": "CrossEntropyLoss is a custom loss function in PaddlePaddle, inheriting from BaseWeightedLoss, for classification tasks. It calculates CrossEntropy loss between scores and labels using F.cross_entropy method and returns the result as a tensor.",
+    "details": [
+        {
+            "comment": "CrossEntropyLoss is a custom loss function in PaddlePaddle for classification tasks. It inherits from BaseWeightedLoss and has a forward method that takes class scores and labels as input.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/paddlevideo/modeling/losses/cross_entropy_loss.py\":0-29",
+            "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport paddle\nimport paddle.nn.functional as F\nfrom ..registry import LOSSES\nfrom .base import BaseWeightedLoss\n@LOSSES.register()\nclass CrossEntropyLoss(BaseWeightedLoss):\n    \"\"\"Cross Entropy Loss.\"\"\"\n    def _forward(self, score, labels, **kwargs):\n        \"\"\"Forward function.\n        Args:\n            score (paddle.Tensor): The class score.\n            labels (paddle.Tensor): The ground truth labels.\n            kwargs: Any keyword argument to be used to calculate"
+        },
+        {
+            "comment": "This function calculates the CrossEntropy loss between score and labels, using Paddle's F.cross_entropy method, and returns the result as a tensor.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/paddlevideo/modeling/losses/cross_entropy_loss.py\":30-35",
+            "content": "                CrossEntropy loss.\n        Returns:\n            loss (paddle.Tensor): The returned CrossEntropy loss.\n        \"\"\"\n        loss = F.cross_entropy(score, labels, **kwargs)\n        return loss"
+        }
+    ]
+}

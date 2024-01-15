@@ -1,0 +1,549 @@
+{
+    "5900": {
+        "file_id": 476,
+        "content": "            fn += 1\n            i += 1\n        elif i == len(gt_trans) or pred_trans[j, 1] < gt_trans[i, 0]:\n            fp += 1\n            j += 1\n        else:\n            i += 1\n            j += 1\n            tp += 1\n    if tp + fp != 0:\n        p = tp / (tp + fp)\n    else:\n        p = 0\n    if tp + fn != 0:\n        r = tp / (tp + fn)\n    else:\n        r = 0\n    if p + r != 0:\n        f1 = (p * r * 2) / (p + r)\n    else:\n        f1 = 0\n    assert tp + fn == len(gt_trans)\n    assert tp + fp == len(pred_trans)\n    return p, r, f1, (tp, fp, fn)\ndef create_scene_based_summaries(one_hot_pred, one_hot_gt):\n    thresholds = np.array([\n        0.02, 0.06, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9\n    ])\n    precision, recall, f1, tp, fp, fn = np.zeros_like(thresholds), np.zeros_like(thresholds),\\\n                                        np.zeros_like(thresholds), np.zeros_like(thresholds),\\\n                                        np.zeros_like(thresholds), np.zeros_like(thresholds)\n    gt_scenes = predictions_to_scenes(one_hot_gt)",
+        "type": "code",
+        "location": "/paddlevideo/metrics/transnetv2_metric.py:81-120"
+    },
+    "5901": {
+        "file_id": 476,
+        "content": "This function calculates precision, recall, and F1-score for transnetv2 metric given ground truth (gt) and predicted (pred) transcript sequences. It iterates through the sequences to count true positives (tp), false negatives (fn), and false positives (fp). Afterwards, it computes precision, recall, and F1-score based on these counts. The function also asserts that the total number of true positives matches the length of gt_trans and the total number of false positives matches the length of pred_trans. It then returns the calculated metrics and the count of tp, fp, and fn. The create_scene_based_summaries function generates precision, recall, and F1-score for different thresholds using a numpy array. It initializes these metrics as well as the counts of true positives, false negatives, false positives, and false negatives to zero, then iterates over the thresholds to calculate the metric values for each threshold.",
+        "type": "comment"
+    },
+    "5902": {
+        "file_id": 476,
+        "content": "    for i in range(len(thresholds)):\n        pred_scenes = predictions_to_scenes(\n            (one_hot_pred > thresholds[i]).astype(np.uint8)\n        )\n        precision[i], recall[i], f1[i], (tp[i], fp[i], fn[i]) = evaluate_scenes(gt_scenes, pred_scenes)\n    best_idx = np.argmax(f1)\n    return f1[best_idx]\n@METRIC.register\nclass TransNetV2Metric(BaseMetric):\n    def __init__(self, data_size, batch_size, log_interval=1):\n        \"\"\"prepare for metrics\n        \"\"\"\n        super().__init__(data_size, batch_size, log_interval)\n        self.predictions = []\n        self.total_stats = {\"tp\": 0, \"fp\": 0, \"fn\": 0}\n    def update(self, batch_id, data, one_hot):\n        \"\"\"update metrics during each iter\n        \"\"\"\n        if isinstance(one_hot, tuple):\n            one_hot = one_hot[0]\n        one_hot = paddle.nn.functional.sigmoid(one_hot)[0]\n        self.predictions.append(one_hot.numpy()[25:75])\n        gt_scenes = data[1]\n        is_new_file = data[2]\n        if is_new_file:\n            self.compute(gt_scenes)\n        # preds ensemble",
+        "type": "code",
+        "location": "/paddlevideo/metrics/transnetv2_metric.py:121-152"
+    },
+    "5903": {
+        "file_id": 476,
+        "content": "This code is from the TransNetV2Metric class, which calculates metrics for a model's predictions. It iterates through different thresholds to compute precision, recall, F1 score, and true positive, false positive, and false negative counts. The update method appends predictions and computes metrics when a new file is encountered.",
+        "type": "comment"
+    },
+    "5904": {
+        "file_id": 476,
+        "content": "        if batch_id % self.log_interval == 0:\n            logger.info(\"[TEST] Processing batch {}/{} ...\".format(\n                batch_id,\n                self.data_size // (self.batch_size * self.world_size)))\n    def compute(self, gt_scenes):\n        predictions = np.concatenate(self.predictions, 0)[:len(frames)]\n        _, _, _, (tp, fp, fn), fp_mistakes, fn_mistakes = evaluate_scenes(\n            gt_scenes, predictions_to_scenes((predictions >= args.thr).astype(np.uint8)))\n        self.total_stats[\"tp\"] += tp\n        self.total_stats[\"fp\"] += fp\n        self.total_stats[\"fn\"] += fn\n    def accumulate(self):\n        \"\"\"accumulate metrics when finished all iters.\n        \"\"\"\n        p = self.total_stats[\"tp\"] / (self.total_stats[\"tp\"] + self.total_stats[\"fp\"])\n        r = self.total_stats[\"tp\"] / (self.total_stats[\"tp\"] + self.total_stats[\"fn\"])\n        f1 = (p * r * 2) / (p + r)\n        logger.info('[TEST] finished, Precision= {:5.2f}, Recall= {:5.2f} , F1 Score= {:5.2f} '.format(\n            p * 100, r * 100, f1 * 100))",
+        "type": "code",
+        "location": "/paddlevideo/metrics/transnetv2_metric.py:153-174"
+    },
+    "5905": {
+        "file_id": 476,
+        "content": "The code calculates precision, recall, and F1 score for a machine learning model. It accumulates the metrics after processing all batches and logs the results using logger. It also displays the Precision, Recall, and F1 Score at the end of computation.",
+        "type": "comment"
+    },
+    "5906": {
+        "file_id": 477,
+        "content": "/paddlevideo/metrics/ucf24_utils.py",
+        "type": "filepath"
+    },
+    "5907": {
+        "file_id": 477,
+        "content": "The PaddleVideo library's UCF101 dataset offers utility functions and the Ucf24Metrics class for metric manipulation, bounding box handling, and precision/recall calculations. It computes mAP for image classification tasks and stores results per class using utility methods to read bounding box text files.",
+        "type": "summary"
+    },
+    "5908": {
+        "file_id": 477,
+        "content": "# copyright (c) 2021 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n#\n# Forked from: https://github.com/rafaelpadilla/Object-Detection-Metrics\n# Developed by: Rafael Padilla (rafael.padilla@smt.ufrj.br)\nimport glob\nimport os\nimport shutil\nimport sys\nfrom collections import Counter\nimport numpy as np\nfrom enum import Enum\nimport cv2\nclass MethodAveragePrecision(Enum):\n    \"\"\"\n    Class representing if the coordinates are relative to the\n    image size or are absolute values.\n        Developed by: Rafael Padilla",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ucf24_utils.py:1-33"
+    },
+    "5909": {
+        "file_id": 477,
+        "content": "This code snippet is from the UCF101 dataset utility functions in the PaddleVideo library. It contains an enum class representing average precision metrics and a copyright notice with license information, original source link, and developer contact details.",
+        "type": "comment"
+    },
+    "5910": {
+        "file_id": 477,
+        "content": "        Last modification: Apr 28 2018\n    \"\"\"\n    EveryPointInterpolation = 1\n    ElevenPointInterpolation = 2\nclass CoordinatesType(Enum):\n    \"\"\"\n    Class representing if the coordinates are relative to the\n    image size or are absolute values.\n        Developed by: Rafael Padilla\n        Last modification: Apr 28 2018\n    \"\"\"\n    Relative = 1\n    Absolute = 2\nclass BBType(Enum):\n    \"\"\"\n    Class representing if the bounding box is groundtruth or not.\n        Developed by: Rafael Padilla\n        Last modification: May 24 2018\n    \"\"\"\n    GroundTruth = 1\n    Detected = 2\nclass BBFormat(Enum):\n    \"\"\"\n    Class representing the format of a bounding box.\n    It can be (X,Y,width,height) => XYWH\n    or (X1,Y1,X2,Y2) => XYX2Y2\n        Developed by: Rafael Padilla\n        Last modification: May 24 2018\n    \"\"\"\n    XYWH = 1\n    XYX2Y2 = 2\ndef convertToRelativeValues(size, box):\n    dw = 1. / (size[0])\n    dh = 1. / (size[1])\n    cx = (box[1] + box[0]) / 2.0\n    cy = (box[3] + box[2]) / 2.0\n    w = box[1] - box[0]\n    h = box[3] - box[2]",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ucf24_utils.py:34-81"
+    },
+    "5911": {
+        "file_id": 477,
+        "content": "This code defines three enumerations (CoordinatesType, BBType, and BBFormat) to represent different types of coordinates and bounding boxes. It also includes a function convertToRelativeValues that takes a size and a box as input and returns the box in relative values. The code was developed by Rafael Padilla with last modifications on April 28th for CoordinatesType, May 24th for BBType and format, and the function convertToRelativeValues is defined as well.",
+        "type": "comment"
+    },
+    "5912": {
+        "file_id": 477,
+        "content": "    x = cx * dw\n    y = cy * dh\n    w = w * dw\n    h = h * dh\n    return x, y, w, h\ndef convertToAbsoluteValues(size, box):\n    xIn = round(((2 * float(box[0]) - float(box[2])) * size[0] / 2))\n    yIn = round(((2 * float(box[1]) - float(box[3])) * size[1] / 2))\n    xEnd = xIn + round(float(box[2]) * size[0])\n    yEnd = yIn + round(float(box[3]) * size[1])\n    if xIn < 0:\n        xIn = 0\n    if yIn < 0:\n        yIn = 0\n    if xEnd >= size[0]:\n        xEnd = size[0] - 1\n    if yEnd >= size[1]:\n        yEnd = size[1] - 1\n    return xIn, yIn, xEnd, yEnd\ndef add_bb_into_image(image, bb, color=(255, 0, 0), thickness=2, label=None):\n    r = int(color[0])\n    g = int(color[1])\n    b = int(color[2])\n    font = cv2.FONT_HERSHEY_SIMPLEX\n    fontScale = 0.5\n    fontThickness = 1\n    x1, y1, x2, y2 = bb.getAbsoluteBoundingBox(BBFormat.XYX2Y2)\n    x1 = int(x1)\n    y1 = int(y1)\n    x2 = int(x2)\n    y2 = int(y2)\n    cv2.rectangle(image, (x1, y1), (x2, y2), (b, g, r), thickness)\n    # Add label\n    if label is not None:\n        # Get size of the text box",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ucf24_utils.py:82-122"
+    },
+    "5913": {
+        "file_id": 477,
+        "content": "Function `ucf24_utils.py:81-121` defines a function `convertToAbsoluteValues` which takes in the size and bounding box coordinates (x, y, w, h) as input and returns absolute values for xIn, yIn, xEnd, yEnd considering the image size. If any of these values fall outside the image boundaries, they are adjusted to the last valid pixel within the image.\nThis code also includes a function `add_bb_into_image` which adds a bounding box with given coordinates (x1, y1, x2, y2) and label on the image using OpenCV's rectangle() function and font() function for adding labels to the bounding boxes.",
+        "type": "comment"
+    },
+    "5914": {
+        "file_id": 477,
+        "content": "        (tw, th) = cv2.getTextSize(label, font, fontScale, fontThickness)[0]\n        # Top-left coord of the textbox\n        (xin_bb, yin_bb) = (x1 + thickness, y1 - th + int(12.5 * fontScale))\n        # Checking position of the text top-left (outside or inside the bb)\n        if yin_bb - th <= 0:  # if outside the image\n            yin_bb = y1 + th  # put it inside the bb\n        r_Xin = x1 - int(thickness / 2)\n        r_Yin = y1 - th - int(thickness / 2)\n        # Draw filled rectangle to put the text in it\n        cv2.rectangle(image, (r_Xin, r_Yin - thickness),\n                      (r_Xin + tw + thickness * 3, r_Yin + th + int(12.5 * fontScale)), (b, g, r),\n                      -1)\n        cv2.putText(image, label, (xin_bb, yin_bb), font, fontScale, (0, 0, 0), fontThickness,\n                    cv2.LINE_AA)\n    return image\nclass BoundingBox:\n    def __init__(self,\n                 imageName,\n                 classId,\n                 x,\n                 y,\n                 w,\n                 h,\n                 typeCoordinates=None,",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ucf24_utils.py:123-148"
+    },
+    "5915": {
+        "file_id": 477,
+        "content": "This function calculates the text box coordinates and draws a rectangle around it, then adds text within the rectangle. The text position is adjusted if it's outside the image area. It also initializes a class for bounding boxes with properties like image name, class ID, and coordinates.",
+        "type": "comment"
+    },
+    "5916": {
+        "file_id": 477,
+        "content": "                 imgSize=None,\n                 bbType=None,\n                 classConfidence=None,\n                 format=None):\n        \"\"\"Constructor.\n        Args:\n            imageName: String representing the image name.\n            classId: String value representing class id.\n            x: Float value representing the X upper-left coordinate of the bounding box.\n            y: Float value representing the Y upper-left coordinate of the bounding box.\n            w: Float value representing the width bounding box.\n            h: Float value representing the height bounding box.\n            typeCoordinates: (optional) Enum (Relative or Absolute) represents if the bounding box\n            coordinates (x,y,w,h) are absolute or relative to size of the image. Default:'Absolute'.\n            imgSize: (optional) 2D vector (width, height)=>(int, int) represents the size of the\n            image of the bounding box. If typeCoordinates is 'Relative', imgSize is required.\n            bbType: (optional) Enum (Groundtruth or Detection) identifies if the bounding box",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ucf24_utils.py:149-165"
+    },
+    "5917": {
+        "file_id": 477,
+        "content": "This code snippet defines a constructor for the class Ucf24Metrics, which takes parameters like image name, class id, bounding box coordinates (x, y, w, h), and type of bounding box coordinates. It also accepts optional arguments such as imgSize, bbType, classConfidence, and format. If typeCoordinates is 'Relative', then imgSize is required. The constructor initializes an object representing a metric for UCF101 dataset.",
+        "type": "comment"
+    },
+    "5918": {
+        "file_id": 477,
+        "content": "            represents a ground truth or a detection. If it is a detection, the classConfidence has\n            to be informed.\n            classConfidence: (optional) Float value representing the confidence of the detected\n            class. If detectionType is Detection, classConfidence needs to be informed.\n            format: (optional) Enum (BBFormat.XYWH or BBFormat.XYX2Y2) indicating the format of the\n            coordinates of the bounding boxes. BBFormat.XYWH: <left> <top> <width> <height>\n            BBFormat.XYX2Y2: <left> <top> <right> <bottom>.\n        \"\"\"\n        self._imageName = imageName\n        self._typeCoordinates = typeCoordinates\n        if typeCoordinates == CoordinatesType.Relative and imgSize is None:\n            raise IOError(\n                'Parameter \\'imgSize\\' is required. It is necessary to inform the image size.')\n        if bbType == BBType.Detected and classConfidence is None:\n            raise IOError(\n                'For bbType=\\'Detection\\', it is necessary to inform the classConfidence value.')",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ucf24_utils.py:166-181"
+    },
+    "5919": {
+        "file_id": 477,
+        "content": "This code defines a class with properties: imageName, typeCoordinates (Relative or Absolute), imgSize (image size required if typeCoordinates is Relative), bbType (Ground Truth or Detection), and classConfidence (optional for Detection). It also includes error checks for mandatory parameters (imgSize for Relative typeCoordinates and classConfidence for Detection bbType).",
+        "type": "comment"
+    },
+    "5920": {
+        "file_id": 477,
+        "content": "        self._classConfidence = classConfidence\n        self._bbType = bbType\n        self._classId = classId\n        self._format = format\n        # If relative coordinates, convert to absolute values\n        # For relative coords: (x,y,w,h)=(X_center/img_width , Y_center/img_height)\n        if typeCoordinates == CoordinatesType.Relative:\n            (self._x, self._y, self._w, self._h) = convertToAbsoluteValues(imgSize, (x, y, w, h))\n            self._width_img = imgSize[0]\n            self._height_img = imgSize[1]\n            if format == BBFormat.XYWH:\n                self._x2 = self._w\n                self._y2 = self._h\n                self._w = self._x2 - self._x\n                self._h = self._y2 - self._y\n            else:\n                raise IOError(\n                    'For relative coordinates, the format must be XYWH (x,y,width,height)')\n        # For absolute coords: (x,y,w,h)=real bb coords\n        else:\n            self._x = x\n            self._y = y\n            if format == BBFormat.XYWH:\n                self._w = w",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ucf24_utils.py:183-207"
+    },
+    "5921": {
+        "file_id": 477,
+        "content": "This function converts relative bounding box coordinates to absolute values and assigns them to the object. If the given format is XYWH, it adjusts the width and height accordingly. For absolute coordinates, it directly assigns the provided values. If the format does not match XYWH for relative coordinates, an IOError is raised.",
+        "type": "comment"
+    },
+    "5922": {
+        "file_id": 477,
+        "content": "                self._h = h\n                self._x2 = self._x + self._w\n                self._y2 = self._y + self._h\n            else:  # format == BBFormat.XYX2Y2: <left> <top> <right> <bottom>.\n                self._x2 = w\n                self._y2 = h\n                self._w = self._x2 - self._x\n                self._h = self._y2 - self._y\n        if imgSize is None:\n            self._width_img = None\n            self._height_img = None\n        else:\n            self._width_img = imgSize[0]\n            self._height_img = imgSize[1]\n    def getAbsoluteBoundingBox(self, format=None):\n        if format == BBFormat.XYWH:\n            return self._x, self._y, self._w, self._h\n        elif format == BBFormat.XYX2Y2:\n            return self._x, self._y, self._x2, self._y2\n    def getRelativeBoundingBox(self, imgSize=None):\n        if imgSize is None and self._width_img is None and self._height_img is None:\n            raise IOError(\n                'Parameter \\'imgSize\\' is required. It is necessary to inform the image size.')",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ucf24_utils.py:208-232"
+    },
+    "5923": {
+        "file_id": 477,
+        "content": "The code defines a class with methods to handle bounding box formats. It supports two formats: XYWH and XYX2Y2. The constructor initializes the bounding box dimensions and image size if provided. The getAbsoluteBoundingBox method returns the bounding box coordinates based on the format specified. If no image size is available, getRelativeBoundingBox requires the imgSize parameter to determine the absolute position of the bounding box.",
+        "type": "comment"
+    },
+    "5924": {
+        "file_id": 477,
+        "content": "        if imgSize is None:\n            return convertToRelativeValues((imgSize[0], imgSize[1]),\n                                           (self._x, self._y, self._w, self._h))\n        else:\n            return convertToRelativeValues((self._width_img, self._height_img),\n                                           (self._x, self._y, self._w, self._h))\n    def getImageName(self):\n        return self._imageName\n    def getConfidence(self):\n        return self._classConfidence\n    def getFormat(self):\n        return self._format\n    def getClassId(self):\n        return self._classId\n    def getImageSize(self):\n        return self._width_img, self._height_img\n    def getCoordinatesType(self):\n        return self._typeCoordinates\n    def getBBType(self):\n        return self._bbType\n    @staticmethod\n    def compare(det1, det2):\n        det1BB = det1.getAbsoluteBoundingBox(format=BBFormat.XYWH)\n        det1ImgSize = det1.getImageSize()\n        det2BB = det2.getAbsoluteBoundingBox(format=BBFormat.XYWH)\n        det2ImgSize = det2.getImageSize()",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ucf24_utils.py:233-266"
+    },
+    "5925": {
+        "file_id": 477,
+        "content": "This code defines a class with various getter methods to access different attributes of the detection result. The class also contains a static method compare() that takes two detections as input and compares them using absolute bounding boxes and image sizes.",
+        "type": "comment"
+    },
+    "5926": {
+        "file_id": 477,
+        "content": "        if det1.getClassId() == det2.getClassId() and \\\n                det1.classConfidence == det2.classConfidenc() and \\\n                det1BB[0] == det2BB[0] and \\\n                det1BB[1] == det2BB[1] and \\\n                det1BB[2] == det2BB[2] and \\\n                det1BB[3] == det2BB[3] and \\\n                det1ImgSize[0] == det1ImgSize[0] and \\\n                det2ImgSize[1] == det2ImgSize[1]:\n            return True\n        return False\n    @staticmethod\n    def clone(boundingBox):\n        absBB = boundingBox.getAbsoluteBoundingBox(format=BBFormat.XYWH)\n        newBoundingBox = BoundingBox(\n            boundingBox.getImageName(),\n            boundingBox.getClassId(),\n            absBB[0],\n            absBB[1],\n            absBB[2],\n            absBB[3],\n            typeCoordinates=boundingBox.getCoordinatesType(),\n            imgSize=boundingBox.getImageSize(),\n            bbType=boundingBox.getBBType(),\n            classConfidence=boundingBox.getConfidence(),\n            format=BBFormat.XYWH)\n        return newBoundingBox",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ucf24_utils.py:268-294"
+    },
+    "5927": {
+        "file_id": 477,
+        "content": "The code snippet compares two bounding boxes to check if they match by comparing their class IDs, coordinates, and image sizes. If the conditions are met, it returns True; otherwise, False. The static method `clone` creates a new bounding box with the same properties as an existing one, allowing for easy cloning of bounding boxes.",
+        "type": "comment"
+    },
+    "5928": {
+        "file_id": 477,
+        "content": "class BoundingBoxes:\n    def __init__(self):\n        self._boundingBoxes = []\n    def addBoundingBox(self, bb):\n        self._boundingBoxes.append(bb)\n    def removeBoundingBox(self, _boundingBox):\n        for d in self._boundingBoxes:\n            if BoundingBox.compare(d, _boundingBox):\n                del self._boundingBoxes[d]\n                return\n    def removeAllBoundingBoxes(self):\n        self._boundingBoxes = []\n    def getBoundingBoxes(self):\n        return self._boundingBoxes\n    def getBoundingBoxByClass(self, classId):\n        boundingBoxes = []\n        for d in self._boundingBoxes:\n            if d.getClassId() == classId:  # get only specified bounding box type\n                boundingBoxes.append(d)\n        return boundingBoxes\n    def getClasses(self):\n        classes = []\n        for d in self._boundingBoxes:\n            c = d.getClassId()\n            if c not in classes:\n                classes.append(c)\n        return classes\n    def getBoundingBoxesByType(self, bbType):\n        # get only specified bb type",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ucf24_utils.py:297-332"
+    },
+    "5929": {
+        "file_id": 477,
+        "content": "This class represents a collection of bounding boxes with methods to add, remove, and retrieve bounding boxes based on their type or class. It also provides functionality to retrieve all classes present in the bounding boxes.",
+        "type": "comment"
+    },
+    "5930": {
+        "file_id": 477,
+        "content": "        return [d for d in self._boundingBoxes if d.getBBType() == bbType]\n    def getBoundingBoxesByImageName(self, imageName):\n        # get only specified bb type\n        return [d for d in self._boundingBoxes if d.getImageName() == imageName]\n    def count(self, bbType=None):\n        if bbType is None:  # Return all bounding boxes\n            return len(self._boundingBoxes)\n        count = 0\n        for d in self._boundingBoxes:\n            if d.getBBType() == bbType:  # get only specified bb type\n                count += 1\n        return count\n    def clone(self):\n        newBoundingBoxes = BoundingBoxes()\n        for d in self._boundingBoxes:\n            det = BoundingBox.clone(d)\n            newBoundingBoxes.addBoundingBox(det)\n        return newBoundingBoxes\n    def drawAllBoundingBoxes(self, image, imageName):\n        bbxes = self.getBoundingBoxesByImageName(imageName)\n        for bb in bbxes:\n            if bb.getBBType() == BBType.GroundTruth:  # if ground truth\n                image = add_bb_into_image(image, bb, color=(0, 255, 0))  # green",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ucf24_utils.py:333-359"
+    },
+    "5931": {
+        "file_id": 477,
+        "content": "Function `getBoundingBoxesByBBType` returns a list of bounding boxes with the specified BB type.\nFunction `getBoundingBoxesByImageName` returns a list of bounding boxes for the given image name.\nMethod `count` counts and returns the number of bounding boxes with the specified BB type, or all bounding boxes if no type is provided.\nMethod `clone` creates a new instance of BoundingBoxes and adds clones of each bounding box from the original instance.\nFunction `drawAllBoundingBoxes` draws all bounding boxes for the given image name on the specified image, only ground truth bounding boxes are drawn in green color.",
+        "type": "comment"
+    },
+    "5932": {
+        "file_id": 477,
+        "content": "            else:  # if detection\n                image = add_bb_into_image(image, bb, color=(255, 0, 0))  # red\n        return image\nclass Evaluator:\n    def GetPascalVOCMetrics(self,\n                            boundingboxes,\n                            IOUThreshold=0.5,\n                            method=None):\n        \"\"\"Get the metrics used by the VOC Pascal 2012 challenge.\n        Get\n        Args:\n            boundingboxes: Object of the class BoundingBoxes representing ground truth and detected\n            bounding boxes;\n            IOUThreshold: IOU threshold indicating which detections will be considered TP or FP\n            (default value = 0.5);\n            method (default = EveryPointInterpolation): It can be calculated as the implementation\n            in the official PASCAL VOC toolkit (EveryPointInterpolation), or applying the 11-point\n            interpolatio as described in the paper \"The PASCAL Visual Object Classes(VOC) Challenge\"\n            or EveryPointInterpolation\"  (ElevenPointInterpolation);",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ucf24_utils.py:360-380"
+    },
+    "5933": {
+        "file_id": 477,
+        "content": "The code defines a function `GetPascalVOCMetrics` within the `Evaluator` class to calculate metrics for Pascal VOC Challenge. It takes `boundingboxes`, `IOUThreshold`, and `method` as input parameters. The method can be set as `EveryPointInterpolation` or `ElevenPointInterpolation`. This function calculates precision, recall, F1 score, and AP metric using the provided parameters for Pascal VOC Challenge evaluation.",
+        "type": "comment"
+    },
+    "5934": {
+        "file_id": 477,
+        "content": "        Returns:\n            A list of dictionaries. Each dictionary contains information and metrics of each class.\n            The keys of each dictionary are:\n            dict['class']: class representing the current dictionary;\n            dict['precision']: array with the precision values;\n            dict['recall']: array with the recall values;\n            dict['AP']: average precision;\n            dict['interpolated precision']: interpolated precision values;\n            dict['interpolated recall']: interpolated recall values;\n            dict['total positives']: total number of ground truth positives;\n            dict['total TP']: total number of True Positive detections;\n            dict['total FP']: total number of False Negative detections;\n        \"\"\"\n        ret = []  # list containing metrics (precision, recall, average precision) of each class\n        # List with all ground truths (Ex: [imageName,class,confidence=1, (bb coordinates XYX2Y2)])\n        groundTruths = []\n        # List with all detections (Ex: [imageName,class,confidence,(bb coordinates XYX2Y2)])",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ucf24_utils.py:381-397"
+    },
+    "5935": {
+        "file_id": 477,
+        "content": "The function returns a list of dictionaries, each containing information and metrics of each class. The keys include class representation, precision values, recall values, average precision, interpolated precision, interpolated recall, total positives, total true positives, and total false positives. It initializes an empty list \"ret\" to store the metrics for each class, as well as groundTruths and detection lists.",
+        "type": "comment"
+    },
+    "5936": {
+        "file_id": 477,
+        "content": "        detections = []\n        # Get all classes\n        classes = []\n        # Loop through all bounding boxes and separate them into GTs and detections\n        for bb in boundingboxes.getBoundingBoxes():\n            # [imageName, class, confidence, (bb coordinates XYX2Y2)]\n            if bb.getBBType() == BBType.GroundTruth:\n                groundTruths.append([\n                    bb.getImageName(),\n                    bb.getClassId(), 1,\n                    bb.getAbsoluteBoundingBox(BBFormat.XYX2Y2)\n                ])\n            else:\n                detections.append([\n                    bb.getImageName(),\n                    bb.getClassId(),\n                    bb.getConfidence(),\n                    bb.getAbsoluteBoundingBox(BBFormat.XYX2Y2)\n                ])\n            # get class\n            if bb.getClassId() not in classes:\n                classes.append(bb.getClassId())\n        classes = sorted(classes)\n        # Precision x Recall is obtained individually by each class\n        # Loop through by classes",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ucf24_utils.py:398-422"
+    },
+    "5937": {
+        "file_id": 477,
+        "content": "The code initializes empty lists for detections and classes, then iterates through all bounding boxes. It separates ground truth (GT) bounding boxes from detections, appending them to their respective lists with additional information such as image name, class ID, confidence, and bounding box coordinates. It also keeps track of unique classes and sorts them. The code will then use these lists and sorted classes for precision-recall calculations by individual classes.",
+        "type": "comment"
+    },
+    "5938": {
+        "file_id": 477,
+        "content": "        for c in classes:\n            # Get only detection of class c\n            dects = []\n            [dects.append(d) for d in detections if d[1] == c]\n            # Get only ground truths of class c\n            gts = []\n            [gts.append(g) for g in groundTruths if g[1] == c]\n            npos = len(gts)\n            # sort detections by decreasing confidence\n            dects = sorted(dects, key=lambda conf: conf[2], reverse=True)\n            TP = np.zeros(len(dects))\n            FP = np.zeros(len(dects))\n            # create dictionary with amount of gts for each image\n            det = Counter([cc[0] for cc in gts])\n            for key, val in det.items():\n                det[key] = np.zeros(val)\n            # Loop through detections\n            for d in range(len(dects)):\n                # Find ground truth image\n                gt = [gt for gt in gts if gt[0] == dects[d][0]]\n                iouMax = sys.float_info.min\n                for j in range(len(gt)):\n                    iou = Evaluator.iou(dects[d][3], gt[j][3])",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ucf24_utils.py:423-445"
+    },
+    "5939": {
+        "file_id": 477,
+        "content": "Iterating through classes, the code collects detections and ground truths for each class. It then calculates the number of positive ground truths (npos), sorts detections by confidence level, and initializes True Positive (TP) and False Positive (FP) arrays. The code creates a dictionary to store the amount of ground truths per image, and iterates through detections to find corresponding ground truth images, calculating Intersection over Union (IoU) between detection and ground truth bounding boxes.",
+        "type": "comment"
+    },
+    "5940": {
+        "file_id": 477,
+        "content": "                    if iou > iouMax:\n                        iouMax = iou\n                        jmax = j\n                # Assign detection as true positive/don't care/false positive\n                if iouMax >= IOUThreshold:\n                    if det[dects[d][0]][jmax] == 0:\n                        TP[d] = 1  # count as true positive\n                        det[dects[d][0]][jmax] = 1  # flag as already 'seen'\n                    else:\n                        FP[d] = 1  # count as false positive\n                # - A detected \"cat\" is overlaped with a GT \"cat\" with IOU >= IOUThreshold.\n                else:\n                    FP[d] = 1  # count as false positive\n            # compute precision, recall and average precision\n            acc_FP = np.cumsum(FP)\n            acc_TP = np.cumsum(TP)\n            rec = acc_TP / npos\n            prec = np.divide(acc_TP, (acc_FP + acc_TP))\n            # Depending on the method, call the right implementation\n            if method == MethodAveragePrecision.EveryPointInterpolation:",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ucf24_utils.py:446-465"
+    },
+    "5941": {
+        "file_id": 477,
+        "content": "This code calculates true positives, false positives, and computes precision, recall, and average precision. It checks if a detected object overlaps with ground truth objects using IOU threshold. If the overlap is within the threshold, it counts as a true positive or false positive depending on whether the object has already been marked 'seen'. Finally, based on the method chosen (EveryPointInterpolation in this case), it calls the appropriate average precision calculation function.",
+        "type": "comment"
+    },
+    "5942": {
+        "file_id": 477,
+        "content": "                [ap, mpre, mrec, ii] = Evaluator.CalculateAveragePrecision(rec, prec)\n            else:\n                [ap, mpre, mrec, _] = Evaluator.ElevenPointInterpolatedAP(rec, prec)\n            # add class result in the dictionary to be returned\n            r = {\n                'class': c,\n                'precision': prec,\n                'recall': rec,\n                'AP': ap,\n                'interpolated precision': mpre,\n                'interpolated recall': mrec,\n                'total positives': npos,\n                'total TP': np.sum(TP),\n                'total FP': np.sum(FP)\n            }\n            ret.append(r)\n        return ret\n    @staticmethod\n    def CalculateAveragePrecision(rec, prec):\n        mrec = [0]\n        [mrec.append(e) for e in rec]\n        mrec.append(1)\n        mpre = [0]\n        [mpre.append(e) for e in prec]\n        mpre.append(0)\n        for i in range(len(mpre) - 1, 0, -1):\n            mpre[i - 1] = max(mpre[i - 1], mpre[i])\n        ii = []\n        for i in range(len(mrec) - 1):",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ucf24_utils.py:466-495"
+    },
+    "5943": {
+        "file_id": 477,
+        "content": "Calculates average precision for each class using CalculateAveragePrecision or ElevenPointInterpolatedAP depending on the input. Appends the results to a dictionary, then adds the dictionary to a list and returns it.",
+        "type": "comment"
+    },
+    "5944": {
+        "file_id": 477,
+        "content": "            if mrec[1:][i] != mrec[0:-1][i]:\n                ii.append(i + 1)\n        ap = 0\n        for i in ii:\n            ap = ap + np.sum((mrec[i] - mrec[i - 1]) * mpre[i])\n        return [ap, mpre[0:len(mpre) - 1], mrec[0:len(mpre) - 1], ii]\n    @staticmethod\n    # 11-point interpolated average precision\n    def ElevenPointInterpolatedAP(rec, prec):\n        mrec = []\n        [mrec.append(e) for e in rec]\n        mpre = []\n        [mpre.append(e) for e in prec]\n        recallValues = np.linspace(0, 1, 11)\n        recallValues = list(recallValues[::-1])\n        rhoInterp = []\n        recallValid = []\n        for r in recallValues:\n            # Obtain all recall values higher or equal than r\n            argGreaterRecalls = np.argwhere(mrec[:] >= r)\n            pmax = 0\n            # If there are recalls above r\n            if argGreaterRecalls.size != 0:\n                pmax = max(mpre[argGreaterRecalls.min():])\n            recallValid.append(r)\n            rhoInterp.append(pmax)\n        # By definition AP = sum(max(precision whose recall is above r))/11",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ucf24_utils.py:496-523"
+    },
+    "5945": {
+        "file_id": 477,
+        "content": "The code calculates the 11-point interpolated average precision (AP) between recall and precision values. It first appends recall and precision lists in reverse order, then creates a list of recall values from 0 to 1 in reverse order. Next, it iterates over these recall values, finding all recall values greater than or equal to the current value and selecting the maximum precision at that index. Finally, it returns the interpolated AP by summing the maximum precisions for each recall value and dividing by 11. The resulting AP values are stored in a list along with the original recall and precision lists, as well as an indicator list of indices where the recall values were greater than or equal to the current recall value.",
+        "type": "comment"
+    },
+    "5946": {
+        "file_id": 477,
+        "content": "        ap = sum(rhoInterp) / 11\n        # Generating values for the plot\n        rvals = [recallValid[0]]\n        [rvals.append(e) for e in recallValid]\n        rvals.append(0)\n        pvals = [0]\n        [pvals.append(e) for e in rhoInterp]\n        pvals.append(0)\n        # rhoInterp = rhoInterp[::-1]\n        cc = []\n        for i in range(len(rvals)):\n            p = (rvals[i], pvals[i - 1])\n            if p not in cc:\n                cc.append(p)\n            p = (rvals[i], pvals[i])\n            if p not in cc:\n                cc.append(p)\n        recallValues = [i[0] for i in cc]\n        rhoInterp = [i[1] for i in cc]\n        return [ap, rhoInterp, recallValues, None]\n    # For each detections, calculate IOU with reference\n    @staticmethod\n    def _getAllIOUs(reference, detections):\n        ret = []\n        bbReference = reference.getAbsoluteBoundingBox(BBFormat.XYX2Y2)\n        # img = np.zeros((200,200,3), np.uint8)\n        for d in detections:\n            bb = d.getAbsoluteBoundingBox(BBFormat.XYX2Y2)\n            iou = Evaluator.iou(bbReference, bb)",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ucf24_utils.py:524-553"
+    },
+    "5947": {
+        "file_id": 477,
+        "content": "The code calculates average precision (AP) and Area Under Curve (AUC), then generates recall and precision values for a plot. It also defines a method to calculate the Intersection over Union (IoU) between reference and detection bounding boxes.",
+        "type": "comment"
+    },
+    "5948": {
+        "file_id": 477,
+        "content": "            ret.append((iou, reference, d))  # iou, reference, detection\n        return sorted(ret, key=lambda i: i[0], reverse=True)  # sort by iou (from highest to lowest)\n    @staticmethod\n    def iou(boxA, boxB):\n        # if boxes dont intersect\n        if Evaluator._boxesIntersect(boxA, boxB) is False:\n            return 0\n        interArea = Evaluator._getIntersectionArea(boxA, boxB)\n        union = Evaluator._getUnionAreas(boxA, boxB, interArea=interArea)\n        # intersection over union\n        iou = interArea / union\n        assert iou >= 0\n        return iou\n    @staticmethod\n    def _boxesIntersect(boxA, boxB):\n        if boxA[0] > boxB[2]:\n            return False  # boxA is right of boxB\n        if boxB[0] > boxA[2]:\n            return False  # boxA is left of boxB\n        if boxA[3] < boxB[1]:\n            return False  # boxA is above boxB\n        if boxA[1] > boxB[3]:\n            return False  # boxA is below boxB\n        return True\n    @staticmethod\n    def _getIntersectionArea(boxA, boxB):\n        xA = max(boxA[0], boxB[0])",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ucf24_utils.py:554-583"
+    },
+    "5949": {
+        "file_id": 477,
+        "content": "The code calculates the IoU (intersection over union) between two bounding boxes, and returns a list of detection results sorted by IoU in descending order. It also includes utility methods to check if two boxes intersect and calculate the intersection area.",
+        "type": "comment"
+    },
+    "5950": {
+        "file_id": 477,
+        "content": "        yA = max(boxA[1], boxB[1])\n        xB = min(boxA[2], boxB[2])\n        yB = min(boxA[3], boxB[3])\n        # intersection area\n        return (xB - xA + 1) * (yB - yA + 1)\n    @staticmethod\n    def _getUnionAreas(boxA, boxB, interArea=None):\n        area_A = Evaluator._getArea(boxA)\n        area_B = Evaluator._getArea(boxB)\n        if interArea is None:\n            interArea = Evaluator._getIntersectionArea(boxA, boxB)\n        return float(area_A + area_B - interArea)\n    @staticmethod\n    def _getArea(box):\n        return (box[2] - box[0] + 1) * (box[3] - box[1] + 1)\n# Validate formats\ndef ValidateFormats(argFormat, argName, errors):\n    if argFormat == 'xywh':\n        return BBFormat.XYWH\n    elif argFormat == 'xyrb':\n        return BBFormat.XYX2Y2\n    elif argFormat is None:\n        return BBFormat.XYWH  # default when nothing is passed\n    else:\n        errors.append(\n            'argument %s: invalid value. It must be either \\'xywh\\' or \\'xyrb\\'' % argName)\n# Validate mandatory args\ndef ValidateMandatoryArgs(arg, argName, errors):",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ucf24_utils.py:584-617"
+    },
+    "5951": {
+        "file_id": 477,
+        "content": "This code contains functions to calculate intersection and union areas of two bounding boxes, and two validation functions for argument formats and mandatory arguments. The ValidateFormats function checks if the format is 'xywh', 'xyrb' or None (default) and returns a corresponding BBFormat type. The ValidateMandatoryArgs function checks if an argument exists and appends an error message to 'errors' if it doesn't meet the requirements.",
+        "type": "comment"
+    },
+    "5952": {
+        "file_id": 477,
+        "content": "    if arg is None:\n        errors.append('argument %s: required argument' % argName)\n    else:\n        return True\ndef ValidateImageSize(arg, argName, argInformed, errors):\n    errorMsg = 'argument %s: required argument if %s is relative' % (argName, argInformed)\n    ret = None\n    if arg is None:\n        errors.append(errorMsg)\n    else:\n        arg = arg.replace('(', '').replace(')', '')\n        args = arg.split(',')\n        if len(args) != 2:\n            errors.append(\n                '%s. It must be in the format \\'width,height\\' (e.g. \\'600,400\\')' % errorMsg)\n        else:\n            if not args[0].isdigit() or not args[1].isdigit():\n                errors.append(\n                    '%s. It must be in INdiaTEGER the format \\'width,height\\' (e.g. \\'600,400\\')' %\n                    errorMsg)\n            else:\n                ret = (int(args[0]), int(args[1]))\n    return ret\n# Validate coordinate types\ndef ValidateCoordinatesTypes(arg, argName, errors):\n    if arg == 'abs':\n        return CoordinatesType.Absolute",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ucf24_utils.py:618-648"
+    },
+    "5953": {
+        "file_id": 477,
+        "content": "This code defines a function ValidateImageSize that checks if the image size argument is valid. It appends error messages to the errors list if the argument is missing or not in the correct format 'width,height'. The function also handles the case where the argument is relative and requires both width and height to be integers. Finally, it returns a tuple of (width, height) if valid. Additionally, there's a ValidateCoordinatesTypes function that checks if the coordinate type argument is valid and returns the CoordinatesType.Absolute if 'abs'.",
+        "type": "comment"
+    },
+    "5954": {
+        "file_id": 477,
+        "content": "    elif arg == 'rel':\n        return CoordinatesType.Relative\n    elif arg is None:\n        return CoordinatesType.Absolute  # default when nothing is passed\n    errors.append('argument %s: invalid value. It must be either \\'rel\\' or \\'abs\\'' % argName)\ndef getBoundingBoxes(directory,\n                     isGT,\n                     bbFormat,\n                     coordType,\n                     allBoundingBoxes=None,\n                     allClasses=None,\n                     imgSize=(0, 0)):\n    \"\"\"Read txt files containing bounding boxes (ground truth and detections).\"\"\"\n    print(directory)\n    if allBoundingBoxes is None:\n        allBoundingBoxes = BoundingBoxes()\n    if allClasses is None:\n        allClasses = []\n    # Read ground truths\n    os.chdir(directory)\n    files = glob.glob(\"*.txt\")\n    files.sort()\n    for f in files:\n        nameOfImage = f.replace(\".txt\", \"\")\n        fh1 = open(f, \"r\")\n        for line in fh1:\n            line = line.replace(\"\\n\", \"\")\n            if line.replace(' ', '') == '':\n                continue",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ucf24_utils.py:649-680"
+    },
+    "5955": {
+        "file_id": 477,
+        "content": "This code reads text files containing bounding boxes (ground truth and detections). It handles 'relative' or 'absolute' coordinates, and checks for invalid arguments. The function takes a directory, image format, and coordinate type as inputs, and returns bounding boxes and classes. If allBoundingBoxes or allClasses are None, it initializes them. It changes the working directory to the specified directory and reads all files in alphabetical order.",
+        "type": "comment"
+    },
+    "5956": {
+        "file_id": 477,
+        "content": "            splitLine = line.split(\" \")\n            if isGT:\n                idClass = (splitLine[0])  # class\n                x = float(splitLine[1])\n                y = float(splitLine[2])\n                w = float(splitLine[3])\n                h = float(splitLine[4])\n                bb = BoundingBox(\n                    nameOfImage,\n                    idClass,\n                    x,\n                    y,\n                    w,\n                    h,\n                    coordType,\n                    imgSize,\n                    BBType.GroundTruth,\n                    format=bbFormat)\n            else:\n                idClass = (splitLine[0])  # class\n                confidence = float(splitLine[1])\n                x = float(splitLine[2])\n                y = float(splitLine[3])\n                w = float(splitLine[4])\n                h = float(splitLine[5])\n                bb = BoundingBox(\n                    nameOfImage,\n                    idClass,\n                    x,\n                    y,\n                    w,",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ucf24_utils.py:681-711"
+    },
+    "5957": {
+        "file_id": 477,
+        "content": "This code reads a line of text and determines whether it represents ground truth or predicted bounding boxes. It then initializes BoundingBox objects with the appropriate attributes based on the type (ground truth or prediction) and stores them accordingly.",
+        "type": "comment"
+    },
+    "5958": {
+        "file_id": 477,
+        "content": "                    h,\n                    coordType,\n                    imgSize,\n                    BBType.Detected,\n                    confidence,\n                    format=bbFormat)\n            allBoundingBoxes.addBoundingBox(bb)\n            if idClass not in allClasses:\n                allClasses.append(idClass)\n        fh1.close()\n    return allBoundingBoxes, allClasses\ndef get_mAP(gtFolder, detFolder, threshold=0.5, savePath=None):\n    gtFormat = 'xyrb'\n    detFormat = 'xyrb'\n    gtCoordinates = 'abs'\n    detCoordinates = 'abs'\n    gtFolder = os.path.join(os.path.abspath('.'), gtFolder)\n    detFolder = os.path.join(os.path.abspath('.'), detFolder)\n    iouThreshold = threshold\n    # Arguments validation\n    errors = []\n    # Validate formats\n    gtFormat = ValidateFormats(gtFormat, 'gtFormat', errors)\n    detFormat = ValidateFormats(detFormat, '-detformat', errors)\n    # Coordinates types\n    gtCoordType = ValidateCoordinatesTypes(gtCoordinates, '-gtCoordinates', errors)\n    detCoordType = ValidateCoordinatesTypes(detCoordinates, '-detCoordinates', errors)",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ucf24_utils.py:712-743"
+    },
+    "5959": {
+        "file_id": 477,
+        "content": "The code defines a function to calculate the mean average precision (mAP) between ground truth and detected objects in image classification tasks. It takes input folders containing ground truth and detection results, adjustable threshold for determining true positives, and an optional save path for the output file. The code performs argument validation to ensure correct formats and coordinate types.",
+        "type": "comment"
+    },
+    "5960": {
+        "file_id": 477,
+        "content": "    imgSize = (0, 0)\n    # Create directory to save results\n    shutil.rmtree(savePath, ignore_errors=True)  # Clear folder\n    if savePath is not None:\n        os.makedirs(savePath)\n    # Get groundtruth boxes\n    allBoundingBoxes, allClasses = getBoundingBoxes(\n        gtFolder, True, gtFormat, gtCoordType, imgSize=imgSize)\n    # Get detected boxes\n    allBoundingBoxes, allClasses = getBoundingBoxes(\n        detFolder, False, detFormat, detCoordType, allBoundingBoxes, allClasses, imgSize=imgSize)\n    allClasses.sort()\n    evaluator = Evaluator()\n    acc_AP = 0\n    validClasses = 0\n    # Plot Precision x Recall curve\n    detections = evaluator.GetPascalVOCMetrics(allBoundingBoxes, iouThreshold,\n                                               method=MethodAveragePrecision.EveryPointInterpolation)\n    # each detection is a class and store AP and mAP results in AP_res list\n    AP_res = []\n    for metricsPerClass in detections:\n        # Get metric values per each class\n        cl = metricsPerClass['class']\n        ap = metricsPerClass['AP']",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ucf24_utils.py:744-772"
+    },
+    "5961": {
+        "file_id": 477,
+        "content": "This code is creating a directory to save results, clearing any previous content in the folder. It then retrieves ground truth and detected bounding boxes, sorts classes, initializes an evaluator object, and calculates average precision (AP) for each class, storing the AP and mean AP results in the AP_res list.",
+        "type": "comment"
+    },
+    "5962": {
+        "file_id": 477,
+        "content": "        totalPositives = metricsPerClass['total positives']\n        if totalPositives > 0:\n            validClasses = validClasses + 1\n            acc_AP = acc_AP + ap\n            ap_str = \"{0:.2f}%\".format(ap * 100)\n            AP_res.append('AP: %s (%s)' % (ap_str, cl))\n    mAP = acc_AP / validClasses\n    mAP_str = \"{0:.2f}%\".format(mAP * 100)\n    AP_res.append('mAP: %s' % mAP_str)\n    return AP_res",
+        "type": "code",
+        "location": "/paddlevideo/metrics/ucf24_utils.py:773-783"
+    },
+    "5963": {
+        "file_id": 477,
+        "content": "This code calculates mean Average Precision (mAP) for each class and returns it as a list. It iterates through valid classes, calculates Average Precision (AP) for each class if there are positive samples, updates mAP by averaging APs of all valid classes, and appends AP and class labels to the result list. The final mAP value is also formatted and added to the result list before returning it.",
+        "type": "comment"
+    },
+    "5964": {
+        "file_id": 478,
+        "content": "/paddlevideo/metrics/vos_metric.py",
+        "type": "filepath"
+    },
+    "5965": {
+        "file_id": 478,
+        "content": "The PaddleVideo framework's VOSMetric class is responsible for video object segmentation tasks, data processing, and model preparation. It includes methods 'flip_tensor', 'save_mask', and manages various operations such as handling failures and logging data.",
+        "type": "summary"
+    },
+    "5966": {
+        "file_id": 478,
+        "content": "# Copyright (c) 2021  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nimport os\nimport paddle\nimport zipfile\nimport time\nfrom PIL import Image\nfrom paddle.io import DataLoader\nfrom .registry import METRIC\nfrom .base import BaseMetric\nfrom paddlevideo.utils import get_logger\nlogger = get_logger(\"paddlevideo\")\n@METRIC.register\nclass VOSMetric(BaseMetric):\n    def __init__(self,\n                 data_size,\n                 batch_size,\n                 result_root,\n                 zip_dir,\n                 log_interval=1):\n        \"\"\"prepare for metrics\n        \"\"\"\n        super().__init__(data_size, batch_size, log_interval)",
+        "type": "code",
+        "location": "/paddlevideo/metrics/vos_metric.py:1-38"
+    },
+    "5967": {
+        "file_id": 478,
+        "content": "This code is part of the PaddleVideo framework, implementing the VOSMetric class. It registers a metric for video object segmentation tasks using the PaddlePaddle library. The class takes parameters such as data size, batch size, result root directory, and zip directory for results storage.",
+        "type": "comment"
+    },
+    "5968": {
+        "file_id": 478,
+        "content": "        self.video_num = 0\n        self.total_time = 0\n        self.total_frame = 0\n        self.total_sfps = 0\n        self.total_video_num = data_size\n        self.count = 0\n        self.result_root = result_root\n        self.zip_dir = zip_dir\n    def update(self, batch_id, data, model):\n        \"\"\"update metrics during each iter\n        \"\"\"\n        self.video_num += 1\n        seq_dataset = data\n        seq_name = seq_dataset.seq_name\n        logger.info('Prcessing Seq {} [{}/{}]:'.format(seq_name, self.video_num,\n                                                       self.total_video_num))\n        seq_dataloader = DataLoader(seq_dataset,\n                                    return_list=True,\n                                    batch_size=1,\n                                    shuffle=False,\n                                    num_workers=0)\n        seq_total_time = 0\n        seq_total_frame = 0\n        ref_embeddings = []\n        ref_masks = []\n        prev_embedding = []\n        prev_mask = []\n        with paddle.no_grad():",
+        "type": "code",
+        "location": "/paddlevideo/metrics/vos_metric.py:39-68"
+    },
+    "5969": {
+        "file_id": 478,
+        "content": "This code initializes a VOS metric class with parameters such as total_video_num, result_root and zip_dir. The update method processes each video in the dataset, updating metrics like seq_total_time and seq_total_frame. It also prepares variables for reference embeddings and masks for the Video Object Segmentation task using PaddlePaddle framework.",
+        "type": "comment"
+    },
+    "5970": {
+        "file_id": 478,
+        "content": "            for frame_idx, samples in enumerate(seq_dataloader):\n                time_start = time.time()\n                all_preds = []\n                join_label = None\n                for aug_idx in range(len(samples)):\n                    if len(ref_embeddings) <= aug_idx:\n                        ref_embeddings.append([])\n                        ref_masks.append([])\n                        prev_embedding.append(None)\n                        prev_mask.append(None)\n                    sample = samples[aug_idx]\n                    ref_emb = ref_embeddings[aug_idx]\n                    ref_m = ref_masks[aug_idx]\n                    prev_emb = prev_embedding[aug_idx]\n                    prev_m = prev_mask[aug_idx]\n                    current_img = sample['current_img']\n                    if 'current_label' in sample.keys():\n                        current_label = sample['current_label']\n                        current_label = paddle.to_tensor(current_label)\n                    else:\n                        current_label = None",
+        "type": "code",
+        "location": "/paddlevideo/metrics/vos_metric.py:69-91"
+    },
+    "5971": {
+        "file_id": 478,
+        "content": "This code appears to be part of a data loading and processing loop for a video object detection model. It loads samples from a sequential dataloader, processes each augmented image, and appends their embeddings and masks to the corresponding lists. The labels are also loaded if available. This process is repeated for all augmented images in the sequence.",
+        "type": "comment"
+    },
+    "5972": {
+        "file_id": 478,
+        "content": "                    obj_num = sample['meta']['obj_num']\n                    imgname = sample['meta']['current_name']\n                    ori_height = sample['meta']['height']\n                    ori_width = sample['meta']['width']\n                    current_img = current_img\n                    obj_num = obj_num\n                    bs, _, h, w = current_img.shape\n                    data_batch = [\n                        ref_emb, ref_m, prev_emb, prev_m, current_img,\n                        [ori_height, ori_width], obj_num\n                    ]\n                    all_pred, current_embedding = model(data_batch, mode='test')\n                    if frame_idx == 0:\n                        if current_label is None:\n                            logger.info(\n                                \"No first frame label in Seq {}.\".format(\n                                    seq_name))\n                        ref_embeddings[aug_idx].append(current_embedding)\n                        ref_masks[aug_idx].append(current_label)",
+        "type": "code",
+        "location": "/paddlevideo/metrics/vos_metric.py:93-113"
+    },
+    "5973": {
+        "file_id": 478,
+        "content": "This code prepares data for a video object detection model. It extracts necessary information from the sample such as obj_num, imgname, ori_height and ori_width. The current image shape is also obtained. A list of data is created including reference embedding, reference mask, previous embedding, previous mask, the current image, image dimensions, and object number. The model is then used to generate all predictions and current embedding. If it's the first frame, if no label exists, an info message is logged. Reference embeddings and masks are appended accordingly.",
+        "type": "comment"
+    },
+    "5974": {
+        "file_id": 478,
+        "content": "                        prev_embedding[aug_idx] = current_embedding\n                        prev_mask[aug_idx] = current_label\n                    else:\n                        if sample['meta']['flip']:  #False\n                            all_pred = self.flip_tensor(all_pred, 3)\n                        #  In YouTube-VOS, not all the objects appear in the first frame for the first time. Thus, we\n                        #  have to introduce new labels for new objects, if necessary.\n                        if not sample['meta']['flip'] and not (\n                                current_label is None) and join_label is None:\n                            join_label = paddle.cast(current_label,\n                                                     dtype='int64')\n                        all_preds.append(all_pred)\n                        if current_label is not None:\n                            ref_embeddings[aug_idx].append(current_embedding)\n                        prev_embedding[aug_idx] = current_embedding",
+        "type": "code",
+        "location": "/paddlevideo/metrics/vos_metric.py:115-129"
+    },
+    "5975": {
+        "file_id": 478,
+        "content": "In this code, it checks if the sample has a 'meta' field with 'flip' set to True. If not, it checks if there are new labels for new objects. If necessary, it introduces a new label and adds the current prediction and embedding to their respective lists. The prev_embedding is also updated.",
+        "type": "comment"
+    },
+    "5976": {
+        "file_id": 478,
+        "content": "                if frame_idx > 0:\n                    all_preds = paddle.concat(all_preds, axis=0)\n                    all_preds = paddle.mean(\n                        all_preds, axis=0)  #average results if augmentation\n                    pred_label = paddle.argmax(all_preds, axis=0)\n                    if join_label is not None:\n                        join_label = paddle.squeeze(paddle.squeeze(join_label,\n                                                                   axis=0),\n                                                    axis=0)\n                        keep = paddle.cast((join_label == 0), dtype=\"int64\")\n                        pred_label = pred_label * keep + join_label * (1 - keep)\n                        pred_label = pred_label\n                    current_label = paddle.reshape(\n                        pred_label, shape=[1, 1, ori_height, ori_width])\n                    flip_pred_label = self.flip_tensor(pred_label, 1)\n                    flip_current_label = paddle.reshape(\n                        flip_pred_label, shape=[1, 1, ori_height, ori_width])",
+        "type": "code",
+        "location": "/paddlevideo/metrics/vos_metric.py:131-147"
+    },
+    "5977": {
+        "file_id": 478,
+        "content": "This code calculates the mean of previous predictions, then finds the maximum value from these averaged results. It handles joining labels if present and reshapes the final prediction to match the original image dimensions.",
+        "type": "comment"
+    },
+    "5978": {
+        "file_id": 478,
+        "content": "                    for aug_idx in range(len(samples)):\n                        if join_label is not None:\n                            if samples[aug_idx]['meta']['flip']:\n                                ref_masks[aug_idx].append(flip_current_label)\n                            else:\n                                ref_masks[aug_idx].append(current_label)\n                        if samples[aug_idx]['meta']['flip']:\n                            prev_mask[aug_idx] = flip_current_label\n                        else:\n                            prev_mask[\n                                aug_idx] = current_label  #update prev_mask\n                    one_frametime = time.time() - time_start\n                    seq_total_time += one_frametime\n                    seq_total_frame += 1\n                    obj_num = float(obj_num)\n                    logger.info('Frame: {}, Obj Num: {}, Time: {}'.format(\n                        imgname[0], obj_num, one_frametime))\n                    self.save_mask(\n                        pred_label,",
+        "type": "code",
+        "location": "/paddlevideo/metrics/vos_metric.py:149-168"
+    },
+    "5979": {
+        "file_id": 478,
+        "content": "The code iterates over a list of samples, updating reference and previous masks based on whether the sample is flipped or not. It then calculates the time taken for one frame, adds it to total sequence time, increments the total frame count, logs frame information including object number, and saves the predicted label mask.",
+        "type": "comment"
+    },
+    "5980": {
+        "file_id": 478,
+        "content": "                        os.path.join(self.result_root, seq_name,\n                                     imgname[0].split('.')[0] + '.png'))\n                else:\n                    one_frametime = time.time() - time_start\n                    seq_total_time += one_frametime\n                    logger.info('Ref Frame: {}, Time: {}'.format(\n                        imgname[0], one_frametime))\n            del (ref_embeddings)\n            del (ref_masks)\n            del (prev_embedding)\n            del (prev_mask)\n            del (seq_dataset)\n            del (seq_dataloader)\n        seq_avg_time_per_frame = seq_total_time / seq_total_frame\n        self.total_time += seq_total_time\n        self.total_frame += seq_total_frame\n        total_avg_time_per_frame = self.total_time / self.total_frame\n        self.total_sfps += seq_avg_time_per_frame\n        avg_sfps = self.total_sfps / (batch_id + 1)\n        logger.info(\"Seq {} FPS: {}, Total FPS: {}, FPS per Seq: {}\".format(\n            seq_name, 1. / seq_avg_time_per_frame,",
+        "type": "code",
+        "location": "/paddlevideo/metrics/vos_metric.py:169-191"
+    },
+    "5981": {
+        "file_id": 478,
+        "content": "This code calculates the average time per frame for a video sequence and reports it. It also keeps track of total time, total frames, average frames per second (FPS) for each sequence, and overall FPS. It logs this information for debugging or analysis purposes. The code handles both cases where all frames are successfully processed and when some frames fail processing. It then deletes unnecessary variables to free up memory.",
+        "type": "comment"
+    },
+    "5982": {
+        "file_id": 478,
+        "content": "            1. / total_avg_time_per_frame, 1. / avg_sfps))\n    def flip_tensor(self, tensor, dim=0):\n        inv_idx = paddle.cast(paddle.arange(tensor.shape[dim] - 1, -1, -1),\n                              dtype=\"int64\")\n        tensor = paddle.index_select(x=tensor, index=inv_idx, axis=dim)\n        return tensor\n    def save_mask(self, mask_tensor, path):\n        _palette = [\n            0, 0, 0, 128, 0, 0, 0, 128, 0, 128, 128, 0, 0, 0, 128, 128, 0, 128,\n            0, 128, 128, 128, 128, 128, 64, 0, 0, 191, 0, 0, 64, 128, 0, 191,\n            128, 0, 64, 0, 128, 191, 0, 128, 64, 128, 128, 191, 128, 128, 0, 64,\n            0, 128, 64, 0, 0, 191, 0, 128, 191, 0, 0, 64, 128, 128, 64, 128, 22,\n            22, 22, 23, 23, 23, 24, 24, 24, 25, 25, 25, 26, 26, 26, 27, 27, 27,\n            28, 28, 28, 29, 29, 29, 30, 30, 30, 31, 31, 31, 32, 32, 32, 33, 33,\n            33, 34, 34, 34, 35, 35, 35, 36, 36, 36, 37, 37, 37, 38, 38, 38, 39,\n            39, 39, 40, 40, 40, 41, 41, 41, 42, 42, 42, 43, 43, 43, 44, 44, 44,",
+        "type": "code",
+        "location": "/paddlevideo/metrics/vos_metric.py:192-209"
+    },
+    "5983": {
+        "file_id": 478,
+        "content": "This code defines a class with two methods: 'flip_tensor' and 'save_mask'. The 'flip_tensor' method flips the tensor along a specified dimension by inverting the indices. The 'save_mask' method saves a mask tensor to a specified file path using a provided palette.",
+        "type": "comment"
+    },
+    "5984": {
+        "file_id": 478,
+        "content": "            45, 45, 45, 46, 46, 46, 47, 47, 47, 48, 48, 48, 49, 49, 49, 50, 50,\n            50, 51, 51, 51, 52, 52, 52, 53, 53, 53, 54, 54, 54, 55, 55, 55, 56,\n            56, 56, 57, 57, 57, 58, 58, 58, 59, 59, 59, 60, 60, 60, 61, 61, 61,\n            62, 62, 62, 63, 63, 63, 64, 64, 64, 65, 65, 65, 66, 66, 66, 67, 67,\n            67, 68, 68, 68, 69, 69, 69, 70, 70, 70, 71, 71, 71, 72, 72, 72, 73,\n            73, 73, 74, 74, 74, 75, 75, 75, 76, 76, 76, 77, 77, 77, 78, 78, 78,\n            79, 79, 79, 80, 80, 80, 81, 81, 81, 82, 82, 82, 83, 83, 83, 84, 84,\n            84, 85, 85, 85, 86, 86, 86, 87, 87, 87, 88, 88, 88, 89, 89, 89, 90,\n            90, 90, 91, 91, 91, 92, 92, 92, 93, 93, 93, 94, 94, 94, 95, 95, 95,\n            96, 96, 96, 97, 97, 97, 98, 98, 98, 99, 99, 99, 100, 100, 100, 101,\n            101, 101, 102, 102, 102, 103, 103, 103, 104, 104, 104, 105, 105,\n            105, 106, 106, 106, 107, 107, 107, 108, 108, 108, 109, 109, 109,\n            110, 110, 110, 111, 111, 111, 112, 112, 112, 113, 113, 113, 114,",
+        "type": "code",
+        "location": "/paddlevideo/metrics/vos_metric.py:210-222"
+    },
+    "5985": {
+        "file_id": 478,
+        "content": "This code appears to be a list of numbers, each representing a potential value for an unknown variable. It spans from 45 to 114 and includes each number exactly once. Without context or additional information, it's difficult to determine the purpose or meaning behind these values.",
+        "type": "comment"
+    },
+    "5986": {
+        "file_id": 478,
+        "content": "            114, 114, 115, 115, 115, 116, 116, 116, 117, 117, 117, 118, 118,\n            118, 119, 119, 119, 120, 120, 120, 121, 121, 121, 122, 122, 122,\n            123, 123, 123, 124, 124, 124, 125, 125, 125, 126, 126, 126, 127,\n            127, 127, 128, 128, 128, 129, 129, 129, 130, 130, 130, 131, 131,\n            131, 132, 132, 132, 133, 133, 133, 134, 134, 134, 135, 135, 135,\n            136, 136, 136, 137, 137, 137, 138, 138, 138, 139, 139, 139, 140,\n            140, 140, 141, 141, 141, 142, 142, 142, 143, 143, 143, 144, 144,\n            144, 145, 145, 145, 146, 146, 146, 147, 147, 147, 148, 148, 148,\n            149, 149, 149, 150, 150, 150, 151, 151, 151, 152, 152, 152, 153,\n            153, 153, 154, 154, 154, 155, 155, 155, 156, 156, 156, 157, 157,\n            157, 158, 158, 158, 159, 159, 159, 160, 160, 160, 161, 161, 161,\n            162, 162, 162, 163, 163, 163, 164, 164, 164, 165, 165, 165, 166,\n            166, 166, 167, 167, 167, 168, 168, 168, 169, 169, 169, 170, 170,\n            170, 171, 171, 171, 172, 172, 172, 173, 173, 173, 174, 174, 174,",
+        "type": "code",
+        "location": "/paddlevideo/metrics/vos_metric.py:223-236"
+    },
+    "5987": {
+        "file_id": 478,
+        "content": "This code snippet contains a series of consecutive integers from 114 to 174.",
+        "type": "comment"
+    },
+    "5988": {
+        "file_id": 478,
+        "content": "            175, 175, 175, 176, 176, 176, 177, 177, 177, 178, 178, 178, 179,\n            179, 179, 180, 180, 180, 181, 181, 181, 182, 182, 182, 183, 183,\n            183, 184, 184, 184, 185, 185, 185, 186, 186, 186, 187, 187, 187,\n            188, 188, 188, 189, 189, 189, 190, 190, 190, 191, 191, 191, 192,\n            192, 192, 193, 193, 193, 194, 194, 194, 195, 195, 195, 196, 196,\n            196, 197, 197, 197, 198, 198, 198, 199, 199, 199, 200, 200, 200,\n            201, 201, 201, 202, 202, 202, 203, 203, 203, 204, 204, 204, 205,\n            205, 205, 206, 206, 206, 207, 207, 207, 208, 208, 208, 209, 209,\n            209, 210, 210, 210, 211, 211, 211, 212, 212, 212, 213, 213, 213,\n            214, 214, 214, 215, 215, 215, 216, 216, 216, 217, 217, 217, 218,\n            218, 218, 219, 219, 219, 220, 220, 220, 221, 221, 221, 222, 222,\n            222, 223, 223, 223, 224, 224, 224, 225, 225, 225, 226, 226, 226,\n            227, 227, 227, 228, 228, 228, 229, 229, 229, 230, 230, 230, 231,\n            231, 231, 232, 232, 232, 233, 233, 233, 234, 234, 234, 235, 235,",
+        "type": "code",
+        "location": "/paddlevideo/metrics/vos_metric.py:237-250"
+    },
+    "5989": {
+        "file_id": 478,
+        "content": "This code snippet is likely representing a list of numbers, potentially related to frame or timestamp values in the video processing context.",
+        "type": "comment"
+    },
+    "5990": {
+        "file_id": 478,
+        "content": "            235, 236, 236, 236, 237, 237, 237, 238, 238, 238, 239, 239, 239,\n            240, 240, 240, 241, 241, 241, 242, 242, 242, 243, 243, 243, 244,\n            244, 244, 245, 245, 245, 246, 246, 246, 247, 247, 247, 248, 248,\n            248, 249, 249, 249, 250, 250, 250, 251, 251, 251, 252, 252, 252,\n            253, 253, 253, 254, 254, 254, 255, 255, 255\n        ]\n        mask = mask_tensor.cpu().numpy().astype('uint8')\n        mask = Image.fromarray(mask).convert('P')\n        mask.putpalette(_palette)\n        mask.save(path)\n    def zip_folder(self, source_folder, zip_dir):\n        f = zipfile.ZipFile(zip_dir, 'w', zipfile.ZIP_DEFLATED)\n        pre_len = len(os.path.dirname(source_folder))\n        for dirpath, dirnames, filenames in os.walk(source_folder):\n            for filename in filenames:\n                pathfile = os.path.join(dirpath, filename)\n                arcname = pathfile[pre_len:].strip(os.path.sep)\n                f.write(pathfile, arcname)\n        f.close()\n    def accumulate(self):",
+        "type": "code",
+        "location": "/paddlevideo/metrics/vos_metric.py:251-272"
+    },
+    "5991": {
+        "file_id": 478,
+        "content": "Code snippet creates a mask from tensor data, converts it to an image and saves it with specified palette.\nThe 'zip_folder' function compresses the contents of a source folder into a zip file, preserving directory structure.\nThe 'accumulate' function is not defined in this code chunk.",
+        "type": "comment"
+    },
+    "5992": {
+        "file_id": 478,
+        "content": "        \"\"\"accumulate metrics when finished all iters.\n        \"\"\"\n        self.zip_folder(self.result_root, self.zip_dir)\n        logger.info('Save result to {}.'.format(self.zip_dir))",
+        "type": "code",
+        "location": "/paddlevideo/metrics/vos_metric.py:273-276"
+    },
+    "5993": {
+        "file_id": 478,
+        "content": "This code snippet is part of a class that handles metrics calculation. It accumulates metrics once all iterations are complete, then zips the results and saves them to a specified directory (zip_dir) using self.zip_folder method from the parent class. The logger.info statement displays an informational message confirming the save location and name of the zip file in the zip_dir.",
+        "type": "comment"
+    },
+    "5994": {
+        "file_id": 479,
+        "content": "/paddlevideo/metrics/youtube8m/average_precision_calculator.py",
+        "type": "filepath"
+    },
+    "5995": {
+        "file_id": 479,
+        "content": "The AveragePrecisionCalculator calculates average precision in video object detection tasks, using a priority queue and providing methods for non-interpolated average precision. It also includes sorting, recall & precision computation, data shuffling, and prediction normalization.",
+        "type": "summary"
+    },
+    "5996": {
+        "file_id": 479,
+        "content": "# Copyright 2020 Google Inc. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#      http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS-IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"Calculate or keep track of the interpolated average precision.\nIt provides an interface for calculating interpolated average precision for an\nentire list or the top-n ranked items. For the definition of the\n(non-)interpolated average precision:\nhttp://trec.nist.gov/pubs/trec15/appendices/CE.MEASURES06.pdf\nExample usages:\n1) Use it as a static function call to directly calculate average precision for\na short ranked list in the memory.",
+        "type": "code",
+        "location": "/paddlevideo/metrics/youtube8m/average_precision_calculator.py:1-23"
+    },
+    "5997": {
+        "file_id": 479,
+        "content": "This code calculates the interpolated average precision for an entire list or top-n ranked items, following the definition provided in the given reference. It can be used as a static function call to calculate average precision for short ranked lists in memory.",
+        "type": "comment"
+    },
+    "5998": {
+        "file_id": 479,
+        "content": "```\nimport random\np = np.array([random.random() for _ in xrange(10)])\na = np.array([random.choice([0, 1]) for _ in xrange(10)])\nap = average_precision_calculator.AveragePrecisionCalculator.ap(p, a)\n```\n2) Use it as an object for long ranked list that cannot be stored in memory or\nthe case where partial predictions can be observed at a time (Tensorflow\npredictions). In this case, we first call the function accumulate many times\nto process parts of the ranked list. After processing all the parts, we call\npeek_interpolated_ap_at_n.\n```\np1 = np.array([random.random() for _ in xrange(5)])\na1 = np.array([random.choice([0, 1]) for _ in xrange(5)])\np2 = np.array([random.random() for _ in xrange(5)])\na2 = np.array([random.choice([0, 1]) for _ in xrange(5)])\n# interpolated average precision at 10 using 1000 break points\ncalculator = average_precision_calculator.AveragePrecisionCalculator(10)\ncalculator.accumulate(p1, a1)\ncalculator.accumulate(p2, a2)\nap3 = calculator.peek_ap_at_n()\n```\n\"\"\"\nimport heapq\nimport random\nimport numbers",
+        "type": "code",
+        "location": "/paddlevideo/metrics/youtube8m/average_precision_calculator.py:25-55"
+    },
+    "5999": {
+        "file_id": 479,
+        "content": "The code defines an AveragePrecisionCalculator class that calculates average precision based on a ranked list. The calculator can handle long lists that cannot fit in memory or partial predictions observed over time (such as from Tensorflow). It uses the accumulate method to process parts of the ranked list and peek_interpolated_ap_at_n to calculate the interpolated average precision at a specific recall level.",
+        "type": "comment"
+    }
+}

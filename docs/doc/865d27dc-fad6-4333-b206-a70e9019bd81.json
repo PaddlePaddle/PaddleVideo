@@ -1,0 +1,15 @@
+{
+    "summary": "This code file in the PaddleVideo library imports various recognizer classes for video recognition tasks, including 1D, 2D, 3D, transformer-based, GCN, MRI, and MoViNet frame-based recognizers. These models are used for action recognition and motion estimation tasks.",
+    "details": [
+        {
+            "comment": "This code file imports various recognizer classes from different modules within the PaddleVideo framework for video recognition tasks. These recognizers include 1D, 2D, 3D, transformer-based, GCN, MRI, 3D MRI, and MoViNet frame-based recognizers, as well as a distillation-based recognizer. Each recognizer is designed for specific types of recognition tasks in video analysis.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/paddlevideo/modeling/framework/recognizers/__init__.py\":0-22",
+            "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nfrom .base import BaseRecognizer\nfrom .recognizer1d import Recognizer1D, RecognizerAction\nfrom .recognizer2d import Recognizer2D\nfrom .recognizer3d import Recognizer3D\nfrom .recognizer_transformer import RecognizerTransformer\nfrom .recognizer_gcn import RecognizerGCN\nfrom .recognizerMRI import RecognizerMRI\nfrom .recognizer3dMRI import Recognizer3DMRI\nfrom .recognizer_transformer_MRI import RecognizerTransformer_MRI\nfrom .recognizer_movinet_frame import MoViNetRecognizerFrame\nfrom .recognizerDistillation import RecognizerDistillation"
+        },
+        {
+            "comment": "This code snippet in the PaddleVideo library defines various recognizer models including BaseRecognizer, Recognizer1D, Recognizer2D, and more. These classes are used for video recognition tasks like action recognition and motion estimation.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/paddlevideo/modeling/framework/recognizers/__init__.py\":24-29",
+            "content": "__all__ = [\n    'BaseRecognizer', 'Recognizer1D', 'Recognizer2D', 'Recognizer3D',\n    'RecognizerTransformer', 'RecognizerGCN', 'RecognizerMRI',\n    'Recognizer3DMRI', 'RecognizerTransformer_MRI', 'MoViNetRecognizerFrame',\n    'RecognizerAction', 'RecognizerDistillation'\n]"
+        }
+    ]
+}

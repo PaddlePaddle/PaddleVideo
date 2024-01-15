@@ -1,0 +1,543 @@
+{
+    "1200": {
+        "file_id": 112,
+        "content": "\"\"\"\nread map for model\n\"\"\"\nfrom reader.reader_utils import regist_reader, get_reader\nimport reader.tsminf_reader as tsminf_reader\nimport reader.audio_reader as audio_reader\nimport reader.bmninf_reader as bmninf_reader\nimport reader.feature_reader as feature_reader\n# regist reader, sort by alphabet\nregist_reader(\"TSM\", tsminf_reader.TSMINFReader)\nregist_reader(\"PPTSM\", tsminf_reader.TSMINFReader)\nregist_reader(\"AUDIO\", audio_reader.AudioReader)\nregist_reader(\"BMN\", bmninf_reader.BMNINFReader)\nregist_reader(\"ACTION\", feature_reader.FeatureReader)",
+        "type": "code",
+        "location": "/applications/BasketballAction/predict/action_detect/reader/__init__.py:1-15"
+    },
+    "1201": {
+        "file_id": 112,
+        "content": "This code imports and registers various readers for different formats (TSM, PPTSM, AUDIO, BMN, ACTION) to read map files for the model. The readers are registered in alphabetical order.",
+        "type": "comment"
+    },
+    "1202": {
+        "file_id": 113,
+        "content": "/applications/FootballAction/predict/action_detect/reader/audio_reader.py",
+        "type": "filepath"
+    },
+    "1203": {
+        "file_id": 113,
+        "content": "The code creates an AudioReader class for youtube-8M dataset, initializing audio readers and loading pcm data. It manages audio batches by appending audios to batch_out until reaching the specified batch size, then yields the batch. Any remaining audios are yielded upon completion.",
+        "type": "summary"
+    },
+    "1204": {
+        "file_id": 113,
+        "content": "\"\"\"\naudio reader\n\"\"\"\n#  Copyright (c) 2019 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport sys\nimport os\nimport _pickle as cPickle\n#from .reader_utils import DataReader\ntry:\n    import cPickle as pickle\n    from cStringIO import StringIO\nexcept ImportError:\n    import pickle\n    from io import BytesIO\nimport numpy as np\nimport random\nimport code\nfrom .reader_utils import DataReader\nimport mfcc.feature_extractor as feature_extractor\nclass AudioReader(DataReader):\n    \"\"\"\n    Data reader for youtube-8M dataset, which was stored as features extracted by prior networks",
+        "type": "code",
+        "location": "/applications/BasketballAction/predict/action_detect/reader/audio_reader.py:1-37"
+    },
+    "1205": {
+        "file_id": 113,
+        "content": "This code defines an AudioReader class for the youtube-8M dataset, which reads features extracted by prior networks. It imports necessary libraries and modules, such as numpy, random, code, DataReader from reader_utils, feature_extractor from mfcc, pickle for file input/output, and StringIO or BytesIO depending on the availability of cPickle. The class inherits from DataReader, indicating it follows a standard data reading structure, and uses a feature extractor to extract audio features.",
+        "type": "comment"
+    },
+    "1206": {
+        "file_id": 113,
+        "content": "    This is for the three models: lstm, attention cluster, nextvlad\n    dataset cfg: num_classes\n                 batch_size\n                 list\n                 NextVlad only: eigen_file\n    \"\"\"\n    def __init__(self, name, mode, cfg, material=None):\n        self.name = name\n        self.mode = mode\n        # set batch size and file list\n        self.sample_rate = cfg[self.name.upper()]['sample_rate']\n        self.batch_size = cfg[self.name.upper()]['batch_size']\n        self.pcm_file = cfg[self.name.upper()]['pcm_file']\n        self.material = material\n    def create_reader(self):\n        \"\"\"create_reader\"\"\"\n        with open(self.pcm_file, \"rb\") as f:\n            pcm_data = f.read()\n        audio_data = np.fromstring(pcm_data, dtype=np.int16)\n        examples = feature_extractor.wav_to_example(audio_data, self.sample_rate)\n        # print(examples.shape)\n        def reader():\n            \"\"\"reader\"\"\"\n            batch_out = []\n            batch_out_pre = []\n            for audio in examples:\n                # batch_out.append([audio])",
+        "type": "code",
+        "location": "/applications/BasketballAction/predict/action_detect/reader/audio_reader.py:38-70"
+    },
+    "1207": {
+        "file_id": 113,
+        "content": "This code initializes an audio reader for three models (LSTM, Attention Cluster, NextVlad). It takes parameters such as name, mode, and configuration file. The batch size, sample rate, and file list are set according to the given configuration. The pcm data is loaded from a binary file and converted to numpy array. Finally, a reader function is defined that iterates through examples and appends them to batches.",
+        "type": "comment"
+    },
+    "1208": {
+        "file_id": 113,
+        "content": "                batch_out.append(audio)\n                if len(batch_out) == self.batch_size:\n                    yield batch_out\n                    batch_out = []\n            if len(batch_out) > 0:\n                yield batch_out\n        return reader",
+        "type": "code",
+        "location": "/applications/BasketballAction/predict/action_detect/reader/audio_reader.py:71-78"
+    },
+    "1209": {
+        "file_id": 113,
+        "content": "This code is creating and managing audio batches in the audio reader class. It appends each audio to batch_out until it reaches the specified batch size, then yields the batch and resets batch_out. If there are remaining audios in batch_out after the loop ends, it yields them before returning the reader object.",
+        "type": "comment"
+    },
+    "1210": {
+        "file_id": 114,
+        "content": "/applications/FootballAction/predict/action_detect/reader/bmninf_reader.py",
+        "type": "filepath"
+    },
+    "1211": {
+        "file_id": 114,
+        "content": "The BMNINFReader class in PaddleVideo reads and processes data from the BMN model for football action detection, filtering invalid proposals and handling image/audio data. This code creates a batch reader that pairs video features with names and scales, yielding batches until completion.",
+        "type": "summary"
+    },
+    "1212": {
+        "file_id": 114,
+        "content": "\"\"\"\n# @File  : bmninf_reader.py  \n# @Author: macaihong\n# @Date  : 2019/12/15\n# @Desc  :\n\"\"\"\nimport os\nimport random\nimport pickle\nimport json\nimport numpy as np\nimport multiprocessing\nimport numpy as np\nfrom .reader_utils import DataReader\ndef get_sw_prop(duration, window=200, step=10):\n    \"\"\"\n    get_sw_prop\n    \"\"\"\n    pr = []\n    local_boxes = []\n    for k in np.arange(0, duration - window + step, step):\n        start_id = k\n        end_id = min(duration, k + window)\n        if end_id - start_id < window:\n            start_id = end_id - window\n        local_boxes = (start_id, end_id)\n        pr.append(local_boxes)\n    def valid_proposal(duration, span):\n        \"\"\"\n        valid_proposal\n        \"\"\"\n        # fileter proposals\n        # a valid proposal should have at least one second in the video\n        real_span = min(duration, span[1]) - span[0]\n        return real_span >= 1\n    pr = list(filter(lambda x: valid_proposal(duration, x), pr))\n    return pr\nclass BMNINFReader(DataReader):\n    \"\"\"\n    Data reader for BMN model, which was stored as features extracted by prior networks",
+        "type": "code",
+        "location": "/applications/FootballAction/predict/action_detect/reader/bmninf_reader.py:1-49"
+    },
+    "1213": {
+        "file_id": 114,
+        "content": "This code defines a class called BMNINFReader which is a data reader for the BMN model. It reads data that has been extracted by prior networks and uses the \"get_sw_prop\" function to filter out invalid proposals. The get_sw_prop function calculates proposal regions based on a given duration, window size, and step size. Proposals with less than one second in the video are filtered out. This data reader is part of the PaddleVideo package for FootballAction application.",
+        "type": "comment"
+    },
+    "1214": {
+        "file_id": 114,
+        "content": "    dataset cfg: feat_path, feature path,\n                 tscale, temporal length of BM map,\n                 dscale, duration scale of BM map,\n                 anchor_xmin, anchor_xmax, the range of each point in the feature sequence,\n                 batch_size, batch size of input data,\n                 num_threads, number of threads of data processing\n    \"\"\"\n    def __init__(self, name, mode, cfg, material=None):\n        self.name = name\n        self.mode = mode\n        self.tscale = cfg[self.name.upper()]['tscale']  # 200\n        self.dscale = cfg[self.name.upper()]['dscale']  # 200\n        # self.subset = cfg[self.name.upper()]['subset']\n        self.tgap = 1. / self.tscale\n        self.step = cfg[self.name.upper()]['window_step']\n        self.material = material\n        src_feature = self.material\n        image_feature = src_feature['image_feature']\n        pcm_feature = src_feature['pcm_feature']\n        pcm_feature = pcm_feature.reshape((pcm_feature.shape[0] * 5, 640))\n        # print(rgb_feature.shape, audio_feature.shape, pcm_feature.shape)",
+        "type": "code",
+        "location": "/applications/FootballAction/predict/action_detect/reader/bmninf_reader.py:50-73"
+    },
+    "1215": {
+        "file_id": 114,
+        "content": "This code initializes a class, likely for data reading and processing. It takes parameters such as name, mode, configuration (cfg), and material. It sets attributes like temporal length (tscale) and duration scale (dscale) from the configuration. The code reshapes pcm_feature to fit the needed shape.",
+        "type": "comment"
+    },
+    "1216": {
+        "file_id": 114,
+        "content": "        min_length = min(image_feature.shape[0], pcm_feature.shape[0])\n        #if min_length == 0:\n        #    continue\n        image_feature = image_feature[:min_length, :]\n        pcm_feature = pcm_feature[:min_length, :]\n        self.features = np.concatenate((image_feature, pcm_feature), axis=1)\n        self.duration = len(self.features)\n        self.window = self.tscale\n        self.get_dataset_dict()\n        self.get_match_map()\n        self.batch_size = cfg[self.name.upper()]['batch_size']\n        if (mode == 'test') or (mode == 'infer'):\n            self.num_threads = 1  # set num_threads as 1 for test and infer\n    def get_dataset_dict(self):\n        \"\"\"\n        get_dataset_dict\n        \"\"\"\n        self.video_list = get_sw_prop(self.duration, self.window, self.step)\n    def get_match_map(self):\n        \"\"\"\n        get_match_map\n        \"\"\"\n        match_map = []\n        for idx in range(self.tscale):\n            tmp_match_window = []\n            xmin = self.tgap * idx\n            for jdx in range(1, self.tscale + 1):",
+        "type": "code",
+        "location": "/applications/FootballAction/predict/action_detect/reader/bmninf_reader.py:74-105"
+    },
+    "1217": {
+        "file_id": 114,
+        "content": "This code reads image and audio data for video analysis, concatenates them into a feature vector, sets the duration, window size, and batch size. It then retrieves the list of videos to process and creates a match map for analyzing video frames. The code is part of a machine learning model used in football action detection.",
+        "type": "comment"
+    },
+    "1218": {
+        "file_id": 114,
+        "content": "                xmax = xmin + self.tgap * jdx\n                tmp_match_window.append([xmin, xmax])\n            match_map.append(tmp_match_window)\n        match_map = np.array(match_map)\n        match_map = np.transpose(match_map, [1, 0, 2])\n        match_map = np.reshape(match_map, [-1, 2])\n        self.match_map = match_map\n        self.anchor_xmin = [self.tgap * i for i in range(self.tscale)]\n        self.anchor_xmax = [self.tgap * i for i in range(1, self.tscale + 1)]\n    def load_file(self, video_wind):\n        \"\"\"\n        load_file\n        \"\"\"\n        start_feat_id = video_wind[0]\n        end_feat_id = video_wind[1]\n        video_feat = self.features[video_wind[0]: video_wind[1]]\n        video_feat = video_feat.T\n        video_feat = video_feat.astype(\"float32\")\n        return video_feat\n    def create_reader(self):\n        \"\"\"\n        reader creator for ctcn model\n        \"\"\"\n        return self.make_infer_reader()\n    def make_infer_reader(self):\n        \"\"\"\n        reader for inference\n        \"\"\"\n        def reader():",
+        "type": "code",
+        "location": "/applications/FootballAction/predict/action_detect/reader/bmninf_reader.py:106-138"
+    },
+    "1219": {
+        "file_id": 114,
+        "content": "This code is for creating a reader function to handle BMNINF file loading and defining the match_map attribute. It defines the load_file function, create_reader function, and make_infer_reader function. The load_file function loads features from a given video window range, converts them to float32 type, and transposes the data. The create_reader function creates a reader for the CTCN model. The make_infer_reader function defines a reader for inference purposes.",
+        "type": "comment"
+    },
+    "1220": {
+        "file_id": 114,
+        "content": "            \"\"\"\n            reader\n            \"\"\"\n            batch_out = []\n            # for video_name in self.video_list:\n            for video_wind in self.video_list:\n                video_idx = self.video_list.index(video_wind)\n                video_feat = self.load_file(video_wind)\n                batch_out.append((video_feat, video_wind, [self.duration, self.dscale]))\n                if len(batch_out) == self.batch_size:\n                    yield batch_out\n                    batch_out = []\n            if len(batch_out) > 0:\n                yield batch_out\n        return reader",
+        "type": "code",
+        "location": "/applications/FootballAction/predict/action_detect/reader/bmninf_reader.py:139-155"
+    },
+    "1221": {
+        "file_id": 114,
+        "content": "This code creates a batch reader for video data in a football action detection application. It loads features from videos, pairs them with their corresponding names and scales, and yields batches of this data until the batch size is reached or all videos are processed.",
+        "type": "comment"
+    },
+    "1222": {
+        "file_id": 115,
+        "content": "/applications/FootballAction/predict/action_detect/reader/feature_reader.py",
+        "type": "filepath"
+    },
+    "1223": {
+        "file_id": 115,
+        "content": "The code defines an attention-based LSTM feature reader for the FootballAction application in PaddleVideo, handling data reading from the youtube-8M dataset. It reads features from image, audio, and pcm_lists, concatenates them, yields batches, and continues even if exceptions occur.",
+        "type": "summary"
+    },
+    "1224": {
+        "file_id": 115,
+        "content": "\"\"\"\nattention-lstm feature reader\n\"\"\"\n#  Copyright (c) 2019 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport sys\ntry:\n    import cPickle as pickle\n    from cStringIO import StringIO\nexcept ImportError:\n    import pickle\nimport numpy as np\nimport random\nimport code\nfrom .reader_utils import DataReader\nclass FeatureReader(DataReader):\n    \"\"\"\n    Data reader for youtube-8M dataset, which was stored as features extracted by prior networks\n    This is for the three models: lstm, attention cluster, nextvlad",
+        "type": "code",
+        "location": "/applications/FootballAction/predict/action_detect/reader/feature_reader.py:1-33"
+    },
+    "1225": {
+        "file_id": 115,
+        "content": "This code is for an attention-based LSTM feature reader, used in the FootballAction application of PaddleVideo. It imports necessary libraries, handles potential import errors, and defines a class called FeatureReader which inherits from DataReader to handle data reading specifically for the youtube-8M dataset that contains features extracted by prior networks. The code is licensed under Apache 2.0 license.",
+        "type": "comment"
+    },
+    "1226": {
+        "file_id": 115,
+        "content": "    dataset cfg: num_classes\n                 batch_size\n                 list\n                 NextVlad only: eigen_file\n    \"\"\"\n    def __init__(self, name, mode, cfg, material=None):\n        self.name = name\n        self.mode = mode\n        self.batch_size = cfg[self.name.upper()]['batch_size']\n        self.feature = material['feature']\n        self.proposal = material['proposal']\n        self.fps = 5\n    def create_reader(self):\n        \"\"\"\n        create_reader\n        \"\"\"\n        image_feature_list = self.feature['image_feature']\n        audio_feature_list = self.feature['audio_feature']\n        pcm_feature_list = self.feature['pcm_feature']\n        pcm_feature_list = pcm_feature_list.reshape((pcm_feature_list.shape[0] * 5, 640))\n        fl = self.proposal\n        if self.mode == 'train':\n            random.shuffle(fl)\n        def reader():\n            \"\"\"\n            reader\n            \"\"\"\n            batch_out = []\n            for prop_info in fl:\n                start_id = int(prop_info['start'])\n                end_id = int(prop_info['end'])",
+        "type": "code",
+        "location": "/applications/FootballAction/predict/action_detect/reader/feature_reader.py:35-71"
+    },
+    "1227": {
+        "file_id": 115,
+        "content": "This code initializes a feature reader object for the FootballAction application, taking in parameters such as name, mode, and configuration (cfg). It then creates a reader function that iterates through proposal features and extracts relevant data based on start and end IDs. The extracted features are stored in batch_out.",
+        "type": "comment"
+    },
+    "1228": {
+        "file_id": 115,
+        "content": "                bmn_score = float(prop_info['score'])\n                try:\n                    image_feature = image_feature_list[start_id: end_id]\n                    audio_feature = audio_feature_list[int(start_id / self.fps): int(end_id / self.fps)]\n                    pcm_feature = pcm_feature_list[start_id: end_id]\n                    # image_feature = np.concatenate((image_feature, pcm_feature), axis=1)\n                    batch_out.append((image_feature, audio_feature, 0, prop_info))\n                    if len(batch_out) == self.batch_size:\n                        yield batch_out\n                        batch_out = []\n                except Exception as e:\n                    continue\n        return reader",
+        "type": "code",
+        "location": "/applications/FootballAction/predict/action_detect/reader/feature_reader.py:72-86"
+    },
+    "1229": {
+        "file_id": 115,
+        "content": "This code reads features from image, audio, and pcm_feature lists based on start_id and end_id. It concatenates the image and pcm_features along axis=1. If batch_size is reached, it yields the batch and resets the batch_out list. The code continues even if an exception occurs.",
+        "type": "comment"
+    },
+    "1230": {
+        "file_id": 116,
+        "content": "/applications/FootballAction/predict/action_detect/reader/reader_utils.py",
+        "type": "filepath"
+    },
+    "1231": {
+        "file_id": 116,
+        "content": "This code defines ReaderNotFoundError and ReaderZoo classes for video input data readers, offering a singleton reader_zoo and functions to register and get specific readers. The get_reader function returns the reader instance based on name, mode, configuration, and material, while raising ReaderNotFoundError if not found.",
+        "type": "summary"
+    },
+    "1232": {
+        "file_id": 116,
+        "content": "\"\"\"\nreader_util\n\"\"\"\n#  Copyright (c) 2019 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport random\nimport numpy as np\nclass ReaderNotFoundError(Exception):\n    \"\"\"\n    \"Error: reader not found\"\n    \"\"\"\n    def __init__(self, reader_name, avail_readers):\n        super(ReaderNotFoundError, self).__init__()\n        self.reader_name = reader_name\n        self.avail_readers = avail_readers\n    def __str__(self):\n        msg = \"Reader {} Not Found.\\nAvailiable readers:\\n\".format(\n            self.reader_name)",
+        "type": "code",
+        "location": "/applications/BasketballAction/predict/action_detect/reader/reader_utils.py:1-34"
+    },
+    "1233": {
+        "file_id": 116,
+        "content": "This code defines a class \"ReaderNotFoundError\" for handling reader not found exceptions with the possibility to specify the unavailable reader name and available readers.",
+        "type": "comment"
+    },
+    "1234": {
+        "file_id": 116,
+        "content": "        for reader in self.avail_readers:\n            msg += \"  {}\\n\".format(reader)\n        return msg\nclass DataReader(object):\n    \"\"\"\n    data reader for video input\n    \"\"\"\n    def __init__(self, model_name, mode, cfg):\n        self.name = model_name\n        self.mode = mode\n        self.cfg = cfg\n    def create_reader(self):\n        \"\"\"\n        Not implemented\n        \"\"\"\n        pass\n    def get_config_from_sec(self, sec, item, default=None):\n        \"\"\"\n        get_config_from_sec\n        \"\"\"\n        if sec.upper() not in self.cfg:\n            return default\n        return self.cfg[sec.upper()].get(item, default)\nclass ReaderZoo(object):\n    \"\"\"\n    ReaderZoo\n    \"\"\"\n    def __init__(self):\n        \"\"\"\n        __init__\n        \"\"\"\n        self.reader_zoo = {}\n    def regist(self, name, reader):\n        \"\"\"\n        regist\n        \"\"\"\n        assert reader.__base__ == DataReader, \"Unknow model type {}\".format(\n            type(reader))\n        self.reader_zoo[name] = reader\n    def get(self, name, mode, cfg, material=None):",
+        "type": "code",
+        "location": "/applications/BasketballAction/predict/action_detect/reader/reader_utils.py:35-83"
+    },
+    "1235": {
+        "file_id": 116,
+        "content": "This code defines classes for video input data readers and a reader zoo. The DataReader class initializes with a model name, mode, and configuration. It has methods to create readers (not implemented) and get config from sections. The ReaderZoo class manages registered readers in a zoo, allowing easy access and usage of different reader types for video input data.",
+        "type": "comment"
+    },
+    "1236": {
+        "file_id": 116,
+        "content": "        \"\"\"\n        get\n        \"\"\"\n        for k, v in self.reader_zoo.items():\n            if k == name:\n                return v(name, mode, cfg, material)\n        raise ReaderNotFoundError(name, self.reader_zoo.keys())\n# singleton reader_zoo\nreader_zoo = ReaderZoo()\ndef regist_reader(name, reader):\n    \"\"\"\n    regist_reader\n    \"\"\"\n    reader_zoo.regist(name, reader)\ndef get_reader(name, mode, cfg, material=None):\n    \"\"\"\n    get_reader\n    \"\"\"\n    reader_model = reader_zoo.get(name, mode, cfg, material)\n    return reader_model.create_reader()",
+        "type": "code",
+        "location": "/applications/BasketballAction/predict/action_detect/reader/reader_utils.py:84-109"
+    },
+    "1237": {
+        "file_id": 116,
+        "content": "This code defines a singleton reader_zoo and provides functions for registering readers and getting a specific reader. The get_reader function returns the created reader instance based on the provided name, mode, configuration (cfg), and material (if any). If the reader is not found, it raises ReaderNotFoundError with available reader names as information.",
+        "type": "comment"
+    },
+    "1238": {
+        "file_id": 117,
+        "content": "/applications/FootballAction/predict/action_detect/reader/tsminf_reader.py",
+        "type": "filepath"
+    },
+    "1239": {
+        "file_id": 117,
+        "content": "The TSMINFReader class is a specialized data reader for JPG video datasets, utilizing threading for image preprocessing and data augmentation. It improves action detection models by manipulating football game images via functions like \"crop_and_resize\", \"group_random_crop\", and \"group_random_flip\" to fit target size and apply random crop sizes for augmentation.",
+        "type": "summary"
+    },
+    "1240": {
+        "file_id": 117,
+        "content": "\"\"\"\ntsn frame reader\n\"\"\"\n#  Copyright (c) 2019 PaddlePaddle Authors. All Rights Reserve.\n#\n#Licensed under the Apache License, Version 2.0 (the \"License\");\n#you may not use this file except in compliance with the License.\n#You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n#Unless required by applicable law or agreed to in writing, software\n#distributed under the License is distributed on an \"AS IS\" BASIS,\n#WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n#See the License for the specific language governing permissions and\n#limitations under the License.\nimport os\nimport sys\nimport random\nimport functools\nimport concurrent.futures\nimport multiprocessing\nimport numpy as np\nimport paddle\nfrom PIL import Image, ImageEnhance\nfrom .reader_utils import DataReader\nclass TSMINFReader(DataReader):\n    \"\"\"\n    Data reader for video dataset of jpg folder.\n    \"\"\"\n    def __init__(self, name, mode, cfg, material=None):\n        super(TSMINFReader, self).__init__(name, mode, cfg)",
+        "type": "code",
+        "location": "/applications/FootballAction/predict/action_detect/reader/tsminf_reader.py:1-38"
+    },
+    "1241": {
+        "file_id": 117,
+        "content": "The code defines a class called TSMINFReader that inherits from DataReader. It is a data reader for video datasets in the JPG format and can be used in specific modes with different configurations. The class takes parameters such as name, mode, cfg, and material (optional) to initialize its instance.",
+        "type": "comment"
+    },
+    "1242": {
+        "file_id": 117,
+        "content": "        name = name.upper()\n        self.seg_num        = cfg[name]['seg_num']\n        self.seglen         = cfg[name]['seglen']\n        self.short_size     = cfg[name]['short_size']\n        self.target_size    = cfg[name]['target_size']\n        self.batch_size     = cfg[name]['batch_size']\n        self.reader_threads = cfg[name]['reader_threads']\n        self.buf_size       = cfg[name]['buf_size']\n        self.video_path     = cfg[name]['frame_list']\n        self.img_mean       = np.array(cfg[name]['image_mean']).reshape([3, 1, 1]).astype(np.float32)\n        self.img_std        = np.array(cfg[name]['image_std']).reshape([3, 1, 1]).astype(np.float32)\n        self.material = material\n    def create_reader(self):\n        \"\"\"\n        batch loader for TSN\n        \"\"\"\n        _reader = self._inference_reader_creator_longvideo(\n                self.video_path,\n                self.mode,\n                seg_num=self.seg_num,\n                seglen=self.seglen,\n                short_size=self.short_size,\n                target_size=self.target_size,",
+        "type": "code",
+        "location": "/applications/FootballAction/predict/action_detect/reader/tsminf_reader.py:39-64"
+    },
+    "1243": {
+        "file_id": 117,
+        "content": "This code initializes the TSN video reader by setting various attributes based on provided configuration (name) and then calls a function to create the reader object with specified parameters. It also sets image mean and std values for normalization, and stores the material type.",
+        "type": "comment"
+    },
+    "1244": {
+        "file_id": 117,
+        "content": "                img_mean=self.img_mean,\n                img_std=self.img_std,\n                num_threads = self.reader_threads,\n                buf_size = self.buf_size)\n        def _batch_reader():\n            batch_out = []\n            for imgs, label in _reader():\n                if imgs is None:\n                    continue\n                batch_out.append((imgs, label))\n                if len(batch_out) == self.batch_size:\n                    yield batch_out\n                    batch_out = []\n            if len(batch_out) > 1:\n                yield batch_out[:-1]\n        return _batch_reader\n    def _inference_reader_creator_longvideo(self, video_path, mode, seg_num, seglen,\n                                  short_size, target_size, img_mean, img_std, num_threads, buf_size):\n        \"\"\"\n        inference reader for video\n        \"\"\"\n        def reader():\n            \"\"\"\n            reader\n            \"\"\"\n            def image_buf(image_id_path_buf):\n                \"\"\"\n                image_buf reader\n                \"\"\"  ",
+        "type": "code",
+        "location": "/applications/FootballAction/predict/action_detect/reader/tsminf_reader.py:65-97"
+    },
+    "1245": {
+        "file_id": 117,
+        "content": "This code defines a class with an image batch reader for inference on video data. The reader function reads images from the specified video path, applying mean and standard deviation normalization. It also sets the number of threads, buffer size, and creates a batch generator using _batch_reader method.",
+        "type": "comment"
+    },
+    "1246": {
+        "file_id": 117,
+        "content": "                try:\n                    img_path = image_id_path_buf[1]\n                    img = Image.open(img_path).convert(\"RGB\")\n                    image_id_path_buf[2] = img\n                except:\n                    image_id_path_buf[2] = None\n            frame_len = len(video_path)\n            read_thread_num = seg_num\n            for i in range(0, frame_len, read_thread_num):\n                image_list_part = video_path[i: i + read_thread_num]\n                image_id_path_buf_list = []\n                for k in range(len(image_list_part)):\n                    image_id_path_buf_list.append([k, image_list_part[k], None])\n                with concurrent.futures.ThreadPoolExecutor(max_workers=read_thread_num) as executor:\n                    executor.map(lambda image_id_path_buf: image_buf(image_id_path_buf), image_id_path_buf_list)\n                imgs_seg_list = [x[2] for x in image_id_path_buf_list]\n                # add the fault-tolerant for bad image\n                for k in range(len(image_id_path_buf_list)):",
+        "type": "code",
+        "location": "/applications/FootballAction/predict/action_detect/reader/tsminf_reader.py:98-119"
+    },
+    "1247": {
+        "file_id": 117,
+        "content": "The code segment is responsible for reading images from a video file in chunks using multiple threads. It opens each image, converts it to RGB format and stores them in an array. The code handles exceptions for opening bad or missing images and uses the ThreadPoolExecutor class from concurrent futures module to execute operations asynchronously with maximum worker threads specified. Finally, it creates a list of images from the segments and adds a fault-tolerant mechanism to handle bad images.",
+        "type": "comment"
+    },
+    "1248": {
+        "file_id": 117,
+        "content": "                    img_buf = image_id_path_buf_list[k][2]\n                    pad_id = 1\n                    while pad_id < seg_num and img_buf is None:\n                        img_buf = imgs_seg_list[(k + pad_id)%seg_num][2]\n                    if img_buf is None:\n                        logger.info(\"read img erro from {} to {}\".format(i, i + read_thread_num))\n                        exit(0)\n                    else:\n                        imgs_seg_list[k] = img_buf\n                for pad_id in range(len(imgs_seg_list), seg_num):\n                    imgs_seg_list.append(imgs_seg_list[-1])\n                yield imgs_seg_list      \n        def inference_imgs_transform(imgs_list, mode, seg_num, seglen, short_size,\\\n                                    target_size, img_mean, img_std):\n            \"\"\"\n            inference_imgs_transform\n            \"\"\" \n            imgs_ret = imgs_transform(imgs_list, mode, seg_num, seglen, short_size,\n                        target_size, img_mean, img_std)\n            label_ret = 0",
+        "type": "code",
+        "location": "/applications/FootballAction/predict/action_detect/reader/tsminf_reader.py:120-141"
+    },
+    "1249": {
+        "file_id": 117,
+        "content": "This code aims to read image data and perform inference by transforming the images. It appends missing image buffers to imgs_seg_list, handles reading errors, and yields the complete list of transformed images. The imgs_transform function performs further transformations on the input images based on provided parameters.",
+        "type": "comment"
+    },
+    "1250": {
+        "file_id": 117,
+        "content": "            return imgs_ret, label_ret\n        mapper = functools.partial(\n            inference_imgs_transform,\n            mode=mode,\n            seg_num=seg_num,\n            seglen=seglen,\n            short_size=short_size,\n            target_size=target_size,\n            img_mean=img_mean,\n            img_std=img_std)\n        return paddle.reader.xmap_readers(mapper, reader, num_threads, buf_size, order=True)\ndef imgs_transform(imgs,\n                   mode,\n                   seg_num,\n                   seglen,\n                   short_size,\n                   target_size,\n                   img_mean,\n                   img_std,\n                   name=''):\n    \"\"\"\n    imgs_transform\n    \"\"\"\n    imgs = group_scale(imgs, short_size)\n    if mode == 'train':\n        if name == \"TSM\":\n            imgs = group_multi_scale_crop(imgs, short_size)\n        imgs = group_random_crop(imgs, target_size)\n        imgs = group_random_flip(imgs)\n    else:\n        imgs = group_center_crop(imgs, target_size)\n    np_imgs = (np.array(imgs[0]).astype('float32').transpose(",
+        "type": "code",
+        "location": "/applications/FootballAction/predict/action_detect/reader/tsminf_reader.py:143-180"
+    },
+    "1251": {
+        "file_id": 117,
+        "content": "This code defines a function `imgs_transform` which performs various image transformations on input images based on the given mode. It groups images by scale, crops them randomly if in training mode (using TSM or center crop otherwise), and applies horizontal flips. The function returns the transformed images as a numpy array.",
+        "type": "comment"
+    },
+    "1252": {
+        "file_id": 117,
+        "content": "        (2, 0, 1))).reshape(1, 3, target_size, target_size) / 255\n    for i in range(len(imgs) - 1):\n        img = (np.array(imgs[i + 1]).astype('float32').transpose(\n            (2, 0, 1))).reshape(1, 3, target_size, target_size) / 255\n        np_imgs = np.concatenate((np_imgs, img))\n    imgs = np_imgs\n    imgs -= img_mean\n    imgs /= img_std\n    imgs = np.reshape(imgs, (seg_num, seglen * 3, target_size, target_size))\n    return imgs\ndef group_multi_scale_crop(img_group, target_size, scales=None, \\\n        max_distort=1, fix_crop=True, more_fix_crop=True):\n    \"\"\"\n    group_multi_scale_crop\n    \"\"\"\n    scales = scales if scales is not None else [1, .875, .75, .66]\n    input_size = [target_size, target_size]\n    im_size = img_group[0].size\n    # get random crop offset\n    def _sample_crop_size(im_size):\n        \"\"\"\n         _sample_crop_size\n        \"\"\"\n        image_w, image_h = im_size[0], im_size[1]\n        base_size = min(image_w, image_h)\n        crop_sizes = [int(base_size * x) for x in scales]\n        crop_h = [",
+        "type": "code",
+        "location": "/applications/FootballAction/predict/action_detect/reader/tsminf_reader.py:181-212"
+    },
+    "1253": {
+        "file_id": 117,
+        "content": "This code is responsible for loading and preprocessing images for an action detection model in a football game. It resizes, normalizes, and concatenates the images, then applies data augmentation techniques to create a more diverse dataset for training the model. The `group_multi_scale_crop` function generates crop offsets and resizes the images with different scales, providing a robust dataset for improving the model's performance in recognizing various actions.",
+        "type": "comment"
+    },
+    "1254": {
+        "file_id": 117,
+        "content": "            input_size[1] if abs(x - input_size[1]) < 3 else x\n            for x in crop_sizes\n        ]\n        crop_w = [\n            input_size[0] if abs(x - input_size[0]) < 3 else x\n            for x in crop_sizes\n        ]\n        pairs = []\n        for i, h in enumerate(crop_h):\n            for j, w in enumerate(crop_w):\n                if abs(i - j) <= max_distort:\n                    pairs.append((w, h))\n        crop_pair = random.choice(pairs)\n        if not fix_crop:\n            w_offset = random.randint(0, image_w - crop_pair[0])\n            h_offset = random.randint(0, image_h - crop_pair[1])\n        else:\n            w_step = (image_w - crop_pair[0]) / 4\n            h_step = (image_h - crop_pair[1]) / 4\n            ret = list()\n            ret.append((0, 0))  # upper left\n            if w_step != 0:\n                ret.append((4 * w_step, 0))  # upper right\n            if h_step != 0:\n                ret.append((0, 4 * h_step))  # lower left\n            if h_step != 0 and w_step != 0:\n                ret.append((4 * w_step, 4 * h_step))  # lower right",
+        "type": "code",
+        "location": "/applications/FootballAction/predict/action_detect/reader/tsminf_reader.py:213-242"
+    },
+    "1255": {
+        "file_id": 117,
+        "content": "This code calculates crop sizes, generates pairs of crop heights and widths, and randomly selects a pair to use for cropping an image. If the 'fix_crop' parameter is True, it also applies random offsets or steps to adjust the position of the cropped area in the image.",
+        "type": "comment"
+    },
+    "1256": {
+        "file_id": 117,
+        "content": "            if h_step != 0 or w_step != 0:\n                ret.append((2 * w_step, 2 * h_step))  # center\n            if more_fix_crop:\n                ret.append((0, 2 * h_step))  # center left\n                ret.append((4 * w_step, 2 * h_step))  # center right\n                ret.append((2 * w_step, 4 * h_step))  # lower center\n                ret.append((2 * w_step, 0 * h_step))  # upper center\n                ret.append((1 * w_step, 1 * h_step))  # upper left quarter\n                ret.append((3 * w_step, 1 * h_step))  # upper right quarter\n                ret.append((1 * w_step, 3 * h_step))  # lower left quarter\n                ret.append((3 * w_step, 3 * h_step))  # lower righ quarter\n            w_offset, h_offset = random.choice(ret)\n            crop_info = {\n                'crop_w': crop_pair[0],\n                'crop_h': crop_pair[1],\n                'offset_w': w_offset,\n                'offset_h': h_offset\n                }\n        return crop_info\n    crop_info = _sample_crop_size(im_size)",
+        "type": "code",
+        "location": "/applications/FootballAction/predict/action_detect/reader/tsminf_reader.py:243-267"
+    },
+    "1257": {
+        "file_id": 117,
+        "content": "This code sample is from a video action detection application and generates random crop sizes for data augmentation. It considers different crop positions based on the step values provided, then randomly selects one of them to create a dictionary of crop information including width, height, offset for width, and offset for height.",
+        "type": "comment"
+    },
+    "1258": {
+        "file_id": 117,
+        "content": "    crop_w = crop_info['crop_w']\n    crop_h = crop_info['crop_h']\n    offset_w = crop_info['offset_w']\n    offset_h = crop_info['offset_h']\n    crop_img_group = [\n        img.crop((offset_w, offset_h, offset_w + crop_w, offset_h + crop_h))\n        for img in img_group\n    ]\n    ret_img_group = [\n        img.resize((input_size[0], input_size[1]), Image.BILINEAR)\n        for img in crop_img_group\n    ]\n    return ret_img_group\ndef group_random_crop(img_group, target_size):\n    \"\"\"\n    group_random_crop\n    \"\"\"\n    w, h = img_group[0].size\n    th, tw = target_size, target_size\n    assert (w >= target_size) and (h >= target_size), \\\n          \"image width({}) and height({}) should be larger than crop size\".format(w, h)\n    out_images = []\n    x1 = random.randint(0, w - tw)\n    y1 = random.randint(0, h - th)\n    for img in img_group:\n        if w == tw and h == th:\n            out_images.append(img)\n        else:\n            out_images.append(img.crop((x1, y1, x1 + tw, y1 + th)))\n    return out_images\ndef group_random_flip(img_group):",
+        "type": "code",
+        "location": "/applications/FootballAction/predict/action_detect/reader/tsminf_reader.py:268-307"
+    },
+    "1259": {
+        "file_id": 117,
+        "content": "The code contains three functions: \"crop_and_resize\" which crops and resizes images based on provided crop information, \"group_random_crop\" which randomly crops a group of images to the target size, and \"group_random_flip\" which performs random horizontal flipping on a group of images.",
+        "type": "comment"
+    },
+    "1260": {
+        "file_id": 117,
+        "content": "    \"\"\"\n    group_random_flip\n    \"\"\"\n    v = random.random()\n    if v < 0.5:\n        ret = [img.transpose(Image.FLIP_LEFT_RIGHT) for img in img_group]\n        return ret\n    else:\n        return img_group\ndef group_center_crop(img_group, target_size):\n    \"\"\"\n    group_center_crop\n    \"\"\"\n    img_crop = []\n    for img in img_group:\n        w, h = img.size\n        th, tw = target_size, target_size\n        assert (w >= target_size) and (h >= target_size), \\\n             \"image width({}) and height({}) should be larger than crop size\".format(w, h)\n        x1 = int(round((w - tw) / 2.))\n        y1 = int(round((h - th) / 2.))\n        img_crop.append(img.crop((x1, y1, x1 + tw, y1 + th)))\n    return img_crop\ndef group_scale(imgs, target_size):\n    \"\"\"\n    group_scale\n    \"\"\"\n    resized_imgs = []\n    for i in range(len(imgs)):\n        img = imgs[i]\n        w, h = img.size\n        if (w <= h and w == target_size) or (h <= w and h == target_size):\n            resized_imgs.append(img)\n            continue\n        if w < h:\n            ow = target_size",
+        "type": "code",
+        "location": "/applications/FootballAction/predict/action_detect/reader/tsminf_reader.py:308-349"
+    },
+    "1261": {
+        "file_id": 117,
+        "content": "The code defines three functions: `group_random_flip`, `group_center_crop`, and `group_scale`. These functions are used to manipulate image groups by flipping, cropping, or resizing them to fit a target size.",
+        "type": "comment"
+    },
+    "1262": {
+        "file_id": 117,
+        "content": "            oh = int(target_size * 4.0 / 3.0)\n            resized_imgs.append(img.resize((ow, oh), Image.BILINEAR))\n        else:\n            oh = target_size\n            ow = int(target_size * 4.0 / 3.0)\n            resized_imgs.append(img.resize((ow, oh), Image.BILINEAR))\n    return resized_imgs",
+        "type": "code",
+        "location": "/applications/FootballAction/predict/action_detect/reader/tsminf_reader.py:350-357"
+    },
+    "1263": {
+        "file_id": 117,
+        "content": "This code resizes images according to the aspect ratio. If the image's aspect ratio is 4:3, it resizes to target_size; otherwise, it resizes to target_size and then calculates a new height and width for the image. It appends these resized images to the 'resized_imgs' list and returns this list.",
+        "type": "comment"
+    },
+    "1264": {
+        "file_id": 118,
+        "content": "/applications/FootballAction/predict/action_detect/utils/config_utils.py",
+        "type": "filepath"
+    },
+    "1265": {
+        "file_id": 118,
+        "content": "The code is from PaddleVideo's BasketballAction application, importing modules and defining AttrDict class. It loads config file into an AttrDict object, processes nested dictionaries, prints configurations, and logs a separator line using the logger module for organization and readability purposes.",
+        "type": "summary"
+    },
+    "1266": {
+        "file_id": 118,
+        "content": "\"\"\"\nconfig_utils\n\"\"\"\n#  Copyright (c) 2018 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport yaml\nimport ast\nimport logger\nlogger = logger.Logger()\nCONFIG_SECS = [\n    'train',\n    'valid',\n    'test',\n    'infer',\n]\nclass AttrDict(dict):\n    \"\"\"\n    AttrDict\n    \"\"\"\n    def __getattr__(self, key):\n        return self[key]\n    def __setattr__(self, key, value):\n        if key in self.__dict__:\n            self.__dict__[key] = value\n        else:\n            self[key] = value\ndef parse_config(cfg_file):",
+        "type": "code",
+        "location": "/applications/BasketballAction/predict/action_detect/utils/config_utils.py:1-46"
+    },
+    "1267": {
+        "file_id": 118,
+        "content": "This code is from the PaddleVideo library's BasketballAction application. It imports yaml and ast modules, as well as a logger class. The code defines a constant list of section names (train, valid, test, infer). It also defines an AttrDict class to handle dictionaries with attributes like getattr and setattr methods. The parse_config function is defined which takes a configuration file as input.",
+        "type": "comment"
+    },
+    "1268": {
+        "file_id": 118,
+        "content": "    \"\"\"Load a config file into AttrDict\"\"\"\n    import yaml\n    with open(cfg_file, 'r') as fopen:\n        yaml_config = AttrDict(yaml.load(fopen, Loader=yaml.Loader))\n    create_attr_dict(yaml_config)\n    return yaml_config\ndef create_attr_dict(yaml_config):\n    \"\"\"create_attr_dict\"\"\"\n    for key, value in yaml_config.items():\n        if isinstance(value, dict):\n            yaml_config[key] = value = AttrDict(value)\n        if isinstance(value, str):\n            try:\n                value = ast.literal_eval(value)\n            except BaseException:\n                pass\n        if isinstance(value, AttrDict):\n            create_attr_dict(yaml_config[key])\n        else:\n            yaml_config[key] = value\n    return\ndef print_configs(cfg, mode):\n    \"\"\"print_configs\"\"\"\n    logger.info(\"---------------- {:>5} Arguments ----------------\".format(\n        mode))\n    for sec, sec_items in cfg.items():\n        logger.info(\"{}:\".format(sec))\n        for k, v in sec_items.items():\n            logger.info(\"    {}:{}\".format(k, v))",
+        "type": "code",
+        "location": "/applications/BasketballAction/predict/action_detect/utils/config_utils.py:47-79"
+    },
+    "1269": {
+        "file_id": 118,
+        "content": "This code is responsible for loading a configuration file into an AttrDict object, processing the nested dictionary structure, and printing the configurations. It uses the yaml library to load the file, and the create_attr_dict function to handle nested dictionaries and convert strings to appropriate data types. The print_configs function prints the configuration in a formatted manner for readability.",
+        "type": "comment"
+    },
+    "1270": {
+        "file_id": 118,
+        "content": "    logger.info(\"-------------------------------------------------\")",
+        "type": "code",
+        "location": "/applications/BasketballAction/predict/action_detect/utils/config_utils.py:80-80"
+    },
+    "1271": {
+        "file_id": 118,
+        "content": "This code snippet is logging a separator line using the logger module. The purpose of this logger statement might be to visually separate different sections or parts of the code for readability and organization purposes.",
+        "type": "comment"
+    },
+    "1272": {
+        "file_id": 119,
+        "content": "/applications/FootballAction/predict/action_detect/utils/preprocess.py",
+        "type": "filepath"
+    },
+    "1273": {
+        "file_id": 119,
+        "content": "This code contains four functions that utilize the FFmpeg tool for handling video and audio files. \"ffmpeg_frames\" extracts frames from a given MP4 file, \"ffmpeg_pcm\" extracts audio in PCM format, \"ffmpeg_mp4\" downloads an MP4 file, and \"get_images\" lists the images inside a specified image directory.",
+        "type": "summary"
+    },
+    "1274": {
+        "file_id": 119,
+        "content": "\"\"\" extract frames and pcm\"\"\"\nimport os\nimport sys\nimport shutil\ndef ffmpeg_frames(mp4_addr, frame_out_folder, fps=5):\n    \"\"\"ffmpeg_frames\"\"\"\n    if os.path.exists(frame_out_folder):\n        shutil.rmtree(frame_out_folder)\n    os.makedirs(frame_out_folder)\n    cmd = './src/utils/ffmpeg -v 0 -i %s -r %d -q 0 %s/%s.jpg' % (mp4_addr, fps, frame_out_folder, '%08d')\n    os.system(cmd)\ndef ffmpeg_pcm(mp4_addr, save_file_name):\n    \"\"\"ffmpeg_pcm\"\"\"\n    cmd = './src/utils/ffmpeg -y  -i %s  -acodec pcm_s16le -f s16le -ac 1 -ar 16000 %s -v 0' \\\n        % (mp4_addr, save_file_name)\n    os.system(cmd)\ndef ffmpeg_mp4(mp4_url, mp4_addr):\n    \"\"\"ffmpeg_mp4\"\"\"\n    cmd = \"wget %s -O %s -q\" % (mp4_url, mp4_addr)\n    print (\"cmd = \", cmd)\n    os.system(cmd)\ndef get_images(image_path):\n    \"\"\"get_images\"\"\"\n    images = sorted(os.listdir(image_path))\n    images = images\n    images_path_list = [image_path + '/' + im for im in images]\n    return images_path_list",
+        "type": "code",
+        "location": "/applications/BasketballAction/predict/action_detect/utils/preprocess.py:1-35"
+    },
+    "1275": {
+        "file_id": 119,
+        "content": "This code contains four functions that utilize the FFmpeg tool for handling video and audio files. \"ffmpeg_frames\" extracts frames from a given MP4 file, \"ffmpeg_pcm\" extracts audio in PCM format, \"ffmpeg_mp4\" downloads an MP4 file, and \"get_images\" lists the images inside a specified image directory.",
+        "type": "comment"
+    },
+    "1276": {
+        "file_id": 120,
+        "content": "/applications/FootballAction/predict/action_detect/utils/process_result.py",
+        "type": "filepath"
+    },
+    "1277": {
+        "file_id": 120,
+        "content": "The code retrieves data, applies NMS to bounding box proposals, filters detected actions from videos using NMS, and stores relevant information in the \"video_results\" list. It defines a function `get_action_result` that takes inputs and performs NMS on processed results.",
+        "type": "summary"
+    },
+    "1278": {
+        "file_id": 120,
+        "content": "\"\"\"\n# @File  : process_result.py  \n# @Author: macaihong\n# @Date  : 2019/12/15\n# @Desc  :\n\"\"\"\nimport sys\nimport os\nimport re\nimport numpy as np\nimport pickle\nimport json\nimport logger\nlogger = logger.Logger()\ndef get_data_res(label_map, data, topk):\n    \"\"\"get_data_res\"\"\"\n    sum_vid = len(data)\n    video_result = []\n    for i in range(sum_vid):\n        vid_name = data[i][0][0]\n        # true_label predict_start predict_end predict_score predict_len gt_iou gt_start gt_ioa\n        feature_start_id = float(data[i][0][1]['start'])\n        feature_end_id = float(data[i][0][1]['end'])\n        feature_stage1_score = data[i][0][1]['score']\n        predict_res = []\n        for k in range(topk):\n            score_top = data[i][1][k]\n            labelid_top = data[i][2][k]\n            label_iou = data[i][3]\n            labelname_top = label_map[str(labelid_top)]\n            video_result.append([feature_start_id, feature_end_id, labelid_top, labelname_top, score_top, label_iou])\n    return video_result\ndef base_nms(bboxes, thresh, delta=0, nms_id=2):",
+        "type": "code",
+        "location": "/applications/BasketballAction/predict/action_detect/utils/process_result.py:1-39"
+    },
+    "1279": {
+        "file_id": 120,
+        "content": "This code defines two functions: `get_data_res` and `base_nms`. The first function takes in a label map, data (a list of features), and a topk value. It iterates through each video in the data, extracts relevant information from the feature, and appends this information to a new list called `video_result`. Finally, it returns the `video_result` list. The second function is an incomplete definition for a non-maximum suppression algorithm used for bounding boxes. It takes in bboxes (bounding box coordinates), thresh (threshold value), delta (optional parameter with default value 0), and nms_id (an identifier for the NMS operation, with a default value of 2).",
+        "type": "comment"
+    },
+    "1280": {
+        "file_id": 120,
+        "content": "    \"\"\"\n    One-dimensional non-maximal suppression\n    :param bboxes: [[vid, label, st, ed, score, ...], ...]\n    :param thresh:\n    :return:\n    \"\"\"\n    \"\"\"\n    t1 = bboxes[:, 0]\n    t2 = bboxes[:, 1]\n    scores = bboxes[:, nms_id]\n    \"\"\"\n    t1 = np.array([max(0, x[0] - delta) for x in bboxes])\n    t2 = np.array([x[1] + delta for x in bboxes])\n    scores = np.array([x[nms_id] for x in bboxes])\n    durations = t2 - t1\n    order = scores.argsort()[::-1]\n    keep = []\n    while order.size > 0:\n        i = order[0]\n        keep.append(i)\n        tt1 = np.maximum(t1[i], t1[order[1:]])\n        tt2 = np.minimum(t2[i], t2[order[1:]])\n        intersection = tt2 - tt1\n        IoU = intersection / (durations[i] + durations[order[1:]] - intersection).astype(float)\n        inds = np.where(IoU <= thresh)[0]\n        order = order[inds + 1]\n    return [bboxes[i] for i in keep]\ndef process_proposal(source_prop_box, min_frame_thread=5, nms_thresh=0.7, score_thresh=0.01):\n    \"\"\"process_video_prop\"\"\"\n    prop_box = []\n    for items in source_prop_box:",
+        "type": "code",
+        "location": "/applications/BasketballAction/predict/action_detect/utils/process_result.py:40-76"
+    },
+    "1281": {
+        "file_id": 120,
+        "content": "This code performs non-maximal suppression on bounding box proposals. It filters out overlapping boxes by keeping only those with the highest scores and discarding the rest. The function process_proposal takes source bounding box proposals, applies non-maximal suppression with a threshold, and returns the filtered results.",
+        "type": "comment"
+    },
+    "1282": {
+        "file_id": 120,
+        "content": "        start_frame = float(items[0])\n        end_frame = float(items[1])\n        score = float(items[2])\n        if end_frame - start_frame < min_frame_thread or score < score_thresh:\n            continue\n        prop_box.append([start_frame, end_frame, score])\n    prop_box_keep = base_nms(prop_box, nms_thresh)\n    prop_res = []\n    for res in prop_box_keep:\n        prop_res.append({'start': res[0], 'end': res[1], 'score': res[2]})\n    return prop_res\ndef process_video_classify(video_prop, fps, score_thread, iou_thread, \\\n                           nms_id=5, nms_thread=0.01, nms_delta=10, backgroundid=0):\n    \"\"\"process_video_classify\"\"\"\n    prop_filter = []\n    for item in video_prop:\n        if item[2] == backgroundid:\n            continue\n        prop_filter.append(item)\n    # prop_filter = sorted(prop_filter, key=lambda x: x[nms_id], reverse=True)\n    prop_filter = base_nms(prop_filter, nms_thread, nms_delta, nms_id)\n    prop_filter = sorted(prop_filter, key=lambda x: x[0])\n    video_results = []\n    for item in prop_filter:",
+        "type": "code",
+        "location": "/applications/BasketballAction/predict/action_detect/utils/process_result.py:77-107"
+    },
+    "1283": {
+        "file_id": 120,
+        "content": "This code is part of a video classification process. It filters and sorts the detected actions in a video, discarding background or weak detections. The results are stored in 'prop_res' and 'video_results'. The code applies non-maximum suppression (NMS) to filter and sort the detections based on frame duration, score threshold, and other parameters like fps, nms_thread, and nms_delta.",
+        "type": "comment"
+    },
+    "1284": {
+        "file_id": 120,
+        "content": "        start_sec = item[0] / fps\n        end_sec = item[1] / fps\n        start_id_frame = item[0]\n        end_id_frame = item[1]\n        # start_time = \"%02d:%02d:%02d\" % ((start_id_frame / fps) / 3600, \\\n        #     ((start_id_frame / fps) % 3600) / 60, (start_id_frame / fps) % 60)\n        # end_time = \"%02d:%02d:%02d\" % ((end_id_frame / fps) / 3600, \\\n        #     ((end_id_frame / fps) % 3600) / 60, (end_id_frame / fps) % 60)\n        start_time = int(start_id_frame / fps)\n        end_time = int(end_id_frame / fps)\n        label_id = item[2]\n        label_name = item[3]\n        label_classify_score = item[4]\n        label_iou_score = item[5]\n        if label_classify_score > score_thread and label_iou_score > iou_thread:\n            video_results.append({\"start_time\": start_time,\n                                  \"end_time\": end_time,\n                                  \"label_id\": label_id,\n                                  \"label_name\": label_name,\n                                  \"classify_score\": label_classify_score,",
+        "type": "code",
+        "location": "/applications/BasketballAction/predict/action_detect/utils/process_result.py:108-129"
+    },
+    "1285": {
+        "file_id": 120,
+        "content": "This code calculates the start and end time in seconds, frame IDs, and other relevant details of detected actions from a video. It then appends these details as a dictionary to the \"video_results\" list if the classify score and IoU score exceed certain thresholds.",
+        "type": "comment"
+    },
+    "1286": {
+        "file_id": 120,
+        "content": "                                  \"iou_score\": label_iou_score})\n    return video_results\ndef get_action_result(result_info, label_map_file, fps, score_thread=0, \\\n                      iou_thread=0, nms_id=5, nms_thread=0.01, frame_offset=10, topk=1):\n    \"\"\"get_action_result\"\"\"\n    label_map = json.load(open(label_map_file, 'r', encoding='utf-8'))\n    org_result = get_data_res(label_map, result_info, topk)\n    nms_result = process_video_classify(org_result, fps, score_thread, iou_thread, nms_id, nms_thread, frame_offset)\n    return nms_result",
+        "type": "code",
+        "location": "/applications/BasketballAction/predict/action_detect/utils/process_result.py:130-144"
+    },
+    "1287": {
+        "file_id": 120,
+        "content": "This code defines a function `get_action_result` that takes in `result_info`, `label_map_file`, `fps`, `score_thread`, `iou_thread`, `nms_id`, `nms_thread`, and `frame_offset` as inputs. It reads the label map from `label_map_file`, processes the result data using `get_data_res` function, performs non-maximum suppression (NMS) on the processed results with specified parameters, and returns the final NMS results.",
+        "type": "comment"
+    },
+    "1288": {
+        "file_id": 121,
+        "content": "/applications/FootballAction/predict/eval.py",
+        "type": "filepath"
+    },
+    "1289": {
+        "file_id": 121,
+        "content": "The code evaluates precision, recall, and F1 scores for a model's predictions using IoU thresholds and label ranges. It iterates through score thresholds, selects the best F1 score, and saves the results.",
+        "type": "summary"
+    },
+    "1290": {
+        "file_id": 121,
+        "content": "\"\"\"\nget instance for lstm\n根据gts计算每个proposal_bmn的iou、ioa、label等信息\n\"\"\"\nimport os\nimport sys\nimport json\nimport random\nimport pickle\nimport numpy as np\nimport io\nsys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding = 'utf-8')\ndataset = \"/home/work/datasets\"\nlabel_index_file = './configs/index_label_football_8.json'\neval_datasets = ['EuroCup2016']\nlabel_files = {'train': 'label_cls8_train.json',\n               'validation': 'label_cls8_val.json'}\nglobal fps, mode\nlabel_index = json.load(open(label_index_file, 'rb'))\ndef load_gts():\n    global fps\n    gts_data = {'fps': 0, 'gts': {}}\n    for eval_data in eval_datasets:\n        for item, value in label_files.items():\n            label_file = '{}/{}/{}'.format(dataset, eval_data, value)\n            gts = json.load(open(label_file, 'rb'))\n            gts_data['fps'] = gts['fps']\n            fps = gts['fps']\n            for gt in gts['gts']:\n                gt['mode'] = item\n                basename = '{}/{}/mp4/{}'.format(dataset, eval_data, os.path.basename(gt['url']))",
+        "type": "code",
+        "location": "/applications/FootballAction/predict/eval.py:1-36"
+    },
+    "1291": {
+        "file_id": 121,
+        "content": "This code imports necessary libraries, defines global variables fps and mode, loads a JSON file containing indexed labels for 8 categories, and initializes a gts_data dictionary with the frame rate (fps) and an empty dictionary to store ground truth data. It also iterates over eval_datasets, label_files, and individual gt data to update fps, populate gts_data, and assign mode for each ground truth item.",
+        "type": "comment"
+    },
+    "1292": {
+        "file_id": 121,
+        "content": "                gts_data['gts'][basename] = gt\n    return gts_data['gts']\ndef computeIoU(e1, e2):\n    \"\"\"\n    clc iou and ioa\n    \"\"\"\n    if not (e1['label'] == e2['label'] and e1['basename'] == e2['basename']):\n        return 0.\n    area1 = e1[\"end\"] - e1[\"start\"]\n    area2 = e2[\"end\"] - e2[\"start\"]\n    x1 = np.maximum(e1[\"start\"], e2[\"start\"])\n    x2 = np.minimum(e1[\"end\"], e2[\"end\"])\n    inter = np.maximum(0.0, x2 - x1)\n    iou = 0.0 if (area1 + area2 - inter) == 0 else inter * 1.0 / (area1 + area2 - inter)\n    if not mode == 'proposal':\n        iou = 0.0 if area2 == 0 else inter * 1.0 / area2\n    return iou\ndef convert_proposal(boxes, basename, score_threshold=0.01):\n    boxes = sorted(boxes, key=lambda x:float(x['score']), reverse=True)\n    res = []\n    for box in boxes:\n        if not float(box['score']) >= score_threshold:\n            continue\n        res.append({'basename': basename,\n                    'start': int(float(box['start']) / fps),\n                    'end': int(float(box['end']) / fps),\n                    'label': 0})",
+        "type": "code",
+        "location": "/applications/FootballAction/predict/eval.py:37-67"
+    },
+    "1293": {
+        "file_id": 121,
+        "content": "The code defines functions for evaluating ground truth (GT) labels and computing Intersection over Union (IoU). It also includes a function to convert proposals with score threshold filtering. The IoU function calculates the area of intersection, the area of union, and returns the IoU value. The 'computeIoU' function can be used for both regular and proposal modes. The 'convert_proposal' function sorts boxes based on scores and selects those above a given threshold to generate new proposals. It assigns each proposal an ID and calculates their respective start and end times.",
+        "type": "comment"
+    },
+    "1294": {
+        "file_id": 121,
+        "content": "    return res\ndef convert_classify(boxes, basename, iou_threshold, score_threshold):\n    boxes = sorted(boxes, key=lambda x:(float(x['classify_score']), float(x['iou_score'])), reverse=True)\n    def convert_time_to_frame(time_type):\n        return int(time_type)\n        h, m, s = time_type.split(':')\n        return int(h) * 3600 + int(m) * 60 + int(s)\n    res = []\n    for box in boxes:\n        if not (box['iou_score'] >= iou_threshold and\n                box['classify_score'] >= score_threshold):\n            continue\n        res.append({'basename': basename,\n                    'start': convert_time_to_frame(box['start_time']),\n                    'end': convert_time_to_frame(box['end_time']),\n                    'label': box['label_id']})\n    return res\ndef convert_groundtruth(boxes, basename, phase=None):\n    res = []\n    for box in boxes:\n        for item in box['label_ids']:\n            label = 0 if phase == 'proposal' else item\n            res.append({'basename': basename,\n                        'start': box['start_id'],",
+        "type": "code",
+        "location": "/applications/FootballAction/predict/eval.py:68-93"
+    },
+    "1295": {
+        "file_id": 121,
+        "content": "This code is defining a function called convert_classify that takes in boxes, basename, iou_threshold and score_threshold as parameters. The function sorts the boxes based on their classify_score and iou_score in descending order. If both iou_score and classify_score meet the threshold values, it appends the box details to a list named res. It returns this list of results. \n\nThe code also defines another function called convert_groundtruth that takes in boxes, basename and phase as parameters. This function iterates through each box and its corresponding label IDs. If the phase is 'proposal', it assigns a value of 0 to the label variable; otherwise, it assigns the item from box['label_ids']. It appends the result to a list named res.",
+        "type": "comment"
+    },
+    "1296": {
+        "file_id": 121,
+        "content": "                        'end': box['end_id'],\n                        'label': label})\n    return res\ndef print_head(iou):\n    print(\"\\nioa = {:.1f}\".format(iou))\n    res_str = ''\n    for item in ['label_name']:\n        res_str += '{:<12s}'.format(item)\n    for item in ['label_id', 'precision', 'recall', 'hit_prop', 'num_prop', 'hit_gts', 'num_gts']:\n        res_str += '{:<10s}'.format(item)\n    print(res_str)\ndef print_result(res_dict, label='avg'):\n    if label == 'avg':\n        res_str = '{:<22s}'.format(str(label))\n    else:\n        res_str = '{0:{2}<6s}{1:<10s}'.format(label_index[str(label)], str(label), chr(12288))\n    for item in ['prec', 'recall']:\n        res_str += '{:<10.4f}'.format(res_dict[item])\n    for item in ['hit_prop', 'num_prop', 'hit_gts', 'num_gts']:\n        res_str += '{:<10d}'.format(res_dict[item])\n    print(res_str)\ndef evaluation(res_boxes, gts_boxes, label_range, iou_range, show_sub = False):\n    iou_map = [computeIoU(resId, gtsId) for resId in res_boxes \\\n                                        for gtsId in gts_boxes]",
+        "type": "code",
+        "location": "/applications/FootballAction/predict/eval.py:94-120"
+    },
+    "1297": {
+        "file_id": 121,
+        "content": "This code defines four functions: \"evaluation\", \"print_result\", \"print_head\", and \"computeIoU\". The \"evaluation\" function computes the intersection over union (IoU) between predicted boxes and ground truth boxes. It then passes these results to \"print_head\" and \"print_result\" for displaying progress and final evaluation results, respectively. The other two functions are used internally by the main \"evaluation\" function.",
+        "type": "comment"
+    },
+    "1298": {
+        "file_id": 121,
+        "content": "    iou_map = np.array(iou_map).reshape((len(res_boxes), len(gts_boxes)))\n    hit_map_prop_total = np.max(iou_map, axis=1)\n    hit_map_index_total = np.argmax(iou_map, axis=1)\n    res_dict = ['hit_prop', 'num_prop', 'hit_gts', 'num_gts']\n    for iou_threshold in iou_range:\n        if show_sub:\n            print_head(iou_threshold)\n        iou_prop = np.array([k >= iou_threshold for k in hit_map_prop_total])\n        average_results = {}\n        for label_id in label_range:\n            sub_results = {}\n            label_prop = np.array([k['label'] == label_id for k in res_boxes])\n            label_gts = np.array([k['label'] == label_id for k in gts_boxes])\n            sub_results['num_prop'] = sum(label_prop)\n            sub_results['num_gts'] = sum(label_gts)\n            if sub_results['num_prop'] == 0:\n                hit_prop_index = []\n            else:\n                hit_prop_index = label_prop & iou_prop\n            sub_results['hit_prop'] = sum(hit_prop_index)\n            sub_results['hit_gts'] = len(set(hit_map_index_total[hit_prop_index]))",
+        "type": "code",
+        "location": "/applications/FootballAction/predict/eval.py:121-144"
+    },
+    "1299": {
+        "file_id": 121,
+        "content": "This code calculates the precision, recall, and F1 score for a set of predicted boxes and ground truth boxes. It iterates over a range of intersection over union (IOU) thresholds and label ranges to produce average results. The results are stored in dictionaries for each IOU threshold and label range combination.",
+        "type": "comment"
+    }
+}

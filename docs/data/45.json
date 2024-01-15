@@ -1,0 +1,545 @@
+{
+    "4500": {
+        "file_id": 384,
+        "content": "[简体中文](../../../zh-CN/model_zoo/recognition/stgcn.md) | English\n# ST-GCN\n---\n## Contents\n- [Introduction](#Introduction)\n- [Data](#Data)\n- [Train](#Train)\n- [Test](#Test)\n- [Inference](#Inference)\n- [Reference](#Reference)\n## Introduction\nST-GCN is skeleton-based action recognition model proposed in AAAI 2018.\n<div align=\"center\">\n<img src=\"../../../images/st-gcn.png\" height=200 width=950 hspace='10'/> <br />\n</div>\n## Data\nPlease refer to FSD data download and preparation doc [FSD](../../dataset/fsd.md)\nPlease refer to NTU-RGBD data download and preparation doc [NTU-RGBD](../../dataset/ntu-rgbd.md)\n## Train\n### Train on FSD\n- Train ST-GCN on FSD scripts:\n```bash\npython3.7 main.py -c configs/recognition/stgcn/stgcn_fsd.yaml\n```\n- Turn off `valid` when training, as validation dataset is not available for the competition.\n### Train on NTU-RGBD\n- Train ST-GCN on NTU-RGBD scripts:\n```bash\npython3.7 -B -m paddle.distributed.launch --gpus=\"0,1,2,3\"  --log_dir=log_stgcn  main.py  --validate -c configs/recognition/stgcn/stgcn_ntucs.yaml",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/stgcn.md:1-49"
+    },
+    "4501": {
+        "file_id": 384,
+        "content": "This code is a documentation for ST-GCN, a skeleton-based action recognition model. It explains the model's introduction, data requirements (FSD and NTU-RGBD), training instructions on both datasets, and how to perform inference.",
+        "type": "comment"
+    },
+    "4502": {
+        "file_id": 384,
+        "content": "```\n- config file `stgcn_ntucs.yaml` corresponding to the config of ST-GCN on NTU-RGB+D dataset with cross-subject splits.\n## Test\n### Test on FSD\n- Test scripts：\n```bash\npython3.7 main.py --test -c configs/recognition/stgcn/stgcn_fsd.yaml -w output/STGCN/STGCN_epoch_00090.pdparams\n```\n- Specify the config file with `-c`, specify the weight path with `-w`.\n- Evaluation results will be saved in `submission.csv` file, final score can be obtained in [competition website](https://aistudio.baidu.com/aistudio/competition/detail/115).\nAccuracy on FSD-10 dataset:\nTest_Data| Top-1 | checkpoints |\n| :----: | :----: | :---- |\n| Test_A | 59.07 | [STGCN_fsd.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/STGCN_fsd.pdparams) |\n### Test on NTU-RGB+D\n- Test scripts：\n```bash\npython3.7 main.py --test -c configs/recognition/stgcn/stgcn_ntucs.yaml -w output/STGCN/STGCN_best.pdparams\n```\n- Specify the config file with `-c`, specify the weight path with `-w`.\nAccuracy on NTU-RGB+D dataset:\n| split | Top-1 | checkpoints |",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/stgcn.md:50-89"
+    },
+    "4503": {
+        "file_id": 384,
+        "content": "This code provides instructions for testing the ST-GCN model on two datasets: FSD and NTU-RGB+D. The user is directed to run specific test scripts with provided command lines, specifying the configuration file and weight path. Results are saved in a submission.csv file and the final scores can be obtained from the competition website. Accuracy results for both datasets are also included.",
+        "type": "comment"
+    },
+    "4504": {
+        "file_id": 384,
+        "content": "| :----: | :----: | :---- |\n| cross-subject | 82.28 | [STGCN_ntucs.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/STGCN_ntucs.pdparams) |\n## Inference\n### export inference model\n To get model architecture file `STGCN.pdmodel` and parameters file `STGCN.pdiparams`, use:\n```bash\npython3.7 tools/export_model.py -c configs/recognition/stgcn/stgcn_fsd.yaml \\\n                                -p data/STGCN_fsd.pdparams \\\n                                -o inference/STGCN\n```\n- Args usage please refer to [Model Inference](https://github.com/PaddlePaddle/PaddleVideo/blob/release/2.0/docs/zh-CN/start.md#2-%E6%A8%A1%E5%9E%8B%E6%8E%A8%E7%90%86).\n### infer\n```bash\npython3.7 tools/predict.py --input_file data/fsd10/example_skeleton.npy \\\n                           --config configs/recognition/stgcn/stgcn_fsd.yaml \\\n                           --model_file inference/STGCN/STGCN.pdmodel \\\n                           --params_file inference/STGCN/STGCN.pdiparams \\\n                           --use_gpu=True \\",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/stgcn.md:90-115"
+    },
+    "4505": {
+        "file_id": 384,
+        "content": "This code provides the commands to export the model architecture and parameters for a STGCN model, as well as how to use the model to make inferences. The `export_model.py` script is used to generate the `STGCN.pdmodel` and `STGCN.pdiparams` files. The `predict.py` script is then used for making predictions using the exported model with optional GPU usage.",
+        "type": "comment"
+    },
+    "4506": {
+        "file_id": 384,
+        "content": "                           --use_tensorrt=False\n```\nexample of logs:\n```\nCurrent video file: data/fsd10/example_skeleton.npy\n        top-1 class: 27\n        top-1 score: 0.9912770986557007\n```\n## Reference\n- [Spatial Temporal Graph Convolutional Networks for Skeleton-Based Action Recognition](https://arxiv.org/abs/1801.07455), Sijie Yan, Yuanjun Xiong, Dahua Lin",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/stgcn.md:116-129"
+    },
+    "4507": {
+        "file_id": 384,
+        "content": "False",
+        "type": "comment"
+    },
+    "4508": {
+        "file_id": 385,
+        "content": "/english_documents/model_zoo/recognition/timesformer.md",
+        "type": "filepath"
+    },
+    "4509": {
+        "file_id": 385,
+        "content": "The TimeSformer model is a top-performing video classifier that uses time series modeling and space-time attention, trained on Kinetics-400 using 8 GPUs with mixed-precision training.",
+        "type": "summary"
+    },
+    "4510": {
+        "file_id": 385,
+        "content": "[简体中文](../../../zh-CN/model_zoo/recognition/timesformer.md) | English\n# TimeSformer\n## Content\n- [Introduction](#Introduction)\n- [Data](#DATA)\n- [Train](#Train)\n- [Test](#Test)\n- [Inference](#Inference)\n- [Reference](#Reference)\n## Introduction\nTimeSformer is a video classification model based on vision transformer, which has the characteristics of no convolution, global receptive field, and strong time series modeling ability. At present, it has achieved SOTA accuracy on the Kinetics-400 data set, surpassing the classic CNN-based video classification models TSN, TSM and Slowfast, and has a shorter training time (the Kinetics-400 data set training time is 39 hourss). **This code implements the time-space separated attention cascade network in the paper**.\n<div align=\"center\">\n<img src=\"../../../images/timesformer_attention_arch.png\" alt=\"image-20210628210446041\"/><img src=\"../../../images/timesformer_attention_visualize.png\" alt=\"image-20210628210446041\"  />\n</div>\n## Data\nK400 data download and preparation please refer to [Kinetics-400 data preparation](../../dataset/k400.md)",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/timesformer.md:1-26"
+    },
+    "4511": {
+        "file_id": 385,
+        "content": "This code implements the TimeSformer, a video classification model based on vision transformer with global receptive field and strong time series modeling ability. It achieves SOTA accuracy on Kinetics-400 dataset and has shorter training time compared to other models. The code showcases the time-space separated attention cascade network architecture, and requires data preparation from Kinetics-400 dataset.",
+        "type": "comment"
+    },
+    "4512": {
+        "file_id": 385,
+        "content": "UCF101 data download and preparation please refer to [UCF-101 data preparation](../../dataset/ucf101.md)\n## Train\n### Kinetics-400 data set training\n#### Download and add pre-trained models\n1. Download the image pre-training model [ViT_base_patch16_224](https://paddle-imagenet-models-name.bj.bcebos.com/dygraph/ViT_base_patch16_224_pretrained.pdparams) as Backbone initialization parameters, or download through the wget command\n   ```bash\n   wget https://paddle-imagenet-models-name.bj.bcebos.com/dygraph/ViT_base_patch16_224_pretrained.pdparams\n   ```\n2. Open `PaddleVideo/configs/recognition/timesformer/timesformer_k400_videos.yaml`, and fill in the downloaded weight storage path below `pretrained:`\n    ```yaml\n    MODEL:\n        framework: \"RecognizerTransformer\"\n        backbone:\n            name: \"VisionTransformer\"\n            pretrained: fill in the path here\n    ```\n#### Start training\n- The Kinetics400 data set uses 8 cards for training, and the start command of the training method is as follows:\n```bash",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/timesformer.md:28-57"
+    },
+    "4513": {
+        "file_id": 385,
+        "content": "Download and prepare UCF101 data, then download the ViT_base_patch16_224 pre-trained model. Update the config file with the model's path and train the Kinetics-400 dataset using 8 GPUs.",
+        "type": "comment"
+    },
+    "4514": {
+        "file_id": 385,
+        "content": "# videos data format\npython3.7 -B -m paddle.distributed.launch --gpus=\"0,1,2,3,4,5,6,7\" --log_dir=log_timesformer main.py --validate -c configs/recognition/ timesformer/timesformer_k400_videos.yaml\n```\n- Turn on amp mixed-precision training to speed up the training process. The training start command is as follows:\n```bash\nexport FLAGS_conv_workspace_size_limit=800 # MB\nexport FLAGS_cudnn_exhaustive_search=1\nexport FLAGS_cudnn_batchnorm_spatial_persistent=1\n# videos data format\npython3.7 -B -m paddle.distributed.launch --gpus=\"0,1,2,3,4,5,6,7\" --log_dir=log_timesformer main.py --amp --validate -c configs/recognition/ timesformer/timesformer_k400_videos.yaml\n```\n- In addition, you can customize and modify the parameter configuration to achieve the purpose of training/testing on different data sets. It is recommended that the naming method of the configuration file is `model_dataset name_file format_data format_sampling method.yaml` , Please refer to [config](../../tutorials/config.md) for parameter usage.",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/timesformer.md:58-72"
+    },
+    "4515": {
+        "file_id": 385,
+        "content": "This code executes the training of a Paddle Video model called \"timesformer\" on 8 GPUs for video data. The command is to be run in a Linux terminal, and it uses mixed-precision training with AMP (Automatic Mixed Precision) to speed up the process. The command also sets some environment variables to configure CUDA behavior. The configuration file name includes the model and dataset names as well as data format and sampling method. For more details on configuring parameters, refer to the provided link.",
+        "type": "comment"
+    },
+    "4516": {
+        "file_id": 385,
+        "content": "## Test\n- The TimeSformer model is verified synchronously during training. You can find the keyword `best` in the training log to obtain the model test accuracy. The log example is as follows:\n  ```\n  Already save the best model (top1 acc)0.7258\n  ```\n- Since the sampling method of the TimeSformer model test mode is **UniformCrop** with a slower speed but higher accuracy, which is different from the **RandomCrop** used in the verification mode during the training process, so the verification index recorded in the training log is `topk Acc `Does not represent the final test score, so after the training is completed, you can use the test mode to test the best model to obtain the final index, the command is as follows:\n  ```bash\n  python3.7 -B -m paddle.distributed.launch --gpus=\"0,1,2,3,4,5,6,7\" --log_dir=log_timesformer main.py --test -c configs/recognition/ timesformer/timesformer_k400_videos.yaml -w \"output/TimeSformer/TimeSformer_best.pdparams\"\n  ```\n  When the test configuration uses the following parameters, the test indicators on the validation data set of Kinetics-400 are as follows:",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/timesformer.md:75-90"
+    },
+    "4517": {
+        "file_id": 385,
+        "content": "The code provides instructions for testing the TimeSformer model, using a different sampling method in test mode for higher accuracy. The best model is identified by the log's \"best\" keyword, and final test scores are obtained after training by using the provided command.",
+        "type": "comment"
+    },
+    "4518": {
+        "file_id": 385,
+        "content": "  | backbone | Sampling method | num_seg | target_size | Top-1 | checkpoints |\n  | :----------------: | :-----: | :-----: | :---------: | :----: | :----------------------------------------------------------: |\n  | Vision Transformer | UniformCrop | 8 | 224 | 77.29 | [TimeSformer_k400.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/TimeSformer_k400.pdparams) |\n- During the test, the TimeSformer video sampling strategy is to use Linspace sampling: in time sequence, num_seg sparse sampling points are uniformly generated from the video sequence to be sampled; in space, select the two ends of the long side and the middle position (left middle right or top middle bottom) 3 regions are sampled. A total of 1 clip is sampled for 1 video.\n## Inference\n### Export inference model\n```bash\npython3.7 tools/export_model.py -c configs/recognition/timesformer/timesformer_k400_videos.yaml \\\n                                -p data/TimeSformer_k400.pdparams \\\n                                -o inference/TimeSformer",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/timesformer.md:93-107"
+    },
+    "4519": {
+        "file_id": 385,
+        "content": "This code snippet is for exporting the TimeSformer inference model. It uses the PaddlePaddle framework and requires a configuration file, a pre-trained model file, and an output directory. The TimeSformer is a video recognition model that utilizes the Vision Transformer architecture and Linspace sampling strategy for its inference process.",
+        "type": "comment"
+    },
+    "4520": {
+        "file_id": 385,
+        "content": "```\nThe above command will generate the model structure file `TimeSformer.pdmodel` and the model weight file `TimeSformer.pdiparams` required for prediction.\n- For the meaning of each parameter, please refer to [Model Reasoning Method](../../start.md#2-infer)\n### Use prediction engine inference\n```bash\npython3.7 tools/predict.py --input_file data/example.avi \\\n                           --config configs/recognition/timesformer/timesformer_k400_videos.yaml \\\n                           --model_file inference/TimeSformer/TimeSformer.pdmodel \\\n                           --params_file inference/TimeSformer/TimeSformer.pdiparams \\\n                           --use_gpu=True \\\n                           --use_tensorrt=False\n```\nThe output example is as follows:\n```\nCurrent video file: data/example.avi\n    top-1 class: 5\n    top-1 score: 0.9999722242355347\n```\nIt can be seen that using the TimeSformer model trained on Kinetics-400 to predict `data/example.avi`, the output top1 category id is `5`, and the confiden",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/timesformer.md:108-133"
+    },
+    "4521": {
+        "file_id": 385,
+        "content": "This code snippet demonstrates the process of using the TimeSformer model to predict the video file 'data/example.avi'. The model is trained on Kinetics-400 and the prediction command uses python3.7 to run 'tools/predict.py' with relevant parameters such as input_file, config, model_file, params_file, use_gpu, and use_tensorrt. The output shows the top-1 class and its corresponding score for the video file.",
+        "type": "comment"
+    },
+    "4522": {
+        "file_id": 385,
+        "content": "ce is 0.99. By consulting the category id and name correspondence table `data/k400/Kinetics-400_label_list.txt`, it can be seen that the predicted category name is `archery`.\n## Reference\n- [Is Space-Time Attention All You Need for Video Understanding?](https://arxiv.org/pdf/2102.05095.pdf), Gedas Bertasius, Heng Wang, Lorenzo Torresani",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/timesformer.md:133-137"
+    },
+    "4523": {
+        "file_id": 385,
+        "content": "Code comments: The code calculates the category id and name from a table, which is used to determine the predicted category name. It references a paper on space-time attention for video understanding.",
+        "type": "comment"
+    },
+    "4524": {
+        "file_id": 386,
+        "content": "/english_documents/model_zoo/recognition/tokenshift_transformer.md",
+        "type": "filepath"
+    },
+    "4525": {
+        "file_id": 386,
+        "content": "The Token Shift Transformer is a versatile video classification model utilizing vision transformer and Token Shift Module, trained on UCF-101 dataset with mixed-precision AMP acceleration, and achieves high accuracy with \"BrushingTeeth.avi\".",
+        "type": "summary"
+    },
+    "4526": {
+        "file_id": 386,
+        "content": "[简体中文](../../../zh-CN/model_zoo/recognition/tokenshift_transformer.md) | English\n# Token Shift Transformer\n## Content\n- [Introduction](#Introduction)\n- [Data](#DATA)\n- [Train](#Train)\n- [Test](#Test)\n- [Inference](#Inference)\n- [Reference](#Reference)\n## Introduction\nToken Shift Transformer is a video classification model based on vision transformer, which shares merits of strong interpretability, high discriminative power on hyper-scale data, and ﬂexibility in processing varying length inputs. Token Shift Module is a novel, zero-parameter, zero-FLOPs operator, for modeling temporal relations within each transformer encoder.\n<div align=\"center\">\n<img src=\"../../../images/tokenshift_structure.png\">\n</div>\n## Data\nUCF-101 data download and preparation please refer to [UCF-101 data preparation](../../dataset/ucf101.md)\n## Train\n### UCF-101 data set training\n#### Download and add pre-trained models\n1. Download the image pre-training model [ViT_base_patch16_224](https://paddle-imagenet-models-name.bj.bcebos.c",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/tokenshift_transformer.md:1-36"
+    },
+    "4527": {
+        "file_id": 386,
+        "content": "Token Shift Transformer is a video classification model using vision transformer, with a novel Token Shift Module for modeling temporal relations. It offers strong interpretability and flexibility, while being zero-parameter and zero-FLOPs. UCF-101 data preparation guide provided.",
+        "type": "comment"
+    },
+    "4528": {
+        "file_id": 386,
+        "content": "om/dygraph/ViT_base_patch16_224_pretrained.pdparams) as Backbone initialization parameters, or download through the wget command\n   ```bash\n   wget https://paddle-imagenet-models-name.bj.bcebos.com/dygraph/ViT_base_patch16_224_pretrained.pdparams\n   ```\n2. Open `PaddleVideo/configs/recognition/token_transformer/tokShift_transformer_ucf101_256_videos.yaml`, and fill in the downloaded weight storage path below `pretrained:`\n    ```yaml\n    MODEL:\n        framework: \"RecognizerTransformer\"\n        backbone:\n            name: \"TokenShiftVisionTransformer\"\n            pretrained: fill in the path here\n    ```\n#### Start training\n- The UCF-101 data set uses 1 card for training, and the start command of the training method is as follows:\n```bash\n# videos data format\npython3 main.py -c configs/recognition/token_transformer/tokShift_transformer_ucf101_256_videos.yaml --validate --seed=1234\n```\n- Turn on amp mixed-precision training to speed up the training process. The training start command is as follows:\n```bash",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/tokenshift_transformer.md:36-63"
+    },
+    "4529": {
+        "file_id": 386,
+        "content": "This code provides instructions on how to download a pre-trained model and modify a configuration file for training the TokenShift Transformer model on the UCF-101 dataset using PaddlePaddle. It also highlights the need for using mixed-precision training with AMP to accelerate the training process.",
+        "type": "comment"
+    },
+    "4530": {
+        "file_id": 386,
+        "content": "python3 main.py --amp -c configs/recognition/token_transformer/tokShift_transformer_ucf101_256_videos.yaml --validate --seed=1234\n```\n- In addition, you can customize and modify the parameter configuration to achieve the purpose of training/testing on different data sets. It is recommended that the naming method of the configuration file is `model_dataset name_file format_data format_sampling method.yaml` , Please refer to [config](../../tutorials/config.md) for parameter usage.\n## Test\n- The Token Shift Transformer model is verified synchronously during training. You can find the keyword `best` in the training log to obtain the model test accuracy. The log example is as follows:\n  ```\n  Already save the best model (top1 acc)0.9201\n  ```\n- Since the sampling method of the Token Shift Transformer model test mode is **uniform** sampling, which is different from the **dense** sampling used in the verification mode during the training process, so the verification index recorded in the training log",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/tokenshift_transformer.md:64-78"
+    },
+    "4531": {
+        "file_id": 386,
+        "content": "This code snippet is used to train a Token Shift Transformer model on the UCF101 dataset with a video size of 256. The model configuration file is tokShift_transformer_ucf101_256_videos.yaml, and the training is performed using automatic mixed precision (--amp flag). The model will be validated during training, and the best model's test accuracy can be found in the training log using the keyword \"best\". The test mode sampling method is uniform sampling, which differs from the dense sampling used in verification mode during training.",
+        "type": "comment"
+    },
+    "4532": {
+        "file_id": 386,
+        "content": ", called `topk Acc `, does not represent the final test score, so after the training is completed, you can use the test mode to test the best model to obtain the final index, the command is as follows:\n  ```bash\n  python3 main.py --amp -c configs/recognition/token_transformer/tokShift_transformer_ucf101_256_videos.yaml --test --seed=1234 -w 'output/TokenShiftVisionTransformer/TokenShiftVisionTransformer_best.pdparams'\n  ```\n  When the test configuration uses the following parameters, the test indicators on the validation data set of UCF-101 are as follows:\n  | backbone | sampling method | num_seg | target_size | Top-1 | checkpoints |\n  | :----------------: | :-----: | :-----: | :---------: | :----: | :----------------------------------------------------------: |\n  | Vision Transformer | Uniform | 8 | 256 | 92.81 | [TokenShiftTransformer.pdparams](https://drive.google.com/drive/folders/1k_TpAqaJZYJE8C5g5pT9phdyk9DrY_XL?usp=sharing) |\n- Uniform sampling: Timing-wise, equal division into `num_seg",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/tokenshift_transformer.md:78-93"
+    },
+    "4533": {
+        "file_id": 386,
+        "content": "This code describes a command for testing the best model after training is complete using the TokenShift VisionTransformer on the UCF-101 dataset. The test configuration parameters include backbone, sampling method, num_seg, and target_size to obtain Top-1 accuracy. The checkpoints are available in a shared Google Drive link. Uniform sampling divides timing equally into `num_seg`.",
+        "type": "comment"
+    },
+    "4534": {
+        "file_id": 386,
+        "content": "` segments, 1 frame sampled at the middle of each segment; spatially, sampling at the center. 1 video sampled 1 clip in total.\n## Inference\n### Export inference model\n```bash\npython3 tools/export_model.py -c configs/recognition/token_transformer/tokShift_transformer_ucf101_256_videos.yaml -p 'output/TokenShiftVisionTransformer/TokenShiftVisionTransformer_best.pdparams'\n```\nThe above command will generate the model structure file `TokenShiftVisionTransformer.pdmodel` and the model weight file `TokenShiftVisionTransformer.pdiparams` required for prediction.\n- For the meaning of each parameter, please refer to [Model Reasoning Method](../../usage.md#2-infer)\n### Use prediction engine inference\n```bash\npython3 tools/predict.py -c configs/recognition/token_transformer/tokShift_transformer_ucf101_256_videos.yaml -i 'data/BrushingTeeth.avi' --model_file ./inference/TokenShiftVisionTransformer.pdmodel --params_file ./inference/TokenShiftVisionTransformer.pdiparams\n```\nThe output example is as follows:\n```\nCurrent video file: data/BrushingTeeth.avi",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/tokenshift_transformer.md:93-116"
+    },
+    "4535": {
+        "file_id": 386,
+        "content": "This code provides instructions for exporting an inference model and using the prediction engine in PaddleVideo's TokenShift Vision Transformer. The first command exports the model structure file (TokenShiftVisionTransformer.pdmodel) and the model weight file (TokenShiftVisionTransformer.pdiparams). The second command uses these files to perform inference on a specific video file (e.g., 'data/BrushingTeeth.avi').",
+        "type": "comment"
+    },
+    "4536": {
+        "file_id": 386,
+        "content": "\ttop-1 class: 19\n\ttop-1 score: 0.9959074258804321\n```\nIt can be seen that using the Token Shift Transformer model trained on UCF-101 to predict `data/BrushingTeeth.avi`, the output top1 category id is `19`, and the confidence is 0.99. By consulting the category id and name correspondence table, it can be seen that the predicted category name is `brushing_teeth`.\n## Reference\n- [Is Space-Time Attention All You Need for Video Understanding?](https://arxiv.org/pdf/2102.05095.pdf), Gedas Bertasius, Heng Wang, Lorenzo Torresani",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/tokenshift_transformer.md:117-125"
+    },
+    "4537": {
+        "file_id": 386,
+        "content": "This code snippet is displaying the top-1 category prediction and confidence score for a given video file \"BrushingTeeth.avi\" using Token Shift Transformer model trained on UCF-101 dataset. The predicted top-1 category id is 19, and its corresponding category name is \"brushing_teeth\", with a high confidence of 0.99.",
+        "type": "comment"
+    },
+    "4538": {
+        "file_id": 387,
+        "content": "/english_documents/model_zoo/recognition/tsm.md",
+        "type": "filepath"
+    },
+    "4539": {
+        "file_id": 387,
+        "content": "This code trains TSM model using ResNet-50, PaddlePaddle, and AMP on UCF-101 and Kinetics-400 datasets with Momentum optimization and L2_Decay. It supports three sampling methods, provides training details, and gives inference instructions.",
+        "type": "summary"
+    },
+    "4540": {
+        "file_id": 387,
+        "content": "[简体中文](../../../zh-CN/model_zoo/recognition/tsm.md) | English\n# TSM\n## Contents\n- [Introduction](#Introduction)\n- [Data](#Data)\n- [Train](#Train)\n- [Test](#Test)\n- [Inference](#Inference)\n- [Details](#Details)\n- [Reference](#Reference)\n## Introduction\nTemporal Shift Module (TSM) is a popular model that attracts more attention at present.\nThe method of moving through channels greatly improves the utilization ability of temporal information without increasing any\nadditional number of parameters and calculation amount.\nMoreover, due to its lightweight and efficient characteristics, it is very suitable for industrial landing.\n  <div align=\"center\">\n  <img src=\"../../../images/tsm_architecture.png\" height=250 width=700 hspace='10'/> <br />\n  </div>\nThis code implemented **single RGB stream** of TSM networks. Backbone is ResNet-50.\nPlease refer to the ICCV 2019 paper for details [TSM: Temporal Shift Module for Efficient Video Understanding](https://arxiv.org/pdf/1811.08383.pdf)\n## Data\nPlease refer to Kinetics-400 data download and preparation [k400 data preparation](../../dataset/k400.md)",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/tsm.md:1-33"
+    },
+    "4541": {
+        "file_id": 387,
+        "content": "This code implements the TSM (Temporal Shift Module) model for video understanding using a single RGB stream and ResNet-50 as the backbone. It follows the ICCV 2019 paper for details, and requires data from Kinetics-400 which can be downloaded and prepared according to the provided instructions.",
+        "type": "comment"
+    },
+    "4542": {
+        "file_id": 387,
+        "content": "Please refer to UCF101 data download and preparation [ucf101 data preparation](../../dataset/ucf101.md)\n## Train\n### Train on the Kinetics-400 dataset\n#### download pretrain-model\n1. Please download [ResNet50_pretrain.pdparams](https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_pretrain.pdparams) as pretraind model:\n   ```bash\n   wget https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_pretrain.pdparams\n   ```\n2. Open `PaddleVideo/configs/recognition/tsm/tsm_k400_frames.yaml`, and fill in the downloaded weight path below `pretrained:`\n   ```bash\n   MODEL:\n   \tframework: \"Recognizer2D\"\n   \t\tbackbone:\n   \t\tname: \"ResNetTSM\"\n   \t\tpretrained: your weight path\n   ```\n#### Start training\n- By specifying different configuration files, different data formats/data sets can be used for training. Taking the training configuration of Kinetics-400 data set + 8 cards + frames format as an example, the startup command is as follows (more training commands can be viewed in `PaddleVideo/run.sh`).",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/tsm.md:35-62"
+    },
+    "4543": {
+        "file_id": 387,
+        "content": "This code explains how to train a TSM (Temporal Shift Module) model on the Kinetics-400 dataset using the PaddleVideo framework. The user needs to download and replace the pretrained ResNet50_pretrain.pdparams model, then specify the new weight path in the tsm_k400_frames.yaml configuration file. Training can be started by running a specific command based on the desired configuration.",
+        "type": "comment"
+    },
+    "4544": {
+        "file_id": 387,
+        "content": "  ```bash\n  python3.7 -B -m paddle.distributed.launch --gpus=\"0,1,2,3,4,5,6,7\" --log_dir=log_tsm main.py  --validate -c configs/recognition/tsm/tsm_k400_frames.yaml\n  ```\n- Training Kinetics-400 dataset of videos format using scripts.\n  ```bash\n  python3.7 -B -m paddle.distributed.launch --gpus=\"0,1,2,3,4,5,6,7\" --log_dir=log_tsm main.py  --validate -c configs/recognition/tsm/tsm_k400_videos.yaml\n  ```\n- AMP is useful for speeding up training, scripts as follows:\n```bash\nexport FLAGS_conv_workspace_size_limit=800 #MB\nexport FLAGS_cudnn_exhaustive_search=1\nexport FLAGS_cudnn_batchnorm_spatial_persistent=1\npython3.7 -B -m paddle.distributed.launch --gpus=\"0,1,2,3,4,5,6,7\" --log_dir=log_tsm main.py  --amp --validate -c configs/recognition/tsm/tsm_k400_frames.yaml\n```\n- AMP works better with `NHWC` data format, scripts as follows:\n```bash\nexport FLAGS_conv_workspace_size_limit=800 #MB\nexport FLAGS_cudnn_exhaustive_search=1\nexport FLAGS_cudnn_batchnorm_spatial_persistent=1\npython3.7 -B -m paddle.distributed.l",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/tsm.md:64-91"
+    },
+    "4545": {
+        "file_id": 387,
+        "content": "This code snippet is running a PaddlePaddle (a deep learning framework) script to train the TSM (Temporal Shift Module) model on the Kinetics-400 dataset. The model is trained for videos and frames formats separately, utilizing Automatic Mixed Precision (AMP) for faster training with some environment variable settings. AMP works better with the NHWC data format and needs specific environment variable configurations as well.",
+        "type": "comment"
+    },
+    "4546": {
+        "file_id": 387,
+        "content": "aunch --gpus=\"0,1,2,3,4,5,6,7\" --log_dir=log_tsm main.py  --amp --validate -c configs/recognition/tsm/tsm_k400_frames_nhwc.yaml\n```\n- For the config file usage，please refer to [config](../../tutorials/config.md).\n### Train on UCF-101 dataset\n#### download pretrain-model\n- Load the TSM model we trained on Kinetics-400 [TSM_k400.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.1/TSM/TSM_k400.pdparams), or download it through the command line\n  ```bash\n  wget https://videotag.bj.bcebos.com/PaddleVideo-release2.1/TSM/TSM_k400.pdparams\n  ```\n- Open `PaddleVideo/configs/recognition/tsm/tsm_ucf101_frames.yaml`, and fill in the downloaded weight path below `pretrained:`\n  ```bash\n  MODEL:\n      framework: \"Recognizer2D\"\n      backbone:\n          name: \"ResNetTSM\"\n          pretrained: your weight path\n  ```\n#### Start training\n- By specifying different configuration files, different data formats/data sets can be used for training. Taking the training configuration of Kinetics-400 data set + 8 cards",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/tsm.md:91-118"
+    },
+    "4547": {
+        "file_id": 387,
+        "content": "This code snippet is for training the TSM (Temporal Shift Module) model on the UCF-101 dataset. It involves loading a pre-trained model, specifying the configuration file, and using 8 GPUs for training. The command launches the model with amp (automatic mixed precision) and validation mode. The provided link shows how to download the pre-trained TSM_k400 model.",
+        "type": "comment"
+    },
+    "4548": {
+        "file_id": 387,
+        "content": " + frames format as an example, the startup command is as follows (more training commands can be viewed in `PaddleVideo/run.sh`).\n  ```bash\n  python3.7 -B -m paddle.distributed.launch --gpus=\"0,1,2,3\" --log_dir=log_tsm main.py  --validate -c configs/recognition/tsm/tsm_ucf101_frames.yaml\n  ```\n- Training UCF-101 dataset of videos format using scripts.\n  ```bash\n  python3.7 -B -m paddle.distributed.launch --gpus=\"0,1,2,3\" --log_dir=log_tsm main.py  --validate -c configs/recognition/tsm/tsm_ucf101_videos.yaml\n  ```\n- AMP is useful for speeding up training, scripts as follows:\n  ```bash\n  export FLAGS_conv_workspace_size_limit=800 #MB\n  export FLAGS_cudnn_exhaustive_search=1\n  export FLAGS_cudnn_batchnorm_spatial_persistent=1\n  python3.7 -B -m paddle.distributed.launch --gpus=\"0,1,2,3\" --log_dir=log_tsm main.py  --amp --validate -c configs/recognition/tsm/tsm_ucf101_frames.yaml\n  ```\n- AMP works better with `NHWC` data format, scripts as follows:\n  ```bash\n  export FLAGS_conv_workspace_size_limit=800 #MB\n  export FLAGS_cudnn_exhaustive_search=1",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/tsm.md:118-144"
+    },
+    "4549": {
+        "file_id": 387,
+        "content": "This code snippet provides commands to train the TSM (Temporal Shift Module) model on the UCF-101 dataset using PaddleVideo. It also demonstrates how to use AMP (Automatic Mixed Precision) for faster training and shows that it works better with `NHWC` data format. The provided commands can be executed in a terminal, specifying the required arguments like GPUs, log directory, and configuration file.",
+        "type": "comment"
+    },
+    "4550": {
+        "file_id": 387,
+        "content": "  export FLAGS_cudnn_batchnorm_spatial_persistent=1\n  python3.7 -B -m paddle.distributed.launch --gpus=\"0,1,2,3\" --log_dir=log_tsm main.py  --amp --validate -c configs/recognition/tsm/tsm_ucf101_frames_nhwc.yaml\n  ```\n## Test\nPut the weight of the model to be tested into the `output/TSM/` directory, the test command is as follows\n```bash\npython3 main.py --test -c configs/recognition/tsm/tsm.yaml -w output/TSM/TSM_best.pdparams\n```\n---\nWhen the test configuration uses the following parameters, the evaluation accuracy on the validation data set of Kinetics-400 is as follows:\n| backbone | Sampling method | Training Strategy | num_seg | target_size | Top-1 | checkpoints |\n| :--------: | :---------------: | :-------: | :-----------: | :-----: | :-----------: | :-----------: |\n| ResNet50 | Uniform         | NCHW | 8       | 224         | 71.06 | [TSM_k400.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.1/TSM/TSM_k400.pdparams)        |\nWhen the test configuration uses the following parameters, the evaluation accuracy on the validation data set of UCF-101 is as follows:",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/tsm.md:145-166"
+    },
+    "4551": {
+        "file_id": 387,
+        "content": "This code exports the flag for CUDNN batch normalization spatial persistent and runs a Python script to test the model with specified configuration files. The testing command takes the best model weights from a directory and evaluates the accuracy on validation datasets of Kinetics-400 and UCF-101.",
+        "type": "comment"
+    },
+    "4552": {
+        "file_id": 387,
+        "content": "| backbone | Sampling method | Training Strategy | num_seg | target_size | Top-1 | checkpoints |\n| :------: | :-------------: | :-----------------: | :-----: | :---------: | :---: | :---------: |\n| ResNet50 |     Uniform     | NCHW              |    8    |     224     | 94.42 |    [TSM_ucf101_nchw.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.1/TSM/TSM_ucf101_nchw.pdparams)     |\n| ResNet50 |     Uniform     | NCHW+AMP |    8    |     224     | 94.40 |   [TSM_ucf101_amp_nchw.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.1/TSM/TSM_ucf101_amp_nchw.pdparams)     |\n| ResNet50 |     Uniform     | NHWC+AMP |    8    |     224     | 94.55 |   [TSM_ucf101_amp_nhwc.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.1/TSM/TSM_ucf101_amp_nhwc.pdparams)     |\n## Inference\n### export inference model\nTo get model architecture file `TSM.pdmodel` and parameters file `TSM.pdiparams`, use:\n```bash\npython3.7 tools/export_model.py -c configs/recognition/tsm/tsm_k400_frames.yaml \\",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/tsm.md:168-181"
+    },
+    "4553": {
+        "file_id": 387,
+        "content": "This code provides information about different TSM (Temporal Shift Module) models trained using ResNet50 backbone with three sampling methods: Uniform, NCHW, NHWC+AMP. It shows the training strategy, number of segments, target size, and Top-1 accuracy for each model. It also mentions where to find the corresponding checkpoints and provides instructions on how to export the inference model using Python script.",
+        "type": "comment"
+    },
+    "4554": {
+        "file_id": 387,
+        "content": "                                -p data/TSM_k400.pdparams \\\n                                -o inference/TSM\n```\n- Args usage please refer to [Model Inference](https://github.com/PaddlePaddle/PaddleVideo/blob/release/2.0/docs/zh-CN/start.md#2-%E6%A8%A1%E5%9E%8B%E6%8E%A8%E7%90%86).\n### infer\n```bash\npython3.7 tools/predict.py --input_file data/example.avi \\\n                           --config configs/recognition/tsm/tsm_k400_frames.yaml \\\n                           --model_file inference/TSM/TSM.pdmodel \\\n                           --params_file inference/TSM/TSM.pdiparams \\\n                           --use_gpu=True \\\n                           --use_tensorrt=False\n```\n## Implementation details\n### data processing\n- The model reads the `mp4` data in the Kinetics-400 data set, first divides each piece of video data into `num_seg` segments, and then uniformly extracts 1 frame of image from each segment to obtain sparsely sampled `num_seg` video frames. Then do the same random data enhancement to this `n",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/tsm.md:182-203"
+    },
+    "4555": {
+        "file_id": 387,
+        "content": "This code is running a model inference for TSM (Temporal Shift Module) on an input video file using PaddlePaddle framework. It specifies the necessary arguments including the input file, configuration file, and model files. The --use_gpu and --use_tensorrt options are set to True and False respectively. The data processing step involves dividing the video into segments, extracting frames randomly, and applying random data enhancement.",
+        "type": "comment"
+    },
+    "4556": {
+        "file_id": 387,
+        "content": "um_seg` frame image, including multi-scale random cropping, random left and right flips, data normalization, etc., and finally zoom to `target_size`.\n### Training strategy\n*  Use Momentum optimization algorithm training, momentum=0.9\n*  Using L2_Decay, the weight attenuation coefficient is 1e-4\n*  Using global gradient clipping, the clipping factor is 20.0\n*  The total number of epochs is 50, and the learning rate will be attenuated by 0.1 times when the epoch reaches 20 and 40\n*  The learning rate of the weight and bias of the FC layer are respectively 5 times and 10 times the overall learning rate, and the bias does not set L2_Decay\n*  Dropout_ratio=0.5\n### Parameter initialization\n- Initialize the weight of the FC layer with the normal distribution of Normal(mean=0, std=0.001), and initialize the bias of the FC layer with a constant of 0\n## Reference\n- [TSM: Temporal Shift Module for Efficient Video Understanding](https://arxiv.org/pdf/1811.08383.pdf), Ji Lin, Chuang Gan, Song Han",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/tsm.md:203-221"
+    },
+    "4557": {
+        "file_id": 387,
+        "content": "The code outlines the training strategy for TSM (Temporal Shift Module) model, which includes using Momentum optimization algorithm with L2_Decay, global gradient clipping, and attenuating the learning rate at certain epochs. It also specifies the total number of epochs, learning rates for FC layer weights and biases, Dropout ratio, and parameter initialization methods.",
+        "type": "comment"
+    },
+    "4558": {
+        "file_id": 388,
+        "content": "/english_documents/model_zoo/recognition/tsn.md",
+        "type": "filepath"
+    },
+    "4559": {
+        "file_id": 388,
+        "content": "This code introduces TSN, a 2D-CNN-based video classification solution that utilizes sparse sampling and ResNet-50 as its backbone. It trains on Kinetics-400 dataset with pre-trained weights, provides data preparation/model config details, tests different methods/backbones, and exports an \"TSN\" inference model.",
+        "type": "summary"
+    },
+    "4560": {
+        "file_id": 388,
+        "content": "[简体中文](../../../zh-CN/model_zoo/recognition/tsn.md) | English\n# TSN\n## Content\n- [Introduction](#Introduction)\n- [Data](#Data)\n- [Train](#Train)\n- [Test](#Test)\n- [Inference](#Inference)\n- [Details](#Details)\n- [Reference](#Reference)\n## Introduction\nTemporal Segment Network (TSN) is a classic 2D-CNN-based solution in the field of video classification. This method mainly solves the problem of long-term behavior recognition of video, and replaces dense sampling by sparsely sampling video frames, which can not only capture the global information of the video, but also remove redundancy and reduce the amount of calculation. The core idea is to average the features of each frame as the overall feature of the video, and then enter the classifier for classification. The model implemented by this code is a TSN network based on a single-channel RGB image, and Backbone uses the ResNet-50 structure.\n<div align=\"center\">\n<img src=\"../../../images/tsn_architecture.png\" height=350 width=80000 hspace='10'/> <br />",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/tsn.md:1-20"
+    },
+    "4561": {
+        "file_id": 388,
+        "content": "This code introduces TSN (Temporal Segment Network), a 2D-CNN-based solution for video classification. It uses sparse sampling to capture global information, reduce redundancy, and decrease computational burden. The model is based on single-channel RGB images and utilizes ResNet-50 as the backbone.",
+        "type": "comment"
+    },
+    "4562": {
+        "file_id": 388,
+        "content": "</div>\nFor details, please refer to the ECCV 2016 paper [Temporal Segment Networks: Towards Good Practices for Deep Action Recognition](https://arxiv.org/abs/1608.00859)\n## Data\nPaddleVide provides training and testing scripts on the Kinetics-400 dataset. Kinetics-400 data download and preparation please refer to [Kinetics-400 data preparation](../../dataset/k400.md)\n## Train\n### Kinetics-400 data set training\n#### Download and add pre-trained models\n1. Load the ResNet50 weights trained on ImageNet1000 as Backbone initialization parameters [ResNet50_pretrain.pdparams](https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_pretrain.pdparams), or download through the command line\n   ```bash\n   wget https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_pretrain.pdparams\n   ```\n2. Open `PaddleVideo/configs/recognition/tsn/tsn_k400_frames.yaml`, and fill in the downloaded weight path below `pretrained:`\n   ```yaml\n   MODEL:\n       framework: \"Recognizer2D\"\n       backbone:\n           name: \"ResNet\"",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/tsn.md:21-48"
+    },
+    "4563": {
+        "file_id": 388,
+        "content": "This code provides instructions for training the Temporal Segment Networks model on the Kinetics-400 dataset. It explains how to download and add pre-trained ResNet50 weights as initialization parameters, and specifies where to find more information about data preparation and model configuration.",
+        "type": "comment"
+    },
+    "4564": {
+        "file_id": 388,
+        "content": "           pretrained: fill in the path here\n   ```\n#### Start training\n- Kinetics-400 data set uses 8 cards for training, the training start command for frames format data is as follows\n  ```bash\n  python3.7 -B -m paddle.distributed.launch --gpus=\"0,1,2,3,4,5,6,7\" --log_dir=log_tsn main.py --validate -c configs/recognition/ tsn/tsn_k400_frames.yaml\n  ```\n## Test\nSince the sampling method of the TSN model test mode is **TenCrop** with a slower speed but higher accuracy, which is different from the **CenterCrop** used in the verification mode during the training process, the verification index `topk Acc` recorded in the training log It does not represent the final test score, so after the training is completed, you can use the test mode to test the best model to obtain the final index. The command is as follows:\n```bash\npython3.7 -B -m paddle.distributed.launch --gpus=\"0,1,2,3,4,5,6,7\" --log_dir=log_tsn main.py --test -c configs/recognition/ tsn/tsn_k400_frames.yaml -w \"output/TSN/TSN_best.pdparams\"",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/tsn.md:49-65"
+    },
+    "4565": {
+        "file_id": 388,
+        "content": "Start training: Use Kinetics-400 dataset and 8 GPUs for training, command to start the training process.\nTest: TSN model test mode uses TenCrop method for better accuracy, different from training's CenterCrop; obtain final index by testing best model after training completes.",
+        "type": "comment"
+    },
+    "4566": {
+        "file_id": 388,
+        "content": "```\nWhen the test configuration uses the following parameters, the test indicators on the validation data set of Kinetics-400 are as follows:\n| backbone | Sampling method | Training Strategy | num_seg | target_size | Top-1 |                         checkpoints                          |\n| :------: | :-------------: | :---------------: | :-----: | :---------: | :---: | :----------------------------------------------------------: |\n| ResNet50 |     TenCrop     |       NCHW        |   3    |     224     | 69.81 | [TSN_k400.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/TSN_k400.pdparams) |\n| ResNet50 |     TenCrop     |       NCHW        |   8    |     224     | 71.70 | [TSN_k400_8.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/TSN_k400_8.pdparams) |\n## Inference\n### export inference model\n```bash\npython3.7 tools/export_model.py -c configs/recognition/tsn/tsn_k400_frames.yaml \\\n                                -p data/TSN_k400.pdparams \\\n                                -o inference/TSN",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/tsn.md:66-81"
+    },
+    "4567": {
+        "file_id": 388,
+        "content": "The code is providing test indicator results for TSN model on the validation dataset of Kinetics-400 using different backbone, sampling methods, and training strategies. It also shows the checkpoints' URLs. Additionally, it exports an inference model named \"TSN\" into a folder called \"inference/TSN\" from the specified configuration file, model parameters, and output directory.",
+        "type": "comment"
+    },
+    "4568": {
+        "file_id": 388,
+        "content": "```\nThe above command will generate the model structure file `TSN.pdmodel` and the model weight file `TSN.pdiparams` required for prediction.\nFor the meaning of each parameter, please refer to [Model Reasoning Method](https://github.com/PaddlePaddle/PaddleVideo/blob/release/2.0/docs/zh-CN/start.md#2-Model Reasoning)\n### infer\n```bash\npython3.7 tools/predict.py --input_file data/example.avi \\\n                           --config configs/recognition/tsn/tsn_k400_frames.yaml \\\n                           --model_file inference/TSN/TSN.pdmodel \\\n                           --params_file inference/TSN/TSN.pdiparams \\\n                           --use_gpu=True \\\n                           --use_tensorrt=False\n```\n## Details\n**data processing:**\n- The model reads the `mp4` data in the Kinetics-400 data set, first divides each piece of video data into `num_seg` segments, and then evenly extracts 1 frame of image from each segment to obtain sparsely sampled `num_seg` video frames , And then do the same random da",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/tsn.md:82-103"
+    },
+    "4569": {
+        "file_id": 388,
+        "content": "This code is for generating and using the TSN model in PaddlePaddle for video recognition. It generates a model structure file (TSN.pdmodel) and weight file (TSN.pdiparams), and then uses predict.py to predict the labels of frames from a video file (example.avi) using the generated files, with GPU acceleration enabled. The model reads frames sparsely sampled from videos in the Kinetics-400 dataset, divides them into segments, extracts one frame per segment, and applies random data augmentation.",
+        "type": "comment"
+    },
+    "4570": {
+        "file_id": 388,
+        "content": "ta enhancement to this `num_seg` frame image, including multi-scale random cropping, random left and right flips, data normalization, etc., and finally zoom to `target_size`\n**training strategy:**\n- Use Momentum optimization algorithm for training, momentum=0.9\n- Using L2_Decay, the weight attenuation coefficient is 1e-4\n- Use global gradient clipping, with a clipping factor of 40.0\n- The total number of epochs is 100, and the learning rate will be attenuated by 0.1 times when the epoch reaches 40 and 80\n- Dropout_ratio=0.4\n**parameter initialization**\n- The convolutional layer of the TSN model uses Paddle's default [KaimingNormal](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/api/paddle/nn/initializer/KaimingNormal_cn.html#kaimingnormal) and [Constant](https://www.paddlepaddle.org.cn/documentation/docs/en/develop/api/paddle/nn/initializer/Constant_cn.html#constant) initialization method, with Normal(mean=0, std= 0.01) normal distribution to initialize the weight of the FC layer, and a constant 0 to initialize the bias of the FC layer",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/tsn.md:103-119"
+    },
+    "4571": {
+        "file_id": 388,
+        "content": "Enhances `num_seg` frame image with multi-scale random cropping, flips, normalization, and zooms to `target_size`. Momentum optimization is used for training, L2 decay with 1e-4 attenuation coefficient, global gradient clipping with a factor of 40.0. Total epochs are 100, learning rate decreases at epochs 40 and 80, dropout_ratio=0.4. KaimingNormal and Constant initializers used for convolutional layers and FC layer weights, respectively.",
+        "type": "comment"
+    },
+    "4572": {
+        "file_id": 388,
+        "content": "## Reference\n- [Temporal Segment Networks: Towards Good Practices for Deep Action Recognition](https://arxiv.org/abs/1608.00859), Limin Wang, Yuanjun Xiong, Zhe Wang, Yu Qiao, Dahua Lin, Xiaoou Tang, Luc Van Gool",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/tsn.md:121-123"
+    },
+    "4573": {
+        "file_id": 388,
+        "content": "The code contains a reference to the paper \"Temporal Segment Networks: Towards Good Practices for Deep Action Recognition\" by Limin Wang et al., which provides information on the implementation of TSN model in PaddleVideo.",
+        "type": "comment"
+    },
+    "4574": {
+        "file_id": 389,
+        "content": "/english_documents/model_zoo/recognition/tsn_dali.md",
+        "type": "filepath"
+    },
+    "4575": {
+        "file_id": 389,
+        "content": "The code improves TSN model training speed with DALI in PaddleVideo, using Kinetics400/UCF101 datasets and ResNet50 pretrained models. It provides detailed guidelines for action recognition tasks, including model download, config file usage, and separate sections for tests and inferences.",
+        "type": "summary"
+    },
+    "4576": {
+        "file_id": 389,
+        "content": "[简体中文](../../../zh-CN/model_zoo/recognition/tsn_dali.md) | English\n# TSN DALI\n- [Introduction](#Introduction)\n- [Requirement](#Requirement)\n- [Data](#Data)\n- [Train](#Train)\n- [Test](#Test)\n- [Inference](#Inference)\n- [Reference](#Reference)\n## Introduction\nWe aims to speed up TSN model training using DALI in this code. As [nvidia DALI](https://github.com/NVIDIA/DALI) not support TSN sampling way, we reimplemented segment sampling in VideoReader.\n### Performance\nTest Environment: \n```\nCard: Tesla v100\nMemory: 4 * 16G\nCuda: 9.0\nbatch_size of single card: 32\n```\n| Training way | batch cost/s  | reader cost/s | ips:instance/sec | Speed up |\n| :--------------- | :--------: | :------------: | :------------: | :------------: |\n| DALI | 2.083 | 1.804 | 15.36597  |  1.41x |\n| Dataloader: num_workers=4 | 2.943 | 2.649 | 10.87460| base |\n| pytorch实现 | TODO | TODO | TODO | TODO | \n## Requirement\ndocker image:\n```\n    huangjun12/paddlevideo:tsn_dali_cuda9_0\n```\nTo build container, you can use:\n```bash\nnvidia-docker run --name t",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/tsn_dali.md:1-45"
+    },
+    "4577": {
+        "file_id": 389,
+        "content": "This code aims to speed up the TSN (Two-Stream Networks) model training using DALI (Data Augmentation Library for Images and Videos) in PaddleVideo. The author reimplemented segment sampling in VideoReader as NVIDIA DALI does not support TSN sampling way. They tested the performance with a Tesla v100 GPU and reported improvements in batch cost/s, reader cost/s, and instance/sec compared to Dataloader and base implementation. The docker image for this implementation is huangjun12/paddlevideo:tsn_dali_cuda9_0.",
+        "type": "comment"
+    },
+    "4578": {
+        "file_id": 389,
+        "content": "sn-DALI -v /home:/workspace --network=host -it --shm-size 64g -e NVIDIA_DRIVER_CAPABILITIES=compute,utility,video huangjun12/paddlevideo:tsn_dali_cuda9_0 /bin/bash\n```\n## Data\n- Kinetics400 dataset please refer to [K400 data](../../dataset/k400.md)\n- UCF101 dataset please refer to [UCF101 data](../../dataset/ucf101.md)\n## Train\n### download pretrain-model\n- Please download [ResNet50_pretrain.pdparams](https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_pretrain.pdparams) as pretraind model:\n```bash\nwget https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_pretrain.pdparams\n```\nand add path to MODEL.framework.backbone.pretrained in config file as：\n```yaml\nMODEL:\n    framework: \"Recognizer2D\"\n    backbone:\n        name: \"ResNet\"\n        pretrained: your weight path\n```\n### Start training\nYou can start training by: \n```bash\npython3.7 -B -m paddle.distributed.launch --gpus=\"0,1,2,3\" --log_dir=log_tsn main.py --train_dali -c configs/recognition/tsn/tsn_dali.yaml -o log_level=\"INFO\"\n```\n- Args -c is used to specify config file，default is ```configs/recognition/tsn/tsn_dali.yaml```。",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/tsn_dali.md:45-82"
+    },
+    "4579": {
+        "file_id": 389,
+        "content": "This code snippet is a command for running TSN (Two-Stream Network) with DALI (Data Augmentation and Layout Innovation) on PaddleVideo. It utilizes the Kinetics400 and UCF101 datasets, downloads the ResNet50 pretrained model, and starts the training process using Python and PaddlePaddle framework. The command also specifies the GPU usage and log directory for tracking progress.",
+        "type": "comment"
+    },
+    "4580": {
+        "file_id": 389,
+        "content": "- For finetune please download our trained model [TSN.pdparams]()<sup>coming soon</sup>，and specify file path with --weights. \n- For the config file usage，please refer to [config](../../tutorials/config.md).\n## Test\nPlease refer to [TSN Test](./tsn.md)\n## Inference\nPlease refer to [TSN Inference](./tsn.md)\n## Reference\n- [Temporal Segment Networks: Towards Good Practices for Deep Action Recognition](https://arxiv.org/abs/1608.00859), Limin Wang, Yuanjun Xiong, Zhe Wang, Yu Qiao, Dahua Lin, Xiaoou Tang, Luc Van Gool",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/tsn_dali.md:84-98"
+    },
+    "4581": {
+        "file_id": 389,
+        "content": "This code is providing information on how to use the TSN model for action recognition. It mentions downloading the trained model file, using a config file, and refers users to separate sections for test and inference processes. The reference section includes the original paper link.",
+        "type": "comment"
+    },
+    "4582": {
+        "file_id": 390,
+        "content": "/english_documents/model_zoo/recognition/videoswin.md",
+        "type": "filepath"
+    },
+    "4583": {
+        "file_id": 390,
+        "content": "The Video-Swin-Transformer model achieves SOTA accuracy on Kinetics-400, offering multi-scale modeling, efficient local attention features, and mixed-precision training. Code provides data prep, training, testing, and inference instructions for 8 GPUs, with pre-trained Swin-Transformer models available in PaddleVideo.",
+        "type": "summary"
+    },
+    "4584": {
+        "file_id": 390,
+        "content": "[简体中文](../../../zh-CN/model_zoo/recognition/videoswin.md) | English\n# Video-Swin-Transformer Video Classification Model\n## content\n- [Introduction](#Introduction)\n- [Data](#DATA)\n- [Train](#Train)\n- [Test](#Test)\n- [Inference](#Inference)\n- [Reference](#Reference)\n## Introduction\nVideo-Swin-Transformer is a video classification model based on Swin Transformer. It utilizes Swin Transformer's multi-scale modeling and efficient local attention characteristics. It currently achieves SOTA accuracy on the Kinetics-400 data set, surpassing the same transformer structure. The TimeSformer model.\n![VideoSwin](../../../images/videoswin.jpg)\n## DATA\nK400 data download and preparation please refer to [Kinetics-400 data preparation](../../dataset/k400.md)\n## Train\n### Kinetics-400 data set training\n#### Download and add pre-trained models\n1. Download the image pre-training model [swin_base_patch4_window7_224.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/swin_base_patch4_window7_224.pdparams) as the Backbone initialization parameter, or download it through the wget command",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/videoswin.md:1-33"
+    },
+    "4585": {
+        "file_id": 390,
+        "content": "This is a model card for the Video-Swin-Transformer video classification model, based on Swin Transformer. It utilizes multi-scale modeling and efficient local attention features to achieve SOTA accuracy on Kinetics-400 dataset. The code provides information about data preparation, training, testing, and inference.",
+        "type": "comment"
+    },
+    "4586": {
+        "file_id": 390,
+        "content": "   ```bash\n   wget https://videotag.bj.bcebos.com/PaddleVideo-release2.2/swin_base_patch4_window7_224.pdparams # ImageNet pretrained model for VideoSwin_base\n   # wget https://videotag.bj.bcebos.com/PaddleVideorelease2.2/swin_small_patch4_window7_224.pdparams # Imagenet pretrained model for VideoSwin_small\n   ```\n2. Open `configs/recognition/videoswin/videoswin_base_k400_videos.yaml`, and fill in the downloaded weight storage path below `pretrained:`\n    ```yaml\n    MODEL:\n        framework: \"RecognizerTransformer\"\n        backbone:\n            name: \"SwinTransformer3D\"\n            pretrained: fill in the path here\n    ```\n#### Start training\n- The Kinetics400 data set uses 8 cards for training, and the start command of the training method is as follows:\n    ```bash\n    # videos data format\n    python3.7 -u -B -m paddle.distributed.launch --gpus=\"0,1,2,3,4,5,6,7\" --log_dir=log_videoswin_base main.py --validate -c configs/recognition/video_swin_transformer/videoswin_base_k400_videos.yaml\n    ```\n- Turn o",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/videoswin.md:35-60"
+    },
+    "4587": {
+        "file_id": 390,
+        "content": "This code provides the steps to download a pretrained VideoSwin model, update its configuration file with the downloaded path, and finally start training it on the Kinetics400 dataset using 8 GPUs.",
+        "type": "comment"
+    },
+    "4588": {
+        "file_id": 390,
+        "content": "n amp mixed-precision training to speed up the training process. The training start command is as follows:\n    ```bash\n    export FLAGS_conv_workspace_size_limit=800 # MB\n    export FLAGS_cudnn_exhaustive_search=1\n    export FLAGS_cudnn_batchnorm_spatial_persistent=1\n    # videos data format\n    python3.7 -u -B -m paddle.distributed.launch --gpus=\"0,1,2,3,4,5,6,7\" --log_dir=log_videoswin_base main.py --amp --validate -c configs/recognition/videoswin/videoswin_base_k400_videos.yaml\n    ```\n- In addition, you can customize and modify the parameter configuration to achieve the purpose of training/testing on different data sets. It is recommended that the naming method of the configuration file is `model_dataset name_file format_data format_sampling method.yaml` , Please refer to [config](../../../zh-CN/contribute/config.md) for parameter usage.\n## Test\n- The Video-Swin-Transformer model is verified during training. You can find the keyword `best` in the training log to obtain the model test accuracy. The log example is as follows:",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/videoswin.md:60-75"
+    },
+    "4589": {
+        "file_id": 390,
+        "content": "The code sets up mixed-precision training with specific flags for faster processing. It also provides command for running the PaddleVideo model, specifically Video-Swin-Transformer, on GPUs and customizable configuration files. The accuracy is verified during training by checking for the \"best\" keyword in the log.",
+        "type": "comment"
+    },
+    "4590": {
+        "file_id": 390,
+        "content": "  ```log\n  Already save the best model (top1 acc)0.7258\n  ```\n- Since the sampling method of the Video-Swin-Transformer model test mode is a bit slower but more accurate **UniformCrop**, which is different from the **CenterCrop** used in the verification mode during the training process, so the verification recorded in the training log The index `topk Acc` does not represent the final test score, so after the training is completed, you can use the test mode to test the best model to obtain the final index. The command is as follows:\n  ```bash\n  python3.7 -B -m paddle.distributed.launch --gpus=\"0,1,2,3,4,5,6,7\" --log_dir=log_videoswin_base main.py --test -c configs/recognition/video_swin_transformer/videoswin_base_k400_videos.yaml -w \"output/VideoSwin_base/VideoSwin_base_best.pdparams\"\n  ```\n  When the test configuration uses the following parameters, the test indicators on the validation data set of Kinetics-400 are as follows:\n   |        backbone        | Sampling method | num_seg | target_s",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/videoswin.md:77-89"
+    },
+    "4591": {
+        "file_id": 390,
+        "content": "Code snippet shows how to test the best Video-Swin-Transformer model after training, using a different sampling method (UniformCrop) for improved accuracy. The command provided demonstrates how to execute the test with specific configuration settings and input files, resulting in evaluation metrics on the Kinetics-400 validation dataset.",
+        "type": "comment"
+    },
+    "4592": {
+        "file_id": 390,
+        "content": "ize | Top-1 |                                                        checkpoints                                                         | pretrain model |\n   | :--------------------: | :-------------: | :-----: | :---------: | :---- | :------------------------------------------------------------------------------------------------------------------------: | :----: |\n   | Swin-Transformer_base  |   UniformCrop   |   32    |     224     | 82.40 |  [SwinTransformer_k400_base.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/VideoSwin_base_k400.pdparams)  | [swin_base_patch4_window7_224.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/swin_base_patch4_window7_224.pdparams) |\n   | Swin-Transformer_small |   UniformCrop   |   32    |     224     | 80.18 | [SwinTransformer_k400_small.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/VideoSwin_small_k400.pdparams) | [swin_small_patch4_window7_224.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/swin_small_patch4_window7_224.pdparams) |",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/videoswin.md:89-92"
+    },
+    "4593": {
+        "file_id": 390,
+        "content": "The table displays pre-trained model checkpoints for Swin-Transformer in PaddleVideo's model zoo, including the model size, input image size, top-1 accuracy, and corresponding URLs for downloading the pdparams files.",
+        "type": "comment"
+    },
+    "4594": {
+        "file_id": 390,
+        "content": "## Inference\n### Export inference model\n```bash\npython3.7 tools/export_model.py -c configs/recognition/videoswin/videoswin_base_k400_videos.yaml \\\n                                -p data/VideoSwin_base_k400.pdparams \\\n                                -o inference/VideoSwin_base\n```\nThe above command will generate the model structure file `VideoSwin_base.pdmodel` and the model weight file `VideoSwin_base.pdiparams` required for prediction.\n- For the meaning of each parameter, please refer to [Model Inference](../../usage.md#2-infer)\n### Use predictive engine inference\n```bash\npython3.7 tools/predict.py --input_file data/example.avi \\\n                           --config configs/recognition/videoswin/videoswin_base_k400_videos.yaml \\\n                           --model_file inference/VideoSwin_base/VideoSwin_base.pdmodel \\\n                           --params_file inference/VideoSwin_base/VideoSwin_base.pdiparams \\\n                           --use_gpu=True \\\n                           --use_tensorrt=False\n```",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/videoswin.md:94-117"
+    },
+    "4595": {
+        "file_id": 390,
+        "content": "This code snippet provides instructions for exporting an inference model and using the predictive engine inference in PaddleVideo. The first command generates the necessary files (`.pdmodel` and `.pdiparams`) required for prediction, while the second command performs the actual prediction on a given input video file with specified configuration and model files.",
+        "type": "comment"
+    },
+    "4596": {
+        "file_id": 390,
+        "content": "The output example is as follows:\n```log\nCurrent video file: data/example.avi\n        top-1 class: 5\n        top-1 score: 0.9999829530715942\n```\nIt can be seen that using the Video-Swin-Transformer model trained on Kinetics-400 to predict `data/example.avi`, the output top1 category id is `5`, and the confidence is 0.99. By referring to the category id and name correspondence table `data/k400/Kinetics-400_label_list.txt`, it can be known that the predicted category name is `archery`.\n## Reference\n- [Video Swin Transformer](https://arxiv.org/pdf/2106.13230.pdf), Ze Liu, Jia Ning, Yue Cao, Yixuan Wei",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/videoswin.md:119-131"
+    },
+    "4597": {
+        "file_id": 390,
+        "content": "This code showcases an example of using the Video-Swin-Transformer model trained on Kinetics-400 to predict a video file. The output includes the top-1 class and score, and referring to the category id and name correspondence table allows for identifying the predicted category name.",
+        "type": "comment"
+    },
+    "4598": {
+        "file_id": 391,
+        "content": "/english_documents/model_zoo/segmentation/asrf.md",
+        "type": "filepath"
+    },
+    "4599": {
+        "file_id": 391,
+        "content": "ASRF is an improved video action segmentation model built upon ms-tcn, utilizing PaddlePaddle framework for training and exporting inference models. It provides accuracy results and performance metrics, with examples for running inference on PaddleVideo.",
+        "type": "summary"
+    }
+}

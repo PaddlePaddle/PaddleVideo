@@ -1,0 +1,10 @@
+{
+    "summary": "This code imports necessary classes and defines the publically accessible '__all__' list, containing the DepthEstimator and BaseEstimator classes.",
+    "details": [
+        {
+            "comment": "This code imports necessary classes and defines the publically accessible '__all__' list, containing the DepthEstimator and BaseEstimator classes.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/paddlevideo/modeling/framework/estimators/__init__.py\":0-3",
+            "content": "from .base import BaseEstimator\nfrom .depth_estimator import DepthEstimator\n__all__ = ['DepthEstimator', 'BaseEstimator']"
+        }
+    ]
+}

@@ -1,0 +1,15 @@
+{
+    "summary": "This code is part of the PaddleVideo framework, which provides base classes for various model classes like 'BasePartitioner', 'TransNetV2Partitioner', 'BaseEstimator', 'DepthEstimator', and more. The list contains names of these available base classes within the module.",
+    "details": [
+        {
+            "comment": "This code is part of the PaddleVideo framework, which provides several base classes for estimators, localizers, partitioners, recognizers, multimodal models, segments, and segmenters. The commented lines describe the license information and the imported classes from different modules within the framework. The '__all__' list contains the names of the base classes available in this module.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/paddlevideo/modeling/framework/__init__.py\":0-23",
+            "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nfrom .estimators import BaseEstimator, DepthEstimator\nfrom .localizers import BaseLocalizer, BMNLocalizer\nfrom .partitioners import BasePartitioner, TransNetV2Partitioner\nfrom .recognizers import BaseRecognizer, Recognizer2D\nfrom .multimodal import ActBert, BaseMultimodal\nfrom .segment import BaseSegment, CFBI\nfrom .segmenters import MSTCN\n__all__ = [\n    'BaseRecognizer', 'Recognizer2D', 'BaseLocalizer', 'BMNLocalizer',"
+        },
+        {
+            "comment": "This code snippet contains a list of various model classes, including 'BasePartitioner', 'TransNetV2Partitioner', 'BaseEstimator', 'DepthEstimator', 'BaseMultimodal', 'ActBert', 'BaseSegment', 'CFBI', and 'MSTCN'. These models are likely used for different tasks within the PaddleVideo framework.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/paddlevideo/modeling/framework/__init__.py\":24-27",
+            "content": "    'BasePartitioner', 'TransNetV2Partitioner', 'BaseEstimator',\n    'DepthEstimator', 'BaseMultimodal', 'ActBert', 'BaseSegment', 'CFBI',\n    'MSTCN'\n]"
+        }
+    ]
+}

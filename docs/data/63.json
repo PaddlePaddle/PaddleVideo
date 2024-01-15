@@ -1,0 +1,547 @@
+{
+    "6300": {
+        "file_id": 491,
+        "content": "# Copyright (c) 2021  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n# https://github.com/yabufarha/ms-tcn/blob/master/model.py\n# https://github.com/yiskw713/asrf/libs/models/tcn.py\nimport paddle\nimport paddle.nn as nn\nimport paddle.nn.functional as F\nimport numpy as np\nimport copy\nimport random\nimport math\nfrom paddle import ParamAttr\nfrom ..registry import BACKBONES\nfrom ..weight_init import weight_init_\nfrom .ms_tcn import DilatedResidualLayer\nfrom ..framework.segmenters.utils import init_bias, KaimingUniform_like_torch",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/asrf.py:1-30"
+    },
+    "6301": {
+        "file_id": 491,
+        "content": "This code block is importing necessary libraries and modules, as well as registering a backbone model within the PaddleVideo framework. It also includes references to external repositories for inspiration or implementation guidance.",
+        "type": "comment"
+    },
+    "6302": {
+        "file_id": 491,
+        "content": "@BACKBONES.register()\nclass ASRF(nn.Layer):\n    def __init__(self, in_channel, num_features, num_classes, num_stages,\n                 num_layers):\n        super().__init__()\n        self.in_channel = in_channel\n        self.num_features = num_features\n        self.num_classes = num_classes\n        self.num_stages = num_stages\n        self.num_layers = num_layers\n        # define layers\n        self.conv_in = nn.Conv1D(self.in_channel, self.num_features, 1)\n        shared_layers = [\n            DilatedResidualLayer(2**i, self.num_features, self.num_features)\n            for i in range(self.num_layers)\n        ]\n        self.shared_layers = nn.LayerList(shared_layers)\n        self.init_weights()\n    def init_weights(self):\n        \"\"\"\n        initialize model layers' weight\n        \"\"\"\n        # init weight\n        for layer in self.sublayers():\n            if isinstance(layer, nn.Conv1D):\n                layer.weight.set_value(\n                    KaimingUniform_like_torch(layer.weight).astype('float32'))\n                if layer.bias is not None:",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/asrf.py:33-65"
+    },
+    "6303": {
+        "file_id": 491,
+        "content": "The ASRF class is a type of backbone model for computer vision tasks. It initializes convolutional layers and shared dilated residual layers, and sets their weights using KaimingUniform initialization. The number of features, stages, and layers are configurable parameters.",
+        "type": "comment"
+    },
+    "6304": {
+        "file_id": 491,
+        "content": "                    layer.bias.set_value(\n                        init_bias(layer.weight, layer.bias).astype('float32'))\n    def forward(self, x):\n        \"\"\" ASRF forward\n        \"\"\"\n        out = self.conv_in(x)\n        for layer in self.shared_layers:\n            out = layer(out)\n        return out",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/asrf.py:66-75"
+    },
+    "6305": {
+        "file_id": 491,
+        "content": "This code sets the initial values of layer biases using init_bias function. The ASRF forward method performs convolution on input x, then iterates through shared layers to modify the output before returning it.",
+        "type": "comment"
+    },
+    "6306": {
+        "file_id": 492,
+        "content": "/paddlevideo/modeling/backbones/bmn.py",
+        "type": "filepath"
+    },
+    "6307": {
+        "file_id": 492,
+        "content": "This function creates mask matrices and BMN class in Paddle.ai, initializes 2D convolutional layers for the BMSN backbone, and defines a video analysis model with layers, activation functions, and returns processed input xp.",
+        "type": "summary"
+    },
+    "6308": {
+        "file_id": 492,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport math\nimport numpy as np\nimport paddle\nfrom paddle import ParamAttr\nfrom ..registry import BACKBONES\ndef _get_interp1d_bin_mask(seg_xmin, seg_xmax, tscale, num_sample,\n                           num_sample_perbin):\n    \"\"\" generate sample mask for a boundary-matching pair \"\"\"\n    plen = float(seg_xmax - seg_xmin)\n    plen_sample = plen / (num_sample * num_sample_perbin - 1.0)\n    total_samples = [\n        seg_xmin + plen_sample * ii",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/bmn.py:1-28"
+    },
+    "6309": {
+        "file_id": 492,
+        "content": "This function generates a sample mask for a boundary-matching pair. It calculates the number of samples per bin and total samples based on segment bounds, total length, and desired numbers of samples.",
+        "type": "comment"
+    },
+    "6310": {
+        "file_id": 492,
+        "content": "        for ii in range(num_sample * num_sample_perbin)\n    ]\n    p_mask = []\n    for idx in range(num_sample):\n        bin_samples = total_samples[idx * num_sample_perbin:(idx + 1) *\n                                    num_sample_perbin]\n        bin_vector = np.zeros([tscale])\n        for sample in bin_samples:\n            sample_upper = math.ceil(sample)\n            sample_decimal, sample_down = math.modf(sample)\n            if (tscale - 1) >= int(sample_down) >= 0:\n                bin_vector[int(sample_down)] += 1 - sample_decimal\n            if (tscale - 1) >= int(sample_upper) >= 0:\n                bin_vector[int(sample_upper)] += sample_decimal\n        bin_vector = 1.0 / num_sample_perbin * bin_vector\n        p_mask.append(bin_vector)\n    p_mask = np.stack(p_mask, axis=1)\n    return p_mask\ndef get_interp1d_mask(tscale, dscale, prop_boundary_ratio, num_sample,\n                      num_sample_perbin):\n    \"\"\" generate sample mask for each point in Boundary-Matching Map \"\"\"\n    mask_mat = []\n    for start_index in range(tscale):",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/bmn.py:29-53"
+    },
+    "6311": {
+        "file_id": 492,
+        "content": "This code generates sample masks for each point in a Boundary-Matching Map. It iterates through samples, creates binary vectors for each, and then scales them to obtain the final mask. The resulting masks are stored in an array and returned.",
+        "type": "comment"
+    },
+    "6312": {
+        "file_id": 492,
+        "content": "        mask_mat_vector = []\n        for duration_index in range(dscale):\n            if start_index + duration_index < tscale:\n                p_xmin = start_index\n                p_xmax = start_index + duration_index\n                center_len = float(p_xmax - p_xmin) + 1\n                sample_xmin = p_xmin - center_len * prop_boundary_ratio\n                sample_xmax = p_xmax + center_len * prop_boundary_ratio\n                p_mask = _get_interp1d_bin_mask(sample_xmin, sample_xmax,\n                                                tscale, num_sample,\n                                                num_sample_perbin)\n            else:\n                p_mask = np.zeros([tscale, num_sample])\n            mask_mat_vector.append(p_mask)\n        mask_mat_vector = np.stack(mask_mat_vector, axis=2)\n        mask_mat.append(mask_mat_vector)\n    mask_mat = np.stack(mask_mat, axis=3)\n    mask_mat = mask_mat.astype(np.float32)\n    sample_mask = np.reshape(mask_mat, [tscale, -1])\n    return sample_mask\ndef init_params(name, in_channels, kernel_size):",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/bmn.py:54-77"
+    },
+    "6313": {
+        "file_id": 492,
+        "content": "This code generates mask matrices for video frames. It iterates over different duration scales and starts from a given start index. For each duration scale, it creates binary masks using interpolation. If the duration is smaller than the total time scale, it adjusts the sample range to include boundaries. Zero paddings are used if the duration exceeds the total time scale. The generated mask vectors are stacked together and reshaped for final output.",
+        "type": "comment"
+    },
+    "6314": {
+        "file_id": 492,
+        "content": "    fan_in = in_channels * kernel_size * 1\n    k = 1. / math.sqrt(fan_in)\n    param_attr = ParamAttr(name=name,\n                           initializer=paddle.nn.initializer.Uniform(low=-k,\n                                                                     high=k))\n    return param_attr\n@BACKBONES.register()\nclass BMN(paddle.nn.Layer):\n    \"\"\"BMN model from\n    `\"BMN: Boundary-Matching Network for Temporal Action Proposal Generation\" <https://arxiv.org/abs/1907.09702>`_\n    Args:\n        tscale (int): sequence length, default 100.\n        dscale (int): max duration length, default 100.\n        prop_boundary_ratio (float): ratio of expanded temporal region in proposal boundary, default 0.5.\n        num_sample (int): number of samples betweent starting boundary and ending boundary of each propoasl, default 32.\n        num_sample_perbin (int):  number of selected points in each sample, default 3.\n    \"\"\"\n    def __init__(\n        self,\n        tscale,\n        dscale,\n        prop_boundary_ratio,\n        num_sample,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/bmn.py:78-103"
+    },
+    "6315": {
+        "file_id": 492,
+        "content": "This code defines a BMN class as a Paddle.ai layer implementing the BMN model for temporal action proposal generation from the paper \"BMN: Boundary-Matching Network for Temporal Action Proposal Generation\". It has parameters tscale, dscale, prop_boundary_ratio, num_sample, and num_sample_perbin which determine the sequence length, max duration length, ratio of expanded temporal region in proposal boundary, number of samples between starting and ending boundaries of each proposal, and number of selected points in each sample respectively. The code also initializes a ParamAttr with Uniform initializer for weight initialization.",
+        "type": "comment"
+    },
+    "6316": {
+        "file_id": 492,
+        "content": "        num_sample_perbin,\n        feat_dim=400,\n    ):\n        super(BMN, self).__init__()\n        #init config\n        self.feat_dim = feat_dim\n        self.tscale = tscale\n        self.dscale = dscale\n        self.prop_boundary_ratio = prop_boundary_ratio\n        self.num_sample = num_sample\n        self.num_sample_perbin = num_sample_perbin\n        self.hidden_dim_1d = 256\n        self.hidden_dim_2d = 128\n        self.hidden_dim_3d = 512\n        # Base Module\n        self.b_conv1 = paddle.nn.Conv1D(\n            in_channels=self.feat_dim,\n            out_channels=self.hidden_dim_1d,\n            kernel_size=3,\n            padding=1,\n            groups=4,\n            weight_attr=init_params('Base_1_w', self.feat_dim, 3),\n            bias_attr=init_params('Base_1_b', self.feat_dim, 3))\n        self.b_conv1_act = paddle.nn.ReLU()\n        self.b_conv2 = paddle.nn.Conv1D(\n            in_channels=self.hidden_dim_1d,\n            out_channels=self.hidden_dim_1d,\n            kernel_size=3,\n            padding=1,\n            groups=4,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/bmn.py:104-137"
+    },
+    "6317": {
+        "file_id": 492,
+        "content": "This code defines the BMN class, which is a backbone model. It initializes parameters and includes convolutional layers with ReLU activation functions for feature extraction. The code also includes instance variables for controlling the model's behavior and dimensionality of the hidden states.",
+        "type": "comment"
+    },
+    "6318": {
+        "file_id": 492,
+        "content": "            weight_attr=init_params('Base_2_w', self.hidden_dim_1d, 3),\n            bias_attr=init_params('Base_2_b', self.hidden_dim_1d, 3))\n        self.b_conv2_act = paddle.nn.ReLU()\n        # Temporal Evaluation Module\n        self.ts_conv1 = paddle.nn.Conv1D(\n            in_channels=self.hidden_dim_1d,\n            out_channels=self.hidden_dim_1d,\n            kernel_size=3,\n            padding=1,\n            groups=4,\n            weight_attr=init_params('TEM_s1_w', self.hidden_dim_1d, 3),\n            bias_attr=init_params('TEM_s1_b', self.hidden_dim_1d, 3))\n        self.ts_conv1_act = paddle.nn.ReLU()\n        self.ts_conv2 = paddle.nn.Conv1D(\n            in_channels=self.hidden_dim_1d,\n            out_channels=1,\n            kernel_size=1,\n            padding=0,\n            groups=1,\n            weight_attr=init_params('TEM_s2_w', self.hidden_dim_1d, 1),\n            bias_attr=init_params('TEM_s2_b', self.hidden_dim_1d, 1))\n        self.ts_conv2_act = paddle.nn.Sigmoid()\n        self.te_conv1 = paddle.nn.Conv1D(",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/bmn.py:138-163"
+    },
+    "6319": {
+        "file_id": 492,
+        "content": "This code defines a Conv1D block for the BMN model, including an input layer, a temporal evaluation module, and two convolutional layers with ReLU activation functions. The weights and biases are initialized using the 'init_params' function.",
+        "type": "comment"
+    },
+    "6320": {
+        "file_id": 492,
+        "content": "            in_channels=self.hidden_dim_1d,\n            out_channels=self.hidden_dim_1d,\n            kernel_size=3,\n            padding=1,\n            groups=4,\n            weight_attr=init_params('TEM_e1_w', self.hidden_dim_1d, 3),\n            bias_attr=init_params('TEM_e1_b', self.hidden_dim_1d, 3))\n        self.te_conv1_act = paddle.nn.ReLU()\n        self.te_conv2 = paddle.nn.Conv1D(\n            in_channels=self.hidden_dim_1d,\n            out_channels=1,\n            kernel_size=1,\n            padding=0,\n            groups=1,\n            weight_attr=init_params('TEM_e2_w', self.hidden_dim_1d, 1),\n            bias_attr=init_params('TEM_e2_b', self.hidden_dim_1d, 1))\n        self.te_conv2_act = paddle.nn.Sigmoid()\n        #Proposal Evaluation Module\n        self.p_conv1 = paddle.nn.Conv1D(\n            in_channels=self.hidden_dim_1d,\n            out_channels=self.hidden_dim_2d,\n            kernel_size=3,\n            padding=1,\n            groups=1,\n            weight_attr=init_params('PEM_1d_w', self.hidden_dim_1d, 3),",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/bmn.py:164-189"
+    },
+    "6321": {
+        "file_id": 492,
+        "content": "This code initializes the TEM and PEM modules of a backbone network. It defines several convolutional layers with specific configurations for each module, followed by activation functions. The weight and bias attributes are initialized using the init_params function.",
+        "type": "comment"
+    },
+    "6322": {
+        "file_id": 492,
+        "content": "            bias_attr=init_params('PEM_1d_b', self.hidden_dim_1d, 3))\n        self.p_conv1_act = paddle.nn.ReLU()\n        # init to speed up\n        sample_mask = get_interp1d_mask(self.tscale, self.dscale,\n                                        self.prop_boundary_ratio,\n                                        self.num_sample, self.num_sample_perbin)\n        self.sample_mask = paddle.to_tensor(sample_mask)\n        self.sample_mask.stop_gradient = True\n        self.p_conv3d1 = paddle.nn.Conv3D(\n            in_channels=128,\n            out_channels=self.hidden_dim_3d,\n            kernel_size=(self.num_sample, 1, 1),\n            stride=(self.num_sample, 1, 1),\n            padding=0,\n            weight_attr=ParamAttr(name=\"PEM_3d1_w\"),\n            bias_attr=ParamAttr(name=\"PEM_3d1_b\"))\n        self.p_conv3d1_act = paddle.nn.ReLU()\n        self.p_conv2d1 = paddle.nn.Conv2D(\n            in_channels=512,\n            out_channels=self.hidden_dim_2d,\n            kernel_size=1,\n            stride=1,\n            padding=0,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/bmn.py:190-215"
+    },
+    "6323": {
+        "file_id": 492,
+        "content": "This code initializes a backbone model for the BMN architecture. It includes convolutional layers, ReLU activations, and a tensor mask for sampling. The model uses 1D, 2D, and 3D convolutions with specific parameters, as well as applies bias attributes to the weights and biases of the convolutions.",
+        "type": "comment"
+    },
+    "6324": {
+        "file_id": 492,
+        "content": "            weight_attr=ParamAttr(name=\"PEM_2d1_w\"),\n            bias_attr=ParamAttr(name=\"PEM_2d1_b\"))\n        self.p_conv2d1_act = paddle.nn.ReLU()\n        self.p_conv2d2 = paddle.nn.Conv2D(\n            in_channels=128,\n            out_channels=self.hidden_dim_2d,\n            kernel_size=3,\n            stride=1,\n            padding=1,\n            weight_attr=ParamAttr(name=\"PEM_2d2_w\"),\n            bias_attr=ParamAttr(name=\"PEM_2d2_b\"))\n        self.p_conv2d2_act = paddle.nn.ReLU()\n        self.p_conv2d3 = paddle.nn.Conv2D(\n            in_channels=128,\n            out_channels=self.hidden_dim_2d,\n            kernel_size=3,\n            stride=1,\n            padding=1,\n            weight_attr=ParamAttr(name=\"PEM_2d3_w\"),\n            bias_attr=ParamAttr(name=\"PEM_2d3_b\"))\n        self.p_conv2d3_act = paddle.nn.ReLU()\n        self.p_conv2d4 = paddle.nn.Conv2D(\n            in_channels=128,\n            out_channels=2,\n            kernel_size=1,\n            stride=1,\n            padding=0,\n            weight_attr=ParamAttr(name=\"PEM_2d4_w\"),",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/bmn.py:216-246"
+    },
+    "6325": {
+        "file_id": 492,
+        "content": "This code initializes a series of 2D convolutional layers with ReLU activation functions for the Batch Multi-Scale Network (BMSN) backbone in PaddleVideo. Each convolutional layer has a specified number of output channels, kernel size, and stride. The weights and biases for each layer are defined using ParamAttr.",
+        "type": "comment"
+    },
+    "6326": {
+        "file_id": 492,
+        "content": "            bias_attr=ParamAttr(name=\"PEM_2d4_b\"))\n        self.p_conv2d4_act = paddle.nn.Sigmoid()\n    def init_weights(self):\n        pass\n    def forward(self, x):\n        #Base Module\n        x = self.b_conv1(x)\n        x = self.b_conv1_act(x)\n        x = self.b_conv2(x)\n        x = self.b_conv2_act(x)\n        #TEM\n        xs = self.ts_conv1(x)\n        xs = self.ts_conv1_act(xs)\n        xs = self.ts_conv2(xs)\n        xs = self.ts_conv2_act(xs)\n        xs = paddle.squeeze(xs, axis=[1])\n        xe = self.te_conv1(x)\n        xe = self.te_conv1_act(xe)\n        xe = self.te_conv2(xe)\n        xe = self.te_conv2_act(xe)\n        xe = paddle.squeeze(xe, axis=[1])\n        #PEM\n        xp = self.p_conv1(x)\n        xp = self.p_conv1_act(xp)\n        #BM layer\n        xp = paddle.matmul(xp, self.sample_mask)\n        xp = paddle.reshape(xp, shape=[0, 0, -1, self.dscale, self.tscale])\n        xp = self.p_conv3d1(xp)\n        xp = self.p_conv3d1_act(xp)\n        xp = paddle.squeeze(xp, axis=[2])\n        xp = self.p_conv2d1(xp)\n        xp = self.p_conv2d1_act(xp)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/bmn.py:247-283"
+    },
+    "6327": {
+        "file_id": 492,
+        "content": "The code is defining a backbone model for video analysis. It consists of base, TEM (temporal-inspired module), PEM (position-inspired module), and BM (block-matching module) layers. The layers are sequentially applied to the input data with appropriate activation functions and reshaping operations in between. Finally, it performs matrix multiplication with a sample mask and applies additional convolutions and activations.",
+        "type": "comment"
+    },
+    "6328": {
+        "file_id": 492,
+        "content": "        xp = self.p_conv2d2(xp)\n        xp = self.p_conv2d2_act(xp)\n        xp = self.p_conv2d3(xp)\n        xp = self.p_conv2d3_act(xp)\n        xp = self.p_conv2d4(xp)\n        xp = self.p_conv2d4_act(xp)\n        return xp, xs, xe",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/bmn.py:284-290"
+    },
+    "6329": {
+        "file_id": 492,
+        "content": "This code is part of a neural network backbone model. It applies multiple convolution layers with activation functions and returns the processed input xp, along with other variables xs and xe.",
+        "type": "comment"
+    },
+    "6330": {
+        "file_id": 493,
+        "content": "/paddlevideo/modeling/backbones/cfbi.py",
+        "type": "filepath"
+    },
+    "6331": {
+        "file_id": 493,
+        "content": "The code imports libraries and defines an FPN class with three layers, creates a backbone model using convolutional layers and GroupNorm. It also defines a \"CFBI\" class that utilizes DeepLab for feature extraction and FPN to combine multi-scale features, returning extracted features at 4x, 8x, 16x scales along with low-level features using a forward function.",
+        "type": "summary"
+    },
+    "6332": {
+        "file_id": 493,
+        "content": "# copyright (c) 2021 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport numpy as np\nimport paddle\nimport paddle.nn as nn\nimport paddle.nn.functional as F\nfrom ..registry import BACKBONES\nfrom .deeplab import DeepLab\nclass FPN(nn.Layer):\n    \"\"\"FPN Layer\"\"\"\n    def __init__(self, in_dim_4x, in_dim_8x, in_dim_16x, out_dim):\n        super(FPN, self).__init__()\n        self.toplayer = self._make_layer(in_dim_16x, out_dim)\n        self.latlayer1 = self._make_layer(in_dim_8x, out_dim)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/cfbi.py:1-28"
+    },
+    "6333": {
+        "file_id": 493,
+        "content": "This code imports necessary libraries and defines a class called FPN, which is an FPN layer in a neural network. It has three layers: toplayer, latlayer1, and latlayer2, each with specific input dimensions and output dimensions. The _make_layer function is used to create these layers.",
+        "type": "comment"
+    },
+    "6334": {
+        "file_id": 493,
+        "content": "        self.latlayer2 = self._make_layer(in_dim_4x, out_dim)\n        self.smooth1 = self._make_layer(out_dim,\n                                        out_dim,\n                                        kernel_size=3,\n                                        padding=1)\n        self.smooth2 = self._make_layer(out_dim,\n                                        out_dim,\n                                        kernel_size=3,\n                                        padding=1)\n    def _make_layer(self, in_dim, out_dim, kernel_size=1, padding=0):\n        return nn.Sequential(\n            nn.Conv2D(in_dim,\n                      out_dim,\n                      kernel_size=kernel_size,\n                      stride=1,\n                      padding=padding,\n                      bias_attr=False),\n            nn.GroupNorm(num_groups=32, num_channels=out_dim))\n    def forward(self, x_4x, x_8x, x_16x):\n        \"\"\" forward function\"\"\"\n        x_16x = self.toplayer(x_16x)\n        x_8x = self.latlayer1(x_8x)\n        x_4x = self.latlayer2(x_4x)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/cfbi.py:29-54"
+    },
+    "6335": {
+        "file_id": 493,
+        "content": "The code defines a backbone model with two convolutional layers followed by GroupNorm layer. The forward function applies the defined layers to input images of size 4x, 8x, and 16x.",
+        "type": "comment"
+    },
+    "6336": {
+        "file_id": 493,
+        "content": "        x_8x = x_8x + F.interpolate(\n            x_16x, size=x_8x.shape[-2:], mode='bilinear', align_corners=True)\n        x_4x = x_4x + F.interpolate(\n            x_8x, size=x_4x.shape[-2:], mode='bilinear', align_corners=True)\n        x_8x = self.smooth1(x_8x)\n        x_4x = self.smooth2(x_4x)\n        return F.relu(x_4x), F.relu(x_8x), F.relu(x_16x)\n@BACKBONES.register()\nclass CFBI(nn.Layer):\n    \"\"\"CFBI plus backbone\"\"\"\n    def __init__(self,\n                 backbone='resnet',\n                 freeze_bn=True,\n                 model_aspp_outdim=256,\n                 in_dim_8x=512,\n                 model_semantic_embedding_dim=256):  #,epsilon=1e-05):\n        super(CFBI, self).__init__()\n        #self.epsilon = epsilon\n        self.feature_extracter = DeepLab(backbone=backbone, freeze_bn=freeze_bn)\n        self.fpn = FPN(in_dim_4x=model_aspp_outdim,\n                       in_dim_8x=in_dim_8x,\n                       in_dim_16x=model_aspp_outdim,\n                       out_dim=model_semantic_embedding_dim)\n    def forward(self, x):",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/cfbi.py:56-84"
+    },
+    "6337": {
+        "file_id": 493,
+        "content": "This code defines a class \"CFBI\" which is a backbone model for feature extraction. It utilizes DeepLab as the feature extractor and FPN (Feature Pyramid Network) to combine features from different scales. The input image x is processed through the feature extracter and the output is passed through the fpn to obtain three outputs at 4x, 8x and 16x scales. These outputs are then interpolated and smoothed before being returned after applying ReLU activation.",
+        "type": "comment"
+    },
+    "6338": {
+        "file_id": 493,
+        "content": "        \"\"\"forward function\"\"\"\n        x, aspp_x, low_level, mid_level = self.feature_extracter(x, True)\n        x_4x, x_8x, x_16x = self.fpn(x, mid_level, aspp_x)\n        return x_4x, x_8x, x_16x, low_level",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/cfbi.py:85-88"
+    },
+    "6339": {
+        "file_id": 493,
+        "content": "This code defines a forward function that takes an input image and uses the feature_extracter and fpn modules to extract features at different scales. It returns the extracted features at 4x, 8x, and 16x scales along with the low-level features.",
+        "type": "comment"
+    },
+    "6340": {
+        "file_id": 494,
+        "content": "/paddlevideo/modeling/backbones/ctrgcn.py",
+        "type": "filepath"
+    },
+    "6341": {
+        "file_id": 494,
+        "content": "The code presents a CTRGCN backbone for video models, initializes a CTRGC model with batch normalization layers and NTUGraph class, defines a neural network model with TCN_GCN_unit, and includes a final layer 10 (l10) to process input and return output.",
+        "type": "summary"
+    },
+    "6342": {
+        "file_id": 494,
+        "content": "# Copyright (c) 2021  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport paddle\nimport paddle.nn as nn\nimport paddle.nn.functional as F\nimport numpy as np\nfrom ..registry import BACKBONES\nfrom ..weight_init import weight_init_\ndef conv_init(conv):\n    if conv.weight is not None:\n        weight_init_(conv.weight, 'kaiming_normal_', mode='fan_in')\n    if conv.bias is not None:\n        nn.initializer.Constant(value=0.0)(conv.bias)\ndef bn_init(bn, scale):\n    nn.initializer.Constant(value=float(scale))(bn.weight)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/ctrgcn.py:1-31"
+    },
+    "6343": {
+        "file_id": 494,
+        "content": "This code imports necessary libraries, defines a convolution initialization function and a batch normalization initialization function. It also sets up scale values for the batch normalization function and registers backbone models in the registry.",
+        "type": "comment"
+    },
+    "6344": {
+        "file_id": 494,
+        "content": "    nn.initializer.Constant(value=0.0)(bn.bias)\ndef einsum(x1, x3):\n    \"\"\"paddle.einsum only support in dynamic graph mode.\n    x1 : n c u v\n    x2 : n c t v\n    \"\"\"\n    n, c, u, v1 = x1.shape\n    n, c, t, v3 = x3.shape\n    assert (v1 == v3), \"Args of einsum not match!\"\n    x1 = paddle.transpose(x1, perm=[0, 1, 3, 2])  # n c v u\n    y = paddle.matmul(x3, x1)\n    # out: n c t u\n    return y\nclass CTRGC(nn.Layer):\n    def __init__(self,\n                 in_channels,\n                 out_channels,\n                 rel_reduction=8,\n                 mid_reduction=1):\n        super(CTRGC, self).__init__()\n        self.in_channels = in_channels\n        self.out_channels = out_channels\n        if in_channels == 3 or in_channels == 9:\n            self.rel_channels = 8\n            self.mid_channels = 16\n        else:\n            self.rel_channels = in_channels // rel_reduction\n            self.mid_channels = in_channels // mid_reduction\n        self.conv1 = nn.Conv2D(self.in_channels,\n                               self.rel_channels,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/ctrgcn.py:32-66"
+    },
+    "6345": {
+        "file_id": 494,
+        "content": "Defines a CTRGC class, a type of convolutional neural network layer. It has two reductions: rel_reduction (defaults to 8) and mid_reduction (defaults to 1). Depending on the input channels, it assigns different channel numbers for rel_channels (always 8 if in_channels is 3 or 9; otherwise based on rel_reduction). It also initializes a Conv2D layer with the assigned channel numbers.",
+        "type": "comment"
+    },
+    "6346": {
+        "file_id": 494,
+        "content": "                               kernel_size=1)\n        self.conv2 = nn.Conv2D(self.in_channels,\n                               self.rel_channels,\n                               kernel_size=1)\n        self.conv3 = nn.Conv2D(self.in_channels,\n                               self.out_channels,\n                               kernel_size=1)\n        self.conv4 = nn.Conv2D(self.rel_channels,\n                               self.out_channels,\n                               kernel_size=1)\n        self.tanh = nn.Tanh()\n    def init_weights(self):\n        \"\"\"Initiate the parameters.\n        \"\"\"\n        for m in self.sublayers():\n            if isinstance(m, nn.Conv2D):\n                conv_init(m)\n            elif isinstance(m, nn.BatchNorm2D):\n                bn_init(m, 1)\n    def forward(self, x, A=None, alpha=1):\n        x1, x2, x3 = self.conv1(x).mean(-2), self.conv2(x).mean(-2), self.conv3(\n            x)\n        x1 = self.tanh(x1.unsqueeze(-1) - x2.unsqueeze(-2))\n        x1 = self.conv4(x1) * alpha + (\n            A.unsqueeze(0).unsqueeze(0) if A is not None else 0)  # N,C,V,V",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/ctrgcn.py:67-93"
+    },
+    "6347": {
+        "file_id": 494,
+        "content": "This code defines a Convolutional Temporal Relational Graph Convolutional Network (CTRGCN) backbone for a video model. It initializes weights and performs forward pass calculations. It uses convolution layers, tanh activation function, and optionally includes an additional input A.",
+        "type": "comment"
+    },
+    "6348": {
+        "file_id": 494,
+        "content": "        # We only support 'paddle.einsum()' in dynamic graph mode, if use in infer model please implement self.\n        # x1 = paddle.einsum('ncuv,nctv->nctu', x1, x3)\n        x1 = einsum(x1, x3)\n        return x1\nclass TemporalConv(nn.Layer):\n    def __init__(self,\n                 in_channels,\n                 out_channels,\n                 kernel_size,\n                 stride=1,\n                 dilation=1):\n        super(TemporalConv, self).__init__()\n        pad = (kernel_size + (kernel_size - 1) * (dilation - 1) - 1) // 2\n        self.conv = nn.Conv2D(in_channels,\n                              out_channels,\n                              kernel_size=(kernel_size, 1),\n                              padding=(pad, 0),\n                              stride=(stride, 1),\n                              dilation=(dilation, 1))\n        self.bn = nn.BatchNorm2D(out_channels)\n    def forward(self, x):\n        x = self.conv(x)\n        x = self.bn(x)\n        return x\nclass MultiScale_TemporalConv(nn.Layer):\n    def __init__(self,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/ctrgcn.py:94-127"
+    },
+    "6349": {
+        "file_id": 494,
+        "content": "Code snippet defines a class TemporalConv, which is a 2D convolutional layer for temporal data. It inherits from the paddle.nn.Layer and includes an instance of nn.Conv2D and nn.BatchNorm2D layers. The MultiScale_TemporalConv class is also defined but its implementation is missing, suggesting it extends TemporalConv with multiple temporal convolution blocks for multi-scale processing.",
+        "type": "comment"
+    },
+    "6350": {
+        "file_id": 494,
+        "content": "                 in_channels,\n                 out_channels,\n                 kernel_size=3,\n                 stride=1,\n                 dilations=[1, 2, 3, 4],\n                 residual=True,\n                 residual_kernel_size=1):\n        super(MultiScale_TemporalConv, self).__init__()\n        assert out_channels % (\n            len(dilations) +\n            2) == 0, '# out channels should be multiples of # branches'\n        # Multiple branches of temporal convolution\n        self.num_branches = len(dilations) + 2\n        branch_channels = out_channels // self.num_branches\n        if type(kernel_size) == list:\n            assert len(kernel_size) == len(dilations)\n        else:\n            kernel_size = [kernel_size] * len(dilations)\n        # Temporal Convolution branches\n        self.branches = nn.LayerList([\n            nn.Sequential(\n                nn.Conv2D(in_channels,\n                          branch_channels,\n                          kernel_size=1,\n                          padding=0),\n                nn.BatchNorm2D(branch_channels),",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/ctrgcn.py:128-155"
+    },
+    "6351": {
+        "file_id": 494,
+        "content": "This code defines a MultiScale_TemporalConv layer with multiple branches of temporal convolution. The number of branches is determined by the dilations, and out channels should be multiples of the number of branches for correct operation. Each branch has its own kernel size, and there are Conv2D layers followed by BatchNorm2D for each branch.",
+        "type": "comment"
+    },
+    "6352": {
+        "file_id": 494,
+        "content": "                nn.ReLU(),\n                TemporalConv(branch_channels,\n                             branch_channels,\n                             kernel_size=ks,\n                             stride=stride,\n                             dilation=dilation),\n            ) for ks, dilation in zip(kernel_size, dilations)\n        ])\n        # Additional Max & 1x1 branch\n        self.branches.append(\n            nn.Sequential(\n                nn.Conv2D(in_channels,\n                          branch_channels,\n                          kernel_size=1,\n                          padding=0), nn.BatchNorm2D(branch_channels),\n                nn.ReLU(),\n                nn.MaxPool2D(kernel_size=(3, 1),\n                             stride=(stride, 1),\n                             padding=(1, 0)), nn.BatchNorm2D(branch_channels)))\n        self.branches.append(\n            nn.Sequential(\n                nn.Conv2D(in_channels,\n                          branch_channels,\n                          kernel_size=1,\n                          padding=0,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/ctrgcn.py:156-182"
+    },
+    "6353": {
+        "file_id": 494,
+        "content": "This code defines a Conv-Temporal RGN backbone model for video analysis. It consists of multiple branches with various convolutional and pooling layers, including TemporalConv and MaxPool2D operations. The branches are appended to the model and initialized with respective settings such as kernel size, dilation rate, etc.",
+        "type": "comment"
+    },
+    "6354": {
+        "file_id": 494,
+        "content": "                          stride=(stride, 1)), nn.BatchNorm2D(branch_channels)))\n        # Residual connection\n        if not residual:\n            self.residual = lambda x: 0\n        elif (in_channels == out_channels) and (stride == 1):\n            self.residual = lambda x: x\n        else:\n            self.residual = TemporalConv(in_channels,\n                                         out_channels,\n                                         kernel_size=residual_kernel_size,\n                                         stride=stride)\n    def init_weights(self):\n        \"\"\"Initiate the parameters.\n        \"\"\"\n        # initialize\n        for m in self.sublayers():\n            if isinstance(m, nn.Conv2D):\n                conv_init(m)\n            elif isinstance(m, nn.BatchNorm2D):\n                weight_init_(m.weight, 'Normal', std=0.02, mean=1.0)\n                nn.initializer.Constant(value=0.0)(m.bias)\n    def forward(self, x):\n        # Input dim: (N,C,T,V)\n        res = self.residual(x)\n        branch_outs = []\n        for tempconv in self.branches:",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/ctrgcn.py:183-211"
+    },
+    "6355": {
+        "file_id": 494,
+        "content": "This code defines a class for a Conv-Temporal Residual Group Convolutional Network (CTRGCN) backbone. The class contains a constructor that sets up the architecture, an initialization function to set the weights, and a forward pass function for feeding data into the model. It performs residual connections using temporal convolutions and has batch normalization layers.",
+        "type": "comment"
+    },
+    "6356": {
+        "file_id": 494,
+        "content": "            out = tempconv(x)\n            branch_outs.append(out)\n        out = paddle.concat(branch_outs, axis=1)\n        out += res\n        return out\nclass unit_tcn(nn.Layer):\n    def __init__(self, in_channels, out_channels, kernel_size=9, stride=1):\n        super(unit_tcn, self).__init__()\n        pad = int((kernel_size - 1) / 2)\n        self.conv = nn.Conv2D(in_channels,\n                              out_channels,\n                              kernel_size=(kernel_size, 1),\n                              padding=(pad, 0),\n                              stride=(stride, 1))\n        self.bn = nn.BatchNorm2D(out_channels)\n        self.relu = nn.ReLU()\n        conv_init(self.conv)\n        bn_init(self.bn, 1)\n    def forward(self, x):\n        x = self.bn(self.conv(x))\n        return x\nclass unit_gcn(nn.Layer):\n    def __init__(self,\n                 in_channels,\n                 out_channels,\n                 A,\n                 coff_embedding=4,\n                 adaptive=True,\n                 residual=True):\n        super(unit_gcn, self).__init__()",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/ctrgcn.py:212-250"
+    },
+    "6357": {
+        "file_id": 494,
+        "content": "This code defines two classes: \"unit_tcn\" and \"unit_gcn\". The \"unit_tcn\" class is a Temporal Convolutional Network unit that performs temporal convolution with batch normalization and ReLU activation. The \"unit_gcn\" class is a Graph Convolutional Network unit that takes input channels, output channels, adjacency matrix A, coefficient embedding, adaptive flag, and residual flag as parameters.",
+        "type": "comment"
+    },
+    "6358": {
+        "file_id": 494,
+        "content": "        inter_channels = out_channels // coff_embedding\n        self.inter_c = inter_channels\n        self.out_c = out_channels\n        self.in_c = in_channels\n        self.adaptive = adaptive\n        self.num_subset = A.shape[0]\n        self.convs = nn.LayerList()\n        for i in range(self.num_subset):\n            self.convs.append(CTRGC(in_channels, out_channels))\n        if residual:\n            if in_channels != out_channels:\n                self.down = nn.Sequential(\n                    nn.Conv2D(in_channels, out_channels, 1),\n                    nn.BatchNorm2D(out_channels))\n            else:\n                self.down = lambda x: x\n        else:\n            self.down = lambda x: 0\n        if self.adaptive:\n            pa_param = paddle.ParamAttr(\n                initializer=paddle.nn.initializer.Assign(A.astype(np.float32)))\n            self.PA = paddle.create_parameter(shape=A.shape,\n                                              dtype='float32',\n                                              attr=pa_param)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/ctrgcn.py:251-276"
+    },
+    "6359": {
+        "file_id": 494,
+        "content": "This code initializes a CTRGC model with specified input and output channels. It also includes optional residual connection, batch normalization, and adaptive parameterization. The number of subsets is determined by the shape of A. If adaptive is set to True, it creates a trainable parameter for the subset of weights.",
+        "type": "comment"
+    },
+    "6360": {
+        "file_id": 494,
+        "content": "        else:\n            A_tensor = paddle.to_tensor(A, dtype=\"float32\")\n            self.A = paddle.create_parameter(\n                shape=A_tensor.shape,\n                dtype='float32',\n                default_initializer=paddle.nn.initializer.Assign(A_tensor))\n            self.A.stop_gradient = True\n        alpha_tensor = paddle.to_tensor(np.zeros(1), dtype=\"float32\")\n        self.alpha = paddle.create_parameter(\n            shape=alpha_tensor.shape,\n            dtype='float32',\n            default_initializer=paddle.nn.initializer.Assign(alpha_tensor))\n        self.bn = nn.BatchNorm2D(out_channels)\n        self.soft = nn.Softmax(-2)\n        self.relu = nn.ReLU()\n    def init_weights(self):\n        for m in self.sublayers():\n            if isinstance(m, nn.Conv2D):\n                conv_init(m)\n            elif isinstance(m, nn.BatchNorm2D):\n                bn_init(m, 1)\n        bn_init(self.bn, 1e-6)\n    def forward(self, x):\n        y = None\n        if self.adaptive:\n            A = self.PA\n        else:\n            A = self.A.cuda(x.get_device())",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/ctrgcn.py:277-306"
+    },
+    "6361": {
+        "file_id": 494,
+        "content": "This code initializes the parameters A and alpha, sets up batch normalization (bn) layers with Softmax and ReLU activation functions, initializes weights using conv_init and bn_init functions, and defines a forward pass that adapts A based on the adaptive flag.",
+        "type": "comment"
+    },
+    "6362": {
+        "file_id": 494,
+        "content": "        for i in range(self.num_subset):\n            z = self.convs[i](x, A[i], self.alpha)\n            y = z + y if y is not None else z\n        y = self.bn(y)\n        y += self.down(x)\n        y = self.relu(y)\n        return y\nclass TCN_GCN_unit(nn.Layer):\n    def __init__(self,\n                 in_channels,\n                 out_channels,\n                 A,\n                 stride=1,\n                 residual=True,\n                 adaptive=True,\n                 kernel_size=5,\n                 dilations=[1, 2]):\n        super(TCN_GCN_unit, self).__init__()\n        self.gcn1 = unit_gcn(in_channels, out_channels, A, adaptive=adaptive)\n        self.tcn1 = MultiScale_TemporalConv(out_channels,\n                                            out_channels,\n                                            kernel_size=kernel_size,\n                                            stride=stride,\n                                            dilations=dilations,\n                                            residual=False)\n        self.relu = nn.ReLU()",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/ctrgcn.py:307-335"
+    },
+    "6363": {
+        "file_id": 494,
+        "content": "This code defines a TCN_GCN_unit class, which is a combination of Graph Convolutional Network (GCN) and Temporal Convolution units. The unit takes input channels, output channels, adjacency matrix A, stride, residual connection, adaptive flag, kernel size, and dilations as parameters. It initializes the GCN and TemporalConv layers, followed by a ReLU activation function.",
+        "type": "comment"
+    },
+    "6364": {
+        "file_id": 494,
+        "content": "        if not residual:\n            self.residual = lambda x: 0\n        elif (in_channels == out_channels) and (stride == 1):\n            self.residual = lambda x: x\n        else:\n            self.residual = unit_tcn(in_channels,\n                                     out_channels,\n                                     kernel_size=1,\n                                     stride=stride)\n    def forward(self, x):\n        y = self.relu(self.tcn1(self.gcn1(x)) + self.residual(x))\n        return y\nclass NTUDGraph:\n    def __init__(self, labeling_mode='spatial'):\n        num_node = 25\n        self_link = [(i, i) for i in range(num_node)]\n        inward_ori_index = [(1, 2), (2, 21), (3, 21), (4, 3), (5, 21), (6, 5),\n                            (7, 6), (8, 7), (9, 21), (10, 9), (11, 10),\n                            (12, 11), (13, 1), (14, 13), (15, 14), (16, 15),\n                            (17, 1), (18, 17), (19, 18), (20, 19), (22, 23),\n                            (23, 8), (24, 25), (25, 12)]\n        inward = [(i - 1, j - 1) for (i, j) in inward_ori_index]",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/ctrgcn.py:336-363"
+    },
+    "6365": {
+        "file_id": 494,
+        "content": "The code defines a `CTRGCN` class with a `forward` method and an `NTUDGraph` class. The `forward` method takes input `x`, applies `relu` activation and adds the residual output of a `unit_tcn` layer or simply passes through if specified conditions are met. The `NTUDGraph` initializes with a fixed number of nodes, self-links, and inward connections.",
+        "type": "comment"
+    },
+    "6366": {
+        "file_id": 494,
+        "content": "        outward = [(j, i) for (i, j) in inward]\n        neighbor = inward + outward\n        self.num_node = num_node\n        self.self_link = self_link\n        self.inward = inward\n        self.outward = outward\n        self.neighbor = neighbor\n        self.A = self.get_adjacency_matrix(labeling_mode)\n    def edge2mat(self, link, num_node):\n        A = np.zeros((num_node, num_node))\n        for i, j in link:\n            A[j, i] = 1\n        return A\n    def normalize_digraph(self, A):\n        Dl = np.sum(A, 0)\n        h, w = A.shape\n        Dn = np.zeros((w, w))\n        for i in range(w):\n            if Dl[i] > 0:\n                Dn[i, i] = Dl[i]**(-1)\n        AD = np.dot(A, Dn)\n        return AD\n    def get_spatial_graph(self, num_node, self_link, inward, outward):\n        I = self.edge2mat(self_link, num_node)\n        In = self.normalize_digraph(self.edge2mat(inward, num_node))\n        Out = self.normalize_digraph(self.edge2mat(outward, num_node))\n        A = np.stack((I, In, Out))\n        return A\n    def get_adjacency_matrix(self, labeling_mode=None):",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/ctrgcn.py:364-397"
+    },
+    "6367": {
+        "file_id": 494,
+        "content": "Function `get_adjacency_matrix` generates adjacency matrices for the model. The function takes a parameter `labeling_mode`, which is optional. It initializes a set of variables: `inward`, `outward`, and `neighbor`. These variables store the connections between nodes in both directions. Then, it calls other helper functions to generate normalized adjacency matrices for self-links, inward edges, outward edges, and finally returns an array containing all these matrices. This is useful for inputting into a model that requires specific formatted input data.",
+        "type": "comment"
+    },
+    "6368": {
+        "file_id": 494,
+        "content": "        if labeling_mode is None:\n            return self.A\n        if labeling_mode == 'spatial':\n            A = self.get_spatial_graph(self.num_node, self.self_link,\n                                       self.inward, self.outward)\n        else:\n            raise ValueError()\n        return A\n@BACKBONES.register()\nclass CTRGCN(nn.Layer):\n    \"\"\"\n    CTR-GCN model from:\n    `\"Channel-wise Topology Refinement Graph Convolution for Skeleton-Based Action Recognition\" <https://arxiv.org/abs/2107.12213>`_\n    Args:\n        num_point: int, numbers of sketeton point.\n        num_person: int, numbers of person.\n        base_channel: int, model's hidden dim.\n        graph: str, sketeton adjacency matrix name.\n        graph_args: dict, sketeton adjacency graph class args.\n        in_channels: int, channels of vertex coordinate. 2 for (x,y), 3 for (x,y,z). Default 3.\n        adaptive: bool, if adjacency matrix can adaptive.\n    \"\"\"\n    def __init__(self,\n                 num_point=25,\n                 num_person=2,\n                 base_channel=64,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/ctrgcn.py:398-426"
+    },
+    "6369": {
+        "file_id": 494,
+        "content": "This code is part of the CTRGCN class in the PaddleVideo library, which represents a specific type of model for skeleton-based action recognition. The function within this code block is used to return an adjacency matrix (A) based on a given labeling mode. If no labeling mode is specified, it returns the adjacency matrix from the instance variables. If the labeling mode is set to 'spatial', it calls another function to generate a spatial adjacency graph. Otherwise, if an invalid labeling mode is provided, it raises a ValueError exception.",
+        "type": "comment"
+    },
+    "6370": {
+        "file_id": 494,
+        "content": "                 graph='ntu_rgb_d',\n                 graph_args=dict(),\n                 in_channels=3,\n                 adaptive=True):\n        super(CTRGCN, self).__init__()\n        if graph == 'ntu_rgb_d':\n            self.graph = NTUDGraph(**graph_args)\n        else:\n            raise ValueError()\n        A = self.graph.A  # 3,25,25\n        self.num_point = num_point\n        self.data_bn = nn.BatchNorm1D(num_person * in_channels * num_point)\n        self.base_channel = base_channel\n        self.l1 = TCN_GCN_unit(in_channels,\n                               self.base_channel,\n                               A,\n                               residual=False,\n                               adaptive=adaptive)\n        self.l2 = TCN_GCN_unit(self.base_channel,\n                               self.base_channel,\n                               A,\n                               adaptive=adaptive)\n        self.l3 = TCN_GCN_unit(self.base_channel,\n                               self.base_channel,\n                               A,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/ctrgcn.py:427-455"
+    },
+    "6371": {
+        "file_id": 494,
+        "content": "This code defines the CTRGCN class, which initializes its graph and layers based on input parameters. It includes a batch normalization layer (data_bn) and three TCN_GCN_unit layers (l1, l2, l3). The graph is determined by the 'graph' parameter, with NTUDGraph used if 'ntu_rgb_d'. If another graph is provided, it raises a ValueError.",
+        "type": "comment"
+    },
+    "6372": {
+        "file_id": 494,
+        "content": "                               adaptive=adaptive)\n        self.l4 = TCN_GCN_unit(self.base_channel,\n                               self.base_channel,\n                               A,\n                               adaptive=adaptive)\n        self.l5 = TCN_GCN_unit(self.base_channel,\n                               self.base_channel * 2,\n                               A,\n                               stride=2,\n                               adaptive=adaptive)\n        self.l6 = TCN_GCN_unit(self.base_channel * 2,\n                               self.base_channel * 2,\n                               A,\n                               adaptive=adaptive)\n        self.l7 = TCN_GCN_unit(self.base_channel * 2,\n                               self.base_channel * 2,\n                               A,\n                               adaptive=adaptive)\n        self.l8 = TCN_GCN_unit(self.base_channel * 2,\n                               self.base_channel * 4,\n                               A,\n                               stride=2,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/ctrgcn.py:456-477"
+    },
+    "6373": {
+        "file_id": 494,
+        "content": "The code initializes six TCN_GCN_unit layers, each with different configurations, for a CTRGCN model. The first layer (l4) has the base channel as input and output. Following layers (l5 to l8) increase the number of channels or apply strides. This represents a deep TCN-GCN architecture with progressively increasing depth and downsampling.",
+        "type": "comment"
+    },
+    "6374": {
+        "file_id": 494,
+        "content": "                               adaptive=adaptive)\n        self.l9 = TCN_GCN_unit(self.base_channel * 4,\n                               self.base_channel * 4,\n                               A,\n                               adaptive=adaptive)\n        self.l10 = TCN_GCN_unit(self.base_channel * 4,\n                                self.base_channel * 4,\n                                A,\n                                adaptive=adaptive)\n    def init_weights(self):\n        bn_init(self.data_bn, 1)\n    def forward(self, x):\n        N, C, T, V, M = x.shape\n        x = paddle.transpose(x, perm=[0, 4, 3, 1, 2])\n        x = paddle.reshape(x, (N, M * V * C, T))\n        x = self.data_bn(x)\n        x = paddle.reshape(x, (N, M, V, C, T))\n        x = paddle.transpose(x, perm=(0, 1, 3, 4, 2))\n        x = paddle.reshape(x, (N * M, C, T, V))\n        x = self.l1(x)\n        x = self.l2(x)\n        x = self.l3(x)\n        x = self.l4(x)\n        x = self.l5(x)\n        x = self.l6(x)\n        x = self.l7(x)\n        x = self.l8(x)\n        x = self.l9(x)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/ctrgcn.py:478-511"
+    },
+    "6375": {
+        "file_id": 494,
+        "content": "This code defines a neural network model with multiple layers. It uses Paddle's TCN_GCN_unit in the last two layers. The init_weights function initializes batch normalization for the data_bn layer, and the forward function processes input through multiple layers before returning the final output.",
+        "type": "comment"
+    },
+    "6376": {
+        "file_id": 494,
+        "content": "        x = self.l10(x)\n        return x, N, M",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/ctrgcn.py:512-514"
+    },
+    "6377": {
+        "file_id": 494,
+        "content": "This code represents the final step of a neural network function. It applies layer 10 (l10) to input x, and returns both the updated x and the original N, M values. This function seems to be part of a larger model, as it references previous layers.",
+        "type": "comment"
+    },
+    "6378": {
+        "file_id": 495,
+        "content": "/paddlevideo/modeling/backbones/darknet.py",
+        "type": "filepath"
+    },
+    "6379": {
+        "file_id": 495,
+        "content": "This code defines a ConvBNLayer class and Darknet backbone, performing convolutions, pooling, and reorganization in a neural network. It concatenates results from two branches, applies more convolutions, and returns final output.",
+        "type": "summary"
+    },
+    "6380": {
+        "file_id": 495,
+        "content": "# Copyright (c) 2021  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport paddle\nfrom paddle import ParamAttr\nimport paddle.nn as nn\nimport paddle.nn.functional as F\nimport numpy as np\nclass ConvBNLayer(nn.Layer):\n    def __init__(self,\n                 input_channels,\n                 output_channels,\n                 filter_size,\n                 stride,\n                 padding,\n                 name=None):\n        super(ConvBNLayer, self).__init__()\n        self._conv = nn.Conv2D(",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/darknet.py:1-32"
+    },
+    "6381": {
+        "file_id": 495,
+        "content": "This code defines a ConvBNLayer class that inherits from nn.Layer and includes a Conv2D layer, Batch Normalization, and other parameters like input_channels, output_channels, filter_size, stride, padding, and name.",
+        "type": "comment"
+    },
+    "6382": {
+        "file_id": 495,
+        "content": "            in_channels=input_channels,\n            out_channels=output_channels,\n            kernel_size=filter_size,\n            stride=stride,\n            padding=padding,\n            weight_attr=ParamAttr(name=name + \".conv.weights\"),\n            bias_attr=False)\n        bn_name = name + \".bn\"\n        self._bn = nn.BatchNorm(\n            num_channels=output_channels,\n            act=\"leaky_relu\",\n            param_attr=ParamAttr(name=bn_name + \".scale\"),\n            bias_attr=ParamAttr(name=bn_name + \".offset\"),\n            moving_mean_name=bn_name + \".mean\",\n            moving_variance_name=bn_name + \".var\")\n    def forward(self, inputs):\n        x = self._conv(inputs)\n        x = self._bn(x)\n        return x\nclass BasicBlock(nn.Layer):\n    def __init__(self, input_channels, output_channels, name=None):\n        super(BasicBlock, self).__init__()\n        self._conv1 = ConvBNLayer(input_channels=input_channels, output_channels=output_channels, filter_size=[\n                                  3, 3], stride=1, padding=1,  name=name+'.0')",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/darknet.py:33-61"
+    },
+    "6383": {
+        "file_id": 495,
+        "content": "This code defines a convolutional neural network block with batch normalization and leaky ReLU activation. The forward function applies the convolution followed by batch normalization, and BasicBlock is a subclass of nn.Layer representing a single block in the model architecture.",
+        "type": "comment"
+    },
+    "6384": {
+        "file_id": 495,
+        "content": "        self._max_pool = nn.MaxPool2D(kernel_size=2, stride=2, padding=0)\n        self._conv2 = ConvBNLayer(input_channels=output_channels, output_channels=output_channels *\n                                  2, filter_size=[3, 3], stride=1, padding=1, name=name+'.1')\n        self._conv3 = ConvBNLayer(input_channels=output_channels*2, output_channels=output_channels,\n                                  filter_size=[1, 1], stride=1, padding=0, name=name+'.2')\n    def forward(self, x):\n        x = self._conv1(x)\n        x = self._max_pool(x)\n        x = self._conv2(x)\n        x = self._conv3(x)\n        return x\nclass Reorg(nn.Layer):\n    def __init__(self, stride=2):\n        super(Reorg, self).__init__()\n        self.stride = stride\n    def forward(self, x):\n        stride = self.stride\n        assert (x.dim() == 4)\n        B = x.shape[0]\n        C = x.shape[1]\n        H = x.shape[2]\n        W = x.shape[3]\n        assert (H % stride == 0)\n        assert (W % stride == 0)\n        ws = stride\n        hs = stride\n        x = x.reshape([B, C, H // hs, hs, W // ws, ws]",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/darknet.py:62-92"
+    },
+    "6385": {
+        "file_id": 495,
+        "content": "Code defines a Darknet backbone with ConvBNLayer and MaxPooling layers, followed by Reorg layer for spatial downsampling.",
+        "type": "comment"
+    },
+    "6386": {
+        "file_id": 495,
+        "content": "                      ).transpose([0, 1, 2, 4, 3, 5])\n        x = x.reshape([B, C, H // hs * W // ws, hs * ws]\n                      ).transpose([0, 1, 3, 2])\n        x = x.reshape([B, C, hs * ws, H // hs, W // ws]\n                      ).transpose([0, 2, 1, 3, 4])\n        x = x.reshape([B, hs * ws * C, H // hs, W // ws])\n        return x\nclass Darknet(nn.Layer):\n    def __init__(self, pretrained=None):\n        super(Darknet, self).__init__()\n        self.pretrained = pretrained\n        self._conv1 = ConvBNLayer(\n            input_channels=3, output_channels=32, filter_size=3, stride=1, padding=1, name='input')\n        self._max_pool1 = nn.MaxPool2D(kernel_size=2, stride=2, padding=0)\n        self._basic_block_11 = BasicBlock(\n            input_channels=32, output_channels=64, name='1.1')\n        self._basic_block_12 = BasicBlock(\n            input_channels=64, output_channels=128, name='1.2')\n        self._basic_block_13 = BasicBlock(\n            input_channels=128, output_channels=256, name='1.3')\n        self._conv2 = ConvBNLayer(",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/darknet.py:93-115"
+    },
+    "6387": {
+        "file_id": 495,
+        "content": "This code reshapes the input tensor and performs a sequence of transpose operations to rearrange dimensions. The code is part of a Darknet class, which inherits from nn.Layer and contains various ConvBNLayer and BasicBlock instances for building a convolutional neural network.",
+        "type": "comment"
+    },
+    "6388": {
+        "file_id": 495,
+        "content": "            input_channels=256, output_channels=512, filter_size=3, stride=1, padding=1, name='up1')\n        self._conv3 = ConvBNLayer(\n            input_channels=512, output_channels=256, filter_size=1, stride=1, padding=0, name='down1')\n        self._conv4 = ConvBNLayer(\n            input_channels=256, output_channels=512, filter_size=3, stride=1, padding=1, name='2.1')\n        self._max_pool2 = nn.MaxPool2D(kernel_size=2, stride=2, padding=0)\n        self._conv5 = ConvBNLayer(\n            input_channels=512, output_channels=1024, filter_size=3, stride=1, padding=1, name='2.2')\n        self._conv6 = ConvBNLayer(input_channels=1024, output_channels=512,\n                                  filter_size=1, stride=1, padding=0, name='2.3')  # ori\n        self._conv7 = ConvBNLayer(\n            input_channels=512, output_channels=1024, filter_size=3, stride=1, padding=1, name='up2')\n        self._conv8 = ConvBNLayer(input_channels=1024, output_channels=512,\n                                  filter_size=1, stride=1, padding=0, name='down2')",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/darknet.py:116-129"
+    },
+    "6389": {
+        "file_id": 495,
+        "content": "The code defines a series of ConvBNLayer objects for the Darknet backbone. These layers include upsampling, downsampling, and convolution operations with different filter sizes and strides. The ConvBNLayer class is used to perform convolutions followed by batch normalization.",
+        "type": "comment"
+    },
+    "6390": {
+        "file_id": 495,
+        "content": "        self._conv9 = ConvBNLayer(\n            input_channels=512, output_channels=1024, filter_size=3, stride=1, padding=1, name='3.1')\n        self._conv10 = ConvBNLayer(\n            input_channels=1024, output_channels=1024, filter_size=3, stride=1, padding=1, name='3.2')\n        self._conv11 = ConvBNLayer(\n            input_channels=1024, output_channels=1024, filter_size=3, stride=1, padding=1, name='3.3')\n        self._conv12 = ConvBNLayer(\n            input_channels=512, output_channels=64, filter_size=1, stride=1, padding=0, name='4.1')\n        self._reorg = Reorg()\n        self._conv13 = ConvBNLayer(\n            input_channels=1280, output_channels=1024, filter_size=3, stride=1, padding=1, name='5.1')\n        self._conv14 = nn.Conv2D(1024, 425, kernel_size=1)\n    def forward(self, inputs):\n        x = self._conv1(inputs)\n        x = self._max_pool1(x)\n        x = self._basic_block_11(x)\n        x = self._basic_block_12(x)\n        x = self._basic_block_13(x)\n        x = self._conv2(x)\n        x = self._conv3(x)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/darknet.py:130-150"
+    },
+    "6391": {
+        "file_id": 495,
+        "content": "This code defines a neural network backbone with multiple convolutional layers, batch normalization, and pooling operations. The forward method implements the network's processing flow for input images.",
+        "type": "comment"
+    },
+    "6392": {
+        "file_id": 495,
+        "content": "        ori = self._conv4(x)\n        x = self._max_pool2(ori)\n        x = self._conv5(x)\n        x = self._conv6(x)\n        x = self._conv7(x)\n        x = self._conv8(x)\n        x = self._conv9(x)\n        x = self._conv10(x)\n        x1 = self._conv11(x)\n        x2 = self._conv12(ori)\n        x2 = self._reorg(x2)\n        x = paddle.concat([x2, x1], 1)\n        x = self._conv13(x)\n        x = self._conv14(x)\n        return x",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/darknet.py:151-165"
+    },
+    "6393": {
+        "file_id": 495,
+        "content": "The code performs multiple convolutional operations, followed by pooling and reorganization. It concatenates the results of two separate branches, then applies further convolutions before returning the final output.",
+        "type": "comment"
+    },
+    "6394": {
+        "file_id": 496,
+        "content": "/paddlevideo/modeling/backbones/deeplab.py",
+        "type": "filepath"
+    },
+    "6395": {
+        "file_id": 496,
+        "content": "This code constructs a PaddlePaddle DeepLab network with convolution layers, batch normalization and activation functions in Bottleneck and ResNet classes. It includes additional layers for better performance, initializes ASPP modules in the DeepLab model for feature extraction, defines a segmentation model with ResNet backbone, adaptive pooling, and Decoder modules, and performs inference using forward function.",
+        "type": "summary"
+    },
+    "6396": {
+        "file_id": 496,
+        "content": "# copyright (c) 2021 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport numpy as np\nimport copy\nimport paddle\nimport paddle.nn as nn\nimport paddle.nn.functional as F\nfrom ..registry import BACKBONES\nclass FrozenBatchNorm2D(nn.Layer):\n    \"\"\"\n    BatchNorm2D where the batch statistics and the affine parameters\n    are fixed\n    \"\"\"\n    def __init__(self, n, epsilon=1e-5):\n        super(FrozenBatchNorm2D, self).__init__()\n        x1 = paddle.ones([n])\n        x2 = paddle.zeros([n])\n        weight = self.create_parameter(",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/deeplab.py:1-33"
+    },
+    "6397": {
+        "file_id": 496,
+        "content": "This code defines a class `FrozenBatchNorm2D` which is a type of batch normalization layer where the batch statistics and affine parameters are fixed. It inherits from `nn.Layer` and initializes `paddle.ones` and `paddle.zeros` tensors as its parameters, representing fixed batch statistics and affine transformation.",
+        "type": "comment"
+    },
+    "6398": {
+        "file_id": 496,
+        "content": "            shape=x1.shape, default_initializer=nn.initializer.Assign(x1))\n        bias = self.create_parameter(\n            shape=x2.shape, default_initializer=nn.initializer.Assign(x2))\n        running_mean = self.create_parameter(\n            shape=x2.shape, default_initializer=nn.initializer.Assign(x2))\n        running_var = self.create_parameter(\n            shape=x1.shape, default_initializer=nn.initializer.Assign(x1))\n        self.add_parameter('weight', weight)\n        self.add_parameter('bias', bias)\n        self.add_parameter('running_mean', running_mean)\n        self.add_parameter('running_var', running_var)\n        self.epsilon = epsilon\n    def forward(self, x):\n        scale = self.weight * paddle.rsqrt((self.running_var + self.epsilon))\n        bias = self.bias - self.running_mean * scale\n        scale = paddle.reshape(scale, [1, -1, 1, 1])\n        bias = paddle.reshape(bias, [1, -1, 1, 1])\n        return x * scale + bias\nclass Bottleneck(nn.Layer):\n    expansion = 4\n    def __init__(self,\n                 inplanes,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/deeplab.py:34-59"
+    },
+    "6399": {
+        "file_id": 496,
+        "content": "The code defines a DeepLab class, initializes its parameters, and creates a Bottleneck layer. The DeepLab class contains a weight parameter for the convolution operation, a bias parameter to adjust output, and running_mean and running_var parameters used in normalization. The Bottleneck layer has an expansion factor of 4, implying it will increase the number of channels by this factor. This code is part of a neural network backbone implementation using PaddlePaddle framework.",
+        "type": "comment"
+    }
+}

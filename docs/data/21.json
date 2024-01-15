@@ -1,0 +1,546 @@
+{
+    "2100": {
+        "file_id": 164,
+        "content": "            size=[self._voc_size, self._emb_size],\n            dtype=self._emb_dtype,\n            param_attr=paddle.ParamAttr(\n                name=self._word_emb_name, initializer=self._param_initializer),\n            is_sparse=False)\n        position_emb_out = static.nn.embedding(\n            input=position_ids,\n            size=[self._max_position_seq_len, self._emb_size],\n            dtype=self._emb_dtype,\n            param_attr=paddle.ParamAttr(\n                name=self._pos_emb_name, initializer=self._param_initializer))\n        sent_emb_out = static.nn.embedding(\n            sentence_ids,\n            size=[self._sent_types, self._emb_size],\n            dtype=self._emb_dtype,\n            param_attr=paddle.ParamAttr(\n                name=self._sent_emb_name, initializer=self._param_initializer))\n        # emb_out = emb_out + position_emb_out\n        # emb_out = emb_out + sent_emb_out\n        emb_out = paddle.add(x=emb_out, y=position_emb_out)\n        emb_out = paddle.add(x=emb_out, y=sent_emb_out)\n        if self._use_task_id:",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/models/ernie.py:133-158"
+    },
+    "2101": {
+        "file_id": 164,
+        "content": "This code initializes and concatenates three embeddings - word, position, and sentence - in a multimodal video tagging model. The embeddings are defined with specific sizes and data types. Two embeddings (position_emb_out and sent_emb_out) are added to the original embedding (emb_out), and then these combined embeddings are returned.",
+        "type": "comment"
+    },
+    "2102": {
+        "file_id": 164,
+        "content": "            task_emb_out = static.nn.embedding(\n                task_ids,\n                size=[self._task_types, self._emb_size],\n                dtype=self._emb_dtype,\n                param_attr=paddle.ParamAttr(\n                    name=self._task_emb_name,\n                    initializer=self._param_initializer))\n            emb_out = emb_out + task_emb_out\n        emb_out = pre_process_layer(\n            emb_out, 'nd', self._prepostprocess_dropout, name='pre_encoder')\n        if self._dtype == \"float16\":\n            emb_out = paddle.cast(x=emb_out, dtype=self._dtype)\n            input_mask = paddle.cast(x=input_mask, dtype=self._dtype)\n        self_attn_mask = paddle.matmul(\n            x=input_mask, y=input_mask, transpose_y=True)\n        self_attn_mask = paddle.scale(\n            x=self_attn_mask, scale=10000.0, bias=-1.0, bias_after_scale=False)\n        n_head_self_attn_mask = paddle.stack(\n            x=[self_attn_mask] * self._n_head, axis=1)\n        n_head_self_attn_mask.stop_gradient = True\n        self._enc_out = encoder(",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/models/ernie.py:159-184"
+    },
+    "2103": {
+        "file_id": 164,
+        "content": "This code initializes an embedding layer for task types, adds it to the embeddings, applies pre-processing with dropout if necessary, and casts the embeddings to the desired dtype. It also creates a self-attention mask, stacks it for each attention head, sets its gradient to stop during backpropagation, and passes the embeddings through an encoder.",
+        "type": "comment"
+    },
+    "2104": {
+        "file_id": 164,
+        "content": "            enc_input=emb_out,\n            attn_bias=n_head_self_attn_mask,\n            n_layer=self._n_layer,\n            n_head=self._n_head,\n            d_key=self._emb_size // self._n_head,\n            d_value=self._emb_size // self._n_head,\n            d_model=self._emb_size,\n            d_inner_hid=self._emb_size * 4,\n            prepostprocess_dropout=self._prepostprocess_dropout,\n            attention_dropout=self._attention_dropout,\n            relu_dropout=0,\n            hidden_act=self._hidden_act,\n            preprocess_cmd=\"\",\n            postprocess_cmd=\"dan\",\n            param_initializer=self._param_initializer,\n            name='encoder')\n        if self._dtype == \"float16\":\n            self._enc_out = paddle.cast(\n                x=self._enc_out, dtype=self._emb_dtype)\n    def get_sequence_output(self):\n        \"\"\"\n        get sequence output\n        \"\"\"\n        return self._enc_out\n    def get_sequence_textcnn_output(self, sequence_feature, input_mask):\n        \"\"\"\n        get sequence output\n        \"\"\"",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/models/ernie.py:185-215"
+    },
+    "2105": {
+        "file_id": 164,
+        "content": "This code is defining and initializing a model for an encoder layer in a deep learning application. The model takes several parameters such as embedding size, number of layers and heads, dropout rates, activation function, etc. It then casts the output to the specified data type if necessary. The `get_sequence_output` method returns the sequence output from the encoder layer and `get_sequence_textcnn_output` takes in a feature sequence and an input mask to generate the output.",
+        "type": "comment"
+    },
+    "2106": {
+        "file_id": 164,
+        "content": "        seq_len = paddle.sum(x=input_mask, axis=[1, 2])\n        seq_len = paddle.cast(seq_len, 'int64')\n        sequence_feature = paddle.static.nn.sequence_unpad(sequence_feature, seq_len)\n        return self.textcnn(sequence_feature)\n    def get_pooled_output(self):\n        \"\"\"Get the first feature of each sequence for classification\"\"\"\n        next_sent_feat = paddle.slice(\n            input=self._enc_out, axes=[1], starts=[0], ends=[1])\n        next_sent_feat = static.nn.fc(\n            x=next_sent_feat,\n            size=self._emb_size,\n            activation=\"tanh\",\n            weight_attr=paddle.ParamAttr(\n                name=\"pooled_fc.w_0\", initializer=self._param_initializer),\n            bias_attr=\"pooled_fc.b_0\")\n        return next_sent_feat\n    def textcnn(self, feature, name='text_cnn'):\n        \"\"\"\n        TextCNN sequence feature extraction\n        \"\"\"\n        win_sizes = [2, 3, 4]\n        hid_dim = 256\n        convs = []\n        for win_size in win_sizes:\n            conv_h = paddle.fluid.nets.sequence_conv_pool(input=feature,",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/models/ernie.py:216-243"
+    },
+    "2107": {
+        "file_id": 164,
+        "content": "This code defines a TextCNN model for sequence feature extraction. It pads the input sequence, applies convolutions with various window sizes, and pools the results. The get_pooled_output function extracts the first feature of each sequence for classification by applying an FC layer with tanh activation. The textcnn function initializes a TextCNN model with specified window sizes and hidden dimensions.",
+        "type": "comment"
+    },
+    "2108": {
+        "file_id": 164,
+        "content": "                                                   num_filters=hid_dim,\n                                                   filter_size=win_size,\n                                                   act=\"tanh\",\n                                                   pool_type=\"max\")\n            convs.append(conv_h)\n        convs_out = paddle.concat(x=convs, axis=1)\n        return convs_out",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/models/ernie.py:244-250"
+    },
+    "2109": {
+        "file_id": 164,
+        "content": "This code is creating a 1D convolutional layer with specified parameters, including the number of filters, filter size, activation function, and pooling type. The resulting convolutional layers are appended to the `convs` list, and then concatenated along axis 1 to form `convs_out`. Finally, the function returns `convs_out`.",
+        "type": "comment"
+    },
+    "2110": {
+        "file_id": 165,
+        "content": "/applications/MultimodalVideoTag/scenario_lib/models/transformer_encoder.py",
+        "type": "filepath"
+    },
+    "2111": {
+        "file_id": 165,
+        "content": "This code defines a PaddlePaddle transformer encoder layer for normalization and training, including residual connections, dropout, self-attention mechanism, and position-wise feed-forward networks. It creates a Transformer Encoder with Scaled Dot-Product Attention for NLP tasks.",
+        "type": "summary"
+    },
+    "2112": {
+        "file_id": 165,
+        "content": "#   Copyright (c) 2019 PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"Transformer encoder.\"\"\"\nfrom __future__ import absolute_import\nfrom __future__ import division\nfrom __future__ import print_function\nfrom functools import partial\nimport paddle\nimport paddle.static as static\ndef multi_head_attention(queries,\n                         keys,\n                         values,\n                         attn_bias,\n                         d_key,\n                         d_value,\n                         d_model,",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/models/transformer_encoder.py:1-32"
+    },
+    "2113": {
+        "file_id": 165,
+        "content": "This code defines a function called \"multi_head_attention\" which performs multi-head attention operations on queries, keys, and values. The function takes in additional parameters such as attn_bias, d_key, d_value, d_model. This is part of the Transformer encoder model implementation in PaddlePaddle framework.",
+        "type": "comment"
+    },
+    "2114": {
+        "file_id": 165,
+        "content": "                         n_head=1,\n                         dropout_rate=0.,\n                         cache=None,\n                         param_initializer=None,\n                         name='multi_head_att'):\n    \"\"\"\n    Multi-Head Attention. Note that attn_bias is added to the logit before\n    computing softmax activiation to mask certain selected positions so that\n    they will not considered in attention weights.\n    \"\"\"\n    keys = queries if keys is None else keys\n    values = keys if values is None else values\n    if not (len(queries.shape) == len(keys.shape) == len(values.shape) == 3):\n        raise ValueError(\n            \"Inputs: quries, keys and values should all be 3-D tensors.\")\n    def __compute_qkv(queries, keys, values, n_head, d_key, d_value):\n        \"\"\"\n        Add linear projection to queries, keys, and values.\n        \"\"\"\n        q = static.nn.fc(x=queries,\n                      size=d_key * n_head,\n                      num_flatten_dims=2,\n                      weight_attr=paddle.ParamAttr(",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/models/transformer_encoder.py:33-57"
+    },
+    "2115": {
+        "file_id": 165,
+        "content": "This code snippet defines a Multi-Head Attention layer. It takes in queries, keys (optional), and values (optional) as inputs, and performs linear projections on the queries before computing the attention weights. The function __compute_qkv also handles the case when keys or values are None by setting them to be equal to queries if needed. The inputs should all be 3-D tensors.",
+        "type": "comment"
+    },
+    "2116": {
+        "file_id": 165,
+        "content": "                          name=name + '_query_fc.w_0',\n                          initializer=param_initializer),\n                      bias_attr=name + '_query_fc.b_0')\n        k = static.nn.fc(x=keys,\n                      size=d_key * n_head,\n                      num_flatten_dims=2,\n                      weight_attr=paddle.ParamAttr(\n                          name=name + '_key_fc.w_0',\n                          initializer=param_initializer),\n                      bias_attr=name + '_key_fc.b_0')\n        v = static.nn.fc(x=values,\n                      size=d_value * n_head,\n                      num_flatten_dims=2,\n                      weight_attr=paddle.ParamAttr(\n                          name=name + '_value_fc.w_0',\n                          initializer=param_initializer),\n                      bias_attr=name + '_value_fc.b_0')\n        return q, k, v\n    def __split_heads(x, n_head):\n        \"\"\"\n        Reshape the last dimension of inpunt tensor x so that it becomes two\n        dimensions and then transpose. Specifically, input a tensor with shape",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/models/transformer_encoder.py:58-80"
+    },
+    "2117": {
+        "file_id": 165,
+        "content": "This code defines a function for the Transformer Encoder layer. It includes functions for multi-head attention, position-wise feed-forward network layers, and splits heads of input tensors. Parameters such as d_key, n_head, and param_initializer are used to define the dimensions and initialization methods for weights. The code uses Paddle's static nn library and defines the names for different FC layers within the function.",
+        "type": "comment"
+    },
+    "2118": {
+        "file_id": 165,
+        "content": "        [bs, max_sequence_length, n_head * hidden_dim] then output a tensor\n        with shape [bs, n_head, max_sequence_length, hidden_dim].\n        \"\"\"\n        hidden_size = x.shape[-1]\n        # The value 0 in shape attr means copying the corresponding dimension\n        # size of the input as the output dimension size.\n        reshaped = paddle.reshape(\n            x=x, shape=[0, 0, n_head, hidden_size // n_head])\n        # permuate the dimensions into:\n        # [batch_size, n_head, max_sequence_len, hidden_size_per_head]\n        return paddle.transpose(x=reshaped, perm=[0, 2, 1, 3])\n    def __combine_heads(x):\n        \"\"\"\n        Transpose and then reshape the last two dimensions of inpunt tensor x\n        so that it becomes one dimension, which is reverse to __split_heads.\n        \"\"\"\n        if len(x.shape) == 3: return x\n        if len(x.shape) != 4:\n            raise ValueError(\"Input(x) should be a 4-D Tensor.\")\n        trans_x = paddle.transpose(x, perm=[0, 2, 1, 3])\n        # The value 0 in shape attr means copying the corresponding dimension",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/models/transformer_encoder.py:81-104"
+    },
+    "2119": {
+        "file_id": 165,
+        "content": "This code is performing tensor reshaping and transposing operations to split the input tensor into multiple smaller tensors, representing different attention heads. The `__split_heads` function splits the tensor into a shape of [bs, n_head, max_sequence_length, hidden_dim], while the `__combine_heads` function reverses this process by transposing and reshaping the last two dimensions to combine the attention heads back into one dimension.",
+        "type": "comment"
+    },
+    "2120": {
+        "file_id": 165,
+        "content": "        # size of the input as the output dimension size.\n        return paddle.reshape(\n            x=trans_x,\n            shape=[0, 0, trans_x.shape[2] * trans_x.shape[3]])\n    def scaled_dot_product_attention(q, k, v, attn_bias, d_key, dropout_rate):\n        \"\"\"\n        Scaled Dot-Product Attention\n        \"\"\"\n        scaled_q = paddle.scale(x=q, scale=d_key**-0.5)\n        product = paddle.matmul(x=scaled_q, y=k, transpose_y=True)\n        if attn_bias:\n            # product += attn_bias\n            product = paddle.add(x=product, y=attn_bias)\n        weights = paddle.nn.functional.softmax(x=product)\n        if dropout_rate:\n            weights = paddle.nn.functional.dropout(weights, p=dropout_rate, mode=\"upscale_in_train\", training=True)\n        out = paddle.matmul(x=weights, y=v)\n        return out\n    q, k, v = __compute_qkv(queries, keys, values, n_head, d_key, d_value)\n    if cache is not None:  # use cache and concat time steps\n        # Since the inplace reshape in __split_heads changes the shape of k and",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/models/transformer_encoder.py:105-128"
+    },
+    "2121": {
+        "file_id": 165,
+        "content": "This code defines a function that performs Scaled Dot-Product Attention. It first scales the query vector by dividing it with the square root of the key dimension, then takes the dot product between scaled query and key matrices after transposing the key matrix. If attention bias is provided, it adds it to the product. It applies softmax activation on the result to get weights, which are optionally dropout masked if a dropout rate is specified. Finally, it computes the output vector by taking the weighted sum of value vectors. This function is used in the context of Transformer Encoder layers.",
+        "type": "comment"
+    },
+    "2122": {
+        "file_id": 165,
+        "content": "        # v, which is the cache input for next time step, reshape the cache\n        # input from the previous time step first.\n        k = cache[\"k\"] = paddle.concat(\n            x=[paddle.reshape(\n                x=cache[\"k\"], shape=[0, 0, d_model]), k], axis=1)\n        v = cache[\"v\"] = paddle.concat(\n            x=[paddle.reshape(\n                x=cache[\"v\"], shape=[0, 0, d_model]), v], axis=1)\n    q = __split_heads(q, n_head)\n    k = __split_heads(k, n_head)\n    v = __split_heads(v, n_head)\n    ctx_multiheads = scaled_dot_product_attention(q, k, v, attn_bias, d_key,\n                                                  dropout_rate)\n    out = __combine_heads(ctx_multiheads)\n    # Project back to the model size.\n    proj_out = static.nn.fc(x=out,\n                         size=d_model,\n                         num_flatten_dims=2,\n                         weight_attr=paddle.ParamAttr(\n                             name=name + '_output_fc.w_0',\n                             initializer=param_initializer),\n                         bias_attr=name + '_output_fc.b_0')",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/models/transformer_encoder.py:129-154"
+    },
+    "2123": {
+        "file_id": 165,
+        "content": "This code is reshaping the cache input for the next time step and splitting the inputs into multiple heads. It performs scaled dot product attention, combines the outputs of each head, and projects the result back to the model size using a fully connected layer.",
+        "type": "comment"
+    },
+    "2124": {
+        "file_id": 165,
+        "content": "    return proj_out\ndef positionwise_feed_forward(x,\n                              d_inner_hid,\n                              d_hid,\n                              dropout_rate,\n                              hidden_act,\n                              param_initializer=None,\n                              name='ffn'):\n    \"\"\"\n    Position-wise Feed-Forward Networks.\n    This module consists of two linear transformations with a ReLU activation\n    in between, which is applied to each position separately and identically.\n    \"\"\"\n    hidden = static.nn.fc(x=x,\n                       size=d_inner_hid,\n                       num_flatten_dims=2,\n                       activation=hidden_act,\n                       weight_attr=paddle.ParamAttr(\n                           name=name + '_fc_0.w_0',\n                           initializer=param_initializer),\n                       bias_attr=name + '_fc_0.b_0')\n    if dropout_rate:\n        hidden = paddle.nn.functional.dropout(\n            hidden,\n            p=dropout_rate,\n            mode=\"upscale_in_train\",",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/models/transformer_encoder.py:155-182"
+    },
+    "2125": {
+        "file_id": 165,
+        "content": "This code defines the position-wise feed-forward network used in a transformer encoder. It consists of two linear transformations with a ReLU activation applied to each position separately and identically. The hidden layer is passed through a dropout if dropout_rate is specified.",
+        "type": "comment"
+    },
+    "2126": {
+        "file_id": 165,
+        "content": "            training=True)\n    out = static.nn.fc(x=hidden,\n                    size=d_hid,\n                    num_flatten_dims=2,\n                    weight_attr=paddle.ParamAttr(\n                        name=name + '_fc_1.w_0', initializer=param_initializer),\n                    bias_attr=name + '_fc_1.b_0')\n    return out\ndef pre_post_process_layer(prev_out, out, process_cmd, dropout_rate=0.,\n                           name=''):\n    \"\"\"\n    Add residual connection, layer normalization and droput to the out tensor\n    optionally according to the value of process_cmd.\n    This will be used before or after multi-head attention and position-wise\n    feed-forward networks.\n    \"\"\"\n    for cmd in process_cmd:\n        if cmd == \"a\":  # add residual connection\n            # out = out + prev_out if prev_out else out\n            out = paddle.add(x=out, y=prev_out) if prev_out else out\n        elif cmd == \"n\":  # add layer normalization\n            out_dtype = out.dtype\n            if out_dtype == \"float16\":\n                out = paddle.cast(x=out, dtype=\"float32\")",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/models/transformer_encoder.py:183-208"
+    },
+    "2127": {
+        "file_id": 165,
+        "content": "This code defines a function for a transformer encoder layer in the PaddleVideo MultimodalVideoTag application. The layer includes a multi-head attention mechanism and a position-wise feed-forward network, with residual connections and layer normalization added before or after these operations, as specified by the process_cmd argument.",
+        "type": "comment"
+    },
+    "2128": {
+        "file_id": 165,
+        "content": "            out = static.nn.layer_norm(\n                out,\n                begin_norm_axis=len(out.shape) - 1,\n                param_attr=paddle.ParamAttr(\n                    name=name + '_layer_norm_scale',\n                    initializer=paddle.nn.initializer.Constant(value=1.)),\n                bias_attr=paddle.ParamAttr(\n                    name=name + '_layer_norm_bias',\n                    initializer=paddle.nn.initializer.Constant(value=0.)))\n            if out_dtype == \"float16\":\n                out = paddle.cast(x=out, dtype=\"float16\")\n        elif cmd == \"d\":  # add dropout\n            if dropout_rate:\n                out = paddle.nn.functional.dropout(\n                    out,\n                    p=dropout_rate,\n                    dropout_implementation=\"upscale_in_train\",\n                    training=True)\n    return out\npre_process_layer = partial(pre_post_process_layer, None)\npost_process_layer = pre_post_process_layer\ndef encoder_layer(enc_input,\n                  attn_bias,\n                  n_head,",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/models/transformer_encoder.py:209-236"
+    },
+    "2129": {
+        "file_id": 165,
+        "content": "This code is part of a transformer encoder layer implementation in PaddlePaddle. It applies layer normalization, optional float16 casting, and optionally dropout for training. The pre_process_layer and post_process_layer are partial functions used for data pre-processing and post-processing respectively. The encoder_layer function takes input, attention bias, and number of heads as inputs to create a transformer encoder layer.",
+        "type": "comment"
+    },
+    "2130": {
+        "file_id": 165,
+        "content": "                  d_key,\n                  d_value,\n                  d_model,\n                  d_inner_hid,\n                  prepostprocess_dropout,\n                  attention_dropout,\n                  relu_dropout,\n                  hidden_act,\n                  preprocess_cmd=\"n\",\n                  postprocess_cmd=\"da\",\n                  param_initializer=None,\n                  name=''):\n    \"\"\"The encoder layers that can be stacked to form a deep encoder.\n    This module consits of a multi-head (self) attention followed by\n    position-wise feed-forward networks and both the two components companied\n    with the post_process_layer to add residual connection, layer normalization\n    and droput.\n    \"\"\"\n    attn_output = multi_head_attention(\n        pre_process_layer(\n            enc_input,\n            preprocess_cmd,\n            prepostprocess_dropout,\n            name=name + '_pre_att'),\n        None,\n        None,\n        attn_bias,\n        d_key,\n        d_value,\n        d_model,\n        n_head,\n        attention_dropout,",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/models/transformer_encoder.py:237-268"
+    },
+    "2131": {
+        "file_id": 165,
+        "content": "This code defines a transformer encoder layer that stacks multiple layers to form a deep encoder. The encoder consists of a multi-head self-attention mechanism followed by position-wise feed-forward networks, all with residual connections and layer normalization to add dropout.",
+        "type": "comment"
+    },
+    "2132": {
+        "file_id": 165,
+        "content": "        param_initializer=param_initializer,\n        name=name + '_multi_head_att')\n    attn_output = post_process_layer(\n        enc_input,\n        attn_output,\n        postprocess_cmd,\n        prepostprocess_dropout,\n        name=name + '_post_att')\n    ffd_output = positionwise_feed_forward(\n        pre_process_layer(\n            attn_output,\n            preprocess_cmd,\n            prepostprocess_dropout,\n            name=name + '_pre_ffn'),\n        d_inner_hid,\n        d_model,\n        relu_dropout,\n        hidden_act,\n        param_initializer=param_initializer,\n        name=name + '_ffn')\n    return post_process_layer(\n        attn_output,\n        ffd_output,\n        postprocess_cmd,\n        prepostprocess_dropout,\n        name=name + '_post_ffn')\ndef encoder(enc_input,\n            attn_bias,\n            n_layer,\n            n_head,\n            d_key,\n            d_value,\n            d_model,\n            d_inner_hid,\n            prepostprocess_dropout,\n            attention_dropout,\n            relu_dropout,\n            hidden_act,",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/models/transformer_encoder.py:269-308"
+    },
+    "2133": {
+        "file_id": 165,
+        "content": "This code defines a transformer encoder model. It utilizes an attention mechanism to process input sequences, followed by position-wise feed forward layers. The function takes input sequences, attention bias, number of layers, number of heads, and other parameters as inputs and returns the processed output.",
+        "type": "comment"
+    },
+    "2134": {
+        "file_id": 165,
+        "content": "            preprocess_cmd=\"n\",\n            postprocess_cmd=\"da\",\n            param_initializer=None,\n            name=''):\n    \"\"\"\n    The encoder is composed of a stack of identical layers returned by calling\n    encoder_layer.\n    \"\"\"\n    for i in range(n_layer):\n        enc_output = encoder_layer(\n            enc_input,\n            attn_bias,\n            n_head,\n            d_key,\n            d_value,\n            d_model,\n            d_inner_hid,\n            prepostprocess_dropout,\n            attention_dropout,\n            relu_dropout,\n            hidden_act,\n            preprocess_cmd,\n            postprocess_cmd,\n            param_initializer=param_initializer,\n            name=name + '_layer_' + str(i))\n        enc_input = enc_output\n    enc_output = pre_process_layer(\n        enc_output, preprocess_cmd, prepostprocess_dropout, name=\"post_encoder\")\n    return enc_output",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/models/transformer_encoder.py:309-338"
+    },
+    "2135": {
+        "file_id": 165,
+        "content": "This code defines a function to create an encoder consisting of multiple layers, where each layer is generated by calling the \"encoder_layer\" function. The encoder takes in input, attention bias, number of heads, dimensionality of keys and values, model dimensions, inner hidden dimensions, and dropout rates for preprocessing and postprocessing. The function applies each layer to the input sequentially, updating the input with each iteration. Finally, it applies a pre-processing layer to the output using specified preprocessing command and prepostprocess_dropout.",
+        "type": "comment"
+    },
+    "2136": {
+        "file_id": 166,
+        "content": "/applications/MultimodalVideoTag/scenario_lib/train.py",
+        "type": "filepath"
+    },
+    "2137": {
+        "file_id": 166,
+        "content": "This code initializes a PaddlePaddle model for video training, sets up feeds and outputs, configures loss and optimizer, builds the model, prepares programs, trains, logs, and saves it. The main function handles arguments, checks save directory, and executes the training process.",
+        "type": "summary"
+    },
+    "2138": {
+        "file_id": 166,
+        "content": "\"\"\"\ntrain main\n\"\"\"\n#  Copyright (c) 2019 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport os\nimport sys\nimport time\nimport argparse\nimport logging\nimport numpy as np\nimport paddle\npaddle.enable_static()\nimport paddle.static as static\nfrom accuracy_metrics import MetricsCalculator\nfrom datareader import get_reader\nfrom config import print_configs, merge_configs, parse_config\nfrom models.attention_lstm_ernie import AttentionLstmErnie\nfrom utils import init_pretraining_params, train_with_pyreader",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/train.py:1-34"
+    },
+    "2139": {
+        "file_id": 166,
+        "content": "The code imports necessary libraries and modules, enables static mode for PaddlePaddle, initializes a model (AttentionLstmErnie), defines train_with_pyreader function, and handles config file operations. It follows the Apache License 2.0 and provides information for obtaining the license.",
+        "type": "comment"
+    },
+    "2140": {
+        "file_id": 166,
+        "content": "logging.root.handlers = []\nFORMAT = '[%(levelname)s: %(filename)s: %(lineno)4d]: %(message)s'\nlogging.basicConfig(level=logging.INFO, format=FORMAT, stream=sys.stdout)\nlogger = logging.getLogger(__name__)\ndef parse_args():\n    \"\"\"parse_args\n    \"\"\"\n    parser = argparse.ArgumentParser(\"Paddle Video train script\")\n    parser.add_argument(\n        '--model_name',\n        type=str,\n        default='BaiduNet',\n        help='name of model to train.')\n    parser.add_argument(\n        '--config',\n        type=str,\n        default='configs/conf.txt',\n        help='path to config file of model')\n    parser.add_argument(\n        '--batch_size',\n        type=int,\n        default=None,\n        help='training batch size. None to use config file setting.')\n    parser.add_argument(\n        '--learning_rate',\n        type=float,\n        default=None,\n        help='learning rate use for training. None to use config file setting.')\n    parser.add_argument(\n        '--pretrain',\n        type=str,\n        default=None,\n        help='path to pretrain weights. None to use default weights path in  ~/.paddle/weights.'",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/train.py:37-71"
+    },
+    "2141": {
+        "file_id": 166,
+        "content": "This code sets up the logging configuration and parses command-line arguments for training a video model using Paddle Video. The default model name is 'BaiduNet', and the config file path is 'configs/conf.txt'. It also allows setting the batch size, learning rate, and pretrain weights through command-line flags.",
+        "type": "comment"
+    },
+    "2142": {
+        "file_id": 166,
+        "content": "    )\n    parser.add_argument(\n        '--resume',\n        type=str,\n        default=None,\n        help='path to resume training based on previous checkpoints. '\n        'None for not resuming any checkpoints.')\n    parser.add_argument(\n        '--use_gpu', type=bool, default=True, help='default use gpu.')\n    parser.add_argument(\n        '--no_use_pyreader',\n        action='store_true',\n        default=False,\n        help='whether to use pyreader')\n    parser.add_argument(\n        '--no_memory_optimize',\n        action='store_true',\n        default=False,\n        help='whether to use memory optimize in train')\n    parser.add_argument(\n        '--epoch_num',\n        type=int,\n        default=0,\n        help='epoch number, 0 for read from config file')\n    parser.add_argument(\n        '--valid_interval',\n        type=int,\n        default=1,\n        help='validation epoch interval, 0 for no validation.')\n    parser.add_argument(\n        '--save_dir',\n        type=str,\n        default='checkpoints',\n        help='directory name to save train snapshoot')",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/train.py:72-105"
+    },
+    "2143": {
+        "file_id": 166,
+        "content": "This code snippet from the PaddleVideo library's MultimodalVideoTag application defines command line argument options for training. Options include resuming training, GPU usage, disabling pyreader, memory optimization during training, epoch number, validation interval, and saving directory.",
+        "type": "comment"
+    },
+    "2144": {
+        "file_id": 166,
+        "content": "    parser.add_argument(\n        '--log_interval',\n        type=int,\n        default=10,\n        help='mini-batch interval to log.')\n    parser.add_argument(\n        '--save_log_name',\n        type=str,\n        default='train_val',\n        help='save to tensorboard filename recommand model name.')\n    args = parser.parse_args()\n    return args\ndef train(args):\n    \"\"\"train main\n    \"\"\"\n    # parse config\n    config = parse_config(args.config)\n    train_config = merge_configs(config, 'train', vars(args))\n    valid_config = merge_configs(config, 'valid', vars(args))\n    print_configs(train_config, 'Train')\n    train_model = AttentionLstmErnie(args.model_name, train_config, mode='train')\n    valid_model = AttentionLstmErnie(args.model_name, valid_config, mode='valid')\n    max_train_steps = train_config.TRAIN.epoch * train_config.TRAIN.num_samples // train_config.TRAIN.batch_size\n    print('max train steps %d' % (max_train_steps))\n    # build model\n    startup = static.Program()\n    train_prog = static.Program()\n    with static.program_guard(train_prog, startup):",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/train.py:106-136"
+    },
+    "2145": {
+        "file_id": 166,
+        "content": "This code defines command-line arguments for the mini-batch interval to log and the save filename, parses the configuration file, creates train and valid models based on the model name and configurations, sets the maximum number of training steps, and prepares static programs for building the model.",
+        "type": "comment"
+    },
+    "2146": {
+        "file_id": 166,
+        "content": "        paddle.disable_static()\n        train_model.build_input(use_pyreader=True)\n        train_model.build_model()\n            # for the input, has the form [data1, data2,..., label], so train_feeds[-1] is label\n        train_feeds = train_model.feeds()\n        train_feeds[-1].persistable = True\n            # for the output of classification model, has the form [pred]\n        train_outputs = train_model.outputs()\n        for output in train_outputs:\n            output.persistable = True\n        train_loss = train_model.loss()\n        train_loss.persistable = True\n            # outputs, loss, label should be fetched, so set persistable to be true\n        optimizer = train_model.optimizer()\n        optimizer.minimize(train_loss)\n        train_pyreader = train_model.pyreader()\n        paddle.enable_static()\n    if not args.no_memory_optimize:\n        paddle.distributed.transpiler.memory_optimize(train_prog)\n    valid_prog = static.Program()\n    with static.program_guard(valid_prog, startup):\n        paddle.disable_static()",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/train.py:137-160"
+    },
+    "2147": {
+        "file_id": 166,
+        "content": "This code snippet prepares the model for training by setting up feeds, outputs, loss, and optimizer. It also enables memory optimization if specified by arguments.",
+        "type": "comment"
+    },
+    "2148": {
+        "file_id": 166,
+        "content": "        valid_model.build_input(True)\n        valid_model.build_model()\n        valid_feeds = valid_model.feeds()\n        valid_outputs = valid_model.outputs()\n        valid_loss = valid_model.loss()\n        valid_pyreader = valid_model.pyreader()\n        paddle.enable_static()\n    place = paddle.CUDAPlace(0) if args.use_gpu else paddle.CPUPlace()\n    exe = static.Executor(place)\n    exe.run(startup)\n    if args.resume:\n        # if resume weights is given, load resume weights directly\n        assert os.path.exists(args.resume), \\\n            \"Given resume weight dir {} not exist.\".format(args.resume)\n        def if_exist(var):\n            \"\"\"if_exist\n            \"\"\"\n            return os.path.exists(os.path.join(args.resume, var.name))\n        print('resuming ,,,,,,,,,,,,,,')\n        paddle.fluid.io.load_persistables(\n                    exe, '', main_program=train_prog, filename=args.resume)\n    else:\n        # load ernie pretrain model\n        init_pretraining_params(exe,\n                                train_config.TRAIN.ernie_pretrain_dict_path,",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/train.py:161-190"
+    },
+    "2149": {
+        "file_id": 166,
+        "content": "The code is building the model, setting up executor and place (CPU or GPU), checking if resume weights exist to load them if necessary, and initializing pre-trained parameters for Ernie model.",
+        "type": "comment"
+    },
+    "2150": {
+        "file_id": 166,
+        "content": "                                main_program=train_prog)\n        # if not in resume mode, load pretrain weights\n        # this pretrain may be only audio or video\n        if args.pretrain:\n            assert os.path.exists(args.pretrain), \\\n                \"Given pretrain weight dir {} not exist.\".format(args.pretrain)\n        if args.pretrain:\n            train_model.load_test_weights_file(exe, args.pretrain, train_prog, place)\n    build_strategy = paddle.static.BuildStrategy()\n    build_strategy.enable_inplace = True\n    compiled_train_prog = static.CompiledProgram(\n        train_prog).with_data_parallel(loss_name=train_loss.name,\n                                       build_strategy=build_strategy)\n    compiled_valid_prog = static.CompiledProgram(\n        valid_prog).with_data_parallel(share_vars_from=compiled_train_prog,\n                                       build_strategy=build_strategy)\n    # get reader\n    bs_denominator = 1\n    if (not args.no_use_pyreader) and args.use_gpu:\n        dev_list = static.cuda_places()",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/train.py:191-213"
+    },
+    "2151": {
+        "file_id": 166,
+        "content": "Loading pre-trained weights if provided, enabling inplace for faster execution and creating compiled programs with data parallelism for both training and validation programs. If not using PyReader and GPU is enabled, it sets the device list to use CUDA places.",
+        "type": "comment"
+    },
+    "2152": {
+        "file_id": 166,
+        "content": "        bs_denominator = len(dev_list)\n    train_config.TRAIN.batch_size = int(train_config.TRAIN.batch_size /\n                                        bs_denominator)\n    valid_config.VALID.batch_size = int(valid_config.VALID.batch_size /\n                                        bs_denominator)\n    train_reader = get_reader(args.model_name.upper(), 'train', train_config)\n    valid_reader = get_reader(args.model_name.upper(), 'valid', valid_config)\n    exe_places = static.cuda_places() if args.use_gpu else static.cpu_places()\n    train_pyreader.decorate_sample_list_generator(train_reader,\n                                                  places=exe_places)\n    valid_pyreader.decorate_sample_list_generator(valid_reader,\n                                                  places=exe_places)\n    # get metrics\n    train_metrics = MetricsCalculator(args.model_name.upper(), 'train', train_config)\n    valid_metrics = MetricsCalculator(args.model_name.upper(), 'valid', valid_config)\n    # print(\"****************************valid_metrics\", valid_metrics.get())",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/train.py:214-231"
+    },
+    "2153": {
+        "file_id": 166,
+        "content": "This code sets the batch size for training and validation based on the length of the development list. It initializes train and valid readers with these batch sizes, decorates them with specified places, and creates MetricsCalculator objects to get metrics for training and validation.",
+        "type": "comment"
+    },
+    "2154": {
+        "file_id": 166,
+        "content": "    train_fetch_list = [train_loss.name] + [x.name for x in train_outputs\n                                            ] + [train_feeds[-1].name]\n    valid_fetch_list = [valid_loss.name] + [x.name for x in valid_outputs\n                                            ] + [valid_feeds[-1].name]\n    epochs = args.epoch_num or train_model.epoch_num()\n    train_with_pyreader(\n        exe,\n        train_prog,\n        compiled_train_prog,\n        train_pyreader,\n        train_fetch_list,\n        train_metrics,\n        epochs=epochs,\n        log_interval=args.log_interval,\n        valid_interval=args.valid_interval,\n        save_dir=args.save_dir,\n        save_model_name=args.model_name,\n        test_exe=compiled_valid_prog,\n        test_pyreader=valid_pyreader,\n        test_fetch_list=valid_fetch_list,\n        test_metrics=valid_metrics)\nif __name__ == \"__main__\":\n    args = parse_args()\n    logger.info(args)\n    if not os.path.exists(args.save_dir):\n        os.makedirs(args.save_dir)\n    train(args)",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/train.py:232-263"
+    },
+    "2155": {
+        "file_id": 166,
+        "content": "The code initializes training and validation fetch lists, sets the number of epochs based on argument or model default, then trains the model using the specified executor, programs, feeds, and fetch lists. It also handles logging intervals, valid intervals, save directory, and save model name. The main function parses arguments, checks if the save directory exists, and calls the train function to execute the training process.",
+        "type": "comment"
+    },
+    "2156": {
+        "file_id": 167,
+        "content": "/applications/MultimodalVideoTag/scenario_lib/utils.py",
+        "type": "filepath"
+    },
+    "2157": {
+        "file_id": 167,
+        "content": "The `test_with_pyreader` and `train_with_pyreader` functions are used in a framework to execute tests with `pyreader`, evaluate metrics, log intervals, train models, handle options like testing, saving, early stopping, measure processing time, and update metrics. The code snippet defines model saving functions, deletes directories, implements early stopping, initializes pre-trained parameters, and uses AttrDict for getter/setter functionality.",
+        "type": "summary"
+    },
+    "2158": {
+        "file_id": 167,
+        "content": "\"\"\"\nutils\n\"\"\"\n#  Copyright (c) 2018 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport os\nimport sys\nimport time\nimport traceback\nimport logging\nimport shutil\nimport numpy as np\nimport paddle\nimport paddle.static as static\nimport static as static\nlogger = logging.getLogger(__name__)\ndef test_with_pyreader(exe,\n                       compiled_test_prog,\n                       test_pyreader,\n                       test_fetch_list,\n                       test_metrics,\n                       log_interval=0):",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/utils.py:1-39"
+    },
+    "2159": {
+        "file_id": 167,
+        "content": "The code defines a function `test_with_pyreader` which takes several parameters like `exe`, `compiled_test_prog`, etc., and appears to be part of a larger framework. It seems to execute a test with the help of `pyreader` for input data, fetch list for outputs, and metrics for evaluation. The function runs on an interval specified by `log_interval`.",
+        "type": "comment"
+    },
+    "2160": {
+        "file_id": 167,
+        "content": "    \"\"\"test_with_pyreader\n    \"\"\"\n    if not test_pyreader:\n        logger.error(\"[TEST] get pyreader failed.\")\n    test_metrics.reset()\n    test_iter = 0\n    label_all = []\n    pred_all = []\n    try:\n        for data in test_pyreader():\n            test_outs = exe.run(compiled_test_prog,\n                                fetch_list=test_fetch_list,\n                                feed=data)\n            loss = np.array(test_outs[0])\n            pred = np.array(test_outs[1])\n            label = np.array(test_outs[-1])\n            pred_all.extend(pred)\n            label_all.extend(label)\n            test_metrics.accumulate(loss, pred, label)\n            test_iter += 1\n        test_metrics.finalize_and_log_out(\"[TEST] Finish\")\n    except Exception as e:\n        logger.warn(\n            \"[TEST] fail to execute test or calculate metrics: {}\".format(e))\n        traceback.print_exc()\n    metrics_dict, test_loss = test_metrics.get_computed_metrics()\n    metrics_dict['label_all'] = label_all\n    metrics_dict['pred_all'] = pred_all",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/utils.py:40-67"
+    },
+    "2161": {
+        "file_id": 167,
+        "content": "The code tests a PaddleVideo application, using the \"test_pyreader\" to read data and runs it through a neural network. It accumulates and logs test metrics, handles exceptions and provides a final result with computed metrics.",
+        "type": "comment"
+    },
+    "2162": {
+        "file_id": 167,
+        "content": "    return test_loss, metrics_dict\ndef train_with_pyreader(exe, train_prog, compiled_train_prog, train_pyreader,\n                        train_fetch_list, train_metrics, epochs=10,\n                        log_interval=0, valid_interval=0,\n                        save_dir='./', save_model_name='model',\n                        test_exe=None, test_pyreader=None,\n                        test_fetch_list=None, test_metrics=None):\n    \"\"\"train_with_pyreader\n    \"\"\"\n    if not train_pyreader:\n        logger.error(\"[TRAIN] get pyreader failed.\")\n    EARLY_STOP_NUM = 20\n    early_stop = EARLY_STOP_NUM\n    global_iter = 0\n    train_iter = 0\n    iter_all = 0\n    best_test_acc1 = 0\n    for epoch in range(epochs):\n        lr = static.global_scope().find_var(\"learning_rate\").get_tensor()\n        logger.info(\n            \"------- learning rate {}, learning rate counter  -----\".format(\n                np.array(lr)))\n        if early_stop < 0:\n            logger.info('Earyly Stop !!!')\n            break\n        train_metrics.reset()",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/utils.py:68-96"
+    },
+    "2163": {
+        "file_id": 167,
+        "content": "The function `train_with_pyreader` trains a model for the specified number of epochs and returns the test loss and metrics dictionary. It also includes options for testing and saving the model, as well as early stopping based on a defined threshold. The code initializes variables and enters a loop over the number of epochs, resetting training metrics and checking if early stopping should occur before each iteration.",
+        "type": "comment"
+    },
+    "2164": {
+        "file_id": 167,
+        "content": "        global_iter += train_iter\n        epoch_periods = []\n        for data in train_pyreader():\n            try:\n                cur_time = time.time()\n                train_outs = exe.run(compiled_train_prog,\n                                     fetch_list=train_fetch_list,\n                                     feed=data)\n                iter_all += 1\n                period = time.time() - cur_time\n                epoch_periods.append(period)\n                loss = np.array(train_outs[0])\n                pred = np.array(train_outs[1])\n                label = np.array(train_outs[-1])\n                train_metrics.accumulate(loss, pred, label)\n                if log_interval > 0 and (train_iter % log_interval == 0):\n                    # eval here\n                    train_metrics.finalize_and_log_out(\n                                info='[TRAIN] Epoch {} iter {} everage: '.format(epoch, train_iter))\n                train_iter += 1\n            except Exception as e:\n                logger.info(\n                    \"[TRAIN] Epoch {}, iter {} data training failed: {}\".",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/utils.py:97-119"
+    },
+    "2165": {
+        "file_id": 167,
+        "content": "This code is part of a training loop for a machine learning model. It keeps track of the current iteration, measures the time taken for processing each data batch, and updates loss, prediction, and label metrics. If logging interval is met, it finalizes and logs the metrics for the current epoch's iteration.",
+        "type": "comment"
+    },
+    "2166": {
+        "file_id": 167,
+        "content": "                    format(epoch, train_iter, str(e)))\n        if len(epoch_periods) < 1:\n            logger.info(\n                'No iteration was executed, please check the data reader')\n            sys.exit(1)\n        logger.info(\n            '[TRAIN] Epoch {} training finished, average time: {}'.format(\n                epoch, np.mean(epoch_periods)))\n        train_metrics.finalize_and_log_out( \\\n            info='[TRAIN] Finished ... Epoch {} all iters average: '.format(epoch))\n        # save models of min loss in best acc epochs\n        if test_exe and valid_interval > 0 and (epoch +\n                                                1) % valid_interval == 0:\n            # metrics_dict,loss = train_metrics.calculator.get_computed_metrics()\n            loss, metrics_dict_test = test_with_pyreader(\n                exe, test_exe, test_pyreader, test_fetch_list, test_metrics,\n                log_interval)\n            test_acc1 = metrics_dict_test['avg_acc1']\n            if test_acc1 > best_test_acc1:\n                best_test_acc1 = test_acc1",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/utils.py:120-141"
+    },
+    "2167": {
+        "file_id": 167,
+        "content": "The code finishes an epoch of training, logs the average time taken, and finalizes training metrics. If testing is enabled and a valid interval is set, it performs testing after each valid interval iteration and saves models with the best test accuracy.",
+        "type": "comment"
+    },
+    "2168": {
+        "file_id": 167,
+        "content": "                save_model(exe, train_prog, save_dir, save_model_name,\n                           \"_epoch{}_acc{}\".format(epoch, best_test_acc1))\n                early_stop = EARLY_STOP_NUM\n            else:\n                early_stop -= 1\ndef save_model(exe, program, save_dir, model_name, postfix=None):\n    \"\"\"save_model\n    \"\"\"\n    model_path = os.path.join(save_dir, model_name + postfix)\n    if os.path.isdir(model_path):\n        shutil.rmtree(model_path)\n    # fluid.io.save_persistables(exe, model_path, main_program=program)\n    save_vars = [x for x in program.list_vars() \\\n                                 if isinstance(x, paddle.framework.Parameter)]\n    static.save_vars(exe,\n                       dirname=model_path,\n                       main_program=program,\n                       vars=save_vars,\n                       filename=\"param\")\ndef save_model_persist(exe, program, save_dir, model_name, postfix=None):\n    \"\"\"save_model\"\"\"\n    model_path = os.path.join(save_dir, model_name + postfix)\n    if os.path.isdir(model_path):",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/utils.py:142-169"
+    },
+    "2169": {
+        "file_id": 167,
+        "content": "This code snippet defines functions for saving the model at specific epochs and after training has stopped. It checks if a directory with the model name exists, deletes it if necessary, and then saves the model using either fluid.io or static methods. The save_model function takes in execution context, program, save directory, model name, and optional postfix for the file name. The save_model_persist function is similar but uses the save_model method to save the model. The code also includes a check to stop training if the early stopping condition is met.",
+        "type": "comment"
+    },
+    "2170": {
+        "file_id": 167,
+        "content": "        shutil.rmtree(model_path)\n    paddle.fluid.io.save_persistables(exe,\n                               save_dir,\n                               main_program=program,\n                               filename=model_path)\ndef init_pretraining_params(exe,\n                            pretraining_params_path,\n                            main_program,\n                            use_fp16=False):\n    \"\"\"\n    init pretrain_params\n    \"\"\"\n    assert os.path.exists(pretraining_params_path\n                          ), \"[%s] cann't be found.\" % pretraining_params_path\n    def existed_params(var):\n        \"\"\"\n        Load existed params\n        \"\"\"\n        if not isinstance(var, paddle.framework.Parameter):\n            return False\n        flag = os.path.exists(os.path.join(pretraining_params_path, var.name))\n        return flag\n    static.load_vars(exe,\n                       pretraining_params_path,\n                       main_program=main_program,\n                       predicate=existed_params)\n    logger.info(\n        \"Load pretraining parameters from {}.\".format(pretraining_params_path))",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/utils.py:170-201"
+    },
+    "2171": {
+        "file_id": 167,
+        "content": "This function initializes the pre-trained parameters for a model. It first checks if the pretraining_params_path exists, and then loads any existing variables in the main program using static.load_vars(). If var is not a Parameter instance, it will return False. Finally, it logs that the pretraining parameters were loaded from the given path.",
+        "type": "comment"
+    },
+    "2172": {
+        "file_id": 167,
+        "content": "class AttrDict(dict):\n    \"\"\"AttrDict\n    \"\"\"\n    def __getattr__(self, key):\n        \"\"\"getter\n        \"\"\"\n        return self[key]\n    def __setattr__(self, key, value):\n        \"\"\"setter\n        \"\"\"\n        if key in self.__dict__:\n            self.__dict__[key] = value\n        else:\n            self[key] = value",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/utils.py:204-218"
+    },
+    "2173": {
+        "file_id": 167,
+        "content": "The code defines a subclass of Python's dictionary, named AttrDict. It overrides the `__getattr__` and `__setattr__` methods to provide getter and setter functionality for dictionary keys as attributes, similar to regular class attributes.",
+        "type": "comment"
+    },
+    "2174": {
+        "file_id": 168,
+        "content": "/applications/MultimodalVideoTag/train.sh",
+        "type": "filepath"
+    },
+    "2175": {
+        "file_id": 168,
+        "content": "This script exports CUDA device settings and FLAGS for efficient GPU usage, then executes a Python file to train an Attention LSTM Ernie model using the specified configuration file. The logs are saved at specific intervals, with pre-trained checkpoints used as well.",
+        "type": "summary"
+    },
+    "2176": {
+        "file_id": 168,
+        "content": "export CUDA_VISIBLE_DEVICES=0,1\nexport FLAGS_eager_delete_tensor_gb=0.0\nexport FLAGS_sync_nccl_allreduce=1\nexport FLAGS_fast_eager_deletion_mode=1\nexport FLAGS_fraction_of_gpu_memory_to_use=0.5\nexport FLAGS_reallocate_gpu_memory_in_mb=0\nexport FLAGS_memory_fraction_of_eager_deletion=1\npython scenario_lib/train.py --model_name=AttentionLstmErnie \\\n--config=./conf/conf.txt \\\n--log_interval=20 \\\n--valid_interval=1 \\\n--save_dir=checkpoints_save_new/ \\\n--pretrain=checkpoints_save/",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/train.sh:1-13"
+    },
+    "2177": {
+        "file_id": 168,
+        "content": "This script exports CUDA device settings and FLAGS for efficient GPU usage, then executes a Python file to train an Attention LSTM Ernie model using the specified configuration file. The logs are saved at specific intervals, with pre-trained checkpoints used as well.",
+        "type": "comment"
+    },
+    "2178": {
+        "file_id": 169,
+        "content": "/applications/PP-Care/Readme.md",
+        "type": "filepath"
+    },
+    "2179": {
+        "file_id": 169,
+        "content": "The code initializes a pre-trained PaddleVideo model for PP-Care using TSM and ResNet50 weights, executes the application, and provides accuracy metrics while referencing relevant research papers on video understanding.",
+        "type": "summary"
+    },
+    "2180": {
+        "file_id": 169,
+        "content": "# Video models for 3DMRI\n## 内容\n- [模型简介](#模型简介)\n- [数据准备](#数据准备)\n- [模型训练](#模型训练)\n- [模型测试](#模型测试)\n- [模型推理](#模型推理)\n- [实现细节](#实现细节)\n- [参考论文](#参考论文)\n在开始使用之前，您需要按照以下命令安装额外的依赖包：\n```bash\npython -m pip install SimpleITK\n```\n## 模型简介\n目前对于医学3D数据如MRI，并无太好的处理手段，大多数2D模型无法获得3D空间层面的特征，而常用的3D模型又需要较大的计算成本。而同时，3D医学数据与常见的视频数据有一定相似之处，我们尝试了通过PaddleVideo中的常见模型解决医学3DMRI数据的分类问题，获得了较好的结果。目前支持PP-TSN、PP-TSM、Slowfast和Timesformer对3DMRI的直接训练。\n## 数据准备\n数据集包括帕金森患者(PD)与正常(Con)两种类型共378个case，训练集：测试集=300：78，使用数据均为公开数据集，包括*neurocon*, *taowu*, *PPMI*和*OASIS-1*（经过选取），并经过一定格式转换，数据最后的格式均为*name.nii*或*name.nii.gz*，路径与label信息通过txt文件保存，数据集可以通过百度网盘下载：[下载链接](https://pan.baidu.com/s/1eIsHHqnkKNG5x9CGjRONEA?pwd=avug)\n- 数据集label格式\n```\n{\n   \"0\": \"Con\",\n   \"1\": \"PD\"\n}\n```\n- 数据集信息文件格式\n```\n{\n   path1 label1\n   path2 label2\n   ...\n}\n```\n- 数据保存格式\n```\n{\n   |--  datasets\n      |--  neurocon\n      |--  taowu\n      |--  PPMI\n      |--  OASIS-1\n}\n```\n## 模型训练\n#### 下载并添加预训练模型\n1. 对于PP-TSN与PP-TSM，除了可以使用ImageNet1000上训练好的预训练模型（见[PP-TSN预训练模型](../../../docs/zh-CN/model_zoo/recognition/pp-tsn.md)与[PP-",
+        "type": "code",
+        "location": "/applications/PP-Care/Readme.md:1-55"
+    },
+    "2181": {
+        "file_id": 169,
+        "content": "Introduction to video models for 3DMRI, data preparation, model training, testing, inference details, and references. Install SimpleITK dependency. Uses PaddleVideo models for 3DMRI classification. Dataset includes PD and Con cases; train/test split is 300:78. Format as *.nii or *.nii.gz. Downloaded from a Baidu link.",
+        "type": "comment"
+    },
+    "2182": {
+        "file_id": 169,
+        "content": "TSM预训练模型](../../../docs/zh-CN/model_zoo/recognition/pp-tsm.md))，也可以使用在MRI数据集上预训练的ResNet50权重座位Backbone初始化参数，通过百度网盘下载: [下载链接](https://pan.baidu.com/s/1eIsHHqnkKNG5x9CGjRONEA?pwd=avug)。对于Slowfast与TimeSformer，目前只支持是使用自然数据集的预训练模型，见[Slowfast预训练模型](../../../docs/zh-CN/model_zoo/recognition/slowfast.md)与[Timesformer预训练模型](../../../docs/zh-CN/model_zoo/recognition/timesformer.md)\n2. 打开`PaddleVideo/applications/PP-Care/configs/XXX.yaml`，将下载好的权重路径填写到下方`pretrained:`之后，以pptsn_MRI为例\n   ```yaml\n   MODEL:\n       framework: \"RecognizerMRI\"\n       backbone:\n           name: \"ResNetTSN_MRI\"\n           pretrained: 将路径填写到此处\n   ```\n#### 开始训练\n- 训练使用显卡数量与输出路径等信息均可以选择，以PP-TSN_MRI的4卡训练为例，训练启动命令如下\n  ```bash\n  python3.7 -B -m paddle.distributed.launch --gpus=\"0,1,2,3\" --log_dir=log_pptsn_MRI main.py  --validate -c applications/PP-Care/configs/pptsn_MRI.yaml\n  ```\n## 模型测试\n由于各模型均存在随机采样部分，且采样方式存在不同，所以训练日志中记录的验证指标`topk Acc`不代表最终的测试分数，因此在训练完成之后可以用测试模式对最好的模型进行测试获取最终的指标，以PP-TSN_MRI为例，命令如下：\n```bash\npython3.7 -B -m paddle.distributed.laun",
+        "type": "code",
+        "location": "/applications/PP-Care/Readme.md:55-81"
+    },
+    "2183": {
+        "file_id": 169,
+        "content": "This code provides instructions on how to initialize a pre-trained model for PaddleVideo's PP-Care application. It mentions downloading a pre-trained TSM model, initializing the backbone with ResNet50 weights trained on MRI data, and filling in the weight path in the YAML configuration file. The code also explains how to train and test the model using specific commands for PP-TSN_MRI as an example.",
+        "type": "comment"
+    },
+    "2184": {
+        "file_id": 169,
+        "content": "ch --gpus=\"0,1,2,3\" --log_dir=log_pptsn_MRI main.py  --test -c applications/PP-Care/configs/pptsn_MRI.yaml -w \"output/ppTSN_MRI/ppTSN_MRI_best.pdparams\"\n```\n当测试配置采用.yaml中参数时，在3DMRI数据的validation数据集上的测试指标如下：\n|      backbone      |     head     |  Acc  |\n| :----------------: | :----------: | :---: |\n|      ResNet50      |    PP-TSN    | 91.07 |\n|      ResNet50      |    PP-TSM    | 90.83 |\n|     3DResNet50     |   Slowfast   | 91.07 |\n| Vision Transformer |  Timesformer | 88.33 |\n训练好的模型可以通过百度网盘下载：[下载链接](https://pan.baidu.com/s/1eIsHHqnkKNG5x9CGjRONEA?pwd=avug)\n## 模型优化\n在实际使用中，可以尝试模型优化策略\n- 可以根据MRI数据分布，调整采样率\n- 本模型目前未加入过多的数据预处理策略，针对不同数据特性，在本模型基础上加入一定的预处理手段可能会使结果继续提升\n- 由于数据量与任务难度限制，本模型目前在准确率上的表现与3DResNet并无显著区别，但对于时间与空间的需求均远小于3D模型\n## 参考论文\n- [Temporal Segment Networks: Towards Good Practices for Deep Action Recognition](https://arxiv.org/pdf/1608.00859.pdf), Limin Wang, Yuanjun Xiong, Zhe Wang\n- [TSM: Temporal Shift Module for Efficient Video Understanding](https://arxiv.org/pdf/1811.08383.pdf), Ji Lin, Chuang Gan, Song Han",
+        "type": "code",
+        "location": "/applications/PP-Care/Readme.md:81-106"
+    },
+    "2185": {
+        "file_id": 169,
+        "content": "The given code executes a PaddleVideo application, PP-Care, using specific configurations and trained model weights. It tests the ResNet50 backbone with PP-TSN and PP-TSM heads on 3DMRI validation data and reports accuracy metrics. The optimized models can be downloaded from a Baidu disk link provided.",
+        "type": "comment"
+    },
+    "2186": {
+        "file_id": 169,
+        "content": "- [Distilling the Knowledge in a Neural Network](https://arxiv.org/abs/1503.02531), Geoffrey Hinton, Oriol Vinyals, Jeff Dean\n- [SlowFast Networks for Video Recognition](https://arxiv.org/abs/1812.03982), Feichtenhofer C, Fan H, Malik J, et al.\n- [A Multigrid Method for Efficiently Training Video Models](https://arxiv.org/abs/1912.00998), Chao-Yuan Wu, Ross Girshick, et al.\n- [Is Space-Time Attention All You Need for Video Understanding?](https://arxiv.org/pdf/2102.05095.pdf), Gedas Bertasius, Heng Wang, Lorenzo Torresani",
+        "type": "code",
+        "location": "/applications/PP-Care/Readme.md:107-110"
+    },
+    "2187": {
+        "file_id": 169,
+        "content": "This code snippet contains the references for various important research papers related to video understanding using neural networks. These papers cover topics like knowledge distillation, slow-fast networks, and efficient training methods for video models.",
+        "type": "comment"
+    },
+    "2188": {
+        "file_id": 170,
+        "content": "/applications/PPHuman/README.md",
+        "type": "filepath"
+    },
+    "2189": {
+        "file_id": 170,
+        "content": "This code converts PaddleVideo's JSON files to training data, exports a model for PP-Human, and organizes it in directories suitable for behavior recognition inference.",
+        "type": "summary"
+    },
+    "2190": {
+        "file_id": 170,
+        "content": "# PP-Human 行为识别模型\n实时行人分析工具[PP-Human](https://github.com/PaddlePaddle/PaddleDetection/tree/release/2.4/deploy/pphuman)中集成了基于骨骼点的行为识别模块。本文档介绍如何基于[PaddleVideo](https://github.com/PaddlePaddle/PaddleVideo/)，完成行为识别模型的训练流程。\n## 行为识别模型训练\n目前行为识别模型使用的是[ST-GCN](https://arxiv.org/abs/1801.07455)，并在[PaddleVideo训练流程](https://github.com/PaddlePaddle/PaddleVideo/blob/develop/docs/zh-CN/model_zoo/recognition/stgcn.md)的基础上修改适配，完成模型训练。\n### 准备训练数据\nSTGCN是一个基于骨骼点坐标序列进行预测的模型。在PaddleVideo中，训练数据为采用`.npy`格式存储的`Numpy`数据，标签则可以是`.npy`或`.pkl`格式存储的文件。对于序列数据的维度要求为`(N,C,T,V,M)`。\n以我们在PPhuman中的模型为例，其中具体说明如下：\n| 维度 | 大小 | 说明 |\n| ---- | ---- | ---------- |\n| N | 不定 | 数据集序列个数 |\n| C | 2 | 关键点坐标维度，即(x, y) |\n| T | 50 | 动作序列的时序维度（即持续帧数）|\n| V | 17 | 每个人物关键点的个数，这里我们使用了`COCO`数据集的定义，具体可见[这里](https://github.com/PaddlePaddle/PaddleDetection/blob/release/2.4/docs/tutorials/PrepareKeypointDataSet_cn.md#COCO%E6%95%B0%E6%8D%AE%E9%9B%86) |\n| M | 1 | 人物个数，这里我们每个动作序列只针对单人预测 |\n#### 1. 获取序列的骨骼点坐标\n对于一个待标注的序列（这里序列指一个动作片段，可以是视频或有顺序的图片集合）。可以通过模型预测或人工标注的方式获取骨骼点（也称为关键点）坐标。",
+        "type": "code",
+        "location": "/applications/PPHuman/README.md:1-21"
+    },
+    "2191": {
+        "file_id": 170,
+        "content": "Training behavior recognition model using ST-GCN on PaddleVideo.\nPrepare training data in Numpy format with dimensions (N,C,T,V,M).",
+        "type": "comment"
+    },
+    "2192": {
+        "file_id": 170,
+        "content": "- 模型预测：可以直接选用[PaddleDetection KeyPoint模型系列](https://github.com/PaddlePaddle/PaddleDetection/tree/release/2.4/configs/keypoint) 模型库中的模型，并根据`3、训练与测试 - 部署预测 - 检测+keypoint top-down模型联合部署`中的步骤获取目标序列的17个关键点坐标。\n- 人工标注：若对关键点的数量或是定义有其他需求，也可以直接人工标注各个关键点的坐标位置，注意对于被遮挡或较难标注的点，仍需要标注一个大致坐标，否则后续网络学习过程会受到影响。\n在完成骨骼点坐标的获取后，建议根据各人物的检测框进行归一化处理，以消除人物位置、尺度的差异给网络带来的收敛难度，这一步可以参考[这里](https://github.com/PaddlePaddle/PaddleDetection/blob/release/2.4/deploy/pphuman/pipe_utils.py#L352-L363)。\n#### 2. 统一序列的时序长度\n由于实际数据中每个动作的长度不一，首先需要根据您的数据和实际场景预定时序长度（在PP-Human中我们采用50帧为一个动作序列），并对数据做以下处理：\n- 实际长度超过预定长度的数据，随机截取一个50帧的片段\n- 实际长度不足预定长度的数据：补0，直到满足50帧\n- 恰好等于预定长度的数据： 无需处理\n注意：在这一步完成后，请严格确认处理后的数据仍然包含了一个完整的行为动作，不会产生预测上的歧义，建议通过可视化数据的方式进行确认。\n#### 3. 保存为PaddleVideo可用的文件格式\n在经过前两步处理后，我们得到了每个人物动作片段的标注，此时我们已有一个列表`all_kpts`，这个列表中包含多个关键点序列片段，其中每一个片段形状为(T, V, C) （在我们的例子中即(50, 17, 2)), 下面进一步将其转化为PaddleVideo可用的格式。\n- 调整维度顺序： 可通过`np.transpose`和`np.expand_dims`将每一个片段的维度转化为(C, T, V, M)的格式。\n- 将所有片段组合并保存为一个文件\n注意：这里的`class_id`是`int`类型，与其他分类任务类似。例如`0：摔倒， 1：其他`。\n至此，我们得到了可用的训练数据（`.npy`）和对应的标注文件（`.pkl`）。",
+        "type": "code",
+        "location": "/applications/PPHuman/README.md:22-42"
+    },
+    "2193": {
+        "file_id": 170,
+        "content": "The code describes the process of preparing data for PP-Human, a human action detection model. It involves obtaining key points from pre-trained models or manual annotations, normalizing the coordinates, setting a uniform sequence length, and saving the data in PaddleVideo compatible format.",
+        "type": "comment"
+    },
+    "2194": {
+        "file_id": 170,
+        "content": "#### 示例：基于UR Fall Detection Dataset的摔倒数据处理\n[UR Fall Detection Dataset](http://fenix.univ.rzeszow.pl/~mkepski/ds/uf.html)是一个包含了不同摄像机视角及不同传感器下的摔倒检测数据集。数据集本身并不包含关键点坐标标注，在这里我们使用平视视角（camera 0）的RGB图像数据，介绍如何依照上面展示的步骤完成数据准备工作。\n（1）使用[PaddleDetection关键点模型](https://github.com/PaddlePaddle/PaddleDetection/tree/release/2.4/configs/keypoint)完成关键点坐标的检测\n```bash\n# current path is under root of PaddleDetection\n# Step 1: download pretrained inference models.\nwget https://bj.bcebos.com/v1/paddledet/models/pipeline/mot_ppyoloe_l_36e_pipeline.zip\nwget https://bj.bcebos.com/v1/paddledet/models/pipeline/dark_hrnet_w32_256x192.zip\nunzip -d output_inference/ mot_ppyoloe_l_36e_pipeline.zip\nunzip -d output_inference/ dark_hrnet_w32_256x192.zip\n# Step 2: Get the keypoint coordinarys\n# if your data is image sequence\npython deploy/python/det_keypoint_unite_infer.py --det_model_dir=output_inference/mot_ppyoloe_l_36e_pipeline/ --keypoint_model_dir=output_inference/dark_hrnet_w32_256x192 --image_dir={your image directory path} --device=GPU --save_res=True",
+        "type": "code",
+        "location": "/applications/PPHuman/README.md:44-60"
+    },
+    "2195": {
+        "file_id": 170,
+        "content": "This code is downloading pretrained models for keypoint detection using PaddleDetection and then using them to get the keypoint coordinates for an image sequence.",
+        "type": "comment"
+    },
+    "2196": {
+        "file_id": 170,
+        "content": "# if your data is video\npython deploy/python/det_keypoint_unite_infer.py --det_model_dir=output_inference/mot_ppyoloe_l_36e_pipeline/ --keypoint_model_dir=output_inference/dark_hrnet_w32_256x192 --video_file={your video file path} --device=GPU --save_res=True\n```\n这样我们会得到一个`det_keypoint_unite_image_results.json`的检测结果文件。内容的具体含义请见[这里](https://github.com/PaddlePaddle/PaddleDetection/blob/release/2.4/deploy/python/det_keypoint_unite_infer.py#L108)。\n这里我们需要对UR Fall中的每一段数据执行上面介绍的步骤，在每一段执行完成后及时将检测结果文件妥善保存到一个文件夹中。\n```bash\nmkdir {root of PaddleVideo}/applications/PPHuman/datasets/annotations\nmv det_keypoint_unite_image_results.json {root of PaddleVideo}/applications/PPHuman/datasets/annotations/det_keypoint_unite_image_results_{video_id}_{camera_id}.json\n```\n（2）将关键点坐标转化为训练数据\n在完成上述步骤后，我们得到的骨骼点数据形式如下：\n```\nannotations/\n├── det_keypoint_unite_image_results_fall-01-cam0-rgb.json\n├── det_keypoint_unite_image_results_fall-02-cam0-rgb.json\n├── det_keypoint_unite_image_results_fall-03-cam0-rgb.json\n├── det_keypoint_unite_image_results_fall-04-cam0-rgb.json",
+        "type": "code",
+        "location": "/applications/PPHuman/README.md:62-83"
+    },
+    "2197": {
+        "file_id": 170,
+        "content": "The provided code is a command line instruction for running the PaddleVideo's PPHuman application on video data. It uses pre-trained models to detect human keypoints in the video, resulting in a `det_keypoint_unite_image_results.json` file containing the detection results. These steps are repeated for each segment of UR Fall data. The JSON files are then saved into a specific directory structure with a naming convention based on video and camera IDs.",
+        "type": "comment"
+    },
+    "2198": {
+        "file_id": 170,
+        "content": "    ...\n├── det_keypoint_unite_image_results_fall-28-cam0-rgb.json\n├── det_keypoint_unite_image_results_fall-29-cam0-rgb.json\n└── det_keypoint_unite_image_results_fall-30-cam0-rgb.json\n```\n这里使用我们提供的脚本直接将数据转化为训练数据, 得到数据文件`train_data.npy`, 标签文件`train_label.pkl`。该脚本执行的内容包括解析json文件内容、前述步骤中介绍的整理训练数据及保存数据文件。\n```bash\n# current path is {root of PaddleVideo}/applications/PPHuman/datasets/\npython prepare_dataset.py\n```\n几点说明：\n- UR Fall的动作大多是100帧左右长度对应一个完整动作，个别视频包含一些无关动作，可以手工去除，也可以裁剪作为负样本\n- 统一将数据整理为100帧，再抽取为50帧，保证动作完整性\n- 上述包含摔倒的动作是正样本，在实际训练中也需要一些其他的动作或正常站立等作为负样本，步骤同上，但注意label的类型取1。\n这里我们提供了我们处理好的更全面的[数据](https://bj.bcebos.com/v1/paddledet/data/PPhuman/fall_data.zip)，包括其他场景中的摔倒及非摔倒的动作场景。\n### 训练与测试\n在PaddleVideo中，使用以下命令即可开始训练：\n```bash\n# current path is under root of PaddleVideo\npython main.py -c applications/PPHuman/configs/stgcn_pphuman.yaml\n# 由于整个任务可能过拟合,建议同时开启验证以保存最佳模型\npython main.py --validate -c applications/PPHuman/configs/stgcn_pphuman.yaml\n```\n在训练完成后，采用以下命令进行预测：\n```bash\npython main.py --test -c applications/PPHuman/configs/stgcn_pphuman.yaml  -w output/STGCN/STGCN_best.pdparams",
+        "type": "code",
+        "location": "/applications/PPHuman/README.md:84-114"
+    },
+    "2199": {
+        "file_id": 170,
+        "content": "Code snippet represents a list of json files in a PaddleVideo application called \"PPHuman\". These JSON files contain image results for different actions. The code suggests using a provided script to convert these data into training data, resulting in two new files: \"train_data.npy\" and \"train_label.pkl\". It mentions that some data preparation steps include parsing the JSON content and organizing the training data. There is a link for more comprehensive data available for download. The code also provides instructions on how to train and test the model using PaddleVideo's main script with specific configurations.",
+        "type": "comment"
+    }
+}

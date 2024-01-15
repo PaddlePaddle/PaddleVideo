@@ -1,0 +1,543 @@
+{
+    "3400": {
+        "file_id": 290,
+        "content": "    def num_accumulated_positives(self):\n        \"\"\"Gets the number of positive samples that have been accumulated.\"\"\"\n        return self._total_positives\n    def accumulate(self, predictions, actuals, num_positives=None):\n        \"\"\"Accumulate the predictions and their ground truth labels.\n    After the function call, we may call peek_ap_at_n to actually calculate\n    the average precision.\n    Note predictions and actuals must have the same shape.\n    Args:\n      predictions: a list storing the prediction scores.\n      actuals: a list storing the ground truth labels. Any value\n      larger than 0 will be treated as positives, otherwise as negatives.\n      num_positives = If the 'predictions' and 'actuals' inputs aren't complete,\n      then it's possible some true positives were missed in them. In that case,\n      you can provide 'num_positives' in order to accurately track recall.\n    Raises:\n      ValueError: An error occurred when the format of the input is not the\n      numpy 1-D array or the shape of predictions and actuals does not match.",
+        "type": "code",
+        "location": "/applications/VideoTag/metrics/youtube8m/average_precision_calculator.py:87-108"
+    },
+    "3401": {
+        "file_id": 290,
+        "content": "This function accumulates prediction scores and ground truth labels, allowing for the calculation of average precision after the call. The function requires both predictions and actuals to have the same shape. If inputs are incomplete, you can provide 'num_positives' to accurately track recall.",
+        "type": "comment"
+    },
+    "3402": {
+        "file_id": 290,
+        "content": "    \"\"\"\n        if len(predictions) != len(actuals):\n            raise ValueError(\n                \"the shape of predictions and actuals does not match.\")\n        if not num_positives is None:\n            if not isinstance(num_positives,\n                              numbers.Number) or num_positives < 0:\n                raise ValueError(\n                    \"'num_positives' was provided but it wan't a nonzero number.\"\n                )\n        if not num_positives is None:\n            self._total_positives += num_positives\n        else:\n            self._total_positives += numpy.size(numpy.where(actuals > 0))\n        topk = self._top_n\n        heap = self._heap\n        for i in range(numpy.size(predictions)):\n            if topk is None or len(heap) < topk:\n                heapq.heappush(heap, (predictions[i], actuals[i]))\n            else:\n                if predictions[i] > heap[0][0]:  # heap[0] is the smallest\n                    heapq.heappop(heap)\n                    heapq.heappush(heap, (predictions[i], actuals[i]))",
+        "type": "code",
+        "location": "/applications/VideoTag/metrics/youtube8m/average_precision_calculator.py:109-134"
+    },
+    "3403": {
+        "file_id": 290,
+        "content": "This code snippet is a class method that checks the shape compatibility of 'predictions' and 'actuals', verifies if 'num_positives' is a nonzero number, calculates the total positives, and populates a heap. It also ensures the correctness of the predictions by comparing them to the actuals and updating the heap accordingly.",
+        "type": "comment"
+    },
+    "3404": {
+        "file_id": 290,
+        "content": "    def clear(self):\n        \"\"\"Clear the accumulated predictions.\"\"\"\n        self._heap = []\n        self._total_positives = 0\n    def peek_ap_at_n(self):\n        \"\"\"Peek the non-interpolated average precision at n.\n    Returns:\n      The non-interpolated average precision at n (default 0).\n      If n is larger than the length of the ranked list,\n      the average precision will be returned.\n    \"\"\"\n        if self.heap_size <= 0:\n            return 0\n        predlists = numpy.array(list(zip(*self._heap)))\n        ap = self.ap_at_n(predlists[0],\n                          predlists[1],\n                          n=self._top_n,\n                          total_num_positives=self._total_positives)\n        return ap\n    @staticmethod\n    def ap(predictions, actuals):\n        \"\"\"Calculate the non-interpolated average precision.\n    Args:\n      predictions: a numpy 1-D array storing the sparse prediction scores.\n      actuals: a numpy 1-D array storing the ground truth labels. Any value\n      larger than 0 will be treated as positives, otherwise as negatives.",
+        "type": "code",
+        "location": "/applications/VideoTag/metrics/youtube8m/average_precision_calculator.py:136-166"
+    },
+    "3405": {
+        "file_id": 290,
+        "content": "This code is part of a class that calculates average precision for video tagging. It includes methods to clear accumulated predictions, peek the non-interpolated average precision at a specific point (n), and calculate the non-interpolated average precision using prediction and actual scores arrays.",
+        "type": "comment"
+    },
+    "3406": {
+        "file_id": 290,
+        "content": "    Returns:\n      The non-interpolated average precision at n.\n      If n is larger than the length of the ranked list,\n      the average precision will be returned.\n    Raises:\n      ValueError: An error occurred when the format of the input is not the\n      numpy 1-D array or the shape of predictions and actuals does not match.\n    \"\"\"\n        return AveragePrecisionCalculator.ap_at_n(predictions, actuals, n=None)\n    @staticmethod\n    def ap_at_n(predictions, actuals, n=20, total_num_positives=None):\n        \"\"\"Calculate the non-interpolated average precision.\n    Args:\n      predictions: a numpy 1-D array storing the sparse prediction scores.\n      actuals: a numpy 1-D array storing the ground truth labels. Any value\n      larger than 0 will be treated as positives, otherwise as negatives.\n      n: the top n items to be considered in ap@n.\n      total_num_positives : (optionally) you can specify the number of total\n        positive\n      in the list. If specified, it will be used in calculation.\n    Returns:",
+        "type": "code",
+        "location": "/applications/VideoTag/metrics/youtube8m/average_precision_calculator.py:168-192"
+    },
+    "3407": {
+        "file_id": 290,
+        "content": "This code calculates the non-interpolated average precision at 'n' in a list. It takes sparse prediction scores and ground truth labels as input, with any value larger than 0 treated as positives. It also allows specifying the total number of positive items in the list, which can be used for calculation if provided.",
+        "type": "comment"
+    },
+    "3408": {
+        "file_id": 290,
+        "content": "      The non-interpolated average precision at n.\n      If n is larger than the length of the ranked list,\n      the average precision will be returned.\n    Raises:\n      ValueError: An error occurred when\n      1) the format of the input is not the numpy 1-D array;\n      2) the shape of predictions and actuals does not match;\n      3) the input n is not a positive integer.\n    \"\"\"\n        if len(predictions) != len(actuals):\n            raise ValueError(\n                \"the shape of predictions and actuals does not match.\")\n        if n is not None:\n            if not isinstance(n, int) or n <= 0:\n                raise ValueError(\"n must be 'None' or a positive integer.\"\n                                 \" It was '%s'.\" % n)\n        ap = 0.0\n        predictions = numpy.array(predictions)\n        actuals = numpy.array(actuals)\n        # add a shuffler to avoid overestimating the ap\n        predictions, actuals = AveragePrecisionCalculator._shuffle(\n            predictions, actuals)\n        sortidx = sorted(range(len(predictions)),",
+        "type": "code",
+        "location": "/applications/VideoTag/metrics/youtube8m/average_precision_calculator.py:193-220"
+    },
+    "3409": {
+        "file_id": 290,
+        "content": "The code defines a function that calculates the average precision at a specific rank, n. It checks the shape of predictions and actuals arrays and if n is positive integer or None. If any error occurs, it raises ValueError. The code also shuffles the predictions and actuals to avoid overestimating the average precision.",
+        "type": "comment"
+    },
+    "3410": {
+        "file_id": 290,
+        "content": "                         key=lambda k: predictions[k],\n                         reverse=True)\n        if total_num_positives is None:\n            numpos = numpy.size(numpy.where(actuals > 0))\n        else:\n            numpos = total_num_positives\n        if numpos == 0:\n            return 0\n        if n is not None:\n            numpos = min(numpos, n)\n        delta_recall = 1.0 / numpos\n        poscount = 0.0\n        # calculate the ap\n        r = len(sortidx)\n        if n is not None:\n            r = min(r, n)\n        for i in range(r):\n            if actuals[sortidx[i]] > 0:\n                poscount += 1\n                ap += poscount / (i + 1) * delta_recall\n        return ap\n    @staticmethod\n    def _shuffle(predictions, actuals):\n        random.seed(0)\n        suffidx = random.sample(range(len(predictions)), len(predictions))\n        predictions = predictions[suffidx]\n        actuals = actuals[suffidx]\n        return predictions, actuals\n    @staticmethod\n    def _zero_one_normalize(predictions, epsilon=1e-7):",
+        "type": "code",
+        "location": "/applications/VideoTag/metrics/youtube8m/average_precision_calculator.py:221-256"
+    },
+    "3411": {
+        "file_id": 290,
+        "content": "This code calculates the average precision of a classification task by first shuffling the predictions and actuals, then iterating through the sorted list to calculate the precision at each recall step. It handles cases where total_num_positives is given or automatically calculated.",
+        "type": "comment"
+    },
+    "3412": {
+        "file_id": 290,
+        "content": "        \"\"\"Normalize the predictions to the range between 0.0 and 1.0.\n    For some predictions like SVM predictions, we need to normalize them before\n    calculate the interpolated average precision. The normalization will not\n    change the rank in the original list and thus won't change the average\n    precision.\n    Args:\n      predictions: a numpy 1-D array storing the sparse prediction scores.\n      epsilon: a small constant to avoid denominator being zero.\n    Returns:\n      The normalized prediction.\n    \"\"\"\n        denominator = numpy.max(predictions) - numpy.min(predictions)\n        ret = (predictions - numpy.min(predictions)) / numpy.max(\n            denominator, epsilon)\n        return ret",
+        "type": "code",
+        "location": "/applications/VideoTag/metrics/youtube8m/average_precision_calculator.py:257-274"
+    },
+    "3413": {
+        "file_id": 290,
+        "content": "This function normalizes the predictions to a range of 0.0 to 1.0 by subtracting the minimum prediction and dividing by the maximum denominator (prediction difference) with an optional epsilon value to prevent division by zero.",
+        "type": "comment"
+    },
+    "3414": {
+        "file_id": 291,
+        "content": "/applications/VideoTag/metrics/youtube8m/eval_util.py",
+        "type": "filepath"
+    },
+    "3415": {
+        "file_id": 291,
+        "content": "The PaddleVideo library evaluates video classification models using GAP, hit@one, precision error, and loss metrics. The `EvaluationMetrics` class accumulates these metrics per mini-batch or epoch using AveragePrecisionCalculator for GAP calculation.",
+        "type": "summary"
+    },
+    "3416": {
+        "file_id": 291,
+        "content": "# Copyright 2016 Google Inc. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#      http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS-IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"Provides functions to help with evaluating models.\"\"\"\nimport datetime\nimport numpy\nfrom . import mean_average_precision_calculator as map_calculator\nfrom . import average_precision_calculator as ap_calculator\ndef flatten(l):\n    \"\"\" Merges a list of lists into a single list. \"\"\"\n    return [item for sublist in l for item in sublist]\ndef calculate_hit_at_one(predictions, actuals):\n    \"\"\"Performs a local (numpy) calculation of the hit at one.",
+        "type": "code",
+        "location": "/applications/VideoTag/metrics/youtube8m/eval_util.py:1-28"
+    },
+    "3417": {
+        "file_id": 291,
+        "content": "Code snippet is a part of the PaddleVideo library, providing functions to help evaluate video classification models. It includes flattening list functionality and calculates hit at one for predictions and actuals using numpy operations.",
+        "type": "comment"
+    },
+    "3418": {
+        "file_id": 291,
+        "content": "  Args:\n    predictions: Matrix containing the outputs of the model.\n      Dimensions are 'batch' x 'num_classes'.\n    actuals: Matrix containing the ground truth labels.\n      Dimensions are 'batch' x 'num_classes'.\n  Returns:\n    float: The average hit at one across the entire batch.\n  \"\"\"\n    top_prediction = numpy.argmax(predictions, 1)\n    hits = actuals[numpy.arange(actuals.shape[0]), top_prediction]\n    return numpy.average(hits)\ndef calculate_precision_at_equal_recall_rate(predictions, actuals):\n    \"\"\"Performs a local (numpy) calculation of the PERR.\n  Args:\n    predictions: Matrix containing the outputs of the model.\n      Dimensions are 'batch' x 'num_classes'.\n    actuals: Matrix containing the ground truth labels.\n      Dimensions are 'batch' x 'num_classes'.\n  Returns:\n    float: The average precision at equal recall rate across the entire batch.\n  \"\"\"\n    aggregated_precision = 0.0\n    num_videos = actuals.shape[0]\n    for row in numpy.arange(num_videos):\n        num_labels = int(numpy.sum(actuals[row]))",
+        "type": "code",
+        "location": "/applications/VideoTag/metrics/youtube8m/eval_util.py:30-59"
+    },
+    "3419": {
+        "file_id": 291,
+        "content": "This code calculates the average hit at one and precision at equal recall rate for a batch of predictions and corresponding actuals. These are metrics commonly used in evaluation of machine learning models, particularly in video classification tasks. The functions take as input two matrices: 'predictions' containing model outputs and 'actuals' with ground truth labels. They return the average hit at one and precision at equal recall rate across the entire batch respectively.",
+        "type": "comment"
+    },
+    "3420": {
+        "file_id": 291,
+        "content": "        top_indices = numpy.argpartition(predictions[row],\n                                         -num_labels)[-num_labels:]\n        item_precision = 0.0\n        for label_index in top_indices:\n            if predictions[row][label_index] > 0:\n                item_precision += actuals[row][label_index]\n        item_precision /= top_indices.size\n        aggregated_precision += item_precision\n    aggregated_precision /= num_videos\n    return aggregated_precision\ndef calculate_gap(predictions, actuals, top_k=20):\n    \"\"\"Performs a local (numpy) calculation of the global average precision.\n  Only the top_k predictions are taken for each of the videos.\n  Args:\n    predictions: Matrix containing the outputs of the model.\n      Dimensions are 'batch' x 'num_classes'.\n    actuals: Matrix containing the ground truth labels.\n      Dimensions are 'batch' x 'num_classes'.\n    top_k: How many predictions to use per video.\n  Returns:\n    float: The global average precision.\n  \"\"\"\n    gap_calculator = ap_calculator.AveragePrecisionCalculator()",
+        "type": "code",
+        "location": "/applications/VideoTag/metrics/youtube8m/eval_util.py:60-87"
+    },
+    "3421": {
+        "file_id": 291,
+        "content": "The code calculates the global average precision (GAP) using the top_k predictions and actuals for each video. It uses a function called AveragePrecisionCalculator to calculate the metric. The function first partitions the predictions based on their values, then iterates through the top indices, adding up the correct ones to calculate item precision. Finally, it averages the item precisions across all videos to get the GAP.",
+        "type": "comment"
+    },
+    "3422": {
+        "file_id": 291,
+        "content": "    sparse_predictions, sparse_labels, num_positives = top_k_by_class(\n        predictions, actuals, top_k)\n    gap_calculator.accumulate(flatten(sparse_predictions),\n                              flatten(sparse_labels), sum(num_positives))\n    return gap_calculator.peek_ap_at_n()\ndef top_k_by_class(predictions, labels, k=20):\n    \"\"\"Extracts the top k predictions for each video, sorted by class.\n  Args:\n    predictions: A numpy matrix containing the outputs of the model.\n      Dimensions are 'batch' x 'num_classes'.\n    k: the top k non-zero entries to preserve in each prediction.\n  Returns:\n    A tuple (predictions,labels, true_positives). 'predictions' and 'labels'\n    are lists of lists of floats. 'true_positives' is a list of scalars. The\n    length of the lists are equal to the number of classes. The entries in the\n    predictions variable are probability predictions, and\n    the corresponding entries in the labels variable are the ground truth for\n    those predictions. The entries in 'true_positives' are the number of true",
+        "type": "code",
+        "location": "/applications/VideoTag/metrics/youtube8m/eval_util.py:88-109"
+    },
+    "3423": {
+        "file_id": 291,
+        "content": "This code extracts the top k predictions for each video, sorted by class. It returns a tuple containing the sparse_predictions, sparse_labels, and num_positives. The gap_calculator accumulates the flattened sparse_predictions, flattened sparse_labels, and sum of num_positives. Finally, it returns the average precision at n using peek_ap_at_n() from the gap_calculator.",
+        "type": "comment"
+    },
+    "3424": {
+        "file_id": 291,
+        "content": "    positives for each class in the ground truth.\n  Raises:\n    ValueError: An error occurred when the k is not a positive integer.\n  \"\"\"\n    if k <= 0:\n        raise ValueError(\"k must be a positive integer.\")\n    k = min(k, predictions.shape[1])\n    num_classes = predictions.shape[1]\n    prediction_triplets = []\n    for video_index in range(predictions.shape[0]):\n        prediction_triplets.extend(\n            top_k_triplets(predictions[video_index], labels[video_index], k))\n    out_predictions = [[] for v in range(num_classes)]\n    out_labels = [[] for v in range(num_classes)]\n    for triplet in prediction_triplets:\n        out_predictions[triplet[0]].append(triplet[1])\n        out_labels[triplet[0]].append(triplet[2])\n    out_true_positives = [numpy.sum(labels[:, i]) for i in range(num_classes)]\n    return out_predictions, out_labels, out_true_positives\ndef top_k_triplets(predictions, labels, k=20):\n    \"\"\"Get the top_k for a 1-d numpy array. Returns a sparse list of tuples in\n  (prediction, class) format\"\"\"",
+        "type": "code",
+        "location": "/applications/VideoTag/metrics/youtube8m/eval_util.py:110-135"
+    },
+    "3425": {
+        "file_id": 291,
+        "content": "Function evaluates predictions and labels for each video and calculates top-k triplets (prediction, class) for each class. If k is not a positive integer, it raises ValueError. It returns out_predictions, out_labels, and out_true_positives for further analysis.",
+        "type": "comment"
+    },
+    "3426": {
+        "file_id": 291,
+        "content": "    m = len(predictions)\n    k = min(k, m)\n    indices = numpy.argpartition(predictions, -k)[-k:]\n    return [(index, predictions[index], labels[index]) for index in indices]\nclass EvaluationMetrics(object):\n    \"\"\"A class to store the evaluation metrics.\"\"\"\n    def __init__(self, num_class, top_k):\n        \"\"\"Construct an EvaluationMetrics object to store the evaluation metrics.\n    Args:\n      num_class: A positive integer specifying the number of classes.\n      top_k: A positive integer specifying how many predictions are considered per video.\n    Raises:\n      ValueError: An error occurred when MeanAveragePrecisionCalculator cannot\n        not be constructed.\n    \"\"\"\n        self.sum_hit_at_one = 0.0\n        self.sum_perr = 0.0\n        self.sum_loss = 0.0\n        self.map_calculator = map_calculator.MeanAveragePrecisionCalculator(\n            num_class)\n        self.global_ap_calculator = ap_calculator.AveragePrecisionCalculator()\n        self.top_k = top_k\n        self.num_examples = 0\n    #def accumulate(self, predictions, labels, loss):",
+        "type": "code",
+        "location": "/applications/VideoTag/metrics/youtube8m/eval_util.py:136-164"
+    },
+    "3427": {
+        "file_id": 291,
+        "content": "The code defines a class `EvaluationMetrics` to store various evaluation metrics for video classification. The `__init__` method initializes the metrics such as hit@one, precision error (perr), and loss. It also initializes two calculators: MeanAveragePrecisionCalculator and AveragePrecisionCalculator. The `accumulate` method updates these metrics based on predictions, labels, and loss values.",
+        "type": "comment"
+    },
+    "3428": {
+        "file_id": 291,
+        "content": "    def accumulate(self, loss, predictions, labels):\n        \"\"\"Accumulate the metrics calculated locally for this mini-batch.\n    Args:\n      predictions: A numpy matrix containing the outputs of the model.\n        Dimensions are 'batch' x 'num_classes'.\n      labels: A numpy matrix containing the ground truth labels.\n        Dimensions are 'batch' x 'num_classes'.\n      loss: A numpy array containing the loss for each sample.\n    Returns:\n      dictionary: A dictionary storing the metrics for the mini-batch.\n    Raises:\n      ValueError: An error occurred when the shape of predictions and actuals\n        does not match.\n    \"\"\"\n        batch_size = labels.shape[0]\n        mean_hit_at_one = calculate_hit_at_one(predictions, labels)\n        mean_perr = calculate_precision_at_equal_recall_rate(\n            predictions, labels)\n        mean_loss = numpy.mean(loss)\n        # Take the top 20 predictions.\n        sparse_predictions, sparse_labels, num_positives = top_k_by_class(\n            predictions, labels, self.top_k)",
+        "type": "code",
+        "location": "/applications/VideoTag/metrics/youtube8m/eval_util.py:165-190"
+    },
+    "3429": {
+        "file_id": 291,
+        "content": "The code defines a function \"accumulate\" that takes in predictions, labels and loss from a mini-batch. It calculates three metrics: mean_hit_at_one, mean_perr, and mean_loss. The function then returns a dictionary containing these metrics for the batch.",
+        "type": "comment"
+    },
+    "3430": {
+        "file_id": 291,
+        "content": "        self.map_calculator.accumulate(sparse_predictions, sparse_labels,\n                                       num_positives)\n        self.global_ap_calculator.accumulate(flatten(sparse_predictions),\n                                             flatten(sparse_labels),\n                                             sum(num_positives))\n        self.num_examples += batch_size\n        self.sum_hit_at_one += mean_hit_at_one * batch_size\n        self.sum_perr += mean_perr * batch_size\n        self.sum_loss += mean_loss * batch_size\n        return {\n            \"hit_at_one\": mean_hit_at_one,\n            \"perr\": mean_perr,\n            \"loss\": mean_loss\n        }\n    def get(self):\n        \"\"\"Calculate the evaluation metrics for the whole epoch.\n    Raises:\n      ValueError: If no examples were accumulated.\n    Returns:\n      dictionary: a dictionary storing the evaluation metrics for the epoch. The\n        dictionary has the fields: avg_hit_at_one, avg_perr, avg_loss, and\n        aps (default nan).\n    \"\"\"\n        if self.num_examples <= 0:",
+        "type": "code",
+        "location": "/applications/VideoTag/metrics/youtube8m/eval_util.py:191-219"
+    },
+    "3431": {
+        "file_id": 291,
+        "content": "This code calculates and accumulates various evaluation metrics during the epoch, including hit_at_one, perr, and loss. It then returns a dictionary with these metrics after an entire epoch of training. If no examples were accumulated during the epoch, it raises a ValueError.",
+        "type": "comment"
+    },
+    "3432": {
+        "file_id": 291,
+        "content": "            raise ValueError(\"total_sample must be positive.\")\n        avg_hit_at_one = self.sum_hit_at_one / self.num_examples\n        avg_perr = self.sum_perr / self.num_examples\n        avg_loss = self.sum_loss / self.num_examples\n        aps = self.map_calculator.peek_map_at_n()\n        gap = self.global_ap_calculator.peek_ap_at_n()\n        epoch_info_dict = {}\n        return {\n            \"avg_hit_at_one\": avg_hit_at_one,\n            \"avg_perr\": avg_perr,\n            \"avg_loss\": avg_loss,\n            \"aps\": aps,\n            \"gap\": gap\n        }\n    def clear(self):\n        \"\"\"Clear the evaluation metrics and reset the EvaluationMetrics object.\"\"\"\n        self.sum_hit_at_one = 0.0\n        self.sum_perr = 0.0\n        self.sum_loss = 0.0\n        self.map_calculator.clear()\n        self.global_ap_calculator.clear()\n        self.num_examples = 0",
+        "type": "code",
+        "location": "/applications/VideoTag/metrics/youtube8m/eval_util.py:220-244"
+    },
+    "3433": {
+        "file_id": 291,
+        "content": "This code defines a class for evaluating metrics in video tagging. It calculates average hit at one, perr, and loss, as well as maps and global APs. The clear method resets the metrics to zero.",
+        "type": "comment"
+    },
+    "3434": {
+        "file_id": 292,
+        "content": "/applications/VideoTag/metrics/youtube8m/mean_average_precision_calculator.py",
+        "type": "filepath"
+    },
+    "3435": {
+        "file_id": 292,
+        "content": "This code snippet calculates mean average precision for video tagging in the Youtube-8m dataset using numpy, with functions for accumulation and processing. It allows for clearing the calculator, checking if empty, and retrieving non-interpolated average precision at n for each class.",
+        "type": "summary"
+    },
+    "3436": {
+        "file_id": 292,
+        "content": "# Copyright 2016 Google Inc. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#      http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS-IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"Calculate the mean average precision.\nIt provides an interface for calculating mean average precision\nfor an entire list or the top-n ranked items.\nExample usages:\nWe first call the function accumulate many times to process parts of the ranked\nlist. After processing all the parts, we call peek_map_at_n\nto calculate the mean average precision.\n```\nimport random\np = np.array([[random.random() for _ in xrange(50)] for _ in xrange(1000)])",
+        "type": "code",
+        "location": "/applications/VideoTag/metrics/youtube8m/mean_average_precision_calculator.py:1-27"
+    },
+    "3437": {
+        "file_id": 292,
+        "content": "This code calculates the mean average precision for an entire list or top-n ranked items in a video tag application. It imports numpy and provides functions to accumulate, process parts of the ranked list, and finally calculate the mean average precision using peek_map_at_n function. The example usage demonstrates how to use this code with a sample array.",
+        "type": "comment"
+    },
+    "3438": {
+        "file_id": 292,
+        "content": "a = np.array([[random.choice([0, 1]) for _ in xrange(50)]\n     for _ in xrange(1000)])\n# mean average precision for 50 classes.\ncalculator = mean_average_precision_calculator.MeanAveragePrecisionCalculator(\n            num_class=50)\ncalculator.accumulate(p, a)\naps = calculator.peek_map_at_n()\n```\n\"\"\"\nimport numpy\nfrom . import average_precision_calculator\nclass MeanAveragePrecisionCalculator(object):\n    \"\"\"This class is to calculate mean average precision.\n  \"\"\"\n    def __init__(self, num_class):\n        \"\"\"Construct a calculator to calculate the (macro) average precision.\n    Args:\n      num_class: A positive Integer specifying the number of classes.\n      top_n_array: A list of positive integers specifying the top n for each\n      class. The top n in each class will be used to calculate its average\n      precision at n.\n      The size of the array must be num_class.\n    Raises:\n      ValueError: An error occurred when num_class is not a positive integer;\n      or the top_n_array is not a list of positive integers.",
+        "type": "code",
+        "location": "/applications/VideoTag/metrics/youtube8m/mean_average_precision_calculator.py:28-58"
+    },
+    "3439": {
+        "file_id": 292,
+        "content": "The code initializes a numpy array 'a' with random values (0 or 1) for each of the 50 classes. It then creates an instance of MeanAveragePrecisionCalculator class and accumulates the predictions and actuals using the 'accumulate' method. Finally, it retrieves the average precision at different recall levels using the 'peek_map_at_n' method.",
+        "type": "comment"
+    },
+    "3440": {
+        "file_id": 292,
+        "content": "    \"\"\"\n        if not isinstance(num_class, int) or num_class <= 1:\n            raise ValueError(\"num_class must be a positive integer.\")\n        self._ap_calculators = []  # member of AveragePrecisionCalculator\n        self._num_class = num_class  # total number of classes\n        for i in range(num_class):\n            self._ap_calculators.append(\n                average_precision_calculator.AveragePrecisionCalculator())\n    def accumulate(self, predictions, actuals, num_positives=None):\n        \"\"\"Accumulate the predictions and their ground truth labels.\n    Args:\n      predictions: A list of lists storing the prediction scores. The outer\n      dimension corresponds to classes.\n      actuals: A list of lists storing the ground truth labels. The dimensions\n      should correspond to the predictions input. Any value\n      larger than 0 will be treated as positives, otherwise as negatives.\n      num_positives: If provided, it is a list of numbers representing the\n      number of true positives for each class. If not provided, the number of",
+        "type": "code",
+        "location": "/applications/VideoTag/metrics/youtube8m/mean_average_precision_calculator.py:59-79"
+    },
+    "3441": {
+        "file_id": 292,
+        "content": "This code initializes an instance of AveragePrecisionCalculator with a specified number of classes. It appends an instance of AveragePrecisionCalculator to the class member _ap_calculators for each class. The accumulate method takes predictions and actuals as arguments, accumulates prediction scores and ground truth labels, treats any value greater than 0 as positives and negatives otherwise, and optionally takes num_positives as an argument if provided.",
+        "type": "comment"
+    },
+    "3442": {
+        "file_id": 292,
+        "content": "      true positives will be inferred from the 'actuals' array.\n    Raises:\n      ValueError: An error occurred when the shape of predictions and actuals\n      does not match.\n    \"\"\"\n        if not num_positives:\n            num_positives = [None for i in predictions.shape[1]]\n        calculators = self._ap_calculators\n        for i in range(len(predictions)):\n            calculators[i].accumulate(predictions[i], actuals[i],\n                                      num_positives[i])\n    def clear(self):\n        for calculator in self._ap_calculators:\n            calculator.clear()\n    def is_empty(self):\n        return ([calculator.heap_size for calculator in self._ap_calculators\n                 ] == [0 for _ in range(self._num_class)])\n    def peek_map_at_n(self):\n        \"\"\"Peek the non-interpolated mean average precision at n.\n    Returns:\n      An array of non-interpolated average precision at n (default 0) for each\n      class.\n    \"\"\"\n        aps = [\n            self._ap_calculators[i].peek_ap_at_n()\n            for i in range(self._num_class)",
+        "type": "code",
+        "location": "/applications/VideoTag/metrics/youtube8m/mean_average_precision_calculator.py:80-111"
+    },
+    "3443": {
+        "file_id": 292,
+        "content": "This code initializes a mean average precision calculator, handles accumulating predictions and actuals, allows for clearing the calculator, checks if it's empty, and retrieves non-interpolated average precision at n for each class.",
+        "type": "comment"
+    },
+    "3444": {
+        "file_id": 292,
+        "content": "        ]\n        return aps",
+        "type": "code",
+        "location": "/applications/VideoTag/metrics/youtube8m/mean_average_precision_calculator.py:112-113"
+    },
+    "3445": {
+        "file_id": 292,
+        "content": "This code snippet calculates mean average precision for video tagging in the Youtube-8m dataset. It returns a list of average precisions (aps) after processing each chunk of data.",
+        "type": "comment"
+    },
+    "3446": {
+        "file_id": 293,
+        "content": "/applications/VideoTag/models/__init__.py",
+        "type": "filepath"
+    },
+    "3447": {
+        "file_id": 293,
+        "content": "Code snippet registers two models, AttentionLSTM and TSN, in the application's model registry using the functions regist_model() and get_model(). Models are sorted alphabetically for easy retrieval.",
+        "type": "summary"
+    },
+    "3448": {
+        "file_id": 293,
+        "content": "from .model import regist_model, get_model\nfrom .attention_lstm import AttentionLSTM\nfrom .tsn import TSN\n# regist models, sort by alphabet\nregist_model(\"AttentionLSTM\", AttentionLSTM)\nregist_model(\"TSN\", TSN)",
+        "type": "code",
+        "location": "/applications/VideoTag/models/__init__.py:1-7"
+    },
+    "3449": {
+        "file_id": 293,
+        "content": "Code snippet registers two models, AttentionLSTM and TSN, in the application's model registry using the functions regist_model() and get_model(). Models are sorted alphabetically for easy retrieval.",
+        "type": "comment"
+    },
+    "3450": {
+        "file_id": 294,
+        "content": "/applications/VideoTag/models/attention_lstm/__init__.py",
+        "type": "filepath"
+    },
+    "3451": {
+        "file_id": 294,
+        "content": "This line imports the functions and classes from the \"attention_lstm.py\" file in the same directory, allowing for easy access to those components within this module.",
+        "type": "summary"
+    },
+    "3452": {
+        "file_id": 294,
+        "content": "from .attention_lstm import *",
+        "type": "code",
+        "location": "/applications/VideoTag/models/attention_lstm/__init__.py:1-1"
+    },
+    "3453": {
+        "file_id": 294,
+        "content": "This line imports the functions and classes from the \"attention_lstm.py\" file in the same directory, allowing for easy access to those components within this module.",
+        "type": "comment"
+    },
+    "3454": {
+        "file_id": 295,
+        "content": "/applications/VideoTag/models/attention_lstm/attention_lstm.py",
+        "type": "filepath"
+    },
+    "3455": {
+        "file_id": 295,
+        "content": "The code defines an AttentionLSTM class for a video tagging model, extending ModelBase. It initializes properties, retrieves configurations and dimensions, builds the LSTM attention model, applies fully connected layers, and uses an optimizer with piecewise learning rate decay and L2 regularization.",
+        "type": "summary"
+    },
+    "3456": {
+        "file_id": 295,
+        "content": "#  Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n#Licensed under the Apache License, Version 2.0 (the \"License\");\n#you may not use this file except in compliance with the License.\n#You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n#Unless required by applicable law or agreed to in writing, software\n#distributed under the License is distributed on an \"AS IS\" BASIS,\n#WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n#See the License for the specific language governing permissions and\n#limitations under the License.\nfrom ..model import ModelBase\nfrom .lstm_attention import LSTMAttentionModel\nimport logging\nimport paddle\nimport paddle.static as static\nlogger = logging.getLogger(__name__)\n__all__ = [\"AttentionLSTM\"]\nclass AttentionLSTM(ModelBase):\n    def __init__(self, name, cfg, mode='train', is_videotag=False):\n        super(AttentionLSTM, self).__init__(name, cfg, mode)\n        self.is_videotag = is_videotag\n        self.get_config()",
+        "type": "code",
+        "location": "/applications/VideoTag/models/attention_lstm/attention_lstm.py:1-31"
+    },
+    "3457": {
+        "file_id": 295,
+        "content": "The code is importing necessary modules and defining a class called AttentionLSTM. It extends the ModelBase class and has an __init__ method to initialize its properties such as name, configuration, mode, and is_videotag flag. The get_config method is also defined for retrieving configuration from a file.",
+        "type": "comment"
+    },
+    "3458": {
+        "file_id": 295,
+        "content": "    def get_config(self):\n        # get model configs\n        self.feature_names = self.cfg.MODEL.feature_names\n        self.feature_dims = self.cfg.MODEL.feature_dims\n        self.num_classes = self.cfg.MODEL.num_classes\n        self.embedding_size = self.cfg.MODEL.embedding_size\n        self.lstm_size = self.cfg.MODEL.lstm_size\n        self.drop_rate = self.cfg.MODEL.drop_rate\n        # get mode configs\n        self.batch_size = self.get_config_from_sec(self.mode, 'batch_size', 1)\n        self.num_gpus = self.get_config_from_sec(self.mode, 'num_gpus', 1)\n        if self.mode == 'train':\n            self.learning_rate = self.get_config_from_sec(\n                'train', 'learning_rate', 1e-3)\n            self.weight_decay = self.get_config_from_sec(\n                'train', 'weight_decay', 8e-4)\n            self.num_samples = self.get_config_from_sec('train', 'num_samples',\n                                                        5000000)\n            self.decay_epochs = self.get_config_from_sec(\n                'train', 'decay_epochs', [5])",
+        "type": "code",
+        "location": "/applications/VideoTag/models/attention_lstm/attention_lstm.py:33-54"
+    },
+    "3459": {
+        "file_id": 295,
+        "content": "The code defines a model's configuration method, retrieving feature names, dimensions, number of classes, embedding size, LSTM size, and drop rate. It also gets mode-specific configurations such as batch size, number of GPUs, learning rate, weight decay, total training samples, and epochs for learning rate decay.",
+        "type": "comment"
+    },
+    "3460": {
+        "file_id": 295,
+        "content": "            self.decay_gamma = self.get_config_from_sec('train', 'decay_gamma',\n                                                        0.1)\n    def build_input(self, use_dataloader):\n        self.feature_input = []\n        for name, dim in zip(self.feature_names, self.feature_dims):\n            self.feature_input.append(\n                static.data(shape=[None, dim],\n                           lod_level=1,\n                           dtype='float32',\n                           name=name))\n        if self.mode != 'infer':\n            self.label_input = static.data(shape=[None, self.num_classes],\n                                          dtype='float32',\n                                          name='label')\n        else:\n            self.label_input = None\n        if use_dataloader:\n            assert self.mode != 'infer', \\\n                    'dataloader is not recommendated when infer, please set use_dataloader to be false.'\n            self.dataloader = paddle.io.DataLoader.from_generator(\n                feed_list=self.feature_input + [self.label_input],",
+        "type": "code",
+        "location": "/applications/VideoTag/models/attention_lstm/attention_lstm.py:55-76"
+    },
+    "3461": {
+        "file_id": 295,
+        "content": "The code initializes feature and label inputs for the model, depending on the mode. It also builds a dataloader if use_dataloader is True, but not recommended in infer mode.",
+        "type": "comment"
+    },
+    "3462": {
+        "file_id": 295,
+        "content": "                capacity=8,\n                iterable=True)\n    def build_model(self):\n        att_outs = []\n        for i, (input_dim,\n                feature) in enumerate(zip(self.feature_dims,\n                                          self.feature_input)):\n            att = LSTMAttentionModel(input_dim, self.embedding_size,\n                                     self.lstm_size, self.drop_rate)\n            att_out = att.forward(feature, is_training=(self.mode == 'train'))\n            att_outs.append(att_out)\n        if len(att_outs) > 1:\n            out = paddle.concat(x=att_outs, axis=1)\n        else:\n            out = att_outs[0]  # video only, without audio in videoTag\n        fc1 = static.nn.fc(\n            x=out,\n            size=8192,\n            activation='relu',\n            bias_attr=paddle.ParamAttr(\n                regularizer=paddle.regularizer.L2Decay(coeff=0.0),\n                initializer=paddle.nn.initializer.Normal(std=0.0)),\n            name='fc1')\n        fc2 = static.nn.fc(\n            x=fc1,",
+        "type": "code",
+        "location": "/applications/VideoTag/models/attention_lstm/attention_lstm.py:77-103"
+    },
+    "3463": {
+        "file_id": 295,
+        "content": "This code defines a LSTM attention model with multiple input features. It concatenates output of each feature, applies fully connected layers, and returns the result.",
+        "type": "comment"
+    },
+    "3464": {
+        "file_id": 295,
+        "content": "            size=4096,\n            activation='tanh',\n            bias_attr=paddle.ParamAttr(\n                regularizer=paddle.regularizer.L2Decay(coeff=0.0),\n                initializer=paddle.nn.initializer.Normal(std=0.0)),\n            name='fc2')\n        self.logit = static.nn.fc(x=fc2, size=self.num_classes, activation=None, \\\n                              bias_attr=paddle.ParamAttr(regularizer=paddle.regularizer.L2Decay(coeff=0.0),\n                                                  initializer=paddle.nn.initializer.Normal(std=0.0)), name='output')\n        self.output = paddle.nn.functional.sigmoid(self.logit)\n    def optimizer(self):\n        assert self.mode == 'train', \"optimizer only can be get in train mode\"\n        values = [\n            self.learning_rate * (self.decay_gamma**i)\n            for i in range(len(self.decay_epochs) + 1)\n        ]\n        iter_per_epoch = self.num_samples / self.batch_size\n        boundaries = [e * iter_per_epoch for e in self.decay_epochs]\n        return paddle.optimizer.RMSProp(",
+        "type": "code",
+        "location": "/applications/VideoTag/models/attention_lstm/attention_lstm.py:104-125"
+    },
+    "3465": {
+        "file_id": 295,
+        "content": "This code defines an attention LSTM model for video tagging. It uses a tanh activation function, L2 decay regularizer, and normal initializer for the fully connected layers. The logit layer applies sigmoid activation to output probabilities for each class. The optimizer function sets up a learning rate schedule using RMSProp optimizer with decay epochs and boundaries.",
+        "type": "comment"
+    },
+    "3466": {
+        "file_id": 295,
+        "content": "            learning_rate=paddle.optimizer.lr.PiecewiseDecay(values=values,\n                                                       boundaries=boundaries),\n            centered=True,\n            weight_decay=paddle.regularizer.L2Decay(coeff=self.weight_decay))\n    def loss(self):\n        assert self.mode != 'infer', \"invalid loss calculationg in infer mode\"\n        cost = paddle.nn.functional.binary_cross_entropy(\n            input=self.logit, label=self.label_input, reduction=None)\n        cost = paddle.sum(x=cost, axis=-1)\n        sum_cost = paddle.sum(x=cost)\n        self.loss_ = paddle.scale(sum_cost,\n                                        scale=self.num_gpus,\n                                        bias_after_scale=False)\n        return self.loss_\n    def outputs(self):\n        return [self.output, self.logit]\n    def feeds(self):\n        return self.feature_input if self.mode == 'infer' else self.feature_input + [\n            self.label_input\n        ]\n    def fetches(self):\n        if self.mode == 'train' or self.mode == 'valid':",
+        "type": "code",
+        "location": "/applications/VideoTag/models/attention_lstm/attention_lstm.py:126-151"
+    },
+    "3467": {
+        "file_id": 295,
+        "content": "This code defines a model with an LSTM layer and attention mechanism. It uses piecewise learning rate decay, L2 weight decay regularization, calculates binary cross-entropy loss for classification tasks, and supports both training, validation, and inference modes.",
+        "type": "comment"
+    },
+    "3468": {
+        "file_id": 295,
+        "content": "            losses = self.loss()\n            fetch_list = [losses, self.output, self.label_input]\n        elif self.mode == 'test':\n            losses = self.loss()\n            fetch_list = [losses, self.output, self.label_input]\n        elif self.mode == 'infer':\n            fetch_list = [self.output]\n        else:\n            raise NotImplementedError('mode {} not implemented'.format(\n                self.mode))\n        return fetch_list\n    def weights_info(self):\n        return None, None\n    def load_pretrain_params(self, exe, pretrain, prog):\n        logger.info(\n            \"Load pretrain weights from {}, exclude fc layer.\".format(pretrain))\n        state_dict = paddle.static.load_program_state(pretrain)\n        dict_keys = list(state_dict.keys())\n        for name in dict_keys:\n            if \"fc_0\" in name:\n                del state_dict[name]\n                logger.info(\n                    'Delete {} from pretrained parameters. Do not load it'.\n                    format(name))\n        paddle.static.set_program_state(prog, state_dict)",
+        "type": "code",
+        "location": "/applications/VideoTag/models/attention_lstm/attention_lstm.py:152-180"
+    },
+    "3469": {
+        "file_id": 295,
+        "content": "This code defines a class with three methods. The first method, `fetch_list()`, returns the fetch list for different modes ('train', 'test', or 'infer'). In 'train' mode, it calculates losses and includes them in the fetch list. In 'test' mode, it does the same. In 'infer' mode, only the output is included in the fetch list. If an unrecognized mode is provided, a `NotImplementedError` is raised. The `weights_info()` method returns no information as it is not implemented yet. Lastly, the `load_pretrain_params()` method loads pretrained weights from a given file, excluding any \"fc_0\" layer parameters, and logs a message confirming this action.",
+        "type": "comment"
+    },
+    "3470": {
+        "file_id": 296,
+        "content": "/applications/VideoTag/models/attention_lstm/lstm_attention.py",
+        "type": "filepath"
+    },
+    "3471": {
+        "file_id": 296,
+        "content": "This code defines an LSTM Attention Model class with parameters and a forward method for computation, applying LSTM layers in both directions and performing dynamic LSTM on input tensor. It uses dropout, FC layer, sequence_softmax, scaling, and sum pooling to obtain the final output.",
+        "type": "summary"
+    },
+    "3472": {
+        "file_id": 296,
+        "content": "#  Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n#Licensed under the Apache License, Version 2.0 (the \"License\");\n#you may not use this file except in compliance with the License.\n#You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n#Unless required by applicable law or agreed to in writing, software\n#distributed under the License is distributed on an \"AS IS\" BASIS,\n#WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n#See the License for the specific language governing permissions and\n#limitations under the License.\nimport numpy as np\nimport paddle\nimport paddle.static as static\nclass LSTMAttentionModel(object):\n    \"\"\"LSTM Attention Model\"\"\"\n    def __init__(self,\n                 bias_attr,\n                 embedding_size=512,\n                 lstm_size=1024,\n                 drop_rate=0.5):\n        self.lstm_size = lstm_size\n        self.embedding_size = embedding_size\n        self.drop_rate = drop_rate\n    def forward(self, input, is_training):",
+        "type": "code",
+        "location": "/applications/VideoTag/models/attention_lstm/lstm_attention.py:1-31"
+    },
+    "3473": {
+        "file_id": 296,
+        "content": "This code is for a class called LSTMAttentionModel, which represents an LSTM Attention Model. It has three parameters: bias_attr, embedding_size (default 512), lstm_size (default 1024), and drop_rate (default 0.5). The class has an __init__ method to initialize these parameters and a forward method for performing the model's computation.",
+        "type": "comment"
+    },
+    "3474": {
+        "file_id": 296,
+        "content": "        input_fc = static.nn.fc(\n            x=input,\n            size=self.embedding_size,\n            activation='tanh',\n            bias_attr=paddle.ParamAttr(\n                regularizer=paddle.regularizer.L2Decay(coeff=0.0),\n                initializer=paddle.nn.initializer.Normal(std=0.0)),\n            name='rgb_fc')\n        lstm_forward_fc = static.nn.fc(\n            x=input_fc,\n            size=self.lstm_size * 4,\n            activation=None,\n            bias_attr=False,  # video_tag\n            name='rgb_fc_forward')\n        lstm_forward, _ = paddle.fluid.layers.dynamic_lstm(input=lstm_forward_fc,\n                                                    size=self.lstm_size * 4,\n                                                    is_reverse=False,\n                                                    name='rgb_lstm_forward')\n        lsmt_backward_fc = static.nn.fc(\n            x=input_fc,\n            size=self.lstm_size * 4,\n            activation=None,\n            bias_attr=False,  #video_tag\n            name='rgb_fc_backward')",
+        "type": "code",
+        "location": "/applications/VideoTag/models/attention_lstm/lstm_attention.py:32-58"
+    },
+    "3475": {
+        "file_id": 296,
+        "content": "This code initializes an LSTM layer for video tagging. It applies two fully connected layers (fc) to the input, one for forward and one for backward direction. The forward LSTM layer is created using dynamic_lstm function with size 4 times the lstm_size attribute and no reverse operation. The backward LSTM layer is also created similarly.",
+        "type": "comment"
+    },
+    "3476": {
+        "file_id": 296,
+        "content": "        lstm_backward, _ = paddle.fluid.layers.dynamic_lstm(input=lsmt_backward_fc,\n                                                     size=self.lstm_size * 4,\n                                                     is_reverse=True,\n                                                     name='rgb_lstm_backward')\n        lstm_concat = paddle.concat(x=[lstm_forward, lstm_backward],\n                                          axis=1)\n        lstm_dropout = paddle.nn.functional.dropout2d(x=lstm_concat,\n                                            p=self.drop_rate,\n                                            training=is_training)\n        lstm_weight = static.nn.fc(\n            x=lstm_dropout,\n            size=1,\n            activation='sequence_softmax',\n            bias_attr=False,  #video_tag\n            name='rgb_weight')\n        scaled = paddle.multiply(x=lstm_dropout,\n                                              y=lstm_weight)\n        lstm_pool = paddle.static.nn.sequence_pool(input=scaled, pool_type='sum')\n        return lstm_pool",
+        "type": "code",
+        "location": "/applications/VideoTag/models/attention_lstm/lstm_attention.py:60-83"
+    },
+    "3477": {
+        "file_id": 296,
+        "content": "This code performs dynamic LSTM on input tensor with forward and backward directions, concatenates the results, applies dropout, then feeds the result into an FC layer for weight assignment using sequence_softmax. The final output is obtained by scaling the previous result with the weights and applying a sum pooling.",
+        "type": "comment"
+    },
+    "3478": {
+        "file_id": 297,
+        "content": "/applications/VideoTag/models/model.py",
+        "type": "filepath"
+    },
+    "3479": {
+        "file_id": 297,
+        "content": "The Python module supports PaddleVideo's VideoTag app, includes a model class for subclassing with base methods, and handles weights, dataloader, pre-trained models, weight file paths, and downloads. It also provides a ModelZoo class for managing models and functions to get/register models.",
+        "type": "summary"
+    },
+    "3480": {
+        "file_id": 297,
+        "content": "#  Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n#Licensed under the Apache License, Version 2.0 (the \"License\");\n#you may not use this file except in compliance with the License.\n#You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n#Unless required by applicable law or agreed to in writing, software\n#distributed under the License is distributed on an \"AS IS\" BASIS,\n#WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n#See the License for the specific language governing permissions and\n#limitations under the License.\nimport os\nimport wget\nimport logging\nimport paddle\nimport paddle.static as static\ntry:\n    from configparser import ConfigParser\nexcept:\n    from ConfigParser import ConfigParser\nfrom .utils import download, AttrDict\nWEIGHT_DIR = os.path.join(os.path.expanduser('~'), '.paddle', 'weights')\nlogger = logging.getLogger(__name__)\ndef is_parameter(var):\n    return isinstance(var, paddle.framework.Parameter)\nclass NotImplementError(Exception):",
+        "type": "code",
+        "location": "/applications/VideoTag/models/model.py:1-36"
+    },
+    "3481": {
+        "file_id": 297,
+        "content": "This code is a Python module for the PaddleVideo project's VideoTag application. It imports necessary libraries, sets the storage location for weights, and defines functions for parameter checking and handling exceptions.",
+        "type": "comment"
+    },
+    "3482": {
+        "file_id": 297,
+        "content": "    \"Error: model function not implement\"\n    def __init__(self, model, function):\n        super(NotImplementError, self).__init__()\n        self.model = model.__class__.__name__\n        self.function = function.__name__\n    def __str__(self):\n        return \"Function {}() is not implemented in model {}\".format(\n            self.function, self.model)\nclass ModelNotFoundError(Exception):\n    \"Error: model not found\"\n    def __init__(self, model_name, avail_models):\n        super(ModelNotFoundError, self).__init__()\n        self.model_name = model_name\n        self.avail_models = avail_models\n    def __str__(self):\n        msg = \"Model {} Not Found.\\nAvailiable models:\\n\".format(\n            self.model_name)\n        for model in self.avail_models:\n            msg += \"  {}\\n\".format(model)\n        return msg\nclass ModelBase(object):\n    def __init__(self, name, cfg, mode='train'):\n        assert mode in ['train', 'valid', 'test', 'infer'], \\\n                \"Unknown mode type {}\".format(mode)\n        self.name = name",
+        "type": "code",
+        "location": "/applications/VideoTag/models/model.py:37-69"
+    },
+    "3483": {
+        "file_id": 297,
+        "content": "This code defines two custom exceptions, \"NotImplementError\" and \"ModelNotFoundError\", to handle specific model-related issues. The \"ModelBase\" class serves as a base for creating different models with different modes (train, valid, test, infer). The code also checks if the mode input is valid.",
+        "type": "comment"
+    },
+    "3484": {
+        "file_id": 297,
+        "content": "        self.is_training = (mode == 'train')\n        self.mode = mode\n        self.cfg = cfg\n        self.dataloader = None\n    def build_model(self):\n        \"build model struct\"\n        raise NotImplementError(self, self.build_model)\n    def build_input(self, use_dataloader):\n        \"build input Variable\"\n        raise NotImplementError(self, self.build_input)\n    def optimizer(self):\n        \"get model optimizer\"\n        raise NotImplementError(self, self.optimizer)\n    def outputs(self):\n        \"get output variable\"\n        raise NotImplementError(self, self.outputs)\n    def loss(self):\n        \"get loss variable\"\n        raise NotImplementError(self, self.loss)\n    def feeds(self):\n        \"get feed inputs list\"\n        raise NotImplementError(self, self.feeds)\n    def fetches(self):\n        \"get fetch list of model\"\n        raise NotImplementError(self, self.fetches)\n    def weights_info(self):\n        \"get model weight default path and download url\"\n        raise NotImplementError(self, self.weights_info)",
+        "type": "code",
+        "location": "/applications/VideoTag/models/model.py:70-105"
+    },
+    "3485": {
+        "file_id": 297,
+        "content": "The code is a model class that requires subclassing for implementation. It defines various methods such as build_model, build_input, optimizer, outputs, loss, feeds, and fetches. However, the actual implementation of these methods should be provided in the subclass since they are all raising NotImplementedError. The weights_info method returns model weight default path and download URL.",
+        "type": "comment"
+    },
+    "3486": {
+        "file_id": 297,
+        "content": "    def get_weights(self):\n        \"get model weight file path, download weight from Paddle if not exist\"\n        path, url = self.weights_info()\n        path = os.path.join(WEIGHT_DIR, path)\n        if not os.path.isdir(WEIGHT_DIR):\n            logger.info('{} not exists, will be created automatically.'.format(\n                WEIGHT_DIR))\n            os.makedirs(WEIGHT_DIR)\n        if os.path.exists(path):\n            return path\n        logger.info(\"Download weights of {} from {}\".format(self.name, url))\n        wget.download(url, path)\n        return path\n    def dataloader(self):\n        return self.dataloader\n    def epoch_num(self):\n        \"get train epoch num\"\n        return self.cfg.TRAIN.epoch\n    def pretrain_info(self):\n        \"get pretrain base model directory\"\n        return (None, None)\n    def get_pretrain_weights(self):\n        \"get model weight file path, download weight from Paddle if not exist\"\n        path, url = self.pretrain_info()\n        if not path:\n            return None\n        path = os.path.join(WEIGHT_DIR, path)",
+        "type": "code",
+        "location": "/applications/VideoTag/models/model.py:107-139"
+    },
+    "3487": {
+        "file_id": 297,
+        "content": "This code defines several methods for a model class. The `get_weights` method returns the weight file path, downloading it from Paddle if it doesn't exist. The `dataloader` method returns the dataloader object. The `epoch_num` method returns the train epoch number. The `pretrain_info` method returns the pre-trained base model directory. The `get_pretrain_weights` method returns the weight file path, downloading it from Paddle if necessary.",
+        "type": "comment"
+    },
+    "3488": {
+        "file_id": 297,
+        "content": "        if not os.path.isdir(WEIGHT_DIR):\n            logger.info('{} not exists, will be created automatically.'.format(\n                WEIGHT_DIR))\n            os.makedirs(WEIGHT_DIR)\n        if os.path.exists(path):\n            return path\n        logger.info(\"Download pretrain weights of {} from {}\".format(\n            self.name, url))\n        download(url, path)\n        return path\n    def load_pretrain_params(self, exe, pretrain, prog):\n        logger.info(\"Load pretrain weights from {}\".format(pretrain))\n        state_dict = paddle.static.load_program_state(pretrain)\n        paddle.static.set_program_state(prog, state_dict)\n    def load_test_weights(self, exe, weights, prog):\n        params_list = list(filter(is_parameter, prog.list_vars()))\n        static.load(prog, weights, executor=exe, var_list=params_list)\n    def get_config_from_sec(self, sec, item, default=None):\n        if sec.upper() not in self.cfg:\n            return default\n        return self.cfg[sec.upper()].get(item, default)\nclass ModelZoo(object):",
+        "type": "code",
+        "location": "/applications/VideoTag/models/model.py:140-167"
+    },
+    "3489": {
+        "file_id": 297,
+        "content": "The code includes functions for handling model weights. It checks if a directory exists, downloads pretrain weights if necessary, loads pretrain and test weights into programs, and retrieves configuration from a config file.",
+        "type": "comment"
+    },
+    "3490": {
+        "file_id": 297,
+        "content": "    def __init__(self):\n        self.model_zoo = {}\n    def regist(self, name, model):\n        assert model.__base__ == ModelBase, \"Unknow model type {}\".format(\n            type(model))\n        self.model_zoo[name] = model\n    def get(self, name, cfg, mode='train', is_videotag=False):\n        for k, v in self.model_zoo.items():\n            if k.upper() == name.upper():\n                return v(name, cfg, mode, is_videotag)\n        raise ModelNotFoundError(name, self.model_zoo.keys())\n# singleton model_zoo\nmodel_zoo = ModelZoo()\ndef regist_model(name, model):\n    model_zoo.regist(name, model)\ndef get_model(name, cfg, mode='train', is_videotag=False):\n    return model_zoo.get(name, cfg, mode, is_videotag)",
+        "type": "code",
+        "location": "/applications/VideoTag/models/model.py:168-192"
+    },
+    "3491": {
+        "file_id": 297,
+        "content": "This code defines a ModelZoo class for managing different models, allowing registration and retrieval of models based on their names. The get() function returns the model instance with the specified name, while regist() registers new model classes to the ModelZoo. The get_model() and regist_model() functions provide convenient methods to interact with the singleton ModelZoo instance.",
+        "type": "comment"
+    },
+    "3492": {
+        "file_id": 298,
+        "content": "/applications/VideoTag/models/tsn/__init__.py",
+        "type": "filepath"
+    },
+    "3493": {
+        "file_id": 298,
+        "content": "This code imports all modules and functions from the \"tsn\" subdirectory within the current package, allowing easy access to those components in other parts of the code. This is commonly used for modularity and organization in larger projects.",
+        "type": "summary"
+    },
+    "3494": {
+        "file_id": 298,
+        "content": "from .tsn import *",
+        "type": "code",
+        "location": "/applications/VideoTag/models/tsn/__init__.py:1-1"
+    },
+    "3495": {
+        "file_id": 298,
+        "content": "This code imports all modules and functions from the \"tsn\" subdirectory within the current package, allowing easy access to those components in other parts of the code. This is commonly used for modularity and organization in larger projects.",
+        "type": "comment"
+    },
+    "3496": {
+        "file_id": 299,
+        "content": "/applications/VideoTag/models/tsn/tsn.py",
+        "type": "filepath"
+    },
+    "3497": {
+        "file_id": 299,
+        "content": "This code initializes a TSN model class and sets parameters for segmentation, training, image statistics, layers, epochs, video data, and optimizer. It defines a VideoTag model with train, test, and infer modes, updating parameters and excluding the final layer for pre-trained weights.",
+        "type": "summary"
+    },
+    "3498": {
+        "file_id": 299,
+        "content": "#  Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n#Licensed under the Apache License, Version 2.0 (the \"License\");\n#you may not use this file except in compliance with the License.\n#You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n#Unless required by applicable law or agreed to in writing, software\n#distributed under the License is distributed on an \"AS IS\" BASIS,\n#WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n#See the License for the specific language governing permissions and\n#limitations under the License.\nfrom ..model import ModelBase\nfrom .tsn_res_model import TSN_ResNet\nimport logging\nimport paddle\nimport paddle.static as static\nlogger = logging.getLogger(__name__)\n__all__ = [\"TSN\"]\nclass TSN(ModelBase):\n    def __init__(self, name, cfg, mode='train', is_videotag=False):\n        super(TSN, self).__init__(name, cfg, mode=mode)\n        self.is_videotag = is_videotag\n        self.get_config()\n    def get_config(self):\n        self.num_classes = self.get_config_from_sec('model', 'num_classes')",
+        "type": "code",
+        "location": "/applications/VideoTag/models/tsn/tsn.py:1-34"
+    },
+    "3499": {
+        "file_id": 299,
+        "content": "This code imports necessary modules and defines a class TSN that extends the ModelBase class. The class takes parameters such as name, configuration, mode and is_videotag. It also has a method get_config that fetches the model configuration from the given section.",
+        "type": "comment"
+    }
+}

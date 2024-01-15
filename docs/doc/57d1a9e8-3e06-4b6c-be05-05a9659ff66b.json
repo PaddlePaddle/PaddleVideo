@@ -1,0 +1,15 @@
+{
+    "summary": "This code is a PaddlePaddle base class for loss functions, requiring subclasses to override `_forward()` and supports optional weight scaling. It initializes the loss class and defines forward pass computation.",
+    "details": [
+        {
+            "comment": "This code is the base class for a loss function in PaddlePaddle. It requires subclasses to override the `_forward()` method, which returns the normal loss without weights. The `loss_weight` parameter is optional and defaults to 1.0, which can be used to scale the final loss value.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/paddlevideo/modeling/losses/base.py\":0-30",
+            "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nfrom abc import  abstractmethod\nimport paddle\nimport paddle.nn as nn\n#XXX use _forward?? or forward??\nclass BaseWeightedLoss(nn.Layer):\n    \"\"\"Base class for loss.\n    All subclass should overwrite the ``_forward()`` method which returns the\n    normal loss without loss weights.\n    Args:\n        loss_weight (float): Factor scalar multiplied on the loss.\n            Default: 1.0.\n    \"\"\"\n    def __init__(self, loss_weight=1.0):"
+        },
+        {
+            "comment": "Initializes the loss class with a weight and defines forward pass for computation.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/paddlevideo/modeling/losses/base.py\":31-48",
+            "content": "        super().__init__()\n        self.loss_weight = loss_weight\n    @abstractmethod\n    def _forward(self, *args, **kwargs):\n        pass\n    def forward(self, *args, **kwargs):\n        \"\"\"Defines the computation performed at every call.\n        Args:\n            *args: The positional arguments for the corresponding\n                loss.\n            **kwargs: The keyword arguments for the corresponding\n                loss.\n        Returns:\n            paddle.Tensor: The calculated loss.\n        \"\"\"\n        return self._forward(*args, **kwargs) * self.loss_weight"
+        }
+    ]
+}

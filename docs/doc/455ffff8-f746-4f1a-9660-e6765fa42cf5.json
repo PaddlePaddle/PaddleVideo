@@ -1,0 +1,20 @@
+{
+    "summary": "The DepthEstimator class inherits from BaseEstimator and contains a forward_net method for feature extraction. It has training, validation, testing, and inference methods with loss metrics calculated using the forward_net and head.loss.",
+    "details": [
+        {
+            "comment": "The code defines a DepthEstimator class that inherits from BaseEstimator. It has a forward_net method that takes inputs and optionally applies a backbone network for feature extraction. The results are stored in outputs.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/paddlevideo/modeling/framework/estimators/depth_estimator.py\":0-30",
+            "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nimport paddle\nfrom paddlevideo.modeling.framework.estimators.base import BaseEstimator\nfrom paddlevideo.modeling.registry import ESTIMATORS\nfrom paddlevideo.utils import get_logger\nfrom ... import builder\nlogger = get_logger(\"paddlevideo\")\n@ESTIMATORS.register()\nclass DepthEstimator(BaseEstimator):\n    \"\"\"DepthEstimator\n    \"\"\"\n    def forward_net(self, inputs, day_or_night='day_and_night'):\n        if self.backbone is not None:\n            outputs = self.backbone(inputs, day_or_night)\n        else:\n            outputs = inputs"
+        },
+        {
+            "comment": "The code defines four methods: train_step, val_step, test_step, and infer_step. The main purpose of each step is to calculate the loss metrics from the input data. The 'forward_net' method is used in all steps to process the inputs and generate outputs, which are then passed to the 'head.loss' method to compute the loss metrics for each step.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/paddlevideo/modeling/framework/estimators/depth_estimator.py\":31-57",
+            "content": "        return outputs\n    def train_step(self, data_batch):\n        \"\"\"Define how the model is going to train, from input to output.\n        \"\"\"\n        inputs, _ = data_batch\n        outputs = self.forward_net(inputs, day_or_night='day_and_night')\n        loss_metrics = self.head.loss(inputs, outputs)\n        return loss_metrics\n    def val_step(self, data_batch):\n        inputs, day_or_night = data_batch\n        outputs = self.forward_net(inputs, day_or_night=day_or_night)\n        loss_metrics = self.head.loss(inputs, outputs)\n        return loss_metrics\n    def test_step(self, data_batch):\n        \"\"\"Define how the model is going to test, from input to output.\"\"\"\n        inputs, day_or_night = data_batch\n        outputs = self.forward_net(inputs, day_or_night=day_or_night)\n        loss_metrics = self.head.loss(inputs, outputs)\n        return loss_metrics\n    def infer_step(self, data_batch):\n        \"\"\"Define how the model is going to infer, from input to output.\"\"\"\n        inputs = data_batch[0]\n        outputs = self.forward_net(inputs, day_or_night='day')"
+        },
+        {
+            "comment": "This code snippet returns the output results from a depth estimator model.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/paddlevideo/modeling/framework/estimators/depth_estimator.py\":58-58",
+            "content": "        return outputs"
+        }
+    ]
+}

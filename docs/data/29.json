@@ -1,0 +1,539 @@
+{
+    "2900": {
+        "file_id": 232,
+        "content": "            return results\n        new_width = size\n        new_height = size\n        if width < height:\n            new_height = int(math.floor((float(height) / width) * size))\n        else:\n            new_width = int(math.floor((float(width) / height) * size))\n        frames_resize = []\n        for j in range(len(imgs)):\n            img = imgs[j]\n            scale_img = img.resize((new_width, new_height), Image.BILINEAR)\n            frames_resize.append(scale_img)\n        results['imgs'] = frames_resize\n        return results\n@PIPELINES.register()\nclass MultiCrop(object):\n    \"\"\"\n    Random crop image.\n    This operation can perform multi-crop during multi-clip test, as in slowfast model.\n    Args:\n        target_size(int): Random crop a square with the target_size from an image.\n    \"\"\"\n    def __init__(self,\n                 target_size,\n                 default_crop_size=224,\n                 short_cycle_factors=[0.5, 0.7071],\n                 test_mode=False):\n        self.orig_target_size = self.target_size = target_size",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/loader/pipelines/augmentations.py:371-403"
+    },
+    "2901": {
+        "file_id": 232,
+        "content": "This code resizes the input images to a specified size while maintaining aspect ratio, and then applies random crop for multi-clip testing in the MultiCrop class. The target_size parameter determines the output image's dimensions after resizing and cropping.",
+        "type": "comment"
+    },
+    "2902": {
+        "file_id": 232,
+        "content": "        self.short_cycle_factors = short_cycle_factors\n        self.default_crop_size = default_crop_size\n        self.test_mode = test_mode\n    def __call__(self, results):\n        \"\"\"\n        Performs random crop operations.\n        Args:\n            imgs: List where each item is a PIL.Image.\n            For example, [PIL.Image0, PIL.Image1, PIL.Image2, ...]\n        return:\n            crop_imgs: List where each item is a PIL.Image after random crop.\n        \"\"\"\n        imgs = results['imgs']\n        spatial_sample_index = results['spatial_sample_index']\n        spatial_num_clips = results['spatial_num_clips']\n        short_cycle_idx = results.get('short_cycle_idx')\n        if short_cycle_idx in [0, 1]:\n            self.target_size = int(\n                round(self.short_cycle_factors[short_cycle_idx] *\n                      self.default_crop_size))\n        else:\n            self.target_size = self.orig_target_size  # use saved value before call\n        w, h = imgs[0].size\n        if w == self.target_size and h == self.target_size:",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/loader/pipelines/augmentations.py:404-430"
+    },
+    "2903": {
+        "file_id": 232,
+        "content": "The function performs random crop operations on images. It takes a list of PIL Images as input and returns the cropped images. The code checks if the current short cycle index is 0 or 1, in which case it adjusts the target size based on the short_cycle_factors variable. If the image size matches the target size, it skips the crop operation.",
+        "type": "comment"
+    },
+    "2904": {
+        "file_id": 232,
+        "content": "            return results\n        assert (w >= self.target_size) and (h >= self.target_size), \\\n            \"image width({}) and height({}) should be larger than crop size({},{})\".format(w, h, self.target_size, self.target_size)\n        frames_crop = []\n        if not self.test_mode:\n            x_offset = random.randint(0, w - self.target_size)\n            y_offset = random.randint(0, h - self.target_size)\n        else:  #multi-crop\n            x_gap = int(\n                math.ceil((w - self.target_size) / (spatial_num_clips - 1)))\n            y_gap = int(\n                math.ceil((h - self.target_size) / (spatial_num_clips - 1)))\n            if h > w:\n                x_offset = int(math.ceil((w - self.target_size) / 2))\n                if spatial_sample_index == 0:\n                    y_offset = 0\n                elif spatial_sample_index == spatial_num_clips - 1:\n                    y_offset = h - self.target_size\n                else:\n                    y_offset = y_gap * spatial_sample_index\n            else:",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/loader/pipelines/augmentations.py:431-452"
+    },
+    "2905": {
+        "file_id": 232,
+        "content": "This function performs image cropping with or without random cropping. If not in test mode, it randomly selects x and y offsets within the image boundaries to crop an area of size self.target_size. In test mode, it performs multi-crop by dividing the image into equal parts based on spatial_num_clips, ensuring each part has a minimum size of self.target_size.",
+        "type": "comment"
+    },
+    "2906": {
+        "file_id": 232,
+        "content": "                y_offset = int(math.ceil((h - self.target_size) / 2))\n                if spatial_sample_index == 0:\n                    x_offset = 0\n                elif spatial_sample_index == spatial_num_clips - 1:\n                    x_offset = w - self.target_size\n                else:\n                    x_offset = x_gap * spatial_sample_index\n        for img in imgs:\n            nimg = img.crop((x_offset, y_offset, x_offset + self.target_size,\n                             y_offset + self.target_size))\n            frames_crop.append(nimg)\n        results['imgs'] = frames_crop\n        return results\n@PIPELINES.register()\nclass PackOutput(object):\n    \"\"\"\n    In slowfast model, we want to get slow pathway from fast pathway based on\n    alpha factor.\n    Args:\n        alpha(int): temporal length of fast/slow\n    \"\"\"\n    def __init__(self, alpha):\n        self.alpha = alpha\n    def __call__(self, results):\n        fast_pathway = results['imgs']\n        # sample num points between start and end\n        slow_idx_start = 0",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/loader/pipelines/augmentations.py:453-484"
+    },
+    "2907": {
+        "file_id": 232,
+        "content": "The code takes a list of images and crops them based on specified offset values to create new images with the desired target size. It then appends these cropped images to a list, stores them in 'frames_crop', and returns a dictionary containing 'imgs'. The function PackOutput is used for getting the slow pathway from the fast pathway based on the alpha factor in the SlowFast model.",
+        "type": "comment"
+    },
+    "2908": {
+        "file_id": 232,
+        "content": "        slow_idx_end = fast_pathway.shape[0] - 1\n        slow_idx_num = fast_pathway.shape[0] // self.alpha\n        slow_idxs_select = np.linspace(slow_idx_start, slow_idx_end,\n                                       slow_idx_num).astype(\"int64\")\n        slow_pathway = fast_pathway[slow_idxs_select]\n        # T H W C -> C T H W.\n        slow_pathway = slow_pathway.transpose(3, 0, 1, 2)\n        fast_pathway = fast_pathway.transpose(3, 0, 1, 2)\n        # slow + fast\n        frames_list = [slow_pathway, fast_pathway]\n        results['imgs'] = frames_list\n        return results",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/loader/pipelines/augmentations.py:485-498"
+    },
+    "2909": {
+        "file_id": 232,
+        "content": "This code is creating a slower pathway by selecting specific frames from the fast_pathway array and rearranging the dimensions. The slower pathway is then combined with the original fast_pathway to create a list of frames, which is added to the 'results' dictionary before returning it.",
+        "type": "comment"
+    },
+    "2910": {
+        "file_id": 233,
+        "content": "/applications/VideoQualityAssessment/paddlevideo/loader/pipelines/compose.py",
+        "type": "filepath"
+    },
+    "2911": {
+        "file_id": 233,
+        "content": "The code defines the Compose class for video transformation pipelines, composing multiple pipeline elements and handling temporary list-type parameters while including a workaround for old format config files.",
+        "type": "summary"
+    },
+    "2912": {
+        "file_id": 233,
+        "content": "\"\"\"\n# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"\nfrom collections.abc import Sequence\nfrom ..registry import PIPELINES\nimport traceback\nfrom ...utils import build\nfrom ...utils import get_logger\n@PIPELINES.register()\nclass Compose(object):\n    \"\"\"\n    Composes several pipelines(include decode func, sample func, and transforms) together.\n    Note: To deal with ```list``` type cfg temporaray, like:\n        transform:\n            - Crop: # A list\n                attribute: 10",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/loader/pipelines/compose.py:1-33"
+    },
+    "2913": {
+        "file_id": 233,
+        "content": "This code defines the Compose class, which composes multiple pipelines (decode func, sample func, and transforms) together. It registers the class in the PIPELINES registry. The code also handles temporary list-type configuration parameters for flexibility.",
+        "type": "comment"
+    },
+    "2914": {
+        "file_id": 233,
+        "content": "            - Resize: # A list\n                attribute: 20\n    every key of list will pass as the key name to build a module.\n    XXX: will be improved in the future.\n    Args:\n        pipelines (list): List of transforms to compose.\n    Returns:\n        A compose object which is callable, __call__ for this Compose\n        object will call each given :attr:`transforms` sequencely.\n    \"\"\"\n    def __init__(self, pipelines):\n        #assert isinstance(pipelines, Sequence)\n        self.pipelines = []\n        for p in pipelines.values():\n            if isinstance(p, dict):\n                p = build(p, PIPELINES)\n                self.pipelines.append(p)\n            elif isinstance(p, list):\n                for t in p:\n                    #XXX: to deal with old format cfg, ugly code here!\n                    temp_dict = dict(name=list(t.keys())[0])\n                    for all_sub_t in t.values():\n                        if all_sub_t is not None:\n                            temp_dict.update(all_sub_t) \n                    t = build(temp_dict, PIPELINES)",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/loader/pipelines/compose.py:34-61"
+    },
+    "2915": {
+        "file_id": 233,
+        "content": "This code is creating a Compose class which takes a list of transforms and composes them sequentially. It checks if the input is in the correct format, builds each transform using the build function from PIPELINES, and stores them in a list. The code also includes a workaround for handling old format config files that may have inconsistent key-value pairs in their lists.",
+        "type": "comment"
+    },
+    "2916": {
+        "file_id": 233,
+        "content": "                    self.pipelines.append(t)\n            elif callable(p):\n                self.pipelines.append(p)\n            else:\n                raise TypeError('pipelines must be callable or a dict,'\n                                'but got {type(p)}')\n    def __call__(self, data):\n        \"\"\"call\"\"\"\n        for p in self.pipelines:\n            try:\n                data = p(data)\n            except Exception as e:\n                stack_info = traceback.format_exc()\n                logger = get_logger(\"paddlevideo\")\n                logger.info(\"fail to perform transform [{}] with error: \"\n                      \"{} and stack:\\n{}\".format(p, e, str(stack_info)))\n                raise e\n        return data",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/loader/pipelines/compose.py:62-79"
+    },
+    "2917": {
+        "file_id": 233,
+        "content": "This code is defining a class for video transformation pipelines. It appends callable functions or dictionaries to the pipeline list and has a __call__ method that applies each pipeline operation to data in sequence, handling exceptions and logging failures if they occur.",
+        "type": "comment"
+    },
+    "2918": {
+        "file_id": 234,
+        "content": "/applications/VideoQualityAssessment/paddlevideo/loader/pipelines/decode.py",
+        "type": "filepath"
+    },
+    "2919": {
+        "file_id": 234,
+        "content": "The PaddleVideo library's VideoDecoder class decodes mp4 files into frames, handles RGB frames and audio, and provides data with masks. It includes functions for decoding, dequantizing feature vectors, and making one-hot labels.",
+        "type": "summary"
+    },
+    "2920": {
+        "file_id": 234,
+        "content": "\"\"\"\n#  Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"\nimport sys\nfrom io import BytesIO\nimport os\nimport random\nimport numpy as np\nimport pickle\nimport cv2\nfrom ..registry import PIPELINES\n@PIPELINES.register()\nclass VideoDecoder(object):\n    \"\"\"\n    Decode mp4 file to frames.\n    Args:\n        filepath: the file path of mp4 file\n    \"\"\"\n    def __init__(self):\n        pass\n    def __call__(self, results):\n        \"\"\"\n        Perform mp4 decode operations.\n        return:",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/loader/pipelines/decode.py:1-42"
+    },
+    "2921": {
+        "file_id": 234,
+        "content": "This code is for a VideoDecoder class in the PaddleVideo library. It decodes mp4 files into frames as part of a pipeline. The class takes a file path argument and performs mp4 decode operations using the __call__ method, which processes results returned.",
+        "type": "comment"
+    },
+    "2922": {
+        "file_id": 234,
+        "content": "            List where each item is a numpy array after decoder.\n        \"\"\"\n        #XXX get info from results!!!\n        file_path = results['filename']\n        cap = cv2.VideoCapture(file_path)\n        videolen = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))\n        sampledFrames = []\n        for i in range(videolen):\n            ret, frame = cap.read()\n            # maybe first frame is empty\n            if ret == False:\n                continue\n            img = frame[:, :, ::-1]\n            sampledFrames.append(img)\n        results['frames'] = sampledFrames\n        results['frames_len'] = len(sampledFrames)\n        results['format'] = 'video'\n        return results\n@PIPELINES.register()\nclass FrameDecoder(object):\n    \"\"\"just parse results\n    \"\"\"\n    def __init__(self):\n        pass\n    def __call__(self, results):\n        results['format'] = 'frame'\n        return results\n@PIPELINES.register()\nclass FeatureDecoder(object):\n    \"\"\"\n        Perform feature decode operations.e.g.youtube8m\n    \"\"\"\n    def __init__(self, num_classes, max_len=512, has_label=True):",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/loader/pipelines/decode.py:43-80"
+    },
+    "2923": {
+        "file_id": 234,
+        "content": "This code defines three classes for decoding different types of data: video, frames, and features. The VideoDecoder reads a video file frame by frame, the FrameDecoder parses results as individual frames, and the FeatureDecoder handles feature decode operations like YouTube8M. The results are stored in 'frames', 'frames_len', and 'format' fields respectively.",
+        "type": "comment"
+    },
+    "2924": {
+        "file_id": 234,
+        "content": "        self.max_len = max_len\n        self.num_classes = num_classes\n        self.has_label = has_label\n    def __call__(self, results):\n        \"\"\"\n        Perform feature decode operations.\n        return:\n            List where each item is a numpy array after decoder.\n        \"\"\"\n        #1. load pkl\n        #2. parse to rgb/audio/\n        #3. padding\n        filepath = results['filename']\n        data = pickle.load(open(filepath, 'rb'), encoding='bytes')\n        record = data\n        nframes = record[b'nframes']\n        rgb = record[b'feature'].astype(float)\n        audio = record[b'audio'].astype(float)\n        if self.has_label:\n            label = record[b'label']\n            one_hot_label = self.make_one_hot(label, self.num_classes)\n        rgb = rgb[0:nframes, :]\n        audio = audio[0:nframes, :]\n        rgb = self.dequantize(rgb,\n                              max_quantized_value=2.,\n                              min_quantized_value=-2.)\n        audio = self.dequantize(audio,\n                                max_quantized_value=2,",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/loader/pipelines/decode.py:81-113"
+    },
+    "2925": {
+        "file_id": 234,
+        "content": "This code is part of a decoding pipeline that loads and preprocesses data from a .pkl file. It extracts RGB frames, audio, and labels (if available), performs dequantization, and applies padding as needed. The results are returned as numpy arrays for further processing.",
+        "type": "comment"
+    },
+    "2926": {
+        "file_id": 234,
+        "content": "                                min_quantized_value=-2)\n        if self.has_label:\n            results['labels'] = one_hot_label.astype(\"float32\")\n        feat_pad_list = []\n        feat_len_list = []\n        mask_list = []\n        vitem = [rgb, audio]\n        for vi in range(2):  #rgb and audio\n            if vi == 0:\n                prefix = \"rgb_\"\n            else:\n                prefix = \"audio_\"\n            feat = vitem[vi]\n            results[prefix + 'len'] = feat.shape[0]\n            #feat pad step 1. padding\n            feat_add = np.zeros((self.max_len - feat.shape[0], feat.shape[1]),\n                                dtype=np.float32)\n            feat_pad = np.concatenate((feat, feat_add), axis=0)\n            results[prefix + 'data'] = feat_pad.astype(\"float32\")\n            #feat pad step 2. mask\n            feat_mask_origin = np.ones(feat.shape, dtype=np.float32)\n            feat_mask_add = feat_add\n            feat_mask = np.concatenate((feat_mask_origin, feat_mask_add),\n                                       axis=0)",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/loader/pipelines/decode.py:114-139"
+    },
+    "2927": {
+        "file_id": 234,
+        "content": "The code snippet initializes a list of feature paddings, lengths, and masks for both rgb and audio data. It iterates through the two types of data (rgb and audio) to populate the results dictionary with information about each type of data, including its length and padded feature data along with their respective masks.",
+        "type": "comment"
+    },
+    "2928": {
+        "file_id": 234,
+        "content": "            results[prefix + 'mask'] = feat_mask.astype(\"float32\")\n        return results\n    def dequantize(self,\n                   feat_vector,\n                   max_quantized_value=2.,\n                   min_quantized_value=-2.):\n        \"\"\"\n        Dequantize the feature from the byte format to the float format\n        \"\"\"\n        assert max_quantized_value > min_quantized_value\n        quantized_range = max_quantized_value - min_quantized_value\n        scalar = quantized_range / 255.0\n        bias = (quantized_range / 512.0) + min_quantized_value\n        return feat_vector * scalar + bias\n    def make_one_hot(self, label, dim=3862):\n        \"\"\"make one hot\"\"\"\n        one_hot_label = np.zeros(dim)\n        one_hot_label = one_hot_label.astype(float)\n        for ind in label:\n            one_hot_label[int(ind)] = 1\n        return one_hot_label",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/loader/pipelines/decode.py:140-165"
+    },
+    "2929": {
+        "file_id": 234,
+        "content": "The code contains functions for decoding, dequantizing feature vectors, and making one-hot labels. The decode function stores the feature mask in a dictionary, the dequantize function scales and translates the quantized values back to float format, and the make_one_hot function creates one-hot encoded labels from given indices.",
+        "type": "comment"
+    },
+    "2930": {
+        "file_id": 235,
+        "content": "/applications/VideoQualityAssessment/paddlevideo/loader/pipelines/mix.py",
+        "type": "filepath"
+    },
+    "2931": {
+        "file_id": 235,
+        "content": "Mixup class in PaddleVideo enhances video quality assessment by mixing images and labels from batches using adjustable alpha values, while Cutmix operator randomly selects boxes for mixing operations. Data augmentation is applied with random bounding boxes, and lambda is calculated for loss calculation.",
+        "type": "summary"
+    },
+    "2932": {
+        "file_id": 235,
+        "content": "\"\"\"\n#  Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"\nimport random\nimport numpy as np\nfrom ..registry import PIPELINES\n@PIPELINES.register()\nclass Mixup(object):\n    \"\"\"\n    Mixup operator.\n    Args:\n        alpha(float): alpha value.\n    \"\"\"\n    def __init__(self, alpha=0.2):\n        assert alpha > 0., \\\n                'parameter alpha[%f] should > 0.0' % (alpha)\n        self.alpha = alpha\n    def __call__(self, batch):\n        imgs, labels = list(zip(*batch))\n        imgs = np.array(imgs)",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/loader/pipelines/mix.py:1-36"
+    },
+    "2933": {
+        "file_id": 235,
+        "content": "This code defines a Mixup class for video quality assessment using PaddleVideo. It is an operator that randomly mixes images and labels from batches to enhance the model's learning ability, with an adjustable alpha value.",
+        "type": "comment"
+    },
+    "2934": {
+        "file_id": 235,
+        "content": "        labels = np.array(labels)\n        bs = len(batch)\n        idx = np.random.permutation(bs)\n        lam = np.random.beta(self.alpha, self.alpha)\n        lams = np.array([lam] * bs, dtype=np.float32)\n        imgs = lam * imgs + (1 - lam) * imgs[idx]\n        return list(zip(imgs, labels, labels[idx], lams))\n@PIPELINES.register()\nclass Cutmix(object):\n    \"\"\" Cutmix operator\n    Args:\n        alpha(float): alpha value.\n    \"\"\"\n    def __init__(self, alpha=0.2):\n        assert alpha > 0., \\\n                'parameter alpha[%f] should > 0.0' % (alpha)\n        self.alpha = alpha\n    def rand_bbox(self, size, lam):\n        \"\"\" rand_bbox \"\"\"\n        w = size[2]\n        h = size[3]\n        cut_rat = np.sqrt(1. - lam)\n        cut_w = np.int(w * cut_rat)\n        cut_h = np.int(h * cut_rat)\n        # uniform\n        cx = np.random.randint(w)\n        cy = np.random.randint(h)\n        bbx1 = np.clip(cx - cut_w // 2, 0, w)\n        bby1 = np.clip(cy - cut_h // 2, 0, h)\n        bbx2 = np.clip(cx + cut_w // 2, 0, w)\n        bby2 = np.clip(cy + cut_h // 2, 0, h)",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/loader/pipelines/mix.py:37-72"
+    },
+    "2935": {
+        "file_id": 235,
+        "content": "This code defines the Cutmix operator, which is used to mix images and their corresponding labels in a dataset. It takes an alpha parameter that determines the mixing ratio, and randomly selects a box to cut out from each image. It then applies a random mixing operation within this box to create augmented versions of both the image and label. The final output is a list containing the original image, its original label, its new mixed label, and an array of the lambda values used for the mixing process.",
+        "type": "comment"
+    },
+    "2936": {
+        "file_id": 235,
+        "content": "        return bbx1, bby1, bbx2, bby2\n    def __call__(self, batch):\n        imgs, labels = list(zip(*batch))\n        imgs = np.array(imgs)\n        labels = np.array(labels)\n        bs = len(batch)\n        idx = np.random.permutation(bs)\n        lam = np.random.beta(self.alpha, self.alpha)\n        bbx1, bby1, bbx2, bby2 = self.rand_bbox(imgs.shape, lam)\n        imgs[:, :, bbx1:bbx2, bby1:bby2] = imgs[idx, :, bbx1:bbx2, bby1:bby2]\n        lam = 1 - (float(bbx2 - bbx1) * (bby2 - bby1) /\n                   (imgs.shape[-2] * imgs.shape[-1]))\n        lams = np.array([lam] * bs, dtype=np.float32)\n        return list(zip(imgs, labels, labels[idx], lams))",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/loader/pipelines/mix.py:74-91"
+    },
+    "2937": {
+        "file_id": 235,
+        "content": "This function generates random bounding boxes and applies data augmentation by replacing portions of images with random patches from the same image. It also calculates lambda, which is used for weighting the original and augmented samples in the loss calculation. The function returns the modified images, labels, original labels, and lambdas.",
+        "type": "comment"
+    },
+    "2938": {
+        "file_id": 236,
+        "content": "/applications/VideoQualityAssessment/paddlevideo/loader/pipelines/sample.py",
+        "type": "filepath"
+    },
+    "2939": {
+        "file_id": 236,
+        "content": "This code defines a Sampler class for sampling frame IDs in video data, using PIL to read images instead of OpenCV, and returns the index of sampled frames. It can calculate indices randomly or by formula.",
+        "type": "summary"
+    },
+    "2940": {
+        "file_id": 236,
+        "content": "\"\"\"\n# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"\nimport random\nfrom PIL import Image\nfrom ..registry import PIPELINES\nimport os\nimport numpy as np\n@PIPELINES.register()\nclass Sampler(object):\n    \"\"\"\n    Sample frames id.\n    NOTE: Use PIL to read image here, has diff with CV2\n    Args:\n        num_seg(int): number of segments.\n        seg_len(int): number of sampled frames in each segment.\n        mode(str): 'train', 'valid'\n    Returns:\n        frames_idx: the index of sampled #frames.",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/loader/pipelines/sample.py:1-32"
+    },
+    "2941": {
+        "file_id": 236,
+        "content": "This code defines a Sampler class that samples frames IDs for video data. It takes arguments: num_seg (number of segments), seg_len (number of sampled frames in each segment), and mode ('train' or 'valid'). The class uses PIL to read images instead of OpenCV (cv2) for better compatibility. The sampler returns the index of sampled frames.",
+        "type": "comment"
+    },
+    "2942": {
+        "file_id": 236,
+        "content": "    \"\"\"\n    def __init__(self, num_seg, seg_len, valid_mode=False):\n        self.num_seg = num_seg\n        self.seg_len = seg_len\n        self.valid_mode = valid_mode\n    def _get(self, frames_idx, results):\n        data_format =results['format']\n        if data_format == \"frame\":\n            frame_dir = results['frame_dir']\n            imgs = []\n            for idx in frames_idx:\n                img = Image.open(os.path.join(frame_dir, results['suffix'].format(idx))).convert('RGB')\n                imgs.append(img)\n        elif data_format == \"video\":\n            frames = np.array(results['frames'])\n            imgs = []\n            for idx in frames_idx:\n                imgbuf = frames[idx]\n                img = Image.fromarray(imgbuf, mode='RGB')\n                imgs.append(img)\n        else:\n            raise NotImplementedError\n        results['imgs'] = imgs\n        return results\n    def __call__(self, results):\n        \"\"\"\n        Args:\n            frames_len: length of frames.\n        return:\n            sampling id.",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/loader/pipelines/sample.py:33-70"
+    },
+    "2943": {
+        "file_id": 236,
+        "content": "The code defines a class with an initialization function and two methods, \"_get\" and \"__call__\". The \"_get\" method takes frames_idx and results as arguments, and based on the data format (frame or video), it retrieves and appends images to imgs. If the format is not frame or video, it raises a NotImplementedError. The \"__call__\" method takes frames_len as an argument and returns a sampling id.",
+        "type": "comment"
+    },
+    "2944": {
+        "file_id": 236,
+        "content": "        \"\"\"\n        frames_len = int(results['frames_len'])\n        average_dur = int(int(frames_len) / self.num_seg)\n        frames_idx = []\n        for i in range(self.num_seg):\n            idx = 0\n            if not self.valid_mode:\n                if average_dur >= self.seg_len:\n                    idx = random.randint(0, average_dur - self.seg_len)\n                    idx += i * average_dur\n                elif average_dur >= 1:\n                    idx += i * average_dur\n                else: # average_dur = 0\n                    idx = i % frames_len\n            else:\n                if average_dur >= self.seg_len:\n                    idx = (average_dur - 1) // 2\n                    idx += i * average_dur\n                elif average_dur >= 1:\n                    idx += i * average_dur\n                else:\n                    idx = i % frames_len\n            for jj in range(idx, idx+self.seg_len):\n                if results['format'] == 'video':\n                    frames_idx.append(int(jj%frames_len))\n                elif results['format'] == 'frame':",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/loader/pipelines/sample.py:71-96"
+    },
+    "2945": {
+        "file_id": 236,
+        "content": "This code calculates frame indices for video or frame data. It takes in 'frames_len' and 'num_seg' as inputs, and if 'valid_mode' is False, it generates random frame indices within the valid frame range. If 'valid_mode' is True, it calculates frame indices based on specific formulas. The output is stored in 'frames_idx'.",
+        "type": "comment"
+    },
+    "2946": {
+        "file_id": 236,
+        "content": "                    #frame from 000001\n                    frames_idx.append(jj+1)\n                else:\n                    raise NotImplementedError\n        return self._get(frames_idx, results)",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/loader/pipelines/sample.py:97-102"
+    },
+    "2947": {
+        "file_id": 236,
+        "content": "This code snippet is part of a class method that retrieves frames from a video file based on their index. If the frame index (jj+1) is not equal to 0, it appends the index to the frames_idx list; otherwise, it raises a NotImplementedError. The method then returns the results using the _get method with the frames_idx and results as arguments.",
+        "type": "comment"
+    },
+    "2948": {
+        "file_id": 237,
+        "content": "/applications/VideoQualityAssessment/paddlevideo/loader/registry.py",
+        "type": "filepath"
+    },
+    "2949": {
+        "file_id": 237,
+        "content": "This code is importing modules and creating registries for pipelines and datasets in the PaddleVideo application. The registries allow easy management of different pipeline and dataset types, making it convenient to extend or customize them later on.",
+        "type": "summary"
+    },
+    "2950": {
+        "file_id": 237,
+        "content": "\"\"\"\n# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"\nfrom ..utils import Registry\nPIPELINES = Registry(\"pipeline\")\nDATASETS = Registry(\"datasets\")",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/loader/registry.py:1-20"
+    },
+    "2951": {
+        "file_id": 237,
+        "content": "This code is importing modules and creating registries for pipelines and datasets in the PaddleVideo application. The registries allow easy management of different pipeline and dataset types, making it convenient to extend or customize them later on.",
+        "type": "comment"
+    },
+    "2952": {
+        "file_id": 238,
+        "content": "/applications/VideoQualityAssessment/paddlevideo/metrics/__init__.py",
+        "type": "filepath"
+    },
+    "2953": {
+        "file_id": 238,
+        "content": "This code file contains the initialization for a Video Quality Assessment application. It includes registrar for metrics, builder function for metrics and defines the QualityMetric class. The code is licensed under Apache License, Version 2.0 and distributed as-is without warranties or conditions.",
+        "type": "summary"
+    },
+    "2954": {
+        "file_id": 238,
+        "content": "\"\"\"\n# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"\nfrom .registry import METRIC\nfrom .build import build_metric\nfrom .quality_metric import QuqlityMetric\n__all__ = [\n    'METRIC', 'build_metric', 'QuqlityMetric'\n]",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/metrics/__init__.py:1-23"
+    },
+    "2955": {
+        "file_id": 238,
+        "content": "This code file contains the initialization for a Video Quality Assessment application. It includes registrar for metrics, builder function for metrics and defines the QualityMetric class. The code is licensed under Apache License, Version 2.0 and distributed as-is without warranties or conditions.",
+        "type": "comment"
+    },
+    "2956": {
+        "file_id": 239,
+        "content": "/applications/VideoQualityAssessment/paddlevideo/metrics/base.py",
+        "type": "filepath"
+    },
+    "2957": {
+        "file_id": 239,
+        "content": "The BaseMetric class serves as a foundation for various video quality assessment metrics, requiring subclasses to implement the update and overridden methods. It utilizes numpy, paddle, and PaddleVideo's utils for data manipulation and distribution information.",
+        "type": "summary"
+    },
+    "2958": {
+        "file_id": 239,
+        "content": "\"\"\"\n# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n\"\"\"\nfrom abc import abstractmethod\nimport numpy as np\nimport paddle\nfrom paddlevideo.utils import get_dist_info\nfrom .registry import METRIC\nclass BaseMetric(object):\n    \"\"\"Base Metric\"\"\"\n    def __init__(self, data_size, batch_size, log_interval=1, **kwargs):\n        self.data_size = data_size\n        self.batch_size = batch_size\n        _, self.world_size = get_dist_info()\n        self.log_interval = log_interval\n    @abstractmethod\n    def update(self):\n        \"\"\"update\"\"\"\n        raise NotImplementedError\n    @abstractmethod",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/metrics/base.py:1-36"
+    },
+    "2959": {
+        "file_id": 239,
+        "content": "This Python class, named BaseMetric, is a base class for different video quality assessment metrics. It initializes with data size, batch size, log interval, and optional keyword arguments. The update method must be implemented by subclasses to update the metric values. The class also has abstract methods that must be overridden in subclasses for actual functionality. It utilizes numpy, paddle, and PaddleVideo's utils for data manipulation and distribution information.",
+        "type": "comment"
+    },
+    "2960": {
+        "file_id": 239,
+        "content": "    def accumulate(self):\n        \"\"\"accumulate\"\"\"\n        raise NotImplementedError",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/metrics/base.py:37-39"
+    },
+    "2961": {
+        "file_id": 239,
+        "content": "This code defines an \"accumulate\" method in a base class, but it raises a NotImplementedError to indicate that subclasses must override this method with their own implementation.",
+        "type": "comment"
+    },
+    "2962": {
+        "file_id": 240,
+        "content": "/applications/VideoQualityAssessment/paddlevideo/metrics/build.py",
+        "type": "filepath"
+    },
+    "2963": {
+        "file_id": 240,
+        "content": "This code file is a part of the PaddleVideo library and contains a function named \"build_metric\". It imports necessary modules, defines a metric registry, and provides a build function to construct metrics according to the specified configuration (cfg). The code is licensed under Apache License 2.0.",
+        "type": "summary"
+    },
+    "2964": {
+        "file_id": 240,
+        "content": "\"\"\"\n# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"\nfrom .registry import METRIC\nfrom ..utils import build\ndef build_metric(cfg):\n    \"\"\"build metric\"\"\"\n    return build(cfg, METRIC)",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/metrics/build.py:1-23"
+    },
+    "2965": {
+        "file_id": 240,
+        "content": "This code file is a part of the PaddleVideo library and contains a function named \"build_metric\". It imports necessary modules, defines a metric registry, and provides a build function to construct metrics according to the specified configuration (cfg). The code is licensed under Apache License 2.0.",
+        "type": "comment"
+    },
+    "2966": {
+        "file_id": 241,
+        "content": "/applications/VideoQualityAssessment/paddlevideo/metrics/quality_metric.py",
+        "type": "filepath"
+    },
+    "2967": {
+        "file_id": 241,
+        "content": "This code calculates Pearson and Spearman correlation coefficients (PLCC & SROCC) for a given output and label pair using numpy arrays and scipy's stats functions.",
+        "type": "summary"
+    },
+    "2968": {
+        "file_id": 241,
+        "content": "\"\"\"\n# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n\"\"\"\nimport numpy as np\nimport paddle\nfrom paddle.hapi.model import _all_gather\nfrom scipy import stats\nfrom .registry import METRIC\nfrom .base import BaseMetric\nfrom paddlevideo.utils import get_logger\nlogger = get_logger(\"paddlevideo\")\n@METRIC.register\nclass QuqlityMetric(BaseMetric):\n    \"\"\"CenterCropQualityMetric\"\"\"\n    def __init__(self, data_size, batch_size, log_interval=1):\n        \"\"\"prepare for metrics\n        \"\"\"\n        super().__init__(data_size, batch_size, log_interval)\n        self.output = []\n        self.label = []",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/metrics/quality_metric.py:1-35"
+    },
+    "2969": {
+        "file_id": 241,
+        "content": "This code defines the QuqlityMetric class for measuring video quality. It imports necessary libraries, registers it with METRIC, and initializes attributes including data_size, batch_size, and log_interval. The output and label lists are used to store data during processing.",
+        "type": "comment"
+    },
+    "2970": {
+        "file_id": 241,
+        "content": "        self.y_pred = np.zeros(data_size)\n        self.y_test = np.zeros(data_size)\n    def update(self, batch_id, data, outputs):\n        \"\"\"update metrics during each iter\n        \"\"\"\n        labels = data[1]\n        predict_output = paddle.tolist(outputs)\n        predict_label = paddle.tolist(labels)\n        predict_output_len = len(predict_output)\n        for i in range(predict_output_len):\n            self.output.append(predict_output[i][0])\n            self.label.append(predict_label[i][0])\n        if batch_id % self.log_interval == 0:\n            logger.info(\"[TEST] Processing batch {}/{} ...\".format(\n                batch_id,\n                self.data_size // (self.batch_size * self.world_size)))\n    def accumulate(self):\n        \"\"\"accumulate metrics when finished all iters.\n        \"\"\"\n        test_output_np = np.array(self.output)\n        test_label_np = np.array(self.label)\n        PLCC = stats.pearsonr(test_output_np, test_label_np)[0]\n        SROCC = stats.spearmanr(test_output_np, test_label_np)[0]",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/metrics/quality_metric.py:36-62"
+    },
+    "2971": {
+        "file_id": 241,
+        "content": "This code defines a class for calculating Pearson and Spearman correlation coefficients. The `update` method updates the metrics for each batch during training, while the `accumulate` method calculates the final Pearson (PLCC) and Spearman (SROCC) correlation coefficients after all iterations are finished.",
+        "type": "comment"
+    },
+    "2972": {
+        "file_id": 241,
+        "content": "        logger.info('[TEST] finished, PLCC= {}, SROCC= {} '.format(PLCC, SROCC))\n    def accumulate_train(self, output, label):\n        \"\"\"accumulate_train\"\"\"\n        output_np = np.array(output)\n        label_np = np.array(label)\n        PLCC = stats.pearsonr(output_np, label_np)[0]\n        SROCC = stats.spearmanr(output_np, label_np)[0]\n        return PLCC, SROCC",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/metrics/quality_metric.py:64-72"
+    },
+    "2973": {
+        "file_id": 241,
+        "content": "This code snippet calculates the Pearson and Spearman correlation coefficients (PLCC and SROCC) for a given output and label pair. It uses numpy arrays to convert the input into numeric data types, then calculates the correlation values using scipy's stats.pearsonr and stats.spearmanr functions respectively. Finally, it returns the calculated PLCC and SROCC values.",
+        "type": "comment"
+    },
+    "2974": {
+        "file_id": 242,
+        "content": "/applications/VideoQualityAssessment/paddlevideo/metrics/registry.py",
+        "type": "filepath"
+    },
+    "2975": {
+        "file_id": 242,
+        "content": "This code is importing the \"Registry\" class from the \"utils\" module and initializing a new instance called \"METRIC\" that will store different types of metrics. The comment indicates it is part of the PaddleVideo library for Video Quality Assessment, licensed under the Apache License 2.0.",
+        "type": "summary"
+    },
+    "2976": {
+        "file_id": 242,
+        "content": "\"\"\"\n# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"\nfrom ..utils import Registry\nMETRIC = Registry('metric')",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/metrics/registry.py:1-19"
+    },
+    "2977": {
+        "file_id": 242,
+        "content": "This code is importing the \"Registry\" class from the \"utils\" module and initializing a new instance called \"METRIC\" that will store different types of metrics. The comment indicates it is part of the PaddleVideo library for Video Quality Assessment, licensed under the Apache License 2.0.",
+        "type": "comment"
+    },
+    "2978": {
+        "file_id": 243,
+        "content": "/applications/VideoQualityAssessment/paddlevideo/modeling/__init__.py",
+        "type": "filepath"
+    },
+    "2979": {
+        "file_id": 243,
+        "content": "The code imports modules, registers them in the registry, and exports a list of model-building modules with functions to build these models and specific classes like ResNet and TSNHead.",
+        "type": "summary"
+    },
+    "2980": {
+        "file_id": 243,
+        "content": "\"\"\"\n# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"\nfrom .backbones import ResNet\nfrom .builder import (build_backbone, build_head, build_recognizer,\n                      build_localizer, build_loss)\nfrom .heads import BaseHead, TSNHead, TSMRecHead\nfrom .losses import SmoothL1Loss, L1Loss\nfrom .framework.recognizers import BaseRecognizer, recognizer2d\nfrom .registry import BACKBONES, HEADS, LOSSES, RECOGNIZERS, LOCALIZERS\nfrom .weight_init import weight_init_",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/modeling/__init__.py:1-24"
+    },
+    "2981": {
+        "file_id": 243,
+        "content": "This code is importing various modules from different sub-directories and registers them in the registry. It also includes a license notice and a function for weight initialization.",
+        "type": "comment"
+    },
+    "2982": {
+        "file_id": 243,
+        "content": "__all__ = [\n    'BACKBONES',\n    'HEADS',\n    'RECOGNIZERS',\n    'LOCALIZERS',\n    'LOSSES',\n    'build_recognizer',\n    'build_localizer',\n    'build_head',\n    'build_backbone',\n    'build_loss',\n    'ResNet',\n    'TSNHead',\n    'BaseHead',\n    'TSMRecHead',\n    'BaseRecognizer',\n    'Recognizer2d',\n    'SmoothL1Loss',\n    'L1Loss',\n]",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/modeling/__init__.py:26-45"
+    },
+    "2983": {
+        "file_id": 243,
+        "content": "This code exports a list of modules for model building, including backbones, heads, recognizers, localizers, and losses. It also includes functions to build these models and specific model classes like ResNet and TSNHead.",
+        "type": "comment"
+    },
+    "2984": {
+        "file_id": 244,
+        "content": "/applications/VideoQualityAssessment/paddlevideo/modeling/backbones/__init__.py",
+        "type": "filepath"
+    },
+    "2985": {
+        "file_id": 244,
+        "content": "This code file imports two backbone models (ResNet and ResNetTweaksTSM) from their respective modules, and then defines the available models in this module as 'ResNet' and 'ResNetTweaksTSM'.",
+        "type": "summary"
+    },
+    "2986": {
+        "file_id": 244,
+        "content": "\"\"\"\n# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"\nfrom .resnet import ResNet\nfrom .resnet_tweaks_tsm import ResNetTweaksTSM\n__all__ = ['ResNet', 'ResNetTweaksTSM']",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/modeling/backbones/__init__.py:1-20"
+    },
+    "2987": {
+        "file_id": 244,
+        "content": "This code file imports two backbone models (ResNet and ResNetTweaksTSM) from their respective modules, and then defines the available models in this module as 'ResNet' and 'ResNetTweaksTSM'.",
+        "type": "comment"
+    },
+    "2988": {
+        "file_id": 245,
+        "content": "/applications/VideoQualityAssessment/paddlevideo/modeling/backbones/resnet.py",
+        "type": "filepath"
+    },
+    "2989": {
+        "file_id": 245,
+        "content": "ConvBNLayer combines Conv2D and BatchNorm2D in PaddlePaddle's ResNet class, using BasicBlock and BottleneckBlock with optional shortcut connections. The code dynamically creates layers, initializes weights, performs convolution and pooling operations, for a customizable deep learning model backbone.",
+        "type": "summary"
+    },
+    "2990": {
+        "file_id": 245,
+        "content": "\"\"\"\n# copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"\nimport numpy as np\nimport math\nimport paddle\nimport paddle.nn as nn\nfrom paddle.nn import (Conv2D, BatchNorm2D, Linear, Dropout, MaxPool2D,\n                       AvgPool2D)\nfrom paddle import ParamAttr\nimport paddle.nn.functional as F\nfrom ..registry import BACKBONES\nfrom ..weight_init import weight_init_\nfrom ...utils import load_ckpt\nclass ConvBNLayer(nn.Layer):\n    \"\"\"Conv2D and BatchNorm2D layer.\n    Args:",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/modeling/backbones/resnet.py:1-35"
+    },
+    "2991": {
+        "file_id": 245,
+        "content": "This code defines the ConvBNLayer class, which is a combination of Conv2D and BatchNorm2D layers. It is part of a PaddlePaddle deep learning model backbone. The class takes arguments for its constructor, suggesting it is customizable or can be initialized with specific parameters. The weight initialization function is also imported to initialize the layer's weights. This could indicate that this class may involve complex neural network layers for image processing tasks like image classification or object detection.",
+        "type": "comment"
+    },
+    "2992": {
+        "file_id": 245,
+        "content": "        in_channels (int): Number of channels for the input.\n        out_channels (int): Number of channels for the output.\n        kernel_size (int): Kernel size.\n        stride (int): Stride in the Conv2D layer. Default: 1.\n        groups (int): Groups in the Conv2D, Default: 1.\n        act (str): Indicate activation after BatchNorm2D layer.\n        name (str): the name of an instance of ConvBNLayer.\n    Note: weight and bias initialization include initialize values and name the restored parameters, values initialization are explicit declared in the ```init_weights``` method.\n    \"\"\"\n    def __init__(self,\n                 in_channels,\n                 out_channels,\n                 kernel_size,\n                 stride=1,\n                 groups=1,\n                 act=None,\n                 name=None):\n        super(ConvBNLayer, self).__init__()\n        self._conv = Conv2D(in_channels=in_channels,\n                            out_channels=out_channels,\n                            kernel_size=kernel_size,",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/modeling/backbones/resnet.py:36-58"
+    },
+    "2993": {
+        "file_id": 245,
+        "content": "This code defines a ConvBNLayer class that takes parameters such as in_channels, out_channels, kernel_size, stride (default 1), groups (default 1), activation function (act) and name. It inherits from another class, super(ConvBNLayer, self). It then initializes the Conv2D layer with the provided parameters and is followed by an init_weights method for weight and bias initialization.",
+        "type": "comment"
+    },
+    "2994": {
+        "file_id": 245,
+        "content": "                            stride=stride,\n                            padding=(kernel_size - 1) // 2,\n                            groups=groups,\n                            weight_attr=ParamAttr(name=name + \"_weights\"),\n                            bias_attr=False)\n        if name == \"conv1\":\n            bn_name = \"bn_\" + name\n        else:\n            bn_name = \"bn\" + name[3:]\n        self._act = act\n        self._batch_norm = BatchNorm2D(out_channels,\n                                       weight_attr=ParamAttr(name=bn_name +\n                                                             \"_scale\"),\n                                       bias_attr=ParamAttr(bn_name + \"_offset\"))\n    def forward(self, inputs):\n        \"\"\"forward\"\"\"\n        y = self._conv(inputs)\n        y = self._batch_norm(y)\n        if self._act:\n            y = getattr(paddle.nn.functional, self._act)(y)\n        return y\nclass BottleneckBlock(nn.Layer):\n    \"\"\"BottleneckBlock\"\"\"\n    def __init__(self,\n                 in_channels,\n                 out_channels,",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/modeling/backbones/resnet.py:59-89"
+    },
+    "2995": {
+        "file_id": 245,
+        "content": "This code defines a Convolutional Neural Network (CNN) layer with optional batch normalization and activation. It is initialized in the ResNet class, which also contains a forward function for feed-forward computation. The BottleneckBlock class extends this design to create a bottleneck block.",
+        "type": "comment"
+    },
+    "2996": {
+        "file_id": 245,
+        "content": "                 stride,\n                 shortcut=True,\n                 name=None):\n        super(BottleneckBlock, self).__init__()\n        self.conv0 = ConvBNLayer(in_channels=in_channels,\n                                 out_channels=out_channels,\n                                 kernel_size=1,\n                                 act=\"relu\",\n                                 name=name + \"_branch2a\")\n        self.conv1 = ConvBNLayer(in_channels=out_channels,\n                                 out_channels=out_channels,\n                                 kernel_size=3,\n                                 stride=stride,\n                                 act=\"relu\",\n                                 name=name + \"_branch2b\")\n        self.conv2 = ConvBNLayer(in_channels=out_channels,\n                                 out_channels=out_channels * 4,\n                                 kernel_size=1,\n                                 act=None,\n                                 name=name + \"_branch2c\")\n        if not shortcut:\n            self.short = ConvBNLayer(in_channels=in_channels,",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/modeling/backbones/resnet.py:90-113"
+    },
+    "2997": {
+        "file_id": 245,
+        "content": "This code defines a BottleneckBlock class with multiple ConvBNLayer instances for the \"branch2a\", \"branch2b\", and \"branch2c\" layers. The BottleneckBlock class is a building block for ResNet architecture in PaddleVideo, used to perform convolutional operations with specific parameters.",
+        "type": "comment"
+    },
+    "2998": {
+        "file_id": 245,
+        "content": "                                     out_channels=out_channels * 4,\n                                     kernel_size=1,\n                                     stride=stride,\n                                     name=name + \"_branch1\")\n        self.shortcut = shortcut\n    def forward(self, inputs):\n        \"\"\"forward\"\"\"\n        y = self.conv0(inputs)\n        conv1 = self.conv1(y)\n        conv2 = self.conv2(conv1)\n        if self.shortcut:\n            short = inputs\n        else:\n            short = self.short(inputs)\n        y = paddle.add(x=short, y=conv2)\n        return F.relu(y)\nclass BasicBlock(nn.Layer):\n    \"\"\"BasicBlock\"\"\"\n    def __init__(self,\n                 in_channels,\n                 out_channels,\n                 stride,\n                 shortcut=True,\n                 name=None):\n        super(BasicBlock, self).__init__()\n        self.stride = stride\n        self.conv0 = ConvBNLayer(in_channels=in_channels,\n                                 out_channels=out_channels,\n                                 kernel_size=3,",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/modeling/backbones/resnet.py:114-146"
+    },
+    "2999": {
+        "file_id": 245,
+        "content": "This code defines a class for a BasicBlock in a convolutional neural network. It contains a ConvBNLayer, another ConvBNLayer, and an optional shortcut connection. The forward function performs the operations within the block and returns the output after applying ReLU activation.",
+        "type": "comment"
+    }
+}

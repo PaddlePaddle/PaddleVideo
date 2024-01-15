@@ -1,0 +1,543 @@
+{
+    "4300": {
+        "file_id": 367,
+        "content": "    <td></td>\n    <td></td>\n    <td></td>\n  </tr>\n  <tr>\n    <td colspan=\"5\" style=\"font-weight:bold;\">Spatio-temporal motion detection method</td>\n  </tr>\n  <tr>\n    <td><a href=\"docs/en/model_zoo/detection/SlowFast_FasterRCNN_en.md\">SlowFast+Fast R-CNN</a>\n    <td></td>\n    <td></td>\n    <td></td>\n    <td></td>\n  </tr>\n  <tr>\n    <td colspan=\"5\" style=\"font-weight:bold;\">Multimodal</td>\n  </tr>\n  <tr>\n    <td><a href=\"./multimodal/actbert.md\">ActBERT</a> (Learning')</td>\n    <td><a href=\"../../../applications/T2VLAD/README.md\">T2VLAD</a> (Retrieval')</td>\n    <td></td>\n    <td></td>\n    <td></td>\n  </tr>\n  <tr>\n    <td colspan=\"5\" style=\"font-weight:bold;\">Video target segmentation</td>\n  </tr>\n  <tr>\n    <td><a href=\"./segmentation/cfbi.md\">CFBI</a> (Semi')</td>\n    <td><a href=\"../../../applications/EIVideo/EIVideo/docs/en/manet.md\">MA-Net</a> (Supervised')</td>\n    <td></td>\n    <td></td>\n    <td></td>\n  </tr>\n  <tr>\n    <td colspan=\"5\" style=\"font-weight:bold;\">Monocular depth estimation</td>\n  </tr>\n  <tr>\n    <td><a href=\"./estimation/adds.md\">ADDS</a> (Unsupervised‘)</td>",
+        "type": "code",
+        "location": "/english_documents/model_zoo/README.md:62-100"
+    },
+    "4301": {
+        "file_id": 367,
+        "content": "This code represents a table of contents with hyperlinks for different models and methods in the PaddleVideo model zoo. It includes categories such as Spatio-temporal motion detection, Multimodal, Video target segmentation, and Monocular depth estimation. Each category has a brief description of its subcategories or models, indicated by hyperlinks.",
+        "type": "comment"
+    },
+    "4302": {
+        "file_id": 367,
+        "content": "    <td></td>\n    <td></td>\n    <td></td>\n    <td></td>\n  </tr>\n</table>",
+        "type": "code",
+        "location": "/english_documents/model_zoo/README.md:101-106"
+    },
+    "4303": {
+        "file_id": 367,
+        "content": "This code represents an empty table cell or row, likely within a HTML table structure.",
+        "type": "comment"
+    },
+    "4304": {
+        "file_id": 368,
+        "content": "/english_documents/model_zoo/detection/SlowFast_FasterRCNN_en.md",
+        "type": "filepath"
+    },
+    "4305": {
+        "file_id": 368,
+        "content": "The code documents a SlowFast_FasterRCNN model for action detection tasks, providing installation and processing instructions. It trains and tests the model with PaddleDetection and exports it for inference, using GPU acceleration and disabling TensorRT optimization.",
+        "type": "summary"
+    },
+    "4306": {
+        "file_id": 368,
+        "content": "[简体中文](../../../zh-CN/model_zoo/detection/SlowFast_FasterRCNN.md) | English\n# SlowFast_FasterRCNN\n## Contents\n- [Introduction](#Introduction)\n- [Data](#Data)\n- [Train](#Train)\n- [Test](#Test)\n- [Inference](#Inference)\nBefore getting started, you need to install additional dependencies as follows:\n```bash\npython -m pip install moviepy\npython -m pip install et_xmlfile\npython -m pip install paddledet\n```\n## Introduction\nThe [SlowFast](https://github.com/PaddlePaddle/PaddleVideo/blob/develop/docs/zh-CN/model_zoo/recognition/slowfast.md) model is one of the high-precision models in the video field. For action detection task, it is also neccessary to detect the person in current frame. Therefore, the SlowFast_FasterRCNN model takes human detection results and video frames as input, extracts spatiotemporal features through the SlowFast model, and then uses FasterRCNN's head gets the actions and positions of humans in the frame.\nThe corresponding AI Studio Notebook Link：[基于SlowFast+FasterRCNN的动作识别](https://aistudio.baidu.com/aistudio/projectdetail/3267637?contributionType=1)",
+        "type": "code",
+        "location": "/english_documents/model_zoo/detection/SlowFast_FasterRCNN_en.md:1-24"
+    },
+    "4307": {
+        "file_id": 368,
+        "content": "This code provides documentation for the SlowFast_FasterRCNN model, a high-precision video model used for action detection tasks. It takes human detection results and video frames as input, uses the SlowFast model to extract spatiotemporal features, and employs FasterRCNN's head to obtain the actions and positions of humans in the frame. Users need to install additional dependencies before getting started.",
+        "type": "comment"
+    },
+    "4308": {
+        "file_id": 368,
+        "content": "For details, please refer to the paper [SlowFast Networks for Video Recognition](https://arxiv.org/pdf/1812.03982.pdf).\n## Data\nWe use [AVA dataset](https://research.google.com/ava/download.html) for action detection. The AVA v2.2 dataset contains 430 videos split into 235 for training, 64 for validation, and 131 for test. Each video has 15 minutes annotated in 1 second intervals.\n### 1 Dowload Videos\n```\nbash  download_videos.sh\n```\n### 2 Download Annotations\n```\nbash  download_annotations.sh\n```\n### 3 Download Proposals\n```\nbash  fetch_ava_proposals.sh\n```\n### 4 Cut Videos\n```\nbash  cut_videos.sh\n```\n### 5 Extract Frames\n```\nbash  extract_rgb_frames.sh\n```\nFor AVA v2.1, there is a simple introduction to some key files：\n* 'ava_videos_15min_frames' dir stores video frames extracted with FPS as the frame rate；\n* 'ava_train_v2.1.csv' file stores the trainning annotations；\n* 'ava_train_excluded_timestamps_v2.1.csv' file stores excluded timestamps；\n* 'ava_dense_proposals_train.FAIR.recall_93.9.pkl' file stores humans' bboxes and scores of key frames；",
+        "type": "code",
+        "location": "/english_documents/model_zoo/detection/SlowFast_FasterRCNN_en.md:26-64"
+    },
+    "4309": {
+        "file_id": 368,
+        "content": "The provided code is a set of instructions for downloading videos, annotations, and proposals as well as cutting videos and extracting frames from the AVA dataset. This dataset contains 430 videos annotated in 1 second intervals for action detection using SlowFast Networks.",
+        "type": "comment"
+    },
+    "4310": {
+        "file_id": 368,
+        "content": "* 'ava_action_list_v2.1_for_activitynet_2018.pbtxt' file stores为 action list.\n## Train\n* `-c`: config file path;\n* `-w`: weights of model. The pretrained model can be downloaded from the table below;\n* `--validate`: evaluate model during training.\n```\nexport CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7\npython -B -m paddle.distributed.launch --gpus=\"0,1,2,3,4,5,6,7\" --log_dir=logdir.ava main.py --validate -w paddle.init_param.pdparams -c configs/detection/ava/ava.yaml\n```\n## Test\nTest model based on the best model:\n```\npython main.py --test \\\n   -w output/AVA_SlowFast_FastRcnn/AVA_SlowFast_FastRcnn_best.pdparams \\\n   -c configs/detection/ava/ava.yaml\n```\n| architecture | depth | Pretrain Model |  frame length x sample rate  | MAP | AVA version | model |\n| ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |------------- |\n| SlowFast | R50 | [Kinetics 400](https://videotag.bj.bcebos.com/PaddleVideo/SlowFast/SlowFast_8*8.pdparams) | 8 x 8 | 23.2 | 2.1 | [`link`](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/SlowFastRCNN_AVA.pdparams) |",
+        "type": "code",
+        "location": "/english_documents/model_zoo/detection/SlowFast_FasterRCNN_en.md:65-90"
+    },
+    "4311": {
+        "file_id": 368,
+        "content": "This code describes the training and testing procedures for a SlowFast model using Faster RCNN on AVA dataset. The training process requires a config file, pre-trained model weights, and evaluates the model during training with the --validate flag. Testing is done based on the best model provided with specifications like architecture, depth, pretrain model, frame length, sample rate, MAP, AVA version, and a link to the trained model.",
+        "type": "comment"
+    },
+    "4312": {
+        "file_id": 368,
+        "content": "## Inference\nThe action detection of this project is divided into two stages. In the first stage, humans' proposals are obtained, and then input into the SlowFast+FasterRCNN model for action recognition.\nFor human detection，you can use the trained model in [PaddleDetection](https://github.com/PaddlePaddle/PaddleDetection).\nInstall PaddleDetection:\n```\ncd PaddleDetection/\npip install -r requirements.txt\n!python setup.py install\n```\nDownload detection model:\n```\n# faster_rcnn_r50_fpn_1x_coco as an example\nwget https://paddledet.bj.bcebos.com/models/faster_rcnn_r50_fpn_1x_coco.pdparams\n```\nexport model:\n```\npython tools/export_model.py \\\n  -c configs/detection/ava/ava.yaml \\\n  -o inference_output \\\n  -p output/AVA_SlowFast_FastRcnn/AVA_SlowFast_FastRcnn_best.pdparams\n```\ninference based on the exported model:\n```\npython tools/predict.py \\\n    -c configs/detection/ava/ava.yaml \\\n    --input_file \"data/-IELREHXDEMO.mp4\" \\\n    --model_file \"inference_output/AVA_SlowFast_FastRcnn.pdmodel\" \\\n    --params_file \"inference_output/AVA_SlowFast_FastRcnn.pdiparams\" \\",
+        "type": "code",
+        "location": "/english_documents/model_zoo/detection/SlowFast_FasterRCNN_en.md:93-126"
+    },
+    "4313": {
+        "file_id": 368,
+        "content": "In this code, the inference process is outlined for an action detection project using SlowFast+FasterRCNN model. It requires installing PaddleDetection and downloading a detection model from provided URL. The \"export_model\" script prepares the model for inference, while the \"predict.py\" script performs inference based on the exported model.",
+        "type": "comment"
+    },
+    "4314": {
+        "file_id": 368,
+        "content": "    --use_gpu=True \\\n    --use_tensorrt=False\n```",
+        "type": "code",
+        "location": "/english_documents/model_zoo/detection/SlowFast_FasterRCNN_en.md:127-129"
+    },
+    "4315": {
+        "file_id": 368,
+        "content": "The code sets `use_gpu` to True and `use_tensorrt` to False. This means the model will use GPU acceleration and not utilize TensorRT for optimizing performance.",
+        "type": "comment"
+    },
+    "4316": {
+        "file_id": 369,
+        "content": "/english_documents/model_zoo/estimation/adds.md",
+        "type": "filepath"
+    },
+    "4317": {
+        "file_id": 369,
+        "content": "ADDS-DepthNet code estimates depth using day and night images, requiring scikit-image and matplotlib, utilizes Oxford RobotCar dataset, offers Resnet18_Imagenet pre-trained model addition, and provides training, testing instructions, and download URL. It demonstrates PaddlePaddle's predict.py tool for inference and saves results as pseudo-colored depth maps with two input images (RGB and depth estimation).",
+        "type": "summary"
+    },
+    "4318": {
+        "file_id": 369,
+        "content": "[Simplified Chinese](../../../zh-CN/model_zoo/estimation/adds.md) | English\n# ADDS-DepthNet model\n## content\n- [Introduction](#Introduction)\n- [Data](#Data)\n- [Train](#Train)\n- [Test](#Test)\n- [Inference](#Inference)\n- [Reference](#Reference)\nBefore getting started, you need to install additional dependencies as follows:\n```bash\npython -m pip install scikit-image\npython -m pip install matplotlib\n```\n## Introduction\nThis model is based on the ICCV 2021 paper **[Self-supervised Monocular Depth Estimation for All Day Images using Domain Separation](https://arxiv.org/abs/2108.07628)** of Baidu Robotics and Autonomous Driving Laboratory,\nThe self-supervised monocular depth estimation model based on day and night images is reproduced, which utilizes the complementary nature of day and night image data, and slows down the large domain shift of day and night images and the accuracy of depth estimation caused by lighting changes. Impact, the most advanced depth estimation results of all-sky images have been achieved on the challenging Oxford RobotCar data set.",
+        "type": "code",
+        "location": "/english_documents/model_zoo/estimation/adds.md:1-23"
+    },
+    "4319": {
+        "file_id": 369,
+        "content": "This code is for the ADDS-DepthNet model, which is based on a self-supervised monocular depth estimation paper by Baidu Robotics and Autonomous Driving Laboratory. The code utilizes day and night images to reproduce the model and achieve advanced depth estimation results on the Oxford RobotCar dataset, mitigating the impact of lighting changes between day and night images. Additional dependencies like scikit-image and matplotlib are required before using the model.",
+        "type": "comment"
+    },
+    "4320": {
+        "file_id": 369,
+        "content": "## Data\nFor data download and preparation of Oxford RobotCar dataset, please refer to [Oxford RobotCar dataset data preparation](../../dataset/Oxford_RobotCar.md)\n## Train\n### Oxford RobotCar dataset training\n#### Download and add pre-trained models\n1. Download the image pre-training model [resnet18.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/Resnet18_Imagenet.pdparams) as Backbone initialization parameters, or download through the wget command\n   ```bash\n   wget -P ./data https://videotag.bj.bcebos.com/PaddleVideo-release2.2/Resnet18_Imagenet.pdparams\n   ```\n2. Open `PaddleVideo/configs/estimation/adds/adds.yaml`, and fill in the downloaded weight storage path below `pretrained:`\n    ```yaml\n    MODEL: #MODEL field\n        framework: \"DepthEstimator\" #Mandatory, indicate the type of network, associate to the'paddlevideo/modeling/framework/'.\n        backbone: #Mandatory, indicate the type of backbone, associate to the'paddlevideo/modeling/backbones/'.\n            name: 'ADDS_DepthNet'",
+        "type": "code",
+        "location": "/english_documents/model_zoo/estimation/adds.md:26-49"
+    },
+    "4321": {
+        "file_id": 369,
+        "content": "This code provides instructions for downloading and adding a pre-trained model to the Oxford RobotCar dataset. It mentions the necessary steps to download the pre-training model, Resnet18_Imagenet.pdparams, using the wget command and specifying its path in the adds.yaml file. The code also highlights the importance of filling in the correct fields in the configuration file for proper association with the relevant model types and frameworks.",
+        "type": "comment"
+    },
+    "4322": {
+        "file_id": 369,
+        "content": "            pretrained: fill in the path here\n    ```\n#### Start training\n- The Oxford RobotCar dataset uses a single card for training, and the starting command for the training method is as follows:\n    ```bash\n    python3.7 main.py --validate -c configs/estimation/adds/adds.yaml --seed 20\n    ```\n## Test\n- The ADDS-DepthNet model is verified synchronously during training (only the day or night data is verified). You can find the keyword `best` in the training log to obtain the model test accuracy. The log example is as follows:\n  ```bash\n  Already save the best model (rmse)8.5531\n  ```\n- Because the model can only test one day or night data set at a given path in the yaml file at a time, to get the complete test score at the beginning of this document, you need to run 4 test commands and record their indicators ( 40m during the day, 60m during the day, 40m at night, 60m at night)\n- Download URL of the trained model: [ADDS_car.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ADDS_car.pdparams)",
+        "type": "code",
+        "location": "/english_documents/model_zoo/estimation/adds.md:50-72"
+    },
+    "4323": {
+        "file_id": 369,
+        "content": "This code snippet provides instructions for training and testing the ADDS-DepthNet model using the Oxford RobotCar dataset. The provided commands initiate the training process with specific configuration file (`configs/estimation/adds/adds.yaml`) and seed value (20). Testing involves running separate commands to test day and night data sets, then recording their respective indicators. A download URL for a pre-trained model is also provided.",
+        "type": "comment"
+    },
+    "4324": {
+        "file_id": 369,
+        "content": "- The test commands are as follows:\n  ```bash\n  # Night 40m\n  python3.7 main.py --test -c configs/estimation/adds/adds.yaml -w \"output/ADDS/ADDS_best.pdparams\" -o DATASET.test.file_path=\"data/oxford/splits/oxford_day/val_night_files.txt\" -o MODEL.head.max_gt_depth=40\n  # Night 60m\n  python3.7 main.py --test -c configs/estimation/adds/adds.yaml -w \"output/ADDS/ADDS_best.pdparams\" -o DATASET.test.file_path=\"data/oxford/splits/oxford_day/val_night_files.txt\" -o MODEL.head.max_gt_depth=60\n  # Daytime 40m\n  python3.7 main.py --test -c configs/estimation/adds/adds.yaml -w \"output/ADDS/ADDS_best.pdparams\" -o DATASET.test.file_path=\"data/oxford/splits/oxford_day/val_day_files.txt\" -o MODEL.head.max_gt_depth=40\n  # Daytime 60m\n  python3.7 main.py --test -c configs/estimation/adds/adds.yaml -w \"output/ADDS/ADDS_best.pdparams\" -o DATASET.test.file_path=\"data/oxford/splits/oxford_day/val_day_files.txt\" -o MODEL.head.max_gt_depth=60\n  ```\n    The test indicators on the validation dataset of Oxford RobotCar dataset are as follows:",
+        "type": "code",
+        "location": "/english_documents/model_zoo/estimation/adds.md:74-90"
+    },
+    "4325": {
+        "file_id": 369,
+        "content": "The code provides test commands for running the ADDS model on the Oxford RobotCar dataset with varying maximum ground truth depth limits and different light conditions (night and daytime). It uses Python 3.7 to execute the main.py file from the PaddleVideo library, configs/estimation/adds/adds.yaml configuration, and specific dataset files for testing.",
+        "type": "comment"
+    },
+    "4326": {
+        "file_id": 369,
+        "content": "  | version | Max Depth | Abs Rel | Sq Rel | RMSE | RMSE log | <img src=\"https://latex.codecogs.com/svg.image?\\delta&space;<&space;1.25&space;\" title=\"\\delta < 1.25 \" /> | <img src=\"https://latex.codecogs.com/svg.image?\\delta&space;<&space;1.25^2\" title=\"\\delta < 1.25^2\" /> | <img src=\"https://latex.codecogs.com/svg.image?\\delta&space;<&space;1.25^3\" title=\"\\delta < 1.25^3\" /> |\n  | ----------- | --------- | ------- | ------ | ----- | ------- | ----------------- |------------------- | ------------------- |\n  | ours(night) | 40 | 0.209 | 1.741 | 6.031 | 0.243 | 0.708 | 0.923 | 0.975 |\n  | ours(night) | 60 | 0.207 | 2.052 | 7.888 | 0.258 | 0.686 | 0.909 | 0.970 |\n  | ours(day) | 40 | 0.114 | 0.574 | 3.411 | 0.157 | 0.860 | 0.977 | 0.993 |\n  | ours(day) | 60 | 0.119 | 0.793 | 4.842 | 0.173 | 0.838 | 0.967 | 0.991 |\n## Inference\n### Export inference model\n```bash\npython3.7 tools/export_model.py -c configs/estimation/adds/adds.yaml -p data/ADDS_car.pdparams -o inference/ADDS\n```\nThe above command will",
+        "type": "code",
+        "location": "/english_documents/model_zoo/estimation/adds.md:92-107"
+    },
+    "4327": {
+        "file_id": 369,
+        "content": "The code presents a table comparing performance metrics of different models under various conditions. It shows the version, maximum depth, and several error measures for each model. The table also includes whether or not the delta value is less than 1.25 raised to different powers. The text describes how to run a command to export an inference model using Python script with specific configuration file, pre-trained parameters, and output directory.",
+        "type": "comment"
+    },
+    "4328": {
+        "file_id": 369,
+        "content": " generate the model structure file `ADDS.pdmodel` and model weight files `ADDS.pdiparams` and `ADDS.pdiparams.info` files needed for prediction, all of which are stored in the `inference/ADDS/` directory\nFor the meaning of each parameter in the above bash command, please refer to [Model Inference Method](https://github.com/PaddlePaddle/PaddleVideo/blob/release/2.0/docs/en/start.md#2-%E6%A8%A1%E5%9E%8B%E6%8E%A8%E7%90%86)\n### Use predictive engine inference\n```bash\npython3.7 tools/predict.py --input_file data/example.png \\\n                           --config configs/estimation/adds/adds.yaml \\\n                           --model_file inference/ADDS/ADDS.pdmodel \\\n                           --params_file inference/ADDS/ADDS.pdiparams \\\n                           --use_gpu=True \\\n                           --use_tensorrt=False\n```\nAt the end of the inference, the depth map estimated by the model will be saved in pseudo-color by default.\nThe following is a sample picture and the corresponding predicted depth map：",
+        "type": "code",
+        "location": "/english_documents/model_zoo/estimation/adds.md:107-124"
+    },
+    "4329": {
+        "file_id": 369,
+        "content": "This code snippet demonstrates the usage of PaddlePaddle's predict.py tool for model inference. It uses a pre-trained model, ADDS, to estimate depth maps from input images. The model files are specified using the --model_file and --params_files parameters, while the input image file is provided with --input_file. The command also includes options for GPU usage (--use_gpu) and TensorRT acceleration (--use_tensorrt). The inference results will be saved as pseudo-colored depth maps by default.",
+        "type": "comment"
+    },
+    "4330": {
+        "file_id": 369,
+        "content": "<img src=\"../../../images/oxford_image.png\" width = \"512\" height = \"256\" alt=\"image\" align=center />\n<img src=\"../../../images/oxford_image_depth.png\" width = \"512\" height = \"256\" alt=\"depth\" align=center />\n## Reference\n- [Self-supervised Monocular Depth Estimation for All Day Images using Domain Separation](https://arxiv.org/abs/2108.07628), Liu, Lina and Song, Xibin and Wang, Mengmeng and Liu, Yong and Zhang, Liangjun",
+        "type": "code",
+        "location": "/english_documents/model_zoo/estimation/adds.md:126-133"
+    },
+    "4331": {
+        "file_id": 369,
+        "content": "The code includes two images, one for regular RGB image and the other for depth estimation from the paper \"Self-supervised Monocular Depth Estimation for All Day Images using Domain Separation\" by Liu et al.",
+        "type": "comment"
+    },
+    "4332": {
+        "file_id": 370,
+        "content": "/english_documents/model_zoo/localization/bmn.md",
+        "type": "filepath"
+    },
+    "4333": {
+        "file_id": 370,
+        "content": "The BMN model, using three modules and the ActivityNet dataset, is trained and inferred for temporal action proposal generation with given commands. The export_model script and predict script are utilized to perform inference, providing logs as examples.",
+        "type": "summary"
+    },
+    "4334": {
+        "file_id": 370,
+        "content": "[简体中文 ](../../../zh-CN/model_zoo/localization/bmn.md) | English\n# BMN\n---\n## Contents\n- [Introduction](#Introduction)\n- [Data](#Data)\n- [Train](#Train)\n- [Test](#Test)\n- [Inference](#Inference)\n- [Reference](#Reference)\n## Introduction\nBMN model contains three modules: Base Module handles the input feature sequence, and out- puts feature sequence shared by the following two modules; Temporal Evaluation Module evaluates starting and ending probabilities of each location in video to generate boundary probability sequences; Proposal Evaluation Module con- tains the BM layer to transfer feature sequence to BM fea- ture map, and contains a series of 3D and 2D convolutional layers to generate BM confidence map.\n<p align=\"center\">\n<img src=\"../../../images/BMN.png\" height=300 width=400 hspace='10'/> <br />\nBMN Overview\n</p>\n## Data\nWe use ActivityNet dataset to train this model，data preparation please refer to [ActivityNet dataset](../../dataset/ActivityNet.md).\n## Train\nYou can start training by such command：\n```bash",
+        "type": "code",
+        "location": "/english_documents/model_zoo/localization/bmn.md:1-35"
+    },
+    "4335": {
+        "file_id": 370,
+        "content": "The code describes the BMN model, which consists of three modules: Base Module, Temporal Evaluation Module, and Proposal Evaluation Module. It uses the ActivityNet dataset for training and provides instructions on how to start the training process using a command.",
+        "type": "comment"
+    },
+    "4336": {
+        "file_id": 370,
+        "content": "export CUDA_VISIBLE_DEVICES=0,1,2,3\npython -B -m paddle.distributed.launch --gpus=\"0,1,2,3\"  --log_dir=log_bmn main.py  --validate -c configs/localization/bmn.yaml\n```\n## Test\nYou can start testing by such command：\n```bash\npython main.py --test -c configs/localization/bmn.yaml -w output/BMN/BMN_epoch_00009.pdparams -o DATASET.test_batch_size=1\n```\n- For now, we only support testing with **single card** and `batch_size=1`.\n-  Please download [activity\\_net\\_1\\_3\\_new.json](https://paddlemodels.bj.bcebos.com/video_detection/activity_net_1_3_new.json) label file and specify the path to `METRIC.ground_truth_filename` in config file.\n-  Args `-w` is used to specifiy the model path，you can download our model in [BMN.pdparams](https://videotag.bj.bcebos.com/PaddleVideo/BMN/BMN.pdparams)\nTest accuracy in ActivityNet1.3:\n| AR@1 | AR@5 | AR@10 | AR@100 | AUC |\n| :---: | :---: | :---: | :---: | :---: |\n| 33.26 | 49.48 | 56.86 | 75.19 | 67.23% |\n## Inference\n### export inference model\n To get model architecture file `BMN.pdmodel` and parameters file `BMN.pdiparams`, use: ",
+        "type": "code",
+        "location": "/english_documents/model_zoo/localization/bmn.md:36-68"
+    },
+    "4337": {
+        "file_id": 370,
+        "content": "This code is launching a PaddlePaddle distributed localization model named BMN using 4 GPUs and running it on the provided configuration file. It also provides instructions for testing, specifying the required label file and model path, as well as inference commands to export the architecture and parameters files.",
+        "type": "comment"
+    },
+    "4338": {
+        "file_id": 370,
+        "content": "```bash\npython3.7 tools/export_model.py -c configs/localization/bmn.yaml \\\n                                -p data/BMN.pdparams \\\n                                -o inference/BMN\n```\n- Args usage please refer to [Model Inference](https://github.com/PaddlePaddle/PaddleVideo/blob/release/2.0/docs/zh-CN/start.md#2-%E6%A8%A1%E5%9E%8B%E6%8E%A8%E7%90%86).\n### infer\n```bash\npython3.7 tools/predict.py --input_file data/example_feat.list \\\n                           --config configs/localization/bmn.yaml \\\n                           --model_file inference/BMN/BMN.pdmodel \\\n                           --params_file inference/BMN/BMN.pdiparams \\\n                           --use_gpu=True \\\n                           --use_tensorrt=False\n```\nexample of logs:\n```\nBMN Inference results of data/example_feat.npy :\n{'score': 0.7968077063560486, 'segment': [0.0, 122.9877]}\n{'score': 0.49097609519958496, 'segment': [12.423000000000002, 124.23]}\n{'score': 0.21395835280418396, 'segment': [39.7536, 122.9877]}\n{'score': 0.2106524258852005, 'segment': [0.0, 109.3224]}",
+        "type": "code",
+        "location": "/english_documents/model_zoo/localization/bmn.md:70-96"
+    },
+    "4339": {
+        "file_id": 370,
+        "content": "The code exports the BMN model and runs inference on a set of feature files, producing output segments and scores. The export_model script requires the configuration file, the PDParams file, and outputs an inference folder. The predict script uses the configuration file, two model files, and a list of input feature files to perform inference. It prints the score and segment for each input, with example logs provided.",
+        "type": "comment"
+    },
+    "4340": {
+        "file_id": 370,
+        "content": "{'score': 0.06876271963119507, 'segment': [23.6037, 114.2916]}\n```\nInference results are saved in `data/bmn/BMN_INFERENCE_results`. \n## Reference\n- [BMN: Boundary-Matching Network for Temporal Action Proposal Generation](https://arxiv.org/abs/1907.09702), Tianwei Lin, Xiao Liu, Xin Li, Errui Ding, Shilei Wen.",
+        "type": "code",
+        "location": "/english_documents/model_zoo/localization/bmn.md:97-104"
+    },
+    "4341": {
+        "file_id": 370,
+        "content": "The code snippet represents the inference results of BMN (Boundary-Matching Network) for temporal action proposal generation. These results, containing a score and segment information, are saved in the specified directory. The BMN paper reference is provided for further information.",
+        "type": "comment"
+    },
+    "4342": {
+        "file_id": 371,
+        "content": "/english_documents/model_zoo/localization/yowo.md",
+        "type": "filepath"
+    },
+    "4343": {
+        "file_id": 371,
+        "content": "YOWO is a single-stage feature extraction network with channel fusion and attention. Pre-trained on UCF101-24, it provides model structure and weight files for prediction with high confidence.",
+        "type": "summary"
+    },
+    "4344": {
+        "file_id": 371,
+        "content": "[简体中文](../../../zh-CN/model_zoo/localization/yowo.md) | English\n# YOWO\n## Content\n- [Introduction](#Introduction)\n- [Data](#DATA)\n- [Train](#Train)\n- [Test](#Test)\n- [Inference](#Inference)\n- [Reference](#Reference)\n## Introduction\nYOWO is a single-stage network with two branches. One branch extracts spatial features of key frames (i.e., the current frame) via 2D-CNN, while the other branch acquires spatio-temporal features of clips consisting of previous frames via 3D-CNN. To accurately aggregate these features, YOWO uses a channel fusion and attention mechanism that maximizes the inter-channel dependencies. Finally, the fused features are subjected to frame-level detection.\n<div align=\"center\">\n<img src=\"../../../images/yowo.jpg\">\n</div>\n## Data\nUCF101-24 data download and preparation please refer to [UCF101-24 data preparation](../../dataset/ucf24.md)\n## Train\n### UCF101-24 data set training\n#### Download and add pre-trained models\n1. Download the pre-training model [resnext-101-kinetics](https://vide",
+        "type": "code",
+        "location": "/english_documents/model_zoo/localization/yowo.md:1-36"
+    },
+    "4345": {
+        "file_id": 371,
+        "content": "YOWO is a single-stage network with 2 branches for spatial and spatio-temporal feature extraction. It uses channel fusion and attention mechanism to aggregate features, then performs frame-level detection. UCF101-24 data preparation instructions provided. Pre-trained models like resnext-101-kinetics are needed for training.",
+        "type": "comment"
+    },
+    "4346": {
+        "file_id": 371,
+        "content": "otag.bj.bcebos.com/PaddleVideo-release2.3/resnext101_kinetics.pdparams) 和 [darknet](https://videotag.bj.bcebos.com/PaddleVideo-release2.3/darknet.pdparam) as Backbone initialization parameters, or download through the wget command\n   ```bash\n    wget -nc https://videotag.bj.bcebos.com/PaddleVideo-release2.3/darknet.pdparam\n    wget -nc https://videotag.bj.bcebos.com/PaddleVideo-release2.3/resnext101_kinetics.pdparams\n   ```\n2. Open `PaddleVideo/configs/localization/yowo.yaml`, and fill in the downloaded weight storage path below `pretrained_2d:` and `pretrained_3d:` respectively\n    ```yaml\n    MODEL:\n        framework: \"YOWOLocalizer\"\n        backbone:\n            name: \"YOWO\"\n            num_class: 24\n            pretrained_2d: fill in the path of 2D pre-training model here\n            pretrained_3d: fill in the path of 3D pre-training model here\n    ```\n#### Start training\n- The UCF101-24 data set uses 1 card for training, and the start command of the training method is as follows:\n    ```bash\n    python3 main.py -c configs/localization/yowo.yaml --validate --seed=1",
+        "type": "code",
+        "location": "/english_documents/model_zoo/localization/yowo.md:36-60"
+    },
+    "4347": {
+        "file_id": 371,
+        "content": "This code provides instructions for downloading and configuring pre-trained models (`darknet.pdparam` and `resnext101_kinetics.pdparams`) for the YOWOLocalizer model in PaddleVideo. The models need to be added under `pretrained_2d:` and `pretrained_3d:` respectively in the `yowo.yaml` file. After that, use the command `python3 main.py -c configs/localization/yowo.yaml --validate --seed=1` to start training on the UCF101-24 dataset using 1 card.",
+        "type": "comment"
+    },
+    "4348": {
+        "file_id": 371,
+        "content": "    ```\n- Turn on amp mixed-precision training to speed up the training process. The training start command is as follows:\n    ```bash\n    python3 main.py --amp -c configs/localization/yowo.yaml --validate --seed=1\n    ```\n- In addition, you can customize and modify the parameter configuration to achieve the purpose of training/testing on different data sets. It is recommended that the naming method of the configuration file is `model_dataset name_file format_data format_sampling method.yaml` , Please refer to [config](../../tutorials/config.md) for parameter usage.\n## Test\n- The YOWO model is verified synchronously during training. You can find the keyword `best` in the training log to obtain the model test accuracy. The log example is as follows:\n  ```\n  Already save the best model (fsocre)0.8779\n  ```\n- Since the verification index of the YOWO model test mode is **Frame-mAP (@ IoU 0.5)**, which is different from the **fscore** used in the verification mode during the training process, so the v",
+        "type": "code",
+        "location": "/english_documents/model_zoo/localization/yowo.md:61-80"
+    },
+    "4349": {
+        "file_id": 371,
+        "content": "Enables AMP mixed-precision for faster training, using the command 'python3 main.py --amp -c configs/localization/yowo.yaml --validate --seed=1'. Customize parameters to train or test on different datasets, following the naming format 'model_dataset name_file format_data format_sampling method.yaml'. During training, find 'best' in logs to obtain model test accuracy using Frame-mAP (@ IoU 0.5), which differs from verification fscore used during training.",
+        "type": "comment"
+    },
+    "4350": {
+        "file_id": 371,
+        "content": "erification index recorded in the training log, called `fscore `, does not represent the final test score, so after the training is completed, you can use the test mode to test the best model to obtain the final index, the command is as follows:\n  ```bash\n  python3 main.py -c configs/localization/yowo.yaml --test --seed=1 -w 'output/YOWO/YOWO_epoch_00005.pdparams'\n  ```\n  When the test configuration uses the following parameters, the test indicators on the validation data set of UCF101-24 are as follows:\n  | Model    | 3D-CNN backbone | 2D-CNN backbone | Dataset  |Input    | Frame-mAP <br>(@ IoU 0.5)    |   checkpoints  |\n  | :-----------: | :-----------: | :-----------: | :-----------: | :-----------: | :-----------: | :-----------: |\n  | YOWO | 3D-ResNext-101 | Darknet-19 | UCF101-24 | 16-frames, d=1 | 80.94 | [YOWO.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.3/YOWO_epoch_00005.pdparams) |\n## Inference\n### Export inference model\n```bash\npython3 tools/export_model.py -c configs/localization/yowo.yaml -p 'output/YOWO/YOWO_epoch_00005.pdparams'",
+        "type": "code",
+        "location": "/english_documents/model_zoo/localization/yowo.md:80-101"
+    },
+    "4351": {
+        "file_id": 371,
+        "content": "The code snippet shows how to evaluate the YOWO model's performance using a test mode and provides information about the input size, frame-mAP with IoU 0.5, and the checkpoint used for testing on UCF101-24 dataset. Additionally, it demonstrates how to export the inference model for future use.",
+        "type": "comment"
+    },
+    "4352": {
+        "file_id": 371,
+        "content": "```\nThe above command will generate the model structure file `YOWO.pdmodel` and the model weight file `YOWO.pdiparams` required for prediction.\n- For the meaning of each parameter, please refer to [Model Reasoning Method](../../usage.md#2-infer)\n### Use prediction engine inference\n- Download the test video [HorseRiding.avi](https://videotag.bj.bcebos.com/Data/HorseRiding.avi) for a quick experience, or via the wget command. The downloaded video should be placed in the `data/ucf24` directory:\n```bash\nwget -nc https://videotag.bj.bcebos.com/Data/HorseRiding.avi\n```\n- Run the following command for inference:\n```bash\npython3 tools/predict.py -c configs/localization/yowo.yaml -i 'data/ucf24/HorseRiding.avi' --model_file ./inference/YOWO.pdmodel --params_file ./inference/YOWO.pdiparams\n```\n- When inference is over, the prediction results in image form will be saved in the `inference/YOWO_infer` directory. The image sequence can be converted to a gif by running the following command to complete the final visualisation.",
+        "type": "code",
+        "location": "/english_documents/model_zoo/localization/yowo.md:102-122"
+    },
+    "4353": {
+        "file_id": 371,
+        "content": "This code explains how to generate the YOWO model structure file and weight file for prediction. It also provides instructions on how to use the prediction engine for inference using a test video, downloading it if necessary, and saving the results as an image sequence that can be converted into a gif for visualization.",
+        "type": "comment"
+    },
+    "4354": {
+        "file_id": 371,
+        "content": "```\npython3 data/ucf24/visualization.py --frames_dir ./inference/YOWO_infer/HorseRiding --duration 0.04\n```\nThe resulting visualization is as follows:\n<div align=\"center\">\n  <img  src=\"../../../images/horse_riding.gif\" alt=\"Horse Riding\">\n</div>\nIt can be seen that using the YOWO model trained on UCF101-24 to predict `data/ucf24/HorseRiding.avi`, the category of each frame output is HorseRiding with a confidence level of about 0.80.\n## Reference\n- [You Only Watch Once: A Unified CNN Architecture for Real-Time Spatiotemporal Action Localization](https://arxiv.org/pdf/1911.06644.pdf), Köpüklü O, Wei X, Rigoll G.",
+        "type": "code",
+        "location": "/english_documents/model_zoo/localization/yowo.md:124-138"
+    },
+    "4355": {
+        "file_id": 371,
+        "content": "This code is running a visualization script for the YOWO model trained on UCF101-24. It predicts the category of frames in \"data/ucf24/HorseRiding.avi\" as HorseRiding with high confidence (about 0.80).",
+        "type": "comment"
+    },
+    "4356": {
+        "file_id": 372,
+        "content": "/english_documents/model_zoo/multimodal/actbert.md",
+        "type": "filepath"
+    },
+    "4357": {
+        "file_id": 372,
+        "content": "ActBERT is a multimodal pretrain task using global action info and TaNgled Transformer block (TNT) for text-object interactions. It outperforms state-of-the-art in video-language tasks and can be trained on HowTo100M dataset with AMP for faster training, evaluated on MSR-VTT, and found at the provided link.",
+        "type": "summary"
+    },
+    "4358": {
+        "file_id": 372,
+        "content": "[简体中文](../../../zh-CN/model_zoo/multimodal/actbert.md) | English\n# ActBERT\n---\n## Contents\n- [Introduction](#Introduction)\n- [Data](#Data)\n- [Train](#Train)\n- [Test](#Test)\n- [Reference](#Reference)\nBefore getting started, you need to install additional dependencies as follows:\n```bash\npython -m pip install paddlenlp\npython -m pip install lmdb\n```\n## Introduction\nActbert is proposed by Baidu in CVPR2020 for multimodal pretrain task. It leverage global action information to cat- alyze mutual interactions between linguistic texts and local regional objects.  This method introduce a TaNgled Transformer block (TNT) to encode three sources of information, i.e., global actions, local regional objects, and linguistic descriptions. ActBERT significantly outperforms the state- of-the-art in five downstream video-and-language tasks, i.e., text-video clip retrieval, video captioning, video question answering, action segmentation, and action step localization.\n<div align=\"center\">\n<img src=\"../../../images/actbert.png\" height=400 width=500 hspace='10'/> <br />",
+        "type": "code",
+        "location": "/english_documents/model_zoo/multimodal/actbert.md:1-25"
+    },
+    "4359": {
+        "file_id": 372,
+        "content": "This is an introduction to ActBERT, a multimodal pretrain task proposed by Baidu in CVPR2020. It uses global action information to analyze mutual interactions between linguistic texts and local regional objects. The method introduces TaNgled Transformer block (TNT) to encode three sources of information. ActBERT outperforms state-of-the-art in five video-and-language tasks, including text-video clip retrieval, video captioning, and action segmentation.",
+        "type": "comment"
+    },
+    "4360": {
+        "file_id": 372,
+        "content": "</div>\n## Data\nPlease refer to Kinetics400 data download and preparation doc [HowTo100M-data](../../dataset/howto100m.md)\nPlease refer to MSR-VTT data download and preparation doc [MSR-VTT-data](../../dataset/umsrvtt.md)\n## Train\n### Train on HowTo100M\n#### download pretrain-model\nPlease download [bert-base-uncased](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/bert-base-uncased.pdparams) as pretraind model:\n```bash\nwget https://videotag.bj.bcebos.com/PaddleVideo-release2.2/bert-base-uncased.pdparams\n```\nand add path to `MODEL.framework.backbone.pretrained` in config file as：\n```yaml\nMODEL:\n    framework: \"ActBert\"\n    backbone:\n        name: \"BertForMultiModalPreTraining\"\n        pretrained: your weight path\n```\n- We provide training option on small data, config file is for reference only.\n#### Start training\n- Train ActBERT on HowTo100M scripts:\n```bash\npython3.7 -B -m paddle.distributed.launch --gpus=\"0,1,2,3,4,5,6,7\"  --log_dir=log_actbert  main.py  --validate -c configs/multimodal/actbert/actbert.yaml",
+        "type": "code",
+        "location": "/english_documents/model_zoo/multimodal/actbert.md:26-65"
+    },
+    "4361": {
+        "file_id": 372,
+        "content": "This code describes how to train ActBERT on HowTo100M dataset. It first requires downloading the pretrain-model \"bert-base-uncased\" from a specified URL and adding its path to the config file. Then, it provides the command to start training using the provided script with specific configuration and GPU allocation.",
+        "type": "comment"
+    },
+    "4362": {
+        "file_id": 372,
+        "content": "```\n- AMP is useful for speeding up training:\n```bash\nexport FLAGS_conv_workspace_size_limit=800 #MB\nexport FLAGS_cudnn_exhaustive_search=1\nexport FLAGS_cudnn_batchnorm_spatial_persistent=1\npython3.7 -B -m paddle.distributed.launch --gpus=\"0,1,2,3,4,5,6,7\"  --log_dir=log_actbert  main.py  --amp --validate -c configs/multimodal/actbert/actbert.yaml\n```\n## Test\n- Evaluation performs on downstream task, i.e. text-video clip retrieval on MSR-VTT dataset, test accuracy can be obtained using scripts:\n```bash\npython3.7 main.py --test -c configs/multimodal/actbert/actbert_msrvtt.yaml -w Actbert.pdparams\n```\nMetrics on MSR-VTT:\n| R@1 | R@5 | R@10 | Median R | Mean R | checkpoints |\n| :------: | :----------: | :----: | :----: | :----: | :----: |\n| 8.6 | 31.2 | 45.5 | 13.0 | 28.5 | [ActBERT.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ActBERT.pdparams) |\n## Reference\n- [ActBERT: Learning Global-Local Video-Text Representations\n](https://arxiv.org/abs/2011.07231), Linchao Zhu, Yi Yang",
+        "type": "code",
+        "location": "/english_documents/model_zoo/multimodal/actbert.md:66-98"
+    },
+    "4363": {
+        "file_id": 372,
+        "content": "This code shows how to train a model using PaddlePaddle with Automatic Mixed Precision (AMP) for faster training, evaluate it on the MSR-VTT dataset, and provides metrics such as R@1, R@5, R@10, and Median R. The ActBERT model can be found at the provided link in the reference section.",
+        "type": "comment"
+    },
+    "4364": {
+        "file_id": 373,
+        "content": "/english_documents/model_zoo/partition/transnetv2.md",
+        "type": "filepath"
+    },
+    "4365": {
+        "file_id": 373,
+        "content": "TransNetV2 is a deep learning-based video segmentation model for shot transition detection, using DDCNN V2 structure, RGB color histograms, and frame similarity. The provided code demonstrates usage of predict.py to infer predictions on input files, with output probabilities and lens boundaries.",
+        "type": "summary"
+    },
+    "4366": {
+        "file_id": 373,
+        "content": "[简体中文](../../../zh-CN/model_zoo/partition/transnetv2.md) | English\n# TransNetV2\n## Contents\n- [Introduction](#Introduction)\n- [Data](#Data)\n- [Train](#Train)\n- [Test](#Test)\n- [Inference](#Inference)\n- [Details](#Details)\n- [Reference](#Reference)\nBefore getting started, you need to install additional dependencies as follows:\n```bash\npython -m pip install ffmpeg-python==0.2.0\n```\n## Introduction\nTransNetV2 is a video segmentation model based on deep learning. It performs feature learning through the DDCNN V2 structure, and adds RGB color histograms and video frame similarity for more effective feature extraction, and finally obtains whether each frame is a shot boundary frame Probability, thereby completing the video segmentation. The algorithm has good effect and efficient calculation, which is very suitable for industrial landing.\n![](../../../images/transnetv2.png)\nThis code currently only supports model inference, and model training and testing will be provided in the future.\nPlease refer to the pap",
+        "type": "code",
+        "location": "/english_documents/model_zoo/partition/transnetv2.md:1-28"
+    },
+    "4367": {
+        "file_id": 373,
+        "content": "TransNetV2 is a video segmentation model based on deep learning using DDCNN V2 structure for feature learning, RGB color histograms, and video frame similarity for effective feature extraction. This code supports inference only, with training and testing to be provided later. Suitable for industrial applications, more details are available in the paper.",
+        "type": "comment"
+    },
+    "4368": {
+        "file_id": 373,
+        "content": "er for details. [TransNet V2: An effective deep network architecture for fast shot transition detection](https://arxiv.org/abs/2008.04838)\n## Data\ncoming soon\n## Train\ncoming soon\n## Test\ncoming soon\n## Inference\nLoad the TransNetV2 weights trained on ClipShots and TRECVID IACC.3 dataset [TransNetV2_shots.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/TransNetV2_shots.pdparams), or download through the command line\n```bash\nwget https://videotag.bj.bcebos.com/PaddleVideo-release2.2/TransNetV2_shots.pdparams\n```\n### export inference model\n```bash\npython3.7 tools/export_model.py -c configs/partitioners/transnetv2/transnetv2.yaml -p data/TransNetV2_shots.pdparams -o inference/TransNetV2\n```\nThe above command will generate the model structure file`TransNetV2.pdmodel`and the model weight file`TransNetV2.pdiparams`required for prediction.\nFor the meaning of each parameter, please refer to [Model Reasoning Method](https://github.com/PaddlePaddle/PaddleVideo/blob/release/2.0/docs/zh-CN/start.md#2-Model Reasoning)",
+        "type": "code",
+        "location": "/english_documents/model_zoo/partition/transnetv2.md:28-62"
+    },
+    "4369": {
+        "file_id": 373,
+        "content": "This code provides instructions to load and export the TransNet V2 inference model for shot transition detection. It mentions the required weights trained on ClipShots and TRECVID IACC.3 dataset, as well as the URL to download them using wget command. The script also outlines how to use `export_model.py` tool to generate the `TransNetV2.pdmodel` and `TransNetV2.pdiparams` files for prediction purposes.",
+        "type": "comment"
+    },
+    "4370": {
+        "file_id": 373,
+        "content": "### infer\n```bash\npython3.7 tools/predict.py --input_file data/example.avi \\\n                           --config configs/partitioners/transnetv2/transnetv2.yaml \\\n                           --model_file inference/TransNetV2/TransNetV2.pdmodel \\\n                           --params_file inference/TransNetV2/TransNetV2.pdiparams \\\n                           --use_gpu=True \\\n                           --use_tensorrt=False\n```\nBy defining the `output_path` parameters in `transnetv2.yaml`, the prediction probability of each frame can be output to `{output_path}/example_predictions.txt`, and the predicted lens boundary is output to `{output_path}/example_scenes.txt`.\nBy defining the `visualize` parameter in `transnetv2.yaml`, the predicted results can be visualized, and the visual results are saved to `{output_path}/example_vis.png`.\n## Reference\n- [TransNet V2: An effective deep network architecture for fast shot transition detection](https://arxiv.org/abs/2008.04838), Tomáš Souček, Jakub Lokoč",
+        "type": "code",
+        "location": "/english_documents/model_zoo/partition/transnetv2.md:64-80"
+    },
+    "4371": {
+        "file_id": 373,
+        "content": "This code snippet demonstrates the usage of predict.py to infer TransNetV2 model predictions for a given input file (example.avi). The model configuration is specified in transnetv2.yaml, and the trained model files are provided as inputs. Prediction probability per frame is output to example_predictions.txt and lens boundary is output to example_scenes.txt. Visualization can be enabled for better interpretation of results.",
+        "type": "comment"
+    },
+    "4372": {
+        "file_id": 374,
+        "content": "/english_documents/model_zoo/recognition/agcn.md",
+        "type": "filepath"
+    },
+    "4373": {
+        "file_id": 374,
+        "content": "This code implements AGCN model for improved ST-GCN accuracy on FSD-10 and NTU-RGBD datasets, achieving high Top-1 accuracies. It provides instructions for data preparation, training, testing, inference, evaluation, and exports an AGCN model for video recognition using Multi-stream Adaptive Graph Convolutional Networks.",
+        "type": "summary"
+    },
+    "4374": {
+        "file_id": 374,
+        "content": "[简体中文](../../../zh-CN/model_zoo/recognition/agcn.md) | English\n# AGCN\n---\n## Contents\n- [Introduction](#Introduction)\n- [Data](#Data)\n- [Train](#Train)\n- [Test](#Test)\n- [Inference](#Inference)\n- [Reference](#Reference)\n## Introduction\nWe implemented Adaptive Graph Convolution Network to improve the accuracy of [ST-GCN](./stgcn.md).\n## Data\nPlease refer to FSD-10 data download and preparation doc [FSD](../../dataset/fsd.md)\nPlease refer to NTU-RGBD data download and preparation doc [NTU-RGBD](../../dataset/ntu-rgbd.md)\n## Train\n### Train on FSD\n- Train AGCN on FSD scripts:\n```bash\npython3.7 main.py -c configs/recognition/agcn/agcn_fsd.yaml\n```\n- Turn off `valid` when training, as validation dataset is not available for the competition.\n### Train on NTU-RGBD\n- Train AGCN on NTU-RGBD scripts:\n```bash\npython3.7 -B -m paddle.distributed.launch --gpus=\"0,1,2,3\"  --log_dir=log_agcn  main.py  --validate -c configs/recognition/agcn/agcn_ntucs.yaml\n```\n- config file `agcn_ntucs.yaml` corresponding to the config of AGCN on NTU-RGB+D dataset with cross-subject splits.",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/agcn.md:1-46"
+    },
+    "4375": {
+        "file_id": 374,
+        "content": "This code describes the Adaptive Graph Convolution Network (AGCN) implementation for improving the accuracy of ST-GCN, trained on FSD-10 and NTU-RGBD datasets. It provides instructions for data preparation, training, testing, and inference.",
+        "type": "comment"
+    },
+    "4376": {
+        "file_id": 374,
+        "content": "## Test\n### Test onf FSD\n- Test scripts：\n```bash\npython3.7 main.py --test -c configs/recognition/agcn/agcn_fsd.yaml  -w output/AGCN/AGCN_epoch_00100.pdparams\n```\n- Specify the config file with `-c`, specify the weight path with `-w`.\n- Evaluation results will be saved in `submission.csv` file, final score can be obtained in [competition website](https://aistudio.baidu.com/aistudio/competition/detail/115).\nAccuracy on FSD dataset:\n| Test_Data | Top-1 | checkpoints |\n| :----: | :----: | :---- |\n| Test_A | 62.29 | [AGCN_fsd.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/AGCN_fsd.pdparams)|\n### Test on NTU-RGB+D\n- Test scripts：\n```bash\npython3.7 main.py --test -c configs/recognition/agcn/agcn_ntucs.yaml -w output/AGCN/AGCN_best.pdparams\n```\n- Specify the config file with `-c`, specify the weight path with `-w`.\nAccuracy on NTU-RGB+D dataset:\n| split | Top-1 | checkpoints |\n| :----: | :----: | :---- |\n| cross-subject | 83.27 | [AGCN_ntucs.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/AGCN_ntucs.pdparams)|",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/agcn.md:49-84"
+    },
+    "4377": {
+        "file_id": 374,
+        "content": "This code provides test scripts to evaluate the performance of the AGCN model on two datasets: FSD and NTU-RGB+D. The test scripts require specifying a configuration file (-c) and a weight path (-w). Evaluation results are saved in submission.csv, with final scores available on the competition website. Testing on FSD dataset returns a Top-1 accuracy of 62.29, while testing on NTU-RGB+D dataset (cross-subject split) returns a Top-1 accuracy of 83.27. The respective model checkpoints are also provided as links for further exploration.",
+        "type": "comment"
+    },
+    "4378": {
+        "file_id": 374,
+        "content": "## Inference\n### export inference model\n To get model architecture file `AGCN.pdmodel` and parameters file `AGCN.pdiparams`, use:\n```bash\npython3.7 tools/export_model.py -c configs/recognition/agcn/agcn_fsd.yaml \\\n                                -p data/AGCN_fsd.pdparams \\\n                                -o inference/AGCN\n```\n- Args usage please refer to [Model Inference](https://github.com/PaddlePaddle/PaddleVideo/blob/release/2.0/docs/zh-CN/start.md#2-%E6%A8%A1%E5%9E%8B%E6%8E%A8%E7%90%86).\n### infer\n```bash\npython3.7 tools/predict.py --input_file data/fsd10/example_skeleton.npy \\\n                           --config configs/recognition/agcn/agcn_fsd.yaml \\\n                           --model_file inference/AGCN/AGCN.pdmodel \\\n                           --params_file inference/AGCN/AGCN.pdiparams \\\n                           --use_gpu=True \\\n                           --use_tensorrt=False\n```\nexample of logs:\n```\nCurrent video file: data/fsd10/example_skeleton.npy\n        top-1 class: 27\n        top-1 score: 0.8965644240379333",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/agcn.md:87-117"
+    },
+    "4379": {
+        "file_id": 374,
+        "content": "This code provides instructions on how to export and use an inference model called AGCN for video recognition. It shows the command to obtain the architecture file (AGCN.pdmodel) and parameter file (AGCN.pdiparams), as well as an example of how to run prediction using the provided files, specifying input data, configuration, and whether to use GPU or not. The output includes the top-1 class and its corresponding score.",
+        "type": "comment"
+    },
+    "4380": {
+        "file_id": 374,
+        "content": "```\n## Reference\n- [Spatial Temporal Graph Convolutional Networks for Skeleton-Based Action Recognition](https://arxiv.org/abs/1801.07455), Sijie Yan, Yuanjun Xiong, Dahua Lin\n- [Two-Stream Adaptive Graph Convolutional Networks for Skeleton-Based Action Recognition](https://arxiv.org/abs/1805.07694), Lei Shi, Yifan Zhang, Jian Cheng, Hanqing Lu\n- [Skeleton-Based Action Recognition with Multi-Stream Adaptive Graph Convolutional Networks](https://arxiv.org/abs/1912.06971), Lei Shi, Yifan Zhang, Jian Cheng, Hanqing Lu\n- Many thanks to [li7819559](https://github.com/li7819559) and [ZhaoJingjing713](https://github.com/ZhaoJingjing713) for contributing the code.",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/agcn.md:118-129"
+    },
+    "4381": {
+        "file_id": 374,
+        "content": "This code snippet implements a Multi-stream Adaptive Graph Convolutional Network for skeleton-based action recognition. It utilizes two input streams (spatial and temporal) to process the data and applies adaptive graph convolution on each stream separately, followed by concatenation of the two streams before being passed through MLP and softmax layers.",
+        "type": "comment"
+    },
+    "4382": {
+        "file_id": 375,
+        "content": "/english_documents/model_zoo/recognition/agcn2s.md",
+        "type": "filepath"
+    },
+    "4383": {
+        "file_id": 375,
+        "content": "The 2s-AGCN model, an enhanced ST-GCN version for motion recognition, utilizes dual-flow adaptive convolutional networks and focuses on second-order bone data. Code offers test scripts, accuracy results, and download links for models trained on different datasets, with PaddleVideo exporting an action recognition model using AGCN2s.",
+        "type": "summary"
+    },
+    "4384": {
+        "file_id": 375,
+        "content": "[简体中文](../../../zh-CN/model_zoo/recognition/2sAGCN.md) | English\n# CTR-GCN\n---\n## Contents\n- [Introduction](#Introduction)\n- [Data](#Data)\n- [Train](#Train)\n- [Test](#Test)\n- [Inference](#Inference)\n- [Reference](#Reference)\n## Introduction\n![模型结构图](../../../images/agcn2s.png)\n[2s-AGCN](https://openaccess.thecvf.com/content_CVPR_2019/papers/Shi_Two-Stream_Adaptive_Graph_Convolutional_Networks_for_Skeleton-Based_Action_Recognition_CVPR_2019_paper.pdf) is an improved article on ST-GCN published in CVPR2019. It proposes a dual-flow adaptive convolutional network, which improves the shortcomings of the original ST-GCN. In the existing GCN based approach, the topology of the graph is set manually and fixed to all layers and input samples. In addition, the second-order information of bone data (bone length and orientation) is naturally more beneficial and discriminating for motion recognition, which was rarely studied in the methods at that time. Therefore, this paper puts forward a node and bones of tw",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/agcn2s.md:1-20"
+    },
+    "4385": {
+        "file_id": 375,
+        "content": "This code provides an introduction to the 2s-AGCN model, an improved version of ST-GCN published in CVPR2019. It uses a dual-flow adaptive convolutional network and focuses on the second-order information of bone data for motion recognition.",
+        "type": "comment"
+    },
+    "4386": {
+        "file_id": 375,
+        "content": "o kinds of information fusion based on skeleton shuangliu network, and join in figure convolution adjacency matrix adaptive matrix, a sharp rise in the bones of gesture recognition accuracy, also has laid the foundation for subsequent work (the subsequent basic skeleton gesture recognition are based on the flow of network framework).\n## Data\nData download and processing are consistent with CTR-GCN. For details, please refer to [NTU-RGBD Data Preparation](../../dataset/ntu-rgbd.md)\n## Train\n### Train on NTU-RGBD\nTrain CTR-GCN on NTU-RGBD scripts using single gpu：\n```bash\n# train cross subject with bone data\npython main.py --validate -c configs/recognition/agcn2s/agcn2s_ntucs_bone.yaml --seed 1\n# train cross subject with joint data\npython main.py --validate -c configs/recognition/agcn2s/agcn2s_ntucs_joint.yaml --seed 1\n# train cross view with bone data\npython main.py --validate -c configs/recognition/agcn2s/agcn2s_ntucv_bone.yaml --seed 1\n# train cross view with joint data\npython main.py --validate -c configs/recognition/agcn2s/agcn2s_ntucv_joint.yaml --seed 1",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/agcn2s.md:20-40"
+    },
+    "4387": {
+        "file_id": 375,
+        "content": "This code provides information on the AGCN2S model, a skeleton-based gesture recognition network. It uses data from NTU-RGBD, with details of its preparation found in another file. The code also outlines how to train the CTR-GCN model on various configurations such as cross-subject and cross-view training scenarios, using bone or joint data. This serves as a guide for running the model's training scripts.",
+        "type": "comment"
+    },
+    "4388": {
+        "file_id": 375,
+        "content": "```\nconfig file `agcn2s_ntucs_joint.yaml` corresponding to the config of 2s-AGCN on NTU-RGB+D dataset with cross-subject splits.\n## Test\n### Test on NTU-RGB+D\nTest scripts：\n```bash\n# test cross subject with bone data\npython main.py --test -c configs/recognition/2sagcn/2sagcn_ntucs_bone.yaml -w data/2SAGCN_ntucs_bone.pdparams\n# test cross subject with joint data\npython main.py --test -c configs/recognition/2sagcn/2sagcn_ntucs_joint.yaml -w data/2SAGCN_ntucs_joint.pdparams\n# test cross view with bone data\npython main.py --test -c configs/recognition/2sagcn/2sagcn_ntucv_bone.yaml -w data/2SAGCN_ntucv_bone.pdparams\n# test cross view with joint data\npython main.py --test -c configs/recognition/2sagcn/2sagcn_ntucv_joint.yaml -w data/2SAGCN_ntucv_joint.pdparams\n```\n* Specify the config file with `-c`, specify the weight path with `-w`.\nAccuracy on NTU-RGB+D dataset:\n|                |  CS   |   CV   |\n| :------------: | :---: | :----: |\n| Js-AGCN(joint) | 85.8% | 94.13% |\n| Bs-AGCN(bone)  | 86.7% | 93.9%  |\nTrain log：[download](https://github.com/ELKYang/2s-AGCN-paddle/tree/main/work_dir/ntu)",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/agcn2s.md:41-71"
+    },
+    "4389": {
+        "file_id": 375,
+        "content": "The code provides test scripts for the 2s-AGCN model on the NTU-RGB+D dataset, both with cross-subject and cross-view splits. The accuracy results for joint and bone data are given, along with a download link to the training log.",
+        "type": "comment"
+    },
+    "4390": {
+        "file_id": 375,
+        "content": "VisualDL log：[download](https://github.com/ELKYang/2s-AGCN-paddle/tree/main/runs)\ncheckpoints：\n|                            CS-Js                             |                            CS-Bs                             |                            CV-Js                             |                            CV-Bs                             |\n| :----------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: |\n| [ntu_cs_agcn_joint](https://github.com/ELKYang/2s-AGCN-paddle/blob/main/weights/ntu_cs_agcn_joint-48-30674.pdparams) | [ntu_cs_agcn_bone](https://github.com/ELKYang/2s-AGCN-paddle/blob/main/weights/ntu_cs_agcn_bone-44-28170.pdparams) | [ntu_cv_agcn_joint](https://github.com/ELKYang/2s-AGCN-paddle/blob/main/weights/ntu_cv_agcn_joint-38-22932.pdparams) | [ntu_cv_agcn_bone](https://github.com/ELKYang/2s-AGCN-paddle/blob/main/weights/ntu_cv_agcn_bone-49-29400.pdparams) |",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/agcn2s.md:73-79"
+    },
+    "4391": {
+        "file_id": 375,
+        "content": "Code snippet contains download links for different checkpoints of the AGCN-2s model trained on various datasets:\n1. ntu_cs_agcn_joint\n2. ntu_cs_agcn_bone\n3. ntu_cv_agcn_joint\n4. ntu_cv_agcn_bone",
+        "type": "comment"
+    },
+    "4392": {
+        "file_id": 375,
+        "content": "## Inference\n### export inference model\n```bash\npython3.7 tools/export_model.py -c configs/recognition/agcn2s/2sagcn_ntucs_joint.yaml \\\n                                -p data/AGCN2s_ntucs_joint.pdparams \\\n                                -o inference/AGCN2s_ntucs_joint\n```\nTo get model architecture file `AGCN2s_ntucs_joint.pdmodel` and parameters file `AGCN2s_ntucs_joint.pdiparams`.\n- Args usage please refer to [Model Inference](https://github.com/PaddlePaddle/PaddleVideo/blob/release/2.0/docs/zh-CN/start.md#2-%E6%A8%A1%E5%9E%8B%E6%8E%A8%E7%90%86).\n### infer\n```bash\npython3.7 tools/predict.py --input_file data/example_NTU-RGB-D_sketeton.npy \\\n                           --config configs/recognition/agcn2s/2sagcn_ntucs_joint.yaml \\\n                           --model_file inference/AGCN2s_ntucs_joint/AGCN2s_ntucs_joint.pdmodel \\\n                           --params_file inference/AGCN2s_ntucs_joint/AGCN2s_ntucs_joint.pdiparams \\\n                           --use_gpu=True \\\n                           --use_tensorrt=False",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/agcn2s.md:81-103"
+    },
+    "4393": {
+        "file_id": 375,
+        "content": "This code is exporting and inferring a model for action recognition using PaddleVideo's AGCN2s. It uses the `export_model.py` script to generate an inference model archive, which includes the model architecture file (AGCN2s_ntucs_joint.pdmodel) and parameters file (AGCN2s_ntucs_joint.pdiparams). The `predict.py` script is then used to perform inference on input data with the specified configuration and model files, using GPU if available and disabling TensorRT.",
+        "type": "comment"
+    },
+    "4394": {
+        "file_id": 375,
+        "content": "```\n### infer result\n![预测引擎推理结果图](../../../images/agcn2s_result.png)\n## Reference\n- [Two-Stream Adaptive Graph Convolutional Networks for Skeleton-Based Action Recognition](https://openaccess.thecvf.com/content_CVPR_2019/papers/Shi_Two-Stream_Adaptive_Graph_Convolutional_Networks_for_Skeleton-Based_Action_Recognition_CVPR_2019_paper.pdf), Lei Shi and Yifan Zhang and Jian Cheng and Hanqing Lu",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/agcn2s.md:104-112"
+    },
+    "4395": {
+        "file_id": 375,
+        "content": "This code block shows the prediction engine result for the AGCN2S model. It displays an image of the prediction results and references the original paper on Two-Stream Adaptive Graph Convolutional Networks for Skeleton-Based Action Recognition.",
+        "type": "comment"
+    },
+    "4396": {
+        "file_id": 376,
+        "content": "/english_documents/model_zoo/recognition/attention_lstm.md",
+        "type": "filepath"
+    },
+    "4397": {
+        "file_id": 376,
+        "content": "The AttentionLSTM model is presented, using LSTMs and an Attention layer to weigh frame features. The code trains and tests on YouTube-8M with PaddleVideo, exporting the model for classification. It accurately predicts top-1 class 11 with 0.9841 confidence.",
+        "type": "summary"
+    },
+    "4398": {
+        "file_id": 376,
+        "content": "[简体中文](../../../zh-CN/model_zoo/recognition/attention_lstm.md) | English\n# AttentionLSTM\n## content\n- [Introduction](#Introduction)\n- [Data](#Data)\n- [Train](#Train)\n- [Test](#Test)\n- [Inference](#Inference)\n- [Reference](#Reference)\n## Introduction\nRecurrent Neural Networks (RNN) are often used in the processing of sequence data, which can model the sequence information of multiple consecutive frames of video, and are commonly used methods in the field of video classification.\nThis model uses a two-way long and short-term memory network (LSTM) to encode all the frame features of the video in sequence. Unlike the traditional method that directly uses the output of the last moment of LSTM, this model adds an Attention layer, and the hidden state output at each moment has an adaptive weight, and then linearly weights the final feature vector. The reference paper implements a two-layer LSTM structure, while **this model implements a two-way LSTM with Attention**.\nThe Attention layer can refer to the paper [AttentionCluster](https://arxiv.org/abs/1711.09550)",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/attention_lstm.md:1-19"
+    },
+    "4399": {
+        "file_id": 376,
+        "content": "This code introduces the AttentionLSTM model, which utilizes two-way LSTMs to encode all video frame features and adds an Attention layer for adaptive weighting. This improves upon traditional methods by linearly weighing final feature vectors based on hidden state outputs at each moment.",
+        "type": "comment"
+    }
+}

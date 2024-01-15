@@ -1,0 +1,541 @@
+{
+    "0": {
+        "file_id": 0,
+        "content": "/MANIFEST.in",
+        "type": "filepath"
+    },
+    "1": {
+        "file_id": 0,
+        "content": "This code is specifying the files and directories to include in the package distribution for PaddleVideo. It includes important documents like LICENSE and README, utilities scripts like utils.py and ava_predict.py, and key data file Kinetics-400_label_list.txt. Additionally, it uses a recursive-include to incorporate all .py and .txt files within the paddlevideo directory.",
+        "type": "summary"
+    },
+    "2": {
+        "file_id": 0,
+        "content": "include LICENSE\ninclude README.md\ninclude tools/__init__.py\ninclude tools/utils.py\ninclude tools/ava_predict.py\ninclude tools/wheel.py\ninclude data/k400/Kinetics-400_label_list.txt\nrecursive-include paddlevideo/ *.py *.txt",
+        "type": "code",
+        "location": "/MANIFEST.in:1-9"
+    },
+    "3": {
+        "file_id": 0,
+        "content": "This code is specifying the files and directories to include in the package distribution for PaddleVideo. It includes important documents like LICENSE and README, utilities scripts like utils.py and ava_predict.py, and key data file Kinetics-400_label_list.txt. Additionally, it uses a recursive-include to incorporate all .py and .txt files within the paddlevideo directory.",
+        "type": "comment"
+    },
+    "4": {
+        "file_id": 1,
+        "content": "/README.md",
+        "type": "filepath"
+    },
+    "5": {
+        "file_id": 1,
+        "content": "PaddleVideo is a Python library for advanced video processing, featuring industry-specific models and data production to deployment pipeline support. The documentation includes sections on distillation, inference deployment, datasets, application scenarios, and licensing information (Apache 2.0).",
+        "type": "summary"
+    },
+    "6": {
+        "file_id": 1,
+        "content": "[English](README_en.md) | 中文\n# PaddleVideo\n![python version](https://img.shields.io/badge/python-3.7+-orange.svg) ![paddle version](https://img.shields.io/badge/PaddlePaddle-2.3.1-blue)\n## 简介\nPaddleVideo旨在打造一套丰富、领先且实用的Video工具库，旨在帮助开发者更好的进行视频领域的学术研究和产业实践。\n<div align=\"center\">\n  <img src=\"docs/images/home.gif\" width=\"450px\"/><br>\n</div>\n## 近期更新\n- 开源视频标注工具🌟[BILS](./docs/zh-CN/annotation_tools.md)，欢迎下载安装包体验～\n- 发布轻量化行为识别模型**🔥[PP-TSMv2](./docs/zh-CN/model_zoo/recognition/pp-tsm_v2.md)**, Kinetics-400精度75.16%，25fps的10s视频cpu推理时间仅需456ms.各模型性能对比[benchmark](./docs/zh-CN/benchmark.md).\n- 新增[知识蒸馏](./docs/zh-CN/distillation.md)功能.\n- 新增基于transformer的行为识别模型[TokenShift](https://github.com/PaddlePaddle/PaddleVideo/blob/develop/docs/zh-CN/model_zoo/recognition/tokenshift_transformer.md).\n- 新增基于骨骼点的行为识别模型[2s-ACGN](https://github.com/PaddlePaddle/PaddleVideo/blob/develop/docs/zh-CN/model_zoo/recognition/agcn2s.md)、[CTR-GCN](./docs/zh-CN/model_zoo/recognition/ctrgcn.md).\n- 新增单阶段时空动作检测模型[YOWO](./docs/zh-CN/model_zoo/localization/yowo.md).",
+        "type": "code",
+        "location": "/README.md:1-22"
+    },
+    "7": {
+        "file_id": 1,
+        "content": "PaddleVideo is a Python library for advanced video processing, providing extensive and cutting-edge tools to assist researchers and industry professionals in the field of computer vision. The recent updates include an open-source video annotation tool (BILS), a lightweight action recognition model (PP-TSMv2), knowledge distillation functionality, transformer-based models, and single-stage action detection models (YOWO).",
+        "type": "comment"
+    },
+    "8": {
+        "file_id": 1,
+        "content": "👀 🌟  **《产业级视频技术与应用案例》系列课程回放链接**:  https://aistudio.baidu.com/aistudio/course/introduce/6742 🌟\n​\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t  💖 **欢迎大家扫码入群讨论** 💖\n<div align=\"center\">\n  <img src=\"docs/images/user_group.png\" width=250/></div>\n- 添加成功后回复【视频】加入交流群\n## 特性\n支持多种Video相关前沿算法，在此基础上打造产业级特色模型[PP-TSM](docs/zh-CN/model_zoo/recognition/pp-tsm.md)和[PP-TSMv2](docs/zh-CN/model_zoo/recognition/pp-tsm_v2.md)，并打通数据生产、模型训练、压缩、预测部署全流程。\n<div align=\"center\">\n    <img src=\"./docs/images/features.png\" width=\"700\">\n</div>\n## 快速开始\n- 一行命令快速使用: [快速开始](./docs/zh-CN/quick_start.md)\n## 场景应用\nPaddleVideo场景应用覆盖体育、互联网、工业、医疗行业，在PP-TSM的基础能力之上，以案例的形式展示利用场景数据微调、模型优化方法、数据增广等内容，为开发者实际落地提供示范与启发。详情可查看[应用](./applications/)。\n## 文档教程\n- [快速开始](./docs/zh-CN/quick_start.md)\n- [安装说明](./docs/zh-CN/install.md)\n- [训练/测试/推理全流程使用指南](./docs/zh-CN/usage.md)\n- [PP-TSM行为识别🔥](./docs/zh-CN/model_zoo/recognition/pp-tsm.md)\n  - [模型库](./docs/zh-CN/model_zoo/recognition/pp-tsm.md#7)\n  - [模型训练](./docs/zh-CN/model_zoo/recognition/pp-tsm.md#4)\n  - [模型压缩](./deploy/slim/)\n      - [模型量化](./deploy/slim/readme.md)",
+        "type": "code",
+        "location": "/README.md:25-58"
+    },
+    "9": {
+        "file_id": 1,
+        "content": "This code is for PaddleVideo, a series of industry-level video technology and application case courses. It supports various video cutting-edge algorithms, creates industry-specific models PP-TSM and PP-TSMv2, and covers the entire data production, model training, compression, and deployment pipeline. The code provides quick start instructions, scene application examples, and documentation for tutorials on different topics such as recognition, model library, and model compression. It also includes links to join discussion groups and course replay.",
+        "type": "comment"
+    },
+    "10": {
+        "file_id": 1,
+        "content": "      - [知识蒸馏](./docs/zh-CN/distillation.md)\n  - [推理部署](./deploy/)\n      - [基于Python预测引擎推理](./docs/zh-CN/model_zoo/recognition/pp-tsm.md#62)\n      - [基于C++预测引擎推理](./deploy/cpp_infer/readme.md)\n      - [服务端部署](./deploy/python_serving/readme.md)\n      - [Paddle2ONNX模型转化与预测](./deploy/paddle2onnx/readme.md)\n      - [Benchmark](./docs/zh-CN/benchmark.md)\n- [前沿算法与模型](./docs/zh-CN/model_zoo/README.md)🚀\n- [数据集](./docs/zh-CN/dataset/README.md)\n- [场景应用](./applications/README.md)\n- [数据标注](./docs/zh-CN/annotation_tools.md)\n- [赛事支持](./docs/zh-CN/competition.md)\n- [贡献代码](./docs/zh-CN/contribute/README.md)\n## 许可证书\n本项目的发布受[Apache 2.0 license](LICENSE)许可认证。",
+        "type": "code",
+        "location": "/README.md:59-75"
+    },
+    "11": {
+        "file_id": 1,
+        "content": "This code provides a table of contents for the PaddleVideo documentation, including sections on distillation, inference deployment using Python and C++ engines, server-side deployment, converting to ONNX models, state-of-the-art algorithms and models, datasets, application scenarios, data labeling tools, competition support, contributing code, and licensing information (Apache 2.0).",
+        "type": "comment"
+    },
+    "12": {
+        "file_id": 2,
+        "content": "/README_en.md",
+        "type": "filepath"
+    },
+    "13": {
+        "file_id": 2,
+        "content": "PaddleVideo is a deep learning library for video processing, offering pre-trained models, training, compression, inference, and deployment options, along with installation guides, datasets, and annotation tools under the Apache 2.0 license.",
+        "type": "summary"
+    },
+    "14": {
+        "file_id": 2,
+        "content": "[简体中文](README.md) | English\n# PaddleVideo\n![python version](https://img.shields.io/badge/python-3.7+-orange.svg) ![paddle version](https://img.shields.io/badge/PaddlePaddle-2.0-blue)\n## Introduction\nPaddleVideo is a toolset for video tasks prepared for the industry and academia. This repository provides examples and best practice guildelines for exploring deep learning algorithm in the scene of video area.\n<div align=\"center\">\n  <img src=\"docs/images/home.gif\" width=\"450px\"/><br>\n</div>\n## Update:\n- release **🔥[PP-TSMv2](./docs/zh-CN/model_zoo/recognition/pp-tsm.md)**, an lite action recognition model, top1_acc on Kinetics-400 is 74.38%，cpu inference time on 10s video with 25fps is only 433ms. [benchmark](./docs/zh-CN/benchmark.md).\n- add [Knowledge Distilltion](./docs/zh-CN/distillation.md) framework code.\n- add [TokenShift](https://github.com/PaddlePaddle/PaddleVideo/blob/develop/docs/zh-CN/model_zoo/recognition/tokenshift_transformer.md), [2s-ACGN](https://github.com/PaddlePaddle/PaddleVideo/b",
+        "type": "code",
+        "location": "/README_en.md:1-20"
+    },
+    "15": {
+        "file_id": 2,
+        "content": "This code is for PaddleVideo, a toolset for video tasks in industry and academia. It provides examples and best practice guidelines for deep learning algorithms in the video domain. Recent updates include the release of PP-TSMv2 (lite action recognition model), addition of Knowledge Distillation framework code, and TokenShift and 2s-ACGN models. Python version required is 3.7+, and it uses PaddlePaddle version 2.0.",
+        "type": "comment"
+    },
+    "16": {
+        "file_id": 2,
+        "content": "lob/develop/docs/zh-CN/model_zoo/recognition/agcn2s.md) and [CTR-GCN](./docs/zh-CN/model_zoo/recognition/ctrgcn.md) model.\n​ 💖 **Welcome to scan the code and join the group discussion** 💖\n<div align=\"center\">\n  <img src=\"docs/images/user_group.png\" width=250/></div>\n- Scan the QR code below with your Wechat and reply \"video\", you can access to official technical exchange group. Look forward to your participation.\n## Features\nPaddleVideo support a variety of cutting-edge algorithms related to video, and developed industrial featured models/solution [PP-TSM](docs/zh-CN/model_zoo/recognition/pp-tsm.md) and [PP-TSMv2](docs/zh-CN/model_zoo/recognition/pp-tsm.md) on this basis, and get through the whole process of data production, model training, compression, inference and deployment.\n<div align=\"center\">\n    <img src=\"./docs/images/features_en.png\" width=\"700\">\n</div>\n## Quick Start\n- One line of code quick use: [Quick Start](./docs/zh-CN/quick_start.md)\n## Tutorials\n- [Quick Start](./docs/zh-CN/quick_start.md)",
+        "type": "code",
+        "location": "/README_en.md:20-43"
+    },
+    "17": {
+        "file_id": 2,
+        "content": "This code is from the \"PaddleVideo\" project's README file. It introduces PaddleVideo as a platform that supports various cutting-edge video algorithms, developed industrial featured models like PP-TSM and PP-TSMv2, and provides a full process of data production, model training, compression, inference, and deployment. The code also mentions the availability of quick start guides and tutorials to make it easier for users to get started with PaddleVideo.",
+        "type": "comment"
+    },
+    "18": {
+        "file_id": 2,
+        "content": "- [Installation](./docs/zh-CN/install.md)\n- [Usage](./docs/zh-CN/usage.md)\n- [PP-TSM🔥](./docs/zh-CN/model_zoo/recognition/pp-tsm.md)\n  - [Model Zoo](./docs/zh-CN/model_zoo/recognition/pp-tsm.md#7)\n  - [Model training](./docs/zh-CN/model_zoo/recognition/pp-tsm.md#4)\n  - [Model Compression](./deploy/slim/)\n      - [Model Quantization](./deploy/slim/readme.md)\n      - [Knowledge Distillation](./docs/zh-CN/distillation.md)\n  - [Inference and Deployment](./deploy/)\n      - [Python Inference](./docs/zh-CN/model_zoo/recognition/pp-tsm.md#62)\n      - [C++ Inference](./deploy/cpp_infer/readme.md)\n      - [Serving](./deploy/python_serving/readme.md)\n      - [Paddle2ONNX](./deploy/paddle2onnx/readme.md)\n      - [Benchmark](./docs/zh-CN/benchmark.md)\n- [Academic algorithms](./docs/en/model_zoo/README.md)🚀\n- [Datasets](./docs/en/dataset/README.md)\n- [Data Annotation](./applications/BILS)\n- [Contribute](./docs/zh-CN/contribute/README.md)\n## License\nPaddleVideo is released under the [Apache 2.0 license](LICENSE).",
+        "type": "code",
+        "location": "/README_en.md:44-65"
+    },
+    "19": {
+        "file_id": 2,
+        "content": "This code outlines the main components of PaddleVideo, a deep learning library for video processing. It includes installation instructions, usage guidelines, model zoo (pre-trained models), model training, model compression techniques such as quantization and knowledge distillation, inference and deployment options including Python, C++, and serving, academic algorithms, datasets, data annotation tool (BILS), and licensing information under Apache 2.0 license.",
+        "type": "comment"
+    },
+    "20": {
+        "file_id": 3,
+        "content": "/__init__.py",
+        "type": "filepath"
+    },
+    "21": {
+        "file_id": 3,
+        "content": "This code is a Python module with the license and copyright information. It imports a class named PaddleVideo from the tools package, and defines its availability as part of the __all__ list.",
+        "type": "summary"
+    },
+    "22": {
+        "file_id": 3,
+        "content": "# Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n__all__ = ['PaddleVideo']\nfrom .tools import PaddleVideo",
+        "type": "code",
+        "location": "/__init__.py:1-16"
+    },
+    "23": {
+        "file_id": 3,
+        "content": "This code is a Python module with the license and copyright information. It imports a class named PaddleVideo from the tools package, and defines its availability as part of the __all__ list.",
+        "type": "comment"
+    },
+    "24": {
+        "file_id": 4,
+        "content": "/applications/AbnormalActionDetection/README.md",
+        "type": "filepath"
+    },
+    "25": {
+        "file_id": 4,
+        "content": "This PaddleVideo code performs video action detection, using SlowFast+FasterRCNN model for abnormal behavior detection, with data preparation, training, evaluation, inference, and deployment. The code exports, deploys static models, and provides deployment instructions.",
+        "type": "summary"
+    },
+    "26": {
+        "file_id": 4,
+        "content": "# 异常行为识别\n## 内容\n- [模型简介](#模型简介)\n- [数据准备](#数据准备)\n- [模型训练](#模型训练)\n- [模型评估](#模型评估)\n- [模型推理](#模型推理)\n- [模型部署](#模型部署)\n- [参考论文](#参考论文)\n## 模型简介\n该代码库用于异常行为检测, 基于paddle2.2版本开发，结合PaddleVideo中的SlowFast+FasterRCNN模型实现7个异常行为的检测。\n主要框架如下：\n<div align=\"center\">\n  <img src=\"./images/SlowFast_FasterRCNN.png\" width=\"640px\"/><br>\n</div>\nAIStudio项目: [基于时空信息的异常行为检测](https://aistudio.baidu.com/aistudio/projectdetail/3431613)\n## 数据准备\n### Step1 稀疏抽取视频帧\n首先稀疏抽取视频帧用于检测每帧中人的位置：\n```\ncd data/ava/script && bash extract_video_frames.sh abnormal_action_videos abnormal_action_frames 2\n```\n* 第一个参数abnormal_action_videos：被抽帧的视频根目录；\n* 第二个参数abnormal_action_frames：抽取的视频帧存放目录；\n* 第三个参数2：抽帧帧率。\n### Step2 目标检测\n用成熟的可检测人的目标检测模型检测上述步骤抽得的视频帧中的人。如PaddleDetection套件中的基于coco数据集训练得到的[PP-YOLOv2](https://github.com/PaddlePaddle/PaddleDetection/tree/develop/configs/ppyolo)模型。\n### Step3 生成pkl文件\n将上述步骤得到的每个视频帧的检测结果进行转化，得到SlowFast_FasterRCNN模型需要的输入格式。注意我们只需要人的检测结果，其他目标不需要。\nSlowFast_FasterRCNN模型需要的proposals是pkl格式文件，该文件以字典形式存储检测结果，字典的key是视频帧的索引（video_id+frame_id拼接得到），value是一个list，每个元素是检测得到的人的位置信息和置信度。",
+        "type": "code",
+        "location": "/applications/AbnormalActionDetection/README.md:1-40"
+    },
+    "27": {
+        "file_id": 4,
+        "content": "This code is for abnormal behavior detection using the PaddleVideo framework with SlowFast+FasterRCNN model, consisting of 6 steps: data preparation (sparse frame extraction, target detection, generating pkl files), model training, evaluation, inference, and deployment.",
+        "type": "comment"
+    },
+    "28": {
+        "file_id": 4,
+        "content": "```\n{\n    打架,0001:\n        [[0.036    0.098    0.55     0.979    0.995518] # x1,y1,x2,y2,score\n        [0.443    0.04     0.99     0.989    0.977824]]\n}\n```\n### Step4 密集抽取视频帧\n对视频数据进行密集抽帧。\nSlowFast_FasterRCNN输入的视频帧是密集帧，因此需要再次对视频进行抽帧。具体命令如下：\n```\ncd data/ava/script && bash extract_video_frames.sh abnormal_action_videos abnormal_action_frames_30fps 30\n```\n具体参数同步骤1，只不过次数抽帧率为30fps。\n### Step5 准备标签数据\n标签数据以pbtxt文件个数存储，本案例具体如下（注意行为标签id从1开始）：\n```\nitem {\n  name: \"挥棍\"\n  id: 1\n}\nitem {\n  name: \"打架\"\n  id: 2\n}\nitem {\n  name: \"踢东西\"\n  id: 3\n}\nitem {\n  name: \"追逐\"\n  id: 4\n}\nitem {\n  name: \"争吵\"\n  id: 5\n}\nitem {\n  name: \"快速奔跑\"\n  id: 6\n}\nitem {\n  name: \"摔倒\"\n  id: 7\n}\n```\n## 模型训练\n异常行为检测模型基于在AVA数据集上训练得到模型进行迁移学习。具体训练命令如下：\n```\npython main.py --validate -w AVA_SlowFast_FastRcnn_best.pdparams \\\n -c configs/abnoraml_action.yaml\n```\n - w 预训练模型路径\n - c 配置文件路径\n## 模型评估\n```\npython main.py --test \\\n   -w abnormal_action_SlowFast_FastRcnn.pdparams \\\n   -c configs/abnoraml_action.yaml\n```\n## 模型推理\n基于动态图的推理：\n```\npython tools/ava_predict.py \\\n  -c configs/abnoraml_action.yaml \\\n  -w abnormal_action_SlowFast_FastRcnn.pdparams \\",
+        "type": "code",
+        "location": "/applications/AbnormalActionDetection/README.md:42-114"
+    },
+    "29": {
+        "file_id": 4,
+        "content": "Step 4: Extracts video frames at a rate of 30fps for SlowFast_FasterRCNN input.\nStep 5: Stores label data as pbtxt files with action IDs starting from 1.\nModel training using pre-trained AVA model and config file.\nModel evaluation on abnormal action detection.\nModel inference using dynamic graph execution.",
+        "type": "comment"
+    },
+    "30": {
+        "file_id": 4,
+        "content": "  --video_path data/wave_9.mp4 \\\n  --detection_model_name 'faster_rcnn/faster_rcnn_r50_fpn_1x_coco' \\\n  --detection_model_weights 'faster_rcnn_r50_fpn_1x_coco.pdparams'\n```\n- video_path 视频路径\n- detection_model_name 检测模型名称\n- detection_model_weights 检测模型权重路径\n基于静态图模型进行推理：\n导出模型，动态图模型转换为静态图模型：\n```\npython tools/export_model.py \\\n  -c configs/abnoraml_action.yaml \\\n  -o inference_output \\\n  -p abnormal_action_SlowFast_FastRcnn.pdparams\n```\n- o 导出模型存放文件夹\n- p 被导出模型路径\n基于导出的模型做推理：\n```\npython tools/predict.py \\\n    -c configs/abnoraml_action.yaml \\\n    --input_file \"data/wave_9.mp4\" \\\n    --model_file \"inference_output/abnormal_action_SlowFast_FastRcnn.pdmodel\" \\\n    --params_file \"inference_output/abnormal_action_SlowFast_FastRcnn.pdiparams\" \\\n    --use_gpu=True \\\n    --use_tensorrt=False\n```\n## 模型部署\n请参考[Paddle Inference示例](https://paddle-inference.readthedocs.io/en/latest/quick_start/python_demo.html)\n## 参考论文\n- [SlowFast Networks for Video Recognition](https://arxiv.org/pdf/1812.03982.pdf), Christoph Feichtenhofer, Haoqi Fan, Jitendra Malik, Kaiming He",
+        "type": "code",
+        "location": "/applications/AbnormalActionDetection/README.md:115-153"
+    },
+    "31": {
+        "file_id": 4,
+        "content": "This code is for video action detection using PaddleVideo. It exports a static model, converts dynamic to static model, performs inference, and deploys the model. The parameters include video path, detection model name, and weights path. Deployment instructions are provided with a reference to a relevant paper.",
+        "type": "comment"
+    },
+    "32": {
+        "file_id": 5,
+        "content": "/applications/Anti-UAV/README.md",
+        "type": "filepath"
+    },
+    "33": {
+        "file_id": 5,
+        "content": "This code provides instructions to detect UAVs in restricted areas using PaddleDetection, with data preparation and dependency installation steps. Users can customize the configuration file and trained model for specific use cases.",
+        "type": "summary"
+    },
+    "34": {
+        "file_id": 5,
+        "content": "# Paddle-Anti-UAV\nAnti-UAV base on PaddleDetection\n## Background\nUAVs are very popular and we can see them in many public spaces, such as parks and playgrounds. Most people use UAVs for taking photos.\nHowever, many areas like airport forbiden UAVs since they are potentially dangerous. In this case, we need to detect the flying UAVs in\nthese areas.\nIn this repository, we show how to train a detection model using [PaddleDetection](https://github.com/PaddlePaddle/PaddleDetection).\n## Data preparation\nThe dataset can be found [here](https://anti-uav.github.io/dataset/). We direcly download the ```test-dev``` split composed of 140 videos\ntrain the detection model.\n* Download the ```test-dev``` dataset.\n* Run `unzip Anti_UAV_test_dev.zip -d Anti_UAV`.\n* Run `python get_image_label.py`. In this step, you may change the path to the videos and the value of `interval`.\nAfter the above steps, you will get a MSCOCO-style datasst for object detection.\n## Install PaddleDetection\nPlease refer to this [link](https://github.com/PaddlePaddle/PaddleDetection/blob/release/2.3/docs/tutorials/INSTALL.md).",
+        "type": "code",
+        "location": "/applications/Anti-UAV/README.md:1-21"
+    },
+    "35": {
+        "file_id": 5,
+        "content": "This code is for the Paddle-Anti-UAV application that uses PaddleDetection to detect flying UAVs in restricted areas. It provides details on data preparation, where to download and unzip the dataset, and how to install PaddleDetection.",
+        "type": "comment"
+    },
+    "36": {
+        "file_id": 5,
+        "content": "We use `python=3.7`, `Paddle=2.2.1`, `CUDA=10.2`.\n## Train PP-YOLO\nWe use [PP-YOLO](https://github.com/PaddlePaddle/PaddleDetection/tree/release/2.3/configs/ppyolo) as the detector.\n* Run `git clone https://github.com/PaddlePaddle/PaddleDetection.git`. Note that you should finish this step when you install PaddleDetection.\n* Move the anti-UAV dataset to `dataset`.\n* Move `anti_uav.yml` to `configs/datasets`, move `ppyolo_r50vd_dcn_1x_antiuav.yml` to `configs/ppyolo` and move `ppyolo_r50vd_dcn_antiuav.yml`\nto `configs/ppyolo/_base`.\n* Keep the value of `anchors` in `configs/ppyolo/_base/ppyolo_reader.yml` the same as `ppyolo_r50vd_dcn_antiuav.yml`.\n* Run `python -m paddle.distributed.launch --log_dir=./ppyolo_dygraph/ --gpus 0,1,2,3,4,5,6,7 tools/train.py -c configs/ppyolo/ppyolo_r50vd_dcn_1x_antiuav.yml &>ppyolo_dygraph.log 2>&1 &`.\nNote that you may change the arguments, such as `batch_size` and `gups`.\n## Inference\nPlease refer to the infernce section on this [webpage](https://github.com/Paddle",
+        "type": "code",
+        "location": "/applications/Anti-UAV/README.md:23-36"
+    },
+    "37": {
+        "file_id": 5,
+        "content": "The code outlines the process to train and use PP-YOLO for UAV detection using PaddleDetection in a specific environment. It involves cloning a repository, moving dataset files, adjusting configurations, and running training and inference commands with specific arguments.",
+        "type": "comment"
+    },
+    "38": {
+        "file_id": 5,
+        "content": "Paddle/PaddleDetection/blob/release/2.3/docs/tutorials/GETTING_STARTED.md). You can just switch the configeration file and trained model to your own files.\n![](https://github.com/qingzwang/Paddle-Anti-UAV/blob/main/demo1.gif)\n![](https://github.com/qingzwang/Paddle-Anti-UAV/blob/main/demo.gif)",
+        "type": "code",
+        "location": "/applications/Anti-UAV/README.md:36-39"
+    },
+    "39": {
+        "file_id": 5,
+        "content": "The code snippet is referring to the README file of an anti-UAV application based on PaddleVideo. It demonstrates two GIFs showing the demo in action and mentions that users can customize the configuration file and trained model for their own use cases.",
+        "type": "comment"
+    },
+    "40": {
+        "file_id": 6,
+        "content": "/applications/Anti-UAV/get_image_label.py",
+        "type": "filepath"
+    },
+    "41": {
+        "file_id": 6,
+        "content": "The code initializes paths, defines train_info and val_info dictionaries, sets interval variables, processes video frames, draws rectangles around objects based on labels, saves images with label information, and writes data to train.json and val.json files after processing all data from given folders.",
+        "type": "summary"
+    },
+    "42": {
+        "file_id": 6,
+        "content": "import cv2\nimport os\nimport json\n# please change it to your path\npath = '/workspace/wangqingzhong/Anti_UAV'\nannotation_path = 'annotations'\ntrain_img_path = 'train_imgs'\nval_img_path = 'val_imgs'\nif not os.path.exists(annotation_path):\n    os.makedirs(annotation_path)\nif not os.path.exists(train_img_path):\n    os.makedirs(train_img_path)\nif not os.path.exists(val_img_path):\n    os.makedirs(val_img_path)\ntrain_info = {\n    'images': [],\n    'type':\n    'instances',\n    'annotations': [],\n    'categories': [{\n        \"supercategory\": \"none\",\n        \"id\": 1,\n        \"name\": \"drone\"\n    }, {\n        \"supercategory\": \"none\",\n        \"id\": 2,\n        \"name\": \"noise\"\n    }]\n}\nval_info = {\n    'images': [],\n    'type':\n    'instances',\n    'annotations': [],\n    'categories': [{\n        \"supercategory\": \"none\",\n        \"id\": 1,\n        \"name\": \"drone\"\n    }, {\n        \"supercategory\": \"none\",\n        \"id\": 2,\n        \"name\": \"noise\"\n    }]\n}\n# you can change it\ninterval = 5\ndirs = os.listdir(path)\ntrain_img_id = 0\nval_img_id = 0\nfor d in dirs:",
+        "type": "code",
+        "location": "/applications/Anti-UAV/get_image_label.py:1-53"
+    },
+    "43": {
+        "file_id": 6,
+        "content": "The code initializes necessary paths and directories for annotation, training, and validation image paths. It creates the required directories if they do not exist. The code defines train_info and val_info as dictionaries containing information about images, annotations, and categories. It sets the interval variable for file processing and then iterates through each directory in the given path.",
+        "type": "comment"
+    },
+    "44": {
+        "file_id": 6,
+        "content": "    if 'new' in d:\n        video_file = os.path.join(path, d, 'IR.mp4')\n        label_file = os.path.join(path, d, 'IR_label.json')\n        labels = json.load(open(label_file, 'r'))\n        exits = labels['exist']\n        gt_bbox = labels['gt_rect']\n        assert len(exits) == len(gt_bbox)\n        videocap = cv2.VideoCapture(video_file)\n        i = 0\n        while True:\n            success, frame = videocap.read()\n            if success:\n                if i % interval == 0:\n                    img_name = d + '_' + str(i) + '.jpg'\n                    cv2.imwrite(os.path.join(val_img_path, img_name), frame)\n                    height, width, depth = frame.shape\n                    x, y, w, h = gt_bbox[i]\n                    isexist = exits[i]\n                    if isexist:\n                        category_id = 1\n                    else:\n                        category_id = 2\n                    draw_frame = cv2.rectangle(frame, (x, y), (x + w, y + h),\n                                               (0, 255, 0), 2)",
+        "type": "code",
+        "location": "/applications/Anti-UAV/get_image_label.py:54-77"
+    },
+    "45": {
+        "file_id": 6,
+        "content": "This code reads an image file and its label from a specified path. It then processes each frame of the video, drawing a rectangle around the object in the frame based on the provided labels. If the object exists, category_id is set to 1; otherwise, it's set to 2. Each processed frame is saved as an image file with its corresponding label information.",
+        "type": "comment"
+    },
+    "46": {
+        "file_id": 6,
+        "content": "                    img_name_draw = d + '_' + str(i) + 'draw.jpg'\n                    cv2.imwrite(os.path.join(val_img_path, img_name_draw),\n                                draw_frame)\n                    img_info = {\n                        'file_name': img_name,\n                        'height': float(height),\n                        'width': float(width),\n                        'id': val_img_id\n                    }\n                    ann_info = {\n                        'area': float(w) * float(h),\n                        'iscrowd': 0,\n                        'bbox': [float(x),\n                                 float(y),\n                                 float(w),\n                                 float(h)],\n                        'category_id': category_id,\n                        'ignore': 0,\n                        'image_id': val_img_id,\n                        'id': val_img_id + 1\n                    }\n                    val_info['images'].append(img_info)\n                    val_info['annotations'].append(ann_info)",
+        "type": "code",
+        "location": "/applications/Anti-UAV/get_image_label.py:78-101"
+    },
+    "47": {
+        "file_id": 6,
+        "content": "This code writes an image, creates image information (file name, height, width, and id), and annotation information (area, iscrowd, bbox coordinates, category_id, ignore, image_id, and id). It then appends the image and annotation information to the existing val_info data structure.",
+        "type": "comment"
+    },
+    "48": {
+        "file_id": 6,
+        "content": "                    val_img_id += 1\n                i += 1\n            else:\n                print('finish {}'.format(d))\n                break\n    else:\n        video_file = os.path.join(path, d, 'IR.mp4')\n        label_file = os.path.join(path, d, 'IR_label.json')\n        labels = json.load(open(label_file, 'r'))\n        exits = labels['exist']\n        gt_bbox = labels['gt_rect']\n        assert len(exits) == len(gt_bbox)\n        videocap = cv2.VideoCapture(video_file)\n        i = 0\n        while True:\n            success, frame = videocap.read()\n            if success:\n                if i % interval == 0:\n                    img_name = d + '_' + str(i) + '.jpg'\n                    cv2.imwrite(os.path.join(train_img_path, img_name), frame)\n                    height, width, depth = frame.shape\n                    x, y, w, h = gt_bbox[i]\n                    isexist = exits[i]\n                    if isexist:\n                        category_id = 1\n                    else:\n                        category_id = 2",
+        "type": "code",
+        "location": "/applications/Anti-UAV/get_image_label.py:102-128"
+    },
+    "49": {
+        "file_id": 6,
+        "content": "Code reads a video and its corresponding label file, then extracts frames based on labels and saves them. If the object exists in the frame, it is labeled as category_id 1, otherwise as category_id 2. The process continues until all frames have been processed or a \"finish\" message is encountered.",
+        "type": "comment"
+    },
+    "50": {
+        "file_id": 6,
+        "content": "                    draw_frame = cv2.rectangle(frame, (x, y), (x + w, y + h),\n                                               (0, 255, 0), 2)\n                    img_name_draw = d + '_' + str(i) + 'draw.jpg'\n                    cv2.imwrite(os.path.join(train_img_path, img_name_draw),\n                                draw_frame)\n                    img_info = {\n                        'file_name': img_name,\n                        'height': height,\n                        'width': width,\n                        'id': train_img_id\n                    }\n                    ann_info = {\n                        'area': float(w) * float(h),\n                        'iscrowd': 0,\n                        'bbox': [float(x),\n                                 float(y),\n                                 float(w),\n                                 float(h)],\n                        'category_id': category_id,\n                        'ignore': 0,\n                        'image_id': train_img_id,\n                        'id': train_img_id + 1",
+        "type": "code",
+        "location": "/applications/Anti-UAV/get_image_label.py:129-151"
+    },
+    "51": {
+        "file_id": 6,
+        "content": "This code draws a rectangle around the detected object in an image, saves the image with the drawn rectangle, and creates two dictionaries (image and annotation information) to be used for training purposes.",
+        "type": "comment"
+    },
+    "52": {
+        "file_id": 6,
+        "content": "                    }\n                    train_info['images'].append(img_info)\n                    train_info['annotations'].append(ann_info)\n                    train_img_id += 1\n                i += 1\n            else:\n                print('finish {}'.format(d))\n                break\nwith open('annotations/train.json', 'w') as f:\n    json.dump(train_info, f)\nwith open('annotations/val.json', 'w') as f:\n    json.dump(val_info, f)",
+        "type": "code",
+        "location": "/applications/Anti-UAV/get_image_label.py:152-164"
+    },
+    "53": {
+        "file_id": 6,
+        "content": "Code writes image and annotation information to train.json and val.json files after processing all data from given folders, ending the loop when done.",
+        "type": "comment"
+    },
+    "54": {
+        "file_id": 7,
+        "content": "/applications/BasketballAction/README.md",
+        "type": "filepath"
+    },
+    "55": {
+        "file_id": 7,
+        "content": "PaddleVideo's BasketballAction app uses PaddlePaddle 2.0 and models for basketball action detection, achieving an F1-score of 80.14%. Developed by authors including hari and Joonseok Lee, it optimizes based on speed, time distribution, and feature fusion methods.",
+        "type": "summary"
+    },
+    "56": {
+        "file_id": 7,
+        "content": "# 篮球动作检测模型\n## 内容\n- [模型简介](#模型简介)\n- [数据准备](#数据准备)\n- [模型训练](#模型训练)\n- [模型评估](#模型评估)\n- [模型推理](#模型推理)\n- [模型优化](#模型优化)\n- [模型部署](#模型部署)\n- [参考论文](#参考论文)\n## 模型简介\n该代码库用于篮球动作检测+识别, 基于paddle2.0版本开发，结合PaddleVideo中的ppTSM, BMN, attentionLSTM的多个视频模型进行视频时空二阶段检测算法。\n主要分为如下几步\n - 特征抽取\n    - 图像特性，ppTSM\n    - 音频特征，Vggsound\n - proposal提取，BMN\n - LSTM，动作分类 + 回归\n## 数据准备\n数据集处理代码\n```\n参考https://github.com/PaddlePaddle/PaddleVideo/tree/application/FootballAction/datasets\n```\n- 数据集label格式\n```\n{\n    \"0\": \"背景\",\n    \"1\": \"回放\",\n    \"2\": \"进球-三分球\",\n    \"3\": \"进球-两分球\",\n    \"4\": \"进球-扣篮\",\n    \"5\": \"罚球\",\n    \"6\": \"跳球\"\n}\n```\n- 数据集gts处理, 将原始标注数据处理成如下json格式\n```\n{\n    'fps': 5,\n    'gts': [\n        {\n            'url': 'xxx.mp4',\n            'total_frames': 6341,\n            'actions': [\n                {\n                    \"label_ids\": [6],\n                    \"label_names\": [\"跳球\"],\n                    \"start_id\": 395,\n                    \"end_id\": 399\n                },\n                ...\n            ]\n        },\n        ...\n    ]\n}\n```\n- 数据集抽帧, 由mp4, 得到frames和pcm, 这里需要添加ffmpeg环境\n```\ncd datasets/script && python get_frames_pcm.py",
+        "type": "code",
+        "location": "/applications/BasketballAction/README.md:1-69"
+    },
+    "57": {
+        "file_id": 7,
+        "content": "This code is for basketball action detection, using PaddlePaddle 2.0 and incorporating various video models from PaddleVideo (ppTSM, BMN, attentionLSTM). The process includes image feature extraction with ppTSM, proposal extraction with BMN, and LSTM-based action classification and regression. Dataset preparation involves data handling, label format specification, gts processing to JSON format, and abstracting frames from mp4 files using ffmpeg.",
+        "type": "comment"
+    },
+    "58": {
+        "file_id": 7,
+        "content": "```\n- 数据预处理后保存格式如下\n```\n   |--  datasets                   # 训练数据集和处理脚本\n        |--  basketball            # xx数据集\n            |--  mp4               # 原始视频.mp4\n            |--  frames            # 图像帧, fps=5, '.jpg'格式\n            |--  pcm               # 音频pcm, 音频采样率16000，采用通道数1\n            |--  url.list          # 视频列表\n            |--  label_train.json  # 训练集原始gts\n            |--  label_val.json    # 验证集原始gts\n```\n## 模型训练\n代码参考足球动作检测：https://github.com/PaddlePaddle/PaddleVideo/tree/application/FootballAction\n将该代码库的文件夹 [datasets](https://github.com/PaddlePaddle/PaddleVideo/tree/application/FootballAction/datasets)，[extractor](https://github.com/PaddlePaddle/PaddleVideo/tree/application/FootballAction/extractor)，[train_lstm](https://github.com/PaddlePaddle/PaddleVideo/tree/application/FootballAction/train_lstm)， 拷贝到本代码库复用。\n - image 采样频率fps=5，如果有些动作时间较短，可以适当提高采样频率\n - BMN windows=200，即40s，所以测试自己的数据时，视频时长需大于40s\n### 基础镜像\n```\ndocker pull tmtalgo/paddleaction:action-detection-v2\n```\n### step1 ppTSM训练\n我们提供了篮球数据训练的模型，参考checkpoints_basketball。如果使用提供的pptsm模型，可直接跳过下边的pptsm训练数据处理和训练步骤。",
+        "type": "code",
+        "location": "/applications/BasketballAction/README.md:70-99"
+    },
+    "59": {
+        "file_id": 7,
+        "content": "This code describes the storage location and structure of a basketball action dataset, including video files (mp4), image frames, audio files (pcm), and JSON files containing ground truth data. It also references the PaddleVideo footbal",
+        "type": "comment"
+    },
+    "60": {
+        "file_id": 7,
+        "content": "如果需要在自己的数据上训练，ppTSM训练代码为：https://github.com/PaddlePaddle/PaddleVideo/tree/release/2.0\nppTSM文档参考：https://github.com/PaddlePaddle/PaddleVideo/blob/develop/docs/zh-CN/model_zoo/recognition/pp-tsm.md\n#### step1.1  ppTSM 训练数据处理\n由frames结合gts生成训练所需要的正负样本\n```\ncd ${BasketballAction}\ncd datasets/script && python get_instance_for_tsn.py\n# 文件名按照如下格式\n'{}_{}_{}_{}'.format(video_basename, start_id, end_id, label)\n```\n完成该步骤后，数据存储位置\n```\n   |--  datasets                   # 训练数据集和处理脚本\n        |--  basketball           # xx数据集\n            |--  input_for_tsn     # tsn/tsm训练的数据\n```\n#### step1.2 ppTSM模型训练\n```\n# https://github.com/PaddlePaddle/PaddleVideo/tree/release/2.0\ncd ${PaddleVideo}\n# 修改config.yaml参数修改为 ${BasketballAcation}/configs_train/pptsm_basketball.yaml\npython -B -m paddle.distributed.launch \\\n    --gpus=\"0,1,2,3\" \\\n    --log_dir=$save_dir/logs \\\n    main.py  \\\n    --validate \\\n    -c {BasketballAcation}/configs_train/pptsm_basketball.yaml \\\n    -o output_dir=$save_dir\n```\n#### step1.3 ppTSM模型转为预测模式\n```\n# https://github.com/PaddlePaddle/PaddleVideo/tree/release/2.0",
+        "type": "code",
+        "location": "/applications/BasketballAction/README.md:100-135"
+    },
+    "61": {
+        "file_id": 7,
+        "content": "Step 1.1: Prepare ppTSM training data by combining frames and gts to generate positive and negative samples, following the format '{}_{}_{}_{}'.format(video_basename, start_id, end_id, label).\n\nStep 1.2: Train ppTSM model using the prepared dataset by modifying config.yaml parameters and running main.py with distributed launch script.\n\nStep 1.3: Convert trained ppTSM model to prediction mode for inference.",
+        "type": "comment"
+    },
+    "62": {
+        "file_id": 7,
+        "content": "$cd {PaddleVideo}\npython tools/export_model.py -c ${BasketballAcation}/configs_train/pptsm_basketball.yaml \\\n                               -p ${pptsm_train_dir}/checkpoints/models_pptsm/ppTSM_epoch_00057.pdparams \\\n                               -o {BasketballAcation}/checkpoints/ppTSM\n```\n####  step1.4 基于ppTSM视频特征提取\nimage and audio特征提取，保存到datasets features文件夹下\n```\ncd ${BasketballAcation}\ncd extractor && python extract_feat.py\n# 特征维度, image(2048) + audio(1024) + pcm(640)\n# 特征保存格式如下，将如下dict保存在pkl格式，用于接下来的BMN训练\nvideo_features = {'image_feature': np_image_features,\n                  'audio_feature': np_audio_features\n                  'pcm_feature': np_pcm_features}\n```\n完成该步骤后，数据存储位置\n```\n   |--  datasets                   # 训练数据集和处理脚本\n        |--  basketball            # xx数据集\n            |--  features          # 视频的图像+音频特征\n```\n### step2 BMN训练\nBMN训练代码为：https://github.com/PaddlePaddle/PaddleVideo/tree/release/2.0\nBMN文档参考：https://github.com/PaddlePaddle/PaddleVideo/blob/develop/docs/zh-CN/model_zoo/localization/bmn.md",
+        "type": "code",
+        "location": "/applications/BasketballAction/README.md:136-163"
+    },
+    "63": {
+        "file_id": 7,
+        "content": "The provided code is related to a PaddleVideo application called BasketballAction. It performs two steps - extracting features from images and audio, and training a BMN model. The extracted features are stored in the datasets/basketball/features directory. The BMN training code can be found at this GitHub link, and more information about BMN can be found in this documentation.",
+        "type": "comment"
+    },
+    "64": {
+        "file_id": 7,
+        "content": "#### step2.1 BMN训练数据处理\n用于提取二分类的proposal，windows=40，根据gts和特征得到BMN训练所需要的数据集\n```\ncd ${BasketballAcation}\ncd datasets/script && python get_instance_for_bmn.py\n# 数据格式\n{\n    \"719b0a4bcb1f461eabb152298406b861_753_793\": {\n        \"duration_second\": 40.0,\n        \"duration_frame\": 200,\n        \"feature_frame\": 200,\n        \"subset\": \"train\",\n        \"annotations\": [\n            {\n                \"segment\": [\n                    15.0,\n                    22.0\n                ],\n                \"label\": \"6.0\",\n                \"label_name\": \"跳球\"\n            }\n        ]\n    },\n    ...\n}\n```\n完成该步骤后，数据存储位置\n```\n   |--  datasets                   # 训练数据集和处理脚本\n        |--  basketball            # xx数据集\n            |--  input_for_bmn     # bmn训练的proposal         \n```\n#### step2.2  BMN模型训练\n```\n# https://github.com/PaddlePaddle/PaddleVideo/tree/release/2.0\ncd ${PaddleVideo}\n# 修改config.yaml参数修为${BasketballAcation}/configs_train/bmn_basketball.yaml\npython -B -m paddle.distributed.launch \\\n     --gpus=\"0,1\" \\\n     --log_dir=$out_dir/logs \\\n     main.py  \\",
+        "type": "code",
+        "location": "/applications/BasketballAction/README.md:165-206"
+    },
+    "65": {
+        "file_id": 7,
+        "content": "Step 2.1 involves processing the Basketball Action dataset to generate binary proposals for BMN training, with a window size of 40. This is done using the get_instance_for_bmn.py script in the datasets/script directory. The resulting data format consists of instance identifiers, duration and feature frame numbers, subset information (train or test), and annotations containing segment locations and labels. Step 2.2 involves training the BMN model, requiring modification of the config.yaml file with Basketball Action-specific parameters and launching the main.py script using PaddlePaddle's distributed training functionality.",
+        "type": "comment"
+    },
+    "66": {
+        "file_id": 7,
+        "content": "     --validate \\\n     -c ${BasketballAcation}/configs_train/bmn_basketball.yaml \\\n     -o output_dir=$out_dir\n```\n#### step2.3 BMN模型转为预测模式\n```\n# https://github.com/PaddlePaddle/PaddleVideo/tree/release/2.0\n${PaddleVideo}\npython tools/export_model.py -c $${BasketballAcation}/configs_train/bmn_basketball.yaml \\\n                               -p ${bmn_train_dir}/checkpoints/models_bmn/bmn_epoch16.pdparams \\\n                               -o {BasketballAcation}/checkpoints/BMN\n```\n#### step2.4  BMN模型预测\n得到动作proposal信息： start_id, end_id, score\n```\ncd ${BasketballAcation}\ncd extractor && python extract_bmn.py\n# 数据格式\n[\n    {\n        \"video_name\": \"c9516c903de3416c97dae91a59e968d7\",\n        \"num_proposal\": 5534,\n        \"bmn_results\": [\n            {\n                \"start\": 7850.0,\n                \"end\": 7873.0,\n                \"score\": 0.77194699622342\n            },\n            {\n                \"start\": 4400.0,\n                \"end\": 4443.0,\n                \"score\": 0.7663803287641536\n            },\n            ...\n        ]",
+        "type": "code",
+        "location": "/applications/BasketballAction/README.md:207-243"
+    },
+    "67": {
+        "file_id": 7,
+        "content": "The code is used in the BasketballAction application of the PaddleVideo library. It converts the BMN model to prediction mode (step2.3), exports it, and then performs BMN-based predictions (step2.4) for obtaining action proposal information like start, end, and score. This helps identify basketball actions from given videos.",
+        "type": "comment"
+    },
+    "68": {
+        "file_id": 7,
+        "content": "    },\n    ...\n]\n```\n完成该步骤后，数据存储位置\n```\n   |--  datasets                   # 训练数据集和处理脚本\n        |--  basketball            # xx数据集\n            |--  feature_bmn\n                 |--  prop.json    # bmn 预测结果\n```\n### step3 LSTM训练\nLSTM训练代码为：train_lstm\n#### step3.1  LSTM训练数据处理\n将BMN得到的proposal截断并处理成LSTM训练所需数据集\n```\ncd ${BasketballAcation}\ncd datasets/script && python get_instance_for_lstm.py\n# 数据格式1，label_info\n{\n    \"fps\": 5,\n    \"results\": [\n        {\n            \"url\": \"https://xxx.mp4\",\n            \"mode\": \"train\",        # train or validation\n            \"total_frames\": 6128,\n            \"num_gts\": 93,\n            \"num_proposals\": 5043,\n            \"proposal_actions\": [\n                {\n                    \"label\": 6,\n                    \"norm_iou\": 0.7575757575757576,\n                    \"norm_ioa\": 0.7575757575757576,\n                    \"norm_start\": -0.32,\n                    \"proposal\": {\n                        \"start\": 5011,\n                        \"end\": 5036,\n                        \"score\": 0.7723643666324231\n                    },",
+        "type": "code",
+        "location": "/applications/BasketballAction/README.md:244-284"
+    },
+    "69": {
+        "file_id": 7,
+        "content": "This code represents a JSON object containing information about a dataset for LSTM training. It includes the frame rate (fps), whether it's for training or validation, the total number of frames, the number of ground truth (gt) instances, and the number of proposals. The proposals contain details like label, normalized IOU, start time, end time, and score. This data is used to train a LSTM model in BasketballAction application.",
+        "type": "comment"
+    },
+    "70": {
+        "file_id": 7,
+        "content": "                    \"hit_gts\": {\n                        \"label_ids\": [\n                            6\n                        ],\n                        \"label_names\": [\n                            \"跳球\"\n                        ],\n                        \"start_id\": 5003,\n                        \"end_id\": 5036\n                    }\n                },\n                ...\n        },\n        ...\n}\n# 数据格式2，LSTM训练所需要的feature\n{\n    'features': np.array(feature_hit, dtype=np.float32),    # TSM audio and pcm 特征, 可根据需求选择组合\n    'feature_fps': 5,                                       # fps = 5\n    'label_info': {'norm_iou': 0.5, 'label': 3, ...},       # 数据格式1中的'proposal_actions'\n    'video_name': 'c9516c903de3416c97dae91a59e968d7'        # video_name\n}\n# 数据格式3，LSTM训练所需label.txt\n'{} {}'.format(filename, label)\n```\n完成该步骤后，数据存储位置\n```\n   |--  datasets                   # 训练数据集和处理脚本\n        |--  basketball            # xx数据集\n            |--  input_for_lstm    # LSTM训练数据集\n```\n#### step3.2  LSTM训练\n```\n#conf.yaml修改为 ${BasketballAcation}/configs_train/lstm_basketball.yaml",
+        "type": "code",
+        "location": "/applications/BasketballAction/README.md:285-319"
+    },
+    "71": {
+        "file_id": 7,
+        "content": "This code is from the PaddleVideo library's BasketballAction application and provides information on data formats for LSTM training. The first format contains label information, start and end IDs in a JSON object. The second format includes features like audio, pcm, fps, and label info in a NumPy array. The third format is the label.txt file for LSTM training. After completing these steps, the trained data will be stored in the \"input_for_lstm\" folder within the BasketballAction dataset folder.",
+        "type": "comment"
+    },
+    "72": {
+        "file_id": 7,
+        "content": "cd ${BasketballAcation}\npython -u scenario_lib/train.py \\\n    --model_name=ActionNet \\\n    --config=${BasketballAcation}/configs_train/lstm_basketball.yaml \\\n    --save_dir=${out_dir}\"/models_lstm/\" \\\n    --log_interval=5 \\\n    --valid_interval=1\n```\n#### step3.3 LSTM模型转为预测模式\n```\n${BasketballAcation}\npython tools/export_model.py -c ${BasketballAction}/train_lstm/conf/conf.yaml \\\n                               -p ${lstm_train_dir}/checkpoints/models_lstm/bmn_epoch29.pdparams \\\n                               -o {BasketballAcation}/checkpoints/LSTM\n```\n## 模型推理\n测试数据格式，可参考使用样例\n```\nwget https://videotag.bj.bcebos.com/Applications/basketball/datasets.tar.gz\n```\n测试模型，可使用我们提供的模型\n```\nwget https://videotag.bj.bcebos.com/Applications/basketball/checkpoints_basketball.tar.gz\n```\n运行预测代码\n```\ncd ${BasketballAction}\ncd predict\n# 如果使用自己训练的模型，请将各训练过程中转换的inference模型放到predict库\n# cp -rf ../checkpoints checkpoints_basketball\npython predict.py\n```\n产出文件\n```\n${BasketballAction}/predict/results.json\n```\n## 模型评估\n```\ncd ${BasketballAction}\ncd predict\npython eval.py results.json",
+        "type": "code",
+        "location": "/applications/BasketballAction/README.md:320-365"
+    },
+    "73": {
+        "file_id": 7,
+        "content": "The code is converting the trained LSTM model to prediction mode, running model inference on testing data, and evaluating the results. This process involves using pre-prepared datasets and models from provided URLs for easy execution of prediction and evaluation.",
+        "type": "comment"
+    },
+    "74": {
+        "file_id": 7,
+        "content": "```\n## 模型优化\n在实际使用场景中可根据视频内容尝试优化策略\n- 可根据动作运动速度，调整抽帧采样率，本代码默认为fps=5\n- 统计动作的时间分布，调整bmn采样窗口\n- 根据图像和音频的关联程度，调整图像和音频特征的融合方式：本代码将图像特征和音频在时间维度对齐，融合后再进入模型训练。也可尝试分别模型训练后，加权融合等\n- 本代码的解决方案也可用于其他动作检测。变换场景后，图像特征重新训练效果更好。音频特征采用的VGGSound训练，如果使用场景仍为生活场景，可直接复用。\n## 模型部署\n本代码解决方案在动作的检测和召回指标F1-score=80.14%\n<div align=\"center\">\n  <img src=\"images/BasketballAction_demo.gif\" width=\"640px\"/><br>\n</div>\n## 参考论文\n- [TSM: Temporal Shift Module for Efficient Video Understanding](https://arxiv.org/pdf/1811.08383.pdf), Ji Lin, Chuang Gan, Song Han\n- [BMN: Boundary-Matching Network for Temporal Action Proposal Generation](https://arxiv.org/abs/1907.09702), Tianwei Lin, Xiao Liu, Xin Li, Errui Ding, Shilei Wen.\n- [Attention Clusters: Purely Attention Based Local Feature Integration for Video Classification](https://arxiv.org/abs/1711.09550), Xiang Long, Chuang Gan, Gerard de Melo, Jiajun Wu, Xiao Liu, Shilei Wen\n- [YouTube-8M: A Large-Scale Video Classification Benchmark](https://arxiv.org/abs/1609.08675), Sami Abu-El-Haija, Nisarg Kot",
+        "type": "code",
+        "location": "/applications/BasketballAction/README.md:366-389"
+    },
+    "75": {
+        "file_id": 7,
+        "content": "This code uses the TSM and BMN models for efficient video understanding, allowing for action detection with a F1-score of 80.14%. The code can optimize based on motion speed, time distribution, and feature fusion methods, and is applicable to other action detection scenarios.",
+        "type": "comment"
+    },
+    "76": {
+        "file_id": 7,
+        "content": "hari, Joonseok Lee, Paul Natsev, George Toderici, Balakrishnan Varadarajan, Sudheendra Vijayanarasimhan",
+        "type": "code",
+        "location": "/applications/BasketballAction/README.md:389-389"
+    },
+    "77": {
+        "file_id": 7,
+        "content": "Code represents authors of a paper or contributors to the project, including hari, Joonseok Lee, Paul Natsev, George Toderici, Balakrishnan Varadarajan, and Sudheendra Vijayanarasimhan.",
+        "type": "comment"
+    },
+    "78": {
+        "file_id": 8,
+        "content": "/applications/BasketballAction/predict/action_detect/action.py",
+        "type": "filepath"
+    },
+    "79": {
+        "file_id": 8,
+        "content": "The Python code initializes a ModelPredict class for basketball action detection using image, audio, and property features. It infers actions by extracting features and utilizing prepared models for classification before saving the output in 'results.json'.",
+        "type": "summary"
+    },
+    "80": {
+        "file_id": 8,
+        "content": "#!./python27-gcc482/bin/python\n# coding: utf-8\n\"\"\"\nBAIDU CLOUD action\n\"\"\"\nimport os\nimport sys\nimport pickle\nimport json\nimport time\nimport functools\nimport numpy as np\nfrom utils.preprocess import get_images\nfrom utils.config_utils import parse_config, print_configs\nimport mfcc.feature_extractor as mfcc_extractor\nimport models.pptsm_infer as image_model\nimport models.audio_infer as audio_model\nimport models.bmn_infer as prop_model\nimport models.lstm_infer as classify_model\nimport logger\nlogger = logger.Logger()\ndef record_time_info(func):\n    \"\"\"decorator func to log cost time for func\n    \"\"\"\n    @functools.wraps(func)\n    def timer(*args):\n        \"\"\"log cost time for func\n        \"\"\"\n        logger.info(\"function [{}] processing ...\".format(func.__name__))\n        start_time = time.time()\n        retval = func(*args)\n        cost_time = round(time.time() - start_time, 5)\n        logger.info(\"function [{}] run time: {:.2f} min\".format(func.__name__, cost_time / 60))\n        return retval\n    return timer\nclass ActionDetection(object):",
+        "type": "code",
+        "location": "/applications/BasketballAction/predict/action_detect/action.py:1-44"
+    },
+    "81": {
+        "file_id": 8,
+        "content": "The code is a Python file containing a class for performing basketball action detection using a combination of image, audio, and property features. It uses various models for feature extraction and classification. The `record_time_info` function is a decorator to log the processing time of different functions.",
+        "type": "comment"
+    },
+    "82": {
+        "file_id": 8,
+        "content": "    \"\"\"ModelPredict\"\"\"\n    def __init__(self, cfg_file=\"configs/configs.yaml\"):\n        cfg = parse_config(cfg_file)\n        self.configs = cfg\n        print_configs(self.configs, \"Infer\")\n        name = 'COMMON'\n        self.DEBUG          = cfg[name]['DEBUG']\n        self.BMN_ONLY       = cfg[name]['BMN_ONLY']\n        self.LSTM_ONLY      = cfg[name]['LSTM_ONLY']\n        self.PCM_ONLY       = cfg[name]['PCM_ONLY']\n        if self.LSTM_ONLY:\n            self.prop_dict = {}\n            for dataset in ['EuroCup2016']:\n                prop_json = '/home/work/datasets/{}/feature_bmn/prop.json'.format(dataset)\n                json_data = json.load(open(prop_json, 'r'))\n                for item in json_data:\n                    basename = prop_json.replace('feature_bmn/prop.json', 'mp4')\n                    basename = basename + '/' + item['video_name'] + '.mp4'\n                    self.prop_dict[basename] = item['bmn_results']\n    @record_time_info\n    def load_model(self):\n        \"\"\"\n        load_model\n        \"\"\"",
+        "type": "code",
+        "location": "/applications/BasketballAction/predict/action_detect/action.py:45-71"
+    },
+    "83": {
+        "file_id": 8,
+        "content": "The code initializes a ModelPredict class by parsing a configuration file, setting instance variables based on the configurations, and loading a model. The configurations include settings for debugging, whether to use only BMN (Basketball Motion Network), LSTM (Long Short-Term Memory) or PCM (Prediction of Coming Movement) models, and a dictionary of properties for specific datasets. The load_model method is decorated with @record_time_info, which suggests it records the time taken to execute this function.",
+        "type": "comment"
+    },
+    "84": {
+        "file_id": 8,
+        "content": "        if not self.DEBUG:\n            self.image_model = image_model.InferModel(self.configs)\n            if not self.PCM_ONLY:\n                self.audio_model = audio_model.InferModel(self.configs)\n        if not self.LSTM_ONLY:\n            self.prop_model = prop_model.InferModel(self.configs)\n        if not self.BMN_ONLY:\n            self.classify_model = classify_model.InferModel(self.configs)\n        logger.info(\"==> Action Detection prepared.\")\n    @record_time_info\n    def infer(self, imgs_path, pcm_path, fps=5):\n        \"\"\"\n        extract_feature\n        \"\"\"\n        print(\"imgs_path  = \", imgs_path)\n        self.imgs_path = imgs_path\n        self.pcm_path = pcm_path\n        self.configs['COMMON']['fps'] = fps\n        logger.info(\"==> input video {}\".format(os.path.basename(self.imgs_path)))\n        # step 1: extract feature\n        video_features = self.extract_feature()\n        # step2: get proposal\n        bmn_results = self.extract_proposal(video_features)\n        # step3: classify \n        material = {'feature': video_features, 'proposal': bmn_results}",
+        "type": "code",
+        "location": "/applications/BasketballAction/predict/action_detect/action.py:72-104"
+    },
+    "85": {
+        "file_id": 8,
+        "content": "Code creates InferModels for image, audio, and classification tasks depending on the configurations. The main function infers action by extracting features from images and audio, then classifying them using the prepared models.",
+        "type": "comment"
+    },
+    "86": {
+        "file_id": 8,
+        "content": "        action_results = self.video_classify(material)\n        return bmn_results, action_results\n    @record_time_info\n    def video_classify(self, material):\n        \"\"\"video classify\"\"\"\n        if self.BMN_ONLY:\n            return []\n        action_results = self.classify_model.predict(self.configs, material=material) \n        logger.info('action shape {}'.format(np.array(action_results).shape))\n        return action_results\n    @record_time_info\n    def extract_proposal(self, video_features):\n        \"\"\"extract proposal\"\"\"\n        if self.LSTM_ONLY:\n            basename = self.imgs_path.replace('frames', 'mp4') + '.mp4'\n            bmn_results = self.prop_dict[basename]\n            return bmn_results\n        bmn_results = self.prop_model.predict(self.configs, material=video_features)\n        logger.info('proposal shape {}'.format(np.array(bmn_results).shape))\n        return bmn_results\n    @record_time_info\n    def extract_feature(self):\n        \"\"\"extract feature\"\"\"\n        if not self.DEBUG:\n            image_path_list = get_images(self.imgs_path)",
+        "type": "code",
+        "location": "/applications/BasketballAction/predict/action_detect/action.py:105-133"
+    },
+    "87": {
+        "file_id": 8,
+        "content": "This code defines classes for video feature extraction, proposal generation, and action detection. It utilizes model prediction with configured parameters and logs the shapes of results.",
+        "type": "comment"
+    },
+    "88": {
+        "file_id": 8,
+        "content": "            self.configs['PPTSM']['frame_list'] = image_path_list\n            self.configs['AUDIO']['pcm_file'] = self.pcm_path\n            image_features = self.image_model.predict(self.configs)\n            if self.PCM_ONLY:\n                sample_rate = self.configs['AUDIO']['sample_rate']\n                pcm_features = mfcc_extractor.extract_pcm(self.pcm_path, sample_rate)\n                audio_features = []\n            else:\n                audio_features, pcm_features = self.audio_model.predict(self.configs)\n            np_image_features = np.array(image_features, dtype=np.float32)\n            np_audio_features = np.array(audio_features, dtype=np.float32)\n            np_pcm_features = np.array(pcm_features, dtype=np.float32)\n            video_features = {'image_feature': np_image_features,\n                              'audio_feature': np_audio_features,\n                              'pcm_feature': np_pcm_features}\n        else:\n            feature_path = self.imgs_path.replace(\"frames\", \"features\") + '.pkl'",
+        "type": "code",
+        "location": "/applications/BasketballAction/predict/action_detect/action.py:134-152"
+    },
+    "89": {
+        "file_id": 8,
+        "content": "The code configures the model inputs, predicts image and audio features, and stores them in the video_features dictionary. If PCM_ONLY is true, it extracts pcm_features separately. Otherwise, it predicts audio_features along with image_features. If no features are available, it sets feature_path to the image path's corresponding features file.",
+        "type": "comment"
+    },
+    "90": {
+        "file_id": 8,
+        "content": "            video_features = pickle.load(open(feature_path, 'rb'))\n        logger.info(\"feature shape {} {} {}\".format(video_features['image_feature'].shape,\n                                                    video_features['audio_feature'].shape,\n                                                    video_features['pcm_feature'].shape))\n        return video_features\nif __name__ == '__main__':\n    model_predict = ActionDetection(cfg_file=\"../configs/configs.yaml\")\n    model_predict.load_model()\n    imgs_path = \"/home/work/datasets/EuroCup2016/frames/1be705a8f67648da8ec4b4296fa80895\"\n    pcm_path = \"/home/work/datasets/EuroCup2016/pcm/1be705a8f67648da8ec4b4296fa80895.pcm\"\n    bmn_results, action_results = model_predict.infer(imgs_path, pcm_path)\n    results = {'bmn_results': bmn_results, 'action_results': action_results}\n    with open('results.json', 'w', encoding='utf-8') as f:\n       data = json.dumps(results, indent=4, ensure_ascii=False)\n       f.write(data)",
+        "type": "code",
+        "location": "/applications/BasketballAction/predict/action_detect/action.py:153-174"
+    },
+    "91": {
+        "file_id": 8,
+        "content": "This code loads video features from file, checks the shape of image_feature, audio_feature, and pcm_feature arrays, and returns the video features. It then calls the ActionDetection model to infer on given image and audio paths, storing the results in bmn_results and action_results variables. Finally, it saves these results in a 'results.json' file.",
+        "type": "comment"
+    },
+    "92": {
+        "file_id": 9,
+        "content": "/applications/BasketballAction/predict/action_detect/logger.py",
+        "type": "filepath"
+    },
+    "93": {
+        "file_id": 9,
+        "content": "This code defines a custom logger class for the news stripper application. It checks if the 'logs' directory exists, creates it if not, and sets up a file handler for the logger. The handler is configured to log INFO level messages and uses a specific log format and date format.",
+        "type": "summary"
+    },
+    "94": {
+        "file_id": 9,
+        "content": "\"\"\"\nlogger\n\"\"\"\nimport os\nimport logging\nclass Logger(logging.Logger):\n    \"\"\"Customized logger for news stripper\n    \"\"\"\n    def __init__(self):\n        super(Logger, self).__init__(self)\n        if not os.path.exists('logs'):\n            os.mkdir('logs')\n        handler = logging.FileHandler(\"logs/action_detect.log\")\n        # handler.setLevel(logging.DEBUG)\n        handler.setLevel(logging.INFO)\n        format = \"%(levelname)s: %(asctime)s: %(filename)s:%(lineno)d %(message)s\"\n        datefmt = \"%y-%m-%d %H:%M:%S\"\n        formatter = logging.Formatter(format, datefmt)\n        handler.setFormatter(formatter)\n        self.addHandler(handler)",
+        "type": "code",
+        "location": "/applications/BasketballAction/predict/action_detect/logger.py:1-23"
+    },
+    "95": {
+        "file_id": 9,
+        "content": "This code defines a custom logger class for the news stripper application. It checks if the 'logs' directory exists, creates it if not, and sets up a file handler for the logger. The handler is configured to log INFO level messages and uses a specific log format and date format.",
+        "type": "comment"
+    },
+    "96": {
+        "file_id": 10,
+        "content": "/applications/BasketballAction/predict/action_detect/mfcc/feature_extractor.py",
+        "type": "filepath"
+    },
+    "97": {
+        "file_id": 10,
+        "content": "This code extracts audio features, converts data to [-1.0, +1.0] range, applies log mel spectrogram, frames into examples for further processing, reads pcm data as bytes, and prints the shape of resulting examples batch.",
+        "type": "summary"
+    },
+    "98": {
+        "file_id": 10,
+        "content": "\"\"\"\naudio feature extract\n\"\"\"\n# coding: utf-8\nimport os\nimport numpy as np\nimport pickle\nimport mfcc.vgg_params as vgg_params\ndef frame(data, window_length, hop_length):\n    \"\"\"\n    frame\n    \"\"\"\n    num_samples = data.shape[0]\n    num_frames = 1 + int(np.floor((num_samples - window_length) / hop_length))\n    shape = (num_frames, window_length) + data.shape[1:]\n    strides = (data.strides[0] * hop_length, ) + data.strides\n    return np.lib.stride_tricks.as_strided(data, shape=shape, strides=strides)\ndef periodic_hann(window_length):\n    \"\"\"\n    periodic_hann\n    \"\"\"\n    return 0.5 - (0.5 *\n                  np.cos(2 * np.pi / window_length * np.arange(window_length)))\ndef stft_magnitude(signal, fft_length, hop_length=None, window_length=None):\n    \"\"\"\n    stft_magnitude\n    \"\"\"\n    frames = frame(signal, window_length, hop_length)\n    window = periodic_hann(window_length)\n    windowed_frames = frames * window\n    return np.abs(np.fft.rfft(windowed_frames, int(fft_length)))\n_MEL_BREAK_FREQUENCY_HERTZ = 700.0\n_MEL_HIGH_FREQUENCY_Q = 1127.0",
+        "type": "code",
+        "location": "/applications/BasketballAction/predict/action_detect/mfcc/feature_extractor.py:1-41"
+    },
+    "99": {
+        "file_id": 10,
+        "content": "This code defines functions for audio feature extraction, including framing the audio data, applying a window function, and computing the short-time Fourier transform (STFT) magnitude. The _MEL_BREAK_FREQUENCY_HERTZ and _MEL_HIGH_FREQUENCY_Q variables are used for converting frequency values to Mel scale.",
+        "type": "comment"
+    }
+}

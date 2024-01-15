@@ -1,0 +1,547 @@
+{
+    "8500": {
+        "file_id": 629,
+        "content": "| SlowFast |slowfast | 动作识别 | 支持 | 混合精度 | - | - |\n| TSM  |tsm_k400_frames | 动作识别 | 支持 | 混合精度 | - | - |\n| TSN  |tsn_k400_frames          | 动作识别 |支持|混合精度|-|-|\n| AttentionLSTM |attention_lstm_youtube8m | 动作识别 | 支持 | 混合精度 | - | - |\n| BMN |bmn | 动作时间定位 | 支持 | 混合精度 | - | - |\n## 3. 测试工具简介\n### 目录介绍\n```shell\ntest_tipc/\n├── configs/  # 配置文件目录\n│   ├── PP-TSM/\n│   │   ├── train_infer_python.txt # PP-TSM在Linux上进行python训练预测（基础训练预测）的配置文件\n│   │   ├── serving_infer_cpp.txt  # PP-TSM在Linux上进行cpp serving测试的配置文件\n│   │   ├── train_amp_infer_python.txt # PP-TSM在Linux上进行python训练预测（混合精度训练预测）的配置文件\n│   │   ├── serving_infer_python.txt # PP-TSM在Linux上进行python serving预测的配置文件\n│   │   └── train_ptq_infer_python.txt # PP-TSM在Linux上进行离线量化推理测试的配置文件\n│   ├── PP-TSN/\n│   │   ├── train_infer_python.txt # PP-TSN在Linux上进行python训练预测（基础训练预测）的配置文件\n│   │   ├── paddle2onnx_infer_python.txt # PP-TSN在Linux上进行Paddle2ONNX预测（基础训练预测）的配置文件\n│   │   ├── serving_infer_cpp.txt  # PP-TSN在Linux上进行cpp serving测试的配置文件\n│   │   └── train_amp_infer_python.txt # PP-TSN在Linux上进行python训练预测（混合精度训练预测）的配置文件",
+        "type": "code",
+        "location": "/test_tipc/README.md:31-55"
+    },
+    "8501": {
+        "file_id": 629,
+        "content": "This code snippet introduces the test tool for PaddleVideo, providing an overview of supported models and their respective configurations, as well as the directory structure containing these configuration files.",
+        "type": "comment"
+    },
+    "8502": {
+        "file_id": 629,
+        "content": "│   ├── ...\n│   └── ...\n├── results/   # 预先保存的预测结果，用于和实际预测结果进行精度比对\n│   ├── PP-TSM/\n│   │\t├── python_ppvideo_PP-TSM_results_fp16.txt # 预存的PP-TSM识别识别模型python预测fp16精度的结果\n│   │\t└── python_ppvideo_PP-TSM_results_fp32.txt # 预存的PP-TSM识别识别模型python预测fp32精度的结果\n│   ├── PP-TSN/\n│   │\t├── python_ppvideo_PP-TSN_results_fp32.txt # 预存的PP-TSN识别识别模型python预测fp16精度的结果\n│   │\t└── python_ppvideo_PP-TSN_results_fp32.txt # 预存的PP-TSN识别识别模型python预测fp32精度的结果\n│   ├── PP-TSN_CPP/\n│   │\t├── python_ppvideo_PP-TSN_results_fp32.txt # 预存的PP-TSN识别识别模型C++预测fp16精度的结果\n│   │\t└── python_ppvideo_PP-TSN_results_fp32.txt # 预存的PP-TSN识别识别模型C++预测fp32精度的结果\n│   ├── ...\n│   └── ...\n├── prepare.sh                        # 完成test_*.sh运行所需要的数据和模型下载\n├── docs/                             # 详细的TIPC各种功能文档\n├── test_train_inference_python.sh    # 测试python训练预测的主程序\n├── test_inference_cpp.sh             # 测试C++预测的主程序\n├── test_paddle2onnx.sh               # 测试paddle2onnx转换与推理的主程序\n├── compare_results.py                # 用于对比log中的预测结果与results中的预存结果精度误差是否在限定范围内\n└── README.md                         # 介绍文档",
+        "type": "code",
+        "location": "/test_tipc/README.md:56-76"
+    },
+    "8503": {
+        "file_id": 629,
+        "content": "This code represents the directory structure of a PaddleVideo test_tipc project. It includes pre-stored prediction results for various models in the 'results' folder, which are used to compare and verify the precision of the actual predictions. The scripts 'prepare.sh', 'test_train_inference_python.sh', 'test_inference_cpp.sh', and 'compare_results.py' are provided for testing, training, inference using Python or C++, as well as comparing the results with pre-stored data to calculate precision errors. The 'docs' folder contains detailed documentation on TIPC features, while 'test_paddle2onnx.sh' is used to test Paddle to ONNX conversion and inference.",
+        "type": "comment"
+    },
+    "8504": {
+        "file_id": 629,
+        "content": "```\n### 测试流程概述\n使用本工具，可以测试不同功能的支持情况，以及预测结果是否对齐，测试流程概括如下：\n<div align=\"center\">\n    <img src=\"docs/Video_TIPC.png\" width=\"800\">\n</div>\n1. 运行prepare.sh准备测试所需数据和模型；\n2. 运行要测试的功能对应的测试脚本`test_*.sh`，产出log，由log可以看到不同配置是否运行成功；\n3. 用`compare_results.py`对比log中的预测结果和预存在results目录下的结果，判断预测精度是否符合预期（在误差范围内）。\n测试单项功能仅需两行命令，**如需测试不同模型/功能，替换配置文件即可**，命令格式如下：\n```shell\n# 功能：准备数据\n# 格式：bash + 运行脚本 + 参数1: 配置文件选择 + 参数2: 模式选择\nbash test_tipc/prepare.sh  configs/[model_name]/[params_file_name]  [Mode]\n# 功能：运行测试\n# 格式：bash + 运行脚本 + 参数1: 配置文件选择 + 参数2: 模式选择\nbash test_tipc/test_train_inference_python.sh configs/[model_name]/[params_file_name]  [Mode]\n```\n例如，测试基本训练预测功能的`lite_train_lite_infer`模式，运行：\n```shell\n# 准备数据\nbash test_tipc/prepare.sh ./test_tipc/configs/PP-TSM/train_infer_python.txt 'lite_train_lite_infer'\n# 运行测试\nbash test_tipc/test_train_inference_python.sh ./test_tipc/configs/PP-TSM/train_infer_python.txt 'lite_train_lite_infer'\n```\n关于本示例命令的更多信息可查看[基础训练预测使用文档](./docs/test_train_inference_python.md)。\n### 配置文件命名规范\n在`configs`目录下存放所有模型测试需要用到的配置文件，配置文件的命名遵循如下规范：",
+        "type": "code",
+        "location": "/test_tipc/README.md:77-112"
+    },
+    "8505": {
+        "file_id": 629,
+        "content": "The code provides an overview of the test process for PaddleVideo's TIPC. It requires running a prepare script and test_*.sh scripts, comparing log files, and specifying model names and parameters using configuration files. Testing a single feature takes only two commands, and changing configurations is as simple as replacing the configuration file.",
+        "type": "comment"
+    },
+    "8506": {
+        "file_id": 629,
+        "content": "1. 基础训练预测配置简单命名为：`train_infer_python.txt`，表示**Linux环境下单机、不使用混合精度训练+python预测**，其完整命名对应`train_linux_gpu_normal_normal_infer_python_linux_gpu_cpu.txt`，由于本配置文件使用频率较高，这里进行了名称简化。\n2. 其他带训练配置命名格式为：`train_训练硬件环境(linux_gpu/linux_dcu/…)_是否多机(fleet/normal)_是否混合精度(amp/normal)_预测模式(infer/lite/serving/js)_语言(cpp/python/java)_预测硬件环境(linux_gpu/mac/jetson/opencl_arm_gpu/...).txt`。如，linux gpu下多机多卡+混合精度链条测试对应配置 `train_linux_gpu_fleet_amp_infer_python_linux_gpu_cpu.txt`，linux dcu下基础训练预测对应配置 `train_linux_dcu_normal_normal_infer_python_linux_dcu.txt`。\n3. 仅预测的配置（如serving、lite等）命名格式：`model_训练硬件环境(linux_gpu/linux_dcu/…)_是否多机(fleet/normal)_是否混合精度(amp/normal)_(infer/lite/serving/js)_语言(cpp/python/java)_预测硬件环境(linux_gpu/mac/jetson/opencl_arm_gpu/...).txt`，即，与2相比，仅第一个字段从train换为model，测试时模型直接下载获取，这里的“训练硬件环境”表示所测试的模型是在哪种环境下训练得到的。\n**根据上述命名规范，可以直接从子目录名称和配置文件名找到需要测试的场景和功能对应的配置文件。**\n<a name=\"more\"></a>\n## 4. 开始测试\n各功能测试中涉及混合精度、裁剪、量化等训练相关，及mkldnn、Tensorrt等多种预测相关参数配置，请点击下方相应链接了解更多细节和使用教程：\n- [test_train_inference_python 使用](docs/test_train_inference_python.md) ：测试基于Python的模型训练、评估、推理等基本功能。",
+        "type": "code",
+        "location": "/test_tipc/README.md:114-126"
+    },
+    "8507": {
+        "file_id": 629,
+        "content": "Code defines naming conventions for various training and inference configurations used by PaddleVideo, allowing users to easily identify the desired test scenario based on subdirectories and configuration file names.",
+        "type": "comment"
+    },
+    "8508": {
+        "file_id": 629,
+        "content": "- [test_amp_train_inference_python 使用](docs/test_train_amp_inference_python.md) ：测试基于Python的**混合精度**模型训练、评估、推理等基本功能。\n- [test_inference_cpp 使用](docs/test_inference_cpp.md) ：测试基于C++的模型推理功能。\n- [test_paddle2onnx 使用](docs/test_paddle2onnx.md) ：测试基于python2onnx模型的推理功能。\n- [test_serving_infer_python 使用](docs/test_serving_infer_python.md) ：测试基于Paddle Serving的服务化部署功能。\n- [test_serving_infer_cpp 使用](docs/test_serving_infer_cpp.md) ：测试基于C++的模型推理功能。\n- [test_ptq_inference_python 使用](docs/test_train_ptq_inference_python.md) ：测试离线量化训练推理功能。\n- [test_train_fleet_inference_python 使用](./docs/test_train_fleet_inference_python.md)：测试基于Python的多机多卡训练与推理等基本功能",
+        "type": "code",
+        "location": "/test_tipc/README.md:127-133"
+    },
+    "8509": {
+        "file_id": 629,
+        "content": "This code provides a brief overview of various test cases available for different functionalities within the PaddleVideo framework. The functionalities include testing Python-based mixed precision training, evaluation, and inference; C++-based model inference; converting models to ONNX format for inference; deploying models using Paddle Serving; offline quantized training and inference; and multi-machine multi-GPU training and inference using Python.",
+        "type": "comment"
+    },
+    "8510": {
+        "file_id": 630,
+        "content": "/test_tipc/benchmark_train.sh",
+        "type": "filepath"
+    },
+    "8511": {
+        "file_id": 630,
+        "content": "This script prepares environment for benchmarking PaddleVideo model, trains with varying batch sizes and precisions, measures execution time, and processes log files to extract performance metrics.",
+        "type": "summary"
+    },
+    "8512": {
+        "file_id": 630,
+        "content": "#!/bin/bash\nsource test_tipc/common_func.sh\n# set env\npython=python\nexport model_branch=`git symbolic-ref HEAD 2>/dev/null | cut -d\"/\" -f 3`\nexport model_commit=$(git log|head -n1|awk '{print $2}')\nexport str_tmp=$(echo `pip list|grep paddlepaddle-gpu|awk -F ' ' '{print $2}'`)\nexport frame_version=${str_tmp%%.post*}\nexport frame_commit=$(echo `${python} -c \"import paddle;print(paddle.version.commit)\"`)\n# BENCHMARK_ROOT='.'  # only for self-test\n# run benchmark sh\n# Usage:\n# bash run_benchmark_train.sh config.txt params\n# or\n# bash run_benchmark_train.sh config.txt\nfunction func_parser_params(){\n    strs=$1\n    IFS=\"=\"\n    array=(${strs})\n    tmp=${array[1]}\n    echo ${tmp}\n}\nfunction func_sed_params(){\n    filename=$1\n    line=$2\n    param_value=$3\n    params=`sed -n \"${line}p\" $filename`\n    IFS=\":\"\n    array=(${params})\n    key=${array[0]}\n    value=${array[1]}\n    if [[ $value =~ 'benchmark_train' ]];then\n        IFS='='\n        _val=(${value})\n        param_value=\"${param_value}\"\n    fi\n    new_params=\"${key}:${param_value}\"",
+        "type": "code",
+        "location": "/test_tipc/benchmark_train.sh:1-42"
+    },
+    "8513": {
+        "file_id": 630,
+        "content": "This script is a Bash function for running benchmark training on PaddlePaddle GPU. It sets environment variables, parses command line arguments, and executes the benchmark training using the provided configuration file.",
+        "type": "comment"
+    },
+    "8514": {
+        "file_id": 630,
+        "content": "    IFS=\";\"\n    cmd=\"sed -i '${line}s/.*/${new_params}/' '${filename}'\"\n    eval $cmd\n}\nfunction set_gpu_id(){\n    string=$1\n    _str=${string:1:6}\n    IFS=\"C\"\n    arr=(${_str})\n    M=${arr[0]}\n    P=${arr[1]}\n    gn=`expr $P - 1`\n    gpu_num=`expr $gn / $M`\n    seq=`seq -s \",\" 0 $gpu_num`\n    echo $seq\n}\nfunction get_repo_name(){\n    IFS=\";\"\n    cur_dir=$(pwd)\n    IFS=\"/\"\n    arr=(${cur_dir})\n    echo ${arr[-1]}\n}\nFILENAME=$1\n# copy FILENAME as new\nnew_filename=\"./test_tipc/benchmark_train.txt\"\ncmd=`yes|cp $FILENAME $new_filename`\nFILENAME=$new_filename\n# MODE must be one of ['benchmark_train']\nMODE=$2\nPARAMS=$3\nREST_ARGS=$4\n# bash test_tipc/benchmark_train.sh /workspace/PaddleVideo/test_tipc/configs/BMN/train_infer_python.txt benchmark_train dynamicTostatic_bs8_fp32_DP_N1C8\nto_static=\"\"\n# parse \"to_static\" options and modify trainer into \"to_static_trainer\"\nif [[ $PARAMS =~ \"dynamicTostatic\" ]] ;then\n   to_static=\"d2sT_\"\n   sed -i 's/trainer:norm_train/trainer:to_static_train/g' $FILENAME\n   # clear PARAM contents\n   if [ $PARAMS = \"to_static\" ] ;then",
+        "type": "code",
+        "location": "/test_tipc/benchmark_train.sh:43-86"
+    },
+    "8515": {
+        "file_id": 630,
+        "content": "This code defines functions to modify parameters in a file and set GPU IDs. It then copies the input filename, sets the mode as \"benchmark_train\", and processes additional parameters. The script performs operations such as modifying lines in the file and replacing \"trainer:norm_train\" with \"trainer:to_static_train\". The purpose of this code seems to be related to manipulating configuration files for a program using PaddleVideo's test_tipc directory.",
+        "type": "comment"
+    },
+    "8516": {
+        "file_id": 630,
+        "content": "    PARAMS=\"\"\n   fi\nfi\nIFS=$'\\n'\n# parser params from train_benchmark.txt\ndataline=`cat $FILENAME`\n# parser params\nIFS=$'\\n'\nlines=(${dataline})\nmodel_name=$(func_parser_value \"${lines[1]}\")\n# 获取'train_benchmark_params'所在的行数\nline_num=`grep -n -w \"train_benchmark_params\" $FILENAME  | cut -d \":\" -f 1`\n# for train log parser\nbatch_size=$(func_parser_value \"${lines[line_num]}\")\nline_num=`expr $line_num + 1`\nfp_items=$(func_parser_value \"${lines[line_num]}\")\nline_num=`expr $line_num + 1`\nepoch=$(func_parser_value \"${lines[line_num]}\")\nline_num=`expr $line_num + 1`\nprofile_option_key=$(func_parser_key \"${lines[line_num]}\")\nprofile_option_params=$(func_parser_value \"${lines[line_num]}\")\nprofile_option=\"${profile_option_key}:${profile_option_params}\"\nline_num=`expr $line_num + 1`\nflags_value=$(func_parser_value \"${lines[line_num]}\")\n# 设置每个模型max-iters，以获取稳定的ips\nline_num=`expr $line_num + 1`\nmax_iters_value=$(func_parser_value \"${lines[line_num]}\")\n# set flags\nIFS=\";\"\nflags_list=(${flags_value})\nfor _flag in ${flags_list[*]}; do",
+        "type": "code",
+        "location": "/test_tipc/benchmark_train.sh:87-123"
+    },
+    "8517": {
+        "file_id": 630,
+        "content": "The code is parsing parameters from the \"train_benchmark.txt\" file and setting variables such as model name, batch size, fp_items, epoch, profile option key, profile option parameters, flags value, and max_iters value for training purposes. These values will be used to train a specific model with given parameters.",
+        "type": "comment"
+    },
+    "8518": {
+        "file_id": 630,
+        "content": "    cmd=\"export ${_flag}\"\n    eval $cmd\ndone\n# set log_name\nrepo_name=$(get_repo_name )\nSAVE_LOG=${BENCHMARK_LOG_DIR:-$(pwd)}   # */benchmark_log\nmkdir -p \"${SAVE_LOG}/benchmark_log/\"\nstatus_log=\"${SAVE_LOG}/benchmark_log/results.log\"\n# get benchmark profiling params : PROFILING_TIMER_ONLY=no|True|False\nPROFILING_TIMER_ONLY=${PROFILING_TIMER_ONLY:-\"True\"}\n# The number of lines in which train params can be replaced.\nline_python=3\nline_gpuid=4\nline_precision=6\nline_epoch=7\nline_batchsize=9\nline_profile=12\nline_eval_py=24\nline_eval_py_2=25\nline_export_py=38\nline_export_py_2=28\nline_export_py_3=30\nline_norm_train=16\nfunc_sed_params \"$FILENAME\" \"${line_eval_py}\" \"null\"\nfunc_sed_params \"$FILENAME\" \"${line_eval_py_2}\" \"null\"\nfunc_sed_params \"$FILENAME\" \"${line_export_py}\" \"null\"\nfunc_sed_params \"$FILENAME\" \"${line_export_py_2}\" \"null\"\nfunc_sed_params \"$FILENAME\" \"${line_export_py_3}\" \"null\"\nfunc_sed_params \"$FILENAME\" \"${line_python}\"  \"$python\"\n# 末尾加上--max_iters=30和--log_interval=1，以便运行并输出足量数据\nset_log_interval_cmd=\"sed -i '${line_norm_train}s/.*/& --max_iters=${max_iters_value} -o log_interval=1/' '${filename}'\"",
+        "type": "code",
+        "location": "/test_tipc/benchmark_train.sh:124-158"
+    },
+    "8519": {
+        "file_id": 630,
+        "content": "This code is setting environment variables, defining log file locations and names, and using sed commands to modify a configuration file. It then executes the modified configuration file with additional command line parameters. This is likely part of a benchmarking or training process for machine learning or video processing tasks.",
+        "type": "comment"
+    },
+    "8520": {
+        "file_id": 630,
+        "content": "eval $set_log_interval_cmd\n# 去掉--validate，benchmark不需要validate\nremove_validate_cmd=\"sed -i '${line_norm_train}s/--validate//' '${filename}'\"\neval $remove_validate_cmd\n# if params\nif  [ ! -n \"$PARAMS\" ] ;then\n    # PARAMS input is not a word.\n    IFS=\"|\"\n    batch_size_list=(${batch_size})\n    fp_items_list=(${fp_items})\n    device_num_list=(N1C4)\n    run_mode=\"DP\"\nelif [[ ${PARAMS} = \"dynamicTostatic\" ]] ;then\n    IFS=\"|\"\n    model_type=$PARAMS\n    batch_size_list=(${batch_size})\n    fp_items_list=(${fp_items})\n    device_num_list=(N1C4)\n    run_mode=\"DP\"\nelse\n    # parser params from input: modeltype_bs${bs_item}_${fp_item}_${run_mode}_${device_num}\n    IFS=\"_\"\n    params_list=(${PARAMS})\n    model_type=${params_list[0]}\n    batch_size=${params_list[1]}\n    batch_size=`echo  ${batch_size} | tr -cd \"[0-9]\" `\n    precision=${params_list[2]}\n    run_mode=${params_list[3]}\n    device_num=${params_list[4]}\n    IFS=\";\"\n    if [ ${precision} = \"null\" ];then\n        precision=\"fp32\"\n    fi\n    fp_items_list=($precision)\n    batch_size_list=($batch_size)",
+        "type": "code",
+        "location": "/test_tipc/benchmark_train.sh:159-197"
+    },
+    "8521": {
+        "file_id": 630,
+        "content": "This code is parsing parameters and configuring the environment for benchmarking. It removes \"validate\" from the command, checks if the input is a dynamic or static parameter, and then assigns variables based on the type of model, batch size, precision, run mode, and device number. If the precision is null, it defaults to fp32.",
+        "type": "comment"
+    },
+    "8522": {
+        "file_id": 630,
+        "content": "    device_num_list=($device_num)\nfi\nlog_interval='--log_interval 1'\nIFS=\"|\"\nfor batch_size in ${batch_size_list[*]}; do\n    for precision in ${fp_items_list[*]}; do\n        for device_num in ${device_num_list[*]}; do\n            # sed batchsize and precision\n            func_sed_params \"$FILENAME\" \"${line_precision}\" \"$precision\"\n            func_sed_params \"$FILENAME\" \"${line_batchsize}\" \"$batch_size\"\n            func_sed_params \"$FILENAME\" \"${line_epoch}\" \"$epoch\"\n            gpu_id=$(set_gpu_id $device_num)\n            if [ ${#gpu_id} -le 1 ];then\n                func_sed_params \"$FILENAME\" \"${line_gpuid}\" \"0\"  # sed used gpu_id \n                if [[ ${PROFILING_TIMER_ONLY} != \"no\" ]];then\n                    echo \"run profile\"\n                    # The default value of profile_option's timer_only parameter is True\n                    if [[ ${PROFILING_TIMER_ONLY} = \"False\" ]];then\n                        profile_option=\"${profile_option};timer_only=False\"\n                    fi\n                    log_path=\"$SAVE_LOG/profiling_log\"",
+        "type": "code",
+        "location": "/test_tipc/benchmark_train.sh:198-220"
+    },
+    "8523": {
+        "file_id": 630,
+        "content": "The code is iterating over different combinations of batch sizes and precisions to train the PaddleVideo model. It sets up various environment variables and uses sed to modify a file before running the training script on specific GPUs. The profile option determines if only timer information should be logged or if full profiling data should be collected.",
+        "type": "comment"
+    },
+    "8524": {
+        "file_id": 630,
+        "content": "                    mkdir -p $log_path\n                    log_name=\"${repo_name}_${model_name}_bs${batch_size}_${precision}_${run_mode}_${device_num}_${to_static}profiling\"\n                    # set profile_option params\n                    tmp=`sed -i \"${line_profile}s/.*/\\\"${profile_option}\\\"/\" \"${FILENAME}\"`\n                    # for models which need to accumulate gradient.\n                    if [[ ${model_name} =~ \"TimeSformer\" ]]; then\n                        global_bs=`expr ${batch_size} \\* ${device_num:3:4} \\* 8`\n                        modify_global_bs_cmd=\"sed -i '${line_norm_train}s/.*/& -o GRADIENT_ACCUMULATION.global_batch_size=${global_bs}/' '${filename}'\"\n                        eval $modify_global_bs_cmd\n                    fi\n                    # run test_train_inference_python.sh\n                    cmd=\"timeout 5m bash test_tipc/test_train_inference_python.sh ${FILENAME} benchmark_train > ${log_path}/${log_name} 2>&1 \"\n                    echo $cmd\n                    eval ${cmd}",
+        "type": "code",
+        "location": "/test_tipc/benchmark_train.sh:221-234"
+    },
+    "8525": {
+        "file_id": 630,
+        "content": "Creates a directory for log storage, sets the name of the log file based on various parameters, modifies profile option settings if necessary (for TimeSformer models), and then runs test_train_inference_python.sh script with provided arguments, redirecting output to the specified log path.",
+        "type": "comment"
+    },
+    "8526": {
+        "file_id": 630,
+        "content": "                    eval \"cat ${log_path}/${log_name}\"\n                fi\n                echo \"run without profile\"  \n                # without profile\n                log_path=\"$SAVE_LOG/train_log\"\n                speed_log_path=\"$SAVE_LOG/index\"\n                mkdir -p $log_path\n                mkdir -p $speed_log_path\n                log_name=\"${repo_name}_${model_name}_bs${batch_size}_${precision}_${run_mode}_${device_num}_${to_static}log\"\n                speed_log_name=\"${repo_name}_${model_name}_bs${batch_size}_${precision}_${run_mode}_${device_num}_${to_static}speed\"\n                func_sed_params \"$FILENAME\" \"${line_profile}\" \"null\"  # sed profile_id as null\n                cmd=\"bash test_tipc/test_train_inference_python.sh ${FILENAME} benchmark_train > ${log_path}/${log_name} 2>&1 \"\n                echo $cmd\n                job_bt=`date '+%Y%m%d%H%M%S'`\n                eval $cmd\n                job_et=`date '+%Y%m%d%H%M%S'`\n                export model_run_time=$((${job_et}-${job_bt}))\n                eval \"cat ${log_path}/${log_name}\"",
+        "type": "code",
+        "location": "/test_tipc/benchmark_train.sh:235-253"
+    },
+    "8527": {
+        "file_id": 630,
+        "content": "This code snippet executes a script without profiling. It sets the log and speed log paths, creates directories if necessary, and then runs a command to execute the test_train_inference_python.sh script. The run time is measured and stored in model_run_time variable. Finally, it displays the execution log.",
+        "type": "comment"
+    },
+    "8528": {
+        "file_id": 630,
+        "content": "                # parser log\n                _model_name=\"${model_name}_bs${batch_size}_${precision}_${run_mode}\"\n                cmd=\"${python} ${BENCHMARK_ROOT}/scripts/analysis.py --filename ${log_path}/${log_name} \\\n                        --speed_log_file '${speed_log_path}/${speed_log_name}' \\\n                        --model_name ${_model_name} \\\n                        --base_batch_size ${batch_size} \\\n                        --run_mode ${run_mode} \\\n                        --fp_item ${precision} \\\n                        --keyword ips: \\\n                        --skip_steps 5 \\\n                        --device_num ${device_num} \\\n                        --speed_unit instance/sec \\\n                        --convergence_key loss: \"\n                echo $cmd\n                eval $cmd\n                last_status=${PIPESTATUS[0]}\n                status_check $last_status \"${cmd}\" \"${status_log}\" \"${model_name}\"\n            else\n                IFS=\";\"\n                unset_env=`unset CUDA_VISIBLE_DEVICES`",
+        "type": "code",
+        "location": "/test_tipc/benchmark_train.sh:255-274"
+    },
+    "8529": {
+        "file_id": 630,
+        "content": "This code section is using Python to execute an analysis script. The analysis script processes log files, extracting performance metrics like inference per second (ips) and loss convergence data. It also handles skipping steps during processing and considers the device used for computation. The resulting status is logged into a specified file.",
+        "type": "comment"
+    },
+    "8530": {
+        "file_id": 630,
+        "content": "                log_path=\"$SAVE_LOG/train_log\"\n                speed_log_path=\"$SAVE_LOG/index\"\n                mkdir -p $log_path\n                mkdir -p $speed_log_path\n                log_name=\"${repo_name}_${model_name}_bs${batch_size}_${precision}_${run_mode}_${device_num}_${to_static}log\"\n                speed_log_name=\"${repo_name}_${model_name}_bs${batch_size}_${precision}_${run_mode}_${device_num}_${to_static}speed\"\n                func_sed_params \"$FILENAME\" \"${line_gpuid}\" \"$gpu_id\"  # sed used gpu_id\n                func_sed_params \"$FILENAME\" \"${line_profile}\" \"null\"  # sed --profile_option as null\n                # for models which need to accumulate gradient.\n                if [[ ${model_name} =~ \"TimeSformer\" ]]; then\n                    global_bs=`expr ${batch_size} \\* ${device_num:3:4} \\* 8`\n                    modify_global_bs_cmd=\"sed -i '${line_norm_train}s/.*/& -o GRADIENT_ACCUMULATION.global_batch_size=${global_bs}/' '${filename}'\"\n                    eval $modify_global_bs_cmd",
+        "type": "code",
+        "location": "/test_tipc/benchmark_train.sh:275-288"
+    },
+    "8531": {
+        "file_id": 630,
+        "content": "Creates log and speed directories, sets variable names for logging files. Uses sed to modify the config file with gpu_id, profile option as null, and adjusts global batch size for TimeSformer model that needs gradient accumulation.",
+        "type": "comment"
+    },
+    "8532": {
+        "file_id": 630,
+        "content": "                fi\n                cmd=\"bash test_tipc/test_train_inference_python.sh ${FILENAME} benchmark_train > ${log_path}/${log_name} 2>&1 \"\n                echo $cmd\n                job_bt=`date '+%Y%m%d%H%M%S'`\n                eval $cmd\n                job_et=`date '+%Y%m%d%H%M%S'`\n                export model_run_time=$((${job_et}-${job_bt}))\n                eval \"cat ${log_path}/${log_name}\"\n                # parser log\n                _model_name=\"${model_name}_bs${batch_size}_${precision}_${run_mode}\"\n                cmd=\"${python} ${BENCHMARK_ROOT}/scripts/analysis.py --filename ${log_path}/${log_name} \\\n                        --speed_log_file '${speed_log_path}/${speed_log_name}' \\\n                        --model_name ${_model_name} \\\n                        --base_batch_size ${batch_size} \\\n                        --run_mode ${run_mode} \\\n                        --fp_item ${precision} \\\n                        --keyword ips: \\\n                        --skip_steps 5 \\\n                        --device_num ${device_num} \\",
+        "type": "code",
+        "location": "/test_tipc/benchmark_train.sh:289-308"
+    },
+    "8533": {
+        "file_id": 630,
+        "content": "This code segment is running a benchmark training script and logging the results. It measures the model run time, parses the log to extract information about the speed, and then passes this information to another script for further analysis. The script is designed to handle different batch sizes, precision types, and run modes.",
+        "type": "comment"
+    },
+    "8534": {
+        "file_id": 630,
+        "content": "                        --speed_unit instance/sec \\\n                        --convergence_key loss: \"\n                echo $cmd\n                eval $cmd\n                last_status=${PIPESTATUS[0]}\n                status_check $last_status \"${cmd}\" \"${status_log}\" \"${model_name}\"\n            fi\n        done\n    done\ndone",
+        "type": "code",
+        "location": "/test_tipc/benchmark_train.sh:309-318"
+    },
+    "8535": {
+        "file_id": 630,
+        "content": "This code iterates through different models and configurations, running them with specified parameters. It logs the commands and checks their status to ensure successful execution.",
+        "type": "comment"
+    },
+    "8536": {
+        "file_id": 631,
+        "content": "/test_tipc/common_func.sh",
+        "type": "filepath"
+    },
+    "8537": {
+        "file_id": 631,
+        "content": "This code includes functions for parsing, setting parameters, and performing status checks. The last function logs success or failure with command details to the specified run_log file using tee -a.",
+        "type": "summary"
+    },
+    "8538": {
+        "file_id": 631,
+        "content": "#!/bin/bash\nfunction func_parser_key(){\n    strs=$1\n    IFS=\":\"\n    array=(${strs})\n    tmp=${array[0]}\n    echo ${tmp}\n}\nfunction func_parser_value(){\n    strs=$1\n    IFS=\":\"\n    array=(${strs})\n    tmp=${array[1]}\n    echo ${tmp}\n}\nfunction func_set_params(){\n    key=$1\n    value=$2\n    if [ ${key}x = \"null\"x ];then\n        echo \" \"\n    elif [[ ${value} = \"null\" ]] || [[ ${value} = \" \" ]] || [ ${#value} -le 0 ];then\n        echo \" \"\n    else \n        echo \"${key}=${value}\"\n    fi\n}\nfunction func_parser_params(){\n    strs=$1\n    IFS=\":\"\n    array=(${strs})\n    key=${array[0]}\n    tmp=${array[1]}\n    IFS=\"|\"\n    res=\"\"\n    for _params in ${tmp[*]}; do\n        IFS=\"=\"\n        array=(${_params})\n        mode=${array[0]}\n        value=${array[1]}\n        if [[ ${mode} = ${MODE} ]]; then\n            IFS=\"|\"\n            #echo $(func_set_params \"${mode}\" \"${value}\")\n            echo $value\n            break\n        fi\n        IFS=\"|\"\n    done\n    echo ${res}\n}\nfunction status_check(){\n    last_status=$1   # the exit code\n    run_command=$2\n    run_log=$3",
+        "type": "code",
+        "location": "/test_tipc/common_func.sh:1-58"
+    },
+    "8539": {
+        "file_id": 631,
+        "content": "This code defines several functions for parsing and setting parameters, as well as performing status checks. The functions extract keys and values from strings using specific delimiters, set parameters based on their presence and content, and check the exit code of previous commands.",
+        "type": "comment"
+    },
+    "8540": {
+        "file_id": 631,
+        "content": "    model_name=$4\n    log_path=$5\n    if [ $last_status -eq 0 ]; then\n        echo -e \"\\033[33m Run successfully with command - ${model_name} - ${run_command} - ${log_path} \\033[0m\" | tee -a ${run_log}\n    else\n        echo -e \"\\033[33m Run failed with command - ${model_name} - ${run_command} - ${log_path} \\033[0m\" | tee -a ${run_log}\n    fi\n}",
+        "type": "code",
+        "location": "/test_tipc/common_func.sh:59-66"
+    },
+    "8541": {
+        "file_id": 631,
+        "content": "This function checks the last status and logs whether the run was successful or failed with specific command details. It appends the log to the specified run_log file using tee -a command.",
+        "type": "comment"
+    },
+    "8542": {
+        "file_id": 632,
+        "content": "/test_tipc/compare_results.py",
+        "type": "filepath"
+    },
+    "8543": {
+        "file_id": 632,
+        "content": "The code imports libraries, defines functions for parsing arguments and log files, checks for names, reads a log file, stores results in \"parser_results\", loads ground truth from multiple files, and compares log results with ground truth for testing.",
+        "type": "summary"
+    },
+    "8544": {
+        "file_id": 632,
+        "content": "import numpy as np\nimport os\nimport subprocess\nimport json\nimport argparse\nimport glob\ndef init_args():\n    parser = argparse.ArgumentParser()\n    # params for testing assert allclose\n    parser.add_argument(\"--atol\", type=float, default=1e-3)\n    parser.add_argument(\"--rtol\", type=float, default=1e-3)\n    parser.add_argument(\"--gt_file\", type=str, default=\"\")\n    parser.add_argument(\"--log_file\", type=str, default=\"\")\n    parser.add_argument(\"--precision\", type=str, default=\"fp32\")\n    return parser\ndef parse_args():\n    parser = init_args()\n    return parser.parse_args()\ndef run_shell_command(cmd):\n    p = subprocess.Popen(cmd,\n                         stdout=subprocess.PIPE,\n                         stderr=subprocess.PIPE,\n                         shell=True)\n    out, err = p.communicate()\n    if p.returncode == 0:\n        return out.decode('utf-8')\n    else:\n        return None\ndef parser_results_from_log_by_name(log_path, names_list):\n    if not os.path.exists(log_path):\n        raise ValueError(\"The log file {} does not exists!\".format(log_path))",
+        "type": "code",
+        "location": "/test_tipc/compare_results.py:1-40"
+    },
+    "8545": {
+        "file_id": 632,
+        "content": "This code imports necessary libraries and defines functions for parsing command-line arguments, running shell commands, and retrieving results from log files. It uses ArgumentParser to handle command line arguments, subprocess to execute shell commands, and os to check file existence.",
+        "type": "comment"
+    },
+    "8546": {
+        "file_id": 632,
+        "content": "    if names_list is None or len(names_list) < 1:\n        return []\n    parser_results = {}\n    lines = open(log_path, 'r').read().splitlines()\n    if 'python_infer' in log_path:  # parse python inference\n        for line in lines:\n            split_items = line.replace('\\t', ' ')\n            split_items = split_items.split(' ')\n            split_items = [item for item in split_items if len(item) > 0]\n            for name in names_list:\n                if name in line:\n                    if '.' in split_items[-1]:\n                        parser_results[name] = float(split_items[-1])\n                    else:\n                        parser_results[name] = int(split_items[-1])\n    else:  # parse cpp inference\n        for line in lines:\n            split_items = line.replace('\\t', ' ')\n            split_items = split_items.split(' ')\n            split_items = [item for item in split_items if len(item) > 0]\n            if all([(name + ':') in split_items for name in names_list]):\n                # print(split_items)",
+        "type": "code",
+        "location": "/test_tipc/compare_results.py:42-64"
+    },
+    "8547": {
+        "file_id": 632,
+        "content": "This code checks if there are any names in the \"names_list\" and reads a log file at the specified \"log_path\". If the file contains \"python_infer\", it parses the python inference results, while for other log files, it parses C++ inference results. It stores the results in the \"parser_results\" dictionary with names as keys and corresponding values as either integers or floats.",
+        "type": "comment"
+    },
+    "8548": {
+        "file_id": 632,
+        "content": "                parser_results['class'] = int(split_items[2])\n                parser_results['score'] = float(split_items[-1])\n    return parser_results\ndef load_gt_from_file(gt_file):\n    if not os.path.exists(gt_file):\n        raise ValueError(\"The log file {} does not exists!\".format(gt_file))\n    with open(gt_file, 'r') as f:\n        data = f.readlines()\n        f.close()\n    parser_gt = {}\n    for line in data:\n        if 'top-1 class' in line:\n            split_items = line.replace('\\t', ' ')\n            split_items = split_items.split(' ')\n            split_items = [item for item in split_items if len(item) > 0]\n            parser_gt['top-1 class'] = int(split_items[-1])\n        elif 'top-1 score' in line:\n            split_items = line.replace('\\t', ' ')\n            split_items = split_items.split(' ')\n            split_items = [item for item in split_items if len(item) > 0]\n            parser_gt['top-1 score'] = float(split_items[-1])\n        elif \"score\" in line and 'segment' in line:\n            location_dict = eval(line)",
+        "type": "code",
+        "location": "/test_tipc/compare_results.py:65-89"
+    },
+    "8549": {
+        "file_id": 632,
+        "content": "This code defines a function `load_gt_from_file` that reads and parses the contents of a log file. It first checks if the file exists, then opens it in read mode. For each line containing 'top-1 class' or 'top-1 score', it extracts the class and score values, storing them as key-value pairs in `parser_gt`. If the file is not found, it raises a ValueError with an error message. The code also handles dictionaries with string keys, allowing for easy integration into larger programs.",
+        "type": "comment"
+    },
+    "8550": {
+        "file_id": 632,
+        "content": "            parser_gt[f\"score_{len(parser_gt)}\"] = location_dict['score']\n            parser_gt[f\"segment_{len(parser_gt)}\"] = location_dict['segment']\n        elif \"class:\" in line and \"score:\" in line:\n            split_items = line.replace('\\t', ' ')\n            split_items = split_items.split(' ')\n            split_items = [item for item in split_items if len(item) > 0]\n            parser_gt['class'] = int(split_items[2])\n            parser_gt['score'] = float(split_items[-1])\n    return parser_gt\ndef load_gt_from_txts(gt_file):\n    gt_list = glob.glob(gt_file)\n    gt_collection = {}\n    for gt_f in gt_list:\n        gt_dict = load_gt_from_file(gt_f)\n        basename = os.path.basename(gt_f)\n        if \"fp32\" in basename:\n            gt_collection[\"fp32\"] = [gt_dict, gt_f]\n        elif \"fp16\" in basename:\n            gt_collection[\"fp16\"] = [gt_dict, gt_f]\n        elif \"int8\" in basename:\n            gt_collection[\"int8\"] = [gt_dict, gt_f]\n        else:\n            continue\n    return gt_collection\ndef collect_predict_from_logs(log_path, key_list):",
+        "type": "code",
+        "location": "/test_tipc/compare_results.py:90-118"
+    },
+    "8551": {
+        "file_id": 632,
+        "content": "The code defines three functions:\n1. `load_gt_from_file` loads ground truth data from a file, handling both the cases when each line contains location details or class and score information.\n2. `collect_predict_from_logs` collects predict results from logs based on given key list.\n3. `load_gt_from_txts` loads ground truth collections from multiple files (fp32, fp16, int8), organizing them under corresponding keys in a dictionary.",
+        "type": "comment"
+    },
+    "8552": {
+        "file_id": 632,
+        "content": "    log_list = glob.glob(log_path)\n    pred_collection = {}\n    for log_f in log_list:\n        pred_dict = parser_results_from_log_by_name(log_f, key_list)\n        key = os.path.basename(log_f)\n        pred_collection[key] = pred_dict\n    return pred_collection\ndef testing_assert_allclose(dict_x, dict_y, atol=1e-7, rtol=1e-7):\n    for k in dict_x:\n        np.testing.assert_allclose(np.array(dict_x[k]),\n                                   np.array(dict_y[k]),\n                                   atol=atol,\n                                   rtol=rtol)\nif __name__ == \"__main__\":\n    # Usage example:\n    # test python infer:\n    ## python3.7 test_tipc/compare_results.py --gt_file=./test_tipc/results/PP-TSM/*.txt  --log_file=./test_tipc/output/PP-TSM/python_infer_*.log\n    # test cpp infer:\n    ## python3.7 test_tipc/compare_results.py --gt_file=./test_tipc/results/PP-TSM_CPP/*.txt  --log_file=./test_tipc/output/PP-TSM_CPP/cpp_infer_*.log\n    args = parse_args()\n    gt_collection = load_gt_from_txts(args.gt_file)",
+        "type": "code",
+        "location": "/test_tipc/compare_results.py:119-146"
+    },
+    "8553": {
+        "file_id": 632,
+        "content": "The code reads logs from specified file paths and compares the results with ground truth data for testing purposes. It uses numpy's assert_allclose function to validate the accuracy of the predicted results against the ground truth. The usage example provides command line options to compare Python and C++ inferencing results.",
+        "type": "comment"
+    },
+    "8554": {
+        "file_id": 632,
+        "content": "    key_list = gt_collection[\"fp32\"][0].keys()\n    pred_collection = collect_predict_from_logs(args.log_file, key_list)\n    for filename in pred_collection.keys():\n        if \"fp32\" in filename:\n            gt_dict, gt_filename = gt_collection[\"fp32\"]\n        elif \"fp16\" in filename:\n            gt_dict, gt_filename = gt_collection[\"fp16\"]\n        elif \"int8\" in filename:\n            gt_dict, gt_filename = gt_collection[\"int8\"]\n        else:\n            continue\n        pred_dict = pred_collection[filename]\n        try:\n            testing_assert_allclose(gt_dict,\n                                    pred_dict,\n                                    atol=args.atol,\n                                    rtol=args.rtol)\n            print(\n                \"Assert allclose passed! The results of {} and {} are consistent!\"\n                .format(filename, gt_filename))\n        except Exception as E:\n            print(E)\n            raise ValueError(\n                \"The results of {} and the results of {} are inconsistent!\".",
+        "type": "code",
+        "location": "/test_tipc/compare_results.py:147-170"
+    },
+    "8555": {
+        "file_id": 632,
+        "content": "Iterates through the log files, compares \"fp32\", \"fp16\" and \"int8\" results with ground truth, uses testing_assert_allclose to check for consistency and prints success/failure messages.",
+        "type": "comment"
+    },
+    "8556": {
+        "file_id": 632,
+        "content": "                format(filename, gt_filename))",
+        "type": "code",
+        "location": "/test_tipc/compare_results.py:171-171"
+    },
+    "8557": {
+        "file_id": 632,
+        "content": "This line of code formats the filename and ground truth filename for comparison purposes in the context of image or video analysis.",
+        "type": "comment"
+    },
+    "8558": {
+        "file_id": 633,
+        "content": "/test_tipc/extract_loss.py",
+        "type": "filepath"
+    },
+    "8559": {
+        "file_id": 633,
+        "content": "This code parses and extracts expressions, specifies reduction type (print/sum/mean), discards line parts, and enables debug mode. It defines functions to parse arguments, log messages, validate/extract data, and performs calculations on a list of numerical tuples based on user-defined parameters in the main function.",
+        "type": "summary"
+    },
+    "8560": {
+        "file_id": 633,
+        "content": "import sys\nimport argparse\nimport re\ndef parameter_parser():\n    parser = argparse.ArgumentParser(description=\"Support Args:\")\n    parser.add_argument(\"-v\",\n                        \"--valid-expr\",\n                        type=str,\n                        default=\"*\",\n                        help=\"when not match, the line will discard.\")\n    parser.add_argument(\"-e\",\n                        \"--extract-expr\",\n                        type=str,\n                        default=\"^{%s}$,\",\n                        help=\"the extract expr for the loss: loss {%f}\")\n    parser.add_argument(\"-r\",\n                        \"--reduction-expr\",\n                        type=str,\n                        default=\"print\",\n                        help=\"print | sum | mean\")\n    parser.add_argument(\"-n\",\n                        \"--discard\",\n                        type=int,\n                        default=0,\n                        help=\"while reduction, discard [0:n] and [-n:]\")\n    parser.add_argument(\"-d\", \"--debug\", type=bool, default=False, help=\"debug\")",
+        "type": "code",
+        "location": "/test_tipc/extract_loss.py:1-28"
+    },
+    "8561": {
+        "file_id": 633,
+        "content": "This code parses arguments for validating and extracting expressions, specifying reduction type (print/sum/mean), discarding line parts, and enabling debug mode.",
+        "type": "comment"
+    },
+    "8562": {
+        "file_id": 633,
+        "content": "    return parser.parse_args()\nargs = parameter_parser()\ndef log(*inp, **kargs):\n    if args.debug:\n        print(*inp, **kargs)\ndef is_valid(line, valid_expr):\n    if valid_expr == \"*\": return True\n    if valid_expr in line: return True\n    return False\ndef extract(line, extract_expr):\n    \"\"\"\n    return tuple, the output will be\n    \"\"\"\n    log(\"Extract_expression is : \", extract_expr)\n    x = re.findall(\"\\{%(.)\\}\", extract_expr)\n    assert len(x) == 1, \"Must exist a {%d} | {%f} | {%s} \"\n    t = x[0]\n    type_converter = {\n        'f': float,\n        'i': int,\n        's': str,\n    }\n    type_extracter = {\n        \"f\": r'(-?\\\\d+\\\\.\\\\d+)',\n        \"i\": r'(-?\\\\d+)',\n        \"s\": r'(.*?)',\n    }\n    log(type_extracter[t])\n    pattern = re.sub(\"\\{%(.)\\}\", type_extracter[t], extract_expr, 1)\n    log(\"Created Pattern is: \", pattern)\n    x = re.findall(pattern, line)\n    if len(x) == 0: return None\n    assert len(x) == 1, f\"Multi Match for `{extract_expr}` in line: \\n{line}\"\n    log(\"Find in line: \", x[0].strip())\n    return type_converter[t](x[0].strip())",
+        "type": "code",
+        "location": "/test_tipc/extract_loss.py:29-71"
+    },
+    "8563": {
+        "file_id": 633,
+        "content": "The code defines functions to parse arguments, log messages, and validate or extract data from a given line. The \"is_valid\" function checks if the input line matches a specific expression or wildcard, while the \"extract\" function uses regular expressions to parse a specified type of data (float, int, or string) from a given line.",
+        "type": "comment"
+    },
+    "8564": {
+        "file_id": 633,
+        "content": "def action(tuple_list, action):\n    # discard the warm up\n    if args.discard > 0:\n        tuple_list = tuple_list[args.discard:]\n        tuple_list = tuple_list[:-args.discard]\n    # do action for each item\n    if action == \"sum\":\n        print(sum(tuple_list))\n    if action == \"mean\":\n        if len(tuple_list) == 0: print(\"null\")\n        else: print(sum(tuple_list) / len(tuple_list))\n    if action == \"print\":\n        for item in tuple_list:\n            print(item)\ndef main():\n    current_step = 0\n    tuple_list = []\n    for line in sys.stdin:\n        line = line.strip()\n        if is_valid(line, args.valid_expr):\n            ret = extract(line, args.extract_expr)\n            if ret: tuple_list.append(ret)\n    action(tuple_list, args.reduction_expr)\nif __name__ == \"__main__\":\n    main()",
+        "type": "code",
+        "location": "/test_tipc/extract_loss.py:74-102"
+    },
+    "8565": {
+        "file_id": 633,
+        "content": "This code defines a function 'action' which performs calculations on a list of numerical tuples and prints the result based on the given action. The main function reads input lines, validates them, extracts values, and passes the resulting tuple list to the 'action' function based on user-defined parameters.",
+        "type": "comment"
+    },
+    "8566": {
+        "file_id": 634,
+        "content": "/test_tipc/prepare.sh",
+        "type": "filepath"
+    },
+    "8567": {
+        "file_id": 634,
+        "content": "This script prepares PaddlePaddle's video object detection models by handling data, installing packages, and downloading/preprocessing for TIPC models. It also prepares data for AttentionLSTM and SlowFast models. The code downloads pre-trained model data and weights for various models like ResNet50, TSN, TimeSformer, PP-TSM, and VideoSwin.",
+        "type": "summary"
+    },
+    "8568": {
+        "file_id": 634,
+        "content": "#!/bin/bash\nsource test_tipc/common_func.sh\nFILENAME=$1\n# set -xe\n:<<!\nMODE be one of ['lite_train_lite_infer' 'lite_train_whole_infer' 'whole_train_whole_infer',\n#                 'whole_infer',\n#                 'cpp_infer', ]\n!\nMODE=$2\ndataline=$(cat ${FILENAME})\n# parser params\nIFS=$'\\n'\nlines=(${dataline})\n# determine python interpreter version\npython=python\n# install auto-log package.\n${python} -m pip install unrar\n${python} -m pip install https://paddleocr.bj.bcebos.com/libs/auto_log-1.2.0-py3-none-any.whl\n# The training params\nmodel_name=$(func_parser_value \"${lines[1]}\")\ntrainer_list=$(func_parser_value \"${lines[14]}\")\nif [ ${MODE} = \"lite_train_lite_infer\" ];then\n    if [ ${model_name} == \"PP-TSM\" ]; then\n        # pretrain lite train data\n        pushd ./data/k400\n        wget -nc https://videotag.bj.bcebos.com/Data/k400_rawframes_small.tar\n        tar -xf k400_rawframes_small.tar\n        popd\n        # download pretrained weights\n        wget -nc -P ./data https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_vd_ssld_v2_pretrained.pdparams --no-check-certificate",
+        "type": "code",
+        "location": "/test_tipc/prepare.sh:1-44"
+    },
+    "8569": {
+        "file_id": 634,
+        "content": "This script is preparing the environment for training and inference on PaddlePaddle's video object detection models. It takes a filename as an argument, parses its contents to determine the model name and mode, installs required packages like auto-log, and prepares any necessary data or pretrained weights for the selected model.",
+        "type": "comment"
+    },
+    "8570": {
+        "file_id": 634,
+        "content": "    elif [ ${model_name} == \"PP-TSN\" ]; then\n        # pretrain lite train data\n        pushd ./data/k400\n        wget -nc https://videotag.bj.bcebos.com/Data/k400_videos_small.tar\n        tar -xf k400_videos_small.tar\n        popd\n        # download pretrained weights\n        wget -nc -P ./data https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_vd_ssld_v2_pretrained.pdparams --no-check-certificate\n    elif [ ${model_name} == \"AGCN\" ]; then\n        # pretrain lite train data\n        pushd data/fsd10\n        wget -nc https://videotag.bj.bcebos.com/Data/FSD_train_data.npy\n        wget -nc https://videotag.bj.bcebos.com/Data/FSD_train_label.npy\n        popd\n    elif [ ${model_name} == \"STGCN\" ]; then\n        # pretrain lite train data\n        pushd data/fsd10\n        wget -nc https://videotag.bj.bcebos.com/Data/FSD_train_data.npy\n        wget -nc https://videotag.bj.bcebos.com/Data/FSD_train_label.npy\n        popd\n    elif [ ${model_name} == \"AGCN2s\" ]; then\n        # pretrain lite train data\n        pushd data/fsd10",
+        "type": "code",
+        "location": "/test_tipc/prepare.sh:45-67"
+    },
+    "8571": {
+        "file_id": 634,
+        "content": "This code checks the value of the 'model_name' variable and performs specific actions based on its value. If 'model_name' is \"PP-TSN\", it downloads pretrained weights for ResNet50 model. If 'model_name' is \"AGCN\" or \"STGCN\", it downloads training data for FSD10 dataset. The code uses pushd and popd commands to navigate directories, and wget command to download files.",
+        "type": "comment"
+    },
+    "8572": {
+        "file_id": 634,
+        "content": "        wget -nc https://videotag.bj.bcebos.com/Data/FSD_train_data.npy\n        wget -nc https://videotag.bj.bcebos.com/Data/FSD_train_label.npy\n        popd\n    elif [ ${model_name} == \"TSM\" ]; then\n        # pretrain lite train data\n        pushd ./data/k400\n        wget -nc https://videotag.bj.bcebos.com/Data/k400_rawframes_small.tar\n        tar -xf k400_rawframes_small.tar\n        popd\n        # download pretrained weights\n        wget -nc -P ./data https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_pretrain.pdparams --no-check-certificate\n    elif [ ${model_name} == \"TSN\" ]; then\n        # pretrain lite train data\n        pushd ./data/k400\n        wget -nc https://videotag.bj.bcebos.com/Data/k400_rawframes_small.tar\n        tar -xf k400_rawframes_small.tar\n        popd\n        # download pretrained weights\n        wget -nc -P ./data https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_pretrain.pdparams --no-check-certificate\n    elif [ ${model_name} == \"TimeSformer\" ]; then",
+        "type": "code",
+        "location": "/test_tipc/prepare.sh:68-87"
+    },
+    "8573": {
+        "file_id": 634,
+        "content": "This code segment downloads the necessary data and pretrained weights for different models (FSD, TSM, or TimeSformer). It checks the value of the model_name variable and performs specific actions accordingly. For FSD, it downloads train data and labels. For TSM and TimeSformer, it downloads lite train data and pretrained ResNet50 weights. The code also uses pushd and popd commands to change directories temporarily during the process.",
+        "type": "comment"
+    },
+    "8574": {
+        "file_id": 634,
+        "content": "        # pretrain lite train data\n        pushd ./data/k400\n        wget -nc https://videotag.bj.bcebos.com/Data/k400_videos_small.tar\n        tar -xf k400_videos_small.tar\n        popd\n        # download pretrained weights\n        wget -nc -P ./data https://paddle-imagenet-models-name.bj.bcebos.com/dygraph/ViT_base_patch16_224_pretrained.pdparams --no-check-certificate\n    elif [ ${model_name} == \"AttentionLSTM\" ]; then\n        pushd data/yt8m\n        ## download & decompression training data\n        wget -nc https://videotag.bj.bcebos.com/Data/yt8m_rawframe_small.tar\n        tar -xf yt8m_rawframe_small.tar\n        ${python} -m pip install tensorflow-gpu==1.14.0 -i https://pypi.tuna.tsinghua.edu.cn/simple\n        ${python} tf2pkl.py ./frame ./pkl_frame/\n        ls pkl_frame/train*.pkl > train_small.list # 将train*.pkl的路径写入train_small.list\n        ls pkl_frame/validate*.pkl > val_small.list # 将validate*.pkl的路径写入val_small.list\n        ${python} split_yt8m.py train_small.list # 拆分每个train*.pkl变成多个train*_split*.pkl",
+        "type": "code",
+        "location": "/test_tipc/prepare.sh:88-105"
+    },
+    "8575": {
+        "file_id": 634,
+        "content": "The code snippet is preparing data and downloading pretrained weights for different models. It first prepares the lite train data by downloading and decompressing a dataset, then installs TensorFlow GPU version 1.14.0, converts data format using tf2pkl.py script, splits the train data into multiple files, and finally, it downloads the pretrained weights for the specified model.",
+        "type": "comment"
+    },
+    "8576": {
+        "file_id": 634,
+        "content": "        ${python} split_yt8m.py val_small.list # 拆分每个validate*.pkl变成多个validate*_split*.pkl\n        ls pkl_frame/train*_split*.pkl > train_small.list # 将train*_split*.pkl的路径重新写入train_small.list\n        ls pkl_frame/validate*_split*.pkl > val_small.list # 将validate*_split*.pkl的路径重新写入val_small.list\n        popd\n    elif [ ${model_name} == \"SlowFast\" ]; then\n        # pretrain lite train data\n        pushd ./data/k400\n        wget -nc https://videotag.bj.bcebos.com/Data/k400_videos_small.tar\n        tar -xf k400_videos_small.tar\n        popd\n    elif [ ${model_name} == \"BMN\" ]; then\n        # pretrain lite train data\n        pushd ./data\n        mkdir bmn_data\n        cd bmn_data\n        wget -nc https://videotag.bj.bcebos.com/Data/BMN_lite/bmn_feat.tar.gz\n        tar -xf bmn_feat.tar.gz\n        wget -nc https://videotag.bj.bcebos.com/Data/BMN_lite/activitynet_1.3_annotations.json\n        wget -nc https://paddlemodels.bj.bcebos.com/video_detection/activity_net_1_3_new.json\n        popd\n    elif [ ${model_name} == \"TokenShiftVisionTransformer\" ]; then",
+        "type": "code",
+        "location": "/test_tipc/prepare.sh:106-127"
+    },
+    "8577": {
+        "file_id": 634,
+        "content": "This code is checking the value of the variable `model_name` and performing different operations based on its value. For example, if `model_name` equals \"SlowFast\", it changes directory to `./data/k400`, downloads a tar file containing data for pre-training a SlowFast model, and then extracts the tar file. Similarly, if `model_name` is \"BMN\" or \"TokenShiftVisionTransformer\", different operations are carried out, such as downloading and extracting necessary data files for pre-training these models. The code uses various commands like `pushd`, `popd`, `wget`, and `tar` to manipulate directories and files.",
+        "type": "comment"
+    },
+    "8578": {
+        "file_id": 634,
+        "content": "        # download pretrained weights\n        wget -nc -P ./data https://paddle-imagenet-models-name.bj.bcebos.com/dygraph/ViT_base_patch16_224_pretrained.pdparams --no-check-certificate\n    elif [ ${model_name} == \"PoseC3D\" ]; then\n        # pretrain lite train data\n        pushd ./data\n        mkdir posec3d_data\n        cd posec3d_data\n        wget -nc https://videotag.bj.bcebos.com/PaddleVideo-release2.3/PoseC3D_data_small.tar\n        tar -xf PoseC3D_data_small.tar\n        popd\n    elif [ ${model_name} == \"YOWO\" ]; then\n        # pretrain lite train data\n        pushd ./data\n        wget -nc https://videotag.bj.bcebos.com/Data/ucf-24-lite.zip\n        unzip -qo ucf-24-lite.zip\n        pushd ./ucf24\n        wget -nc https://videotag.bj.bcebos.com/PaddleVideo-release2.3/darknet.pdparam\n        wget -nc https://videotag.bj.bcebos.com/PaddleVideo-release2.3/resnext101_kinetics.pdparams\n        wget -nc https://videotag.bj.bcebos.com/PaddleVideo-release2.3/YOWO_epoch_00005.pdparams\n        popd\n    else\n        echo \"Not added into TIPC yet.\"",
+        "type": "code",
+        "location": "/test_tipc/prepare.sh:128-149"
+    },
+    "8579": {
+        "file_id": 634,
+        "content": "This script downloads pre-trained model weights and preprocesses training data for specific models. For ViT_base, it downloads the weight file. For PoseC3D, it downloads and unzips a small dataset. For YOWO, it downloads the necessary datasets and YOWO's pre-trained model at a specific epoch. Models not in TIPC are not processed.",
+        "type": "comment"
+    },
+    "8580": {
+        "file_id": 634,
+        "content": "    fi\nelif [ ${MODE} = \"whole_train_whole_infer\" ];then\n    if [ ${model_name} == \"PP-TSM\" ]; then\n        # pretrain whole train data\n        pushd ./data/k400\n        wget -nc https://ai-rank.bj.bcebos.com/Kinetics400/train_link.list\n        wget -nc https://ai-rank.bj.bcebos.com/Kinetics400/val_link.list\n        bash download_k400_data.sh train_link.list\n        bash download_k400_data.sh val_link.list\n        ${python} extract_rawframes.py ./videos/ ./rawframes/ --level 2 --ext mp4 # extract frames from video file\n        # download annotations\n        wget -nc https://videotag.bj.bcebos.com/PaddleVideo/Data/Kinetic400/train_frames.list\n        wget -nc https://videotag.bj.bcebos.com/PaddleVideo/Data/Kinetic400/val_frames.list\n        popd\n        # download pretrained weights\n        wget -nc -P ./data https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_vd_ssld_v2_pretrained.pdparams --no-check-certificate\n    elif [ ${model_name} == \"PP-TSN\" ]; then\n        # pretrain whole train data",
+        "type": "code",
+        "location": "/test_tipc/prepare.sh:150-168"
+    },
+    "8581": {
+        "file_id": 634,
+        "content": "Checking if MODE is \"whole_train_whole_infer\". If true, it determines the model (PP-TSM or PP-TSN) and performs specific actions for pretraining with whole training data. For PP-TSM, downloads Kinetics400 data, extracts raw frames, downloads annotations, and gets pretrained weights. For PP-TSN, similar steps are followed but with different data and models.",
+        "type": "comment"
+    },
+    "8582": {
+        "file_id": 634,
+        "content": "        pushd ./data/k400\n        wget -nc https://ai-rank.bj.bcebos.com/Kinetics400/train_link.list\n        wget -nc https://ai-rank.bj.bcebos.com/Kinetics400/val_link.list\n        bash download_k400_data.sh train_link.list\n        bash download_k400_data.sh val_link.list\n        # download annotations\n        wget -nc https://videotag.bj.bcebos.com/PaddleVideo/Data/Kinetic400/train.list\n        wget -nc https://videotag.bj.bcebos.com/PaddleVideo/Data/Kinetic400/val.list\n        popd\n        # download pretrained weights\n        wget -nc -P ./data https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_vd_ssld_v2_pretrained.pdparams --no-check-certificate\n    elif [ ${model_name} == \"AGCN\" ]; then\n        # pretrain whole train data\n        pushd data/fsd10\n        wget -nc https://videotag.bj.bcebos.com/Data/FSD_train_data.npy\n        wget -nc https://videotag.bj.bcebos.com/Data/FSD_train_label.npy\n        popd\n    elif [ ${model_name} == \"STGCN\" ]; then\n        # pretrain whole train data\n        pushd data/fsd10",
+        "type": "code",
+        "location": "/test_tipc/prepare.sh:169-188"
+    },
+    "8583": {
+        "file_id": 634,
+        "content": "This code downloads pre-trained model weights and data for different models, such as ResNet50_vd_ssld_v2, AGCN, and STGCN. It also downloads annotations and train/validation lists from specific URLs. The code uses pushd and popd commands to change directories temporarily and wget command to perform non-checking downloads (nc) of files.",
+        "type": "comment"
+    },
+    "8584": {
+        "file_id": 634,
+        "content": "        wget -nc https://videotag.bj.bcebos.com/Data/FSD_train_data.npy\n        wget -nc https://videotag.bj.bcebos.com/Data/FSD_train_label.npy\n        popd\n    elif [ ${model_name} == \"TSM\" ]; then\n        # pretrain whole train data\n        pushd ./data/k400\n        wget -nc https://ai-rank.bj.bcebos.com/Kinetics400/train_link.list\n        wget -nc https://ai-rank.bj.bcebos.com/Kinetics400/val_link.list\n        bash download_k400_data.sh train_link.list\n        bash download_k400_data.sh val_link.list\n        ${python} extract_rawframes.py ./videos/ ./rawframes/ --level 2 --ext mp4 # extract frames from video file\n        # download annotations\n        wget -nc https://videotag.bj.bcebos.com/PaddleVideo/Data/Kinetic400/train_frames.list\n        wget -nc https://videotag.bj.bcebos.com/PaddleVideo/Data/Kinetic400/val_frames.list\n        popd\n        # download pretrained weights\n        wget -nc -P ./data https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_pretrain.pdparams --no-check-certificate",
+        "type": "code",
+        "location": "/test_tipc/prepare.sh:189-205"
+    },
+    "8585": {
+        "file_id": 634,
+        "content": "The code checks the value of 'model_name', and if it's \"TSM\", it performs specific actions. It changes to the directory ./data/k400, downloads train and val lists from the URLs provided, then uses bash scripts to download data based on the list. Afterwards, it extracts frames from video files using the 'extract_rawframes.py' script at a certain level and with specific extensions. It also downloads annotations for training and validation sets. Finally, it changes back to the previous directory and downloads pretrained ResNet50 weights.",
+        "type": "comment"
+    },
+    "8586": {
+        "file_id": 634,
+        "content": "    elif [ ${model_name} == \"TSN\" ]; then\n        # pretrain whole train data\n        pushd ./data/k400\n        wget -nc https://ai-rank.bj.bcebos.com/Kinetics400/train_link.list\n        wget -nc https://ai-rank.bj.bcebos.com/Kinetics400/val_link.list\n        bash download_k400_data.sh train_link.list\n        bash download_k400_data.sh val_link.list\n        ${python} extract_rawframes.py ./videos/ ./rawframes/ --level 2 --ext mp4 # extract frames from video file\n        # download annotations\n        wget -nc https://videotag.bj.bcebos.com/PaddleVideo/Data/Kinetic400/train_frames.list\n        wget -nc https://videotag.bj.bcebos.com/PaddleVideo/Data/Kinetic400/val_frames.list\n        popd\n        # download pretrained weights\n        wget -nc -P ./data https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_pretrain.pdparams --no-check-certificate\n    elif [ ${model_name} == \"TimeSformer\" ]; then\n        # pretrain whole train data\n        pushd ./data/k400\n        wget -nc https://ai-rank.bj.bcebos.com/Kinetics400/train_link.list",
+        "type": "code",
+        "location": "/test_tipc/prepare.sh:206-223"
+    },
+    "8587": {
+        "file_id": 634,
+        "content": "The code checks if the model name is \"TSN\" or \"TimeSformer\" and then downloads corresponding data and pretrained weights for each model. It pushes to a directory, downloads training and validation lists, extracts frames from videos, downloads annotations, and finally pops out of the directory. This script appears to be part of a larger program that prepares data for specific models in a machine learning or deep learning context.",
+        "type": "comment"
+    },
+    "8588": {
+        "file_id": 634,
+        "content": "        wget -nc https://ai-rank.bj.bcebos.com/Kinetics400/val_link.list\n        bash download_k400_data.sh train_link.list\n        bash download_k400_data.sh val_link.list\n        # download annotations\n        wget -nc https://videotag.bj.bcebos.com/PaddleVideo/Data/Kinetic400/train.list\n        wget -nc https://videotag.bj.bcebos.com/PaddleVideo/Data/Kinetic400/val.list\n        popd\n        # download pretrained weights\n        wget -nc -P ./data https://paddle-imagenet-models-name.bj.bcebos.com/dygraph/ViT_base_patch16_224_pretrained.pdparams --no-check-certificate\n    elif [ ${model_name} == \"AttentionLSTM\" ]; then\n        # pretrain whole train data\n        pushd data/yt8m\n        mkdir frame\n        cd frame\n        ## download & decompression training data\n        curl data.yt8m.org/download.py | partition=2/frame/train mirror=asia python\n        curl data.yt8m.org/download.py | partition=2/frame/validate mirror=asia python\n        ${python} -m pip install tensorflow-gpu==1.14.0 -i https://pypi.tuna.tsinghua.edu.cn/simple",
+        "type": "code",
+        "location": "/test_tipc/prepare.sh:224-241"
+    },
+    "8589": {
+        "file_id": 634,
+        "content": "This code is preparing the data and environment for a specific model named \"AttentionLSTM\". It downloads links for training and validation datasets, fetches annotations, and gets pre-trained weights. The model requires TensorFlow GPU version 1.14.0 and uses YT8M dataset partitioned into 2 parts - train and validate.",
+        "type": "comment"
+    },
+    "8590": {
+        "file_id": 634,
+        "content": "        cd ..\n        ${python} tf2pkl.py ./frame ./pkl_frame/\n        ls pkl_frame/train*.pkl > train.list # 将train*.pkl的路径写入train.list\n        ls pkl_frame/validate*.pkl > val.list # 将validate*.pkl的路径写入val.list\n        ${python} split_yt8m.py train.list # 拆分每个train*.pkl变成多个train*_split*.pkl\n        ${python} split_yt8m.py val.list # 拆分每个validate*.pkl变成多个validate*_split*.pkl\n        ls pkl_frame/train*_split*.pkl > train.list # 将train*_split*.pkl的路径重新写入train.list\n        ls pkl_frame/validate*_split*.pkl > val.list # 将validate*_split*.pkl的路径重新写入val.list\n        popd\n    elif [ ${model_name} == \"SlowFast\" ]; then\n        # pretrain whole train data\n        pushd ./data/k400\n        wget -nc https://ai-rank.bj.bcebos.com/Kinetics400/train_link.list\n        wget -nc https://ai-rank.bj.bcebos.com/Kinetics400/val_link.list\n        bash download_k400_data.sh train_link.list\n        bash download_k400_data.sh val_link.list\n        # download annotations\n        wget -nc https://videotag.bj.bcebos.com/PaddleVideo/Data/Kinetic400/train.list",
+        "type": "code",
+        "location": "/test_tipc/prepare.sh:242-261"
+    },
+    "8591": {
+        "file_id": 634,
+        "content": "The code is preparing the Kinetics400 dataset for PaddleVideo's SlowFast model by downloading and splitting the train and validation data. It changes directory, uses tf2pkl.py to convert frame files into pkl format, splits the pkl files using split_yt8m.py, and finally writes the file paths into train.list and val.list.",
+        "type": "comment"
+    },
+    "8592": {
+        "file_id": 634,
+        "content": "        wget -nc https://videotag.bj.bcebos.com/PaddleVideo/Data/Kinetic400/val.list\n        popd\n    elif [ ${model_name} == \"BMN\" ]; then\n        # pretrain whole train data\n        pushd ./data\n        mkdir bmn_data\n        cd bmn_data\n        wget -nc https://paddlemodels.bj.bcebos.com/video_detection/bmn_feat.tar.gz\n        tar -xf bmn_feat.tar.gz\n        wget -nc https://paddlemodels.bj.bcebos.com/video_detection/activitynet_1.3_annotations.json\n        wget -nc https://paddlemodels.bj.bcebos.com/video_detection/activity_net_1_3_new.json\n        popd\n    else\n        echo \"Not added into TIPC yet.\"\n    fi\nelif [ ${MODE} = \"lite_train_whole_infer\" ];then\n    if [ ${model_name} == \"PP-TSM\" ]; then\n        # pretrain lite train data\n        pushd ./data/k400\n        wget -nc https://videotag.bj.bcebos.com/Data/k400_rawframes_small.tar\n        tar -xf k400_rawframes_small.tar\n        popd\n        # download pretrained weights\n        wget -nc -P ./data https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_vd_ssld_v2_pretrained.pdparams --no-check-certificate",
+        "type": "code",
+        "location": "/test_tipc/prepare.sh:262-285"
+    },
+    "8593": {
+        "file_id": 634,
+        "content": "Code handles different scenarios based on the model_name and MODE variables. For BMN, it pretrains using whole train data by downloading necessary files from specified URLs. For PP-TSM in lite_train_whole_infer scenario, it pretrains using lite train data by downloading a tar file and pretrained weights. If none of the conditions match, it displays \"Not added into TIPC yet.\" message.",
+        "type": "comment"
+    },
+    "8594": {
+        "file_id": 634,
+        "content": "    elif [ ${model_name} == \"PP-TSN\" ]; then\n        # pretrain lite train data\n        pushd ./data/k400\n        wget -nc https://videotag.bj.bcebos.com/Data/k400_videos_small.tar\n        tar -xf k400_videos_small.tar\n        popd\n        # download pretrained weights\n        wget -nc -P ./data https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_vd_ssld_v2_pretrained.pdparams --no-check-certificate\n    elif [ ${model_name} == \"AGCN\" ]; then\n        # pretrain lite train data\n        pushd data/fsd10\n        wget -nc https://videotag.bj.bcebos.com/Data/FSD_train_data.npy\n        wget -nc https://videotag.bj.bcebos.com/Data/FSD_train_label.npy\n        popd\n    elif [ ${model_name} == \"STGCN\" ]; then\n        # pretrain lite train data\n        pushd data/fsd10\n        wget -nc https://videotag.bj.bcebos.com/Data/FSD_train_data.npy\n        wget -nc https://videotag.bj.bcebos.com/Data/FSD_train_label.npy\n        popd\n    elif [ ${model_name} == \"TSM\" ]; then\n        # pretrain lite train data\n        pushd ./data/k400",
+        "type": "code",
+        "location": "/test_tipc/prepare.sh:286-308"
+    },
+    "8595": {
+        "file_id": 634,
+        "content": "This code checks the value of the `model_name` variable and performs different actions accordingly. If it's \"PP-TSN\", it downloads pretrained weights and lite train data for PP-TSN model. If it's \"AGCN\" or \"STGCN\", it downloads lite train data. And if it's \"TSM\", it downloads lite train data for TSM model. It uses pushd/popd to change directories and wget to download files from specified URLs.",
+        "type": "comment"
+    },
+    "8596": {
+        "file_id": 634,
+        "content": "        wget -nc https://videotag.bj.bcebos.com/Data/k400_rawframes_small.tar\n        tar -xf k400_rawframes_small.tar\n        popd\n        # download pretrained weights\n        wget -nc -P ./data https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_pretrain.pdparams --no-check-certificate\n    elif [ ${model_name} == \"TSN\" ]; then\n        # pretrain lite train data\n        pushd ./data/k400\n        wget -nc https://videotag.bj.bcebos.com/Data/k400_rawframes_small.tar\n        tar -xf k400_rawframes_small.tar\n        popd\n        # download pretrained weights\n        wget -nc -P ./data https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_pretrain.pdparams --no-check-certificate\n    elif [ ${model_name} == \"TimeSformer\" ]; then\n        # pretrain lite train data\n        pushd ./data/k400\n        wget -nc https://videotag.bj.bcebos.com/Data/k400_videos_small.tar\n        tar -xf k400_videos_small.tar\n        popd\n        # download pretrained weights\n        wget -nc -P ./data https:/",
+        "type": "code",
+        "location": "/test_tipc/prepare.sh:309-329"
+    },
+    "8597": {
+        "file_id": 634,
+        "content": "This code downloads pre-trained model files for different models. For \"PaddleVideo/test_tipc/prepare.sh\", it checks the value of $model_name and proceeds accordingly. It pushes to a specific data folder, then downloads rawframes or videos depending on the model type. Finally, it retrieves the pre-trained weights for each model from an HTTPS URL, handling network errors with -nc option.",
+        "type": "comment"
+    },
+    "8598": {
+        "file_id": 634,
+        "content": "/paddle-imagenet-models-name.bj.bcebos.com/dygraph/ViT_base_patch16_224_pretrained.pdparams --no-check-certificate\n    elif [ ${model_name} == \"AttentionLSTM\" ]; then\n        # pretrain lite train data\n        pushd data/yt8m\n        ## download & decompression training data\n        wget -nc https://videotag.bj.bcebos.com/Data/yt8m_rawframe_small.tar\n        tar -xf yt8m_rawframe_small.tar\n        ${python} -m pip install tensorflow-gpu==1.14.0 -i https://pypi.tuna.tsinghua.edu.cn/simple\n        ${python} tf2pkl.py ./frame ./pkl_frame/\n        ls pkl_frame/train*.pkl > train_small.list # 将train*.pkl的路径写入train_small.list\n        ls pkl_frame/validate*.pkl > val_small.list # 将validate*.pkl的路径写入val_small.list\n        ${python} split_yt8m.py train_small.list # 拆分每个train*.pkl变成多个train*_split*.pkl\n        ${python} split_yt8m.py val_small.list # 拆分每个validate*.pkl变成多个validate*_split*.pkl\n        ls pkl_frame/train*_split*.pkl > train_small.list # 将train*_split*.pkl的路径重新写入train_small.list\n        ls pkl_frame/validate*_split*.pkl > val_small.list # 将validate*_split*.pkl的路径重新写入val_small.list",
+        "type": "code",
+        "location": "/test_tipc/prepare.sh:329-345"
+    },
+    "8599": {
+        "file_id": 634,
+        "content": "This code snippet downloads and prepares the dataset for training an AttentionLSTM model. It first checks out the data from a specific URL, installs TensorFlow version 1.14.0, converts the raw video frames to pickle format, splits the data into training and validation sets, and finally lists the resulting files in train_small.list and val_small.list.",
+        "type": "comment"
+    }
+}

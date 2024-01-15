@@ -1,0 +1,541 @@
+{
+    "1100": {
+        "file_id": 102,
+        "content": "/applications/FootballAction/extractor/extract_feat.py",
+        "type": "filepath"
+    },
+    "1101": {
+        "file_id": 102,
+        "content": "This Python script loads Baidu Cloud models for video classification, extracts audio and pcm features, logs details, saves features in a pickle file, creates \"features\" directory if necessary, and classifies videos from a specified dataset directory.",
+        "type": "summary"
+    },
+    "1102": {
+        "file_id": 102,
+        "content": "#!./python27-gcc482/bin/python\n# coding: utf-8\n\"\"\"\nBAIDU CLOUD action\n\"\"\"\nimport os\nimport sys\nimport pickle\nimport json\nimport time\nimport shutil\nimport numpy as np\nsys.path.append(\"../predict/action_detect\")\nimport models.pptsm_infer as image_model\nimport models.audio_infer as audio_model\nfrom utils.preprocess import get_images\nfrom utils.config_utils import parse_config, print_configs\nimport utils.config_utils as config_utils\nimport logger\nlogger = logger.Logger()\ndef load_model(cfg_file=\"configs/configs.yaml\"):\n    \"\"\"\n    load_model\n    \"\"\"\n    logger.info(\"load model ... \")\n    global infer_configs\n    infer_configs = parse_config(cfg_file)\n    print_configs(infer_configs, \"Infer\")\n    t0 = time.time()\n    global image_model, audio_model\n    image_model = image_model.InferModel(infer_configs)\n    audio_model = audio_model.InferModel(infer_configs)\n    t1 = time.time()\n    logger.info(\"step0: load model time: {} min\\n\".format((t1 - t0) * 1.0 / 60))\ndef video_classify(video_name):\n    \"\"\"\n    extract_feature\n    \"\"\"\n    logger.info('predict ... ')",
+        "type": "code",
+        "location": "/applications/FootballAction/extractor/extract_feat.py:1-50"
+    },
+    "1103": {
+        "file_id": 102,
+        "content": "This Python script is for the Baidu Cloud action, loading and initializing image and audio models according to a given configuration file. It also provides a function to classify videos. The script logs information about model loading time and the progress of video classification.",
+        "type": "comment"
+    },
+    "1104": {
+        "file_id": 102,
+        "content": "    logger.info(video_name)\n    imgs_path = video_name.replace(\".mp4\", \"\").replace(\"mp4\", \"frames\")\n    pcm_path = video_name.replace(\".mp4\", \".pcm\").replace(\"mp4\", \"pcm\")\n    # step 1: extract feature\n    t0 = time.time()\n    image_path_list = get_images(imgs_path)\n    infer_configs['PPTSM']['frame_list'] = image_path_list\n    infer_configs['AUDIO']['pcm_file'] = pcm_path\n    image_features = image_model.predict(infer_configs)\n    audio_features, pcm_features = audio_model.predict(infer_configs)\n    np_image_features = np.array(image_features, dtype=np.float32)\n    np_audio_features = np.array(audio_features, dtype=np.float32)\n    np_pcm_features = np.array(pcm_features, dtype=np.float32)\n    t1 = time.time()\n    logger.info('{} {} {}'.format(np_image_features.shape,\n                                  np_audio_features.shape,\n                                  np_pcm_features.shape))\n    logger.info(\"step1: feature extract time: {} min\".format(\n        (t1 - t0) * 1.0 / 60))\n    video_features = {\n        'image_feature': np_image_features,",
+        "type": "code",
+        "location": "/applications/FootballAction/extractor/extract_feat.py:51-74"
+    },
+    "1105": {
+        "file_id": 102,
+        "content": "Extracting video features, specifically images and audio. Converting extracted features to numpy arrays. Logging shapes of the arrays and time taken for feature extraction.",
+        "type": "comment"
+    },
+    "1106": {
+        "file_id": 102,
+        "content": "        'audio_feature': np_audio_features,\n        'pcm_feature': np_pcm_features\n    }\n    # save feature\n    feature_path = video_name.replace(\".mp4\", \".pkl\").replace(\"mp4\", \"features\")\n    feat_pkl_str = pickle.dumps(video_features,\n                                protocol=pickle.HIGHEST_PROTOCOL)\n    with open(feature_path, 'wb') as fout:\n        fout.write(feat_pkl_str)\nif __name__ == '__main__':\n    dataset_dir = \"../datasets/EuroCup2016\"\n    if not os.path.exists(dataset_dir + '/features'):\n        os.mkdir(dataset_dir + '/features')\n    load_model()\n    video_url = os.path.join(dataset_dir, 'url.list')\n    with open(video_url, 'r') as f:\n        lines = f.readlines()\n    lines = [os.path.join(dataset_dir, k.strip()) for k in lines]\n    for line in lines:\n        video_classify(line)",
+        "type": "code",
+        "location": "/applications/FootballAction/extractor/extract_feat.py:75-100"
+    },
+    "1107": {
+        "file_id": 102,
+        "content": "The code extracts audio and pcm features from video files, saves them in a pickle file named after the original video, creates a \"features\" directory if it doesn't exist, then classifies each video based on its location in a specified dataset directory.",
+        "type": "comment"
+    },
+    "1108": {
+        "file_id": 103,
+        "content": "/applications/FootballAction/predict/action_detect/action.py",
+        "type": "filepath"
+    },
+    "1109": {
+        "file_id": 103,
+        "content": "This code employs machine learning and deep learning for Baidu Cloud's action detection system, including preprocessing, feature extraction, model application, and time-tracked execution. It configures PPTSM model, predicts features from data, creates a video feature dictionary, loads pre-existing features, checks shapes, and writes results to JSON file.",
+        "type": "summary"
+    },
+    "1110": {
+        "file_id": 103,
+        "content": "#!./python27-gcc482/bin/python\n# coding: utf-8\n\"\"\"\nBAIDU CLOUD action\n\"\"\"\nimport os\nimport sys\nimport pickle\nimport json\nimport time\nimport functools\nimport numpy as np\nfrom utils.preprocess import get_images\nfrom utils.config_utils import parse_config, print_configs\nimport mfcc.feature_extractor as mfcc_extractor\nimport models.pptsm_infer as image_model\nimport models.audio_infer as audio_model\nimport models.bmn_infer as prop_model\nimport models.lstm_infer as classify_model\nimport logger\nlogger = logger.Logger()\ndef record_time_info(func):\n    \"\"\"decorator func to log cost time for func\n    \"\"\"\n    @functools.wraps(func)\n    def timer(*args):\n        \"\"\"log cost time for func\n        \"\"\"\n        logger.info(\"function [{}] processing ...\".format(func.__name__))\n        start_time = time.time()\n        retval = func(*args)\n        cost_time = round(time.time() - start_time, 5)\n        logger.info(\"function [{}] run time: {:.2f} min\".format(func.__name__, cost_time / 60))\n        return retval\n    return timer\nclass ActionDetection(object):",
+        "type": "code",
+        "location": "/applications/FootballAction/predict/action_detect/action.py:1-44"
+    },
+    "1111": {
+        "file_id": 103,
+        "content": "This code is for the Baidu Cloud action detection system, which uses machine learning and deep learning models to classify actions from both audio and image inputs. It includes utilities for preprocessing data, extracting features, and applying various models including image, audio, and propensity models. The code also has a logger module to log processing time information. A class ActionDetection is defined which likely handles the overall action detection process.",
+        "type": "comment"
+    },
+    "1112": {
+        "file_id": 103,
+        "content": "    \"\"\"ModelPredict\"\"\"\n    def __init__(self, cfg_file=\"configs/configs.yaml\"):\n        cfg = parse_config(cfg_file)\n        self.configs = cfg\n        print_configs(self.configs, \"Infer\")\n        name = 'COMMON'\n        self.DEBUG          = cfg[name]['DEBUG']\n        self.BMN_ONLY       = cfg[name]['BMN_ONLY']\n        self.LSTM_ONLY      = cfg[name]['LSTM_ONLY']\n        self.PCM_ONLY       = cfg[name]['PCM_ONLY']\n        if self.LSTM_ONLY:\n            self.prop_dict = {}\n            for dataset in ['EuroCup2016']:\n                prop_json = '/home/work/datasets/{}/feature_bmn/prop.json'.format(dataset)\n                json_data = json.load(open(prop_json, 'r'))\n                for item in json_data:\n                    basename = prop_json.replace('feature_bmn/prop.json', 'mp4')\n                    basename = basename + '/' + item['video_name'] + '.mp4'\n                    self.prop_dict[basename] = item['bmn_results']\n    @record_time_info\n    def load_model(self):\n        \"\"\"\n        load_model\n        \"\"\"",
+        "type": "code",
+        "location": "/applications/FootballAction/predict/action_detect/action.py:45-71"
+    },
+    "1113": {
+        "file_id": 103,
+        "content": "This code initializes a ModelPredict object with various configuration settings and properties. It reads configuration data from a specified file, prints relevant information for debugging, and sets attributes related to model components such as BMN_ONLY, LSTM_ONLY, and PCM_ONLY. If LSTM_ONLY is set to true, it populates a prop_dict with video names and their corresponding BMN results for later use in the load_model function.",
+        "type": "comment"
+    },
+    "1114": {
+        "file_id": 103,
+        "content": "        if not self.DEBUG:\n            self.image_model = image_model.InferModel(self.configs)\n            if not self.PCM_ONLY:\n                self.audio_model = audio_model.InferModel(self.configs)\n        if not self.LSTM_ONLY:\n            self.prop_model = prop_model.InferModel(self.configs)\n        if not self.BMN_ONLY:\n            self.classify_model = classify_model.InferModel(self.configs)\n        logger.info(\"==> Action Detection prepared.\")\n    @record_time_info\n    def infer(self, imgs_path, pcm_path, fps=5):\n        \"\"\"\n        extract_feature\n        \"\"\"\n        self.imgs_path = imgs_path\n        self.pcm_path = pcm_path\n        self.configs['COMMON']['fps'] = fps\n        logger.info(\"==> input video {}\".format(os.path.basename(self.imgs_path)))\n        # step 1: extract feature\n        video_features = self.extract_feature()\n        # step2: get proposal\n        bmn_results = self.extract_proposal(video_features)\n        # step3: classify \n        material = {'feature': video_features, 'proposal': bmn_results}",
+        "type": "code",
+        "location": "/applications/FootballAction/predict/action_detect/action.py:72-103"
+    },
+    "1115": {
+        "file_id": 103,
+        "content": "This code initializes models for image, audio, property prediction, and action classification. If DEBUG is not set, it creates InferModel instances for each model type. It then extracts features from input video, gets proposals using BMN (Bidirectional Mixture of Experts Network), and classifies the actions based on these features and proposals.",
+        "type": "comment"
+    },
+    "1116": {
+        "file_id": 103,
+        "content": "        action_results = self.video_classify(material)\n        return bmn_results, action_results\n    @record_time_info\n    def video_classify(self, material):\n        \"\"\"video classify\"\"\"\n        if self.BMN_ONLY:\n            return []\n        action_results = self.classify_model.predict(self.configs, material=material) \n        logger.info('action shape {}'.format(np.array(action_results).shape))\n        return action_results\n    @record_time_info\n    def extract_proposal(self, video_features):\n        \"\"\"extract proposal\"\"\"\n        if self.LSTM_ONLY:\n            basename = self.imgs_path.replace('frames', 'mp4') + '.mp4'\n            bmn_results = self.prop_dict[basename]\n            return bmn_results\n        bmn_results = self.prop_model.predict(self.configs, material=video_features)\n        logger.info('proposal shape {}'.format(np.array(bmn_results).shape))\n        return bmn_results\n    @record_time_info\n    def extract_feature(self):\n        \"\"\"extract feature\"\"\"\n        if not self.DEBUG:\n            image_path_list = get_images(self.imgs_path)",
+        "type": "code",
+        "location": "/applications/FootballAction/predict/action_detect/action.py:104-132"
+    },
+    "1117": {
+        "file_id": 103,
+        "content": "The code contains multiple methods: `video_classify`, `extract_proposal`, and `extract_feature`. The `video_classify` method predicts actions using a classification model, while the `extract_proposal` method extracts proposals (BMN results) for an input video. Both methods are decorated with the `@record_time_info` decorator to track execution time. The `extract_feature` method extracts features from images in the given path and is only executed if `DEBUG` flag is not set.",
+        "type": "comment"
+    },
+    "1118": {
+        "file_id": 103,
+        "content": "            self.configs['PPTSM']['frame_list'] = image_path_list\n            self.configs['AUDIO']['pcm_file'] = self.pcm_path\n            image_features = self.image_model.predict(self.configs)\n            if self.PCM_ONLY:\n                sample_rate = self.configs['AUDIO']['sample_rate']\n                pcm_features = mfcc_extractor.extract_pcm(self.pcm_path, sample_rate)\n                audio_features = []\n            else:\n                audio_features, pcm_features = self.audio_model.predict(self.configs)\n            np_image_features = np.array(image_features, dtype=np.float32)\n            np_audio_features = np.array(audio_features, dtype=np.float32)\n            np_pcm_features = np.array(pcm_features, dtype=np.float32)\n            video_features = {'image_feature': np_image_features,\n                              'audio_feature': np_audio_features,\n                              'pcm_feature': np_pcm_features}\n        else:\n            feature_path = self.imgs_path.replace(\"frames\", \"features\") + '.pkl'",
+        "type": "code",
+        "location": "/applications/FootballAction/predict/action_detect/action.py:133-151"
+    },
+    "1119": {
+        "file_id": 103,
+        "content": "This code configures the PPTSM model with image and audio data, then predicts features for both. If PCM_ONLY is True, it extracts MFCC from pcm file. It creates a video feature dictionary containing the predicted image, audio, and (if applicable) pcm features. If no input images are given, it loads the corresponding features from the specified feature path.",
+        "type": "comment"
+    },
+    "1120": {
+        "file_id": 103,
+        "content": "            video_features = pickle.load(open(feature_path, 'rb'))\n        logger.info(\"feature shape {} {} {}\".format(video_features['image_feature'].shape,\n                                                    video_features['audio_feature'].shape,\n                                                    video_features['pcm_feature'].shape))\n        return video_features\nif __name__ == '__main__':\n    model_predict = ActionDetection(cfg_file=\"../configs/configs.yaml\")\n    model_predict.load_model()\n    imgs_path = \"/home/work/datasets/EuroCup2016/frames/1be705a8f67648da8ec4b4296fa80895\"\n    pcm_path = \"/home/work/datasets/EuroCup2016/pcm/1be705a8f67648da8ec4b4296fa80895.pcm\"\n    bmn_results, action_results = model_predict.infer(imgs_path, pcm_path)\n    results = {'bmn_results': bmn_results, 'action_results': action_results}\n    with open('results.json', 'w', encoding='utf-8') as f:\n       data = json.dumps(results, indent=4, ensure_ascii=False)\n       f.write(data)",
+        "type": "code",
+        "location": "/applications/FootballAction/predict/action_detect/action.py:152-173"
+    },
+    "1121": {
+        "file_id": 103,
+        "content": "Code loads pre-existing video features from a file, checks their shapes and returns them for further processing. It then creates an instance of the ActionDetection model, loads the model, and calls infer function with image and audio paths. Finally, it writes results to a JSON file.",
+        "type": "comment"
+    },
+    "1122": {
+        "file_id": 104,
+        "content": "/applications/FootballAction/predict/action_detect/logger.py",
+        "type": "filepath"
+    },
+    "1123": {
+        "file_id": 104,
+        "content": "This code defines a custom logger class for the news stripper application. It checks if the 'logs' directory exists, creates it if not, and sets up a file handler for the logger. The handler is configured to log INFO level messages and uses a specific log format and date format.",
+        "type": "summary"
+    },
+    "1124": {
+        "file_id": 104,
+        "content": "\"\"\"\nlogger\n\"\"\"\nimport os\nimport logging\nclass Logger(logging.Logger):\n    \"\"\"Customized logger for news stripper\n    \"\"\"\n    def __init__(self):\n        super(Logger, self).__init__(self)\n        if not os.path.exists('logs'):\n            os.mkdir('logs')\n        handler = logging.FileHandler(\"logs/action_detect.log\")\n        # handler.setLevel(logging.DEBUG)\n        handler.setLevel(logging.INFO)\n        format = \"%(levelname)s: %(asctime)s: %(filename)s:%(lineno)d %(message)s\"\n        datefmt = \"%y-%m-%d %H:%M:%S\"\n        formatter = logging.Formatter(format, datefmt)\n        handler.setFormatter(formatter)\n        self.addHandler(handler)",
+        "type": "code",
+        "location": "/applications/BasketballAction/predict/action_detect/logger.py:1-23"
+    },
+    "1125": {
+        "file_id": 104,
+        "content": "This code defines a custom logger class for the news stripper application. It checks if the 'logs' directory exists, creates it if not, and sets up a file handler for the logger. The handler is configured to log INFO level messages and uses a specific log format and date format.",
+        "type": "comment"
+    },
+    "1126": {
+        "file_id": 105,
+        "content": "/applications/FootballAction/predict/action_detect/mfcc/feature_extractor.py",
+        "type": "filepath"
+    },
+    "1127": {
+        "file_id": 105,
+        "content": "The code extracts audio features using MFCC and STFT for action detection in FootballAction. It includes spectrogram bins conversion, data normalization, and resampling with examples using a WAV file.",
+        "type": "summary"
+    },
+    "1128": {
+        "file_id": 105,
+        "content": "\"\"\"\naudio feature extract\n\"\"\"\n# coding: utf-8\nimport os\nimport numpy as np\nimport pickle\nimport mfcc.vgg_params as vgg_params\ndef frame(data, window_length, hop_length):\n    \"\"\"\n    frame\n    \"\"\"\n    num_samples = data.shape[0]\n    #print(\"window_length , hop_length\", window_length, hop_length)\n    #print(\"num_sample = \", num_samples)\n    num_frames = 1 + int(np.floor((num_samples - window_length) / hop_length))\n    #print(\" num_frames = \", num_frames)\n    shape = (num_frames, window_length) + data.shape[1:]\n    #print(\" shape = \", shape)\n    strides = (data.strides[0] * hop_length, ) + data.strides\n    #print(\"data.strides = \", data.strides)\n    #print(\"strides = \", strides)\n    return np.lib.stride_tricks.as_strided(data, shape=shape, strides=strides)\ndef periodic_hann(window_length):\n    \"\"\"\n    periodic_hann\n    \"\"\"\n    return 0.5 - (0.5 *\n                  np.cos(2 * np.pi / window_length * np.arange(window_length)))\ndef stft_magnitude(signal, fft_length, hop_length=None, window_length=None):\n    \"\"\"\n    stft_magnitude",
+        "type": "code",
+        "location": "/applications/FootballAction/predict/action_detect/mfcc/feature_extractor.py:1-38"
+    },
+    "1129": {
+        "file_id": 105,
+        "content": "This code extracts audio features using the Mel-frequency cepstral coefficients (MFCC) method. It defines a function \"frame\" to slice data into frames, another function \"periodic_hann\" for windowing using periodic Hann window, and finally a function \"stft_magnitude\" for computing Short Time Fourier Transform (STFT) magnitude from signal. The code likely uses these functions in combination to extract MFCC features from audio data.",
+        "type": "comment"
+    },
+    "1130": {
+        "file_id": 105,
+        "content": "    \"\"\"\n    frames = frame(signal, window_length, hop_length)\n    window = periodic_hann(window_length)\n    windowed_frames = frames * window\n    return np.abs(np.fft.rfft(windowed_frames, int(fft_length)))\n_MEL_BREAK_FREQUENCY_HERTZ = 700.0\n_MEL_HIGH_FREQUENCY_Q = 1127.0\ndef hertz_to_mel(frequencies_hertz):\n    \"\"\"\n    hertz_to_mel\n    \"\"\"\n    return _MEL_HIGH_FREQUENCY_Q * np.log(1.0 + (frequencies_hertz /\n                                                 _MEL_BREAK_FREQUENCY_HERTZ))\ndef spectrogram_to_mel_matrix(num_mel_bins=20,\n                              num_spectrogram_bins=129,\n                              audio_sample_rate=8000,\n                              lower_edge_hertz=125.0,\n                              upper_edge_hertz=3800.0):\n    \"\"\"\n    spectrogram_to_mel_matrix\n    \"\"\"\n    nyquist_hertz = audio_sample_rate / 2.\n    if lower_edge_hertz >= upper_edge_hertz:\n        raise ValueError(\"lower_edge_hertz %.1f >= upper_edge_hertz %.1f\" %\n                         (lower_edge_hertz, upper_edge_hertz))",
+        "type": "code",
+        "location": "/applications/FootballAction/predict/action_detect/mfcc/feature_extractor.py:39-69"
+    },
+    "1131": {
+        "file_id": 105,
+        "content": "This code defines functions for converting frequencies from Hertz to Mel scale, and creating a mel spectrum matrix from a spectrogram. It also includes validation checks to ensure lower edge frequency is less than the upper edge frequency. The Mel scale is used in audio processing for approximating human auditory perception of sound.",
+        "type": "comment"
+    },
+    "1132": {
+        "file_id": 105,
+        "content": "    spectrogram_bins_hertz = np.linspace(0.0, nyquist_hertz,\n                                         num_spectrogram_bins)\n    spectrogram_bins_mel = hertz_to_mel(spectrogram_bins_hertz)\n    band_edges_mel = np.linspace(hertz_to_mel(lower_edge_hertz),\n                                 hertz_to_mel(upper_edge_hertz),\n                                 num_mel_bins + 2)\n    mel_weights_matrix = np.empty((num_spectrogram_bins, num_mel_bins))\n    for i in range(num_mel_bins):\n        lower_edge_mel, center_mel, upper_edge_mel = band_edges_mel[i:i + 3]\n        lower_slope = ((spectrogram_bins_mel - lower_edge_mel) /\n                       (center_mel - lower_edge_mel))\n        upper_slope = ((upper_edge_mel - spectrogram_bins_mel) /\n                       (upper_edge_mel - center_mel))\n        mel_weights_matrix[:,\n                           i] = np.maximum(0.0,\n                                           np.minimum(lower_slope, upper_slope))\n    mel_weights_matrix[0, :] = 0.0\n    return mel_weights_matrix\ndef log_mel_spectrogram(data,",
+        "type": "code",
+        "location": "/applications/FootballAction/predict/action_detect/mfcc/feature_extractor.py:70-90"
+    },
+    "1133": {
+        "file_id": 105,
+        "content": "This function calculates mel-frequency cepstral coefficients (MFCC) from speech audio data. It converts spectrogram bins to hertz and mel scales, creates band edges for mel analysis, computes mel weights matrix using triangular interpolation, and sets the first row of the matrix to zero.",
+        "type": "comment"
+    },
+    "1134": {
+        "file_id": 105,
+        "content": "                        audio_sample_rate=8000,\n                        log_offset=0.0,\n                        window_length_secs=0.025,\n                        hop_length_secs=0.010,\n                        **kwargs):\n    \"\"\"\n    log_mel_spectrogram\n    \"\"\"\n    window_length_samples = int(round(audio_sample_rate * window_length_secs))\n    #print(\"audio_sample_rate = \", audio_sample_rate)\n    #print(\"window_length_secs = \", window_length_secs)\n    #print(\"window_length_sample \", window_length_samples)\n    hop_length_samples = int(round(audio_sample_rate * hop_length_secs))\n    #print(\"hop_length_samples \", hop_length_samples)\n    fft_length = 2**int(np.ceil(np.log(window_length_samples) / np.log(2.0)))\n    #print(\" fft_lengt = \", fft_length)\n    spectrogram = stft_magnitude(data,\n                                 fft_length=fft_length,\n                                 hop_length=hop_length_samples,\n                                 window_length=window_length_samples)\n    #print(\" spectrogram.shape = \", spectrogram.shape)",
+        "type": "code",
+        "location": "/applications/FootballAction/predict/action_detect/mfcc/feature_extractor.py:91-111"
+    },
+    "1135": {
+        "file_id": 105,
+        "content": "This function takes in audio data and parameters such as audio sample rate, window length in seconds, hop length in seconds, and other optional keywords. It calculates the window length samples and hop length samples based on the provided audio sample rate. It then determines the FFT length by taking the next highest power of 2 from the window length samples. Finally, it computes the spectrogram using the STFT (Short-Time Fourier Transform) magnitude with the calculated parameters and returns the resulting spectrogram.",
+        "type": "comment"
+    },
+    "1136": {
+        "file_id": 105,
+        "content": "    mel_spectrogram = np.dot(\n        spectrogram,\n        spectrogram_to_mel_matrix(num_spectrogram_bins=spectrogram.shape[1],\n                                  audio_sample_rate=audio_sample_rate,\n                                  **kwargs))\n    return np.log(mel_spectrogram + log_offset)\ndef wav_to_example(wav_data, sample_rate):\n    \"\"\"\n    wav_to_example\n    \"\"\"\n    #sample_rate, wav_data = wavfile.read(wav_file)\n    assert wav_data.dtype == np.int16, 'Bad sample type: %r' % wav_data.dtype\n    #wav_data = wav_data[:16000*30]\n    #print(\" wav_data \", wav_data.shape)\n    #print(\" wav_data \", wav_data.shape)\n    pad_zero_num = int(sample_rate * (vgg_params.STFT_WINDOW_LENGTH_SECONDS -\n                                      vgg_params.STFT_HOP_LENGTH_SECONDS))\n    wav_data_extend = np.hstack((wav_data, np.zeros(pad_zero_num)))\n    wav_data = wav_data_extend\n    #print(\" wav_data \", wav_data.shape)\n    wav_data = wav_data / 32768.0  # Convert to [-1.0, +1.0]\n    #print(\" wav_data after convert to -1 1\", wav_data)",
+        "type": "code",
+        "location": "/applications/FootballAction/predict/action_detect/mfcc/feature_extractor.py:112-136"
+    },
+    "1137": {
+        "file_id": 105,
+        "content": "The code extracts audio features from a WAV file using short-time Fourier transform (STFT) and applies Mel-frequency cepstral coefficients (MFCCs). It reads the WAV file, pads zeros if necessary to match desired window length, scales the data to be between -1 and 1, and then calculates STFT. Finally, it computes MFCCs from the spectrogram and returns the log of the result plus a small offset for numerical stability.",
+        "type": "comment"
+    },
+    "1138": {
+        "file_id": 105,
+        "content": "    #if wav_data.shape[0] > max_second * sample_rate:\n    #    wav_data = wav_data[:max_second * sample_rate, :]\n    if len(wav_data.shape) > 1:\n        wav_data = np.mean(wav_data, axis=1)\n    #print(\" wav_data after mean\", wav_data.shape, len(wav_data.shape), wav_data)\n    # Resample to the rate assumed by vgg.\n    #if sample_rate != vgg_params.SAMPLE_RATE:\n    #    wav_data = resampy.resample(wav_data, sample_rate, vgg_params.SAMPLE_RATE)\n    log_mel = log_mel_spectrogram(\n        wav_data,\n        audio_sample_rate=vgg_params.SAMPLE_RATE,\n        log_offset=vgg_params.LOG_OFFSET,\n        window_length_secs=vgg_params.STFT_WINDOW_LENGTH_SECONDS,\n        hop_length_secs=vgg_params.STFT_HOP_LENGTH_SECONDS,\n        num_mel_bins=vgg_params.NUM_MEL_BINS,\n        lower_edge_hertz=vgg_params.MEL_MIN_HZ,\n        upper_edge_hertz=vgg_params.MEL_MAX_HZ)\n    # Frame features into examples.\n    features_sample_rate = 1.0 / vgg_params.STFT_HOP_LENGTH_SECONDS\n    example_window_length = int(\n        round(vgg_params.EXAMPLE_WINDOW_SECONDS * features_sample_rate))",
+        "type": "code",
+        "location": "/applications/FootballAction/predict/action_detect/mfcc/feature_extractor.py:137-157"
+    },
+    "1139": {
+        "file_id": 105,
+        "content": "This code performs feature extraction on audio data for action detection in the FootballAction application. It ensures that the audio data is within specified bounds, applies mean normalization if necessary, resamples to a fixed rate, and then generates log mel spectrogram features. These features are framed into examples at a specific sample rate and window length for use by VGG model.",
+        "type": "comment"
+    },
+    "1140": {
+        "file_id": 105,
+        "content": "    example_hop_length = int(\n        round(vgg_params.EXAMPLE_HOP_SECONDS * features_sample_rate))\n    log_mel_examples = frame(log_mel,\n                             window_length=example_window_length,\n                             hop_length=example_hop_length)\n    return log_mel_examples\ndef extract_pcm(pcm_file, sample_rate):\n    with open(pcm_file, \"rb\") as f:\n        pcm_data = f.read()\n    audio_data = np.fromstring(pcm_data, dtype=np.int16)\n    examples = wav_to_example(audio_data, sample_rate)\n    return examples\nif __name__ == \"__main__\":\n    wav_file = sys.argv[1]\n    print(\"wav_file = \", wav_file)\n    with open(wav_file, \"rb\") as f:\n        pcm_data = f.read()\n    audio_data = np.fromstring(pcm_data, dtype = np.int16)\n    examples_batch = wav_to_example(audio_data, 16000)\n    print(\"examples_batch.shape\", examples_batch.shape)   ",
+        "type": "code",
+        "location": "/applications/FootballAction/predict/action_detect/mfcc/feature_extractor.py:159-182"
+    },
+    "1141": {
+        "file_id": 105,
+        "content": "The code defines a function that extracts audio features from WAV files. It calculates the hop length based on the example window length and sample rate, and applies a log Mel spectrum to the audio data. It also includes a separate function for extracting examples from PCM files and converting them into examples at a given sample rate. The main part of the code demonstrates how to use the functions by reading a WAV file, printing its shape after processing with the feature extraction functions.",
+        "type": "comment"
+    },
+    "1142": {
+        "file_id": 106,
+        "content": "/applications/FootballAction/predict/action_detect/mfcc/model_config.py",
+        "type": "filepath"
+    },
+    "1143": {
+        "file_id": 106,
+        "content": "The ModelAudio class extracts audio features using wav_to_example and slices the data into parts, calculating features for each part. The predict method appends these features to a list and returns the audio feature list after dividing by sample rate.",
+        "type": "summary"
+    },
+    "1144": {
+        "file_id": 106,
+        "content": "\"\"\"\naudio model config\n\"\"\"\nimport numpy as np\nimport mfcc.feature_extractor as feature_extractor\nclass ModelAudio(object):\n    \"\"\"\n    modelAudio\n    \"\"\"\n    def __init__(self, configs, use_gpu=1):\n        self.use_gpu = use_gpu\n        self.audio_fps = configs.COMMON.fps\n        self.audio_feat_scale = configs.TSN.audio_scale\n        self.sample_rate = 16000\n    def predict_slice(self, wav_data, sample_rate):\n        \"\"\"\n        audio predict\n        \"\"\"\n        examples_batch = feature_extractor.wav_to_example(\n            wav_data, sample_rate)[0]\n        return examples_batch\n    def predict_audio(self, audio_file):\n        \"\"\"\n        predict_audio\n        \"\"\"\n        audio_feature_list = []\n        # read pcm\n        sample_rate = self.sample_rate\n        try:\n            with open(audio_file, \"rb\") as f:\n                pcm_data = f.read()\n            audio_data = np.fromstring(pcm_data, dtype=np.int16)\n            audio_status = \"audio load success\"\n        except Exception as e:\n            audio_data = []\n            audio_status = \"audio load failed\"",
+        "type": "code",
+        "location": "/applications/BasketballAction/predict/action_detect/mfcc/model_config.py:1-42"
+    },
+    "1145": {
+        "file_id": 106,
+        "content": "The code defines a ModelAudio class which takes in audio-related configurations and performs audio feature extraction using the feature_extractor module's wav_to_example function. The class also predicts audio by converting PCM data to numpy array and handles audio file reading exceptions.",
+        "type": "comment"
+    },
+    "1146": {
+        "file_id": 106,
+        "content": "        step = 1\n        len_video = int(len(audio_data) / sample_rate)\n        print(len_video)\n        for i in range(0, len_video, step):\n            audio_data_part = audio_data[i * sample_rate:(i + step) *\n                                         sample_rate]\n            feature_audio = self.predict_slice(audio_data_part, sample_rate)\n            audio_feature_list.append(feature_audio)\n        return audio_feature_list",
+        "type": "code",
+        "location": "/applications/BasketballAction/predict/action_detect/mfcc/model_config.py:43-51"
+    },
+    "1147": {
+        "file_id": 106,
+        "content": "The code slices the audio data into parts of size 'step' and calculates features for each part using a predict method, then appends the features to a list. The length of the entire audio data is divided by the sample rate to determine how many steps can fit in it. This function returns the audio feature list.",
+        "type": "comment"
+    },
+    "1148": {
+        "file_id": 107,
+        "content": "/applications/FootballAction/predict/action_detect/mfcc/vgg_params.py",
+        "type": "filepath"
+    },
+    "1149": {
+        "file_id": 107,
+        "content": "The code defines global parameters for the VGGish model, including architectural constants, hyperparameters, and optimizer settings. It extracts audio features from spectrogram patches using PCA quantization and embedding processing, with options to adjust STFT window and hop lengths, mel frequency bins, and learning rate.",
+        "type": "summary"
+    },
+    "1150": {
+        "file_id": 107,
+        "content": "\"\"\"Global parameters for the VGGish model.\nSee vggish_slim.py for more information.\n\"\"\"\n# Architectural constants.\nNUM_FRAMES = 50  # Frames in input mel-spectrogram patch.\nNUM_BANDS = 64  # Frequency bands in input mel-spectrogram patch.\nEMBEDDING_SIZE = 128  # Size of embedding layer.\n# Hyperparameters used in feature and example generation.\nSAMPLE_RATE = 16000\nSTFT_WINDOW_LENGTH_SECONDS = 0.040\nSTFT_HOP_LENGTH_SECONDS = 0.020\nNUM_MEL_BINS = NUM_BANDS\nMEL_MIN_HZ = 125\nMEL_MAX_HZ = 7500\nLOG_OFFSET = 0.01  # Offset used for stabilized log of input mel-spectrogram.\nEXAMPLE_WINDOW_SECONDS = 1.00  # Each example contains 96 10ms frames\nEXAMPLE_HOP_SECONDS = 1.00  # with zero overlap.\n# Parameters used for embedding postprocessing.\nPCA_EIGEN_VECTORS_NAME = 'pca_eigen_vectors'\nPCA_MEANS_NAME = 'pca_means'\nQUANTIZE_MIN_VAL = -2.0\nQUANTIZE_MAX_VAL = +2.0\n# Hyperparameters used in training.\nINIT_STDDEV = 0.01  # Standard deviation used to initialize weights.\nLEARNING_RATE = 1e-4  # Learning rate for the Adam optimizer.",
+        "type": "code",
+        "location": "/applications/BasketballAction/predict/action_detect/mfcc/vgg_params.py:1-29"
+    },
+    "1151": {
+        "file_id": 107,
+        "content": "This code sets global parameters for the VGGish model. It defines architectural constants, hyperparameters for feature and example generation, embedding postprocessing, and training. The VGGish model is used to extract audio features from spectrogram patches, with options for PCA-based quantization and embedding processing. Hyperparameters control the STFT window and hop lengths, mel frequency bins, and learning rate for Adam optimizer.",
+        "type": "comment"
+    },
+    "1152": {
+        "file_id": 107,
+        "content": "ADAM_EPSILON = 1e-8  # Epsilon for the Adam optimizer.\n# Names of ops, tensors, and features.\nINPUT_OP_NAME = 'vggish/input_features'\nINPUT_TENSOR_NAME = INPUT_OP_NAME + ':0'\nOUTPUT_OP_NAME = 'vggish/embedding'\nOUTPUT_TENSOR_NAME = OUTPUT_OP_NAME + ':0'\nAUDIO_EMBEDDING_FEATURE_NAME = 'audio_embedding'",
+        "type": "code",
+        "location": "/applications/BasketballAction/predict/action_detect/mfcc/vgg_params.py:30-37"
+    },
+    "1153": {
+        "file_id": 107,
+        "content": "This code sets the Adam optimizer's epsilon value to 1e-8, defines names for input and output operations, tensors, and features. It also assigns the name \"audio_embedding\" to a feature.",
+        "type": "comment"
+    },
+    "1154": {
+        "file_id": 108,
+        "content": "/applications/FootballAction/predict/action_detect/models/audio_infer.py",
+        "type": "filepath"
+    },
+    "1155": {
+        "file_id": 108,
+        "content": "The \"InferModel\" class is for audio inference, initializing the model and creating a predictor object. It takes input, performs inference, returns output, and measures time taken. The code loads an audio file, sets path, performs prediction, prints shape, first output, and time.",
+        "type": "summary"
+    },
+    "1156": {
+        "file_id": 108,
+        "content": "\"\"\"\nppTSM InferModel\n\"\"\"\nimport sys\nimport numpy as np\nimport time\nsys.path.append('../')\nfrom utils.preprocess import get_images\nfrom utils.config_utils import parse_config\nimport reader\nfrom paddle.inference import Config\nfrom paddle.inference import create_predictor\nclass InferModel(object):\n    \"\"\"audio infer\"\"\"\n    def __init__(self, cfg, name='AUDIO'): \n        name = name.upper()\n        self.name           = name\n        model_file          = cfg[name]['model_file']\n        params_file         = cfg[name]['params_file']\n        gpu_mem             = cfg[name]['gpu_mem']\n        device_id           = cfg[name]['device_id']\n        # model init\n        config = Config(model_file, params_file)\n        config.enable_use_gpu(gpu_mem, device_id)\n        config.switch_ir_optim(True)  # default true\n        config.enable_memory_optim()\n        # use zero copy\n        config.switch_use_feed_fetch_ops(False)\n        self.predictor = create_predictor(config)\n        input_names = self.predictor.get_input_names()\n        self.input_tensor = self.predictor.get_input_handle(input_names[0])",
+        "type": "code",
+        "location": "/applications/BasketballAction/predict/action_detect/models/audio_infer.py:1-37"
+    },
+    "1157": {
+        "file_id": 108,
+        "content": "This code defines a class named \"InferModel\" for audio inference. It initializes the model by reading configuration files, enabling GPU usage, and creating a predictor object. The input name and handle are stored for later use during inference.",
+        "type": "comment"
+    },
+    "1158": {
+        "file_id": 108,
+        "content": "        output_names = self.predictor.get_output_names()\n        self.output_tensor = self.predictor.get_output_handle(output_names[0])\n    def infer(self, input):\n        \"\"\"infer\"\"\"\n        self.input_tensor.copy_from_cpu(input)\n        self.predictor.run()\n        output = self.output_tensor.copy_to_cpu()\n        return output\n    def predict(self, infer_config):\n        \"\"\"predict\"\"\"\n        infer_reader = reader.get_reader(self.name, 'infer', infer_config)\n        feature_list = []\n        pcm_list = []\n        for infer_iter, data in enumerate(infer_reader()):\n            inputs = np.array(data, dtype = 'float32')\n            output = self.infer(inputs)\n            feature_list.append(np.squeeze(output))\n            pcm_list.append(inputs)\n        feature_values = np.vstack(feature_list)\n        pcm_values = np.vstack(pcm_list)\n        return feature_values, pcm_values\nif __name__ == \"__main__\":\n    cfg_file = '/home/work/inference/configs/configs.yaml' \n    cfg = parse_config(cfg_file)\n    model = InferModel(cfg)",
+        "type": "code",
+        "location": "/applications/BasketballAction/predict/action_detect/models/audio_infer.py:39-69"
+    },
+    "1159": {
+        "file_id": 108,
+        "content": "The code defines a model that takes audio input, performs inference using the predictor, and returns output. The predict method reads data from infer_config and for each iteration, it prepares inputs, runs inference, collects feature lists and pcm lists, then combines them into feature_values and pcm_values before returning.",
+        "type": "comment"
+    },
+    "1160": {
+        "file_id": 108,
+        "content": "    pcm_path = '/home/work/datasets/WorldCup2018/pcm/6e577252c4004961ac7caa738a52c238.pcm'\n    t0 = time.time()\n    cfg['AUDIO']['pcm_file'] = pcm_path\n    outputs = model.predict(cfg)\n    # outputs = model.infer(np.random.rand(32, 8, 3, 224, 224).astype(np.float32))\n    t1 = time.time()\n    print(outputs.shape)\n    print(outputs[0])\n    print('cost time = {} min'.format((t1 - t0) / 60.0))",
+        "type": "code",
+        "location": "/applications/BasketballAction/predict/action_detect/models/audio_infer.py:71-80"
+    },
+    "1161": {
+        "file_id": 108,
+        "content": "This code loads an audio file, sets the path for it in the configuration file, performs prediction on the model, prints the shape and first output of the prediction, and calculates and prints the time taken in minutes.",
+        "type": "comment"
+    },
+    "1162": {
+        "file_id": 109,
+        "content": "/applications/FootballAction/predict/action_detect/models/bmn_infer.py",
+        "type": "filepath"
+    },
+    "1163": {
+        "file_id": 109,
+        "content": "This code defines a Paddle Inference engine class for the \"bmn infer\" application, performing action detection through averaging predictions, generating proposal results, and processing score outcomes. It initializes models, loads data, performs inference, saves results, outputs masks, and prints execution time.",
+        "type": "summary"
+    },
+    "1164": {
+        "file_id": 109,
+        "content": "\"\"\"\nppTSM InferModel\n\"\"\"\nimport sys\nimport numpy as np\nimport json\nimport pickle\nimport time\nsys.path.append('../')\nfrom utils.preprocess import get_images\nfrom utils.config_utils import parse_config\nfrom utils.process_result import process_proposal\nimport reader\nfrom paddle.inference import Config\nfrom paddle.inference import create_predictor\nclass InferModel(object):\n    \"\"\"bmn infer\"\"\"\n    def __init__(self, cfg, name='BMN'): \n        name = name.upper()\n        self.name           = name\n        model_file          = cfg[name]['model_file']\n        params_file         = cfg[name]['params_file']\n        gpu_mem             = cfg[name]['gpu_mem']\n        device_id           = cfg[name]['device_id']\n        self.nms_thread          = cfg[name]['nms_thread']\n        self.min_pred_score      = cfg[name]['score_thread']\n        self.min_frame_thread    = cfg['COMMON']['fps']\n        # model init\n        config = Config(model_file, params_file)\n        config.enable_use_gpu(gpu_mem, device_id)\n        config.switch_ir_optim(True)  # default true",
+        "type": "code",
+        "location": "/applications/FootballAction/predict/action_detect/models/bmn_infer.py:1-37"
+    },
+    "1165": {
+        "file_id": 109,
+        "content": "This code defines a class `InferModel` for the \"bmn infer\" application. It imports necessary modules and utilities, sets up model configuration parameters from a JSON file, and initializes the Paddle Inference engine with specified model and parameter files. The GPU memory and device ID are also configured according to the input JSON file. Additionally, some threshold values for NMS (non-maximum suppression) and minimum prediction scores are set.",
+        "type": "comment"
+    },
+    "1166": {
+        "file_id": 109,
+        "content": "        config.enable_memory_optim()\n        # use zero copy\n        config.switch_use_feed_fetch_ops(False)\n        self.predictor = create_predictor(config)\n        input_names = self.predictor.get_input_names()\n        self.input_tensor = self.predictor.get_input_handle(input_names[0])\n        output_names = self.predictor.get_output_names()\n        self.output1_tensor = self.predictor.get_output_handle(output_names[0])\n        self.output2_tensor = self.predictor.get_output_handle(output_names[1])\n        self.output3_tensor = self.predictor.get_output_handle(output_names[2])\n    def infer(self, input):\n        \"\"\"infer\"\"\"\n        self.input_tensor.copy_from_cpu(input)\n        self.predictor.run()\n        output1 = self.output1_tensor.copy_to_cpu()\n        output2 = self.output2_tensor.copy_to_cpu()\n        output3 = self.output3_tensor.copy_to_cpu()\n        return output1, output2, output3\n    def generate_props(self, pred_bmn, pred_start, pred_end, max_window=200, min_window=5):\n        \"\"\"generate_props\"\"\"",
+        "type": "code",
+        "location": "/applications/FootballAction/predict/action_detect/models/bmn_infer.py:38-63"
+    },
+    "1167": {
+        "file_id": 109,
+        "content": "The code initializes a predictor and sets up input/output tensors for inferencing. It then runs the inference process, copying input data from CPU and output results to CPU, allowing for further processing or analysis. The generate_props function generates properties based on predictions, start, and end timestamps, with adjustable window size.",
+        "type": "comment"
+    },
+    "1168": {
+        "file_id": 109,
+        "content": "        video_len = min(pred_bmn.shape[-1], min(pred_start.shape[-1], pred_end.shape[-1]))\n        pred_bmn = pred_bmn[0, :, :] * pred_bmn[1, :, :]\n        start_mask = self.boundary_choose(pred_start)\n        start_mask[0] = 1.\n        end_mask = self.boundary_choose(pred_end)\n        end_mask[-1] = 1.\n        score_results = []\n        for idx in range(min_window, max_window):\n            for jdx in range(video_len):\n                start_index = jdx\n                end_index = start_index + idx\n                if end_index < video_len and start_mask[start_index] == 1 and end_mask[end_index] == 1:\n                    xmin = start_index\n                    xmax = end_index\n                    xmin_score = pred_start[start_index]\n                    xmax_score = pred_end[end_index]\n                    bmn_score = pred_bmn[idx, jdx]\n                    conf_score = xmin_score * xmax_score * bmn_score\n                    score_results.append([xmin, xmax, conf_score])\n        return score_results\n    def boundary_choose(self, score_list):",
+        "type": "code",
+        "location": "/applications/FootballAction/predict/action_detect/models/bmn_infer.py:64-86"
+    },
+    "1169": {
+        "file_id": 109,
+        "content": "This code is calculating action boundaries from predicted start and end frames, along with a binary mask network (BMN) score. It extracts relevant data from the input, loops through the range of potential window sizes, checks if start and end indices fall within the video length and if boundary masks are activated. If these conditions are met, it calculates the confidence score and appends to the results list. Finally, it returns the list of action boundaries with their respective scores.",
+        "type": "comment"
+    },
+    "1170": {
+        "file_id": 109,
+        "content": "        \"\"\"boundary_choose\"\"\"\n        max_score = max(score_list)\n        mask_high = (score_list > max_score * 0.5)\n        score_list = list(score_list)\n        score_middle = np.array([0.0] + score_list + [0.0])\n        score_front = np.array([0.0, 0.0] + score_list)\n        score_back = np.array(score_list + [0.0, 0.0])\n        mask_peak = ((score_middle > score_front) & (score_middle > score_back))\n        mask_peak = mask_peak[1:-1]\n        mask = (mask_high | mask_peak).astype('float32')\n        return mask\n    def predict(self, infer_config, material):\n        \"\"\"predict\"\"\"\n        infer_reader = reader.get_reader(self.name, 'infer', infer_config, material=material)\n        feature_list = []\n        for infer_iter, data in enumerate(infer_reader()):\n            inputs      = [items[0] for items in data]\n            winds       = [items[1] for items in data]\n            feat_info   = [items[2] for items in data]\n            feature_T   = feat_info[0][0]\n            feature_N   = feat_info[0][1]\n            inputs = np.array(inputs)",
+        "type": "code",
+        "location": "/applications/FootballAction/predict/action_detect/models/bmn_infer.py:87-111"
+    },
+    "1171": {
+        "file_id": 109,
+        "content": "This code defines a function that chooses the boundary based on score. The function then returns a mask representing the chosen boundary. The predict function reads data from an infer_reader and loops through each iteration, extracting inputs and feature information.",
+        "type": "comment"
+    },
+    "1172": {
+        "file_id": 109,
+        "content": "            pred_bmn, pred_sta, pred_end = self.infer(inputs)\n            if infer_iter == 0:\n                sum_pred_bmn = np.zeros((2, feature_N, feature_T))\n                sum_pred_sta = np.zeros((feature_T, ))\n                sum_pred_end = np.zeros((feature_T, ))\n                sum_pred_cnt = np.zeros((feature_T, ))\n            for idx, sub_wind in enumerate(winds):\n                sum_pred_bmn[:, :, sub_wind[0]: sub_wind[1]] += pred_bmn[idx]\n                sum_pred_sta[sub_wind[0]: sub_wind[1]] += pred_sta[idx]\n                sum_pred_end[sub_wind[0]: sub_wind[1]] += pred_end[idx]\n                sum_pred_cnt[sub_wind[0]: sub_wind[1]] += np.ones((sub_wind[1] - sub_wind[0], ))\n        pred_bmn = sum_pred_bmn / sum_pred_cnt\n        pred_sta = sum_pred_sta / sum_pred_cnt\n        pred_end = sum_pred_end / sum_pred_cnt\n        score_result = self.generate_props(pred_bmn, pred_sta, pred_end)\n        results = process_proposal(score_result, self.min_frame_thread, self.nms_thread, self.min_pred_score)",
+        "type": "code",
+        "location": "/applications/FootballAction/predict/action_detect/models/bmn_infer.py:112-131"
+    },
+    "1173": {
+        "file_id": 109,
+        "content": "The code performs action detection by averaging predictions from multiple windows and then generates proposal results. It takes input, infers predictions for each window, sums the predictions within their corresponding windows, divides them by the count of frames in the window to get average predictions, and passes these averages to generate_props function to produce score_result. The process_proposal function is then used to process the score result based on some parameters like minimum frame thread, nms thread, and minimum prediction score to obtain the final results.",
+        "type": "comment"
+    },
+    "1174": {
+        "file_id": 109,
+        "content": "        return results\nif __name__ == \"__main__\":\n    cfg_file = '/home/work/inference/configs/configs.yaml' \n    cfg = parse_config(cfg_file)\n    model = InferModel(cfg)\n    imgs_path = '/home/work/datasets/WorldCup2018/frames/6e577252c4004961ac7caa738a52c238'\n    # feature\n    feature_path = imgs_path.replace(\"frames\", \"features\") + '.pkl'\n    video_features = pickle.load(open(feature_path, 'rb'))\n    t0 = time.time()\n    outputs = model.predict(cfg, video_features)\n    # outputs = model.infer(np.random.rand(32, 8, 3, 224, 224).astype(np.float32))\n    t1 = time.time()\n    results = {'proposal': outputs}\n    with open('results.json', 'w', encoding='utf-8') as f:\n       data = json.dumps(results, indent=4, ensure_ascii=False)\n       f.write(data) \n    print('cost time = {} min'.format((t1 - t0) / 60.0))",
+        "type": "code",
+        "location": "/applications/FootballAction/predict/action_detect/models/bmn_infer.py:133-156"
+    },
+    "1175": {
+        "file_id": 109,
+        "content": "This code initializes a model, loads data, and performs inference. It then saves the results to a JSON file and prints the time taken for execution.",
+        "type": "comment"
+    },
+    "1176": {
+        "file_id": 110,
+        "content": "/applications/FootballAction/predict/action_detect/models/lstm_infer.py",
+        "type": "filepath"
+    },
+    "1177": {
+        "file_id": 110,
+        "content": "This code initializes an LSTM model in PaddlePaddle for football action prediction and predicts sequences using pre-trained models, measuring time efficiency.",
+        "type": "summary"
+    },
+    "1178": {
+        "file_id": 110,
+        "content": "\"\"\"\nppTSM InferModel\n\"\"\"\nimport sys\nimport numpy as np\nimport json\nimport pickle\nimport time\nsys.path.append('../')\nfrom utils.preprocess import get_images\nfrom utils.config_utils import parse_config\nfrom utils.process_result import get_action_result\nimport reader\nfrom paddle.inference import Config\nfrom paddle.inference import create_predictor\nclass InferModel(object):\n    \"\"\"lstm infer\"\"\"\n    def __init__(self, cfg, name='ACTION'): \n        name = name.upper()\n        self.name           = name\n        model_file          = cfg[name]['model_file']\n        params_file         = cfg[name]['params_file']\n        gpu_mem             = cfg[name]['gpu_mem']\n        device_id           = cfg[name]['device_id']\n        self.topk           = cfg[name]['topk']\n        self.frame_offset   = cfg[name]['nms_offset']\n        self.nms_thread     = cfg[name]['nms_thread']\n        self.cls_thread     = cfg[name]['classify_score_thread']\n        self.iou_thread     = cfg[name]['iou_score_thread']\n        self.label_map_file = cfg['COMMON']['label_dic']",
+        "type": "code",
+        "location": "/applications/FootballAction/predict/action_detect/models/lstm_infer.py:1-36"
+    },
+    "1179": {
+        "file_id": 110,
+        "content": "The code defines a class \"InferModel\" that uses PaddlePaddle's inference API to predict football actions. It initializes with a configuration file specifying the model, parameters, and other settings for inference. The class contains variables such as topk, frame_offset, nms_thread, cls_thread, iou_score_thread, and label_map_file.",
+        "type": "comment"
+    },
+    "1180": {
+        "file_id": 110,
+        "content": "        self.fps            = cfg['COMMON']['fps']\n        self.nms_id         = 5\n        # model init\n        config = Config(model_file, params_file)\n        config.enable_use_gpu(gpu_mem, device_id)\n        config.switch_ir_optim(True)  # default true\n        config.enable_memory_optim()\n        # use zero copy\n        config.switch_use_feed_fetch_ops(False)\n        self.predictor = create_predictor(config)\n        input_names = self.predictor.get_input_names()\n        self.input1_tensor = self.predictor.get_input_handle(input_names[0])\n        self.input2_tensor = self.predictor.get_input_handle(input_names[1])\n        output_names = self.predictor.get_output_names()\n        self.output1_tensor = self.predictor.get_output_handle(output_names[0])\n        self.output2_tensor = self.predictor.get_output_handle(output_names[1])\n    def infer(self, input1_arr, input1_lod, input2_arr=None, input2_lod=None):\n        \"\"\"infer\"\"\"\n        self.input1_tensor.copy_from_cpu(input1_arr)\n        self.input1_tensor.set_lod(input1_lod)",
+        "type": "code",
+        "location": "/applications/FootballAction/predict/action_detect/models/lstm_infer.py:37-61"
+    },
+    "1181": {
+        "file_id": 110,
+        "content": "This code initializes a LSTM model for video action detection. It sets the FPS, NMS ID, and configures GPU memory optimization. It also sets up input/output tensors for inference on the model.",
+        "type": "comment"
+    },
+    "1182": {
+        "file_id": 110,
+        "content": "        if not input2_arr is None:\n            self.input2_tensor.copy_from_cpu(input2_arr)\n            self.input2_tensor.set_lod(input2_lod)\n        self.predictor.run()\n        output1 = self.output1_tensor.copy_to_cpu()\n        output2 = self.output2_tensor.copy_to_cpu()\n        # print(output.shape)\n        return output1, output2\n    def pre_process(self, input):\n        \"\"\"pre process\"\"\"\n        input_arr = []\n        input_lod = [0]\n        start_lod = 0\n        end_lod = 0\n        for sub_item in input:\n            end_lod = start_lod + len(sub_item)\n            input_lod.append(end_lod)\n            input_arr.extend(sub_item)\n            start_lod = end_lod\n        input_arr = np.array(input_arr)\n        # print(input_arr.shape)\n        # print([input_lod])\n        return input_arr, [input_lod]\n    def predict(self, infer_config, material):\n        \"\"\"predict\"\"\"\n        infer_reader = reader.get_reader(self.name, 'infer', infer_config, material=material)\n        results = []\n        for infer_iter, data in enumerate(infer_reader()):",
+        "type": "code",
+        "location": "/applications/FootballAction/predict/action_detect/models/lstm_infer.py:62-91"
+    },
+    "1183": {
+        "file_id": 110,
+        "content": "This code defines a class with methods for pre-processing, predicting, and potentially post-processing data. The pre_process method takes in an input and converts it into a suitable format for the model. The predict method uses a reader to iterate over data and generates results. The LSTM model is run after processing the input, returning the outputs.",
+        "type": "comment"
+    },
+    "1184": {
+        "file_id": 110,
+        "content": "            video_id = [[items[-2], items[-1]] for items in data]\n            input1 = [items[0] for items in data]\n            input2 = [items[1] for items in data]\n            input1_arr, input1_lod = self.pre_process(input1)\n            input2_arr, input2_lod = self.pre_process(input2)\n            output1, output2 = self.infer(input1_arr, input1_lod, input2_arr, input2_lod)\n            # output1, output2 = self.infer(input1_arr, input1_lod)\n            predictions_id = output1 \n            predictions_iou = output2\n            for i in range(len(predictions_id)):\n                topk_inds = predictions_id[i].argsort()[0 - self.topk:]\n                topk_inds = topk_inds[::-1]\n                preds_id = predictions_id[i][topk_inds]\n                preds_iou = predictions_iou[i][0]\n                results.append((video_id[i], preds_id.tolist(), topk_inds.tolist(), preds_iou.tolist()))\n        predict_result = get_action_result(results, self.label_map_file, self.fps, \n                                           self.cls_thread, self.iou_thread, ",
+        "type": "code",
+        "location": "/applications/FootballAction/predict/action_detect/models/lstm_infer.py:92-110"
+    },
+    "1185": {
+        "file_id": 110,
+        "content": "The code takes in data and preprocesses it into input1_arr, input1_lod, input2_arr, and input2_lod. It then runs an infer function on these inputs to get output1 and output2. The code then extracts predictions_id and predictions_iou from the outputs. It sorts topk_inds in reverse order and appends video_id, preds_id, topk_inds, and preds_iou to the results list. Finally, it calls get_action_result with the results, label_map_file, fps, cls_thread, and iou_thread as arguments.",
+        "type": "comment"
+    },
+    "1186": {
+        "file_id": 110,
+        "content": "                                           self.nms_id, self.nms_thread, self.frame_offset)\n        return predict_result\nif __name__ == \"__main__\":\n    cfg_file = '/home/work/inference/configs/configs.yaml' \n    cfg = parse_config(cfg_file)\n    model = InferModel(cfg)\n    # proposal total\n    prop_dict = {}\n    for dataset in ['EuroCup2016', 'WorldCup2018']:\n        prop_json = '/home/work/datasets/{}/feature_bmn/prop.json'.format(dataset)\n        json_data = json.load(open(prop_json, 'r'))\n        for item in json_data:\n            basename = prop_json.replace('feature_bmn/prop.json', 'mp4')\n            basename = basename + '/' + item['video_name'] + '.mp4'\n            prop_dict[basename] = item['bmn_results']\n    imgs_path = '/home/work/datasets/WorldCup2018/frames/6e577252c4004961ac7caa738a52c238'\n    # feature\n    feature_path = imgs_path.replace(\"frames\", \"features\") + '.pkl'\n    video_features = pickle.load(open(feature_path, 'rb'))\n    # proposal\n    basename = imgs_path.replace('frames', 'mp4') + '.mp4'",
+        "type": "code",
+        "location": "/applications/FootballAction/predict/action_detect/models/lstm_infer.py:111-137"
+    },
+    "1187": {
+        "file_id": 110,
+        "content": "The code initializes an InferModel object with a given configuration file. It then loads proposal data from 'EuroCup2016' and 'WorldCup2018' datasets, storing them in a dictionary. The code also specifies the path for image frames and video features, which will be used for further processing.",
+        "type": "comment"
+    },
+    "1188": {
+        "file_id": 110,
+        "content": "    bmn_results = prop_dict[basename]\n    material = {'feature': video_features, 'proposal': bmn_results}\n    t0 = time.time()\n    outputs = model.predict(cfg, material)\n    # outputs = model.infer(np.random.rand(32, 8, 3, 224, 224).astype(np.float32))\n    # print(outputs.shape)\n    t1 = time.time()\n    results = {'actions': outputs}\n    with open('results.json', 'w', encoding='utf-8') as f:\n       data = json.dumps(results, indent=4, ensure_ascii=False)\n       f.write(data) \n    print('cost time = {} min'.format((t1 - t0) / 60.0))",
+        "type": "code",
+        "location": "/applications/FootballAction/predict/action_detect/models/lstm_infer.py:138-152"
+    },
+    "1189": {
+        "file_id": 110,
+        "content": "The code predicts action sequences from video features using a pre-trained model, and saves the results in a JSON file. It measures and prints the time taken for prediction.",
+        "type": "comment"
+    },
+    "1190": {
+        "file_id": 111,
+        "content": "/applications/FootballAction/predict/action_detect/models/pptsm_infer.py",
+        "type": "filepath"
+    },
+    "1191": {
+        "file_id": 111,
+        "content": "This code defines the InferModel class for inference using a pre-trained PPTSM model, taking config files and performing inference on image data from a specified path, predicting football actions and printing output shape and time taken.",
+        "type": "summary"
+    },
+    "1192": {
+        "file_id": 111,
+        "content": "\"\"\"\nppTSM InferModel\n\"\"\"\nimport sys\nimport numpy as np\nimport time\nsys.path.append('../')\nfrom utils.preprocess import get_images\nfrom utils.config_utils import parse_config\nimport reader\nfrom paddle.inference import Config\nfrom paddle.inference import create_predictor\nclass InferModel(object):\n    \"\"\"pptsm infer\"\"\"\n    def __init__(self, cfg, name='PPTSM'):\n        name = name.upper()\n        self.name = name\n        model_file = cfg[name]['model_file']\n        params_file = cfg[name]['params_file']\n        gpu_mem = cfg[name]['gpu_mem']\n        device_id = cfg[name]['device_id']\n        # model init\n        config = Config(model_file, params_file)\n        config.enable_use_gpu(gpu_mem, device_id)\n        config.switch_ir_optim(True)  # default true\n        config.enable_memory_optim()\n        # use zero copy\n        config.switch_use_feed_fetch_ops(False)\n        self.predictor = create_predictor(config)\n        input_names = self.predictor.get_input_names()\n        self.input_tensor = self.predictor.get_input_handle(input_names[0])",
+        "type": "code",
+        "location": "/applications/FootballAction/predict/action_detect/models/pptsm_infer.py:1-38"
+    },
+    "1193": {
+        "file_id": 111,
+        "content": "The code defines a class called InferModel that initializes and prepares the PPTSM model for inference. It takes a configuration file as input, which includes details such as model files, parameter files, GPU memory, and device ID. The code sets up configurations to optimize GPU memory usage and enable zero-copy operations. It then creates a predictor object with these configurations and retrieves the input tensor handle.",
+        "type": "comment"
+    },
+    "1194": {
+        "file_id": 111,
+        "content": "        output_names = self.predictor.get_output_names()\n        self.output_tensor = self.predictor.get_output_handle(output_names[1])\n        #self.output_tensor = self.predictor.get_output_handle(output_names[0])\n    def infer(self, input):\n        \"\"\"infer\"\"\"\n        self.input_tensor.copy_from_cpu(input)\n        self.predictor.run()\n        output = self.output_tensor.copy_to_cpu()\n        return output\n    def predict(self, infer_config):\n        \"\"\"predict\"\"\"\n        infer_reader = reader.get_reader(self.name, 'infer', infer_config)\n        feature_list = []\n        for infer_iter, data in enumerate(infer_reader()):\n            inputs = [items[:-1] for items in data]\n            inputs = np.array(inputs)\n            output = self.infer(inputs)\n            feature_list.append(np.squeeze(output))\n        feature_list = np.vstack(feature_list)\n        return feature_list\nif __name__ == \"__main__\":\n    cfg_file = '/home/work/inference/configs/configs.yaml'\n    cfg = parse_config(cfg_file)\n    model = InferModel(cfg)",
+        "type": "code",
+        "location": "/applications/FootballAction/predict/action_detect/models/pptsm_infer.py:40-67"
+    },
+    "1195": {
+        "file_id": 111,
+        "content": "The code defines a class that performs inference using a pre-trained model. It gets the output names and handles from the predictor, runs inference on input data, and returns the output. The main function reads a configuration file and creates an instance of the InferModel class to perform inference based on the specified config.",
+        "type": "comment"
+    },
+    "1196": {
+        "file_id": 111,
+        "content": "    imgs_path = '/home/work/datasets/WorldCup2018/frames/6e577252c4004961ac7caa738a52c238/'\n    imgs_list = get_images(imgs_path)\n    t0 = time.time()\n    cfg['PPTSM']['frame_list'] = imgs_list\n    outputs = model.predict(cfg)\n    # outputs = model.infer(np.random.rand(32, 8, 3, 224, 224).astype(np.float32))\n    t1 = time.time()\n    print(outputs.shape)\n    print('cost time = {} min'.format((t1 - t0) / 60.0))",
+        "type": "code",
+        "location": "/applications/FootballAction/predict/action_detect/models/pptsm_infer.py:69-78"
+    },
+    "1197": {
+        "file_id": 111,
+        "content": "This code loads image data from a specific path, uses the model to predict action for each frame, and prints the output shape and time taken for inference. It seems to be part of an application related to FootballAction.",
+        "type": "comment"
+    },
+    "1198": {
+        "file_id": 112,
+        "content": "/applications/FootballAction/predict/action_detect/reader/__init__.py",
+        "type": "filepath"
+    },
+    "1199": {
+        "file_id": 112,
+        "content": "This code imports and registers various readers for different formats (TSM, PPTSM, AUDIO, BMN, ACTION) to read map files for the model. The readers are registered in alphabetical order.",
+        "type": "summary"
+    }
+}

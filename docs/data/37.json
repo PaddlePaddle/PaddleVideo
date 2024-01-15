@@ -1,0 +1,546 @@
+{
+    "3700": {
+        "file_id": 316,
+        "content": "/data/50salads/prepare_asrf_data.py",
+        "type": "filepath"
+    },
+    "3701": {
+        "file_id": 316,
+        "content": "The code defines two functions, get_class2id_map and get_arguments. It reads ground truth text files, splits them by class labels, saves as .npy files, defines boundary frames for new actions, and saves these as separate .npy files. Assumes input files preprocessed and split by lines.",
+        "type": "summary"
+    },
+    "3702": {
+        "file_id": 316,
+        "content": "import argparse\nimport glob\nimport os\nimport sys\nfrom typing import Dict\nimport numpy as np\nsys.path.append(os.path.join(os.path.dirname(__file__), \"..\"))\ndataset_names = [\"50salads\", \"breakfast\", \"gtea\"]\ndef get_class2id_map(dataset: str,\n                     dataset_dir: str = \"./dataset\") -> Dict[str, int]:\n    \"\"\"\n    Args:\n        dataset: 50salads, gtea, breakfast\n        dataset_dir: the path to the datset directory\n    \"\"\"\n    assert (dataset in dataset_names\n            ), \"You have to choose 50salads, gtea or breakfast as dataset.\"\n    with open(os.path.join(dataset_dir, \"{}/mapping.txt\".format(dataset)),\n              \"r\") as f:\n        actions = f.read().split(\"\\n\")[:-1]\n    class2id_map = dict()\n    for a in actions:\n        class2id_map[a.split()[1]] = int(a.split()[0])\n    return class2id_map\ndef get_arguments() -> argparse.Namespace:\n    \"\"\"\n    parse all the arguments from command line inteface\n    return a list of parsed arguments\n    \"\"\"\n    parser = argparse.ArgumentParser(\n        description=\"convert ground truth txt files to numpy array\")",
+        "type": "code",
+        "location": "/data/50salads/prepare_asrf_data.py:1-42"
+    },
+    "3703": {
+        "file_id": 316,
+        "content": "This code defines two functions: get_class2id_map and get_arguments. The get_class2id_map function takes a dataset name (50salads, gtea, or breakfast) and the path to the dataset directory, and returns a dictionary mapping class names to their respective IDs by reading the \"mapping.txt\" file in the specified dataset directory. The get_arguments function parses all arguments from the command line interface for converting ground truth txt files to numpy arrays.",
+        "type": "comment"
+    },
+    "3704": {
+        "file_id": 316,
+        "content": "    parser.add_argument(\n        \"--dataset_dir\",\n        type=str,\n        default=\"./dataset\",\n        help=\"path to a dataset directory (default: ./dataset)\",\n    )\n    return parser.parse_args()\ndef main() -> None:\n    args = get_arguments()\n    datasets = [\"50salads\", \"gtea\", \"breakfast\", \"baseball\"]\n    for dataset in datasets:\n        # make directory for saving ground truth numpy arrays\n        cls_save_dir = os.path.join(args.dataset_dir, dataset, \"gt_arr\")\n        if not os.path.exists(cls_save_dir):\n            os.mkdir(cls_save_dir)\n        # make directory for saving ground truth numpy arrays\n        boundary_save_dir = os.path.join(args.dataset_dir, dataset,\n                                         \"gt_boundary_arr\")\n        if not os.path.exists(boundary_save_dir):\n            os.mkdir(boundary_save_dir)\n        # class to index mapping\n        class2id_map = get_class2id_map(dataset, dataset_dir=args.dataset_dir)\n        gt_dir = os.path.join(args.dataset_dir, dataset, \"groundTruth\")\n        gt_paths = glob.glob(os.path.join(gt_dir, \"*.txt\"))",
+        "type": "code",
+        "location": "/data/50salads/prepare_asrf_data.py:43-74"
+    },
+    "3705": {
+        "file_id": 316,
+        "content": "This code sets up the dataset directory path and creates directories for saving ground truth numpy arrays. It also creates a class to index mapping using get_class2id_map function, and retrieves all groundTruth text files' paths in the specified dataset directory.",
+        "type": "comment"
+    },
+    "3706": {
+        "file_id": 316,
+        "content": "        for gt_path in gt_paths:\n            # the name of ground truth text file\n            gt_name = os.path.relpath(gt_path, gt_dir)\n            with open(gt_path, \"r\") as f:\n                gt = f.read().split(\"\\n\")[:-1]\n            gt_array = np.zeros(len(gt))\n            for i in range(len(gt)):\n                gt_array[i] = class2id_map[gt[i]]\n            # save array\n            np.save(os.path.join(cls_save_dir, gt_name[:-4] + \".npy\"), gt_array)\n            # the name of ground truth text file\n            gt_name = os.path.relpath(gt_path, gt_dir)\n            with open(gt_path, \"r\") as f:\n                gt = f.read().split(\"\\n\")[:-1]\n            # define the frame where new action starts as boundary frame\n            boundary = np.zeros(len(gt))\n            last = gt[0]\n            boundary[0] = 1\n            for i in range(1, len(gt)):\n                if last != gt[i]:\n                    boundary[i] = 1\n                    last = gt[i]\n            # save array\n            np.save(os.path.join(boundary_save_dir, gt_name[:-4] + \".npy\"),",
+        "type": "code",
+        "location": "/data/50salads/prepare_asrf_data.py:76-106"
+    },
+    "3707": {
+        "file_id": 316,
+        "content": "This code is reading ground truth text files, splitting them into arrays based on class labels, and saving these arrays as .npy files. It also defines boundary frames for new actions and saves these as separate .npy files. The code assumes that the input files are already processed and split by lines.",
+        "type": "comment"
+    },
+    "3708": {
+        "file_id": 316,
+        "content": "                    boundary)\n    print(\"Done\")\nif __name__ == \"__main__\":\n    main()",
+        "type": "code",
+        "location": "/data/50salads/prepare_asrf_data.py:107-113"
+    },
+    "3709": {
+        "file_id": 316,
+        "content": "This code snippet defines a function named \"main\" and checks if the script is being run directly. If it is, the \"main\" function is called to execute the desired task. The code prints \"Done\" after completing the specified operation.",
+        "type": "comment"
+    },
+    "3710": {
+        "file_id": 317,
+        "content": "/data/50salads/transform_segmentation_label.py",
+        "type": "filepath"
+    },
+    "3711": {
+        "file_id": 317,
+        "content": "The code processes video data, creating labels, organizing files, and parsing command line arguments. It allows for segmentation or localization labeling with features such as label conversion and ground truth processing.",
+        "type": "summary"
+    },
+    "3712": {
+        "file_id": 317,
+        "content": "import json\nimport numpy as np\nimport argparse\nimport os\nfrom tqdm import tqdm\ndef generate_mapping_list_txt(action_dict, out_path):\n    out_txt_file_path = os.path.join(out_path, \"mapping.txt\")\n    f = open(out_txt_file_path, \"w\", encoding='utf-8')\n    for key, action_name in action_dict.items():\n        str_str = str(key) + \" \" + action_name + \"\\n\"\n        f.write(str_str)\n    # add None\n    str_str = str(len(action_dict)) + \" None\" + \"\\n\"\n    f.write(str_str)\n    f.close()\ndef segmentation_convert_localization_label(prefix_data_path, out_path,\n                                            action_dict, fps):\n    label_path = os.path.join(prefix_data_path)\n    label_txt_name_list = os.listdir(label_path)\n    labels_dict = {}\n    labels_dict[\"fps\"] = fps\n    labels_list = []\n    for label_name in tqdm(label_txt_name_list, desc='label convert:'):\n        label_dict = {}\n        label_dict[\"url\"] = label_name.split(\".\")[0] + \".mp4\"\n        label_txt_path = os.path.join(prefix_data_path, label_name)\n        with open(label_txt_path, \"r\", encoding='utf-8') as f:",
+        "type": "code",
+        "location": "/data/50salads/transform_segmentation_label.py:1-34"
+    },
+    "3713": {
+        "file_id": 317,
+        "content": "This code reads label files from a specified path, converts the labels to localization format and writes them into another specified output path. It also generates mapping information between the localization format and original format. The function takes prefix_data_path (path to read data), out_path (output path for results), action_dict (dictionary of action mappings) and fps (frames per second) as input parameters. It processes each label file in the prefix_data_path, updating labels_list with converted labels, and writes them to the output path. Finally, it generates mapping information in \"mapping.txt\" format.",
+        "type": "comment"
+    },
+    "3714": {
+        "file_id": 317,
+        "content": "            gt = f.read().split(\"\\n\")[:-1]\n        label_dict[\"total_frames\"] = len(gt)\n        boundary_index_list = [0]\n        before_action_name = gt[0]\n        for index in range(1, len(gt)):\n            if before_action_name != gt[index]:\n                boundary_index_list.append(index)\n                before_action_name = gt[index]\n        actions_list = []\n        for index in range(len(boundary_index_list) - 1):\n            if gt[boundary_index_list[index]] != \"None\":\n                action_name = gt[boundary_index_list[index]]\n                start_sec = float(boundary_index_list[index]) / float(fps)\n                end_sec = float(boundary_index_list[index + 1] - 1) / float(fps)\n                action_id = action_dict[action_name]\n                label_action_dict = {}\n                label_action_dict[\"label_names\"] = action_name\n                label_action_dict[\"start_id\"] = start_sec\n                label_action_dict[\"end_id\"] = end_sec\n                label_action_dict[\"label_ids\"] = [action_id]",
+        "type": "code",
+        "location": "/data/50salads/transform_segmentation_label.py:35-55"
+    },
+    "3715": {
+        "file_id": 317,
+        "content": "This code segment reads a ground truth file line by line and counts the total frames. It then identifies action boundaries, creates an actions list, and for each action, it extracts action name, start and end time (in seconds), and the corresponding label ID from the action dictionary to create a label_action_dict. This information will be useful in transforming segmentation labels.",
+        "type": "comment"
+    },
+    "3716": {
+        "file_id": 317,
+        "content": "                actions_list.append(label_action_dict)\n        label_dict[\"actions\"] = actions_list\n        labels_list.append(label_dict)\n    labels_dict[\"gts\"] = labels_list\n    output_path = os.path.join(out_path, \"output.json\")\n    f = open(output_path, \"w\", encoding='utf-8')\n    f.write(json.dumps(labels_dict, indent=4))\n    f.close()\ndef generate_action_dict(label):\n    action_dict = {}\n    for gt in label[\"gts\"]:\n        for action in gt[\"actions\"]:\n            label_id = action[\"label_ids\"][0]\n            label_name = action[\"label_names\"][0]\n            action_dict[label_id] = label_name\n    return action_dict\ndef load_action_dict(data_path):\n    mapping_txt_path = os.path.join(data_path, \"mapping.txt\")\n    with open(mapping_txt_path, \"r\", encoding='utf-8') as f:\n        actions = f.read().split(\"\\n\")[:-1]\n    class2id_map = dict()\n    for a in actions:\n        class2id_map[a.split()[1]] = int(a.split()[0])\n    return class2id_map\ndef localization_convert_segmentation_label(label, prefix_data_path, out_path):",
+        "type": "code",
+        "location": "/data/50salads/transform_segmentation_label.py:56-90"
+    },
+    "3717": {
+        "file_id": 317,
+        "content": "This code appears to be part of a larger program that performs video segmentation and labeling. It generates a dictionary containing action labels based on provided ground truth segmentation data, converts segmentation labels into localization format, and saves the results in JSON format for further use. The function `generate_action_dict()` generates an action dictionary, `load_action_dict()` loads an action dictionary from a file, and `localization_convert_segmentation_label()` converts segmentation labels into localization format.",
+        "type": "comment"
+    },
+    "3718": {
+        "file_id": 317,
+        "content": "    path = os.path.join(out_path, \"groundTruth\")\n    isExists = os.path.exists(path)\n    if not isExists:\n        os.makedirs(path)\n        print(path + ' 创建成功')\n    else:\n        print(path + ' 目录已存在')\n    fps = float(label[\"fps\"])\n    video_list = []\n    for gt in tqdm(label[\"gts\"], desc='label convert:'):\n        video_name = gt[\"url\"].split(\".\")[0]\n        data_path = os.path.join(prefix_data_path, video_name + \".pkl\")\n        video_list.append(video_name + \".txt\")\n        feature = np.load(data_path, allow_pickle=True)[\"image_feature\"]\n        num_feture = feature.shape[0]\n        seg_label = [\"None\"] * (num_feture)\n        for action in gt[\"actions\"]:\n            start_id = action[\"start_id\"]\n            end_id = action[\"end_id\"]\n            label_name = action[\"label_names\"]\n            start_index = int(np.floor(start_id * fps))\n            end_index = int(np.floor(end_id * fps)) + 1\n            if end_index < num_feture - 1:\n                seg_label[start_index:end_index] = label_name * (end_index -",
+        "type": "code",
+        "location": "/data/50salads/transform_segmentation_label.py:91-119"
+    },
+    "3719": {
+        "file_id": 317,
+        "content": "The code checks if a directory exists and creates it if not. It then loops through each ground truth segmentation in the label, retrieves the corresponding video data, extracts relevant information like feature, action labels, start and end indices, and populates seg_label array with action labels for the specified time range.",
+        "type": "comment"
+    },
+    "3720": {
+        "file_id": 317,
+        "content": "                                                                 start_index)\n            elif start_index < num_feture - 1:\n                seg_label[start_index:] = label_name * (num_feture -\n                                                        start_index)\n            else:\n                pass\n        if len(seg_label) != num_feture:\n            seg_label = seg_label[:num_feture]\n        out_txt_file_path = os.path.join(out_path, \"groundTruth\",\n                                         video_name + \".txt\")\n        str = '\\n'\n        f = open(out_txt_file_path, \"w\", encoding='utf-8')\n        f.write(str.join(seg_label) + str)\n        f.close()\n    out_txt_file_path = os.path.join(out_path, \"train_list.txt\")\n    str = '\\n'\n    f = open(out_txt_file_path, \"w\", encoding='utf-8')\n    f.write(str.join(video_list) + str)\n    f.close()\ndef main():\n    args = get_arguments()\n    if args.mode in [\"segmentation\", \"localization\"]:\n        if args.mode == \"segmentation\":\n            with open(args.label_path, 'r', encoding='utf-8') as json_file:",
+        "type": "code",
+        "location": "/data/50salads/transform_segmentation_label.py:120-147"
+    },
+    "3721": {
+        "file_id": 317,
+        "content": "This code segment is part of a larger program that appears to be related to video data processing. The function is setting up a segmentation label and writing it to a file, as well as creating another list for training purposes. It determines the starting index based on the number of features, and fills in the label accordingly. The code then writes the label and video list to separate text files in the specified output path. This process is controlled by the \"args\" variable which contains command line arguments like \"mode\", \"label_path\", and \"out_path\".",
+        "type": "comment"
+    },
+    "3722": {
+        "file_id": 317,
+        "content": "                label = json.load(json_file)\n            action_dict = generate_action_dict(label)\n            generate_mapping_list_txt(action_dict, args.out_path)\n            localization_convert_segmentation_label(label, args.data_path,\n                                                    args.out_path)\n        elif args.mode == \"localization\":\n            action_dict = load_action_dict(args.label_path)\n            segmentation_convert_localization_label(args.data_path,\n                                                    args.out_path,\n                                                    action_dict,\n                                                    fps=25.0)\n    else:\n        raise NotImplementedError\ndef get_arguments():\n    \"\"\"\n    parse all the arguments from command line inteface\n    return a list of parsed arguments\n    \"\"\"\n    parser = argparse.ArgumentParser(\n        description=\"convert segmentation and localization label\")\n    parser.add_argument(\"label_path\", type=str, help=\"path of a label file\")",
+        "type": "code",
+        "location": "/data/50salads/transform_segmentation_label.py:148-173"
+    },
+    "3723": {
+        "file_id": 317,
+        "content": "The code reads a label file, determines the mode (segmentation or localization), and performs corresponding operations. It uses function calls like generate_action_dict, load_action_dict, segmentation_convert_localization_label. The get_arguments function parses command line arguments.",
+        "type": "comment"
+    },
+    "3724": {
+        "file_id": 317,
+        "content": "    parser.add_argument(\n        \"data_path\",\n        type=str,\n        help=\"path of video feature or segmentation label txt.\",\n    )\n    parser.add_argument(\n        \"out_path\",\n        type=str,\n        help=\"path of output file.\",\n    )\n    parser.add_argument(\n        \"--mode\",\n        type=str,\n        default=\"segmentation\",\n        help=\"Convert segmentation label or localization label.\",\n    )\n    return parser.parse_args()\nif __name__ == \"__main__\":\n    main()",
+        "type": "code",
+        "location": "/data/50salads/transform_segmentation_label.py:174-195"
+    },
+    "3725": {
+        "file_id": 317,
+        "content": "This code snippet defines command line arguments for the input data path, output path, and mode. It then parses these arguments and returns them, allowing the program to convert segmentation or localization labels as specified by the user.",
+        "type": "comment"
+    },
+    "3726": {
+        "file_id": 318,
+        "content": "/data/ntu-rgb-d/download_dataset.sh",
+        "type": "filepath"
+    },
+    "3727": {
+        "file_id": 318,
+        "content": "This script changes directory to \"data/ntu-rgb-d\" and downloads a zip file containing skeleton data for frames 1-17. It then unzips the file, deletes the original, and downloads another zip file named \"statistics.zip\". The script creates a new folder named \"statistics\", extracts its contents into it, and removes the downloaded zip file.",
+        "type": "summary"
+    },
+    "3728": {
+        "file_id": 318,
+        "content": "cd data/ntu-rgb-d\n# download\nwget --load-cookies /tmp/cookies.txt \"https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=1CUZnBtYwifVXS21yVg62T-vrPVayso5H' -O- | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\\1\\n/p')&id=1CUZnBtYwifVXS21yVg62T-vrPVayso5H\" -O nturgbd_skeletons_s001_to_s017.zip && rm -rf /tmp/cookies.txt\nunzip nturgbd_skeletons_s001_to_s017.zip && rm -rf nturgbd_skeletons_s001_to_s017.zip\nwget https://videotag.bj.bcebos.com/Data/statistics.zip\nmkdir statistics\nunzip statistics.zip -d statistics/ && rm -rf statistics.zip",
+        "type": "code",
+        "location": "/data/ntu-rgb-d/download_dataset.sh:1-12"
+    },
+    "3729": {
+        "file_id": 318,
+        "content": "This script changes directory to \"data/ntu-rgb-d\" and downloads a zip file containing skeleton data for frames 1-17. It then unzips the file, deletes the original, and downloads another zip file named \"statistics.zip\". The script creates a new folder named \"statistics\", extracts its contents into it, and removes the downloaded zip file.",
+        "type": "comment"
+    },
+    "3730": {
+        "file_id": 319,
+        "content": "/data/ntu-rgb-d/get_raw_denoised_data.py",
+        "type": "filepath"
+    },
+    "3731": {
+        "file_id": 319,
+        "content": "The code cleans and processes NTU RGB-D dataset data by removing noisy frames, handling missing values, updating arrays, logging counts, denoising raw skeleton data, and generating log files for sequences with multiple actors. It reads sequence data, extracts joints and color data, handles multiple actors and missing frames, and stores the processed data for further processing while counting missing data.",
+        "type": "summary"
+    },
+    "3732": {
+        "file_id": 319,
+        "content": "# ref: https://github.com/Uason-Chen/CTR-GCN/blob/main/data/ntu/get_raw_denoised_data.py\nimport os\nimport os.path as osp\nimport numpy as np\nimport pickle\nimport logging\nroot_path = './'\nraw_data_file = osp.join(root_path, 'raw_data', 'raw_skes_data.pkl')\nsave_path = osp.join(root_path, 'denoised_data')\nif not osp.exists(save_path):\n    os.mkdir(save_path)\nrgb_ske_path = osp.join(save_path, 'rgb+ske')\nif not osp.exists(rgb_ske_path):\n    os.mkdir(rgb_ske_path)\nactors_info_dir = osp.join(save_path, 'actors_info')\nif not osp.exists(actors_info_dir):\n    os.mkdir(actors_info_dir)\nmissing_count = 0\nnoise_len_thres = 11\nnoise_spr_thres1 = 0.8\nnoise_spr_thres2 = 0.69754\nnoise_mot_thres_lo = 0.089925\nnoise_mot_thres_hi = 2\nnoise_len_logger = logging.getLogger('noise_length')\nnoise_len_logger.setLevel(logging.INFO)\nnoise_len_logger.addHandler(\n    logging.FileHandler(osp.join(save_path, 'noise_length.log')))\nnoise_len_logger.info('{:^20}\\t{:^17}\\t{:^8}\\t{}'.format(\n    'Skeleton', 'bodyID', 'Motion', 'Length'))\nnoise_spr_logger = logging.getLogger('noise_spread')",
+        "type": "code",
+        "location": "/data/ntu-rgb-d/get_raw_denoised_data.py:1-38"
+    },
+    "3733": {
+        "file_id": 319,
+        "content": "This code is setting up directories and loggers for processing raw data and identifying noisy sequences. It checks if the required folders exist, creates them if not, sets up loggers to track noise length and spread thresholds, and initializes variables for the process.",
+        "type": "comment"
+    },
+    "3734": {
+        "file_id": 319,
+        "content": "noise_spr_logger.setLevel(logging.INFO)\nnoise_spr_logger.addHandler(\n    logging.FileHandler(osp.join(save_path, 'noise_spread.log')))\nnoise_spr_logger.info('{:^20}\\t{:^17}\\t{:^8}\\t{:^8}'.format(\n    'Skeleton', 'bodyID', 'Motion', 'Rate'))\nnoise_mot_logger = logging.getLogger('noise_motion')\nnoise_mot_logger.setLevel(logging.INFO)\nnoise_mot_logger.addHandler(\n    logging.FileHandler(osp.join(save_path, 'noise_motion.log')))\nnoise_mot_logger.info('{:^20}\\t{:^17}\\t{:^8}'.format('Skeleton', 'bodyID',\n                                                     'Motion'))\nfail_logger_1 = logging.getLogger('noise_outliers_1')\nfail_logger_1.setLevel(logging.INFO)\nfail_logger_1.addHandler(\n    logging.FileHandler(osp.join(save_path, 'denoised_failed_1.log')))\nfail_logger_2 = logging.getLogger('noise_outliers_2')\nfail_logger_2.setLevel(logging.INFO)\nfail_logger_2.addHandler(\n    logging.FileHandler(osp.join(save_path, 'denoised_failed_2.log')))\nmissing_skes_logger = logging.getLogger('missing_frames')\nmissing_skes_logger.setLevel(logging.INFO)",
+        "type": "code",
+        "location": "/data/ntu-rgb-d/get_raw_denoised_data.py:39-63"
+    },
+    "3735": {
+        "file_id": 319,
+        "content": "The code sets up multiple loggers for different types of output: 'noise_spread.log', 'noise_motion.log', 'denoised_failed_1.log', and 'denoised_failed_2.log'. It also creates a logger for missing frames named 'missing_frames'. Each logger is configured with a specific level of logging (INFO) and a file handler to store the logs in designated files within the specified save path. This allows for organized and easily accessible logging during program execution.",
+        "type": "comment"
+    },
+    "3736": {
+        "file_id": 319,
+        "content": "missing_skes_logger.addHandler(\n    logging.FileHandler(osp.join(save_path, 'missing_skes.log')))\nmissing_skes_logger.info('{:^20}\\t{}\\t{}'.format('Skeleton', 'num_frames',\n                                                 'num_missing'))\nmissing_skes_logger1 = logging.getLogger('missing_frames_1')\nmissing_skes_logger1.setLevel(logging.INFO)\nmissing_skes_logger1.addHandler(\n    logging.FileHandler(osp.join(save_path, 'missing_skes_1.log')))\nmissing_skes_logger1.info('{:^20}\\t{}\\t{}\\t{}\\t{}\\t{}'.format(\n    'Skeleton', 'num_frames', 'Actor1', 'Actor2', 'Start', 'End'))\nmissing_skes_logger2 = logging.getLogger('missing_frames_2')\nmissing_skes_logger2.setLevel(logging.INFO)\nmissing_skes_logger2.addHandler(\n    logging.FileHandler(osp.join(save_path, 'missing_skes_2.log')))\nmissing_skes_logger2.info('{:^20}\\t{}\\t{}\\t{}'.format('Skeleton', 'num_frames',\n                                                      'Actor1', 'Actor2'))\ndef denoising_by_length(ske_name, bodies_data):\n    \"\"\"\n    Denoising data based on the frame length for each bodyID.",
+        "type": "code",
+        "location": "/data/ntu-rgb-d/get_raw_denoised_data.py:64-86"
+    },
+    "3737": {
+        "file_id": 319,
+        "content": "Creates multiple loggers for tracking missing skeleton frames, with different handlers and levels of information. Function denoising_by_length takes a skeleton name and bodies_data as input to perform data denoising based on frame length for each bodyID.",
+        "type": "comment"
+    },
+    "3738": {
+        "file_id": 319,
+        "content": "    Filter out the bodyID which length is less or equal than the predefined threshold.\n    \"\"\"\n    noise_info = str()\n    new_bodies_data = bodies_data.copy()\n    for (bodyID, body_data) in new_bodies_data.items():\n        length = len(body_data['interval'])\n        if length <= noise_len_thres:\n            noise_info += 'Filter out: %s, %d (length).\\n' % (bodyID, length)\n            noise_len_logger.info('{}\\t{}\\t{:.6f}\\t{:^6d}'.format(\n                ske_name, bodyID, body_data['motion'], length))\n            del bodies_data[bodyID]\n    if noise_info != '':\n        noise_info += '\\n'\n    return bodies_data, noise_info\ndef get_valid_frames_by_spread(points):\n    \"\"\"\n    Find the valid (or reasonable) frames (index) based on the spread of X and Y.\n    :param points: joints or colors\n    \"\"\"\n    num_frames = points.shape[0]\n    valid_frames = []\n    for i in range(num_frames):\n        x = points[i, :, 0]\n        y = points[i, :, 1]\n        if (x.max() - x.min()) <= noise_spr_thres1 * (y.max() - y.min()):  # 0.8",
+        "type": "code",
+        "location": "/data/ntu-rgb-d/get_raw_denoised_data.py:87-116"
+    },
+    "3739": {
+        "file_id": 319,
+        "content": "Code snippet filters out bodies with a length less than or equal to the predefined threshold and finds valid frames based on the spread of X and Y. It also logs the filtered body information and returns the updated bodies data along with filter information.",
+        "type": "comment"
+    },
+    "3740": {
+        "file_id": 319,
+        "content": "            valid_frames.append(i)\n    return valid_frames\ndef denoising_by_spread(ske_name, bodies_data):\n    \"\"\"\n    Denoising data based on the spread of Y value and X value.\n    Filter out the bodyID which the ratio of noisy frames is higher than the predefined\n    threshold.\n    bodies_data: contains at least 2 bodyIDs\n    \"\"\"\n    noise_info = str()\n    denoised_by_spr = False  # mark if this sequence has been processed by spread.\n    new_bodies_data = bodies_data.copy()\n    # for (bodyID, body_data) in bodies_data.items():\n    for (bodyID, body_data) in new_bodies_data.items():\n        if len(bodies_data) == 1:\n            break\n        valid_frames = get_valid_frames_by_spread(body_data['joints'].reshape(\n            -1, 25, 3))\n        num_frames = len(body_data['interval'])\n        num_noise = num_frames - len(valid_frames)\n        if num_noise == 0:\n            continue\n        ratio = num_noise / float(num_frames)\n        motion = body_data['motion']\n        if ratio >= noise_spr_thres2:  # 0.69754\n            del bodies_data[bodyID]",
+        "type": "code",
+        "location": "/data/ntu-rgb-d/get_raw_denoised_data.py:117-147"
+    },
+    "3741": {
+        "file_id": 319,
+        "content": "The function \"denoising_by_spread\" takes a sequence of body data and filters out any bodies with a high ratio of noisy frames. It uses the spread of Y and X values to determine if a frame is valid or not. If the ratio of noisy frames exceeds a predefined threshold, the corresponding body is removed from the data. This function ensures that only clean data is used for further processing.",
+        "type": "comment"
+    },
+    "3742": {
+        "file_id": 319,
+        "content": "            denoised_by_spr = True\n            noise_info += 'Filter out: %s (spread rate >= %.2f).\\n' % (\n                bodyID, noise_spr_thres2)\n            noise_spr_logger.info('%s\\t%s\\t%.6f\\t%.6f' %\n                                  (ske_name, bodyID, motion, ratio))\n        else:  # Update motion\n            joints = body_data['joints'].reshape(-1, 25, 3)[valid_frames]\n            body_data['motion'] = min(\n                motion, np.sum(np.var(joints.reshape(-1, 3), axis=0)))\n            noise_info += '%s: motion %.6f -> %.6f\\n' % (bodyID, motion,\n                                                         body_data['motion'])\n            # TODO: Consider removing noisy frames for each bodyID\n    if noise_info != '':\n        noise_info += '\\n'\n    return bodies_data, noise_info, denoised_by_spr\ndef denoising_by_motion(ske_name, bodies_data, bodies_motion):\n    \"\"\"\n    Filter out the bodyID which motion is out of the range of predefined interval\n    \"\"\"\n    # Sort bodies based on the motion, return a list of tuples",
+        "type": "code",
+        "location": "/data/ntu-rgb-d/get_raw_denoised_data.py:148-172"
+    },
+    "3743": {
+        "file_id": 319,
+        "content": "This function filters out frames with high noise (spread rate) and updates the motion values for each bodyID. It also returns a list of tuples sorted by motion, potentially removing noisy frames for each bodyID.",
+        "type": "comment"
+    },
+    "3744": {
+        "file_id": 319,
+        "content": "    # bodies_motion = sorted(bodies_motion.items(), key=lambda x, y: cmp(x[1], y[1]), reverse=True)\n    bodies_motion = sorted(bodies_motion.items(),\n                           key=lambda x: x[1],\n                           reverse=True)\n    # Reserve the body data with the largest motion\n    denoised_bodies_data = [(bodies_motion[0][0],\n                             bodies_data[bodies_motion[0][0]])]\n    noise_info = str()\n    for (bodyID, motion) in bodies_motion[1:]:\n        if (motion < noise_mot_thres_lo) or (motion > noise_mot_thres_hi):\n            noise_info += 'Filter out: %s, %.6f (motion).\\n' % (bodyID, motion)\n            noise_mot_logger.info('{}\\t{}\\t{:.6f}'.format(\n                ske_name, bodyID, motion))\n        else:\n            denoised_bodies_data.append((bodyID, bodies_data[bodyID]))\n    if noise_info != '':\n        noise_info += '\\n'\n    return denoised_bodies_data, noise_info\ndef denoising_bodies_data(bodies_data):\n    \"\"\"\n    Denoising data based on some heuristic methods, not necessarily correct for all samples.",
+        "type": "code",
+        "location": "/data/ntu-rgb-d/get_raw_denoised_data.py:173-198"
+    },
+    "3745": {
+        "file_id": 319,
+        "content": "This code sorts the motion data for each body, discards data with low or high motion values, and returns denoised body data along with information about filtered out bodies. The denoising process is based on heuristic methods that may not be correct for all samples.",
+        "type": "comment"
+    },
+    "3746": {
+        "file_id": 319,
+        "content": "    Return:\n      denoised_bodies_data (list): tuple: (bodyID, body_data).\n    \"\"\"\n    ske_name = bodies_data['name']\n    bodies_data = bodies_data['data']\n    # Step 1: Denoising based on frame length.\n    bodies_data, noise_info_len = denoising_by_length(ske_name, bodies_data)\n    if len(bodies_data) == 1:  # only has one bodyID left after step 1\n        return bodies_data.items(), noise_info_len\n    # Step 2: Denoising based on spread.\n    bodies_data, noise_info_spr, denoised_by_spr = denoising_by_spread(\n        ske_name, bodies_data)\n    if len(bodies_data) == 1:\n        return bodies_data.items(), noise_info_len + noise_info_spr\n    bodies_motion = dict()  # get body motion\n    for (bodyID, body_data) in bodies_data.items():\n        bodies_motion[bodyID] = body_data['motion']\n    # Sort bodies based on the motion\n    # bodies_motion = sorted(bodies_motion.items(), key=lambda x, y: cmp(x[1], y[1]), reverse=True)\n    bodies_motion = sorted(bodies_motion.items(),\n                           key=lambda x: x[1],",
+        "type": "code",
+        "location": "/data/ntu-rgb-d/get_raw_denoised_data.py:200-225"
+    },
+    "3747": {
+        "file_id": 319,
+        "content": "This code performs denoising on bodies data based on frame length and spread. It first denoises the data by frame length and then by spread, if necessary. The function returns a tuple containing the denoised bodies data and the noise information for each step. The code also sorts the bodies based on their motion and returns it in a sorted manner.",
+        "type": "comment"
+    },
+    "3748": {
+        "file_id": 319,
+        "content": "                           reverse=True)\n    denoised_bodies_data = list()\n    for (bodyID, _) in bodies_motion:\n        denoised_bodies_data.append((bodyID, bodies_data[bodyID]))\n    return denoised_bodies_data, noise_info_len + noise_info_spr\n    # TODO: Consider denoising further by integrating motion method\n    # if denoised_by_spr:  # this sequence has been denoised by spread\n    #     bodies_motion = sorted(bodies_motion.items(), lambda x, y: cmp(x[1], y[1]), reverse=True)\n    #     denoised_bodies_data = list()\n    #     for (bodyID, _) in bodies_motion:\n    #         denoised_bodies_data.append((bodyID, bodies_data[bodyID]))\n    #     return denoised_bodies_data, noise_info\n    # Step 3: Denoising based on motion\n    # bodies_data, noise_info = denoising_by_motion(ske_name, bodies_data, bodies_motion)\n    # return bodies_data, noise_info\ndef get_one_actor_points(body_data, num_frames):\n    \"\"\"\n    Get joints and colors for only one actor.\n    For joints, each frame contains 75 X-Y-Z coordinates.\n    For colors, each frame contains 25 x 2 (X, Y) coordinates.",
+        "type": "code",
+        "location": "/data/ntu-rgb-d/get_raw_denoised_data.py:226-252"
+    },
+    "3749": {
+        "file_id": 319,
+        "content": "This code retrieves denoised data from the NTU RGB-D dataset, and considers further denoising by integrating motion. It also defines a function to get joints and colors for only one actor.",
+        "type": "comment"
+    },
+    "3750": {
+        "file_id": 319,
+        "content": "    \"\"\"\n    joints = np.zeros((num_frames, 75), dtype=np.float32)\n    colors = np.ones((num_frames, 1, 25, 2), dtype=np.float32) * np.nan\n    start, end = body_data['interval'][0], body_data['interval'][-1]\n    joints[start:end + 1] = body_data['joints'].reshape(-1, 75)\n    colors[start:end + 1, 0] = body_data['colors']\n    return joints, colors\ndef remove_missing_frames(ske_name, joints, colors):\n    \"\"\"\n    Cut off missing frames which all joints positions are 0s\n    For the sequence with 2 actors' data, also record the number of missing frames for\n    actor1 and actor2, respectively (for debug).\n    \"\"\"\n    num_frames = joints.shape[0]\n    num_bodies = colors.shape[1]  # 1 or 2\n    if num_bodies == 2:  # DEBUG\n        missing_indices_1 = np.where(joints[:, :75].sum(axis=1) == 0)[0]\n        missing_indices_2 = np.where(joints[:, 75:].sum(axis=1) == 0)[0]\n        cnt1 = len(missing_indices_1)\n        cnt2 = len(missing_indices_2)\n        start = 1 if 0 in missing_indices_1 else 0\n        end = 1 if num_frames - 1 in missing_indices_1 else 0",
+        "type": "code",
+        "location": "/data/ntu-rgb-d/get_raw_denoised_data.py:253-280"
+    },
+    "3751": {
+        "file_id": 319,
+        "content": "This code segment defines a function to get raw denoised data from body_data and another function to remove missing frames in the sequence. The first function initializes joints and colors arrays, extracts relevant data from body_data, and returns the joints and colors. The second function cuts off missing frames when all joint positions are 0s and records the number of missing frames for each actor if there are two actors' data.",
+        "type": "comment"
+    },
+    "3752": {
+        "file_id": 319,
+        "content": "        if max(cnt1, cnt2) > 0:\n            if cnt1 > cnt2:\n                info = '{}\\t{:^10d}\\t{:^6d}\\t{:^6d}\\t{:^5d}\\t{:^3d}'.format(\n                    ske_name, num_frames, cnt1, cnt2, start, end)\n                missing_skes_logger1.info(info)\n            else:\n                info = '{}\\t{:^10d}\\t{:^6d}\\t{:^6d}'.format(\n                    ske_name, num_frames, cnt1, cnt2)\n                missing_skes_logger2.info(info)\n    # Find valid frame indices that the data is not missing or lost\n    # For two-subjects action, this means both data of actor1 and actor2 is missing.\n    valid_indices = np.where(joints.sum(axis=1) != 0)[0]  # 0-based index\n    missing_indices = np.where(joints.sum(axis=1) == 0)[0]\n    num_missing = len(missing_indices)\n    if num_missing > 0:  # Update joints and colors\n        joints = joints[valid_indices]\n        colors[missing_indices] = np.nan\n        global missing_count\n        missing_count += 1\n        missing_skes_logger.info('{}\\t{:^10d}\\t{:^11d}'.format(\n            ske_name, num_frames, num_missing))",
+        "type": "code",
+        "location": "/data/ntu-rgb-d/get_raw_denoised_data.py:281-303"
+    },
+    "3753": {
+        "file_id": 319,
+        "content": "This code checks if any data is missing or lost for two subjects in a video. If there are missing frames, it updates the joints and colors arrays, marks missing indices with NaN, and logs the number of missing frames and total missing counts.",
+        "type": "comment"
+    },
+    "3754": {
+        "file_id": 319,
+        "content": "    return joints, colors\ndef get_bodies_info(bodies_data):\n    bodies_info = '{:^17}\\t{}\\t{:^8}\\n'.format('bodyID', 'Interval', 'Motion')\n    for (bodyID, body_data) in bodies_data.items():\n        start, end = body_data['interval'][0], body_data['interval'][-1]\n        bodies_info += '{}\\t{:^8}\\t{:f}\\n'.format(bodyID, str([start, end]),\n                                                  body_data['motion'])\n    return bodies_info + '\\n'\ndef get_two_actors_points(bodies_data):\n    \"\"\"\n    Get the first and second actor's joints positions and colors locations.\n    # Arguments:\n        bodies_data (dict): 3 key-value pairs: 'name', 'data', 'num_frames'.\n        bodies_data['data'] is also a dict, while the key is bodyID, the value is\n        the corresponding body_data which is also a dict with 4 keys:\n          - joints: raw 3D joints positions. Shape: (num_frames x 25, 3)\n          - colors: raw 2D color locations. Shape: (num_frames, 25, 2)\n          - interval: a list which records the frame indices.\n          - motion: motion amount",
+        "type": "code",
+        "location": "/data/ntu-rgb-d/get_raw_denoised_data.py:305-329"
+    },
+    "3755": {
+        "file_id": 319,
+        "content": "Function get_bodies_info formats the bodies' data into a string with bodyID, interval (start and end frame), and motion amount.\nFunction get_two_actors_points retrieves the first and second actor's joints positions and colors locations from given data.",
+        "type": "comment"
+    },
+    "3756": {
+        "file_id": 319,
+        "content": "    # Return:\n        joints, colors.\n    \"\"\"\n    ske_name = bodies_data['name']\n    label = int(ske_name[-2:])\n    num_frames = bodies_data['num_frames']\n    bodies_info = get_bodies_info(bodies_data['data'])\n    bodies_data, noise_info = denoising_bodies_data(\n        bodies_data)  # Denoising data\n    bodies_info += noise_info\n    bodies_data = list(bodies_data)\n    if len(bodies_data) == 1:  # Only left one actor after denoising\n        if label >= 50:  # DEBUG: Denoising failed for two-subjects action\n            fail_logger_2.info(ske_name)\n        bodyID, body_data = bodies_data[0]\n        joints, colors = get_one_actor_points(body_data, num_frames)\n        bodies_info += 'Main actor: %s' % bodyID\n    else:\n        if label < 50:  # DEBUG: Denoising failed for one-subject action\n            fail_logger_1.info(ske_name)\n        joints = np.zeros((num_frames, 150), dtype=np.float32)\n        colors = np.ones((num_frames, 2, 25, 2), dtype=np.float32) * np.nan\n        bodyID, actor1 = bodies_data[0]  # the 1st actor with largest motion",
+        "type": "code",
+        "location": "/data/ntu-rgb-d/get_raw_denoised_data.py:331-358"
+    },
+    "3757": {
+        "file_id": 319,
+        "content": "This function denoises bodies data and extracts joints and colors information for each frame. If only one actor remains after denoising, it checks if the action is for two subjects (label >= 50) and retrieves joints and colors from the remaining actor. If there are still multiple actors but the action is for one subject (label < 50), it initializes joints as zeros and colors as nans.",
+        "type": "comment"
+    },
+    "3758": {
+        "file_id": 319,
+        "content": "        start1, end1 = actor1['interval'][0], actor1['interval'][-1]\n        joints[start1:end1 + 1, :75] = actor1['joints'].reshape(-1, 75)\n        colors[start1:end1 + 1, 0] = actor1['colors']\n        actor1_info = '{:^17}\\t{}\\t{:^8}\\n'.format('Actor1', 'Interval', 'Motion') + \\\n                      '{}\\t{:^8}\\t{:f}\\n'.format(bodyID, str([start1, end1]), actor1['motion'])\n        del bodies_data[0]\n        actor2_info = '{:^17}\\t{}\\t{:^8}\\n'.format('Actor2', 'Interval',\n                                                   'Motion')\n        start2, end2 = [0, 0]  # initial interval for actor2 (virtual)\n        while len(bodies_data) > 0:\n            bodyID, actor = bodies_data[0]\n            start, end = actor['interval'][0], actor['interval'][-1]\n            if min(end1, end) - max(start1,\n                                    start) <= 0:  # no overlap with actor1\n                joints[start:end + 1, :75] = actor['joints'].reshape(-1, 75)\n                colors[start:end + 1, 0] = actor['colors']\n                actor1_info += '{}\\t{:^8}\\t{:f}\\n'.format(",
+        "type": "code",
+        "location": "/data/ntu-rgb-d/get_raw_denoised_data.py:359-377"
+    },
+    "3759": {
+        "file_id": 319,
+        "content": "Code snippet extracts joints, colors and other information from actors' data and assigns them to relevant arrays. It also generates formatted information about each actor including their interval and motion. The while loop iterates through the bodies_data list, considering only those actors whose intervals do not overlap with Actor1, appending their joints and colors to the respective arrays.",
+        "type": "comment"
+    },
+    "3760": {
+        "file_id": 319,
+        "content": "                    bodyID, str([start, end]), actor['motion'])\n                # Update the interval of actor1\n                start1 = min(start, start1)\n                end1 = max(end, end1)\n            elif min(end2, end) - max(start2,\n                                      start) <= 0:  # no overlap with actor2\n                joints[start:end + 1, 75:] = actor['joints'].reshape(-1, 75)\n                colors[start:end + 1, 1] = actor['colors']\n                actor2_info += '{}\\t{:^8}\\t{:f}\\n'.format(\n                    bodyID, str([start, end]), actor['motion'])\n                # Update the interval of actor2\n                start2 = min(start, start2)\n                end2 = max(end, end2)\n            del bodies_data[0]\n        bodies_info += ('\\n' + actor1_info + '\\n' + actor2_info)\n    with open(osp.join(actors_info_dir, ske_name + '.txt'), 'w') as fw:\n        fw.write(bodies_info + '\\n')\n    return joints, colors\ndef get_raw_denoised_data():\n    \"\"\"\n    Get denoised data (joints positions and color locations) from raw skeleton sequences.",
+        "type": "code",
+        "location": "/data/ntu-rgb-d/get_raw_denoised_data.py:378-403"
+    },
+    "3761": {
+        "file_id": 319,
+        "content": "This function extracts and denoises joint positions and color locations from raw skeleton sequences. It takes intervals of actor1 and actor2, updates their intervals if there's no overlap, and then stores the information in separate variables. Finally, it writes the information to a text file.",
+        "type": "comment"
+    },
+    "3762": {
+        "file_id": 319,
+        "content": "    For each frame of a skeleton sequence, an actor's 3D positions of 25 joints represented\n    by an 2D array (shape: 25 x 3) is reshaped into a 75-dim vector by concatenating each\n    3-dim (x, y, z) coordinates along the row dimension in joint order. Each frame contains\n    two actor's joints positions constituting a 150-dim vector. If there is only one actor,\n    then the last 75 values are filled with zeros. Otherwise, select the main actor and the\n    second actor based on the motion amount. Each 150-dim vector as a row vector is put into\n    a 2D numpy array where the number of rows equals the number of valid frames. All such\n    2D arrays are put into a list and finally the list is serialized into a cPickle file.\n    For the skeleton sequence which contains two or more actors (mostly corresponds to the\n    last 11 classes), the filename and actors' information are recorded into log files.\n    For better understanding, also generate RGB+skeleton videos for visualization.\n    \"\"\"\n    with open(raw_data_file, 'rb') as fr:  # load raw skeletons data",
+        "type": "code",
+        "location": "/data/ntu-rgb-d/get_raw_denoised_data.py:405-419"
+    },
+    "3763": {
+        "file_id": 319,
+        "content": "This code reads raw skeleton data from a file, then processes and reshapes the 3D positions of each joint into a 75-dimensional vector for each frame. If there's only one actor, it fills zeros to complete the 150-dimensional vector. It selects the main and second actors based on motion amount. The resulting 2D arrays are stored in a list and serialized into a cPickle file. Additionally, log files record the filename and actors' information for skeleton sequences with two or more actors. The code also generates RGB+skeleton videos for better visualization.",
+        "type": "comment"
+    },
+    "3764": {
+        "file_id": 319,
+        "content": "        raw_skes_data = pickle.load(fr)\n    num_skes = len(raw_skes_data)\n    print('Found %d available skeleton sequences.' % num_skes)\n    raw_denoised_joints = []\n    raw_denoised_colors = []\n    frames_cnt = []\n    for (idx, bodies_data) in enumerate(raw_skes_data):\n        ske_name = bodies_data['name']\n        print('Processing %s' % ske_name)\n        num_bodies = len(bodies_data['data'])\n        if num_bodies == 1:  # only 1 actor\n            num_frames = bodies_data['num_frames']\n            body_data = list(bodies_data['data'].values())[0]\n            joints, colors = get_one_actor_points(body_data, num_frames)\n        else:  # more than 1 actor, select two main actors\n            joints, colors = get_two_actors_points(bodies_data)\n            # Remove missing frames\n            joints, colors = remove_missing_frames(ske_name, joints, colors)\n            num_frames = joints.shape[0]  # Update\n            # Visualize selected actors' skeletons on RGB videos.\n        raw_denoised_joints.append(joints)",
+        "type": "code",
+        "location": "/data/ntu-rgb-d/get_raw_denoised_data.py:420-445"
+    },
+    "3765": {
+        "file_id": 319,
+        "content": "Code reads raw skeleton sequence data from file, counts the number of sequences, and processes each sequence by extracting joints and color data. It handles single or multiple actors in a sequence, removes missing frames if necessary, and stores processed data into separate lists for further processing.",
+        "type": "comment"
+    },
+    "3766": {
+        "file_id": 319,
+        "content": "        raw_denoised_colors.append(colors)\n        frames_cnt.append(num_frames)\n        if (idx + 1) % 1000 == 0:\n            print('Processed: %.2f%% (%d / %d), ' % \\\n                  (100.0 * (idx + 1) / num_skes, idx + 1, num_skes) + \\\n                  'Missing count: %d' % missing_count)\n    raw_skes_joints_pkl = osp.join(save_path, 'raw_denoised_joints.pkl')\n    with open(raw_skes_joints_pkl, 'wb') as f:\n        pickle.dump(raw_denoised_joints, f, pickle.HIGHEST_PROTOCOL)\n    raw_skes_colors_pkl = osp.join(save_path, 'raw_denoised_colors.pkl')\n    with open(raw_skes_colors_pkl, 'wb') as f:\n        pickle.dump(raw_denoised_colors, f, pickle.HIGHEST_PROTOCOL)\n    frames_cnt = np.array(frames_cnt, dtype=np.int)\n    np.savetxt(osp.join(save_path, 'frames_cnt.txt'), frames_cnt, fmt='%d')\n    print('Saved raw denoised positions of {} frames into {}'.format(\n        np.sum(frames_cnt), raw_skes_joints_pkl))\n    print('Found %d files that have missing data' % missing_count)\nif __name__ == '__main__':\n    get_raw_denoised_data()",
+        "type": "code",
+        "location": "/data/ntu-rgb-d/get_raw_denoised_data.py:446-471"
+    },
+    "3767": {
+        "file_id": 319,
+        "content": "The code iterates over a set of skes, appends raw denoised joints and colors to lists, prints progress, and saves the data into pickle files and text file. It also counts missing data and reports it at the end.",
+        "type": "comment"
+    },
+    "3768": {
+        "file_id": 320,
+        "content": "/data/ntu-rgb-d/get_raw_skes_data.py",
+        "type": "filepath"
+    },
+    "3769": {
+        "file_id": 320,
+        "content": "This function processes skeleton data, extracts body information, updates a dictionary with the data and returns the skeleton name, body data, and frame count. It handles missing frames and calculates motion using NTU RGB-D dataset data. Additionally, it combines and processes raw skeleton data from multiple files, updating progress, filters out missing frames, logs events, and saves the filtered data into pickle files.",
+        "type": "summary"
+    },
+    "3770": {
+        "file_id": 320,
+        "content": "# ref: https://github.com/Uason-Chen/CTR-GCN/blob/main/data/ntu/get_raw_skes_data.py\nimport os.path as osp\nimport os\nimport numpy as np\nimport pickle\nimport logging\ndef get_raw_bodies_data(skes_path, ske_name, frames_drop_skes,\n                        frames_drop_logger):\n    \"\"\"\n    Get raw bodies data from a skeleton sequence.\n    Each body's data is a dict that contains the following keys:\n      - joints: raw 3D joints positions. Shape: (num_frames x 25, 3)\n      - colors: raw 2D color locations. Shape: (num_frames, 25, 2)\n      - interval: a list which stores the frame indices of this body.\n      - motion: motion amount (only for the sequence with 2 or more bodyIDs).\n    Return:\n      a dict for a skeleton sequence with 3 key-value pairs:\n        - name: the skeleton filename.\n        - data: a dict which stores raw data of each body.\n        - num_frames: the number of valid frames.\n    \"\"\"\n    ske_file = osp.join(skes_path, ske_name + '.skeleton')\n    assert osp.exists(ske_file), 'Error: Skeleton file %s not found' % ske_file",
+        "type": "code",
+        "location": "/data/ntu-rgb-d/get_raw_skes_data.py:1-28"
+    },
+    "3771": {
+        "file_id": 320,
+        "content": "This function gets raw bodies data from a skeleton sequence by loading the file and checking its existence. It returns a dictionary with three key-value pairs: name (skeleton filename), data (raw data of each body), and num_frames (number of valid frames).",
+        "type": "comment"
+    },
+    "3772": {
+        "file_id": 320,
+        "content": "    # Read all data from .skeleton file into a list (in string format)\n    print('Reading data from %s' % ske_file[-29:])\n    with open(ske_file, 'r') as fr:\n        str_data = fr.readlines()\n    num_frames = int(str_data[0].strip('\\r\\n'))\n    frames_drop = []\n    bodies_data = dict()\n    valid_frames = -1  # 0-based index\n    current_line = 1\n    for f in range(num_frames):\n        num_bodies = int(str_data[current_line].strip('\\r\\n'))\n        current_line += 1\n        if num_bodies == 0:  # no data in this frame, drop it\n            frames_drop.append(f)  # 0-based index\n            continue\n        valid_frames += 1\n        joints = np.zeros((num_bodies, 25, 3), dtype=np.float32)\n        colors = np.zeros((num_bodies, 25, 2), dtype=np.float32)\n        for b in range(num_bodies):\n            bodyID = str_data[current_line].strip('\\r\\n').split()[0]\n            current_line += 1\n            num_joints = int(str_data[current_line].strip('\\r\\n'))  # 25 joints\n            current_line += 1\n            for j in range(num_joints):",
+        "type": "code",
+        "location": "/data/ntu-rgb-d/get_raw_skes_data.py:29-58"
+    },
+    "3773": {
+        "file_id": 320,
+        "content": "Reading and processing .skeleton file data into a list, storing number of frames, ignoring frames with no bodies, extracting body IDs, and counting the number of joints for each body.",
+        "type": "comment"
+    },
+    "3774": {
+        "file_id": 320,
+        "content": "                temp_str = str_data[current_line].strip('\\r\\n').split()\n                joints[b, j, :] = np.array(temp_str[:3], dtype=np.float32)\n                colors[b, j, :] = np.array(temp_str[5:7], dtype=np.float32)\n                current_line += 1\n            if bodyID not in bodies_data:  # Add a new body's data\n                body_data = dict()\n                body_data['joints'] = joints[b]  # ndarray: (25, 3)\n                body_data['colors'] = colors[b,\n                                             np.newaxis]  # ndarray: (1, 25, 2)\n                body_data['interval'] = [valid_frames\n                                         ]  # the index of the first frame\n            else:  # Update an already existed body's data\n                body_data = bodies_data[bodyID]\n                # Stack each body's data of each frame along the frame order\n                body_data['joints'] = np.vstack(\n                    (body_data['joints'], joints[b]))\n                body_data['colors'] = np.vstack(",
+        "type": "code",
+        "location": "/data/ntu-rgb-d/get_raw_skes_data.py:59-76"
+    },
+    "3775": {
+        "file_id": 320,
+        "content": "This code reads data from a file, extracts joint and color information for each body, and updates or adds body data to a dictionary based on the body ID. The joint and color arrays are created using numpy functions, and the joints array is stacked along the frame order if the body's data already exists in the dictionary.",
+        "type": "comment"
+    },
+    "3776": {
+        "file_id": 320,
+        "content": "                    (body_data['colors'], colors[b, np.newaxis]))\n                pre_frame_idx = body_data['interval'][-1]\n                body_data['interval'].append(pre_frame_idx +\n                                             1)  # add a new frame index\n            bodies_data[bodyID] = body_data  # Update bodies_data\n    num_frames_drop = len(frames_drop)\n    assert num_frames_drop < num_frames, \\\n        'Error: All frames data (%d) of %s is missing or lost' % (num_frames, ske_name)\n    if num_frames_drop > 0:\n        frames_drop_skes[ske_name] = np.array(frames_drop, dtype=np.int)\n        frames_drop_logger.info('{}: {} frames missed: {}\\n'.format(\n            ske_name, num_frames_drop, frames_drop))\n    # Calculate motion (only for the sequence with 2 or more bodyIDs)\n    if len(bodies_data) > 1:\n        for body_data in bodies_data.values():\n            body_data['motion'] = np.sum(np.var(body_data['joints'], axis=0))\n    return {\n        'name': ske_name,\n        'data': bodies_data,\n        'num_frames': num_frames - num_frames_drop",
+        "type": "code",
+        "location": "/data/ntu-rgb-d/get_raw_skes_data.py:77-100"
+    },
+    "3777": {
+        "file_id": 320,
+        "content": "This code retrieves raw data for a specific subject's skeleton (ske_name) from the NTU RGB-D dataset. It handles missing frames, calculates motion based on body data with multiple bodyIDs and returns the skeleton name, body data and updated frame count.",
+        "type": "comment"
+    },
+    "3778": {
+        "file_id": 320,
+        "content": "    }\ndef get_raw_skes_data():\n    skes_name = np.loadtxt(skes_name_file, dtype=str)\n    num_files = skes_name.size\n    print('Found %d available skeleton files.' % num_files)\n    raw_skes_data = []\n    frames_cnt = np.zeros(num_files, dtype=np.int)\n    for (idx, ske_name) in enumerate(skes_name):\n        bodies_data = get_raw_bodies_data(skes_path, ske_name, frames_drop_skes,\n                                          frames_drop_logger)\n        raw_skes_data.append(bodies_data)\n        frames_cnt[idx] = bodies_data['num_frames']\n        if (idx + 1) % 1000 == 0:\n            print('Processed: %.2f%% (%d / %d)' % \\\n                  (100.0 * (idx + 1) / num_files, idx + 1, num_files))\n    with open(save_data_pkl, 'wb') as fw:\n        pickle.dump(raw_skes_data, fw, pickle.HIGHEST_PROTOCOL)\n    np.savetxt(osp.join(save_path, 'raw_data', 'frames_cnt.txt'),\n               frames_cnt,\n               fmt='%d')\n    print('Saved raw bodies data into %s' % save_data_pkl)\n    print('Total frames: %d' % np.sum(frames_cnt))",
+        "type": "code",
+        "location": "/data/ntu-rgb-d/get_raw_skes_data.py:101-130"
+    },
+    "3779": {
+        "file_id": 320,
+        "content": "This function retrieves raw skeleton data from multiple files, processes it, and saves the combined data in a file. It keeps track of the number of frames for each file and prints progress updates every 1000 files processed.",
+        "type": "comment"
+    },
+    "3780": {
+        "file_id": 320,
+        "content": "    with open(frames_drop_pkl, 'wb') as fw:\n        pickle.dump(frames_drop_skes, fw, pickle.HIGHEST_PROTOCOL)\nif __name__ == '__main__':\n    save_path = './'\n    skes_path = '../ntu-rgb-d/nturgb+d_skeletons/'\n    stat_path = osp.join(save_path, 'statistics')\n    if not osp.exists('./raw_data'):\n        os.makedirs('./raw_data')\n    skes_name_file = osp.join(stat_path, 'skes_available_name.txt')\n    save_data_pkl = osp.join(save_path, 'raw_data', 'raw_skes_data.pkl')\n    frames_drop_pkl = osp.join(save_path, 'raw_data', 'frames_drop_skes.pkl')\n    frames_drop_logger = logging.getLogger('frames_drop')\n    frames_drop_logger.setLevel(logging.INFO)\n    frames_drop_logger.addHandler(\n        logging.FileHandler(osp.join(save_path, 'raw_data', 'frames_drop.log')))\n    frames_drop_skes = dict()\n    get_raw_skes_data()\n    with open(frames_drop_pkl, 'wb') as fw:\n        pickle.dump(frames_drop_skes, fw, pickle.HIGHEST_PROTOCOL)",
+        "type": "code",
+        "location": "/data/ntu-rgb-d/get_raw_skes_data.py:132-157"
+    },
+    "3781": {
+        "file_id": 320,
+        "content": "This code reads data from the NTU-RGB+D dataset, filters out frames with missing skeleton data, and saves it into two pickle files. The data is read from a specific path, and if the raw_data directory does not exist, it creates one. A logger for frames drop events is also set up and logs to a file. Finally, the code dumps the filtered frames data into another pickle file.",
+        "type": "comment"
+    },
+    "3782": {
+        "file_id": 321,
+        "content": "/data/ntu-rgb-d/seq_transformation.py",
+        "type": "filepath"
+    },
+    "3783": {
+        "file_id": 321,
+        "content": "The code imports modules, defines functions for data processing and splitting, handles evaluation cases, transforms joints, encodes labels, and saves the training/testing sets in suitable formats. It applies translation, alignment, and uses \"split_dataset\" function to create train/test indices before printing 'Done!'.",
+        "type": "summary"
+    },
+    "3784": {
+        "file_id": 321,
+        "content": "# ref: https://github.com/Uason-Chen/CTR-GCN/blob/main/data/ntu/seq_transformation.py\nimport os\nimport os.path as osp\nimport numpy as np\nimport pickle\nimport logging\nfrom sklearn.model_selection import train_test_split\nroot_path = './'\nstat_path = osp.join(root_path, 'statistics')\nsetup_file = osp.join(stat_path, 'setup.txt')\ncamera_file = osp.join(stat_path, 'camera.txt')\nperformer_file = osp.join(stat_path, 'performer.txt')\nreplication_file = osp.join(stat_path, 'replication.txt')\nlabel_file = osp.join(stat_path, 'label.txt')\nskes_name_file = osp.join(stat_path, 'skes_available_name.txt')\ndenoised_path = osp.join(root_path, 'denoised_data')\nraw_skes_joints_pkl = osp.join(denoised_path, 'raw_denoised_joints.pkl')\nframes_file = osp.join(denoised_path, 'frames_cnt.txt')\nsave_path = './'\nif not osp.exists(save_path):\n    os.mkdir(save_path)\ndef remove_nan_frames(ske_name, ske_joints, nan_logger):\n    num_frames = ske_joints.shape[0]\n    valid_frames = []\n    for f in range(num_frames):\n        if not np.any(np.isnan(ske_joints[f])):",
+        "type": "code",
+        "location": "/data/ntu-rgb-d/seq_transformation.py:1-34"
+    },
+    "3785": {
+        "file_id": 321,
+        "content": "This code imports necessary modules and defines constants for file paths. It checks if a directory exists, creates it if not, and defines a function to remove frames with NaN values while logging such occurrences.",
+        "type": "comment"
+    },
+    "3786": {
+        "file_id": 321,
+        "content": "            valid_frames.append(f)\n        else:\n            nan_indices = np.where(np.isnan(ske_joints[f]))[0]\n            nan_logger.info('{}\\t{:^5}\\t{}'.format(ske_name, f + 1,\n                                                   nan_indices))\n    return ske_joints[valid_frames]\ndef seq_translation(skes_joints):\n    for idx, ske_joints in enumerate(skes_joints):\n        num_frames = ske_joints.shape[0]\n        num_bodies = 1 if ske_joints.shape[1] == 75 else 2\n        if num_bodies == 2:\n            missing_frames_1 = np.where(ske_joints[:, :75].sum(axis=1) == 0)[0]\n            missing_frames_2 = np.where(ske_joints[:, 75:].sum(axis=1) == 0)[0]\n            cnt1 = len(missing_frames_1)\n            cnt2 = len(missing_frames_2)\n        i = 0  # get the \"real\" first frame of actor1\n        while i < num_frames:\n            if np.any(ske_joints[i, :75] != 0):\n                break\n            i += 1\n        origin = np.copy(ske_joints[i, 3:6])  # new origin: joint-2\n        for f in range(num_frames):\n            if num_bodies == 1:",
+        "type": "code",
+        "location": "/data/ntu-rgb-d/seq_transformation.py:35-63"
+    },
+    "3787": {
+        "file_id": 321,
+        "content": "The code defines a function \"seq_translation\" that iterates through multiple skeleton joints sequences. It checks for missing frames and calculates the origin point. It returns valid frames only if any are found, or logs nan indices otherwise. The code also handles cases with one or two bodies in the sequence.",
+        "type": "comment"
+    },
+    "3788": {
+        "file_id": 321,
+        "content": "                ske_joints[f] -= np.tile(origin, 25)\n            else:  # for 2 actors\n                ske_joints[f] -= np.tile(origin, 50)\n        if (num_bodies == 2) and (cnt1 > 0):\n            ske_joints[missing_frames_1, :75] = np.zeros((cnt1, 75),\n                                                         dtype=np.float32)\n        if (num_bodies == 2) and (cnt2 > 0):\n            ske_joints[missing_frames_2, 75:] = np.zeros((cnt2, 75),\n                                                         dtype=np.float32)\n        skes_joints[idx] = ske_joints  # Update\n    return skes_joints\ndef frame_translation(skes_joints, skes_name, frames_cnt):\n    nan_logger = logging.getLogger('nan_skes')\n    nan_logger.setLevel(logging.INFO)\n    nan_logger.addHandler(logging.FileHandler(\"./nan_frames.log\"))\n    nan_logger.info('{}\\t{}\\t{}'.format('Skeleton', 'Frame', 'Joints'))\n    for idx, ske_joints in enumerate(skes_joints):\n        num_frames = ske_joints.shape[0]\n        # Calculate the distance between spine base (joint-1) and spine (joint-21)",
+        "type": "code",
+        "location": "/data/ntu-rgb-d/seq_transformation.py:64-89"
+    },
+    "3789": {
+        "file_id": 321,
+        "content": "This code is performing sequence transformation for NTU RGB+D dataset. It subtracts origin from joint coordinates and handles missing frames by setting them to zero if there are only two actors. It also logs information about skeletons, frames, and joints using a logger.",
+        "type": "comment"
+    },
+    "3790": {
+        "file_id": 321,
+        "content": "        j1 = ske_joints[:, 0:3]\n        j21 = ske_joints[:, 60:63]\n        dist = np.sqrt(((j1 - j21)**2).sum(axis=1))\n        for f in range(num_frames):\n            origin = ske_joints[f, 3:\n                                6]  # new origin: middle of the spine (joint-2)\n            if (ske_joints[f, 75:] == 0).all():\n                ske_joints[f, :75] = (ske_joints[f, :75] - np.tile(origin, 25)) / \\\n                                      dist[f] + np.tile(origin, 25)\n            else:\n                ske_joints[f] = (ske_joints[f] - np.tile(origin, 50)) / \\\n                                 dist[f] + np.tile(origin, 50)\n        ske_name = skes_name[idx]\n        ske_joints = remove_nan_frames(ske_name, ske_joints, nan_logger)\n        frames_cnt[idx] = num_frames  # update valid number of frames\n        skes_joints[idx] = ske_joints\n    return skes_joints, frames_cnt\ndef align_frames(skes_joints, frames_cnt):\n    \"\"\"\n    Align all sequences with the same frame length.\n    \"\"\"\n    num_skes = len(skes_joints)\n    max_num_frames = frames_cnt.max()  # 300",
+        "type": "code",
+        "location": "/data/ntu-rgb-d/seq_transformation.py:90-118"
+    },
+    "3791": {
+        "file_id": 321,
+        "content": "This code aligns all sequences to the same frame length by subtracting the origin (middle of spine joint) from each skeleton joint, normalizing the resulting coordinates based on the distance between the new origin and original origin. It updates the number of valid frames for each sequence and returns the aligned skeleton joints and updated frame counts.",
+        "type": "comment"
+    },
+    "3792": {
+        "file_id": 321,
+        "content": "    aligned_skes_joints = np.zeros((num_skes, max_num_frames, 150),\n                                   dtype=np.float32)\n    for idx, ske_joints in enumerate(skes_joints):\n        num_frames = ske_joints.shape[0]\n        num_bodies = 1 if ske_joints.shape[1] == 75 else 2\n        if num_bodies == 1:\n            aligned_skes_joints[idx, :num_frames] = np.hstack(\n                (ske_joints, np.zeros_like(ske_joints)))\n        else:\n            aligned_skes_joints[idx, :num_frames] = ske_joints\n    return aligned_skes_joints\ndef one_hot_vector(labels):\n    num_skes = len(labels)\n    labels_vector = np.zeros((num_skes, 60))\n    for idx, l in enumerate(labels):\n        labels_vector[idx, l] = 1\n    return labels_vector\ndef split_train_val(train_indices, method='sklearn', ratio=0.05):\n    \"\"\"\n    Get validation set by splitting data randomly from training set with two methods.\n    In fact, I thought these two methods are equal as they got the same performance.\n    \"\"\"\n    if method == 'sklearn':\n        return train_test_split(train_indices,",
+        "type": "code",
+        "location": "/data/ntu-rgb-d/seq_transformation.py:119-150"
+    },
+    "3793": {
+        "file_id": 321,
+        "content": "This code is part of the PaddleVideo library and contains three functions. The first function, `seq_transformation`, takes a list of skeleton joints and transforms them into aligned positions for all frames. It handles cases where there are either one or two bodies. The second function, `one_hot_vector`, converts a list of labels into a one-hot encoded vector. Lastly, the third function, `split_train_val`, splits the training set into train and validation sets using a specified method (either 'sklearn' or user-defined) and ratio.",
+        "type": "comment"
+    },
+    "3794": {
+        "file_id": 321,
+        "content": "                                test_size=ratio,\n                                random_state=10000)\n    else:\n        np.random.seed(10000)\n        np.random.shuffle(train_indices)\n        val_num_skes = int(np.ceil(0.05 * len(train_indices)))\n        val_indices = train_indices[:val_num_skes]\n        train_indices = train_indices[val_num_skes:]\n        return train_indices, val_indices\ndef split_dataset(skes_name, skes_joints, label, performer, camera, evaluation,\n                  save_path):\n    train_indices, test_indices = get_indices(performer, camera, evaluation)\n    m = 'sklearn'  # 'sklearn' or 'numpy'\n    # Select validation set from training set\n    # train_indices, val_indices = split_train_val(train_indices, m)\n    # Save labels and num_frames for each sequence of each data set\n    train_labels = label[train_indices]\n    test_labels = label[test_indices]\n    train_x = skes_joints[train_indices]\n    # train_y = one_hot_vector(train_labels)\n    test_x = skes_joints[test_indices]\n    # test_y = one_hot_vector(test_labels)",
+        "type": "code",
+        "location": "/data/ntu-rgb-d/seq_transformation.py:151-176"
+    },
+    "3795": {
+        "file_id": 321,
+        "content": "This code defines a function to split a dataset into training and validation sets based on the input parameters. It also includes functionality for selecting the validation set from the training set using either sklearn or numpy methods, and saving labels and features (joints positions) for each sequence of each dataset.",
+        "type": "comment"
+    },
+    "3796": {
+        "file_id": 321,
+        "content": "    evaluation_path = osp.join(save_path, evaluation)\n    isExists = osp.exists(evaluation_path)\n    if not isExists:\n        os.makedirs(evaluation_path)\n    train_data_save_path = osp.join(evaluation_path, 'train_data.npy')\n    train_label_save_path = osp.join(evaluation_path, 'train_label.pkl')\n    val_data_save_path = osp.join(evaluation_path, 'val_data.npy')\n    val_label_save_path = osp.join(evaluation_path, 'val_label.pkl')\n    # reshape data\n    N, T, VC = train_x.shape\n    train_x = np.reshape(train_x, (N, T, 2, 25, 3))\n    train_x = np.transpose(train_x, (0, 4, 1, 3, 2))\n    N, T, VC = test_x.shape\n    test_x = np.reshape(test_x, (N, T, 2, 25, 3))\n    test_x = np.transpose(test_x, (0, 4, 1, 3, 2))\n    # save train\n    np.save(train_data_save_path, train_x)\n    out = [skes_name[train_indices], train_labels]\n    with open(train_label_save_path, 'wb') as f:\n        pickle.dump(out, f)\n    # save test\n    np.save(val_data_save_path, test_x)\n    out = [skes_name[test_indices], test_labels]\n    with open(val_label_save_path, 'wb') as f:",
+        "type": "code",
+        "location": "/data/ntu-rgb-d/seq_transformation.py:178-204"
+    },
+    "3797": {
+        "file_id": 321,
+        "content": "The code is creating evaluation paths, checking if they exist, and then initializing the paths for train_data.npy, train_label.pkl, val_data.npy, and val_label.pkl files. It reshapes the train and test data and saves them using np.save() function. The train and test labels are also saved separately in pickle format.",
+        "type": "comment"
+    },
+    "3798": {
+        "file_id": 321,
+        "content": "        pickle.dump(out, f)\ndef get_indices(performer, camera, evaluation='xsub'):\n    test_indices = np.empty(0)\n    train_indices = np.empty(0)\n    if evaluation == 'xsub':  # Cross Subject (Subject IDs)\n        train_ids = [\n            1, 2, 4, 5, 8, 9, 13, 14, 15, 16, 17, 18, 19, 25, 27, 28, 31, 34,\n            35, 38\n        ]\n        test_ids = [\n            3, 6, 7, 10, 11, 12, 20, 21, 22, 23, 24, 26, 29, 30, 32, 33, 36, 37,\n            39, 40\n        ]\n        # Get indices of test data\n        for idx in test_ids:\n            temp = np.where(performer == idx)[0]  # 0-based index\n            test_indices = np.hstack((test_indices, temp)).astype(np.int)\n        # Get indices of training data\n        for train_id in train_ids:\n            temp = np.where(performer == train_id)[0]  # 0-based index\n            train_indices = np.hstack((train_indices, temp)).astype(np.int)\n    else:  # Cross View (Camera IDs)\n        train_ids = [2, 3]\n        test_ids = 1\n        # Get indices of test data\n        temp = np.where(camera == test_ids)[0]  # 0-based index",
+        "type": "code",
+        "location": "/data/ntu-rgb-d/seq_transformation.py:205-235"
+    },
+    "3799": {
+        "file_id": 321,
+        "content": "This function, `get_indices`, takes performer and camera as inputs and returns the indices of training and test data based on either cross-subject or cross-view evaluation. For cross-subject, it selects train/test IDs, then finds their respective indices in the performer array. Similarly, for cross-view, it selects train/test camera IDs and finds their indices. The code handles both cases and returns the training and test indices separately.",
+        "type": "comment"
+    }
+}

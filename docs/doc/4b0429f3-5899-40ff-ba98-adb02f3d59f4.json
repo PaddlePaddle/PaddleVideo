@@ -1,0 +1,15 @@
+{
+    "summary": "This code includes functions for parsing, setting parameters, and performing status checks. The last function logs success or failure with command details to the specified run_log file using tee -a.",
+    "details": [
+        {
+            "comment": "This code defines several functions for parsing and setting parameters, as well as performing status checks. The functions extract keys and values from strings using specific delimiters, set parameters based on their presence and content, and check the exit code of previous commands.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/test_tipc/common_func.sh\":0-57",
+            "content": "#!/bin/bash\nfunction func_parser_key(){\n    strs=$1\n    IFS=\":\"\n    array=(${strs})\n    tmp=${array[0]}\n    echo ${tmp}\n}\nfunction func_parser_value(){\n    strs=$1\n    IFS=\":\"\n    array=(${strs})\n    tmp=${array[1]}\n    echo ${tmp}\n}\nfunction func_set_params(){\n    key=$1\n    value=$2\n    if [ ${key}x = \"null\"x ];then\n        echo \" \"\n    elif [[ ${value} = \"null\" ]] || [[ ${value} = \" \" ]] || [ ${#value} -le 0 ];then\n        echo \" \"\n    else \n        echo \"${key}=${value}\"\n    fi\n}\nfunction func_parser_params(){\n    strs=$1\n    IFS=\":\"\n    array=(${strs})\n    key=${array[0]}\n    tmp=${array[1]}\n    IFS=\"|\"\n    res=\"\"\n    for _params in ${tmp[*]}; do\n        IFS=\"=\"\n        array=(${_params})\n        mode=${array[0]}\n        value=${array[1]}\n        if [[ ${mode} = ${MODE} ]]; then\n            IFS=\"|\"\n            #echo $(func_set_params \"${mode}\" \"${value}\")\n            echo $value\n            break\n        fi\n        IFS=\"|\"\n    done\n    echo ${res}\n}\nfunction status_check(){\n    last_status=$1   # the exit code\n    run_command=$2\n    run_log=$3"
+        },
+        {
+            "comment": "This function checks the last status and logs whether the run was successful or failed with specific command details. It appends the log to the specified run_log file using tee -a command.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/test_tipc/common_func.sh\":58-65",
+            "content": "    model_name=$4\n    log_path=$5\n    if [ $last_status -eq 0 ]; then\n        echo -e \"\\033[33m Run successfully with command - ${model_name} - ${run_command} - ${log_path} \\033[0m\" | tee -a ${run_log}\n    else\n        echo -e \"\\033[33m Run failed with command - ${model_name} - ${run_command} - ${log_path} \\033[0m\" | tee -a ${run_log}\n    fi\n}"
+        }
+    ]
+}

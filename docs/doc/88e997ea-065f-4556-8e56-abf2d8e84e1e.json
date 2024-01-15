@@ -1,0 +1,10 @@
+{
+    "summary": "This code block is importing modules and defining the contents of the package. It sets __all__ to include 'utils', 'PaddleVideo', and 'ava_predict'. The code block also includes copyright, license information, and imports from different . files within the package.",
+    "details": [
+        {
+            "comment": "This code block is importing modules and defining the contents of the package. It sets __all__ to include 'utils', 'PaddleVideo', and 'ava_predict'. The code block also includes copyright, license information, and imports from different . files within the package.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/tools/__init__.py\":0-18",
+            "content": "# Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n__all__ = ['utils', 'PaddleVideo', 'ava_predict']\nfrom . import utils\nfrom .wheel import PaddleVideo\nfrom . import ava_predict"
+        }
+    ]
+}

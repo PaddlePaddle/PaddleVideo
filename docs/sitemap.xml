@@ -1,0 +1,3916 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset
+      xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+            http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+<!-- created with Free Online Sitemap Generator www.xml-sitemaps.com -->
+
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/MANIFEST.in</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/README.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/README_en.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/AbnormalActionDetection/README.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/Anti-UAV/README.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/Anti-UAV/get_image_label.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/BasketballAction/README.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/BasketballAction/predict/action_detect/action.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/BasketballAction/predict/action_detect/logger.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/BasketballAction/predict/action_detect/mfcc/feature_extractor.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/BasketballAction/predict/action_detect/mfcc/model_config.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/BasketballAction/predict/action_detect/mfcc/vgg_params.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/BasketballAction/predict/action_detect/models/audio_infer.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/BasketballAction/predict/action_detect/models/bmn_infer.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/BasketballAction/predict/action_detect/models/lstm_infer.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/BasketballAction/predict/action_detect/models/pptsm_infer.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/BasketballAction/predict/action_detect/reader/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/BasketballAction/predict/action_detect/reader/audio_reader.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/BasketballAction/predict/action_detect/reader/bmninf_reader.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/BasketballAction/predict/action_detect/reader/feature_reader.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/BasketballAction/predict/action_detect/reader/reader_utils.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/BasketballAction/predict/action_detect/reader/tsminf_reader.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/BasketballAction/predict/action_detect/utils/config_utils.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/BasketballAction/predict/action_detect/utils/preprocess.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/BasketballAction/predict/action_detect/utils/process_result.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/BasketballAction/predict/eval.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/BasketballAction/predict/predict.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/EIVideo/EIVideo/README.MD</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/EIVideo/EIVideo/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/EIVideo/EIVideo/api.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/EIVideo/EIVideo/main.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/EIVideo/EIVideo/paddlevideo/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/EIVideo/EIVideo/paddlevideo/loader/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/EIVideo/EIVideo/paddlevideo/loader/builder.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/EIVideo/EIVideo/paddlevideo/loader/pipelines/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/EIVideo/EIVideo/paddlevideo/loader/pipelines/compose.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/EIVideo/EIVideo/paddlevideo/loader/pipelines/custom_transforms_f.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/EIVideo/EIVideo/paddlevideo/loader/registry.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/EIVideo/EIVideo/paddlevideo/metrics/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/EIVideo/EIVideo/paddlevideo/metrics/base.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/EIVideo/EIVideo/paddlevideo/metrics/build.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/EIVideo/EIVideo/paddlevideo/metrics/registry.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/EIVideo/EIVideo/paddlevideo/metrics/vos_metric.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/EIVideo/EIVideo/paddlevideo/modeling/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/EIVideo/EIVideo/paddlevideo/modeling/backbones/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/EIVideo/EIVideo/paddlevideo/modeling/backbones/aspp_manet.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/EIVideo/EIVideo/paddlevideo/modeling/backbones/decoder_manet.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/EIVideo/EIVideo/paddlevideo/modeling/backbones/deeplab_manet.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/EIVideo/EIVideo/paddlevideo/modeling/backbones/resnet_manet.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/EIVideo/EIVideo/paddlevideo/modeling/builder.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/EIVideo/EIVideo/paddlevideo/modeling/framework/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/EIVideo/EIVideo/paddlevideo/modeling/framework/segment/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/EIVideo/EIVideo/paddlevideo/modeling/framework/segment/base.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/EIVideo/EIVideo/paddlevideo/modeling/framework/segment/manet_stage1.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/EIVideo/EIVideo/paddlevideo/modeling/heads/IntVOS.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/EIVideo/EIVideo/paddlevideo/modeling/heads/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/EIVideo/EIVideo/paddlevideo/modeling/registry.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/EIVideo/EIVideo/paddlevideo/modeling/weight_init.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/EIVideo/EIVideo/paddlevideo/tasks/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/EIVideo/EIVideo/paddlevideo/tasks/test.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/EIVideo/EIVideo/paddlevideo/utils/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/EIVideo/EIVideo/paddlevideo/utils/build_utils.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/EIVideo/EIVideo/paddlevideo/utils/config.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/EIVideo/EIVideo/paddlevideo/utils/dist_utils.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/EIVideo/EIVideo/paddlevideo/utils/logger.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/EIVideo/EIVideo/paddlevideo/utils/manet_utils.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/EIVideo/EIVideo/paddlevideo/utils/precise_bn.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/EIVideo/EIVideo/paddlevideo/utils/profiler.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/EIVideo/EIVideo/paddlevideo/utils/record.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/EIVideo/EIVideo/paddlevideo/utils/registry.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/EIVideo/EIVideo/paddlevideo/utils/save_load.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/EIVideo/EIVideo/paddlevideo/version.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/EIVideo/EIVideo/setup.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/EIVideo/EIVideo/version.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/EIVideo/QEIVideo/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/EIVideo/QEIVideo/build_gui.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/EIVideo/QEIVideo/gui/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/EIVideo/QEIVideo/gui/demo.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/EIVideo/QEIVideo/gui/ui_main_window.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/EIVideo/QEIVideo/start.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/EIVideo/QEIVideo/tools/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/EIVideo/QEIVideo/ui/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/EIVideo/QEIVideo/ui/demo.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/EIVideo/QEIVideo/version.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/EIVideo/QEIVideo/widget/PaintBoard.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/EIVideo/README.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/EIVideo/resources/QT/demo.ui</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/EIVideo/resources/cmd</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/FightRecognition/README.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/FigureSkating/README.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/FootballAction/README.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/FootballAction/checkpoints/download.sh</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/FootballAction/datasets/EuroCup2016/dataset_url.list</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/FootballAction/datasets/EuroCup2016/download_dataset.sh</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/FootballAction/datasets/EuroCup2016/url.list</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/FootballAction/datasets/EuroCup2016/url_val.list</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/FootballAction/datasets/script/get_frames_pcm.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/FootballAction/datasets/script/get_instance_for_bmn.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/FootballAction/datasets/script/get_instance_for_lstm.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/FootballAction/datasets/script/get_instance_for_pptsm.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/FootballAction/extractor/extract_bmn.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/FootballAction/extractor/extract_feat.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/FootballAction/predict/action_detect/action.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/FootballAction/predict/action_detect/logger.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/FootballAction/predict/action_detect/mfcc/feature_extractor.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/FootballAction/predict/action_detect/mfcc/model_config.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/FootballAction/predict/action_detect/mfcc/vgg_params.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/FootballAction/predict/action_detect/models/audio_infer.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/FootballAction/predict/action_detect/models/bmn_infer.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/FootballAction/predict/action_detect/models/lstm_infer.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/FootballAction/predict/action_detect/models/pptsm_infer.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/FootballAction/predict/action_detect/reader/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/FootballAction/predict/action_detect/reader/audio_reader.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/FootballAction/predict/action_detect/reader/bmninf_reader.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/FootballAction/predict/action_detect/reader/feature_reader.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/FootballAction/predict/action_detect/reader/reader_utils.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/FootballAction/predict/action_detect/reader/tsminf_reader.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/FootballAction/predict/action_detect/utils/config_utils.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/FootballAction/predict/action_detect/utils/preprocess.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/FootballAction/predict/action_detect/utils/process_result.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/FootballAction/predict/eval.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/FootballAction/predict/predict.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/Ma-Net/README.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/Ma-Net/README_cn.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/Ma-Net/config.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/Ma-Net/dataloaders/DAVIS2017.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/Ma-Net/dataloaders/DAVIS2017_cn.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/Ma-Net/dataloaders/custom_transforms_f.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/Ma-Net/dataloaders/davis_2017_f.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/Ma-Net/dataloaders/helpers.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/Ma-Net/dataloaders/samplers.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/Ma-Net/networks/IntVOS.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/Ma-Net/networks/aspp.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/Ma-Net/networks/backbone/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/Ma-Net/networks/backbone/drn.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/Ma-Net/networks/backbone/mobilenet.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/Ma-Net/networks/backbone/resnet.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/Ma-Net/networks/backbone/xception.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/Ma-Net/networks/decoder.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/Ma-Net/networks/deeplab.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/Ma-Net/networks/loss.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/Ma-Net/run.sh</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/Ma-Net/test.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/Ma-Net/train_stage1.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/Ma-Net/train_stage2.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/Ma-Net/utils/api.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/Ma-Net/utils/mask_damaging.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/Ma-Net/utils/meters.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/Ma-Net/utils/utils.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/MultimodalVideoTag/README.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/MultimodalVideoTag/download.sh</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/MultimodalVideoTag/eval_and_save_model.sh</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/MultimodalVideoTag/inference.sh</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/MultimodalVideoTag/scenario_lib/accuracy_metrics.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/MultimodalVideoTag/scenario_lib/config.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/MultimodalVideoTag/scenario_lib/datareader/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/MultimodalVideoTag/scenario_lib/datareader/ernie_task_reader.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/MultimodalVideoTag/scenario_lib/datareader/feature_reader.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/MultimodalVideoTag/scenario_lib/datareader/reader_utils.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/MultimodalVideoTag/scenario_lib/datareader/tokenization.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/MultimodalVideoTag/scenario_lib/eval_and_save_model.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/MultimodalVideoTag/scenario_lib/inference.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/MultimodalVideoTag/scenario_lib/models/attention_lstm_ernie.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/MultimodalVideoTag/scenario_lib/models/ernie.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/MultimodalVideoTag/scenario_lib/models/transformer_encoder.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/MultimodalVideoTag/scenario_lib/train.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/MultimodalVideoTag/scenario_lib/utils.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/MultimodalVideoTag/train.sh</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/PP-Care/Readme.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/PPHuman/README.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/PPHuman/datasets/prepare_dataset.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/README.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/T2VLAD/README.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/T2VLAD/README_en.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/T2VLAD/base/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/T2VLAD/base/base_dataset.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/T2VLAD/base/base_model.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/T2VLAD/base/base_trainer.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/T2VLAD/data/download_features.sh</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/T2VLAD/data_loader/MSRVTT_dataset.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/T2VLAD/data_loader/data_loaders.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/T2VLAD/logger/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/T2VLAD/logger/log_parser.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/T2VLAD/logger/logger.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/T2VLAD/model/loss.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/T2VLAD/model/metric.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/T2VLAD/model/model.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/T2VLAD/model/net_vlad.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/T2VLAD/model/text.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/T2VLAD/parse_config.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/T2VLAD/test.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/T2VLAD/train.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/T2VLAD/trainer/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/T2VLAD/trainer/trainer.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/T2VLAD/utils/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/T2VLAD/utils/util.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/TableTennis/ActionRecognition/README.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/TableTennis/datasets/script/submission_format_transfer.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/TableTennis/extractor/extract_bmn_for_tabletennis.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/TableTennis/fix_bad_label.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/TableTennis/get_instance_for_bmn.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/TableTennis/gts_format_transfer.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/TableTennis/predict/action_detect/action.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/TableTennis/predict/action_detect/logger.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/TableTennis/predict/action_detect/mfcc/feature_extractor.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/TableTennis/predict/action_detect/mfcc/model_config.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/TableTennis/predict/action_detect/mfcc/vgg_params.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/TableTennis/predict/action_detect/models/audio_infer.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/TableTennis/predict/action_detect/models/bmn_infer.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/TableTennis/predict/action_detect/models/lstm_infer.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/TableTennis/predict/action_detect/models/pptsm_infer.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/TableTennis/predict/action_detect/reader/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/TableTennis/predict/action_detect/reader/bmninf_reader.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/TableTennis/predict/action_detect/reader/feature_reader.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/TableTennis/predict/action_detect/reader/reader_utils.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/TableTennis/predict/action_detect/utils/config_utils.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/TableTennis/predict/action_detect/utils/preprocess.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/TableTennis/predict/action_detect/utils/process_result.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/TableTennis/predict/eval.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/TableTennis/predict/predict.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/TableTennis/val_split.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoQualityAssessment/README.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoQualityAssessment/main.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoQualityAssessment/paddlevideo/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoQualityAssessment/paddlevideo/loader/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoQualityAssessment/paddlevideo/loader/builder.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoQualityAssessment/paddlevideo/loader/dataset/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoQualityAssessment/paddlevideo/loader/dataset/base.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoQualityAssessment/paddlevideo/loader/dataset/frame_rec.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoQualityAssessment/paddlevideo/loader/dataset/video.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoQualityAssessment/paddlevideo/loader/pipelines/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoQualityAssessment/paddlevideo/loader/pipelines/augmentations.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoQualityAssessment/paddlevideo/loader/pipelines/compose.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoQualityAssessment/paddlevideo/loader/pipelines/decode.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoQualityAssessment/paddlevideo/loader/pipelines/mix.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoQualityAssessment/paddlevideo/loader/pipelines/sample.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoQualityAssessment/paddlevideo/loader/registry.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoQualityAssessment/paddlevideo/metrics/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoQualityAssessment/paddlevideo/metrics/base.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoQualityAssessment/paddlevideo/metrics/build.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoQualityAssessment/paddlevideo/metrics/quality_metric.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoQualityAssessment/paddlevideo/metrics/registry.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoQualityAssessment/paddlevideo/modeling/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoQualityAssessment/paddlevideo/modeling/backbones/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoQualityAssessment/paddlevideo/modeling/backbones/resnet.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoQualityAssessment/paddlevideo/modeling/backbones/resnet_tweaks_tsm.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoQualityAssessment/paddlevideo/modeling/builder.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoQualityAssessment/paddlevideo/modeling/framework/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoQualityAssessment/paddlevideo/modeling/framework/recognizers/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoQualityAssessment/paddlevideo/modeling/framework/recognizers/base.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoQualityAssessment/paddlevideo/modeling/framework/recognizers/recognizer2d.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoQualityAssessment/paddlevideo/modeling/heads/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoQualityAssessment/paddlevideo/modeling/heads/base.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoQualityAssessment/paddlevideo/modeling/heads/tsm_rec_head.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoQualityAssessment/paddlevideo/modeling/heads/tsn_head.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoQualityAssessment/paddlevideo/modeling/losses/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoQualityAssessment/paddlevideo/modeling/losses/base.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoQualityAssessment/paddlevideo/modeling/losses/l1_loss.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoQualityAssessment/paddlevideo/modeling/losses/smooth_l1_loss.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoQualityAssessment/paddlevideo/modeling/registry.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoQualityAssessment/paddlevideo/modeling/weight_init.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoQualityAssessment/paddlevideo/solver/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoQualityAssessment/paddlevideo/solver/custom_lr.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoQualityAssessment/paddlevideo/solver/lr.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoQualityAssessment/paddlevideo/solver/optimizer.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoQualityAssessment/paddlevideo/tasks/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoQualityAssessment/paddlevideo/tasks/test.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoQualityAssessment/paddlevideo/tasks/train.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoQualityAssessment/paddlevideo/utils/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoQualityAssessment/paddlevideo/utils/build_utils.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoQualityAssessment/paddlevideo/utils/config.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoQualityAssessment/paddlevideo/utils/dist_utils.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoQualityAssessment/paddlevideo/utils/logger.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoQualityAssessment/paddlevideo/utils/precise_bn.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoQualityAssessment/paddlevideo/utils/record.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoQualityAssessment/paddlevideo/utils/registry.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoQualityAssessment/paddlevideo/utils/save_load.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoQualityAssessment/paddlevideo/version.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoQualityAssessment/run.sh</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoQualityAssessment/save_model.sh</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoQualityAssessment/setup.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoTag/FineTune.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoTag/README.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoTag/Run.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoTag/Test.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoTag/eval.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoTag/metrics/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoTag/metrics/kinetics/accuracy_metrics.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoTag/metrics/metrics_util.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoTag/metrics/youtube8m/average_precision_calculator.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoTag/metrics/youtube8m/eval_util.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoTag/metrics/youtube8m/mean_average_precision_calculator.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoTag/models/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoTag/models/attention_lstm/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoTag/models/attention_lstm/attention_lstm.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoTag/models/attention_lstm/lstm_attention.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoTag/models/model.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoTag/models/tsn/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoTag/models/tsn/tsn.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoTag/models/tsn/tsn_res_model.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoTag/models/utils.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoTag/predict.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoTag/reader/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoTag/reader/feature_reader.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoTag/reader/kinetics_reader.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoTag/reader/reader_utils.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoTag/train.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoTag/tsn_extractor.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoTag/utils/config_utils.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoTag/utils/train_utils.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoTag/utils/utility.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/applications/VideoTag/videotag_test.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/benchmark/TimeSformer/README.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/benchmark/TimeSformer/run_all.sh</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/benchmark/TimeSformer/run_benchmark.sh</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/data/50salads/prepare_asrf_data.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/data/50salads/transform_segmentation_label.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/data/ntu-rgb-d/download_dataset.sh</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/data/ntu-rgb-d/get_raw_denoised_data.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/data/ntu-rgb-d/get_raw_skes_data.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/data/ntu-rgb-d/seq_transformation.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/deploy/cpp_infer/external-cmake/auto-log.cmake</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/deploy/cpp_infer/include/postprocess_op.h</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/deploy/cpp_infer/include/preprocess_op.h</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/deploy/cpp_infer/include/utility.h</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/deploy/cpp_infer/include/video_rec.h</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/deploy/cpp_infer/readme.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/deploy/cpp_infer/readme_en.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/deploy/cpp_infer/src/main.cpp</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/deploy/cpp_infer/src/postprocess_op.cpp</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/deploy/cpp_infer/src/preprocess_op.cpp</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/deploy/cpp_infer/src/utility.cpp</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/deploy/cpp_infer/src/video_rec.cpp</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/deploy/cpp_infer/tools/build.sh</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/deploy/cpp_serving/paddle_env_install.sh</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/deploy/cpp_serving/preprocess_ops.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/deploy/cpp_serving/readme.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/deploy/cpp_serving/readme_en.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/deploy/cpp_serving/run_cpp_serving.sh</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/deploy/cpp_serving/serving_client.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/deploy/paddle2onnx/predict_onnx.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/deploy/paddle2onnx/readme.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/deploy/paddle2onnx/readme_en.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/deploy/python_serving/pipeline_http_client.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/deploy/python_serving/pipeline_rpc_client.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/deploy/python_serving/readme.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/deploy/python_serving/readme_en.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/deploy/python_serving/recognition_web_service.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/deploy/python_serving/utils.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/deploy/slim/quant_post_static.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/deploy/slim/readme.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/deploy/slim/readme_en.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/english_documents/benchmark.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/english_documents/dataset/AVA.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/english_documents/dataset/ActivityNet.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/english_documents/dataset/Oxford_RobotCar.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/english_documents/dataset/README.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/english_documents/dataset/SegmentationDataset.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/english_documents/dataset/fsd.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/english_documents/dataset/k400.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/english_documents/dataset/msrvtt.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/english_documents/dataset/ntu-rgbd.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/english_documents/dataset/ucf101.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/english_documents/dataset/ucf24.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/english_documents/dataset/youtube8m.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/english_documents/install.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/english_documents/model_zoo/README.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/english_documents/model_zoo/detection/SlowFast_FasterRCNN_en.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/english_documents/model_zoo/estimation/adds.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/english_documents/model_zoo/localization/bmn.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/english_documents/model_zoo/localization/yowo.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/english_documents/model_zoo/multimodal/actbert.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/english_documents/model_zoo/partition/transnetv2.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/english_documents/model_zoo/recognition/agcn.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/english_documents/model_zoo/recognition/agcn2s.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/english_documents/model_zoo/recognition/attention_lstm.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/english_documents/model_zoo/recognition/ctrgcn.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/english_documents/model_zoo/recognition/movinet.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/english_documents/model_zoo/recognition/posec3d.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/english_documents/model_zoo/recognition/pp-timesformer.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/english_documents/model_zoo/recognition/pp-tsm.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/english_documents/model_zoo/recognition/pp-tsn.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/english_documents/model_zoo/recognition/slowfast.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/english_documents/model_zoo/recognition/stgcn.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/english_documents/model_zoo/recognition/timesformer.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/english_documents/model_zoo/recognition/tokenshift_transformer.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/english_documents/model_zoo/recognition/tsm.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/english_documents/model_zoo/recognition/tsn.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/english_documents/model_zoo/recognition/tsn_dali.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/english_documents/model_zoo/recognition/videoswin.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/english_documents/model_zoo/segmentation/asrf.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/english_documents/model_zoo/segmentation/cfbi.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/english_documents/model_zoo/segmentation/mstcn.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/english_documents/quick_start.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/english_documents/tools.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/english_documents/tutorials/Action%20Recognition%20Datasets</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/english_documents/tutorials/Action%20Recognition%20Papers</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/english_documents/tutorials/Spatio-Temporal%20Action%20Detection%20Papers</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/english_documents/tutorials/TSM.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/english_documents/tutorials/Temporal%20Action%20Detection%20Papers</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/english_documents/tutorials/accelerate.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/english_documents/tutorials/config.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/english_documents/tutorials/customized_usage.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/english_documents/tutorials/demos</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/english_documents/tutorials/deployment.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/english_documents/tutorials/modular_design.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/english_documents/tutorials/pp-tsm.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/english_documents/tutorials/summarize.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/english_documents/usage.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/main.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/loader/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/loader/builder.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/loader/dali_loader.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/loader/dataset/MRI.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/loader/dataset/MRI_SlowFast.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/loader/dataset/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/loader/dataset/actbert_dataset.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/loader/dataset/asrf_dataset.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/loader/dataset/ava_dataset.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/loader/dataset/base.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/loader/dataset/bmn_dataset.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/loader/dataset/davis_dataset.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/loader/dataset/feature.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/loader/dataset/frame.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/loader/dataset/ms_tcn_dataset.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/loader/dataset/msrvtt.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/loader/dataset/oxford.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/loader/dataset/skeleton.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/loader/dataset/slowfast_video.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/loader/dataset/ucf101_skeleton.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/loader/dataset/ucf24_dataset.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/loader/dataset/video.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/loader/pipelines/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/loader/pipelines/anet_pipeline.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/loader/pipelines/augmentations.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/loader/pipelines/augmentations_ava.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/loader/pipelines/compose.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/loader/pipelines/decode.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/loader/pipelines/decode_image.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/loader/pipelines/decode_sampler.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/loader/pipelines/decode_sampler_MRI.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/loader/pipelines/mix.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/loader/pipelines/multimodal.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/loader/pipelines/sample.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/loader/pipelines/sample_ava.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/loader/pipelines/sample_ucf24.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/loader/pipelines/segmentation.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/loader/pipelines/segmentation_pipline.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/loader/pipelines/skeleton_pipeline.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/loader/registry.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/metrics/ActivityNet/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/metrics/ActivityNet/anet_prop.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/metrics/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/metrics/ava_evaluation/README.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/metrics/ava_evaluation/metrics.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/metrics/ava_evaluation/np_box_list.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/metrics/ava_evaluation/np_box_ops.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/metrics/ava_evaluation/object_detection_evaluation.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/metrics/ava_evaluation/per_image_evaluation.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/metrics/ava_evaluation/standard_fields.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/metrics/ava_metric.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/metrics/ava_utils.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/metrics/base.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/metrics/bmn_metric.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/metrics/build.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/metrics/center_crop_metric.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/metrics/center_crop_metric_MRI.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/metrics/depth_metric.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/metrics/msrvtt_metric.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/metrics/multi_crop_metric.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/metrics/recall.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/metrics/registry.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/metrics/segmentation_metric.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/metrics/skeleton_metric.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/metrics/transnetv2_metric.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/metrics/ucf24_utils.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/metrics/vos_metric.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/metrics/youtube8m/average_precision_calculator.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/metrics/youtube8m/eval_util.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/metrics/youtube8m/mean_average_precision_calculator.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/metrics/yowo_metric.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/assigners/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/assigners/max_iou_assigner_ava.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/backbones/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/backbones/actbert.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/backbones/adds.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/backbones/agcn.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/backbones/agcn2s.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/backbones/asrf.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/backbones/bmn.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/backbones/cfbi.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/backbones/ctrgcn.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/backbones/darknet.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/backbones/deeplab.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/backbones/movinet.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/backbones/ms_tcn.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/backbones/pptsm_mv2.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/backbones/pptsm_mv3.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/backbones/pptsm_v2.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/backbones/resnet.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/backbones/resnet3d.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/backbones/resnet3d_slowonly.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/backbones/resnet_slowfast.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/backbones/resnet_slowfast_MRI.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/backbones/resnet_tsm.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/backbones/resnet_tsm_MRI.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/backbones/resnet_tsn_MRI.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/backbones/resnet_tweaks_tsm.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/backbones/resnet_tweaks_tsn.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/backbones/resnext101.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/backbones/stgcn.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/backbones/swin_transformer.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/backbones/toshift_vit.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/backbones/transnetv2.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/backbones/vit.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/backbones/vit_tweaks.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/backbones/yowo.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/bbox_utils.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/builder.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/framework/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/framework/detectors/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/framework/detectors/base.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/framework/detectors/fast_rcnn.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/framework/detectors/two_stage.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/framework/estimators/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/framework/estimators/base.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/framework/estimators/depth_estimator.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/framework/localizers/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/framework/localizers/base.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/framework/localizers/bmn_localizer.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/framework/localizers/yowo_localizer.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/framework/localizers/yowo_utils.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/framework/multimodal/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/framework/multimodal/actbert.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/framework/multimodal/base.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/framework/partitioners/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/framework/partitioners/base.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/framework/partitioners/transnetv2_partitioner.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/framework/recognizers/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/framework/recognizers/base.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/framework/recognizers/recognizer1d.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/framework/recognizers/recognizer2d.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/framework/recognizers/recognizer3d.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/framework/recognizers/recognizer3dMRI.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/framework/recognizers/recognizerDistillation.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/framework/recognizers/recognizerMRI.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/framework/recognizers/recognizer_gcn.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/framework/recognizers/recognizer_movinet_frame.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/framework/recognizers/recognizer_transformer.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/framework/recognizers/recognizer_transformer_MRI.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/framework/segment/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/framework/segment/base.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/framework/segment/cfbi.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/framework/segment/utils.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/framework/segmenters/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/framework/segmenters/asrf.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/framework/segmenters/base.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/framework/segmenters/ms_tcn.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/framework/segmenters/utils.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/heads/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/heads/adds_head.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/heads/agcn2s_head.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/heads/asrf_head.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/heads/attention_lstm_head.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/heads/base.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/heads/bbox_head.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/heads/cfbi_head.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/heads/ctrgcn_head.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/heads/i3d_head.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/heads/movinet_head.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/heads/ms_tcn_head.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/heads/pptimesformer_head.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/heads/pptsm_head.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/heads/pptsn_head.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/heads/roi_extractor.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/heads/roi_head.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/heads/single_straight3d.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/heads/slowfast_head.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/heads/stgcn_head.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/heads/timesformer_head.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/heads/token_shift_head.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/heads/transnetv2_head.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/heads/tsm_head.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/heads/tsn_head.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/losses/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/losses/actbert_loss.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/losses/asrf_loss.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/losses/base.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/losses/bmn_loss.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/losses/cross_entropy_loss.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/losses/depth_loss.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/losses/distillation_loss.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/losses/transnetv2_loss.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/losses/yowo_loss.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/registry.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/samplers/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/samplers/random_sampler.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/modeling/weight_init.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/solver/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/solver/custom_lr.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/solver/lr.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/solver/optimizer.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/tasks/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/tasks/test.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/tasks/train.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/tasks/train_dali.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/tasks/train_multigrid.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/utils/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/utils/build_utils.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/utils/config.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/utils/dist_utils.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/utils/logger.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/utils/multigrid/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/utils/multigrid/batchnorm_helper.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/utils/multigrid/interval_helper.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/utils/multigrid/multigrid.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/utils/multigrid/save_load_helper.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/utils/multigrid/short_sampler.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/utils/precise_bn.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/utils/profiler.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/utils/record.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/utils/registry.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/utils/save_load.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/paddlevideo/version.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/run.sh</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/setup.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/test_tipc/README.md</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/test_tipc/benchmark_train.sh</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/test_tipc/common_func.sh</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/test_tipc/compare_results.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/test_tipc/extract_loss.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/test_tipc/prepare.sh</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/test_tipc/test_inference_cpp.sh</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/test_tipc/test_paddle2onnx.sh</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/test_tipc/test_ptq_inference_python.sh</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/test_tipc/test_serving_infer_cpp.sh</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/test_tipc/test_serving_infer_python.sh</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/test_tipc/test_train_dy2static_python.sh</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/test_tipc/test_train_inference_python.sh</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/test_tipc/test_train_inference_python_npu.sh</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/test_tipc/test_train_inference_python_xpu.sh</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/tools/__init__.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/tools/ava_predict.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/tools/export_model.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/tools/predict.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/tools/summary.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/tools/utils.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+<url>
+  <loc>https://james4ever0.github.io/PaddleVideo?q=/tools/wheel.py</loc>
+  <lastmod>2023-12-28T09:21:02+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+
+</urlset>

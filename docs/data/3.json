@@ -1,0 +1,539 @@
+{
+    "300": {
+        "file_id": 30,
+        "content": "    result = {'overlays': overlays}\n    # result = {'masks': masks.tolist()}\n    with open(TEMP_JSON_FINAL_PATH, 'w') as f:\n        json.dump(result, f)",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/api.py:131-134"
+    },
+    "301": {
+        "file_id": 30,
+        "content": "This code is saving a dictionary of overlays to a JSON file. It was previously also saving a list of masks, but that functionality has been commented out. The dictionary contains the overlays and the resulting JSON will be written to the specified temporary path.",
+        "type": "comment"
+    },
+    "302": {
+        "file_id": 31,
+        "content": "/applications/EIVideo/EIVideo/main.py",
+        "type": "filepath"
+    },
+    "303": {
+        "file_id": 31,
+        "content": "This code trains the PaddleVideo model using command line arguments, initializes the environment, and performs operations with distributed training and automatic mixed precision support.",
+        "type": "summary"
+    },
+    "304": {
+        "file_id": 31,
+        "content": "# copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless requifFred by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport argparse\nimport random\nimport numpy as np\nimport paddle\nfrom EIVideo.paddlevideo.tasks import (test_model)\nfrom EIVideo.paddlevideo.utils import get_config, get_dist_info\nfrom EIVideo import EI_VIDEO_ROOT, join_root_path\nDEF_CONFIG_FILE_PATH = join_root_path(\"configs/manet.yaml\")\nDEF_PARAMS_FILE_PATH = join_root_path(\"model/default_manet.pdparams\")\ndef parse_args():\n    parser = argparse.ArgumentParser(\"PaddleVideo train script\")",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/main.py:1-29"
+    },
+    "305": {
+        "file_id": 31,
+        "content": "This code is a Python script for training the PaddleVideo model. It imports necessary modules, defines functions to parse command line arguments and sets default configuration and parameter files. The script uses argparse to create an argument parser with a description \"PaddleVideo train script\". It also provides default paths for config file (\"configs/manet.yaml\") and parameter file (\"model/default_manet.pdparams\").",
+        "type": "comment"
+    },
+    "306": {
+        "file_id": 31,
+        "content": "    parser.add_argument('-c',\n                        '--config',\n                        type=str,\n                        default=DEF_CONFIG_FILE_PATH,\n                        help='config file path')\n    parser.add_argument('-o',\n                        '--override',\n                        action='append',\n                        default=[],\n                        help='config options to be overridden')\n    parser.add_argument('--test',\n                        action='store_true',\n                        help='whether to test a model')\n    parser.add_argument('--train_dali',\n                        action='store_true',\n                        help='whether to use dali to speed up training')\n    parser.add_argument('--multigrid',\n                        action='store_true',\n                        help='whether to use multigrid training')\n    parser.add_argument('-w',\n                        '--weights',\n                        type=str,\n                        default=DEF_PARAMS_FILE_PATH,\n                        help='weights for finetuning or testing')",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/main.py:30-53"
+    },
+    "307": {
+        "file_id": 31,
+        "content": "This code defines command line arguments for the EIVideo application. It sets default values and provides help messages for config file path, overriding options, testing a model, using Dali for training speedup, multigrid training, and weights for finetuning or testing.",
+        "type": "comment"
+    },
+    "308": {
+        "file_id": 31,
+        "content": "    parser.add_argument('--fleet',\n                        action='store_true',\n                        help='whether to use fleet run distributed training')\n    parser.add_argument('--amp',\n                        action='store_true',\n                        help='whether to open amp training.')\n    parser.add_argument(\n        '--validate',\n        action='store_true',\n        help='whether to evaluate the checkpoint during training')\n    parser.add_argument(\n        '--seed',\n        type=int,\n        default=None,\n        help='fixed all random seeds when the program is running')\n    parser.add_argument(\n        '--max_iters',\n        type=int,\n        default=None,\n        help='max iterations when training(this argonly used in test_tipc)')\n    parser.add_argument(\n        '-p',\n        '--profiler_options',\n        type=str,\n        default=None,\n        help='The option of profiler, which should be in format '\n             '\\\"key1=value1;key2=value2;key3=value3\\\".')\n    parser.add_argument('--use_npu',\n                        type=bool,",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/main.py:54-82"
+    },
+    "309": {
+        "file_id": 31,
+        "content": "This code snippet adds command-line arguments to a parser object. The \"--fleet\" argument enables distributed training using fleet, \"--amp\" enables automatic mixed precision training, \"--validate\" triggers checkpoint evaluation during training, \"--seed\" sets random seeds for deterministic behavior, \"--max_iters\" sets the maximum number of iterations, and \"--profiler_options\" sets profiler options in key-value pairs.",
+        "type": "comment"
+    },
+    "310": {
+        "file_id": 31,
+        "content": "                        default=False,\n                        help='whether use npu.')\n    args = parser.parse_args()\n    return args\ndef main(**kwargs):\n    args = parse_args()\n    cfg = get_config(args.config, overrides=args.override)\n    # ToDo To AP-kai: 下面这行代码目的是更新配置，这样的话我们调用main(use_npu = Ture)，这时cfg.use_npu就是Ture了\n    for key, value in kwargs.items():\n        cfg.__setattr__(key, value)\n    # set seed if specified\n    seed = args.seed\n    if seed is not None:\n        assert isinstance(\n            seed,\n            int), f\"seed must be a integer when specified, but got {seed}\"\n        paddle.seed(seed)\n        np.random.seed(seed)\n        random.seed(seed)\n    _, world_size = get_dist_info()\n    parallel = world_size != 1\n    if parallel:\n        paddle.distributed.init_parallel_env()\n    final = test_model(cfg, weights=args.weights, parallel=parallel)\n    return final\nif __name__ == '__main__':\n    main(video_path='example/example1.mp4', save_path='./output')",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/main.py:83-116"
+    },
+    "311": {
+        "file_id": 31,
+        "content": "This code defines a `main` function that parses command-line arguments, updates the configuration with optional kwargs, sets the random seed if specified, initializes parallel environment if necessary, and then calls `test_model` to perform some operation. Finally, it returns the final result. It is called as `main(video_path='example/example1.mp4', save_path='./output')`.",
+        "type": "comment"
+    },
+    "312": {
+        "file_id": 32,
+        "content": "/applications/EIVideo/EIVideo/paddlevideo/__init__.py",
+        "type": "filepath"
+    },
+    "313": {
+        "file_id": 32,
+        "content": "This code snippet is importing the paddlevideo_version from the version module. This suggests that this file is serving as an initialization point for the PaddleVideo library, potentially setting up necessary imports or defining constants and functions to be used throughout the library.",
+        "type": "summary"
+    },
+    "314": {
+        "file_id": 32,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nfrom .version import paddlevideo_version",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/__init__.py:1-15"
+    },
+    "315": {
+        "file_id": 32,
+        "content": "This code snippet is importing the paddlevideo_version from the version module. This suggests that this file is serving as an initialization point for the PaddleVideo library, potentially setting up necessary imports or defining constants and functions to be used throughout the library.",
+        "type": "comment"
+    },
+    "316": {
+        "file_id": 33,
+        "content": "/applications/EIVideo/EIVideo/paddlevideo/loader/__init__.py",
+        "type": "filepath"
+    },
+    "317": {
+        "file_id": 33,
+        "content": "This code imports necessary functions and classes from other modules, defines the exported symbols (build_batch_pipeline and Compose), and sets license information.",
+        "type": "summary"
+    },
+    "318": {
+        "file_id": 33,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nfrom .builder import build_batch_pipeline\nfrom .pipelines.compose import Compose\n__all__ = [\n    'build_batch_pipeline','Compose'\n]",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/loader/__init__.py:1-20"
+    },
+    "319": {
+        "file_id": 33,
+        "content": "This code imports necessary functions and classes from other modules, defines the exported symbols (build_batch_pipeline and Compose), and sets license information.",
+        "type": "comment"
+    },
+    "320": {
+        "file_id": 34,
+        "content": "/applications/EIVideo/EIVideo/paddlevideo/loader/builder.py",
+        "type": "filepath"
+    },
+    "321": {
+        "file_id": 34,
+        "content": "This code creates PaddleVideo dataset loaders and sets up signal handlers for graceful termination of a process group upon receiving SIGINT or SIGTERM signals.",
+        "type": "summary"
+    },
+    "322": {
+        "file_id": 34,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport signal\nimport os\nimport paddle\nfrom paddle.io import BatchSampler, DataLoader, DistributedBatchSampler\nfrom .pipelines.compose import Compose\nfrom .registry import DATASETS, PIPELINES, DATALOADERS, BATCH_SAMPLERS, SAMPLERS\nfrom ..utils import get_logger\nfrom ..utils.build_utils import build\nimport numpy as np\nlogger = get_logger(\"paddlevideo\")\ndef build_pipeline(cfg):\n    \"\"\"Build pipeline.\n    Args:\n        cfg (dict): root config dict.",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/loader/builder.py:1-31"
+    },
+    "323": {
+        "file_id": 34,
+        "content": "This code snippet is a part of the PaddleVideo library and contains a function named build_pipeline. It imports various modules, defines a logger for logging purposes, and uses a function called build from utils. This function seems to be building some kind of pipeline based on the provided configuration (cfg). The purpose of this pipeline might be to process data or prepare it for model training in the context of PaddleVideo.",
+        "type": "comment"
+    },
+    "324": {
+        "file_id": 34,
+        "content": "    \"\"\"\n    if cfg == None:\n        return\n    return Compose(cfg)\ndef build_dataset(cfg):\n    \"\"\"Build dataset.\n    Args:\n        cfg (dict): root config dict.\n    Returns:\n        dataset: dataset.\n    \"\"\"\n    # XXX: ugly code here!\n    cfg_dataset, cfg_pipeline = cfg\n    cfg_dataset.pipeline = build_pipeline(cfg_pipeline)\n    dataset = build(cfg_dataset, DATASETS, key=\"format\")\n    return dataset\ndef build_sampler(cfg):\n    \"\"\"Build batch_sampler.\n    Args:\n        cfg (dict): root config dict.\n    Returns:\n        batch_sampler: batch_sampler.\n    \"\"\"\n    sampler = build(cfg, SAMPLERS)\n    return sampler\ndef build_batch_pipeline(cfg):\n    batch_pipeline = build(cfg, PIPELINES)\n    return batch_pipeline\ndef build_custom_dataloader(cfg):\n    custom_dataloader = build(cfg, DATALOADERS, key='dataloader')\n    return custom_dataloader\ndef build_dataloader(dataset,\n                     batch_size,\n                     num_workers,\n                     places=None,\n                     shuffle=True,\n                     drop_last=True,",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/loader/builder.py:32-80"
+    },
+    "325": {
+        "file_id": 34,
+        "content": "This code defines several functions to build different components for a dataset loader. The main function is `build_dataset` which takes a configuration dictionary and returns a dataset object after building the pipeline, dataset, sampler, and dataloader as per the given configuration. It uses other helper functions like `build_pipeline`, `build_sampler`, `build_batch_pipeline`, and `build_custom_dataloader` to build these components.",
+        "type": "comment"
+    },
+    "326": {
+        "file_id": 34,
+        "content": "                     multigrid=False,\n                     collate_fn_cfg=None,\n                     **kwargs):\n    \"\"\"Build Paddle Dataloader.\n    XXX explain how the batch_sampler work!\n    Args:\n        dataset (paddle.dataset): A PaddlePaddle dataset object.\n        batch_size (int): batch size on single card.\n        num_worker (int): num_worker\n        shuffle(bool): whether to shuffle the data at every epoch.\n    \"\"\"\n    if not kwargs.get('sampler'):\n        batch_sampler = DistributedBatchSampler(dataset,\n                                                batch_size=batch_size,\n                                                shuffle=shuffle,\n                                                drop_last=drop_last)\n    else:\n        sampler = build_sampler(kwargs['sampler'])\n        batch_sampler = BatchSampler(dataset,\n                                     sampler=sampler,\n                                     batch_size=batch_size,\n                                     shuffle=shuffle,\n                                     drop_last=drop_last)",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/loader/builder.py:81-106"
+    },
+    "327": {
+        "file_id": 34,
+        "content": "The code builds a Paddle Dataloader with optional custom sampler, shuffles data if necessary, and handles distributed batch sampling. It takes dataset, batch size, number of workers, and shuffle settings as input arguments.",
+        "type": "comment"
+    },
+    "328": {
+        "file_id": 34,
+        "content": "    kwargs.update({'batch_sampler': batch_sampler})\n    # NOTE(shipping): when switch the mix operator on, such as: mixup, cutmix.\n    # batch like: [[img, label, attibute, ...], [imgs, label, attribute, ...], ...] will recollate to:\n    # [[img, img, ...], [label, label, ...], [attribute, attribute, ...], ...] as using numpy.transpose.\n    def mix_collate_fn(batch):\n        pipeline = build_batch_pipeline(collate_fn_cfg)\n        batch = pipeline(batch)\n        slots = []\n        for items in batch:\n            for i, item in enumerate(items):\n                if len(slots) < len(items):\n                    slots.append([item])\n                else:\n                    slots[i].append(item)\n        return [np.stack(slot, axis=0) for slot in slots]\n    # if collate_fn_cfg is not None:\n    # ugly code here. collate_fn is mix op config\n    #    collate_fn = mix_collate_fn(collate_fn_cfg)\n    data_loader = DataLoader(\n        dataset,\n        places=places,\n        num_workers=num_workers,\n        collate_fn=mix_collate_fn if collate_fn_cfg is not None else None,",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/loader/builder.py:107-134"
+    },
+    "329": {
+        "file_id": 34,
+        "content": "This code defines a mix_collate_fn for handling batches of data in a specific way. It first builds a batch pipeline and applies it to the input batch. Then, it collates the batch so that each item is stacked horizontally (axis=0) into a new batch. This function is used as the collate_fn if the collate_fn_cfg is not None.",
+        "type": "comment"
+    },
+    "330": {
+        "file_id": 34,
+        "content": "        **kwargs)\n    return data_loader\ndef term_mp(sig_num, frame):\n    \"\"\" kill all child processes\n    \"\"\"\n    pid = os.getpid()\n    pgid = os.getpgid(os.getpid())\n    logger.info(\"main proc {} exit, kill process group \" \"{}\".format(pid, pgid))\n    os.killpg(pgid, signal.SIGKILL)\n    return\nsignal.signal(signal.SIGINT, term_mp)\nsignal.signal(signal.SIGTERM, term_mp)",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/loader/builder.py:135-151"
+    },
+    "331": {
+        "file_id": 34,
+        "content": "This code is setting up signal handlers for SIGINT and SIGTERM signals. It retrieves the process ID (pid) and process group ID (pgid), logs a message, then sends a SIGKILL signal to all processes in the group upon receiving either of those signals.",
+        "type": "comment"
+    },
+    "332": {
+        "file_id": 35,
+        "content": "/applications/EIVideo/EIVideo/paddlevideo/loader/pipelines/__init__.py",
+        "type": "filepath"
+    },
+    "333": {
+        "file_id": 35,
+        "content": "This code file contains import statements and a list of functions used for image preprocessing in PaddleVideo's EIVideo application. It includes Resize, RandomCrop, RandomHorizontalFlip, ToTensor, and RandomScale transformations specific to the \"manet\" model. These transformations are part of PaddlePaddle's video processing framework.",
+        "type": "summary"
+    },
+    "334": {
+        "file_id": 35,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nfrom .custom_transforms_f import Resize_manet, RandomCrop_manet, RandomHorizontalFlip_manet, ToTensor_manet, \\\n    RandomScale_manet\n__all__ = [\n     'Resize_manet', 'RandomCrop_manet',\n    'RandomHorizontalFlip_manet', 'ToTensor_manet', 'RandomScale_manet',\n]",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/loader/pipelines/__init__.py:1-21"
+    },
+    "335": {
+        "file_id": 35,
+        "content": "This code file contains import statements and a list of functions used for image preprocessing in PaddleVideo's EIVideo application. It includes Resize, RandomCrop, RandomHorizontalFlip, ToTensor, and RandomScale transformations specific to the \"manet\" model. These transformations are part of PaddlePaddle's video processing framework.",
+        "type": "comment"
+    },
+    "336": {
+        "file_id": 36,
+        "content": "/applications/EIVideo/EIVideo/paddlevideo/loader/pipelines/compose.py",
+        "type": "filepath"
+    },
+    "337": {
+        "file_id": 36,
+        "content": "The Compose class combines registry-based pipeline components like decode functions, sample functions, and transforms to apply transformations flexibly on dictionary or list inputs. It includes a workaround for old format configuration files.",
+        "type": "summary"
+    },
+    "338": {
+        "file_id": 36,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nfrom collections.abc import Sequence\nfrom ..registry import PIPELINES\nimport traceback\nfrom ...utils import build\nfrom ...utils import get_logger\n@PIPELINES.register()\nclass Compose(object):\n    \"\"\"\n    Composes several pipelines(include decode func, sample func, and transforms) together.\n    Note: To deal with ```list``` type cfg temporaray, like:\n        transform:\n            - Crop: # A list\n                attribute: 10",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/loader/pipelines/compose.py:1-31"
+    },
+    "339": {
+        "file_id": 36,
+        "content": "This code defines the Compose class, which composes multiple pipelines such as decode functions, sample functions, and transforms. It uses the PIPELINES registry for registration and builds pipelines based on input configurations. The code also handles temporary list-type configuration for flexibility.",
+        "type": "comment"
+    },
+    "340": {
+        "file_id": 36,
+        "content": "            - Resize: # A list\n                attribute: 20\n    every key of list will pass as the key name to build a module.\n    XXX: will be improved in the future.\n    Args:\n        pipelines (list): List of transforms to compose.\n    Returns:\n        A compose object which is callable, __call__ for this Compose\n        object will call each given :attr:`transforms` sequencely.\n    \"\"\"\n    def __init__(self, pipelines):\n        #assert isinstance(pipelines, Sequence)\n        self.pipelines = []\n        for p in pipelines.values():\n            if isinstance(p, dict):\n                p = build(p, PIPELINES)\n                self.pipelines.append(p)\n            elif isinstance(p, list):\n                for t in p:\n                    #XXX: to deal with old format cfg, ugly code here!\n                    temp_dict = dict(name=list(t.keys())[0])\n                    for all_sub_t in t.values():\n                        if all_sub_t is not None:\n                            temp_dict.update(all_sub_t) \n                    t = build(temp_dict, PIPELINES)",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/loader/pipelines/compose.py:32-59"
+    },
+    "341": {
+        "file_id": 36,
+        "content": "The code defines a Compose class that takes a list of transforms and composes them sequentially. It checks if the input is a dictionary or a list, builds the transform modules using build function from PIPELINES, and appends them to the pipelines list. The code also includes an ugly workaround for dealing with old format configuration files.",
+        "type": "comment"
+    },
+    "342": {
+        "file_id": 36,
+        "content": "                    self.pipelines.append(t)\n            elif callable(p):\n                self.pipelines.append(p)\n            else:\n                raise TypeError(f'pipelines must be callable or a dict,'\n                                f'but got {type(p)}')\n    def __call__(self, data):\n        for p in self.pipelines:\n            try:\n                data = p(data)\n            except Exception as e:\n                stack_info = traceback.format_exc()\n                logger = get_logger(\"paddlevideo\")\n                logger.info(\"fail to perform transform [{}] with error: \"\n                      \"{} and stack:\\n{}\".format(p, e, str(stack_info)))\n                raise e\n        return data",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/loader/pipelines/compose.py:60-76"
+    },
+    "343": {
+        "file_id": 36,
+        "content": "The code defines a class with a `__call__` method and an append function for adding pipelines. The `__call__` method applies transformations to input data by iterating over the pipelines. If any pipeline fails, it logs the error and raises an exception. Pipelines can be either callable or dictionaries, but if not, a TypeError is raised.",
+        "type": "comment"
+    },
+    "344": {
+        "file_id": 37,
+        "content": "/applications/EIVideo/EIVideo/paddlevideo/loader/pipelines/custom_transforms_f.py",
+        "type": "filepath"
+    },
+    "345": {
+        "file_id": 37,
+        "content": "This code defines Paddle Video's image preprocessing classes for resizing, aspect ratio adjustment, and custom cropping transforms. It performs horizontal flipping, object detection, and returns foreground/nocare masks from a scribble image.",
+        "type": "summary"
+    },
+    "346": {
+        "file_id": 37,
+        "content": "import os\nimport random\nimport cv2\nimport numpy as np\nimport paddle\nfrom PIL import Image\nfrom davisinteractive.utils.operations import bresenham\nfrom ..registry import PIPELINES\ncv2.setNumThreads(0)\nNEW_BRANCH = True\n@PIPELINES.register()\nclass RandomScale_manet(object):\n    \"\"\"Randomly resize the image and the ground truth to specified scales.\n    Args:\n        scales (list): the list of scales\n    \"\"\"\n    def __init__(self, scales=[0.75, 1, 1.25]):\n        self.scales = scales\n    def __call__(self, sample):\n        # Fixed range of scales\n        sc = self.scales[random.randint(0, len(self.scales) - 1)]\n        for elem in sample.keys():\n            if 'meta' in elem:\n                continue\n            tmp = sample[elem]\n            if elem == 'img1' or elem == 'img2' or elem == 'ref_img':\n                flagval = cv2.INTER_CUBIC\n            else:\n                flagval = cv2.INTER_NEAREST\n            tmp = cv2.resize(tmp, None, fx=sc, fy=sc, interpolation=flagval)\n            sample[elem] = tmp\n        return sample",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/loader/pipelines/custom_transforms_f.py:1-43"
+    },
+    "347": {
+        "file_id": 37,
+        "content": "This code defines a Paddle Video pipeline class, \"RandomScale\\_manet,\" which resizes the input image and its corresponding ground truth to random scales. The allowed scales are [0.75, 1, 1.25]. For elements like 'img1', 'img2', or 'ref\\_img,' it uses cv2's INTER_CUBIC interpolation. For other elements, it utilizes cv2's INTER_NEAREST interpolation. The pipeline is registered at PIPELINES for further usage.",
+        "type": "comment"
+    },
+    "348": {
+        "file_id": 37,
+        "content": "@PIPELINES.register()\nclass Resize_manet(object):\n    \"\"\"Rescale the image in a results to a given size.\n    Args:\n        output_size (tuple or int): Desired output size. If tuple, output is\n            matched to output_size. If int, smaller of image edges is matched\n            to output_size keeping aspect ratio the same.\n    \"\"\"\n    def __init__(self, output_size):\n        assert isinstance(output_size, (int, list))\n        if isinstance(output_size, int):\n            self.output_size = (output_size, output_size)\n        else:\n            self.output_size = output_size\n    #        self.seg_interpolation = cv2.INTER_CUBIC if is_continuous else cv2.INTER_NEAREST\n    #        self.fix = fix\n    def __call__(self, results):\n        img1 = results['img1']\n        h, w = img1.shape[:2]\n        if self.output_size == (h, w):\n            return results\n        else:\n            new_h, new_w = self.output_size\n        new_h, new_w = int(new_h), int(new_w)\n        for elem in results.keys():\n            if 'meta' in elem:",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/loader/pipelines/custom_transforms_f.py:46-75"
+    },
+    "349": {
+        "file_id": 37,
+        "content": "The code defines a Resize_manet class, which is a pipeline for resizing an image to a specified output size. The input could be either an integer or a tuple representing the desired output dimensions. If the input is an integer, it will use that as the smaller edge of the image and maintain aspect ratio. The code checks if the current image size matches the desired output size; if so, it returns the results without modification, otherwise it resizes the image to match the desired output size. This class is used in a computer vision context for preprocessing images.",
+        "type": "comment"
+    },
+    "350": {
+        "file_id": 37,
+        "content": "                continue\n            tmp = results[elem]\n            if elem == 'img1' or elem == 'img2' or elem == 'ref_img':\n                flagval = cv2.INTER_CUBIC\n            else:\n                flagval = cv2.INTER_NEAREST\n            tmp = cv2.resize(tmp, dsize=(new_w, new_h), interpolation=flagval)\n            results[elem] = tmp\n        return results\n@PIPELINES.register()\nclass RandomCrop_manet(object):\n    \"\"\"Crop randomly the image in a results.\n    Args:\n        output_size (tuple or int): Desired output size. If int, square crop\n            is made.\n    \"\"\"\n    def __init__(self, output_size, step=None):\n        assert isinstance(output_size, (int, list))\n        if isinstance(output_size, int):\n            self.output_size = (output_size, output_size)\n        else:\n            assert len(output_size) == 2\n            self.output_size = output_size\n        self.step = step\n    def __call__(self, results):\n        image = results['img1']\n        h, w = image.shape[:2]\n        new_h, new_w = self.output_size",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/loader/pipelines/custom_transforms_f.py:76-109"
+    },
+    "351": {
+        "file_id": 37,
+        "content": "This code defines a custom transform for image processing, specifically random cropping. It takes an input image and crops it randomly to the specified output size. The interpolation method used during resizing is determined by the element type in the 'results' dictionary. If the element is 'img1', 'img2', or 'ref_img', cubic interpolation is used, otherwise nearest neighbor interpolation is used. The cropped image is then stored back into the results dictionary.",
+        "type": "comment"
+    },
+    "352": {
+        "file_id": 37,
+        "content": "        new_h = h if new_h >= h else new_h\n        new_w = w if new_w >= w else new_w\n        is_contain_obj = False\n        #        while (not is_contain_obj) and (step < 5):\n        if self.step is None:\n            while not is_contain_obj:\n                #                step += 1\n                top = np.random.randint(0, h - new_h + 1)\n                left = np.random.randint(0, w - new_w + 1)\n                ref_scribble_label = results['ref_scribble_label']\n                new_ref_scribble_label = ref_scribble_label[top:top + new_h,\n                                                            left:left + new_w]\n                if len(np.unique(new_ref_scribble_label)) == 1:\n                    continue\n                else:\n                    for elem in results.keys():\n                        if 'meta' in elem:\n                            continue\n                        tmp = results[elem]\n                        tmp = tmp[top:top + new_h, left:left + new_w]\n                        results[elem] = tmp",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/loader/pipelines/custom_transforms_f.py:111-134"
+    },
+    "353": {
+        "file_id": 37,
+        "content": "This code randomly crops an image and its associated labels to the specified new height and width. It checks if the cropped reference scribble label contains only one class label before updating other labels accordingly.",
+        "type": "comment"
+    },
+    "354": {
+        "file_id": 37,
+        "content": "                    break\n        else:\n            st = 0\n            while not is_contain_obj and st < self.step:\n                st += 1\n                top = np.random.randint(0, h - new_h + 1)\n                left = np.random.randint(0, w - new_w + 1)\n                ref_scribble_label = results['ref_scribble_label']\n                new_ref_scribble_label = ref_scribble_label[top:top + new_h,\n                                                            left:left + new_w]\n                if len(np.unique(\n                        new_ref_scribble_label)) == 1 or st < self.step - 1:\n                    continue\n                else:\n                    for elem in results.keys():\n                        if 'meta' in elem:\n                            continue\n                        tmp = results[elem]\n                        tmp = tmp[top:top + new_h, left:left + new_w]\n                        results[elem] = tmp\n                    break\n        return results\n@PIPELINES.register()\nclass RandomHorizontalFlip_manet(object):",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/loader/pipelines/custom_transforms_f.py:135-163"
+    },
+    "355": {
+        "file_id": 37,
+        "content": "This code randomly selects a region within the original image and applies random horizontal flipping to it. It checks if the selected region contains an object (by checking if the number of unique labels in ref_scribble_label is greater than 1) and continues flipping until either an object is found or the maximum allowed steps are reached. The function then returns the modified dictionary with the updated data for each key, except 'meta'. This custom transform is registered as a pipeline module for use in image processing tasks.",
+        "type": "comment"
+    },
+    "356": {
+        "file_id": 37,
+        "content": "    \"\"\"Horizontally flip the given image and ground truth randomly with a probability of 0.5.\"\"\"\n    def __init__(self, prob):\n        self.p = prob\n    def __call__(self, results):\n        if random.random() < self.p:\n            for elem in results.keys():\n                if 'meta' in elem:\n                    continue\n                tmp = results[elem]\n                tmp = cv2.flip(tmp, flipCode=1)\n                results[elem] = tmp\n        return results\n@PIPELINES.register()\nclass ToTensor_manet(object):\n    \"\"\"Convert ndarrays in results to Tensors.\"\"\"\n    def __call__(self, results):\n        for elem in results.keys():\n            if 'meta' in elem:\n                continue\n            tmp = results[elem]\n            if tmp.ndim == 2:\n                tmp = tmp[:, :, np.newaxis]\n            else:\n                tmp = tmp / 255.\n                tmp -= (0.485, 0.456, 0.406)\n                tmp /= (0.229, 0.224, 0.225)\n            tmp = tmp.transpose([2, 0, 1])\n            results[elem] = paddle.to_tensor(tmp)",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/loader/pipelines/custom_transforms_f.py:164-198"
+    },
+    "357": {
+        "file_id": 37,
+        "content": "This code snippet contains two custom transforms for image processing. The first one, HorizontalFlip, randomly flips the given image and ground truth horizontally with a probability of 0.5. The second one, ToTensor_manet, converts ndarrays in results to Tensors by normalizing the images and reshaping them as required. Both transforms are added to the PADDLEPIPELINES registry for later use in image processing pipelines.",
+        "type": "comment"
+    },
+    "358": {
+        "file_id": 37,
+        "content": "        return results\ndef gt_from_scribble(scr, dilation=11, nocare_area=21):\n    # Compute foreground\n    if scr.max() == 1:\n        kernel_fg = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,\n                                              (dilation, dilation))\n        fg = cv2.dilate(scr.astype(np.uint8),\n                        kernel=kernel_fg).astype(scr.dtype)\n    else:\n        fg = scr\n    # Compute nocare area\n    if nocare_area is None:\n        nocare = None\n    else:\n        kernel_nc = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,\n                                              (nocare_area, nocare_area))\n        nocare = cv2.dilate(fg, kernel=kernel_nc) - fg\n    return fg, nocare",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/loader/pipelines/custom_transforms_f.py:199-220"
+    },
+    "359": {
+        "file_id": 37,
+        "content": "This function takes in a scribble image and optionally dilation and nocare area values. It returns the foreground mask and nocare mask. If the maximum value of the scribble is 1, it computes the foreground by dilating the scribble using an ellipse kernel. Else, it assigns the scribble as the foreground. Then, if a nocare area is given, it computes the nocare mask by dilating the foreground with another ellipse kernel and subtracting the original foreground.",
+        "type": "comment"
+    },
+    "360": {
+        "file_id": 38,
+        "content": "/applications/EIVideo/EIVideo/paddlevideo/loader/registry.py",
+        "type": "filepath"
+    },
+    "361": {
+        "file_id": 38,
+        "content": "This code is importing Registry classes from the \"utils\" module and creating four different registries named PIPELINES, DATASETS, SAMPLERS, BATCH_SAMPLERS, and DATALOADERS. These registries will be used for organizing and managing various functionalities in the PaddleVideo framework.",
+        "type": "summary"
+    },
+    "362": {
+        "file_id": 38,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nfrom ..utils import Registry\nPIPELINES = Registry(\"pipeline\")\nDATASETS = Registry(\"datasets\")\nSAMPLERS = Registry(\"sampler\")\nBATCH_SAMPLERS = Registry(\"batch_sampler\")\nDATALOADERS = Registry(\"dataloader\")",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/loader/registry.py:1-21"
+    },
+    "363": {
+        "file_id": 38,
+        "content": "This code is importing Registry classes from the \"utils\" module and creating four different registries named PIPELINES, DATASETS, SAMPLERS, BATCH_SAMPLERS, and DATALOADERS. These registries will be used for organizing and managing various functionalities in the PaddleVideo framework.",
+        "type": "comment"
+    },
+    "364": {
+        "file_id": 39,
+        "content": "/applications/EIVideo/EIVideo/paddlevideo/metrics/__init__.py",
+        "type": "filepath"
+    },
+    "365": {
+        "file_id": 39,
+        "content": "This code is part of the PaddleVideo library and includes the necessary imports and declarations for the VOSMetric and build_metric functions. It also contains licensing information, specifying that it's under the Apache License, Version 2.0.",
+        "type": "summary"
+    },
+    "366": {
+        "file_id": 39,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nfrom .vos_metric import VOSMetric\nfrom .build import build_metric\n__all__ = [\n    'VOSMetric', \"build_metric\"\n]",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/metrics/__init__.py:1-20"
+    },
+    "367": {
+        "file_id": 39,
+        "content": "This code is part of the PaddleVideo library and includes the necessary imports and declarations for the VOSMetric and build_metric functions. It also contains licensing information, specifying that it's under the Apache License, Version 2.0.",
+        "type": "comment"
+    },
+    "368": {
+        "file_id": 40,
+        "content": "/applications/EIVideo/EIVideo/paddlevideo/metrics/base.py",
+        "type": "filepath"
+    },
+    "369": {
+        "file_id": 40,
+        "content": "This code defines an abstract base class `BaseMetric` for metrics in PaddleVideo's EIVideo application. It initializes the metric object with data size, batch size, and world size from distributed environment. The abstract methods `update()` and `accumulate()` must be implemented by subclasses.",
+        "type": "summary"
+    },
+    "370": {
+        "file_id": 40,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nfrom abc import abstractmethod\nfrom EIVideo.paddlevideo.utils import get_dist_info\nclass BaseMetric(object):\n    def __init__(self, data_size, batch_size, log_interval=1, **kwargs):\n        self.data_size = data_size\n        self.batch_size = batch_size\n        _, self.world_size = get_dist_info()\n        self.log_interval = log_interval\n    @abstractmethod\n    def update(self):\n        raise NotImplemented\n    @abstractmethod\n    def accumulate(self):\n        raise NotImplemented",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/metrics/base.py:1-30"
+    },
+    "371": {
+        "file_id": 40,
+        "content": "This code defines an abstract base class `BaseMetric` for metrics in PaddleVideo's EIVideo application. It initializes the metric object with data size, batch size, and world size from distributed environment. The abstract methods `update()` and `accumulate()` must be implemented by subclasses.",
+        "type": "comment"
+    },
+    "372": {
+        "file_id": 41,
+        "content": "/applications/EIVideo/EIVideo/paddlevideo/metrics/build.py",
+        "type": "filepath"
+    },
+    "373": {
+        "file_id": 41,
+        "content": "Copyright notice, Apache License v2.0, software distributed as is without warranties or conditions. Imports registry and utils modules, defines build_metric function that builds metric using provided configuration.",
+        "type": "summary"
+    },
+    "374": {
+        "file_id": 41,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nfrom .registry import METRIC\nfrom ..utils import build\ndef build_metric(cfg):\n    return build(cfg, METRIC)",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/metrics/build.py:1-20"
+    },
+    "375": {
+        "file_id": 41,
+        "content": "Copyright notice, Apache License v2.0, software distributed as is without warranties or conditions. Imports registry and utils modules, defines build_metric function that builds metric using provided configuration.",
+        "type": "comment"
+    },
+    "376": {
+        "file_id": 42,
+        "content": "/applications/EIVideo/EIVideo/paddlevideo/metrics/registry.py",
+        "type": "filepath"
+    },
+    "377": {
+        "file_id": 42,
+        "content": "The code imports a Registry class from the utils module and initializes the METRIC as an instance of this Registry, designed to store and manage different types of metrics.",
+        "type": "summary"
+    },
+    "378": {
+        "file_id": 42,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nfrom ..utils import Registry\nMETRIC = Registry('metric')",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/metrics/registry.py:1-17"
+    },
+    "379": {
+        "file_id": 42,
+        "content": "The code imports a Registry class from the utils module and initializes the METRIC as an instance of this Registry, designed to store and manage different types of metrics.",
+        "type": "comment"
+    },
+    "380": {
+        "file_id": 43,
+        "content": "/applications/EIVideo/EIVideo/paddlevideo/metrics/vos_metric.py",
+        "type": "filepath"
+    },
+    "381": {
+        "file_id": 43,
+        "content": "The VOSMetric class initializes attributes, performs data processing and augmentation for video object segmentation, measures frame rates, handles flipped labels, and frees memory. It also tracks sequences, compresses files into a zip, creates image masks, aggregates metrics, and logs results.",
+        "type": "summary"
+    },
+    "382": {
+        "file_id": 43,
+        "content": "# Copyright (c) 2021  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nimport os\nimport paddle\nimport zipfile\nimport time\nfrom PIL import Image\nfrom paddle.io import DataLoader\nfrom .registry import METRIC\nfrom .base import BaseMetric\nfrom EIVideo.paddlevideo.utils import get_logger\nlogger = get_logger(\"paddlevideo\")\n@METRIC.register\nclass VOSMetric(BaseMetric):\n    def __init__(self,\n                 data_size,\n                 batch_size,\n                 result_root,\n                 zip_dir,\n                 log_interval=1):\n        \"\"\"prepare for metrics\n        \"\"\"\n        super().__init__(data_size, batch_size, log_interval)",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/metrics/vos_metric.py:1-38"
+    },
+    "383": {
+        "file_id": 43,
+        "content": "This code defines a class VOSMetric that inherits from BaseMetric and is registered in the METRIC registry. It takes data_size, batch_size, result_root, zip_dir, and log_interval as parameters for metrics preparation.",
+        "type": "comment"
+    },
+    "384": {
+        "file_id": 43,
+        "content": "        self.video_num = 0\n        self.total_time = 0\n        self.total_frame = 0\n        self.total_sfps = 0\n        self.total_video_num = data_size\n        self.count = 0\n        self.result_root = result_root\n        self.zip_dir = zip_dir\n    def update(self, batch_id, data, model):\n        \"\"\"update metrics during each iter\n        \"\"\"\n        self.video_num += 1\n        seq_dataset = data\n        seq_name = seq_dataset.seq_name\n        logger.info('Prcessing Seq {} [{}/{}]:'.format(seq_name,\n                                                       self.video_num,\n                                                       self.total_video_num))\n        seq_dataloader = DataLoader(seq_dataset,\n                                    return_list=True,\n                                    batch_size=1,\n                                    shuffle=False,\n                                    num_workers=0)\n        seq_total_time = 0\n        seq_total_frame = 0\n        ref_embeddings = []\n        ref_masks = []\n        prev_embedding = []",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/metrics/vos_metric.py:39-67"
+    },
+    "385": {
+        "file_id": 43,
+        "content": "The code initializes a class with attributes to store video processing information, such as the total number of videos, count, result root, and zip directory. The update method takes batch ID, data, and model as inputs and processes each sequence by incrementing the video number and logging the current processed sequence. It then creates a data loader, calculates the total time and frame count for the current sequence, and stores reference embeddings and masks.",
+        "type": "comment"
+    },
+    "386": {
+        "file_id": 43,
+        "content": "        prev_mask = []\n        with paddle.no_grad():\n            for frame_idx, samples in enumerate(seq_dataloader):\n                time_start = time.time()\n                all_preds = []\n                join_label = None\n                for aug_idx in range(len(samples)):\n                    if len(ref_embeddings) <= aug_idx:\n                        ref_embeddings.append([])\n                        ref_masks.append([])\n                        prev_embedding.append(None)\n                        prev_mask.append(None)\n                    sample = samples[aug_idx]\n                    ref_emb = ref_embeddings[aug_idx]\n                    ref_m = ref_masks[aug_idx]\n                    prev_emb = prev_embedding[aug_idx]\n                    prev_m = prev_mask[aug_idx]\n                    current_img = sample['current_img']\n                    if 'current_label' in sample.keys():\n                        current_label = sample['current_label']\n                        current_label = paddle.to_tensor(current_label)",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/metrics/vos_metric.py:68-90"
+    },
+    "387": {
+        "file_id": 43,
+        "content": "The code initializes empty lists for reference embeddings, reference masks, previous embeddings, and previous masks. It then uses Paddle's no_grad context to iterate over a data loader with multiple samples. For each sample, it checks if the corresponding reference embedding and mask lists are long enough, appending them if necessary. It assigns current image, label, previous embedding, and mask values from the sample and converts the label into a tensor for further processing.",
+        "type": "comment"
+    },
+    "388": {
+        "file_id": 43,
+        "content": "                    else:\n                        current_label = None\n                    obj_num = sample['meta']['obj_num']\n                    imgname = sample['meta']['current_name']\n                    ori_height = sample['meta']['height']\n                    ori_width = sample['meta']['width']\n                    current_img = current_img\n                    obj_num = obj_num\n                    bs, _, h, w = current_img.shape\n                    data_batch = [\n                        ref_emb, ref_m, prev_emb, prev_m, current_img,\n                        [ori_height, ori_width], obj_num\n                    ]\n                    all_pred, current_embedding = model(data_batch,\n                                                        mode='test')\n                    if frame_idx == 0:\n                        if current_label is None:\n                            logger.info(\n                                \"No first frame label in Seq {}.\".format(\n                                    seq_name))\n                        ref_embeddings[aug_idx].append(current_embedding)",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/metrics/vos_metric.py:91-114"
+    },
+    "389": {
+        "file_id": 43,
+        "content": "This code is a part of the PaddleVideo framework, specifically for the EIVideo application. It prepares the data for model input and then runs it through the model to generate predictions and embeddings. If the current label is None (first frame), it logs an information message. The code also keeps track of references embeddings based on augmentation index (aug_idx) in ref_embeddings list.",
+        "type": "comment"
+    },
+    "390": {
+        "file_id": 43,
+        "content": "                        ref_masks[aug_idx].append(current_label)\n                        prev_embedding[aug_idx] = current_embedding\n                        prev_mask[aug_idx] = current_label\n                    else:\n                        if sample['meta']['flip']:  #False\n                            all_pred = self.flip_tensor(all_pred, 3)\n                        #  In YouTube-VOS, not all the objects appear in the first frame for the first time. Thus, we\n                        #  have to introduce new labels for new objects, if necessary.\n                        if not sample['meta']['flip'] and not (\n                                current_label is None) and join_label is None:\n                            join_label = paddle.cast(current_label,\n                                                     dtype='int64')\n                        all_preds.append(all_pred)\n                        if current_label is not None:\n                            ref_embeddings[aug_idx].append(current_embedding)\n                        prev_embedding[aug_idx] = current_embedding",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/metrics/vos_metric.py:115-131"
+    },
+    "391": {
+        "file_id": 43,
+        "content": "This code appears to be part of a video object segmentation model, specifically for the YouTube-VOS task. It checks if there are new objects and updates labels accordingly while maintaining reference masks, previous embeddings, and all predictions. The code also handles flipping based on the 'meta' information of each sample.",
+        "type": "comment"
+    },
+    "392": {
+        "file_id": 43,
+        "content": "                if frame_idx > 0:\n                    all_preds = paddle.concat(all_preds, axis=0)\n                    all_preds = paddle.mean(\n                        all_preds, axis=0)  #average results if augmentation\n                    pred_label = paddle.argmax(all_preds, axis=0)\n                    if join_label is not None:\n                        join_label = paddle.squeeze(paddle.squeeze(join_label,\n                                                                   axis=0),\n                                                    axis=0)\n                        keep = paddle.cast((join_label == 0), dtype=\"int64\")\n                        pred_label = pred_label * keep + join_label * (1 -\n                                                                       keep)\n                        pred_label = pred_label\n                    current_label = paddle.reshape(\n                        pred_label, shape=[1, 1, ori_height, ori_width])\n                    flip_pred_label = self.flip_tensor(pred_label, 1)",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/metrics/vos_metric.py:133-148"
+    },
+    "393": {
+        "file_id": 43,
+        "content": "This code segment is performing data augmentation and label averaging. It first concatenates previous predictions, then calculates the mean to average the results from different augmentations. If a join_label exists, it performs element-wise multiplication with a keep mask to combine with current_label. Finally, it reshapes pred_label into a 1x1xori_heightxori_width tensor and flips it along the second dimension using self.flip_tensor function.",
+        "type": "comment"
+    },
+    "394": {
+        "file_id": 43,
+        "content": "                    flip_current_label = paddle.reshape(\n                        flip_pred_label, shape=[1, 1, ori_height, ori_width])\n                    for aug_idx in range(len(samples)):\n                        if join_label is not None:\n                            if samples[aug_idx]['meta']['flip']:\n                                ref_masks[aug_idx].append(flip_current_label)\n                            else:\n                                ref_masks[aug_idx].append(current_label)\n                        if samples[aug_idx]['meta']['flip']:\n                            prev_mask[aug_idx] = flip_current_label\n                        else:\n                            prev_mask[\n                                aug_idx] = current_label  #update prev_mask\n                    one_frametime = time.time() - time_start\n                    seq_total_time += one_frametime\n                    seq_total_frame += 1\n                    obj_num = float(obj_num)\n                    logger.info('Frame: {}, Obj Num: {}, Time: {}'.format(",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/metrics/vos_metric.py:149-168"
+    },
+    "395": {
+        "file_id": 43,
+        "content": "This code generates flipped labels for each frame of a video sequence. It checks the 'flip' flag in the sample metadata and appends either the current or flipped label to the corresponding list. The code also calculates the time taken per frame and updates total sequence time and frame count. Finally, it logs the frame number, object count, and time taken.",
+        "type": "comment"
+    },
+    "396": {
+        "file_id": 43,
+        "content": "                        imgname[0], obj_num, one_frametime))\n                    self.save_mask(\n                        pred_label,\n                        os.path.join(self.result_root, seq_name,\n                                     imgname[0].split('.')[0] + '.png'))\n                else:\n                    one_frametime = time.time() - time_start\n                    seq_total_time += one_frametime\n                    logger.info('Ref Frame: {}, Time: {}'.format(\n                        imgname[0], one_frametime))\n            del (ref_embeddings)\n            del (ref_masks)\n            del (prev_embedding)\n            del (prev_mask)\n            del (seq_dataset)\n            del (seq_dataloader)\n        seq_avg_time_per_frame = seq_total_time / seq_total_frame\n        self.total_time += seq_total_time\n        self.total_frame += seq_total_frame\n        total_avg_time_per_frame = self.total_time / self.total_frame\n        self.total_sfps += seq_avg_time_per_frame\n        avg_sfps = self.total_sfps / (batch_id + 1)",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/metrics/vos_metric.py:169-192"
+    },
+    "397": {
+        "file_id": 43,
+        "content": "This code calculates the average time per frame for each sequence and updates the total time, total frames, and average speed. It then calculates the average speed across all sequences. The code uses a \"else\" statement to handle cases where no object is detected in an image and calculates the time taken for processing that image. It also deletes variables used within the loop to free up memory before moving on to the next sequence or batch of images.",
+        "type": "comment"
+    },
+    "398": {
+        "file_id": 43,
+        "content": "        logger.info(\"Seq {} FPS: {}, Total FPS: {}, FPS per Seq: {}\".format(\n            seq_name, 1. / seq_avg_time_per_frame,\n            1. / total_avg_time_per_frame, 1. / avg_sfps))\n    def flip_tensor(self, tensor, dim=0):\n        inv_idx = paddle.cast(paddle.arange(tensor.shape[dim] - 1, -1, -1),\n                              dtype=\"int64\")\n        tensor = paddle.index_select(x=tensor, index=inv_idx, axis=dim)\n        return tensor\n    def save_mask(self, mask_tensor, path):\n        _palette = [\n            0, 0, 0, 128, 0, 0, 0, 128, 0, 128, 128, 0, 0, 0, 128, 128, 0, 128,\n            0, 128, 128, 128, 128, 128, 64, 0, 0, 191, 0, 0, 64, 128, 0, 191,\n            128, 0, 64, 0, 128, 191, 0, 128, 64, 128, 128, 191, 128, 128, 0,\n            64, 0, 128, 64, 0, 0, 191, 0, 128, 191, 0, 0, 64, 128, 128, 64,\n            128, 22, 22, 22, 23, 23, 23, 24, 24, 24, 25, 25, 25, 26, 26, 26,\n            27, 27, 27, 28, 28, 28, 29, 29, 29, 30, 30, 30, 31, 31, 31, 32, 32,\n            32, 33, 33, 33, 34, 34, 34, 35, 35, 35, 36, 36, 36, 37, 37, 37, 38,",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/metrics/vos_metric.py:193-211"
+    },
+    "399": {
+        "file_id": 43,
+        "content": "Logger is reporting sequence frame rate, total frame rate and frame rate per sequence.\nFunction flips tensor along a specified dimension.\nFunction saves a mask tensor to a given path using specific palette colors.",
+        "type": "comment"
+    }
+}

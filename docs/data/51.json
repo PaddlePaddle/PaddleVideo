@@ -1,0 +1,551 @@
+{
+    "5100": {
+        "file_id": 436,
+        "content": "        self.inplace = inplace\n        if not inplace:\n            self.mean = np.array(mean).reshape(tensor_shape).astype(np.float32)\n            self.std = np.array(std).reshape(tensor_shape).astype(np.float32)\n        else:\n            self.mean = np.array(mean, dtype=np.float32)\n            self.std = np.array(std, dtype=np.float32)\n    def __call__(self, results):\n        \"\"\"\n        Performs normalization operations.\n        Args:\n            imgs: Numpy array.\n        return:\n            np_imgs: Numpy array after normalization.\n        \"\"\"\n        if self.inplace:\n            n = len(results['imgs'])\n            h, w, c = results['imgs'][0].shape\n            norm_imgs = np.empty((n, h, w, c), dtype=np.float32)\n            for i, img in enumerate(results['imgs']):\n                norm_imgs[i] = img\n            for img in norm_imgs:  # [n,h,w,c]\n                mean = np.float64(self.mean.reshape(1, -1))  # [1, 3]\n                stdinv = 1 / np.float64(self.std.reshape(1, -1))  # [1, 3]\n                cv2.subtract(img, mean, img)",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations.py:667-693"
+    },
+    "5101": {
+        "file_id": 436,
+        "content": "This code defines a class for normalizing images. It takes mean and std values as inputs, which are used for image normalization. If inplace is set to False, it converts the input into numpy arrays with appropriate shapes and data types. The __call__ method performs normalization on the given results. If inplace is True, it uses the existing array and avoids making copies. The method calculates mean and std values for normalization and applies them to each image in the results using cv2.subtract.",
+        "type": "comment"
+    },
+    "5102": {
+        "file_id": 436,
+        "content": "                cv2.multiply(img, stdinv, img)\n        else:\n            imgs = results['imgs']\n            norm_imgs = imgs / 255.0\n            norm_imgs -= self.mean\n            norm_imgs /= self.std\n            if 'backend' in results and results['backend'] == 'pyav':\n                norm_imgs = paddle.to_tensor(norm_imgs, dtype=paddle.float32)\n        results['imgs'] = norm_imgs\n        return results\n@PIPELINES.register()\nclass JitterScale(object):\n    \"\"\"\n    Scale image, while the target short size is randomly select between min_size and max_size.\n    Args:\n        min_size: Lower bound for random sampler.\n        max_size: Higher bound for random sampler.\n    \"\"\"\n    def __init__(self,\n                 min_size,\n                 max_size,\n                 short_cycle_factors=[0.5, 0.7071],\n                 default_min_size=256):\n        self.default_min_size = default_min_size\n        self.orig_min_size = self.min_size = min_size\n        self.max_size = max_size\n        self.short_cycle_factors = short_cycle_factors",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations.py:694-722"
+    },
+    "5103": {
+        "file_id": 436,
+        "content": "This code applies image normalization and potentially scales the images while preserving aspect ratio, with options for random scaling. This is part of a PaddleVideo pipeline, likely for preprocessing input data before feeding it to a model for training or inference. It can be used with different backends such as \"cv2\" or \"pyav\", and returns the processed image results.",
+        "type": "comment"
+    },
+    "5104": {
+        "file_id": 436,
+        "content": "    def __call__(self, results):\n        \"\"\"\n        Performs jitter resize operations.\n        Args:\n            imgs (Sequence[PIL.Image]): List where each item is a PIL.Image.\n            For example, [PIL.Image0, PIL.Image1, PIL.Image2, ...]\n        return:\n            resized_imgs: List where each item is a PIL.Image after scaling.\n        \"\"\"\n        short_cycle_idx = results.get('short_cycle_idx')\n        if short_cycle_idx in [0, 1]:\n            self.min_size = int(\n                round(self.short_cycle_factors[short_cycle_idx] *\n                      self.default_min_size))\n        else:\n            self.min_size = self.orig_min_size\n        imgs = results['imgs']\n        size = int(round(np.random.uniform(self.min_size, self.max_size)))\n        assert (len(imgs) >= 1), \\\n            \"len(imgs):{} should be larger than 1\".format(len(imgs))\n        if 'backend' in results and results['backend'] == 'pyav':\n            height, width = imgs.shape[2:]\n        else:\n            width, height = imgs[0].size",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations.py:724-749"
+    },
+    "5105": {
+        "file_id": 436,
+        "content": "This code defines a function that performs jitter resize operations. It takes in an image sequence and scales each image based on a random size between min_size and max_size, considering short cycle factors and asserting the minimum length of images. If the backend is pyav, it retrieves height and width separately; otherwise, it gets the size from the first image.",
+        "type": "comment"
+    },
+    "5106": {
+        "file_id": 436,
+        "content": "        if (width <= height and width == size) or (height <= width\n                                                   and height == size):\n            return results\n        new_width = size\n        new_height = size\n        if width < height:\n            new_height = int(math.floor((float(height) / width) * size))\n        else:\n            new_width = int(math.floor((float(width) / height) * size))\n        if 'backend' in results and results['backend'] == 'pyav':\n            frames_resize = F.interpolate(imgs,\n                                          size=(new_height, new_width),\n                                          mode=\"bilinear\",\n                                          align_corners=False)  # [c,t,h,w]\n        else:\n            frames_resize = []\n            for j in range(len(imgs)):\n                img = imgs[j]\n                scale_img = img.resize((new_width, new_height), Image.BILINEAR)\n                frames_resize.append(scale_img)\n        results['imgs'] = frames_resize\n        return results",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations.py:750-774"
+    },
+    "5107": {
+        "file_id": 436,
+        "content": "This code resizes images to a specified size (width or height equals size). It checks if the image is loaded by PyAV and performs the resize operation using F.interpolate for PyAV-loaded images, otherwise it uses PIL's Image.resize function for other images. The resized images are added to 'imgs' in the results dictionary and returned.",
+        "type": "comment"
+    },
+    "5108": {
+        "file_id": 436,
+        "content": "@PIPELINES.register()\nclass MultiCenterCrop(object):\n    \"\"\"\n    center crop, left center crop right center crop\n    Args:\n        target_size(int): Random crop a square with the target_size from an image.\n    \"\"\"\n    def __init__(self, target_size):\n        self.target_size = target_size\n    def __call__(self, results):\n        \"\"\"\n        Performs random crop operations.\n        Args:\n            imgs: List where each item is a PIL.Image.\n            For example, [PIL.Image0, PIL.Image1, PIL.Image2, ...]\n        return:\n            crop_imgs: List where each item is a PIL.Image after random crop.\n        \"\"\"\n        imgs = results['imgs']\n        if 'backend' in results and results['backend'] == 'pyav':  # [c,t,h,w]\n            h, w = imgs.shape[2:]\n        else:\n            w, h = imgs[0].size\n        th, tw = self.target_size, self.target_size\n        assert (w >= self.target_size) and (h >= self.target_size), \\\n            \"image width({}) and height({}) should be larger than crop size\".format(\n                w, h, self.target_size)",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations.py:777-805"
+    },
+    "5109": {
+        "file_id": 436,
+        "content": "This code defines a MultiCenterCrop class that performs center crop, left center crop, and right center crop operations on images. It takes a target size as input and returns the cropped images. The function checks if the image size is larger than the target size before performing the operation. If the image size is smaller, it throws an assertion error.",
+        "type": "comment"
+    },
+    "5110": {
+        "file_id": 436,
+        "content": "        crop_images = []\n        #just for tensor\n        crop_imgs_center = []\n        crop_imgs_left = []\n        crop_imgs_right = []\n        if 'backend' in results and results['backend'] == 'pyav':\n            #center_corp\n            x1 = 0\n            if w > self.target_size:\n                x1 = int((w - self.target_size) / 2.0)\n            y1 = 0\n            if h > self.target_size:\n                y1 = int((h - self.target_size) / 2.0)\n            crop_imgs_center = imgs[:, :, y1:y1 + th,\n                                    x1:x1 + tw].numpy()  # [C, T, th, tw]\n            #left_crop\n            x1 = 0\n            y1 = 0\n            if h > self.target_size:\n                y1 = int((h - self.target_size) / 2.0)\n            crop_imgs_left = imgs[:, :, y1:y1 + th, x1:x1 + tw].numpy()\n            #right_crop\n            x1 = 0\n            y1 = 0\n            if w > self.target_size:\n                x1 = w - self.target_size\n            if h > self.target_size:\n                y1 = int((h - self.target_size) / 2.0)",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations.py:807-834"
+    },
+    "5111": {
+        "file_id": 436,
+        "content": "This code is performing image cropping for a specific backend (pyav) and storing the results in three separate lists: crop_imgs_center, crop_imgs_left, and crop_imgs_right. The cropping is done based on the size of the original image compared to the target size, with different crops for center, left, and right areas.",
+        "type": "comment"
+    },
+    "5112": {
+        "file_id": 436,
+        "content": "            crop_imgs_right = imgs[:, :, y1:y1 + th, x1:x1 + tw].numpy()\n            crop_imgs = np.concatenate(\n                (crop_imgs_center, crop_imgs_left, crop_imgs_right), axis=1)\n            crop_images = paddle.to_tensor(crop_imgs)\n        else:\n            x1 = 0\n            if w > self.target_size:\n                x1 = random.randint(0, w - tw)\n            y1 = 0\n            if h > self.target_size:\n                y1 = random.randint(0, h - th)\n            for img in imgs:\n                if w == tw and h == th:\n                    crop_images.append(img)\n                else:\n                    crop_images.append(img.crop((x1, y1, x1 + tw, y1 + th)))\n        results['imgs'] = crop_images\n        return results\n@PIPELINES.register()\nclass MultiCrop(object):\n    \"\"\"\n    Random crop image.\n    This operation can perform multi-crop during multi-clip test, as in slowfast model.\n    Args:\n        target_size(int): Random crop a square with the target_size from an image.\n    \"\"\"\n    def __init__(self,\n                 target_size,",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations.py:835-865"
+    },
+    "5113": {
+        "file_id": 436,
+        "content": "This code defines a MultiCrop pipeline that randomly crops an image into three parts: center, left, and right. The cropped images are concatenated horizontally and converted to Paddle Tensor before returning the results.",
+        "type": "comment"
+    },
+    "5114": {
+        "file_id": 436,
+        "content": "                 default_crop_size=224,\n                 short_cycle_factors=[0.5, 0.7071],\n                 test_mode=False):\n        self.orig_target_size = self.target_size = target_size\n        self.short_cycle_factors = short_cycle_factors\n        self.default_crop_size = default_crop_size\n        self.test_mode = test_mode\n    def __call__(self, results):\n        \"\"\"\n        Performs random crop operations.\n        Args:\n            imgs: List where each item is a PIL.Image.\n            For example, [PIL.Image0, PIL.Image1, PIL.Image2, ...]\n        return:\n            crop_imgs: List where each item is a PIL.Image after random crop.\n        \"\"\"\n        imgs = results['imgs']\n        spatial_sample_index = results['spatial_sample_index']\n        spatial_num_clips = results['spatial_num_clips']\n        short_cycle_idx = results.get('short_cycle_idx')\n        if short_cycle_idx in [0, 1]:\n            self.target_size = int(\n                round(self.short_cycle_factors[short_cycle_idx] *\n                      self.default_crop_size))",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations.py:866-891"
+    },
+    "5115": {
+        "file_id": 436,
+        "content": "The code initializes an augmentation class with parameters for target size, short cycle factors, default crop size, and test mode. It then defines a __call__ method that performs random cropping operations on images based on the provided parameters.",
+        "type": "comment"
+    },
+    "5116": {
+        "file_id": 436,
+        "content": "        else:\n            self.target_size = self.orig_target_size  # use saved value before call\n        w, h = imgs[0].size\n        if w == self.target_size and h == self.target_size:\n            return results\n        assert (w >= self.target_size) and (h >= self.target_size), \\\n            \"image width({}) and height({}) should be larger than crop size({},{})\".format(w, h, self.target_size, self.target_size)\n        frames_crop = []\n        if not self.test_mode:\n            x_offset = random.randint(0, w - self.target_size)\n            y_offset = random.randint(0, h - self.target_size)\n        else:  # multi-crop\n            x_gap = int(\n                math.ceil((w - self.target_size) / (spatial_num_clips - 1)))\n            y_gap = int(\n                math.ceil((h - self.target_size) / (spatial_num_clips - 1)))\n            if h > w:\n                x_offset = int(math.ceil((w - self.target_size) / 2))\n                if spatial_sample_index == 0:\n                    y_offset = 0\n                elif spatial_sample_index == spatial_num_clips - 1:",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations.py:892-914"
+    },
+    "5117": {
+        "file_id": 436,
+        "content": "This code checks if the image size matches the target size. If it does, it returns the results. If not, it generates crops for multi-crop testing mode or a single crop for non-testing mode based on random offsets. The code also handles the case where the target size is determined from a saved value before the call.",
+        "type": "comment"
+    },
+    "5118": {
+        "file_id": 436,
+        "content": "                    y_offset = h - self.target_size\n                else:\n                    y_offset = y_gap * spatial_sample_index\n            else:\n                y_offset = int(math.ceil((h - self.target_size) / 2))\n                if spatial_sample_index == 0:\n                    x_offset = 0\n                elif spatial_sample_index == spatial_num_clips - 1:\n                    x_offset = w - self.target_size\n                else:\n                    x_offset = x_gap * spatial_sample_index\n        for img in imgs:\n            nimg = img.crop((x_offset, y_offset, x_offset + self.target_size,\n                             y_offset + self.target_size))\n            frames_crop.append(nimg)\n        results['imgs'] = frames_crop\n        return results\n@PIPELINES.register()\nclass PackOutput(object):\n    \"\"\"\n    In slowfast model, we want to get slow pathway from fast pathway based on\n    alpha factor.\n    Args:\n        alpha(int): temporal length of fast/slow\n    \"\"\"\n    def __init__(self, alpha):\n        self.alpha = alpha",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations.py:915-944"
+    },
+    "5119": {
+        "file_id": 436,
+        "content": "This code calculates the crop offsets for a set of images based on their size and target size. If the aspect ratio is preserved, it determines the y_offset, otherwise, it calculates the x and y offsets separately for each spatial sample index. The resulting cropped images are stored in frames\\_crop and added to results['imgs']. PackOutput is a pipeline register that takes an alpha argument and is used in slowfast model to get slow pathway from fast pathway based on alpha factor.",
+        "type": "comment"
+    },
+    "5120": {
+        "file_id": 436,
+        "content": "    def __call__(self, results):\n        fast_pathway = results['imgs']\n        # sample num points between start and end\n        slow_idx_start = 0\n        slow_idx_end = fast_pathway.shape[0] - 1\n        slow_idx_num = fast_pathway.shape[0] // self.alpha\n        slow_idxs_select = np.linspace(slow_idx_start, slow_idx_end,\n                                       slow_idx_num).astype(\"int64\")\n        slow_pathway = fast_pathway[slow_idxs_select]\n        # T H W C -> C T H W.\n        slow_pathway = slow_pathway.transpose(3, 0, 1, 2)\n        fast_pathway = fast_pathway.transpose(3, 0, 1, 2)\n        # slow + fast\n        frames_list = [slow_pathway, fast_pathway]\n        results['imgs'] = frames_list\n        return results\n@PIPELINES.register()\nclass GroupFullResSample(object):\n    def __init__(self, crop_size, flip=False):\n        self.crop_size = crop_size if not isinstance(crop_size, int) else (\n            crop_size, crop_size)\n        self.flip = flip\n    def __call__(self, results):\n        img_group = results['imgs']",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations.py:946-975"
+    },
+    "5121": {
+        "file_id": 436,
+        "content": "The code defines a GroupFullResSample pipeline that selects and groups slow and fast pathways from input images. It resizes the pathways to the specified crop_size, performs horizontal flips if flip is True, and stores them in frames_list before updating results['imgs'].",
+        "type": "comment"
+    },
+    "5122": {
+        "file_id": 436,
+        "content": "        image_w, image_h = img_group[0].size\n        crop_w, crop_h = self.crop_size\n        w_step = (image_w - crop_w) // 4\n        h_step = (image_h - crop_h) // 4\n        offsets = list()\n        offsets.append((0 * w_step, 2 * h_step))  # left\n        offsets.append((4 * w_step, 2 * h_step))  # right\n        offsets.append((2 * w_step, 2 * h_step))  # center\n        oversample_group = list()\n        for o_w, o_h in offsets:\n            normal_group = list()\n            flip_group = list()\n            for i, img in enumerate(img_group):\n                crop = img.crop((o_w, o_h, o_w + crop_w, o_h + crop_h))\n                normal_group.append(crop)\n                if self.flip:\n                    flip_crop = crop.copy().transpose(Image.FLIP_LEFT_RIGHT)\n                    flip_group.append(flip_crop)\n            oversample_group.extend(normal_group)\n            if self.flip:\n                oversample_group.extend(flip_group)\n        results['imgs'] = oversample_group\n        return results\n@PIPELINES.register()",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations.py:977-1007"
+    },
+    "5123": {
+        "file_id": 436,
+        "content": "This code performs image augmentation by creating a list of different crops and flips from the input image group. It calculates the crop size and step sizes, creates offsets for each crop position, iterates over the input images to create normal and flipped crops, and stores them in separate groups before combining them into the oversample_group. Finally, it adds the oversample_group to the results dictionary and returns the results.",
+        "type": "comment"
+    },
+    "5124": {
+        "file_id": 436,
+        "content": "class TenCrop:\n    \"\"\"\n    Crop out 5 regions (4 corner points + 1 center point) from the picture,\n    and then flip the cropping result to get 10 cropped images, which can make the prediction result more robust.\n    Args:\n        target_size(int | tuple[int]): (w, h) of target size for crop.\n    \"\"\"\n    def __init__(self, target_size):\n        self.target_size = (target_size, target_size)\n    def __call__(self, results):\n        imgs = results['imgs']\n        img_w, img_h = imgs[0].size\n        crop_w, crop_h = self.target_size\n        w_step = (img_w - crop_w) // 4\n        h_step = (img_h - crop_h) // 4\n        offsets = [\n            (0, 0),\n            (4 * w_step, 0),\n            (0, 4 * h_step),\n            (4 * w_step, 4 * h_step),\n            (2 * w_step, 2 * h_step),\n        ]\n        img_crops = list()\n        for x_offset, y_offset in offsets:\n            crop = [\n                img.crop(\n                    (x_offset, y_offset, x_offset + crop_w, y_offset + crop_h))\n                for img in imgs\n            ]",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations.py:1008-1037"
+    },
+    "5125": {
+        "file_id": 436,
+        "content": "This code defines a class \"TenCrop\" which crops a given image into 10 cropped images, taking the top-left corner, bottom-left corner, top-right corner, bottom-right corner, and center of the image. It achieves this by using the target size for crop and calculating the width and height steps based on the original image's dimensions. The class also includes a __call__ method which takes a results dictionary as input and returns an array of cropped images.",
+        "type": "comment"
+    },
+    "5126": {
+        "file_id": 436,
+        "content": "            crop_fliped = [\n                timg.transpose(Image.FLIP_LEFT_RIGHT) for timg in crop\n            ]\n            img_crops.extend(crop)\n            img_crops.extend(crop_fliped)\n        results['imgs'] = img_crops\n        return results\n@PIPELINES.register()\nclass UniformCrop:\n    \"\"\"\n    Perform uniform spatial sampling on the images,\n    select the two ends of the long side and the middle position (left middle right or top middle bottom) 3 regions.\n    Args:\n        target_size(int | tuple[int]): (w, h) of target size for crop.\n    \"\"\"\n    def __init__(self, target_size, backend='cv2'):\n        if isinstance(target_size, tuple):\n            self.target_size = target_size\n        elif isinstance(target_size, int):\n            self.target_size = (target_size, target_size)\n        else:\n            raise TypeError(\n                f'target_size must be int or tuple[int], but got {type(target_size)}'\n            )\n        self.backend = backend\n    def __call__(self, results):\n        imgs = results['imgs']",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations.py:1038-1069"
+    },
+    "5127": {
+        "file_id": 436,
+        "content": "This code is for the \"UniformCrop\" pipeline, which performs uniform spatial sampling on images by selecting three regions: two ends of the long side and the middle position (left/right or top/bottom). The target size can be provided as an integer for square crop or a tuple for specific width and height. It uses either OpenCV or PIL for image manipulation based on the 'backend' argument, which defaults to OpenCV.",
+        "type": "comment"
+    },
+    "5128": {
+        "file_id": 436,
+        "content": "        if 'backend' in results and results['backend'] == 'pyav':  # [c,t,h,w]\n            img_h, img_w = imgs.shape[2:]\n        elif self.backend == 'pillow':\n            img_w, img_h = imgs[0].size\n        else:\n            img_h, img_w = imgs[0].shape[:2]\n        crop_w, crop_h = self.target_size\n        if crop_h == img_h:\n            w_step = (img_w - crop_w) // 2\n            offsets = [\n                (0, 0),\n                (w_step * 2, 0),\n                (w_step, 0),\n            ]\n        elif crop_w == img_w:\n            h_step = (img_h - crop_h) // 2\n            offsets = [\n                (0, 0),\n                (0, h_step * 2),\n                (0, h_step),\n            ]\n        else:\n            raise ValueError(\n                f\"img_w({img_w}) == crop_w({crop_w}) or img_h({img_h}) == crop_h({crop_h})\"\n            )\n        img_crops = []\n        if 'backend' in results and results['backend'] == 'pyav':  # [c,t,h,w]\n            for x_offset, y_offset in offsets:\n                crop = imgs[:, :, y_offset:y_offset + crop_h,",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations.py:1070-1099"
+    },
+    "5129": {
+        "file_id": 436,
+        "content": "This code is determining the image offsets for cropping based on the target size and the original image dimensions. It supports two backends: 'pyav' and 'pillow'. If the backend is 'pyav', it extracts the height and width of the image. If the backend is 'pillow', it retrieves the width and height from the first image. The code then calculates the step size for cropping based on whether the target size matches the image dimensions or not, and finally constructs a list of offsets to crop the images.",
+        "type": "comment"
+    },
+    "5130": {
+        "file_id": 436,
+        "content": "                            x_offset:x_offset + crop_w]\n                img_crops.append(crop)\n            img_crops = paddle.concat(img_crops, axis=1)\n        else:\n            if self.backend == 'pillow':\n                for x_offset, y_offset in offsets:\n                    crop = [\n                        img.crop((x_offset, y_offset, x_offset + crop_w,\n                                  y_offset + crop_h)) for img in imgs\n                    ]\n                    img_crops.extend(crop)\n            else:\n                for x_offset, y_offset in offsets:\n                    crop = [\n                        img[y_offset:y_offset + crop_h,\n                            x_offset:x_offset + crop_w] for img in imgs\n                    ]\n                    img_crops.extend(crop)\n        results['imgs'] = img_crops\n        return results\n@PIPELINES.register()\nclass GroupResize(object):\n    def __init__(self, height, width, scale, K, mode='train'):\n        self.height = height\n        self.width = width\n        self.scale = scale",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations.py:1100-1127"
+    },
+    "5131": {
+        "file_id": 436,
+        "content": "The code is defining a pipeline for image augmentation, including cropping and resizing operations. If the backend is 'pillow', it performs cropping using pixel coordinates; otherwise, it uses slice notation to crop images. The results are stored in 'img_crops' and returned as 'results['imgs']'.",
+        "type": "comment"
+    },
+    "5132": {
+        "file_id": 436,
+        "content": "        self.resize = {}\n        self.K = np.array(K, dtype=np.float32)\n        self.mode = mode\n        for i in range(self.scale):\n            s = 2**i\n            self.resize[i] = paddle.vision.transforms.Resize(\n                (self.height // s, self.width // s), interpolation='lanczos')\n    def __call__(self, results):\n        if self.mode == 'infer':\n            imgs = results['imgs']\n            for k in list(imgs):  # (\"color\", 0, -1)\n                if \"color\" in k or \"color_n\" in k:\n                    n, im, _ = k\n                    for i in range(self.scale):\n                        imgs[(n, im, i)] = self.resize[i](imgs[(n, im, i - 1)])\n        else:\n            imgs = results['imgs']\n            for scale in range(self.scale):\n                K = self.K.copy()\n                K[0, :] *= self.width // (2**scale)\n                K[1, :] *= self.height // (2**scale)\n                inv_K = np.linalg.pinv(K)\n                imgs[(\"K\", scale)] = K\n                imgs[(\"inv_K\", scale)] = inv_K\n            for k in list(imgs):",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations.py:1128-1156"
+    },
+    "5133": {
+        "file_id": 436,
+        "content": "This code initializes a resize transformation for image augmentation in PaddleVideo. The transformations are applied based on the scale and mode ('infer' or 'train') specified. For infer mode, it processes color images by applying resizing to each scale level. In train mode, it calculates the K matrix and its inverse for each scale level and stores them in the results dictionary.",
+        "type": "comment"
+    },
+    "5134": {
+        "file_id": 436,
+        "content": "                if \"color\" in k or \"color_n\" in k:\n                    n, im, i = k\n                    for i in range(self.scale):\n                        imgs[(n, im, i)] = self.resize[i](imgs[(n, im, i - 1)])\n            results['imgs'] = imgs\n        return results\n@PIPELINES.register()\nclass ColorJitter(object):\n    \"\"\"Randomly change the brightness, contrast, saturation and hue of an image.\n    \"\"\"\n    def __init__(self,\n                 brightness=0,\n                 contrast=0,\n                 saturation=0,\n                 hue=0,\n                 mode='train',\n                 p=0.5,\n                 keys=None):\n        self.mode = mode\n        self.colorjitter = paddle.vision.transforms.ColorJitter(\n            brightness, contrast, saturation, hue)\n        self.p = p\n    def __call__(self, results):\n        \"\"\"\n        Args:\n            results (PIL Image): Input image.\n        Returns:\n            PIL Image: Color jittered image.\n        \"\"\"\n        do_color_aug = random.random() > self.p\n        imgs = results['imgs']",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations.py:1157-1193"
+    },
+    "5135": {
+        "file_id": 436,
+        "content": "This code applies color jitter augmentation to the images by randomly adjusting brightness, contrast, saturation, and hue. The ColorJitter class initializes a colorjitter transform with specified parameters for train mode or test mode. The __call__ method is called on each image in the results dictionary and checks if the color augmentation should be applied. If true, the color jittered image is returned.",
+        "type": "comment"
+    },
+    "5136": {
+        "file_id": 436,
+        "content": "        for k in list(imgs):\n            f = imgs[k]\n            if \"color\" in k or \"color_n\" in k:\n                n, im, i = k\n                imgs[(n, im, i)] = f\n                if do_color_aug:\n                    imgs[(n + \"_aug\", im, i)] = self.colorjitter(f)\n                else:\n                    imgs[(n + \"_aug\", im, i)] = f\n        if self.mode == \"train\":\n            for i in results['frame_idxs']:\n                del imgs[(\"color\", i, -1)]\n                del imgs[(\"color_aug\", i, -1)]\n                del imgs[(\"color_n\", i, -1)]\n                del imgs[(\"color_n_aug\", i, -1)]\n        else:\n            for i in results['frame_idxs']:\n                del imgs[(\"color\", i, -1)]\n                del imgs[(\"color_aug\", i, -1)]\n        results['img'] = imgs\n        return results\n@PIPELINES.register()\nclass GroupRandomFlip(object):\n    def __init__(self, p=0.5):\n        self.p = p\n    def __call__(self, results):\n        imgs = results['imgs']\n        do_flip = random.random() > self.p\n        if do_flip:",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations.py:1194-1227"
+    },
+    "5137": {
+        "file_id": 436,
+        "content": "This code is part of a data augmentation pipeline, specifically handling color and flip transformations for images. It iterates over the 'imgs' dictionary to find and organize color images, applying color jitter if required. Then it removes specific color images based on the mode (\"train\" or \"test\"). Finally, it returns the updated results dictionary with the modified image groupings. The GroupRandomFlip class performs random flipping of images with a specified probability.",
+        "type": "comment"
+    },
+    "5138": {
+        "file_id": 436,
+        "content": "            for k in list(imgs):\n                if \"color\" in k or \"color_n\" in k:\n                    n, im, i = k\n                    imgs[(n, im,\n                          i)] = imgs[(n, im,\n                                      i)].transpose(Image.FLIP_LEFT_RIGHT)\n            if \"depth_gt\" in imgs:\n                imgs['depth_gt'] = np.array(np.fliplr(imgs['depth_gt']))\n        results['imgs'] = imgs\n        return results\n@PIPELINES.register()\nclass ToArray(object):\n    def __init__(self):\n        pass\n    def __call__(self, results):\n        imgs = results['imgs']\n        for k in list(imgs):\n            if \"color\" in k or \"color_n\" in k or \"color_aug\" in k or \"color_n_aug\" in k:\n                n, im, i = k\n                imgs[(n, im,\n                      i)] = np.array(imgs[(n, im, i)]).astype('float32') / 255.0\n                imgs[(n, im, i)] = imgs[(n, im, i)].transpose((2, 0, 1))\n        if \"depth_gt\" in imgs:\n            imgs['depth_gt'] = np.array(imgs['depth_gt']).astype('float32')\n        results['imgs'] = imgs",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations.py:1228-1257"
+    },
+    "5139": {
+        "file_id": 436,
+        "content": "This code is part of a machine learning pipeline that processes image data. It first flips left-right some images marked with \"color\" or \"color_n\". Then, it converts certain color and depth images to floats and normalizes them to [0,1] for training. Finally, it returns the updated image dictionary as part of the results.",
+        "type": "comment"
+    },
+    "5140": {
+        "file_id": 436,
+        "content": "        return results\n@PIPELINES.register()\nclass YowoAug(object):\n    def __init__(self, target_size=224, jitter=0.2, hue=0.1, saturation=1.5, exposure=1.5, valid_mode=False):\n        self.shape = (target_size, target_size)\n        self.jitter = jitter\n        self.hue = hue\n        self.saturation = saturation\n        self.exposure = exposure\n        self.valid_mode = valid_mode\n    def _rand_scale(self, s):\n        scale = random.uniform(1, s)\n        if (random.randint(1, 10000) % 2):\n            return scale\n        return 1. / scale\n    def _distort_image(self, im, hue, sat, val):\n        im = im.convert('HSV')\n        cs = list(im.split())\n        cs[1] = cs[1].point(lambda i: i * sat)\n        cs[2] = cs[2].point(lambda i: i * val)\n        def _change_hue(x):\n            x += hue * 255\n            if x > 255:\n                x -= 255\n            if x < 0:\n                x += 255\n            return x\n        cs[0] = cs[0].point(_change_hue)\n        im = Image.merge(im.mode, tuple(cs))\n        im = im.convert('RGB')",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations.py:1258-1294"
+    },
+    "5141": {
+        "file_id": 436,
+        "content": "This code defines a class called YowoAug for image augmentation. It takes in parameters such as target size, jitter, hue, saturation, exposure, and valid mode. The class has methods to randomly scale the image, distort the image by changing hue, saturation, and exposure levels, and returns the augmented results.",
+        "type": "comment"
+    },
+    "5142": {
+        "file_id": 436,
+        "content": "        # constrain_image(im)\n        return im\n    def _random_distort_image(self, im, dhue, dsat, dexp):\n        res = self._distort_image(im, dhue, dsat, dexp)\n        return res\n    def _read_truths_args(self, lab_path, min_box_scale):\n        truths = np.loadtxt(lab_path)\n        truths = np.reshape(truths, (truths.size // 5, 5))\n        new_truths = []\n        for i in range(truths.shape[0]):\n            cx = (truths[i][1] + truths[i][3]) / (2 * 320)\n            cy = (truths[i][2] + truths[i][4]) / (2 * 240)\n            imgw = (truths[i][3] - truths[i][1]) / 320\n            imgh = (truths[i][4] - truths[i][2]) / 240\n            truths[i][0] = truths[i][0] - 1\n            truths[i][1] = cx\n            truths[i][2] = cy\n            truths[i][3] = imgw\n            truths[i][4] = imgh\n            if truths[i][3] < min_box_scale:\n                continue\n            new_truths.append([truths[i][0], truths[i][1], truths[i][2], truths[i][3], truths[i][4]])\n        return np.array(new_truths)\n    def _fill_truth_detection(self, labpath, flip, dx, dy, sx, sy):",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations.py:1295-1322"
+    },
+    "5143": {
+        "file_id": 436,
+        "content": "The code snippet defines several functions related to image augmentation and truth detection in an object detection task. The \"constrain_image\" function ensures the image is within a specific range of values. \"random_distort_image\" applies distortion to the input image randomly. \"read_truths_args\" reads the ground truth boxes from a file, scales and transforms them accordingly, and checks if the box scale is smaller than the minimum required scale before adding it to new_truths. Lastly, \"_fill_truth_detection\" fills in the ground truth detection with additional parameters like flip, dx, dy, sx, and sy.",
+        "type": "comment"
+    },
+    "5144": {
+        "file_id": 436,
+        "content": "        max_boxes = 50\n        label = np.zeros((max_boxes, 5))\n        bs = np.loadtxt(labpath)\n        bs = np.reshape(bs, (-1, 5))\n        for i in range(bs.shape[0]):\n            cx = (bs[i][1] + bs[i][3]) / (2 * 320)\n            cy = (bs[i][2] + bs[i][4]) / (2 * 240)\n            imgw = (bs[i][3] - bs[i][1]) / 320\n            imgh = (bs[i][4] - bs[i][2]) / 240\n            bs[i][0] = bs[i][0] - 1\n            bs[i][1] = cx\n            bs[i][2] = cy\n            bs[i][3] = imgw\n            bs[i][4] = imgh\n        cc = 0\n        for i in range(bs.shape[0]):\n            x1 = bs[i][1] - bs[i][3] / 2\n            y1 = bs[i][2] - bs[i][4] / 2\n            x2 = bs[i][1] + bs[i][3] / 2\n            y2 = bs[i][2] + bs[i][4] / 2\n            x1 = min(0.999, max(0, x1 * sx - dx))\n            y1 = min(0.999, max(0, y1 * sy - dy))\n            x2 = min(0.999, max(0, x2 * sx - dx))\n            y2 = min(0.999, max(0, y2 * sy - dy))\n            bs[i][1] = (x1 + x2) / 2\n            bs[i][2] = (y1 + y2) / 2\n            bs[i][3] = (x2 - x1)",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations.py:1323-1353"
+    },
+    "5145": {
+        "file_id": 436,
+        "content": "The code resizes and normalizes bounding box coordinates from a loaded label file, adjusts them based on image size scaling factors and offsets, and updates the bounding boxes accordingly.",
+        "type": "comment"
+    },
+    "5146": {
+        "file_id": 436,
+        "content": "            bs[i][4] = (y2 - y1)\n            if flip:\n                bs[i][1] = 0.999 - bs[i][1]\n            if bs[i][3] < 0.001 or bs[i][4] < 0.001:\n                continue\n            label[cc] = bs[i]\n            cc += 1\n            if cc >= 50:\n                break\n        label = np.reshape(label, (-1))\n        return label\n    def __call__(self, results):\n        clip = results['imgs']\n        frame_num = len(clip)\n        oh = clip[0].height\n        ow = clip[0].width\n        labpath = results['filename'].replace('jpg', 'txt').replace('rgb-images', 'labels')\n        if not self.valid_mode:\n            dw = int(ow * self.jitter)\n            dh = int(oh * self.jitter)\n            pleft = random.randint(-dw, dw)\n            pright = random.randint(-dw, dw)\n            ptop = random.randint(-dh, dh)\n            pbot = random.randint(-dh, dh)\n            swidth = ow - pleft - pright\n            sheight = oh - ptop - pbot\n            sx = float(swidth) / ow\n            sy = float(sheight) / oh\n            dx = (float(pleft) / ow) / sx",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations.py:1354-1390"
+    },
+    "5147": {
+        "file_id": 436,
+        "content": "This code initializes a list of bounding boxes, applies jitter if not in valid mode (randomly adjusts image size and position), reshapes the list into a single array of bounding boxes, and returns it.",
+        "type": "comment"
+    },
+    "5148": {
+        "file_id": 436,
+        "content": "            dy = (float(ptop) / oh) / sy\n            flip = random.randint(1, 10000) % 2\n            dhue = random.uniform(-self.hue, self.hue)\n            dsat = self._rand_scale(self.saturation)\n            dexp = self._rand_scale(self.exposure)\n            # Augment\n            cropped = [img.crop((pleft, ptop, pleft + swidth - 1, ptop + sheight - 1)) for img in clip]\n            sized = [img.resize(self.shape) for img in cropped]\n            if flip:\n                sized = [img.transpose(Image.FLIP_LEFT_RIGHT) for img in sized]\n            clip = [self._random_distort_image(img, dhue, dsat, dexp) for img in sized]\n            label = self._fill_truth_detection(labpath, flip, dx, dy, 1. / sx, 1. / sy)\n        else:\n            label = np.zeros([50 * 5])\n            tmp = self._read_truths_args(labpath, 8.0 / clip[0].width).astype('float32')\n            tmp = np.reshape(tmp, [-1])\n            tsz = tmp.size\n            if tsz > 50 * 5:\n                label = tmp[0:50 * 5]\n            elif tsz > 0:\n                label[0:tsz] = tmp",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations.py:1391-1419"
+    },
+    "5149": {
+        "file_id": 436,
+        "content": "This code performs image augmentations and label manipulations. It applies random crop, resize, flip (horizontally), and distortion to the image(s) with a certain probability. The label is either filled from the truth detection or set to zero vector depending on the size of the extracted truth data.",
+        "type": "comment"
+    },
+    "5150": {
+        "file_id": 436,
+        "content": "            clip = [img.resize(self.shape) for img in clip]\n        clip = [np.asarray(img).astype('float32') / 255.0 for img in clip]\n        clip = np.concatenate(clip, 0).reshape([frame_num, 224, 224, 3])\n        clip = np.transpose(clip, [3, 0, 1, 2])\n        results['imgs'] = clip\n        results['labels'] = label\n        return results",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations.py:1420-1427"
+    },
+    "5151": {
+        "file_id": 436,
+        "content": "Resizes images to a specific shape, converts them to float32 type and scales by 255.0, concatenates frames into a single array, transposes array dimensions, stores image and label arrays in 'results', returns results",
+        "type": "comment"
+    },
+    "5152": {
+        "file_id": 437,
+        "content": "/paddlevideo/loader/pipelines/augmentations_ava.py",
+        "type": "filepath"
+    },
+    "5153": {
+        "file_id": 437,
+        "content": "This code defines image augmentation and resizing functions for AVA dataset in PaddleVideo library using operations like resizing, lazy initialization, and RandomRescale/Resize transforms. It creates classes for ground truth bounding boxes and proposals, cropping and flipping entity boxes, and includes Flip and Normalize classes for image processing and normalization.",
+        "type": "summary"
+    },
+    "5154": {
+        "file_id": 437,
+        "content": "#  Copyright (c) 2021 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport random\nimport numpy as np\nimport math\nfrom PIL import Image\nfrom ..registry import PIPELINES\nfrom collections.abc import Sequence\nimport cv2\npillow_interp_codes = {\n    'nearest': Image.NEAREST,\n    'bilinear': Image.BILINEAR,\n    'bicubic': Image.BICUBIC,\n    'box': Image.BOX,\n    'lanczos': Image.LANCZOS,\n    'hamming': Image.HAMMING\n}\ncv2_interp_codes = {\n    'nearest': cv2.INTER_NEAREST,\n    'bilinear': cv2.INTER_LINEAR,",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations_ava.py:1-34"
+    },
+    "5155": {
+        "file_id": 437,
+        "content": "This code is part of the PaddleVideo library and contains a module for image augmentations in the AVA dataset. It imports necessary libraries, defines conversion dictionaries for interpolation methods between PIL and OpenCV, and sets up registry entries for the PIPELINES module.",
+        "type": "comment"
+    },
+    "5156": {
+        "file_id": 437,
+        "content": "    'bicubic': cv2.INTER_CUBIC,\n    'area': cv2.INTER_AREA,\n    'lanczos': cv2.INTER_LANCZOS4\n}\ndef _init_lazy_if_proper(results, lazy):\n    \"\"\"Initialize lazy operation properly.\n    Make sure that a lazy operation is properly initialized,\n    and avoid a non-lazy operation accidentally getting mixed in.\n    Required keys in results are \"imgs\" if \"img_shape\" not in results,\n    otherwise, Required keys in results are \"img_shape\", add or modified keys\n    are \"img_shape\", \"lazy\".\n    Add or modified keys in \"lazy\" are \"original_shape\", \"crop_bbox\", \"flip\",\n    \"flip_direction\", \"interpolation\".\n    Args:\n        results (dict): A dict stores data pipeline result.\n        lazy (bool): Determine whether to apply lazy operation. Default: False.\n    \"\"\"\n    if 'img_shape' not in results:\n        results['img_shape'] = results['imgs'][0].shape[:2]\n    if lazy:\n        if 'lazy' not in results:\n            img_h, img_w = results['img_shape']\n            lazyop = dict()\n            lazyop['original_shape'] = results['img_shape']",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations_ava.py:35-64"
+    },
+    "5157": {
+        "file_id": 437,
+        "content": "This function initializes the lazy operation properly, ensuring a non-lazy operation is not accidentally mixed in. If 'img_shape' is not in results, it adds 'img_shape'. If 'lazy' is set to True and 'lazy' does not exist in results, it creates a new dictionary for lazy operation containing 'original_shape', 'img_shape', 'crop_bbox', 'flip', 'flip_direction', and 'interpolation'.",
+        "type": "comment"
+    },
+    "5158": {
+        "file_id": 437,
+        "content": "            lazyop['crop_bbox'] = np.array([0, 0, img_w, img_h],\n                                           dtype=np.float32)\n            lazyop['flip'] = False\n            lazyop['flip_direction'] = None\n            lazyop['interpolation'] = None\n            results['lazy'] = lazyop\n    else:\n        assert 'lazy' not in results, 'Use Fuse after lazy operations'\ndef _scale_size(size, scale):\n    \"\"\"Rescale a size by a ratio.\n    Args:\n        size (tuple[int]): (w, h).\n        scale (float): Scaling factor.\n    Returns:\n        tuple[int]: scaled size.\n    \"\"\"\n    w, h = size\n    return int(w * float(scale) + 0.5), int(h * float(scale) + 0.5)\ndef rescale_size(old_size, scale, return_scale=False):\n    \"\"\"Calculate the new size to be rescaled to.\n    Args:\n        old_size (tuple[int]): The old size (w, h) of image.\n        scale (float | tuple[int]): The scaling factor or maximum size.\n            If it is a float number, then the image will be rescaled by this\n            factor, else if it is a tuple of 2 integers, then the image will",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations_ava.py:65-96"
+    },
+    "5159": {
+        "file_id": 437,
+        "content": "This code defines functions for image augmentations in the AVA dataset pipeline. The \"_scale_size\" function scales a size by a ratio, while \"rescale_size\" calculates the new size to be rescaled based on an input scale factor or maximum size. The code also includes the initialization of crop parameters and flipping options for lazy operations in the results dictionary.",
+        "type": "comment"
+    },
+    "5160": {
+        "file_id": 437,
+        "content": "            be rescaled as large as possible within the scale.\n        return_scale (bool): Whether to return the scaling factor besides the\n            rescaled image size.\n    Returns:\n        tuple[int]: The new rescaled image size.\n    \"\"\"\n    w, h = old_size\n    if isinstance(scale, (float, int)):\n        if scale <= 0:\n            raise ValueError(f'Invalid scale {scale}, must be positive.')\n        scale_factor = scale\n    elif isinstance(scale, tuple):\n        max_long_edge = max(scale)\n        max_short_edge = min(scale)\n        scale_factor = min(max_long_edge / max(h, w),\n                           max_short_edge / min(h, w))\n    else:\n        raise TypeError(\n            f'Scale must be a number or tuple of int, but got {type(scale)}')\n    new_size = _scale_size((w, h), scale_factor)\n    if return_scale:\n        return new_size, scale_factor\n    else:\n        return new_size\ndef imresize(img,\n             size,\n             return_scale=False,\n             interpolation='bilinear',\n             out=None,",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations_ava.py:97-130"
+    },
+    "5161": {
+        "file_id": 437,
+        "content": "Function \"imresize\" resizes an image based on the provided scale factor. If the scale is a number, it's used directly as the scaling factor. If it's a tuple of ints, it sets max and min edge sizes for resizing. Returns new resized size or both size and scaling factor if requested.",
+        "type": "comment"
+    },
+    "5162": {
+        "file_id": 437,
+        "content": "             backend=None):\n    \"\"\"Resize image to a given size.  \"\"\"\n    h, w = img.shape[:2]\n    if backend is None:\n        backend = 'cv2'\n    if backend not in ['cv2', 'pillow']:\n        raise ValueError(f'backend: {backend} is not supported for resize.'\n                         f\"Supported backends are 'cv2', 'pillow'\")\n    if backend == 'pillow':\n        assert img.dtype == np.uint8, 'Pillow backend only support uint8 type'\n        pil_image = Image.fromarray(img)\n        pil_image = pil_image.resize(size, pillow_interp_codes[interpolation])\n        resized_img = np.array(pil_image)\n    else:\n        resized_img = cv2.resize(\n            img, size, dst=out, interpolation=cv2_interp_codes[interpolation])\n    if not return_scale:\n        return resized_img\n    else:\n        w_scale = size[0] / w\n        h_scale = size[1] / h\n        return resized_img, w_scale, h_scale\n@PIPELINES.register()\nclass EntityBoxRescale:\n    \"\"\"Rescale the entity box and proposals according to the image shape.\n    Required keys are \"proposals\", \"gt_bboxes\", added or modified keys are",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations_ava.py:131-160"
+    },
+    "5163": {
+        "file_id": 437,
+        "content": "This code defines a function for resizing an image to a given size. It supports two backends: 'cv2' and 'pillow'. If the backend is not specified, it defaults to 'cv2'. The function first gets the original image's height and width, checks if the backend is valid, handles unsupported backends, asserts the image type for 'pillow' backend, resizes the image using either OpenCV or Pillow library based on the backend, and finally returns the resized image along with scale factors if return_scale is True. The EntityBoxRescale class registers a pipeline to rescale entity boxes and proposals according to the image shape.",
+        "type": "comment"
+    },
+    "5164": {
+        "file_id": 437,
+        "content": "    \"gt_bboxes\". If original \"proposals\" is not None, \"proposals\" and\n    will be added or modified.\n    Args:\n        scale_factor (np.ndarray): The scale factor used entity_box rescaling.\n    \"\"\"\n    def __init__(self, scale_factor):\n        self.scale_factor = scale_factor\n    def __call__(self, results):\n        scale_factor = np.concatenate([self.scale_factor, self.scale_factor])\n        if 'gt_bboxes' in results:\n            gt_bboxes = results['gt_bboxes']\n            results['gt_bboxes'] = gt_bboxes * scale_factor\n        if 'proposals' in results:\n            proposals = results['proposals']\n            if proposals is not None:\n                assert proposals.shape[1] == 4, (\n                    'proposals shape should be in '\n                    f'(n, 4), but got {proposals.shape}')\n                results['proposals'] = proposals * scale_factor\n        return results\n    def __repr__(self):\n        return f'{self.__class__.__name__}(scale_factor={self.scale_factor})'\n@PIPELINES.register()\nclass EntityBoxCrop:",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations_ava.py:161-193"
+    },
+    "5165": {
+        "file_id": 437,
+        "content": "The code defines a class called EntityBoxCrop that scales the ground truth bounding boxes (gt_bboxes) and proposals, if present, by a given scale factor. It ensures that the number of columns in the proposals is 4. This class can be registered as a pipeline for video augmentation.",
+        "type": "comment"
+    },
+    "5166": {
+        "file_id": 437,
+        "content": "    \"\"\"Crop the entity boxes and proposals according to the cropped images.\n    Required keys are \"proposals\", \"gt_bboxes\", added or modified keys are\n    \"gt_bboxes\". If original \"proposals\" is not None, \"proposals\" will be\n    modified.\n    Args:\n        crop_bbox(np.ndarray | None): The bbox used to crop the original image.\n    \"\"\"\n    def __init__(self, crop_bbox):\n        self.crop_bbox = crop_bbox\n    def __call__(self, results):\n        proposals = results['proposals']\n        gt_bboxes = results['gt_bboxes']\n        if self.crop_bbox is None:\n            return results\n        x1, y1, x2, y2 = self.crop_bbox\n        img_w, img_h = x2 - x1, y2 - y1\n        assert gt_bboxes.shape[-1] == 4\n        gt_bboxes_ = gt_bboxes.copy()\n        gt_bboxes_[..., 0::2] = np.clip(gt_bboxes[..., 0::2] - x1, 0, img_w - 1)\n        gt_bboxes_[..., 1::2] = np.clip(gt_bboxes[..., 1::2] - y1, 0, img_h - 1)\n        results['gt_bboxes'] = gt_bboxes_\n        if proposals is not None:\n            assert proposals.shape[-1] == 4",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations_ava.py:194-224"
+    },
+    "5167": {
+        "file_id": 437,
+        "content": "This code initializes an object that crops the entity boxes and proposals according to the cropped images. The required keys are \"proposals\" and \"gt_bboxes\", while \"gt_bboxes\" is added or modified. If original \"proposals\" is not None, \"proposals\" will be modified. The crop_bbox argument specifies the bbox used to crop the original image.",
+        "type": "comment"
+    },
+    "5168": {
+        "file_id": 437,
+        "content": "            proposals_ = proposals.copy()\n            proposals_[..., 0::2] = np.clip(proposals[..., 0::2] - x1, 0,\n                                            img_w - 1)\n            proposals_[..., 1::2] = np.clip(proposals[..., 1::2] - y1, 0,\n                                            img_h - 1)\n            results['proposals'] = proposals_\n        return results\n    def __repr__(self):\n        return f'{self.__class__.__name__}(crop_bbox={self.crop_bbox})'\n@PIPELINES.register()\nclass EntityBoxFlip:\n    \"\"\"Flip the entity boxes and proposals with a probability.\n    Reverse the order of elements in the given bounding boxes and proposals\n    with a specific direction. The shape of them are preserved, but the\n    elements are reordered. Only the horizontal flip is supported (seems\n    vertical flipping makes no sense). Required keys are \"proposals\",\n    \"gt_bboxes\", added or modified keys are \"gt_bboxes\". If \"proposals\"\n    is not None, it will also be modified.\n    Args:\n        img_shape (tuple[int]): The img shape.",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations_ava.py:225-249"
+    },
+    "5169": {
+        "file_id": 437,
+        "content": "This code defines two classes, \"EntityBoxFlip\" and a nameless class. The nameless class performs cropping operations on proposals based on given coordinates (x1, y1). It also updates the results['proposals'] with the modified proposals. The EntityBoxFlip class flips the entity boxes and proposals horizontally with a certain probability. It adds or modifies keys \"gt_bboxes\" in the results dictionary. If \"proposals\" is not None, it will also modify them. The img_shape tuple represents the image shape.",
+        "type": "comment"
+    },
+    "5170": {
+        "file_id": 437,
+        "content": "    \"\"\"\n    def __init__(self, img_shape):\n        self.img_shape = img_shape\n    def __call__(self, results):\n        proposals = results['proposals']\n        gt_bboxes = results['gt_bboxes']\n        img_h, img_w = self.img_shape\n        assert gt_bboxes.shape[-1] == 4\n        gt_bboxes_ = gt_bboxes.copy()\n        gt_bboxes_[..., 0::4] = img_w - gt_bboxes[..., 2::4] - 1\n        gt_bboxes_[..., 2::4] = img_w - gt_bboxes[..., 0::4] - 1\n        if proposals is not None:\n            assert proposals.shape[-1] == 4\n            proposals_ = proposals.copy()\n            proposals_[..., 0::4] = img_w - proposals[..., 2::4] - 1\n            proposals_[..., 2::4] = img_w - proposals[..., 0::4] - 1\n        else:\n            proposals_ = None\n        results['proposals'] = proposals_\n        results['gt_bboxes'] = gt_bboxes_\n        return results\n    def __repr__(self):\n        repr_str = f'{self.__class__.__name__}(img_shape={self.img_shape})'\n        return repr_str\n@PIPELINES.register()\nclass Resize:\n    \"\"\"Resize images to a specific size.",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations_ava.py:250-284"
+    },
+    "5171": {
+        "file_id": 437,
+        "content": "This code defines a pipeline for resizing images to a specific size. It first initializes the pipeline with an image shape and then, in the __call__ method, it adjusts the ground truth bounding boxes and proposal bounding boxes by subtracting their width values from the total image width minus 1. If there are no proposals, it sets proposals_ to None. The __repr__ method provides a string representation of the pipeline.",
+        "type": "comment"
+    },
+    "5172": {
+        "file_id": 437,
+        "content": "    Required keys are \"imgs\", \"img_shape\", \"modality\", added or modified\n    keys are \"imgs\", \"img_shape\", \"keep_ratio\", \"scale_factor\", \"lazy\",\n    \"resize_size\". Required keys in \"lazy\" is None, added or modified key is\n    \"interpolation\".\n    Args:\n        scale (float | Tuple[int]): If keep_ratio is True, it serves as scaling\n            factor or maximum size:\n            If it is a float number, the image will be rescaled by this\n            factor, else if it is a tuple of 2 integers, the image will\n            be rescaled as large as possible within the scale.\n            Otherwise, it serves as (w, h) of output size.\n        keep_ratio (bool): If set to True, Images will be resized without\n            changing the aspect ratio. Otherwise, it will resize images to a\n            given size. Default: True.\n        interpolation (str): Algorithm used for interpolation:\n            \"nearest\" | \"bilinear\". Default: \"bilinear\".\n        lazy (bool): Determine whether to apply lazy operation. Default: False.",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations_ava.py:286-303"
+    },
+    "5173": {
+        "file_id": 437,
+        "content": "This code defines a function for image augmentation in PaddleVideo. The function takes arguments like scale, keep_ratio, interpolation, and lazy. If keep_ratio is True, it scales the image by the given factor or resizes to the maximum size specified by the tuple. It uses bilinear interpolation by default. Lazy operation can be determined if lazy argument is set to True.",
+        "type": "comment"
+    },
+    "5174": {
+        "file_id": 437,
+        "content": "    \"\"\"\n    def __init__(self,\n                 scale,\n                 keep_ratio=True,\n                 interpolation='bilinear',\n                 lazy=False):\n        if isinstance(scale, str):\n            scale = eval(scale)\n        if isinstance(scale, float):\n            if scale <= 0:\n                raise ValueError(f'Invalid scale {scale}, must be positive.')\n        elif isinstance(scale, tuple):\n            max_long_edge = max(scale)\n            max_short_edge = min(scale)\n            if max_short_edge == -1:\n                # assign np.inf to long edge for rescaling short edge later.\n                scale = (np.inf, max_long_edge)\n        else:\n            raise TypeError(\n                f'Scale must be float or tuple of int, but got {type(scale)}')\n        self.scale = scale\n        self.keep_ratio = keep_ratio\n        self.interpolation = interpolation\n        self.lazy = lazy\n    def __call__(self, results):\n        \"\"\"Performs the Resize augmentation.\n        Args:\n            results (dict): The resulting dict to be modified and passed",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations_ava.py:304-334"
+    },
+    "5175": {
+        "file_id": 437,
+        "content": "Initializes a resize augmentation object with scale, keeps ratio (True or False), interpolation method ('bilinear' default), and lazy flag (False).",
+        "type": "comment"
+    },
+    "5176": {
+        "file_id": 437,
+        "content": "                to the next transform in pipeline.\n        \"\"\"\n        _init_lazy_if_proper(results, self.lazy)\n        if 'scale_factor' not in results:\n            results['scale_factor'] = np.array([1, 1], dtype=np.float32)\n        img_h, img_w = results['img_shape']\n        if self.keep_ratio:\n            new_w, new_h = rescale_size((img_w, img_h), self.scale)\n        else:\n            new_w, new_h = self.scale\n        self.scale_factor = np.array([new_w / img_w, new_h / img_h],\n                                     dtype=np.float32)\n        results['img_shape'] = (new_h, new_w)\n        results['keep_ratio'] = self.keep_ratio\n        results['scale_factor'] = results['scale_factor'] * self.scale_factor\n        if not self.lazy:\n            if 'imgs' in results:\n                results['imgs'] = [\n                    imresize(\n                        img, (new_w, new_h), interpolation=self.interpolation)\n                    for img in results['imgs']\n                ]\n            if 'keypoint' in results:\n                results['keypoint'] = results['keypoint'] * self.scale_factor",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations_ava.py:335-363"
+    },
+    "5177": {
+        "file_id": 437,
+        "content": "This code resizes images and keypoints based on the 'scale_factor' or scale provided. If 'scale_factor' is not already in the results, it initializes it with a default value of [1, 1]. The code then calculates new image width (new_w) and height (new_h) based on the scale or keep_ratio setting. It updates 'img_shape', 'keep_ratio', and 'scale_factor' in the results dictionary, and if not lazy, it resizes images and keypoints accordingly using the imresize function.",
+        "type": "comment"
+    },
+    "5178": {
+        "file_id": 437,
+        "content": "        else:\n            lazyop = results['lazy']\n            if lazyop['flip']:\n                raise NotImplementedError('Put Flip at last for now')\n            lazyop['interpolation'] = self.interpolation\n        #if 'gt_bboxes' in results:\n        assert not self.lazy\n        entity_box_rescale = EntityBoxRescale(self.scale_factor)\n        results = entity_box_rescale(results)\n        return results\n    def __repr__(self):\n        repr_str = (f'{self.__class__.__name__}('\n                    f'scale={self.scale}, keep_ratio={self.keep_ratio}, '\n                    f'interpolation={self.interpolation}, '\n                    f'lazy={self.lazy})')\n        return repr_str\n@PIPELINES.register()\nclass RandomRescale:\n    \"\"\"Randomly resize images so that the short_edge is resized to a specific\n    size in a given range. The scale ratio is unchanged after resizing.\n    \"\"\"\n    def __init__(self, scale_range, interpolation='bilinear'):\n        scale_range = eval(scale_range)\n        self.scale_range = scale_range",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations_ava.py:364-393"
+    },
+    "5179": {
+        "file_id": 437,
+        "content": "This code defines a class RandomRescale that performs random rescaling on images, maintaining the aspect ratio. It takes in a range for the short edge size, and an optional interpolation method. The class also has a lazy attribute to control whether the transformation is applied lazily or not. The class also includes an EntityBoxRescale function to rescale bounding boxes. The code ends with registering RandomRescale as a pipeline module.",
+        "type": "comment"
+    },
+    "5180": {
+        "file_id": 437,
+        "content": "        assert len(scale_range) == 2\n        assert scale_range[0] < scale_range[1]\n        assert np.all([x > 0 for x in scale_range])\n        self.keep_ratio = True\n        self.interpolation = interpolation\n    def __call__(self, results):\n        \"\"\"Performs the Resize augmentation.\n        Args:\n            results (dict): The resulting dict to be modified and passed\n                to the next transform in pipeline.\n        \"\"\"\n        short_edge = np.random.randint(self.scale_range[0],\n                                       self.scale_range[1] + 1)\n        resize = Resize((-1, short_edge),\n                        keep_ratio=True,\n                        interpolation=self.interpolation,\n                        lazy=False)\n        results = resize(results)\n        results['short_edge'] = short_edge\n        return results\n    def __repr__(self):\n        scale_range = self.scale_range\n        repr_str = (f'{self.__class__.__name__}('\n                    f'scale_range=({scale_range[0]}, {scale_range[1]}), '",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations_ava.py:395-423"
+    },
+    "5181": {
+        "file_id": 437,
+        "content": "This code defines a Resize augmentation transform with random scaling range, keeps aspect ratio and applies specified interpolation. It also includes a __repr__ method to provide class name, scale range and short edge value for debugging purposes.",
+        "type": "comment"
+    },
+    "5182": {
+        "file_id": 437,
+        "content": "                    f'interpolation={self.interpolation})')\n        return repr_str\n@PIPELINES.register()\nclass Rescale:\n    \"\"\"resize images so that the short_edge is resized to a specific\n    size in a given range. The scale ratio is unchanged after resizing.\n    Required keys are \"imgs\", \"img_shape\", \"modality\", added or modified\n    keys are \"imgs\", \"img_shape\", \"keep_ratio\", \"scale_factor\", \"resize_size\",\n    \"short_edge\".\n    Args:\n        scale_range (tuple[int]): The range of short edge length. A closed\n            interval.\n        interpolation (str): Algorithm used for interpolation:\n            \"nearest\" | \"bilinear\". Default: \"bilinear\".\n    \"\"\"\n    def __init__(self, scale_range, interpolation='bilinear'):\n        scale_range = eval(scale_range)\n        self.scale_range = scale_range\n        self.keep_ratio = True\n        self.interpolation = interpolation\n    def __call__(self, results):\n        \"\"\"Performs the Resize augmentation.\n        Args:\n            results (dict): The resulting dict to be modified and passed",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations_ava.py:424-455"
+    },
+    "5183": {
+        "file_id": 437,
+        "content": "This code defines a Rescale augmentation class for image processing in the PaddleVideo framework. It resizes images so that the short edge length is within a specified range, while maintaining the aspect ratio. The interpolation method can be set to 'nearest' or 'bilinear'. This augmentation modifies the 'imgs', 'img_shape', 'keep_ratio', 'scale_factor', 'resize_size', and 'short_edge' keys in the results dictionary.",
+        "type": "comment"
+    },
+    "5184": {
+        "file_id": 437,
+        "content": "                to the next transform in pipeline.\n        \"\"\"\n        resize = Resize(\n            self.scale_range,\n            keep_ratio=True,\n            interpolation=self.interpolation,\n            lazy=False)\n        results = resize(results)\n        return results\n    def __repr__(self):\n        scale_range = self.scale_range\n        repr_str = (f'{self.__class__.__name__}('\n                    f'scale_range=({scale_range[0]}, {scale_range[1]}), '\n                    f'interpolation={self.interpolation})')\n        return repr_str\n@PIPELINES.register()\nclass RandomCrop_v2:\n    \"\"\"Vanilla square random crop that specifics the output size.\n    Required keys in results are \"imgs\" and \"img_shape\", added or\n    modified keys are \"imgs\", \"lazy\"; Required keys in \"lazy\" are \"flip\",\n    \"crop_bbox\", added or modified key is \"crop_bbox\".\n    Args:\n        size (int): The output size of the images.\n        lazy (bool): Determine whether to apply lazy operation. Default: False.\n    \"\"\"\n    def __init__(self, size, lazy=False):",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations_ava.py:456-487"
+    },
+    "5185": {
+        "file_id": 437,
+        "content": "This code defines a Resize transform and a RandomCrop_v2 class for image processing pipelines in PaddleVideo. The Resize transform scales images within a specified range and with optional interpolation, while the RandomCrop_v2 performs square random cropping on images to a specific output size.",
+        "type": "comment"
+    },
+    "5186": {
+        "file_id": 437,
+        "content": "        if not isinstance(size, int):\n            raise TypeError(f'Size must be an int, but got {type(size)}')\n        self.size = size\n        self.lazy = lazy\n    def __call__(self, results):\n        \"\"\"Performs the RandomCrop augmentation.\n        Args:\n            results (dict): The resulting dict to be modified and passed\n                to the next transform in pipeline.\n        \"\"\"\n        _init_lazy_if_proper(results, self.lazy)\n        img_h, img_w = results['img_shape']\n        assert self.size <= img_h and self.size <= img_w\n        y_offset = 0\n        x_offset = 0\n        if img_h > self.size:\n            y_offset = int(np.random.randint(0, img_h - self.size))\n        if img_w > self.size:\n            x_offset = int(np.random.randint(0, img_w - self.size))\n        if 'crop_quadruple' not in results:\n            results['crop_quadruple'] = np.array(\n                [0, 0, 1, 1],  # x, y, w, h\n                dtype=np.float32)\n        x_ratio, y_ratio = x_offset / img_w, y_offset / img_h\n        w_ratio, h_ratio = self.size / img_w, self.size / img_h",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations_ava.py:488-517"
+    },
+    "5187": {
+        "file_id": 437,
+        "content": "This code defines a class with an __init__ method that checks if the input 'size' is an integer, and a __call__ method to perform random cropping. The __call__ method takes a dictionary of results and performs random cropping based on the size attribute of the class instance. It asserts that the size is less than or equal to the image height and width, then randomly selects y and x offsets for cropping. If 'crop_quadruple' is not in the results dictionary, it adds a new entry with initial values. Finally, it calculates ratios for cropping based on the input size and image dimensions.",
+        "type": "comment"
+    },
+    "5188": {
+        "file_id": 437,
+        "content": "        old_crop_quadruple = results['crop_quadruple']\n        old_x_ratio, old_y_ratio = old_crop_quadruple[0], old_crop_quadruple[1]\n        old_w_ratio, old_h_ratio = old_crop_quadruple[2], old_crop_quadruple[3]\n        new_crop_quadruple = [\n            old_x_ratio + x_ratio * old_w_ratio,\n            old_y_ratio + y_ratio * old_h_ratio, w_ratio * old_w_ratio,\n            h_ratio * old_x_ratio\n        ]\n        results['crop_quadruple'] = np.array(\n            new_crop_quadruple, dtype=np.float32)\n        new_h, new_w = self.size, self.size\n        results['crop_bbox'] = np.array(\n            [x_offset, y_offset, x_offset + new_w, y_offset + new_h])\n        results['img_shape'] = (new_h, new_w)\n        if not self.lazy:\n            results['imgs'] = [\n                img[y_offset:y_offset + new_h, x_offset:x_offset + new_w]\n                for img in results['imgs']\n            ]\n        else:\n            lazyop = results['lazy']\n            if lazyop['flip']:\n                raise NotImplementedError('Put Flip at last for now')",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations_ava.py:519-544"
+    },
+    "5189": {
+        "file_id": 437,
+        "content": "This code segment is adjusting the crop quadruple, calculating a new crop bounding box, and updating the image shape based on provided offsets. It also handles lazy loading if enabled.",
+        "type": "comment"
+    },
+    "5190": {
+        "file_id": 437,
+        "content": "            # record crop_bbox in lazyop dict to ensure only crop once in Fuse\n            lazy_left, lazy_top, lazy_right, lazy_bottom = lazyop['crop_bbox']\n            left = x_offset * (lazy_right - lazy_left) / img_w\n            right = (x_offset + new_w) * (lazy_right - lazy_left) / img_w\n            top = y_offset * (lazy_bottom - lazy_top) / img_h\n            bottom = (y_offset + new_h) * (lazy_bottom - lazy_top) / img_h\n            lazyop['crop_bbox'] = np.array(\n                [(lazy_left + left), (lazy_top + top), (lazy_left + right),\n                 (lazy_top + bottom)],\n                dtype=np.float32)\n        # Process entity boxes\n        if 'gt_bboxes' in results:\n            assert not self.lazy\n            entity_box_crop = EntityBoxCrop(results['crop_bbox'])\n            results = entity_box_crop(results)\n        return results\n    def __repr__(self):\n        repr_str = (f'{self.__class__.__name__}(size={self.size}, '\n                    f'lazy={self.lazy})')\n        return repr_str\ndef imflip_(img, direction='horizontal'):",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations_ava.py:546-571"
+    },
+    "5191": {
+        "file_id": 437,
+        "content": "This code section is responsible for applying augmentations to video frames, specifically crop and flip operations. It takes input parameters such as image size, whether it should be applied lazily or not, and the direction of flipping (if applicable). The code adjusts the crop region based on the specified offset values and stores them in the 'crop_bbox' field of the lazy operation dictionary. Additionally, if there are entity boxes present, they will also be processed according to the applied crop and flip operations.",
+        "type": "comment"
+    },
+    "5192": {
+        "file_id": 437,
+        "content": "    \"\"\"Inplace flip an image horizontally or vertically.\n    Args:\n        img (ndarray): Image to be flipped.\n        direction (str): The flip direction, either \"horizontal\" or\n            \"vertical\" or \"diagonal\".\n    Returns:\n        ndarray: The flipped image (inplace).\n    \"\"\"\n    assert direction in ['horizontal', 'vertical', 'diagonal']\n    if direction == 'horizontal':\n        return cv2.flip(img, 1, img)\n    elif direction == 'vertical':\n        return cv2.flip(img, 0, img)\n    else:\n        return cv2.flip(img, -1, img)\ndef iminvert(img):\n    \"\"\"Invert (negate) an image.\n    Args:\n        img (ndarray): Image to be inverted.\n    Returns:\n        ndarray: The inverted image.\n    \"\"\"\n    return np.full_like(img, 255) - img\n@PIPELINES.register()\nclass Flip:\n    \"\"\"Flip the input images with a probability.\n    Reverse the order of elements in the given imgs with a specific direction.\n    The shape of the imgs is preserved, but the elements are reordered.\n    Required keys are \"imgs\", \"img_shape\", \"modality\", added or modified",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations_ava.py:572-609"
+    },
+    "5193": {
+        "file_id": 437,
+        "content": "The provided code contains three functions: `inplace_flip`, `iminvert`, and a pipeline class called `Flip`. \n\n`inplace_flip` takes an image (`ndarray`) and the direction for flipping (horizontal, vertical or diagonal), asserts that the direction is valid, and returns the flipped image in-place. If the direction is horizontal, it uses `cv2.flip()` with parameter 1 to flip horizontally; if the direction is vertical, it uses `cv2.flip()` with parameter 0 to flip vertically; if the direction is diagonal, it uses `cv2.flip()` with parameter -1 for diagonal flipping.\n\n`iminvert` takes an image (`ndarray`) and returns its negative (inverted) version by subtracting the original image from a numpy array of full value 255 (the maximum possible value for an 8-bit image). This effectively reverses all pixel intensities in the image.\n\nThe `Flip` class is a pipeline module that flips the input images with a certain probability. It requires keys \"imgs\", \"img_shape\", and \"modality\" (although it does not modify them) and adds no new keys.",
+        "type": "comment"
+    },
+    "5194": {
+        "file_id": 437,
+        "content": "    keys are \"imgs\", \"lazy\" and \"flip_direction\". Required keys in \"lazy\" is\n    None, added or modified key are \"flip\" and \"flip_direction\". The Flip\n    augmentation should be placed after any cropping / reshaping augmentations,\n    to make sure crop_quadruple is calculated properly.\n    Args:\n        flip_ratio (float): Probability of implementing flip. Default: 0.5.\n        direction (str): Flip imgs horizontally or vertically. Options are\n            \"horizontal\" | \"vertical\". Default: \"horizontal\".\n        lazy (bool): Determine whether to apply lazy operation. Default: False.\n    \"\"\"\n    _directions = ['horizontal', 'vertical']\n    def __init__(self, flip_ratio=0.5, direction='horizontal', lazy=False):\n        if direction not in self._directions:\n            raise ValueError(f'Direction {direction} is not supported. '\n                             f'Currently support ones are {self._directions}')\n        self.flip_ratio = flip_ratio\n        self.direction = direction\n        self.lazy = lazy\n    def __call__(self, results):",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations_ava.py:610-631"
+    },
+    "5195": {
+        "file_id": 437,
+        "content": "This code defines a Flip augmentation class for image processing in PaddleVideo. It takes flip ratio, direction (horizontal or vertical), and lazy operation as parameters. The flip_ratio determines the probability of applying the flip transformation, while direction specifies whether to flip horizontally or vertically. If the 'lazy' parameter is True, the transformation will be applied lazily. This augmentation should be placed after cropping/reshaping transformations for proper crop_quadruple calculation.",
+        "type": "comment"
+    },
+    "5196": {
+        "file_id": 437,
+        "content": "        \"\"\"Performs the Flip augmentation.\n        Args:\n            results (dict): The resulting dict to be modified and passed\n                to the next transform in pipeline.\n        \"\"\"\n        _init_lazy_if_proper(results, self.lazy)\n        flip = np.random.rand() < self.flip_ratio\n        results['flip'] = flip\n        results['flip_direction'] = self.direction\n        if not self.lazy:\n            if flip:\n                for i, img in enumerate(results['imgs']):\n                    imflip_(img, self.direction)\n                lt = len(results['imgs'])\n            else:\n                results['imgs'] = list(results['imgs'])\n        else:\n            lazyop = results['lazy']\n            if lazyop['flip']:\n                raise NotImplementedError('Use one Flip please')\n            lazyop['flip'] = flip\n            lazyop['flip_direction'] = self.direction\n        if 'gt_bboxes' in results and flip:\n            assert not self.lazy and self.direction == 'horizontal'\n            entity_box_flip = EntityBoxFlip(results['img_shape'])",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations_ava.py:632-660"
+    },
+    "5197": {
+        "file_id": 437,
+        "content": "The code snippet performs a Flip augmentation on images, randomly flipping them horizontally based on a given flip ratio. It also sets the 'flip' and 'flip_direction' keys in the results dictionary. If the 'lazy' option is not used (self.lazy), it iterates through the images, applying the flip transformation if necessary. It also handles 'gt_bboxes' if they exist in the results dictionary, ensuring horizontal flips are applied correctly without any issues.",
+        "type": "comment"
+    },
+    "5198": {
+        "file_id": 437,
+        "content": "            results = entity_box_flip(results)\n        return results\n    def __repr__(self):\n        repr_str = (\n            f'{self.__class__.__name__}('\n            f'flip_ratio={self.flip_ratio}, direction={self.direction}, '\n            f'lazy={self.lazy})')\n        return repr_str\ndef imnormalize_(img, mean, std, to_rgb=True):\n    \"\"\"Inplace normalize an image with mean and std.\n    Args:\n        img (ndarray): Image to be normalized.\n        mean (ndarray): The mean to be used for normalize.\n        std (ndarray): The std to be used for normalize.\n        to_rgb (bool): Whether to convert to rgb.\n    Returns:\n        ndarray: The normalized image.\n    \"\"\"\n    # cv2 inplace normalization does not accept uint8\n    assert img.dtype != np.uint8\n    mean = np.float64(mean.reshape(1, -1))\n    stdinv = 1 / np.float64(std.reshape(1, -1))\n    if to_rgb:\n        cv2.cvtColor(img, cv2.COLOR_BGR2RGB, img)  # inplace\n    cv2.subtract(img, mean, img)  # inplace\n    cv2.multiply(img, stdinv, img)  # inplace\n    return img",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations_ava.py:661-693"
+    },
+    "5199": {
+        "file_id": 437,
+        "content": "This code contains a class for image augmentation, including flip ratio and direction, with a method to normalize an image using mean and std values. It also includes an inplace normalization function that converts BGR to RGB if necessary. The `__repr__` method returns a string representation of the class attributes.",
+        "type": "comment"
+    }
+}

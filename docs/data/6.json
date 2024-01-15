@@ -1,0 +1,541 @@
+{
+    "600": {
+        "file_id": 55,
+        "content": "            seq_ref_frame_embedding = paddle.transpose(seq_ref_frame_embedding,\n                                                       [1, 2, 0])\n            seq_ref_scribble_label = paddle.transpose(\n                scale_ref_scribble_label[n], [1, 2, 0])\n            nn_features_n = local_previous_frame_nearest_neighbor_features_per_object(\n                prev_frame_embedding=seq_ref_frame_embedding,\n                query_embedding=seq_ref_frame_embedding,\n                prev_frame_labels=seq_ref_scribble_label,\n                gt_ids=gt_id,\n                max_distance=self.cfg['model_max_local_distance'])\n            #######\n            ######################Global map update\n            if seq_names[n] not in global_map_tmp_dic:\n                global_map_tmp_dic[seq_names[n]] = paddle.ones_like(\n                    nn_features_n).tile([1000, 1, 1, 1, 1])\n            nn_features_n_ = paddle.where(\n                nn_features_n <=\n                global_map_tmp_dic[seq_names[n]][frame_num[n]].unsqueeze(0),",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/heads/IntVOS.py:814-832"
+    },
+    "601": {
+        "file_id": 55,
+        "content": "Updating the global map with the nearest neighbor features for each sequence, only if it's not already in the global_map_tmp_dic.",
+        "type": "comment"
+    },
+    "602": {
+        "file_id": 55,
+        "content": "                nn_features_n,\n                global_map_tmp_dic[seq_names[n]][frame_num[n]].unsqueeze(0))\n            ###\n            ###\n            #             print('detach 3')\n            # nn_features_n_ = nn_features_n_.detach()\n            global_map_tmp_dic[seq_names[n]][\n                frame_num[n]] = nn_features_n_.detach()[0]\n            ##################Local map update\n            if local_map_dics is not None:\n                local_map_tmp_dic, local_map_dist_dic = local_map_dics\n                if seq_names[n] not in local_map_dist_dic:\n                    local_map_dist_dic[seq_names[n]] = paddle.zeros([1000, 9])\n                if seq_names[n] not in local_map_tmp_dic:\n                    local_map_tmp_dic[seq_names[n]] = paddle.ones_like(\n                        nn_features_n).unsqueeze(0).tile([1000, 9, 1, 1, 1, 1])\n                local_map_dist_dic[seq_names[n]][frame_num[n]][interaction_num\n                                                               - 1] = 0\n                local_map_dics = (local_map_tmp_dic, local_map_dist_dic)",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/heads/IntVOS.py:833-854"
+    },
+    "603": {
+        "file_id": 55,
+        "content": "This code segment appears to be updating the global and local map dictionaries in a video processing model. The global_map_tmp_dic is being updated with nn_features_n_.detach()[0] at the current frame. Additionally, if the sequence name exists in the local_map_dist_dic or local_map_tmp_dic it is being modified accordingly.",
+        "type": "comment"
+    },
+    "604": {
+        "file_id": 55,
+        "content": "            ##################\n            to_cat_current_frame_embedding = ref_frame_embedding[n].unsqueeze(\n                0).tile((gt_id.shape[0], 1, 1, 1))\n            to_cat_nn_feature_n = nn_features_n.squeeze(0).transpose(\n                [2, 3, 0, 1])\n            to_cat_scribble_mask_to_cat = (\n                float_(seq_ref_scribble_label) == float_(gt_id)\n            )  # float comparision?\n            to_cat_scribble_mask_to_cat = float_(\n                to_cat_scribble_mask_to_cat.unsqueeze(-1).transpose(\n                    [2, 3, 0, 1]))\n            if not first_inter:\n                seq_prev_round_label = scale_prev_round_label[n].transpose(\n                    [1, 2, 0])\n                to_cat_prev_round_to_cat = (\n                    float_(seq_prev_round_label) == float_(gt_id)\n                )  # float comparision?\n                to_cat_prev_round_to_cat = float_(\n                    to_cat_prev_round_to_cat.unsqueeze(-1).transpose(\n                        [2, 3, 0, 1]))\n            else:",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/heads/IntVOS.py:856-878"
+    },
+    "605": {
+        "file_id": 55,
+        "content": "This code calculates the current frame embedding and nn_feature_n for each object instance in the scene. It then creates a scribble mask for each object and, if not the first iteration, also creates a previous round mask. The code uses transpose and unsqueeze functions for tensor manipulation and float comparisons to create binary masks.",
+        "type": "comment"
+    },
+    "606": {
+        "file_id": 55,
+        "content": "                to_cat_prev_round_to_cat = paddle.zeros_like(\n                    to_cat_scribble_mask_to_cat)\n                to_cat_prev_round_to_cat[0] = 1.\n            to_cat = paddle.concat(\n                (to_cat_current_frame_embedding, to_cat_scribble_mask_to_cat,\n                 to_cat_prev_round_to_cat), 1)\n            pred_ = self.inter_seghead(to_cat)\n            pred_ = pred_.transpose([1, 0, 2, 3])\n            dic_tmp[seq_names[n]] = pred_\n        if local_map_dics is None:\n            return dic_tmp\n        else:\n            return dic_tmp, local_map_dics",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/heads/IntVOS.py:879-893"
+    },
+    "607": {
+        "file_id": 55,
+        "content": "In this code, a concatenation of current frame embedding, scribble mask, and previous round information is passed to inter_seghead for segmentation prediction. The predictions are then transposed before being added to dic_tmp for further processing. If local_map_dics is None, the function returns dic_tmp; otherwise, it returns both dic_tmp and local_map_dics.",
+        "type": "comment"
+    },
+    "608": {
+        "file_id": 56,
+        "content": "/applications/EIVideo/EIVideo/paddlevideo/modeling/heads/__init__.py",
+        "type": "filepath"
+    },
+    "609": {
+        "file_id": 56,
+        "content": "Copyright notice and license information for the module. Imports IntVOS from the same directory and adds it to __all__.",
+        "type": "summary"
+    },
+    "610": {
+        "file_id": 56,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nfrom .IntVOS import IntVOS\n__all__ = ['IntVOS'\n]",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/heads/__init__.py:1-17"
+    },
+    "611": {
+        "file_id": 56,
+        "content": "Copyright notice and license information for the module. Imports IntVOS from the same directory and adds it to __all__.",
+        "type": "comment"
+    },
+    "612": {
+        "file_id": 57,
+        "content": "/applications/EIVideo/EIVideo/paddlevideo/modeling/registry.py",
+        "type": "filepath"
+    },
+    "613": {
+        "file_id": 57,
+        "content": "The \"registry.py\" file in PaddleVideo's EIVideo application defines Registry classes for components of the video processing pipeline, and organizes them into four registries for different functionalities: bbox_coder, estimator, multimodal, and segment.",
+        "type": "summary"
+    },
+    "614": {
+        "file_id": 57,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nfrom ..utils import Registry\nBACKBONES = Registry('backbone')\nHEADS = Registry('head')\nRECOGNIZERS = Registry('recognizer')\nLOCALIZERS = Registry('localizer')\nPARTITIONERS = Registry('partitioner')\nSEGMENT = Registry('segmentation')\nLOSSES = Registry('loss')\nROI_EXTRACTORS = Registry('roi_extractor')\nDETECTORS = Registry('detectors')\nBBOX_ASSIGNERS = Registry('bbox_assigner')\nBBOX_SAMPLERS = Registry('bbox_sampler')",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/registry.py:1-27"
+    },
+    "615": {
+        "file_id": 57,
+        "content": "The code snippet is from the \"registry.py\" file in PaddleVideo's EIVideo application. It defines several Registry classes, each representing a different component of the video processing pipeline: BACKBONES, HEADS, RECOGNIZERS, LOCALIZERS, PARTITIONERS, SEGMENT, LOSSES, ROI_EXTRACTORS, DETECTORS, BBOX_ASSIGNERS, and BBOX_SAMPLERS. These Registry classes will be used to register and manage different instances of these components in the video processing pipeline.",
+        "type": "comment"
+    },
+    "616": {
+        "file_id": 57,
+        "content": "BBOX_CODERS = Registry('bbox_coder')\nESTIMATORS = Registry('estimator')\nMULTIMODAL = Registry('multimodal')\nSEGMENT = Registry('segment')",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/registry.py:28-31"
+    },
+    "617": {
+        "file_id": 57,
+        "content": "This code defines four registries for different functionalities: bbox_coder, estimator, multimodal, and segment. These registries will be used to organize and manage different types of models or algorithms in the codebase.",
+        "type": "comment"
+    },
+    "618": {
+        "file_id": 58,
+        "content": "/applications/EIVideo/EIVideo/paddlevideo/modeling/weight_init.py",
+        "type": "filepath"
+    },
+    "619": {
+        "file_id": 58,
+        "content": "This code initializes weights for a PaddlePaddle layer with options for customization and truncated normal distribution, offering proper initialization for deep learning models using normal distribution and PaddlePaddle's Normal initializer.",
+        "type": "summary"
+    },
+    "620": {
+        "file_id": 58,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport math\nimport paddle\nimport paddle.nn.initializer as init\nimport numpy as np\nfrom scipy import special\ndef weight_init_(layer,\n                 func,\n                 weight_name=None,\n                 bias_name=None,\n                 bias_value=0.0,\n                 **kwargs):\n    \"\"\"\n    In-place params init function.\n    Usage:\n    .. code-block:: python\n        import paddle\n        import numpy as np\n        data = np.ones([3, 4], dtype='float32')",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/weight_init.py:1-36"
+    },
+    "621": {
+        "file_id": 58,
+        "content": "The code is a function for initializing the weights of a given layer using different functions. It supports in-place parameter initialization and can be used with PaddlePaddle framework. The function accepts various arguments to customize the weight initialization process.",
+        "type": "comment"
+    },
+    "622": {
+        "file_id": 58,
+        "content": "        linear = paddle.nn.Linear(4, 4)\n        input = paddle.to_tensor(data)\n        print(linear.weight)\n        linear(input)\n        weight_init_(linear, 'Normal', 'fc_w0', 'fc_b0', std=0.01, mean=0.1)\n        print(linear.weight)\n    \"\"\"\n    if hasattr(layer, 'weight') and layer.weight is not None:\n        getattr(init, func)(**kwargs)(layer.weight)\n        if weight_name is not None:\n            # override weight name\n            layer.weight.name = weight_name\n    if hasattr(layer, 'bias') and layer.bias is not None:\n        init.Constant(bias_value)(layer.bias)\n        if bias_name is not None:\n            # override bias name\n            layer.bias.name = bias_name\ndef _no_grad_trunc_normal_(tensor, mean, std, a, b):\n    def norm_cdf(x):\n        # Computes standard normal cumulative distribution function\n        return (1. + math.erf(x / math.sqrt(2.))) / 2.\n    if (mean < a - 2 * std) or (mean > b + 2 * std):\n        print(\"mean is more than 2 std from [a, b] in nn.init.trunc_normal_. \"\n              \"The distribution of values may be incorrect.\")",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/weight_init.py:37-66"
+    },
+    "623": {
+        "file_id": 58,
+        "content": "Code initializes a linear layer, prints its weight, applies weight initialization with normal distribution, and prints the weight again. The _no_grad_trunc_normal_ function sets tensor values to be truncated normal with specified mean, std, a, and b parameters.",
+        "type": "comment"
+    },
+    "624": {
+        "file_id": 58,
+        "content": "    with paddle.no_grad():\n        # Values are generated by using a truncated uniform distribution and\n        # then using the inverse CDF for the normal distribution.\n        # Get upper and lower cdf values\n        l = norm_cdf((a - mean) / std)\n        u = norm_cdf((b - mean) / std)\n        # Uniformly fill tensor with values from [l, u], then translate to [2l-1, 2u-1].\n        tmp = np.random.uniform(2 * l - 1, 2 * u - 1,\n                                size=list(tensor.shape)).astype(np.float32)\n        # Use inverse cdf transform for normal distribution to get truncated\n        # standard normal\n        tmp = special.erfinv(tmp)\n        # Transform to proper mean, std\n        tmp *= (std * math.sqrt(2.0))\n        tmp += mean\n        # Clamp to ensure it's in the proper range\n        tmp = np.clip(tmp, a, b)\n        tensor.set_value(paddle.to_tensor(tmp))\n        return tensor\ndef _calculate_fan_in_and_fan_out(tensor):\n    dimensions = tensor.dim()\n    if dimensions < 2:\n        raise ValueError(\n            \"Fan in and fan out can not be computed for tensor with fewer than 2 dimensions\"",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/weight_init.py:68-98"
+    },
+    "625": {
+        "file_id": 58,
+        "content": "This code initializes the weights of a tensor by generating values from a truncated normal distribution, with the lower and upper bounds defined by 'a' and 'b'. It then transforms these values to ensure they are within the desired range, mean, and standard deviation. The resulting tensor is set as the new value for the original tensor. This process ensures proper initialization for deep learning models.",
+        "type": "comment"
+    },
+    "626": {
+        "file_id": 58,
+        "content": "        )\n    num_input_fmaps = tensor.shape[1]\n    num_output_fmaps = tensor.shape[0]\n    receptive_field_size = 1\n    if tensor.dim() > 2:\n        receptive_field_size = tensor[0][0].numel()\n    fan_in = num_input_fmaps * receptive_field_size\n    fan_out = num_output_fmaps * receptive_field_size\n    return fan_in, fan_out\ndef trunc_normal_(tensor, mean=0., std=1., a=-2., b=2.):\n    return _no_grad_trunc_normal_(tensor, mean, std, a, b)\ndef kaiming_normal_(tensor, a=0., mode='fan_in', nonlinearity='leaky_relu'):\n    def _calculate_correct_fan(tensor, mode):\n        mode = mode.lower()\n        valid_modes = ['fan_in', 'fan_out']\n        if mode not in valid_modes:\n            raise ValueError(\n                \"Mode {} not supported, please use one of {}\".format(\n                    mode, valid_modes))\n        fan_in, fan_out = _calculate_fan_in_and_fan_out(tensor)\n        return fan_in if mode == 'fan_in' else fan_out\n    def calculate_gain(nonlinearity, param=None):\n        linear_fns = [\n            'linear', 'conv1d', 'conv2d', 'conv3d', 'conv_transpose1d',",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/weight_init.py:99-130"
+    },
+    "627": {
+        "file_id": 58,
+        "content": "The code defines a function for initializing the weight of a neural network. It first calculates the fan-in and fan-out based on the shape and dimensions of the tensor. Then, it provides options to initialize weights with truncated normal or Kaiming normal distributions. The trunc_normal_ and kaiming_normal_ functions are also defined to handle different initialization methods with optional parameters for mean, std, a, b, mode, and nonlinearity.",
+        "type": "comment"
+    },
+    "628": {
+        "file_id": 58,
+        "content": "            'conv_transpose2d', 'conv_transpose3d'\n        ]\n        if nonlinearity in linear_fns or nonlinearity == 'sigmoid':\n            return 1\n        elif nonlinearity == 'tanh':\n            return 5.0 / 3\n        elif nonlinearity == 'relu':\n            return math.sqrt(2.0)\n        elif nonlinearity == 'leaky_relu':\n            if param is None:\n                negative_slope = 0.01\n            elif not isinstance(param, bool) and isinstance(\n                    param, int) or isinstance(param, float):\n                negative_slope = param\n            else:\n                raise ValueError(\n                    \"negative_slope {} not a valid number\".format(param))\n            return math.sqrt(2.0 / (1 + negative_slope**2))\n        else:\n            raise ValueError(\n                \"Unsupported nonlinearity {}\".format(nonlinearity))\n    fan = _calculate_correct_fan(tensor, mode)\n    gain = calculate_gain(nonlinearity, a)\n    std = gain / math.sqrt(fan)\n    with paddle.no_grad():\n        paddle.nn.initializer.Normal(0, std)(tensor)",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/weight_init.py:131-157"
+    },
+    "629": {
+        "file_id": 58,
+        "content": "This function initializes the weights of a tensor with a normal distribution. It checks the type of nonlinearity function and returns an appropriate gain factor, then calculates the standard deviation for weight initialization using fan inversion formula. The final step is to initialize the tensor with Normal initializer from PaddlePaddle library.",
+        "type": "comment"
+    },
+    "630": {
+        "file_id": 58,
+        "content": "        return tensor",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/weight_init.py:158-158"
+    },
+    "631": {
+        "file_id": 58,
+        "content": "Initializing weights for a neural network model.\nThis function returns the initialized tensor with random values.",
+        "type": "comment"
+    },
+    "632": {
+        "file_id": 59,
+        "content": "/applications/EIVideo/EIVideo/paddlevideo/tasks/__init__.py",
+        "type": "filepath"
+    },
+    "633": {
+        "file_id": 59,
+        "content": "This code snippet is importing the \"test_model\" function from the \"test.py\" module in the same directory and adding it to the __all__ list. The text at the beginning of the file contains license information and copyright notice.",
+        "type": "summary"
+    },
+    "634": {
+        "file_id": 59,
+        "content": "# copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nfrom .test import test_model\n__all__ = [\n    'test_model',\n]",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/tasks/__init__.py:1-19"
+    },
+    "635": {
+        "file_id": 59,
+        "content": "This code snippet is importing the \"test_model\" function from the \"test.py\" module in the same directory and adding it to the __all__ list. The text at the beginning of the file contains license information and copyright notice.",
+        "type": "comment"
+    },
+    "636": {
+        "file_id": 60,
+        "content": "/applications/EIVideo/EIVideo/paddlevideo/tasks/test.py",
+        "type": "filepath"
+    },
+    "637": {
+        "file_id": 60,
+        "content": "This code imports libraries and defines a test_model function for testing a model without gradient calculation. It sets configuration, updates model's test_step function with updated parameters, and performs multi-card testing.",
+        "type": "summary"
+    },
+    "638": {
+        "file_id": 60,
+        "content": "# copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport paddle\nfrom EIVideo.paddlevideo.utils import get_logger, load\nfrom ..loader.builder import build_dataloader, build_dataset\nfrom ..metrics import build_metric\nfrom ..modeling.builder import build_model\nfrom ..modeling.framework import Manet\nlogger = get_logger(\"paddlevideo\")\n@paddle.no_grad()\ndef test_model(cfg, weights, parallel=True):\n    \"\"\"Test model entry\n    Args:\n        cfg (dict): configuration.\n        weights (str): weights path to load.",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/tasks/test.py:1-31"
+    },
+    "639": {
+        "file_id": 60,
+        "content": "This code imports necessary libraries and functions for testing a model. It defines a function called test_model that takes configuration (cfg), weights path (weights), and parallel flag as arguments. The function performs model testing without gradient calculation (paddle.no_grad()) to save computation resources.",
+        "type": "comment"
+    },
+    "640": {
+        "file_id": 60,
+        "content": "        parallel (bool): Whether to do multi-cards testing. Default: True.\n    \"\"\"\n    if cfg.MODEL.framework == \"Manet\":\n        cfg_helper = {\"knns\": 1, \"is_save_image\": True}\n        cfg.update(cfg_helper)\n        final = Manet().test_step(**cfg, weights=weights, parallel=False)\n        return final",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/tasks/test.py:32-39"
+    },
+    "641": {
+        "file_id": 60,
+        "content": "This code sets the configuration for multi-card testing and then calls the Manet model's test_step function with updated configuration, weights, and parallel set to False.",
+        "type": "comment"
+    },
+    "642": {
+        "file_id": 61,
+        "content": "/applications/EIVideo/EIVideo/paddlevideo/utils/__init__.py",
+        "type": "filepath"
+    },
+    "643": {
+        "file_id": 61,
+        "content": "This code imports various functions and classes from different modules within the PaddleVideo library. It also sets up logger and profiler functionality, provides a build function for creating objects, and handles saving and loading data.",
+        "type": "summary"
+    },
+    "644": {
+        "file_id": 61,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nfrom .registry import Registry\nfrom .build_utils import build\nfrom .config import *\nfrom .logger import setup_logger, coloring, get_logger\nfrom .record import AverageMeter, build_record, log_batch, log_epoch\nfrom .dist_utils import get_dist_info, main_only\nfrom .save_load import save, load, load_ckpt, mkdir\nfrom .precise_bn import do_preciseBN\nfrom .profiler import add_profiler_step\n__all__ = ['Registry', 'build']",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/__init__.py:1-24"
+    },
+    "645": {
+        "file_id": 61,
+        "content": "This code imports various functions and classes from different modules within the PaddleVideo library. It also sets up logger and profiler functionality, provides a build function for creating objects, and handles saving and loading data.",
+        "type": "comment"
+    },
+    "646": {
+        "file_id": 62,
+        "content": "/applications/EIVideo/EIVideo/paddlevideo/utils/build_utils.py",
+        "type": "filepath"
+    },
+    "647": {
+        "file_id": 62,
+        "content": "The \"build\" function takes a config dictionary and registry, constructs an object from the configuration, checks for required keys, retrieves class from the registry, and returns the instance.",
+        "type": "summary"
+    },
+    "648": {
+        "file_id": 62,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\ndef build(cfg, registry, key='name'):\n    \"\"\"Build a module from config dict.\n    Args:\n        cfg (dict): Config dict. It should at least contain the key.\n        registry (XXX): The registry to search the type from.\n        key (str): the key.\n    Returns:\n        obj: The constructed object.\n    \"\"\"\n    assert isinstance(cfg, dict) and key in cfg\n    cfg_copy = cfg.copy()\n    obj_type = cfg_copy.pop(key)\n    obj_cls = registry.get(obj_type)",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/build_utils.py:1-31"
+    },
+    "649": {
+        "file_id": 62,
+        "content": "This code defines a function named \"build\" that takes a config dictionary and a registry, builds an object from the given configuration dictionary, and returns it. The function asserts that the input is a valid dictionary and checks if the required key exists. It then retrieves the object type from the dictionary and gets the corresponding class from the registry before returning the constructed object.",
+        "type": "comment"
+    },
+    "650": {
+        "file_id": 62,
+        "content": "    if obj_cls is None:\n        raise KeyError('{} is not in the {} registry'.format(\n                obj_type, registry.name))\n    return obj_cls(**cfg_copy)",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/build_utils.py:32-35"
+    },
+    "651": {
+        "file_id": 62,
+        "content": "Checks if an object class is provided, raises a KeyError if not found in the registry, and returns an instance of the found class with provided configuration.",
+        "type": "comment"
+    },
+    "652": {
+        "file_id": 63,
+        "content": "/applications/EIVideo/EIVideo/paddlevideo/utils/config.py",
+        "type": "filepath"
+    },
+    "653": {
+        "file_id": 63,
+        "content": "The code imports libraries, sets up logger, and defines AttrDict class for config files. It includes functions to parse, print, visualize, check, and replace configurations using 'override' function. The code parses a config file, applies overrides, checks if the input option is a string, separates key-value pairs, splits keys by dots, calls `print_config()` and `check_config()`, and returns the updated config object.",
+        "type": "summary"
+    },
+    "654": {
+        "file_id": 63,
+        "content": "# copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport os\nimport yaml\nfrom EIVideo.paddlevideo.utils.logger import coloring, setup_logger\n__all__ = ['get_config']\nlogger = setup_logger(\"./\", name=\"paddlevideo\", level=\"INFO\")\nclass AttrDict(dict):\n    def __getattr__(self, key):\n        return self[key]\n    def __setattr__(self, key, value):\n        if key in self.__dict__:\n            self.__dict__[key] = value\n        else:\n            self[key] = value\ndef create_attr_dict(yaml_config):",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/config.py:1-34"
+    },
+    "655": {
+        "file_id": 63,
+        "content": "This code block is importing necessary libraries, setting up logger, and defining an AttrDict class for handling config files. It also defines a function create_attr_dict that takes in a yaml configuration file.",
+        "type": "comment"
+    },
+    "656": {
+        "file_id": 63,
+        "content": "    from ast import literal_eval\n    for key, value in yaml_config.items():\n        if type(value) is dict:\n            yaml_config[key] = value = AttrDict(value)\n        if isinstance(value, str):\n            try:\n                value = literal_eval(value)\n            except BaseException:\n                pass\n        if isinstance(value, AttrDict):\n            create_attr_dict(yaml_config[key])\n        else:\n            yaml_config[key] = value\ndef parse_config(cfg_file):\n    \"\"\"Load a config file into AttrDict\"\"\"\n    with open(cfg_file, 'r') as fopen:\n        yaml_config = AttrDict(yaml.load(fopen, Loader=yaml.SafeLoader))\n    create_attr_dict(yaml_config)\n    return yaml_config\ndef print_dict(d, delimiter=0):\n    \"\"\"\n    Recursively visualize a dict and\n    indenting acrrording by the relationship of keys.\n    \"\"\"\n    placeholder = \"-\" * 60\n    for k, v in sorted(d.items()):\n        if isinstance(v, dict):\n            logger.info(\"{}{} : \".format(delimiter * \" \", coloring(k,\n                                                                   \"HEADER\")))",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/config.py:35-67"
+    },
+    "657": {
+        "file_id": 63,
+        "content": "This code defines functions for parsing and printing config files. The `parse_config` function loads a config file into an AttrDict object, handling nested dictionaries and string values. The `print_dict` function recursively visualizes a dictionary, indented based on the relationship of keys.",
+        "type": "comment"
+    },
+    "658": {
+        "file_id": 63,
+        "content": "            print_dict(v, delimiter + 4)\n        elif isinstance(v, list) and len(v) >= 1 and isinstance(v[0], dict):\n            logger.info(\"{}{} : \".format(delimiter * \" \",\n                                         coloring(str(k), \"HEADER\")))\n            for value in v:\n                print_dict(value, delimiter + 4)\n        else:\n            logger.info(\"{}{} : {}\".format(delimiter * \" \",\n                                           coloring(k, \"HEADER\"),\n                                           coloring(v, \"OKGREEN\")))\n        if k.isupper():\n            logger.info(placeholder)\ndef print_config(config):\n    \"\"\"\n    visualize configs\n    Arguments:\n        config: configs\n    \"\"\"\n    print_dict(config)\ndef check_config(config):\n    \"\"\"\n    Check config\n    \"\"\"\n    pass\ndef override(dl, ks, v):\n    \"\"\"\n    Recursively replace dict of list\n    Args:\n        dl(dict or list): dict or list to be replaced\n        ks(list): list of keys\n        v(str): value to be replaced\n    \"\"\"\n    def str2num(v):\n        try:\n            return eval(v)",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/config.py:68-109"
+    },
+    "659": {
+        "file_id": 63,
+        "content": "This code defines functions for visualizing and checking configurations, as well as recursively replacing dictionary or list values. It includes functions to print a configuration, check the configuration (currently empty), and override values in a dictionary or list. The print function formats output with coloring and delimiters, and the override function handles both dictionaries and lists for value replacement.",
+        "type": "comment"
+    },
+    "660": {
+        "file_id": 63,
+        "content": "        except Exception:\n            return v\n    assert isinstance(dl, (list, dict)), (\"{} should be a list or a dict\")\n    assert len(ks) > 0, ('lenght of keys should larger than 0')\n    if isinstance(dl, list):\n        k = str2num(ks[0])\n        if len(ks) == 1:\n            assert k < len(dl), ('index({}) out of range({})'.format(k, dl))\n            dl[k] = str2num(v)\n        else:\n            override(dl[k], ks[1:], v)\n    else:\n        if len(ks) == 1:\n            #assert ks[0] in dl, ('{} is not exist in {}'.format(ks[0], dl))\n            if not ks[0] in dl:\n                logger.warning('A new filed ({}) detected!'.format(ks[0], dl))\n            dl[ks[0]] = str2num(v)\n        else:\n            assert ks[0] in dl, (\n                '({}) doesn\\'t exist in {}, a new dict field is invalid'.format(\n                    ks[0], dl))\n            override(dl[ks[0]], ks[1:], v)\ndef override_config(config, options=None):\n    \"\"\"\n    Recursively override the config\n    Args:\n        config(dict): dict to be replaced",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/config.py:110-139"
+    },
+    "661": {
+        "file_id": 63,
+        "content": "This function overrides the config, recursively replacing values in the dictionary or list. It requires the configuration and optional options, both as dictionaries. If the key exists, it updates the value, otherwise a warning is issued for new fields, and a new field is created if the key is present in the options. If the key does not exist, an error is thrown.\n\nIn other words, this function allows you to update your configuration by replacing values with new ones. It also helps to identify and handle newly-appearing fields.",
+        "type": "comment"
+    },
+    "662": {
+        "file_id": 63,
+        "content": "        options(list): list of pairs(key0.key1.idx.key2=value)\n            such as: [\n                epochs=20',\n                'PIPELINE.train.transform.1.ResizeImage.resize_short=300'\n            ]\n    Returns:\n        config(dict): replaced config\n    \"\"\"\n    if options is not None:\n        for opt in options:\n            assert isinstance(opt,\n                              str), (\"option({}) should be a str\".format(opt))\n            assert \"=\" in opt, (\n                \"option({}) should contain a =\"\n                \"to distinguish between key and value\".format(opt))\n            pair = opt.split('=')\n            assert len(pair) == 2, (\"there can be only a = in the option\")\n            key, value = pair\n            keys = key.split('.')\n            override(config, keys, value)\n    return config\ndef get_config(fname, overrides=None, show=True):\n    \"\"\"\n    Read config from file\n    \"\"\"\n    assert os.path.exists(fname), ('config file({}) is not exist'.format(fname))\n    config = parse_config(fname)\n    override_config(config, overrides)",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/config.py:140-170"
+    },
+    "663": {
+        "file_id": 63,
+        "content": "The code parses a config file and applies overrides. It checks if the input option is a string and if it contains an equal sign to separate key-value pairs. It then splits the option into key and value, further splitting keys by dots. The function overrides the configuration file with these options, returning the updated configuration.",
+        "type": "comment"
+    },
+    "664": {
+        "file_id": 63,
+        "content": "    if show:\n        print_config(config)\n    check_config(config)\n    return config",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/config.py:171-174"
+    },
+    "665": {
+        "file_id": 63,
+        "content": "This code checks if `show` is True, and if so, it calls the function `print_config(config)`. It then always calls another function `check_config(config)`, before finally returning the `config` object. This implies that `print_config()` prints out configuration details, while `check_config()` checks for correctness or validity of the configuration. The config is returned regardless to ensure it's available to the rest of the codebase.",
+        "type": "comment"
+    },
+    "666": {
+        "file_id": 64,
+        "content": "/applications/EIVideo/EIVideo/paddlevideo/utils/dist_utils.py",
+        "type": "filepath"
+    },
+    "667": {
+        "file_id": 64,
+        "content": "This code is from PaddleVideo's EIVideo module and includes util functions for distributed computing. It defines a function get_dist_info() to retrieve the current rank and world size, and main_only() is a decorator that only runs the wrapped function if the rank is 0 (used in distributed environments).",
+        "type": "summary"
+    },
+    "668": {
+        "file_id": 64,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport functools\nimport paddle\nimport paddle.distributed as dist\ndef get_dist_info():\n    world_size = dist.get_world_size()\n    rank = dist.get_rank()\n    return rank, world_size\ndef main_only(func):\n    @functools.wraps(func)\n    def wrapper(*args, **kwargs):\n        rank, _ = get_dist_info()\n        if rank == 0:\n            return func(*args, **kwargs)\n    return wrapper",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/dist_utils.py:1-30"
+    },
+    "669": {
+        "file_id": 64,
+        "content": "This code is from PaddleVideo's EIVideo module and includes util functions for distributed computing. It defines a function get_dist_info() to retrieve the current rank and world size, and main_only() is a decorator that only runs the wrapped function if the rank is 0 (used in distributed environments).",
+        "type": "comment"
+    },
+    "670": {
+        "file_id": 65,
+        "content": "/applications/EIVideo/EIVideo/paddlevideo/utils/logger.py",
+        "type": "filepath"
+    },
+    "671": {
+        "file_id": 65,
+        "content": "This code sets up a colorful logging function for PaddleVideo, initializes logger with verbosity levels, and ensures non-propagation of logs. It configures logger for Python's logging module using different formats and handlers based on local rank.",
+        "type": "summary"
+    },
+    "672": {
+        "file_id": 65,
+        "content": "#   Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport logging\nimport os\nimport sys\nimport datetime\nfrom paddle.distributed import ParallelEnv\nColor = {\n    'RED': '\\033[31m',\n    'HEADER': '\\033[35m',  # deep purple\n    'PURPLE': '\\033[95m',  # purple\n    'OKBLUE': '\\033[94m',\n    'OKGREEN': '\\033[92m',\n    'WARNING': '\\033[93m',\n    'FAIL': '\\033[91m',\n    'ENDC': '\\033[0m'\n}\ndef coloring(message, color=\"OKGREEN\"):\n    assert color in Color.keys()\n    if os.environ.get('COLORING', True):",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/logger.py:1-38"
+    },
+    "673": {
+        "file_id": 65,
+        "content": "This code is from the \"logger.py\" file in the PaddleVideo project, and it sets up a coloring function for logging messages with optional colors using ANSI escape sequences. The function takes a message and an optional color parameter, which should be one of the defined colors in the Color dictionary. It asserts that the provided color is indeed a key in the dictionary, and then returns the message with the specified color applied. The function also checks the environment variable \"COLORING\" to determine whether coloring should be enabled or not (default is True).",
+        "type": "comment"
+    },
+    "674": {
+        "file_id": 65,
+        "content": "        return Color[color] + str(message) + Color[\"ENDC\"]\n    else:\n        return message\nlogger_initialized = []\ndef setup_logger(output=None, name=\"paddlevideo\", level=\"INFO\"):\n    \"\"\"\n    Initialize the paddlevideo logger and set its verbosity level to \"INFO\".\n    Args:\n        output (str): a file name or a directory to save log. If None, will not save log file.\n            If ends with \".txt\" or \".log\", assumed to be a file name.\n            Otherwise, logs will be saved to `output/log.txt`.\n        name (str): the root module name of this logger\n    Returns:\n        logging.Logger: a logger\n    \"\"\"\n    def time_zone(sec, fmt):\n        real_time = datetime.datetime.now()\n        return real_time.timetuple()\n    logging.Formatter.converter = time_zone\n    logger = logging.getLogger(name)\n    if level == \"INFO\":\n        logger.setLevel(logging.INFO)\n    elif level==\"DEBUG\":\n        logger.setLevel(logging.DEBUG)\n    logger.propagate = False\n    if level == \"DEBUG\":\n        plain_formatter = logging.Formatter(",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/logger.py:39-71"
+    },
+    "675": {
+        "file_id": 65,
+        "content": "This code initializes the PaddleVideo logger and sets its verbosity level to \"INFO\" or \"DEBUG\", depending on the input argument. It also defines a custom time zone converter for logging, and ensures that the logger does not propagate logs to its parent loggers.",
+        "type": "comment"
+    },
+    "676": {
+        "file_id": 65,
+        "content": "            \"[%(asctime)s] %(name)s %(levelname)s: %(message)s\",\n            datefmt=\"%m/%d %H:%M:%S\")\n    else:\n        plain_formatter = logging.Formatter(\n            \"[%(asctime)s] %(message)s\",\n            datefmt=\"%m/%d %H:%M:%S\")\n    # stdout logging: master only\n    local_rank = ParallelEnv().local_rank\n    if local_rank == 0:\n        ch = logging.StreamHandler(stream=sys.stdout)\n        ch.setLevel(logging.DEBUG)\n        formatter = plain_formatter\n        ch.setFormatter(formatter)\n        logger.addHandler(ch)\n    # file logging: all workers\n    if output is not None:\n        if output.endswith(\".txt\") or output.endswith(\".log\"):\n            filename = output\n        else:\n            filename = os.path.join(output, \".log.txt\")\n        if local_rank > 0:\n            filename = filename + \".rank{}\".format(local_rank)\n        # PathManager.mkdirs(os.path.dirname(filename))\n        os.makedirs(os.path.dirname(filename), exist_ok=True)\n        # fh = logging.StreamHandler(_cached_log_stream(filename)\n        fh = logging.FileHandler(filename, mode='a')",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/logger.py:72-100"
+    },
+    "677": {
+        "file_id": 65,
+        "content": "This code configures a logger for Python's logging module. It uses different formats and handlers (stdout, file) based on the local rank of the process, creating separate log files for each worker ranked greater than 0. If the output is a .txt or .log file, it will be used as-is; otherwise, a .log.txt file with optional rank appended will be created. The code also ensures that missing directories for the log file are created beforehand.",
+        "type": "comment"
+    },
+    "678": {
+        "file_id": 65,
+        "content": "        fh.setLevel(logging.DEBUG)\n        fh.setFormatter(plain_formatter)\n        logger.addHandler(fh)\n    logger_initialized.append(name)\n    return logger\ndef get_logger(name, output=None):\n    logger = logging.getLogger(name)\n    if name in logger_initialized:\n        return logger\n    return setup_logger(name=name, output=name)",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/logger.py:101-113"
+    },
+    "679": {
+        "file_id": 65,
+        "content": "This code initializes a logger object and sets its level to DEBUG, adds a file handler with a plain formatter, and appends the logger's name to an initialized list. The function returns the logger if it has been previously initialized for the given name; otherwise, it sets up the logger using the provided name and optional output.",
+        "type": "comment"
+    },
+    "680": {
+        "file_id": 66,
+        "content": "/applications/EIVideo/EIVideo/paddlevideo/utils/manet_utils.py",
+        "type": "filepath"
+    },
+    "681": {
+        "file_id": 66,
+        "content": "This PyTorch code uses OpenCV for image processing, offers conversion functions and error handling with PaddleVideo. It initializes tensors using Xavier/Glorot or Kaiming normal distribution, favoring Torch.nn.init methods over older ones.",
+        "type": "summary"
+    },
+    "682": {
+        "file_id": 66,
+        "content": "from __future__ import absolute_import\nimport json\nimport math\nimport os\nimport pickle\nimport warnings\nimport numpy\nimport numpy as np\nfrom numpy import inf\nfrom paddle import Tensor, concat, reshape, nn\nimport paddle\nfrom typing import Union, Iterable\n# from reprod_log.compare import compute_diff\n# from reprod_log.utils import check_print_diff, np2torch, np2paddle, torch2np, paddle2np\n_tensor_or_tensors = Union[paddle.Tensor, Iterable[paddle.Tensor]]\n_palette = [\n    0, 0, 0, 128, 0, 0, 0, 128, 0, 128, 128, 0, 0, 0, 128, 128, 0, 128, 0, 128,\n    128, 128, 128, 128, 64, 0, 0, 191, 0, 0, 64, 128, 0, 191, 128, 0, 64, 0,\n    128, 191, 0, 128, 64, 128, 128, 191, 128, 128, 0, 64, 0, 128, 64, 0, 0, 191,\n    0, 128, 191, 0, 0, 64, 128, 128, 64, 128, 22, 22, 22, 23, 23, 23, 24, 24,\n    24, 25, 25, 25, 26, 26, 26, 27, 27, 27, 28, 28, 28, 29, 29, 29, 30, 30, 30,\n    31, 31, 31, 32, 32, 32, 33, 33, 33, 34, 34, 34, 35, 35, 35, 36, 36, 36, 37,\n    37, 37, 38, 38, 38, 39, 39, 39, 40, 40, 40, 41, 41, 41, 42, 42, 42, 43, 43,",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/manet_utils.py:1-28"
+    },
+    "683": {
+        "file_id": 66,
+        "content": "Imports various modules and defines a type hint for paddle tensor or iterable of tensors.",
+        "type": "comment"
+    },
+    "684": {
+        "file_id": 66,
+        "content": "    43, 44, 44, 44, 45, 45, 45, 46, 46, 46, 47, 47, 47, 48, 48, 48, 49, 49, 49,\n    50, 50, 50, 51, 51, 51, 52, 52, 52, 53, 53, 53, 54, 54, 54, 55, 55, 55, 56,\n    56, 56, 57, 57, 57, 58, 58, 58, 59, 59, 59, 60, 60, 60, 61, 61, 61, 62, 62,\n    62, 63, 63, 63, 64, 64, 64, 65, 65, 65, 66, 66, 66, 67, 67, 67, 68, 68, 68,\n    69, 69, 69, 70, 70, 70, 71, 71, 71, 72, 72, 72, 73, 73, 73, 74, 74, 74, 75,\n    75, 75, 76, 76, 76, 77, 77, 77, 78, 78, 78, 79, 79, 79, 80, 80, 80, 81, 81,\n    81, 82, 82, 82, 83, 83, 83, 84, 84, 84, 85, 85, 85, 86, 86, 86, 87, 87, 87,\n    88, 88, 88, 89, 89, 89, 90, 90, 90, 91, 91, 91, 92, 92, 92, 93, 93, 93, 94,\n    94, 94, 95, 95, 95, 96, 96, 96, 97, 97, 97, 98, 98, 98, 99, 99, 99, 100,\n    100, 100, 101, 101, 101, 102, 102, 102, 103, 103, 103, 104, 104, 104, 105,\n    105, 105, 106, 106, 106, 107, 107, 107, 108, 108, 108, 109, 109, 109, 110,\n    110, 110, 111, 111, 111, 112, 112, 112, 113, 113, 113, 114, 114, 114, 115,\n    115, 115, 116, 116, 116, 117, 117, 117, 118, 118, 118, 119, 119, 119, 120,",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/manet_utils.py:29-41"
+    },
+    "685": {
+        "file_id": 66,
+        "content": "This code consists of a long sequence of integers with no apparent functionality or structure. It may represent an array, list, or range of values used in various parts of the codebase, but without further context, it is impossible to determine the specific purpose or usage for these numbers.",
+        "type": "comment"
+    },
+    "686": {
+        "file_id": 66,
+        "content": "    120, 120, 121, 121, 121, 122, 122, 122, 123, 123, 123, 124, 124, 124, 125,\n    125, 125, 126, 126, 126, 127, 127, 127, 128, 128, 128, 129, 129, 129, 130,\n    130, 130, 131, 131, 131, 132, 132, 132, 133, 133, 133, 134, 134, 134, 135,\n    135, 135, 136, 136, 136, 137, 137, 137, 138, 138, 138, 139, 139, 139, 140,\n    140, 140, 141, 141, 141, 142, 142, 142, 143, 143, 143, 144, 144, 144, 145,\n    145, 145, 146, 146, 146, 147, 147, 147, 148, 148, 148, 149, 149, 149, 150,\n    150, 150, 151, 151, 151, 152, 152, 152, 153, 153, 153, 154, 154, 154, 155,\n    155, 155, 156, 156, 156, 157, 157, 157, 158, 158, 158, 159, 159, 159, 160,\n    160, 160, 161, 161, 161, 162, 162, 162, 163, 163, 163, 164, 164, 164, 165,\n    165, 165, 166, 166, 166, 167, 167, 167, 168, 168, 168, 169, 169, 169, 170,\n    170, 170, 171, 171, 171, 172, 172, 172, 173, 173, 173, 174, 174, 174, 175,\n    175, 175, 176, 176, 176, 177, 177, 177, 178, 178, 178, 179, 179, 179, 180,\n    180, 180, 181, 181, 181, 182, 182, 182, 183, 183, 183, 184, 184, 184, 185,",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/manet_utils.py:42-54"
+    },
+    "687": {
+        "file_id": 66,
+        "content": "This code likely contains a list of integer values, potentially representing coordinates or other numerical data.",
+        "type": "comment"
+    },
+    "688": {
+        "file_id": 66,
+        "content": "    185, 185, 186, 186, 186, 187, 187, 187, 188, 188, 188, 189, 189, 189, 190,\n    190, 190, 191, 191, 191, 192, 192, 192, 193, 193, 193, 194, 194, 194, 195,\n    195, 195, 196, 196, 196, 197, 197, 197, 198, 198, 198, 199, 199, 199, 200,\n    200, 200, 201, 201, 201, 202, 202, 202, 203, 203, 203, 204, 204, 204, 205,\n    205, 205, 206, 206, 206, 207, 207, 207, 208, 208, 208, 209, 209, 209, 210,\n    210, 210, 211, 211, 211, 212, 212, 212, 213, 213, 213, 214, 214, 214, 215,\n    215, 215, 216, 216, 216, 217, 217, 217, 218, 218, 218, 219, 219, 219, 220,\n    220, 220, 221, 221, 221, 222, 222, 222, 223, 223, 223, 224, 224, 224, 225,\n    225, 225, 226, 226, 226, 227, 227, 227, 228, 228, 228, 229, 229, 229, 230,\n    230, 230, 231, 231, 231, 232, 232, 232, 233, 233, 233, 234, 234, 234, 235,\n    235, 235, 236, 236, 236, 237, 237, 237, 238, 238, 238, 239, 239, 239, 240,\n    240, 240, 241, 241, 241, 242, 242, 242, 243, 243, 243, 244, 244, 244, 245,\n    245, 245, 246, 246, 246, 247, 247, 247, 248, 248, 248, 249, 249, 249, 250,",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/manet_utils.py:55-67"
+    },
+    "689": {
+        "file_id": 66,
+        "content": "This code appears to be a list of integers. It is difficult to provide a brief comment as there seems to be no clear context or purpose for these numbers in this specific location.",
+        "type": "comment"
+    },
+    "690": {
+        "file_id": 66,
+        "content": "    250, 250, 251, 251, 251, 252, 252, 252, 253, 253, 253, 254, 254, 254, 255,\n    255, 255\n]\n# paddle.set_device('gpu') if paddle.is_compiled_with_cuda() else paddle.set_device('cpu')\nimport paddle\nimport PIL\nimport numbers\nimport numpy as np\nfrom PIL import Image\nfrom paddle.vision.transforms import BaseTransform\nfrom paddle.vision.transforms import functional as F\nimport numpy as np\nfrom scipy.ndimage import interpolation, binary_dilation\ntry:\n    from skimage import morphology, transform\nexcept ImportError as e:\n    print(\n        f\"{e}, [scikit-image] package and it's dependencies is required for EIVideo.\"\n    )\nimport paddle\nimport cv2\nimport random\n####\ndef mask_damager(labels=None, p_black=0.2):\n    scales = (0.8, 1.0, 1.2)\n    kernel_size = random.randint(10, 15)\n    kernel = np.ones((kernel_size, kernel_size), np.uint8)\n    if random.random() < p_black:\n        final_label = paddle.zeros_like(labels)\n        final_label = final_label.squeeze().numpy()\n    else:\n        prot = random.randint(5, 15)\n        nrot = random.randint(-15, -5)",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/manet_utils.py:68-105"
+    },
+    "691": {
+        "file_id": 66,
+        "content": "This code defines a function called \"mask\\_damager\" which takes in labels and a probability of blacking out as input. It randomly scales the image using a scale range of (0.8, 1.0, 1.2), generates a random kernel size between 10 to 15, and applies random rotation to the image. If a random number is less than the given probability, it sets the final label as black; otherwise, it performs random rotations and scaling on the input labels.",
+        "type": "comment"
+    },
+    "692": {
+        "file_id": 66,
+        "content": "        rots = [prot, nrot, 0]\n        rot = rots[random.randint(0, 2)]\n        sc = scales[random.randint(0, 2)]\n        _, _, h, w = labels.shape\n        tmp = labels.squeeze()\n        tmp = tmp.unsqueeze(-1)\n        tmp = tmp.numpy().astype(np.uint8)\n        morph_p = random.random()\n        if morph_p < 0.5:\n            tmp = cv2.morphologyEx(tmp, cv2.MORPH_OPEN, kernel)\n        else:\n            tmp = cv2.morphologyEx(tmp, cv2.MORPH_CLOSE, kernel)\n        tmp = tmp.astype(np.uint8)\n        center = (w / 2, h / 2)\n        M = cv2.getRotationMatrix2D(center, rot, sc)\n        final_label = cv2.warpAffine(tmp, M, (w, h), cv2.INTER_NEAREST)\n    return final_label\ncolor_map = [\n    [0, 0, 0],\n    [255, 127, 0],\n    [30, 144, 255],\n    [186, 85, 211],\n    [255, 105, 180],\n    [192, 255, 62],\n    [255, 105, 180],\n    [50, 255, 255],\n]\ncolor_map_np = np.array(color_map)\ndef overlay_davis(image, mask, alpha=0.5):\n    \"\"\" Overlay segmentation on top of RGB image. from davis official\"\"\"\n    im_overlay = image.copy()\n    mask = mask.astype('uint8')",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/manet_utils.py:106-146"
+    },
+    "693": {
+        "file_id": 66,
+        "content": "The code performs morphological operations on an image using OpenCV and then applies a rotation transformation to overlay the segmentation mask onto the RGB image. It uses different colors for different classes in the segmentation mask.",
+        "type": "comment"
+    },
+    "694": {
+        "file_id": 66,
+        "content": "    colored_mask = color_map_np[mask]\n    foreground = image * alpha + (1 - alpha) * colored_mask\n    binary_mask = (mask > 0)\n    # Compose image\n    im_overlay[binary_mask] = foreground[binary_mask]\n    countours = binary_dilation(binary_mask) ^ binary_mask\n    im_overlay[countours, :] = 0\n    return im_overlay.astype(image.dtype)\n# TODO\ndef submit_masks(masks, images, inter_file_path):\n    overlays = []\n    save_result_path = os.path.join(inter_file_path, 'result')\n    os.makedirs(save_result_path, exist_ok=True)\n    for imgname, (mask, image) in enumerate(zip(masks, images)):\n        overlay = overlay_davis(image, mask)\n        overlays.append(overlay.tolist())\n        overlay = Image.fromarray(overlay)\n        imgname = str(imgname)\n        while len(imgname) < 5:\n            imgname = '0' + imgname\n        overlay.save(os.path.join(save_result_path, imgname + '.png'))\n    result = {'overlays': overlays}\n    # result = {'masks': masks.tolist()}\n    with open(os.path.join(save_result_path, 'masks.json'), 'w') as f:",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/manet_utils.py:147-172"
+    },
+    "695": {
+        "file_id": 66,
+        "content": "This function takes a list of masks and images, and for each pair, it applies an overlay function to generate an overlay image. It saves these overlay images in the specified directory with filenames corresponding to their original image names. Additionally, it stores the list of overlays as JSON in a file named \"masks.json\". The comments suggest that there might be another function to store masks as a list instead of overlays.",
+        "type": "comment"
+    },
+    "696": {
+        "file_id": 66,
+        "content": "        json.dump(result, f)\ndef load_video(path, min_side=None):\n    frame_list = []\n    cap = cv2.VideoCapture(path)\n    while (cap.isOpened()):\n        _, frame = cap.read()\n        if frame is None:\n            break\n        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)\n        if min_side:\n            h, w = frame.shape[:2]\n            new_w = (w * min_side // min(w, h))\n            new_h = (h * min_side // min(w, h))\n            frame = cv2.resize(frame, (new_w, new_h),\n                               interpolation=cv2.INTER_CUBIC)\n            # .transpose([2, 0, 1])\n        frame_list.append(frame)\n    frames = np.stack(frame_list, axis=0)\n    return frames\ndef get_scribbles():\n    for i in range(8):\n        with open(f'/home/lc/paddlevideo/data/bike-packing/lable/{i + 1}.json'\n                  ) as f:\n            scribbles = json.load(f)\n            first_scribble = not i\n            yield scribbles, first_scribble\ndef get_images(sequence='bike-packing'):\n    img_path = os.path.join('/home/lc/paddlevideo/data', sequence.strip(),",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/manet_utils.py:173-206"
+    },
+    "697": {
+        "file_id": 66,
+        "content": "load_video function reads frames from a video file and optionally resizes the frame to match a minimum side length, appending each frame to a list. The function then stacks the frames in the list into a single numpy array and returns it. get_scribbles generates scribble data for 8 labels by iterating through corresponding JSON files and yields the data along with a flag indicating if it is the first label or not. get_images retrieves video images from a specified sequence directory.",
+        "type": "comment"
+    },
+    "698": {
+        "file_id": 66,
+        "content": "                            'frame')\n    img_files = os.listdir(img_path)\n    img_files.sort()\n    files = []\n    for img in img_files:\n        img_file = np.array(Image.open(os.path.join(img_path, img)))\n        files.append(img_file)\n    return np.array(files)\ndef rough_ROI(ref_scribble_labels):\n    #### b*1*h*w\n    dist = 20\n    b, _, h, w = ref_scribble_labels.shape\n    filter_ = paddle.zeros_like(ref_scribble_labels)\n    to_fill = paddle.zeros_like(ref_scribble_labels)\n    for i in range(b):\n        no_background = (ref_scribble_labels[i] != -1)\n        no_background = no_background.squeeze(0)\n        no_b = no_background.nonzero()\n        (h_min, w_min) = paddle.min(no_b, 0)\n        (h_max, w_max) = paddle.max(no_b, 0)\n        filter_[i, 0,\n                max(h_min - dist, 0):min(h_max + dist, h - 1),\n                max(w_min - dist, 0):min(w_max + dist, w - 1)] = 1\n    final_scribble_labels = paddle.where(byte_(filter_), ref_scribble_labels,\n                                         to_fill)\n    return final_scribble_labels",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/manet_utils.py:207-236"
+    },
+    "699": {
+        "file_id": 66,
+        "content": "The code defines two functions: \"load_image\" and \"rough_ROI\". The \"load_image\" function loads an image from a specified directory, sorts the images by file name, reads each image using PIL library, and returns the images as a numpy array. The \"rough_ROI\" function receives scribble labels as input, determines the bounding box around each scribble in the batch, applies this bounding box to another mask, and returns the final scribble labels after filtering.",
+        "type": "comment"
+    }
+}

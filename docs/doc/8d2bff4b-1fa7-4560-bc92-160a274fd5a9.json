@@ -1,0 +1,10 @@
+{
+    "summary": "This code is the initialization file of PaddleVideo's partitioner module. It imports base and TransNetV2Partitioner classes, and declares them as part of the public interface (__all__). The license and copyright information are also included.",
+    "details": [
+        {
+            "comment": "This code is the initialization file of PaddleVideo's partitioner module. It imports base and TransNetV2Partitioner classes, and declares them as part of the public interface (__all__). The license and copyright information are also included.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/paddlevideo/modeling/framework/partitioners/__init__.py\":0-17",
+            "content": "# copyright (c) 2020  paddlepaddle authors. all rights reserved.\n#\n# licensed under the apache license, version 2.0 (the \"license\"\n# you may not use this file except in compliance with the license.\n# you may obtain a copy of the license at\n#\n#     http://www.apache.org/licenses/license-2.0\n#\n# unless required by applicable law or agreed to in writing, software\n# distributed under the license is distributed on an \"as is\" basis,\n# without warranties or conditions of any kind, either express or implied.\n# see the license for the specific language governing permissions and\n# limitations under the license.\nfrom .base import BasePartitioner\nfrom .transnetv2_partitioner import TransNetV2Partitioner\n__all__ = ['BasePartitioner', 'TransNetV2Partitioner']"
+        }
+    ]
+}

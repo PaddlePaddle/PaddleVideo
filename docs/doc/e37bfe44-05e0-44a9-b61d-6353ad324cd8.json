@@ -1,0 +1,15 @@
+{
+    "summary": "The script updates a configuration file for NPU use, disables MKLDNN on non-x86_64, sets Python to 3.9 for NPU support, and changes the execution script from \"gpu\" to \"npu\". It executes a bash script using eval with the command stored in variable 'cmd'.",
+    "details": [
+        {
+            "comment": "This script modifies a configuration file to use NPU instead of GPU, disables MKLDNN on non-x86_64 environments, and updates the Python version to 3.9 for NPU backend support. It also changes the execution script from using \"gpu\" to \"npu\".",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/test_tipc/test_train_inference_python_npu.sh\":0-38",
+            "content": "#!/bin/bash\nsource test_tipc/common_func.sh\nfunction readlinkf() {\n    perl -MCwd -e \"print Cwd::abs_path shift\" \"$1\";\n}\nfunction func_parser_config() {\n    strs=$1\n    IFS=\" \"\n    array=(${strs})\n    tmp=${array[2]}\n    echo ${tmp}\n}\nBASEDIR=$(dirname \"$0\")\nREPO_ROOT_PATH=$(readlinkf ${BASEDIR}/../)\nFILENAME=$1\n# disable mkldnn on non x86_64 env\narch=$(uname -i)\nif [ $arch != \"x86_64\" ]; then\n    sed -i \"s/--enable_mkldnn:True|False/--enable_mkldnn:False/g\" $FILENAME\n    sed -i \"s/--enable_mkldnn:True/--enable_mkldnn:False/g\" $FILENAME\nfi\n# change gpu to npu in tipc txt configs\nsed -i \"s/use_gpu/use_npu/g\" $FILENAME\n# disable benchmark as AutoLog required nvidia-smi command\nsed -i \"s/--enable_benchmark:True/--enable_benchmark:False/g\" $FILENAME\n# python has been updated to version 3.9 for npu backend\nsed -i \"s/python3.7/python3.9/g\" $FILENAME\ndataline=`cat $FILENAME`\n# change gpu to npu in execution script\nsed -i \"s/\\\"gpu\\\"/\\\"npu\\\"/g\" test_tipc/test_train_inference_python.sh\n# pass parameters to test_train_inference_python.sh"
+        },
+        {
+            "comment": "The code is executing a bash script, storing the command in variable 'cmd', printing its execution status, and then running it using eval.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/test_tipc/test_train_inference_python_npu.sh\":39-41",
+            "content": "cmd=\"bash test_tipc/test_train_inference_python.sh ${FILENAME} $2\"\necho -e \"\\033[1;32m Started to run command: ${cmd}!  \\033[0m\"\neval $cmd"
+        }
+    ]
+}

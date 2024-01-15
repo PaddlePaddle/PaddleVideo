@@ -1,0 +1,541 @@
+{
+    "400": {
+        "file_id": 43,
+        "content": "            38, 38, 39, 39, 39, 40, 40, 40, 41, 41, 41, 42, 42, 42, 43, 43, 43,\n            44, 44, 44, 45, 45, 45, 46, 46, 46, 47, 47, 47, 48, 48, 48, 49, 49,\n            49, 50, 50, 50, 51, 51, 51, 52, 52, 52, 53, 53, 53, 54, 54, 54, 55,\n            55, 55, 56, 56, 56, 57, 57, 57, 58, 58, 58, 59, 59, 59, 60, 60, 60,\n            61, 61, 61, 62, 62, 62, 63, 63, 63, 64, 64, 64, 65, 65, 65, 66, 66,\n            66, 67, 67, 67, 68, 68, 68, 69, 69, 69, 70, 70, 70, 71, 71, 71, 72,\n            72, 72, 73, 73, 73, 74, 74, 74, 75, 75, 75, 76, 76, 76, 77, 77, 77,\n            78, 78, 78, 79, 79, 79, 80, 80, 80, 81, 81, 81, 82, 82, 82, 83, 83,\n            83, 84, 84, 84, 85, 85, 85, 86, 86, 86, 87, 87, 87, 88, 88, 88, 89,\n            89, 89, 90, 90, 90, 91, 91, 91, 92, 92, 92, 93, 93, 93, 94, 94, 94,\n            95, 95, 95, 96, 96, 96, 97, 97, 97, 98, 98, 98, 99, 99, 99, 100,\n            100, 100, 101, 101, 101, 102, 102, 102, 103, 103, 103, 104, 104,\n            104, 105, 105, 105, 106, 106, 106, 107, 107, 107, 108, 108, 108,",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/metrics/vos_metric.py:212-224"
+    },
+    "401": {
+        "file_id": 43,
+        "content": "This code represents a sequence of numbers, potentially used for various purposes within the codebase such as tracking or counting.",
+        "type": "comment"
+    },
+    "402": {
+        "file_id": 43,
+        "content": "            109, 109, 109, 110, 110, 110, 111, 111, 111, 112, 112, 112, 113,\n            113, 113, 114, 114, 114, 115, 115, 115, 116, 116, 116, 117, 117,\n            117, 118, 118, 118, 119, 119, 119, 120, 120, 120, 121, 121, 121,\n            122, 122, 122, 123, 123, 123, 124, 124, 124, 125, 125, 125, 126,\n            126, 126, 127, 127, 127, 128, 128, 128, 129, 129, 129, 130, 130,\n            130, 131, 131, 131, 132, 132, 132, 133, 133, 133, 134, 134, 134,\n            135, 135, 135, 136, 136, 136, 137, 137, 137, 138, 138, 138, 139,\n            139, 139, 140, 140, 140, 141, 141, 141, 142, 142, 142, 143, 143,\n            143, 144, 144, 144, 145, 145, 145, 146, 146, 146, 147, 147, 147,\n            148, 148, 148, 149, 149, 149, 150, 150, 150, 151, 151, 151, 152,\n            152, 152, 153, 153, 153, 154, 154, 154, 155, 155, 155, 156, 156,\n            156, 157, 157, 157, 158, 158, 158, 159, 159, 159, 160, 160, 160,\n            161, 161, 161, 162, 162, 162, 163, 163, 163, 164, 164, 164, 165,\n            165, 165, 166, 166, 166, 167, 167, 167, 168, 168, 168, 169, 169,",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/metrics/vos_metric.py:225-238"
+    },
+    "403": {
+        "file_id": 43,
+        "content": "The code contains a sequence of numbers ranging from 109 to 169, which could be used as array indices or other numeric identifiers in the following lines. Without further context, it's difficult to determine the exact purpose of these numbers.",
+        "type": "comment"
+    },
+    "404": {
+        "file_id": 43,
+        "content": "            169, 170, 170, 170, 171, 171, 171, 172, 172, 172, 173, 173, 173,\n            174, 174, 174, 175, 175, 175, 176, 176, 176, 177, 177, 177, 178,\n            178, 178, 179, 179, 179, 180, 180, 180, 181, 181, 181, 182, 182,\n            182, 183, 183, 183, 184, 184, 184, 185, 185, 185, 186, 186, 186,\n            187, 187, 187, 188, 188, 188, 189, 189, 189, 190, 190, 190, 191,\n            191, 191, 192, 192, 192, 193, 193, 193, 194, 194, 194, 195, 195,\n            195, 196, 196, 196, 197, 197, 197, 198, 198, 198, 199, 199, 199,\n            200, 200, 200, 201, 201, 201, 202, 202, 202, 203, 203, 203, 204,\n            204, 204, 205, 205, 205, 206, 206, 206, 207, 207, 207, 208, 208,\n            208, 209, 209, 209, 210, 210, 210, 211, 211, 211, 212, 212, 212,\n            213, 213, 213, 214, 214, 214, 215, 215, 215, 216, 216, 216, 217,\n            217, 217, 218, 218, 218, 219, 219, 219, 220, 220, 220, 221, 221,\n            221, 222, 222, 222, 223, 223, 223, 224, 224, 224, 225, 225, 225,\n            226, 226, 226, 227, 227, 227, 228, 228, 228, 229, 229, 229, 230,",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/metrics/vos_metric.py:239-252"
+    },
+    "405": {
+        "file_id": 43,
+        "content": "This code snippet appears to be a list or sequence of numbers, possibly representing frame coordinates, timestamps, or some other numerical data used in video processing or analysis. The specific application and purpose would require further context from the surrounding code and documentation.",
+        "type": "comment"
+    },
+    "406": {
+        "file_id": 43,
+        "content": "            230, 230, 231, 231, 231, 232, 232, 232, 233, 233, 233, 234, 234,\n            234, 235, 235, 235, 236, 236, 236, 237, 237, 237, 238, 238, 238,\n            239, 239, 239, 240, 240, 240, 241, 241, 241, 242, 242, 242, 243,\n            243, 243, 244, 244, 244, 245, 245, 245, 246, 246, 246, 247, 247,\n            247, 248, 248, 248, 249, 249, 249, 250, 250, 250, 251, 251, 251,\n            252, 252, 252, 253, 253, 253, 254, 254, 254, 255, 255, 255\n        ]\n        mask = mask_tensor.cpu().numpy().astype('uint8')\n        mask = Image.fromarray(mask).convert('P')\n        mask.putpalette(_palette)\n        mask.save(path)\n    def zip_folder(self, source_folder, zip_dir):\n        f = zipfile.ZipFile(zip_dir, 'w', zipfile.ZIP_DEFLATED)\n        pre_len = len(os.path.dirname(source_folder))\n        for dirpath, dirnames, filenames in os.walk(source_folder):\n            for filename in filenames:\n                pathfile = os.path.join(dirpath, filename)\n                arcname = pathfile[pre_len:].strip(os.path.sep)",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/metrics/vos_metric.py:253-271"
+    },
+    "407": {
+        "file_id": 43,
+        "content": "This code snippet seems to define a function `zip_folder` that compresses files within a source folder into a zip file. It also includes a nested function that creates and saves an image mask, potentially for visualization purposes. However, the context or specific functionality of these functions is not clear without additional information about the larger codebase.",
+        "type": "comment"
+    },
+    "408": {
+        "file_id": 43,
+        "content": "                f.write(pathfile, arcname)\n        f.close()\n    def accumulate(self):\n        \"\"\"accumulate metrics when finished all iters.\n        \"\"\"\n        self.zip_folder(self.result_root, self.zip_dir)\n        logger.info('Save result to {}.'.format(self.zip_dir))",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/metrics/vos_metric.py:272-279"
+    },
+    "409": {
+        "file_id": 43,
+        "content": "This code writes data to a file and then closes it. It defines a function called accumulate that aggregates metrics when all iterations are complete. This function zips the folder, creates a zip directory, and logs a message indicating that the result is saved in the specified directory.",
+        "type": "comment"
+    },
+    "410": {
+        "file_id": 44,
+        "content": "/applications/EIVideo/EIVideo/paddlevideo/modeling/__init__.py",
+        "type": "filepath"
+    },
+    "411": {
+        "file_id": 44,
+        "content": "This code is an import script for PaddleVideo, registering various modules like backbones, heads, recognizers, localizers, and losses in relevant registries. It defines key function names and includes popular models like 'DeepLab' and 'IntVOS'.",
+        "type": "summary"
+    },
+    "412": {
+        "file_id": 44,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nfrom .backbones import DeepLab\nfrom .builder import (build_backbone, build_head, build_localizer, build_loss,\n                      build_recognizer)\nfrom .heads import IntVOS\nfrom .registry import (BACKBONES, DETECTORS, HEADS, LOCALIZERS, LOSSES,\n                       PARTITIONERS, RECOGNIZERS, ROI_EXTRACTORS)\nfrom .weight_init import kaiming_normal_, trunc_normal_, weight_init_\n__all__ = [\n    'BACKBONES', 'HEADS', 'RECOGNIZERS', 'LOCALIZERS', 'PARTITIONERS',",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/__init__.py:1-23"
+    },
+    "413": {
+        "file_id": 44,
+        "content": "This code appears to be an import script for PaddleVideo, importing various modules such as backbones, heads, recognizers, localizers, and losses from different parts of the codebase. It also registers these items in relevant registries (e.g., BACKBONES, HEADS) and defines __all__ to include those registered items.",
+        "type": "comment"
+    },
+    "414": {
+        "file_id": 44,
+        "content": "    'LOSSES', 'build_recognizer', 'build_localizer', 'build_head',\n    'build_backbone', 'build_loss', 'DETECTORS', 'kaiming_normal_', 'trunc_normal_',\n    'weight_init_', 'DeepLab', 'IntVOS'\n]",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/__init__.py:24-27"
+    },
+    "415": {
+        "file_id": 44,
+        "content": "This code defines several variables and function names used in the PaddleVideo library, including loss functions ('build_loss'), backbone building ('build_backbone'), detectors ('DETECTORS'), and initialization methods ('weight_init_'). It also includes references to popular models such as 'DeepLab' and 'IntVOS'.",
+        "type": "comment"
+    },
+    "416": {
+        "file_id": 45,
+        "content": "/applications/EIVideo/EIVideo/paddlevideo/modeling/backbones/__init__.py",
+        "type": "filepath"
+    },
+    "417": {
+        "file_id": 45,
+        "content": "This code is an import statement for the DeepLab class from the deeplab_manet module and specifies that it should be included in the __all__ list.",
+        "type": "summary"
+    },
+    "418": {
+        "file_id": 45,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nfrom .deeplab_manet import DeepLab\n__all__ = ['DeepLab']",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/backbones/__init__.py:1-16"
+    },
+    "419": {
+        "file_id": 45,
+        "content": "This code is an import statement for the DeepLab class from the deeplab_manet module and specifies that it should be included in the __all__ list.",
+        "type": "comment"
+    },
+    "420": {
+        "file_id": 46,
+        "content": "/applications/EIVideo/EIVideo/paddlevideo/modeling/backbones/aspp_manet.py",
+        "type": "filepath"
+    },
+    "421": {
+        "file_id": 46,
+        "content": "The code initializes an ASPP network using Paddle, defines its architecture, sets parameters for BatchNorm layers and global average pooling operation, creates the ASPP-MANET backbone model class, initializes layers, and applies weight initialization.",
+        "type": "summary"
+    },
+    "422": {
+        "file_id": 46,
+        "content": "import paddle\nimport paddle.nn as nn\nimport paddle.nn.functional as F\nfrom EIVideo.paddlevideo.utils.manet_utils import kaiming_normal_\nclass _ASPPModule(nn.Layer):\n    def __init__(self, inplanes, planes, kernel_size, padding, dilation,\n                 BatchNorm):\n        super(_ASPPModule, self).__init__()\n        self.atrous_conv = nn.Conv2D(inplanes,\n                                     planes,\n                                     kernel_size=kernel_size,\n                                     stride=1,\n                                     padding=padding,\n                                     dilation=dilation,\n                                     bias_attr=False)\n        self.bn = BatchNorm(planes)\n        self.relu = nn.ReLU(True)\n        self._init_weight()\n    def forward(self, x):\n        x = self.atrous_conv(x)\n        x = self.bn(x)\n        return self.relu(x)\n    def _init_weight(self):\n        for m in self.sublayers():\n            if isinstance(m, nn.Conv2D):\n                kaiming_normal_(m.weight)",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/backbones/aspp_manet.py:1-32"
+    },
+    "423": {
+        "file_id": 46,
+        "content": "Imports Paddle, nn, and functional modules for creating a module that implements the ASPP layer with Conv2D, BatchNorm, and ReLU layers. Initializes weights using Kaiming normal distribution.",
+        "type": "comment"
+    },
+    "424": {
+        "file_id": 46,
+        "content": "            elif isinstance(m, nn.BatchNorm2D):\n                from EIVideo.paddlevideo.utils.manet_utils import fill_\n                fill_(m.weight, 1)\n                from EIVideo.paddlevideo.utils.manet_utils import zero_\n                zero_(m.bias)\nclass ASPP(nn.Layer):\n    def __init__(self, backbone, output_stride, BatchNorm):\n        super(ASPP, self).__init__()\n        if backbone == 'drn':\n            inplanes = 512\n        elif backbone == 'mobilenet':\n            inplanes = 320\n        else:\n            inplanes = 2048\n        if output_stride == 16:\n            dilations = [1, 6, 12, 18]\n        elif output_stride == 8:\n            dilations = [1, 12, 24, 36]\n        else:\n            raise NotImplementedError\n        self.aspp1 = _ASPPModule(inplanes,\n                                 256,\n                                 1,\n                                 padding=0,\n                                 dilation=dilations[0],\n                                 BatchNorm=BatchNorm)\n        self.aspp2 = _ASPPModule(inplanes,",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/backbones/aspp_manet.py:33-62"
+    },
+    "425": {
+        "file_id": 46,
+        "content": "This code initializes an ASPP (Atrous Spatial Pyramid Pooling) network. The network architecture is defined based on the selected backbone and output stride. The BatchNorm layer weights are set to 1, and its biases are set to zero using functions from the manet_utils module. Dilation rates for each ASPPModule are determined based on the chosen output stride.",
+        "type": "comment"
+    },
+    "426": {
+        "file_id": 46,
+        "content": "                                 256,\n                                 3,\n                                 padding=dilations[1],\n                                 dilation=dilations[1],\n                                 BatchNorm=BatchNorm)\n        self.aspp3 = _ASPPModule(inplanes,\n                                 256,\n                                 3,\n                                 padding=dilations[2],\n                                 dilation=dilations[2],\n                                 BatchNorm=BatchNorm)\n        self.aspp4 = _ASPPModule(inplanes,\n                                 256,\n                                 3,\n                                 padding=dilations[3],\n                                 dilation=dilations[3],\n                                 BatchNorm=BatchNorm)\n        self.global_avg_pool = nn.Sequential(\n            nn.AdaptiveAvgPool2D((1, 1)),\n            nn.Conv2D(inplanes, 256, 1, stride=1, bias_attr=False),\n            BatchNorm(256), nn.ReLU())\n        self.conv1 = nn.Conv2D(1280, 256, 1, bias_attr=False)",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/backbones/aspp_manet.py:63-85"
+    },
+    "427": {
+        "file_id": 46,
+        "content": "This code defines an ASPP module with three branches, each having different dilation rates. It also includes a global average pooling operation and subsequent convolution layers to extract features from the input planes.",
+        "type": "comment"
+    },
+    "428": {
+        "file_id": 46,
+        "content": "        self.bn1 = BatchNorm(256)\n        self.relu = nn.ReLU(True)\n        self.dropout = nn.Dropout(0.1)\n        self._init_weight()\n    def forward(self, x):\n        x1 = self.aspp1(x)\n        x2 = self.aspp2(x)\n        x3 = self.aspp3(x)\n        x4 = self.aspp4(x)\n        x5 = self.global_avg_pool(x)\n        x5 = F.interpolate(x5,\n                           size=x4.shape[2:],\n                           mode='bilinear',\n                           align_corners=True)\n        x = paddle.concat((x1, x2, x3, x4, x5), axis=1)\n        x = self.conv1(x)\n        x = self.bn1(x)\n        x = self.relu(x)\n        return x\n        return self.dropout(x)\n    def _init_weight(self):\n        for m in self.sublayers():\n            if isinstance(m, nn.Conv2D):\n                # n = m._kernel_size[0] * m._kernel_size[1] * m._out_channels\n                # m.weight.normal_(0, math.sqrt(2. / n))\n                kaiming_normal_(m.weight)\n            elif isinstance(m, nn.BatchNorm2D):\n                from EIVideo.paddlevideo.utils.manet_utils import fill_",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/backbones/aspp_manet.py:86-117"
+    },
+    "429": {
+        "file_id": 46,
+        "content": "This code defines a class for ASPP-MANET backbone model in the ASPP-MANET network architecture. It initializes batch normalization, ReLU activation and dropout layers, with weight initialization function defined separately. The forward pass applies aspp1 to x and other similar operations on x, then concatenates them along axis=1. Conv2D layer is applied on the concatenated input, followed by BatchNorm2D and ReLU activation functions. Finally, it returns the output and also drops out some values using dropout. The weight initialization follows Kaiming Normal distribution for convolutional layers and uses fill function for batch normalization layers.",
+        "type": "comment"
+    },
+    "430": {
+        "file_id": 46,
+        "content": "                fill_(m.weight, 1)\n                from EIVideo.paddlevideo.utils.manet_utils import zero_\n                zero_(m.bias)\ndef build_aspp(backbone, output_stride, BatchNorm):\n    return ASPP(backbone, output_stride, BatchNorm)",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/backbones/aspp_manet.py:118-124"
+    },
+    "431": {
+        "file_id": 46,
+        "content": "This code defines a function called build_aspp that returns an instance of the ASPP class. The function initializes the model's weights to 1 and sets the bias to zero using the zero_ function from the manet_utils module.",
+        "type": "comment"
+    },
+    "432": {
+        "file_id": 47,
+        "content": "/applications/EIVideo/EIVideo/paddlevideo/modeling/backbones/decoder_manet.py",
+        "type": "filepath"
+    },
+    "433": {
+        "file_id": 47,
+        "content": "This code defines a Paddle's nn.Layer Decoder class with convolutional layers, BatchNorm, and ReLU activation functions for Manet architecture decoding. It imports the 'zero_' function to initialize all model biases to 0.",
+        "type": "summary"
+    },
+    "434": {
+        "file_id": 47,
+        "content": "import paddle\nimport paddle.nn as nn\nimport paddle.nn.functional as F\nfrom EIVideo.paddlevideo.utils.manet_utils import kaiming_normal_\nclass Decoder(nn.Layer):\n    def __init__(self, num_classes, backbone, BatchNorm):\n        super(Decoder, self).__init__()\n        if backbone == 'resnet' or backbone == 'drn' or backbone == 'resnet_edge':\n            low_level_inplanes = 256\n        elif backbone == 'xception':\n            low_level_inplanes = 128\n        elif backbone == 'mobilenet':\n            low_level_inplanes = 24\n        else:\n            raise NotImplementedError\n        self.conv1 = nn.Conv2D(low_level_inplanes, 48, 1, bias_attr=False)\n        self.bn1 = BatchNorm(48)\n        self.relu = nn.ReLU(True)\n        self.last_conv = nn.Sequential(\n            nn.Conv2D(304,\n                      256,\n                      kernel_size=3,\n                      stride=1,\n                      padding=1,\n                      bias_attr=False), BatchNorm(256), nn.ReLU(True),\n            nn.Sequential(),\n            nn.Conv2D(256,",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/backbones/decoder_manet.py:1-30"
+    },
+    "435": {
+        "file_id": 47,
+        "content": "This code defines a Decoder class using Paddle's nn.Layer, which takes in the number of classes and backbone type as parameters. It initializes the convolutional layers for feature extraction, BatchNorm layers for normalization, and ReLU activation functions. The last_conv sequence contains multiple Conv2D, BatchNorm, and ReLU layers for further processing.",
+        "type": "comment"
+    },
+    "436": {
+        "file_id": 47,
+        "content": "                      256,\n                      kernel_size=3,\n                      stride=1,\n                      padding=1,\n                      bias_attr=False), BatchNorm(256), nn.ReLU(True),\n            nn.Sequential())\n        self._init_weight()\n    def forward(self, x, low_level_feat):\n        low_level_feat = self.conv1(low_level_feat)\n        low_level_feat = self.bn1(low_level_feat)\n        low_level_feat = self.relu(low_level_feat)\n        x = F.interpolate(x,\n                          size=low_level_feat.shape[2:],\n                          mode='bilinear',\n                          align_corners=True)\n        x = paddle.concat((x, low_level_feat), axis=1)\n        x = self.last_conv(x)\n        return x\n    def _init_weight(self):\n        for m in self.sublayers():\n            if isinstance(m, nn.Conv2D):\n                kaiming_normal_(m.weight)\n            elif isinstance(m, nn.BatchNorm2D):\n                from EIVideo.paddlevideo.utils.manet_utils import fill_\n                fill_(m.weight, 1)",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/backbones/decoder_manet.py:31-59"
+    },
+    "437": {
+        "file_id": 47,
+        "content": "This code defines a decoder block for the Manet architecture. It includes a 2D convolution layer, batch normalization, and ReLU activation. The forward function performs interpolation on input feature maps and concatenates them with low-level features before passing through a final convolution. The _init_weight function initializes the weights of the block using Kaiming initialization for convolutions and fills batch norm with a constant value.",
+        "type": "comment"
+    },
+    "438": {
+        "file_id": 47,
+        "content": "                from EIVideo.paddlevideo.utils.manet_utils import zero_\n                zero_(m.bias)\ndef build_decoder(num_classes, backbone, BatchNorm):\n    return Decoder(num_classes, backbone, BatchNorm)",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/backbones/decoder_manet.py:60-65"
+    },
+    "439": {
+        "file_id": 47,
+        "content": "This code imports the function 'zero_' from EIVideo.paddlevideo.utils.manet_utils and then defines a build_decoder function that returns an instance of Decoder class with provided parameters (num_classes, backbone, BatchNorm). The zero_(m.bias) line initializes all the bias in the model (m) to 0 using the imported 'zero_' function.",
+        "type": "comment"
+    },
+    "440": {
+        "file_id": 48,
+        "content": "/applications/EIVideo/EIVideo/paddlevideo/modeling/backbones/deeplab_manet.py",
+        "type": "filepath"
+    },
+    "441": {
+        "file_id": 48,
+        "content": "The code introduces a FrozenBatchNorm2d class for static batch normalization and DeepLab class as a neural network backbone, allowing freezing of BatchNorm layers. The code also provides methods to get parameters with different learning rates and creates an instance of the model, evaluates it, generates input data, and outputs its shape.",
+        "type": "summary"
+    },
+    "442": {
+        "file_id": 48,
+        "content": "import paddle\nimport paddle.nn as nn\nfrom ..registry import BACKBONES\nfrom EIVideo.paddlevideo.modeling.backbones.aspp_manet import build_aspp\nfrom EIVideo.paddlevideo.modeling.backbones.decoder_manet import build_decoder\nfrom EIVideo.paddlevideo.modeling.backbones.resnet_manet import build_backbone\nclass FrozenBatchNorm2d(nn.Layer):\n    def __init__(self, n):\n        super(FrozenBatchNorm2d, self).__init__()\n        self.register_buffer(\"weight\", paddle.ones(n))\n        self.register_buffer(\"bias\", paddle.zeros(n))\n        self.register_buffer(\"running_mean\", paddle.zeros(n))\n        self.register_buffer(\"running_var\", paddle.ones(n))\n    def forward(self, x):\n        if x.dtype == paddle.float16:\n            self.weight = self.weight.half()\n            self.bias = self.bias.half()\n            self.running_mean = self.running_mean.half()\n            self.running_var = self.running_var.half()\n        scale = self.weight * self.running_var.rsqrt()\n        bias = self.bias - self.running_mean * scale\n        scale = scale.reshape(1, -1, 1, 1)",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/backbones/deeplab_manet.py:1-26"
+    },
+    "443": {
+        "file_id": 48,
+        "content": "This code defines a FrozenBatchNorm2d class and imports necessary modules. The class is used to create a batch normalization layer where the parameters are frozen, meaning they will not be updated during training.",
+        "type": "comment"
+    },
+    "444": {
+        "file_id": 48,
+        "content": "        bias = bias.reshape(1, -1, 1, 1)\n        return x * scale + bias\n@BACKBONES.register()\nclass DeepLab(nn.Layer):\n    def __init__(self,\n                 backbone='resnet',\n                 output_stride=16,\n                 num_classes=21,\n                 freeze_bn=False,\n                 pretrained=None):\n        super(DeepLab, self).__init__()\n        if backbone == 'drn':\n            output_stride = 8\n        if freeze_bn == True:\n            print(\"Use frozen BN in DeepLab\")\n            BatchNorm = FrozenBatchNorm2d\n        else:\n            BatchNorm = nn.BatchNorm2D\n        self.backbone = build_backbone(output_stride, BatchNorm, pretrained)\n        self.aspp = build_aspp(backbone, output_stride, BatchNorm)\n        self.decoder = build_decoder(num_classes, backbone, BatchNorm)\n    def forward(self, input):\n        x, low_level_feat = self.backbone(input)\n        x = self.aspp(x)\n        x = self.decoder(x, low_level_feat)\n        return x\n    def freeze_bn(self):\n        for m in self.sublayers():\n            if isinstance(m, nn.BatchNorm2D):",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/backbones/deeplab_manet.py:27-61"
+    },
+    "445": {
+        "file_id": 48,
+        "content": "The code defines a DeepLab class as a neural network backbone, which uses other modules (backbone, ASPP, and decoder) for feature extraction and classification. It takes input and returns output after passing through these modules. The freeze_bn method can be called to freeze the BatchNorm layers if needed.",
+        "type": "comment"
+    },
+    "446": {
+        "file_id": 48,
+        "content": "                m.eval()\n    def get_1x_lr_params(self):\n        modules = [self.backbone]\n        for i in range(len(modules)):\n            for m in modules[i].named_modules():\n                if isinstance(m[1], nn.Conv2D) or isinstance(\n                        m[1], nn.BatchNorm2D):\n                    for p in m[1].parameters():\n                        if p.requires_grad:\n                            yield p\n    def get_10x_lr_params(self):\n        modules = [self.aspp, self.decoder]\n        for i in range(len(modules)):\n            for m in modules[i].named_modules():\n                if isinstance(m[1], nn.Conv2D) or isinstance(\n                        m[1], nn.BatchNorm2D):\n                    for p in m[1].parameters():\n                        if p.requires_grad:\n                            yield p\nif __name__ == \"__main__\":\n    model = DeepLab(backbone='resnet', output_stride=16)\n    model.eval()\n    input = paddle.rand([2, 3, 513, 513])\n    output = model(input)\n    print(output.shape)",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/backbones/deeplab_manet.py:62-90"
+    },
+    "447": {
+        "file_id": 48,
+        "content": "This code defines a DeepLab model with backbone options, sets the model to evaluation mode, and provides two methods for getting parameters with different learning rates. The main part of the code creates an instance of the model, evaluates it, generates random input data, and outputs its shape.",
+        "type": "comment"
+    },
+    "448": {
+        "file_id": 49,
+        "content": "/applications/EIVideo/EIVideo/paddlevideo/modeling/backbones/resnet_manet.py",
+        "type": "filepath"
+    },
+    "449": {
+        "file_id": 49,
+        "content": "The code defines a ResNet-MANET model with BatchNorm, ReLU activation, and residual blocks using convolution, batch normalization, and max pooling layers. The model is initialized and processes input to obtain output and low-level features as JSON files.",
+        "type": "summary"
+    },
+    "450": {
+        "file_id": 49,
+        "content": "import paddle.nn as nn\n# from reprod_log.utils import paddle2np\nfrom EIVideo.paddlevideo.utils.manet_utils import fill_, zero_\nclass Bottleneck(nn.Layer):\n    expansion = 4\n    def __init__(self,\n                 inplanes,\n                 planes,\n                 stride=1,\n                 dilation=1,\n                 downsample=None,\n                 BatchNorm=None):\n        super(Bottleneck, self).__init__()\n        self.conv1 = nn.Conv2D(inplanes, planes, kernel_size=1, bias_attr=False)\n        self.bn1 = BatchNorm(planes)\n        self.conv2 = nn.Conv2D(planes,\n                               planes,\n                               kernel_size=3,\n                               stride=stride,\n                               dilation=dilation,\n                               padding=dilation,\n                               bias_attr=False)\n        self.bn2 = BatchNorm(planes)\n        self.conv3 = nn.Conv2D(planes,\n                               planes * 4,\n                               kernel_size=1,\n                               bias_attr=False)",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/backbones/resnet_manet.py:1-31"
+    },
+    "451": {
+        "file_id": 49,
+        "content": "This code defines the Bottleneck class for ResNet architecture, consisting of convolutional layers and batch normalization layers. It takes parameters such as inplanes, planes, stride, dilation, downsample, and BatchNorm for initialization.",
+        "type": "comment"
+    },
+    "452": {
+        "file_id": 49,
+        "content": "        self.bn3 = BatchNorm(planes * 4)\n        self.relu = nn.ReLU()\n        self.downsample = downsample\n        self.stride = stride\n        self.dilation = dilation\n    def forward(self, x):\n        residual = x\n        out = self.conv1(x)\n        out = self.bn1(out)\n        out = self.relu(out)\n        out = self.conv2(out)\n        out = self.bn2(out)\n        out = self.relu(out)\n        out = self.conv3(out)\n        out = self.bn3(out)\n        if self.downsample is not None:\n            residual = self.downsample(x)\n        out += residual\n        out = self.relu(out)\n        return out\nclass ResNet(nn.Layer):\n    def __init__(self,\n                 block,\n                 layers,\n                 output_stride,\n                 BatchNorm,\n                 pretrained=None):\n        self.inplanes = 64\n        super(ResNet, self).__init__()\n        blocks = [1, 2, 4]\n        if output_stride == 16:\n            strides = [1, 2, 2, 1]\n            dilations = [1, 1, 1, 2]\n        elif output_stride == 8:\n            strides = [1, 2, 1, 1]",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/backbones/resnet_manet.py:32-75"
+    },
+    "453": {
+        "file_id": 49,
+        "content": "Class \"ResNet\" is a Residual Network backbone with multiple blocks and layers. It utilizes BatchNorm for normalization, ReLU as the activation function, and supports different output strides.",
+        "type": "comment"
+    },
+    "454": {
+        "file_id": 49,
+        "content": "            dilations = [1, 1, 2, 4]\n        else:\n            raise NotImplementedError\n        # Modules\n        self.conv1 = nn.Conv2D(3,\n                               64,\n                               kernel_size=7,\n                               stride=2,\n                               padding=3,\n                               bias_attr=False)\n        self.bn1 = BatchNorm(64)\n        self.relu = nn.ReLU()\n        self.maxpool = nn.MaxPool2D(kernel_size=3, stride=2, padding=1)\n        self.layer1 = self._make_layer(block,\n                                       64,\n                                       layers[0],\n                                       stride=strides[0],\n                                       dilation=dilations[0],\n                                       BatchNorm=BatchNorm)\n        self.layer2 = self._make_layer(block,\n                                       128,\n                                       layers[1],\n                                       stride=strides[1],\n                                       dilation=dilations[1],",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/backbones/resnet_manet.py:76-101"
+    },
+    "455": {
+        "file_id": 49,
+        "content": "The code defines a ResNet-MANET backbone model with BatchNorm and ReLU activation functions. It initializes convolution, batch normalization, ReLU, max pooling layers along with the first two residual blocks based on input parameters such as block type, number of channels, number of layers, and strides. Dilations are assigned based on the provided conditions.",
+        "type": "comment"
+    },
+    "456": {
+        "file_id": 49,
+        "content": "                                       BatchNorm=BatchNorm)\n        self.layer3 = self._make_layer(block,\n                                       256,\n                                       layers[2],\n                                       stride=strides[2],\n                                       dilation=dilations[2],\n                                       BatchNorm=BatchNorm)\n        self.layer4 = self._make_MG_unit(block,\n                                         512,\n                                         blocks=blocks,\n                                         stride=strides[3],\n                                         dilation=dilations[3],\n                                         BatchNorm=BatchNorm)\n        self.init_weight()\n    def _make_layer(self,\n                    block,\n                    planes,\n                    blocks,\n                    stride=1,\n                    dilation=1,\n                    BatchNorm=None):\n        downsample = None\n        if stride != 1 or self.inplanes != planes * block.expansion:",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/backbones/resnet_manet.py:102-127"
+    },
+    "457": {
+        "file_id": 49,
+        "content": "This code defines a ResNet-MANET model, creating layers and functions for the network architecture. It includes the creation of three main layers (layer1, layer2, and layer3), using blocks and specific parameters such as stride and dilation. The _make_MG_unit function is used to create an additional MG unit in the layer4. Finally, the init_weight method initializes the weight for the network.",
+        "type": "comment"
+    },
+    "458": {
+        "file_id": 49,
+        "content": "            downsample = nn.Sequential(\n                nn.Conv2D(self.inplanes,\n                          planes * block.expansion,\n                          kernel_size=1,\n                          stride=stride,\n                          bias_attr=False),\n                BatchNorm(planes * block.expansion),\n            )\n        layers = []\n        layers.append(\n            block(self.inplanes, planes, stride, dilation, downsample,\n                  BatchNorm))\n        self.inplanes = planes * block.expansion\n        for i in range(1, blocks):\n            layers.append(\n                block(self.inplanes,\n                      planes,\n                      dilation=dilation,\n                      BatchNorm=BatchNorm))\n        return nn.Sequential(*layers)\n    def _make_MG_unit(self,\n                      block,\n                      planes,\n                      blocks,\n                      stride=1,\n                      dilation=1,\n                      BatchNorm=None):\n        downsample = None\n        if stride != 1 or self.inplanes != planes * block.expansion:",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/backbones/resnet_manet.py:128-159"
+    },
+    "459": {
+        "file_id": 49,
+        "content": "This code defines a function _make_MG_unit that creates a residual block with downsampling for a ResNet model. The downsample operation is determined based on stride and inplanes values, and BatchNorm layer is optional.",
+        "type": "comment"
+    },
+    "460": {
+        "file_id": 49,
+        "content": "            downsample = nn.Sequential(\n                nn.Conv2D(self.inplanes,\n                          planes * block.expansion,\n                          kernel_size=1,\n                          stride=stride,\n                          bias_attr=False),\n                BatchNorm(planes * block.expansion),\n            )\n        layers = []\n        layers.append(\n            block(self.inplanes,\n                  planes,\n                  stride,\n                  dilation=blocks[0] * dilation,\n                  downsample=downsample,\n                  BatchNorm=BatchNorm))\n        self.inplanes = planes * block.expansion\n        for i in range(1, len(blocks)):\n            layers.append(\n                block(self.inplanes,\n                      planes,\n                      stride=1,\n                      dilation=blocks[i] * dilation,\n                      BatchNorm=BatchNorm))\n        return nn.Sequential(*layers)\n    def forward(self, input):\n        x = self.conv1(input)\n        x = self.bn1(x)\n        x = self.relu(x)",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/backbones/resnet_manet.py:160-191"
+    },
+    "461": {
+        "file_id": 49,
+        "content": "This code defines a ResNet-MANET backbone model. It uses BatchNorm layers and block functions to create multiple convolutional layers with different dilation rates. The forward function applies the first layer, batch normalization, and ReLU activation before returning the sequence of layers.",
+        "type": "comment"
+    },
+    "462": {
+        "file_id": 49,
+        "content": "        x = self.maxpool(x)\n        x = self.layer1(x)\n        low_level_feat = x\n        x = self.layer2(x)\n        x = self.layer3(x)\n        x = self.layer4(x)\n        return x, low_level_feat\n    def init_weight(self):\n        for m in self.sublayers():\n            if isinstance(m, nn.Conv2D):\n                n = m._kernel_size[0] * m._kernel_size[1] * m._out_channels\n                fill_(m.weight, 1)\n            elif isinstance(m, nn.BatchNorm2D):\n                fill_(m.weight, 1)\n                zero_(m.bias)\n        return self.sublayers()\ndef ResNet101(output_stride, BatchNorm, pretrained=None):\n    \"\"\"Constructs a ResNet-101 model.\n    Args:\n        pretrained (bool): If True, returns a model pre-trained on ImageNet\n    \"\"\"\n    model = ResNet(Bottleneck, [3, 4, 23, 3],\n                   output_stride,\n                   BatchNorm,\n                   pretrained=pretrained)\n    return model\ndef build_backbone(output_stride, BatchNorm, pretrained):\n    return ResNet101(output_stride, BatchNorm, pretrained)",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/backbones/resnet_manet.py:192-227"
+    },
+    "463": {
+        "file_id": 49,
+        "content": "This code defines a ResNet101 model with BatchNorm and outputs the features at different stages. It initializes the weights of convolutional layers, and builds a backbone based on output stride and pretrained parameters.",
+        "type": "comment"
+    },
+    "464": {
+        "file_id": 49,
+        "content": "if __name__ == \"__main__\":\n    import paddle\n    model = ResNet101(BatchNorm=nn.BatchNorm2D,\n                      pretrained=True,\n                      output_stride=8)\n    input = paddle.rand([1, 3, 512, 512])\n    output, low_level_feat = model(input)\n    print(output.shape)\n    print(low_level_feat.shape)\n    import json\n    with open('output.txt', 'w') as f:\n        json.dump(output.tolist(), f)\n    with open('low_level_feat.txt', 'w') as f:\n        json.dump(low_level_feat.tolist(), f)",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/backbones/resnet_manet.py:230-245"
+    },
+    "465": {
+        "file_id": 49,
+        "content": "The code initializes a ResNet101 model, generates random input, passes it through the model to obtain output and low-level features, and saves them as JSON files.",
+        "type": "comment"
+    },
+    "466": {
+        "file_id": 50,
+        "content": "/applications/EIVideo/EIVideo/paddlevideo/modeling/builder.py",
+        "type": "filepath"
+    },
+    "467": {
+        "file_id": 50,
+        "content": "This code imports and registers various models for computer vision, defines functions to build these components based on configuration, and uses a \"build\" function to determine the model type.",
+        "type": "summary"
+    },
+    "468": {
+        "file_id": 50,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nfrom .registry import BACKBONES, HEADS, LOSSES, RECOGNIZERS, LOCALIZERS, ROI_EXTRACTORS, DETECTORS, BBOX_ASSIGNERS, BBOX_SAMPLERS, BBOX_CODERS, PARTITIONERS, MULTIMODAL, SEGMENT\nfrom ..utils import build\nfrom .registry import (BACKBONES, BBOX_ASSIGNERS, BBOX_CODERS, BBOX_SAMPLERS,\n                       DETECTORS, ESTIMATORS, HEADS, LOCALIZERS, LOSSES,\n                       MULTIMODAL, PARTITIONERS, RECOGNIZERS, ROI_EXTRACTORS)",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/builder.py:1-19"
+    },
+    "469": {
+        "file_id": 50,
+        "content": "This code imports necessary modules and registers various types of models for a computer vision application. It also includes licensing information and provides utility functions for model building.",
+        "type": "comment"
+    },
+    "470": {
+        "file_id": 50,
+        "content": "def build_backbone(cfg):\n    \"\"\"Build backbone.\"\"\"\n    return build(cfg, BACKBONES)\ndef build_roi_extractor(cfg):\n    \"\"\"Build roi extractor.\"\"\"\n    return build(cfg, ROI_EXTRACTORS)\ndef build_assigner(cfg, **default_args):\n    \"\"\"Builder of box assigner.\"\"\"\n    return build(cfg, BBOX_ASSIGNERS)\ndef build_sampler(cfg, **default_args):\n    \"\"\"Builder of box batch_sampler.\"\"\"\n    return build(cfg, BBOX_SAMPLERS)\ndef build_roi_extractor(cfg):\n    \"\"\"Build roi extractor.\"\"\"\n    return build(cfg, ROI_EXTRACTORS)\ndef build_assigner(cfg, **default_args):\n    \"\"\"Builder of box assigner.\"\"\"\n    return build(cfg, BBOX_ASSIGNERS)\ndef build_sampler(cfg, **default_args):\n    \"\"\"Builder of box batch_sampler.\"\"\"\n    return build(cfg, BBOX_SAMPLERS)\ndef build_head(cfg):\n    \"\"\"Build head.\"\"\"\n    return build(cfg, HEADS)\ndef build_loss(cfg):\n    \"\"\"Build loss.\"\"\"\n    return build(cfg, LOSSES)\ndef build_recognizer(cfg):\n    \"\"\"Build recognizer.\"\"\"\n    return build(cfg, RECOGNIZERS, key='framework')\ndef build_localizer(cfg):\n    \"\"\"Build localizer.\"\"\"",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/builder.py:22-73"
+    },
+    "471": {
+        "file_id": 50,
+        "content": "The code defines functions for building various components of a video processing model, including backbone, roi extractor, assigner, sampler, head, loss, recognizer, and localizer. These functions use the `build()` method to construct the components based on the given configuration (cfg). BACKBONES, ROI_EXTRACTORS, BBOX_ASSIGNERS, BBOX_SAMPLERS, HEADS, LOSSES, RECOGNIZERS, and framework are used as parameters in the `build()` method. The functions repeat twice for each component, which could be a code formatting issue or redundancy.",
+        "type": "comment"
+    },
+    "472": {
+        "file_id": 50,
+        "content": "    return build(cfg, LOCALIZERS, key='framework')\ndef build_segmentationer(cfg):\n    \"\"\"Build detector.\"\"\"\n    return build(cfg, SEGMENT, key='framework')\ndef build_partitioner(cfg):\n    \"\"\"Build partitioner.\"\"\"\n    return build(cfg, PARTITIONERS, key='framework')\ndef build_estimator(cfg):\n    \"\"\"Build estimator.\"\"\"\n    return build(cfg, ESTIMATORS, key='framework')\ndef build_multimodal(cfg):\n    \"\"\"Build multimodal.\"\"\"\n    return build(cfg, MULTIMODAL, key='framework')\ndef build_detector(cfg):\n    \"\"\"Build multimodal.\"\"\"\n    return build(cfg, DETECTORS, key='framework')\ndef build_segment(cfg):\n    \"\"\"Build segment.\"\"\"\n    return build(cfg, SEGMENT, key='framework')\ndef build_model(cfg, key='framework'):\n    cfg_copy = cfg.copy()\n    framework_type = cfg_copy.get(key)\n    if framework_type in RECOGNIZERS:\n        return build_recognizer(cfg)\n    elif framework_type in LOCALIZERS:\n        return build_localizer(cfg)\n    elif framework_type in PARTITIONERS:\n        return build_partitioner(cfg)\n    elif framework_type in DETECTORS:",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/builder.py:74-116"
+    },
+    "473": {
+        "file_id": 50,
+        "content": "The code defines several functions that build different models such as recognizer, localizer, partitioner, estimator, and segment. It uses a \"build\" function to determine which model to create based on the provided configuration (cfg). The model is built by copying the cfg and checking its value for the key 'framework', then calling the appropriate function to build the desired model.",
+        "type": "comment"
+    },
+    "474": {
+        "file_id": 50,
+        "content": "        return build_detector(cfg)\n    elif framework_type in ESTIMATORS:\n        return build_estimator(cfg)\n    elif framework_type in MULTIMODAL:\n        return build_multimodal(cfg)\n    elif framework_type in SEGMENT:\n        return build_segment(cfg)\n    else:\n        raise NotImplementedError",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/builder.py:117-125"
+    },
+    "475": {
+        "file_id": 50,
+        "content": "This code is selecting a function to build a video analysis framework based on the given configuration (cfg) and framework type. If the type matches any of the predefined categories, it returns the corresponding function result. Otherwise, it raises a NotImplementedError.",
+        "type": "comment"
+    },
+    "476": {
+        "file_id": 51,
+        "content": "/applications/EIVideo/EIVideo/paddlevideo/modeling/framework/__init__.py",
+        "type": "filepath"
+    },
+    "477": {
+        "file_id": 51,
+        "content": "This file contains the definitions for BaseSegment and Manet classes, both part of PaddleVideo framework. These classes are likely used in video modeling or segmentation tasks. The code is licensed under Apache License 2.0 and distributed as-is without warranties or conditions.",
+        "type": "summary"
+    },
+    "478": {
+        "file_id": 51,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nfrom .segment import BaseSegment, Manet\n__all__ = ['BaseSegment',\n           'Manet'\n]",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/framework/__init__.py:1-19"
+    },
+    "479": {
+        "file_id": 51,
+        "content": "This file contains the definitions for BaseSegment and Manet classes, both part of PaddleVideo framework. These classes are likely used in video modeling or segmentation tasks. The code is licensed under Apache License 2.0 and distributed as-is without warranties or conditions.",
+        "type": "comment"
+    },
+    "480": {
+        "file_id": 52,
+        "content": "/applications/EIVideo/EIVideo/paddlevideo/modeling/framework/segment/__init__.py",
+        "type": "filepath"
+    },
+    "481": {
+        "file_id": 52,
+        "content": "This code snippet contains copyright and license information, imports necessary modules from the PaddlePaddle framework, and defines two classes 'BaseSegment' and 'Manet'. It also specifies that these are the components included in the current module.",
+        "type": "summary"
+    },
+    "482": {
+        "file_id": 52,
+        "content": "# Copyright (c) 2021  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nfrom .base import BaseSegment\nfrom .manet_stage1 import Manet\n__all__ = [\n    'BaseSegment',\n    'Manet',\n]",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/framework/segment/__init__.py:1-19"
+    },
+    "483": {
+        "file_id": 52,
+        "content": "This code snippet contains copyright and license information, imports necessary modules from the PaddlePaddle framework, and defines two classes 'BaseSegment' and 'Manet'. It also specifies that these are the components included in the current module.",
+        "type": "comment"
+    },
+    "484": {
+        "file_id": 53,
+        "content": "/applications/EIVideo/EIVideo/paddlevideo/modeling/framework/segment/base.py",
+        "type": "filepath"
+    },
+    "485": {
+        "file_id": 53,
+        "content": "This code defines a PaddlePaddle base class for semi-Video Object Segmentation, with methods for training, validating, testing, and inference, determined by the mode argument.",
+        "type": "summary"
+    },
+    "486": {
+        "file_id": 53,
+        "content": "# Copyright (c) 2021  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nfrom abc import abstractmethod\nfrom ... import builder\nimport paddle.nn as nn\nclass BaseSegment(nn.Layer):\n    \"\"\"Base class for semi-Video Object Segmentation.\n    All subclass should overwrite:\n    - Methods:``train_step``, supporting to forward when training.\n    - Methods:``valid_step``, supporting to forward when validating.\n    - Methods:``test_step``, supporting to forward when testing.\n    Args:\n        backbone (dict): Backbone modules to extract feature.\n        head (dict): Head to process feature.\n        loss(dict): Loss function.",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/framework/segment/base.py:2-30"
+    },
+    "487": {
+        "file_id": 53,
+        "content": "This code is a base class for semi-Video Object Segmentation in PaddlePaddle. It requires subclasses to overwrite training, validation, and testing forward methods. The class also includes backbone modules for feature extraction and head modules for processing features, with specified loss functions.",
+        "type": "comment"
+    },
+    "488": {
+        "file_id": 53,
+        "content": "    \"\"\"\n    def __init__(self, backbone=None, head=None, loss=None):\n        super().__init__()\n        if backbone != None:\n            self.backbone = builder.build_backbone(backbone)\n            if hasattr(self.backbone, 'init_weights'):\n                self.backbone.init_weights()\n        else:\n            self.backbone = None\n        if head != None:\n            self.head_name = head.name\n            if head.name == 'IntVOS':\n                head.update({'feature_extracter': self.backbone})\n                self.head = builder.build_head(head)\n            else:\n                self.head = builder.build_head(head)\n            if hasattr(self.head, 'init_weights'):\n                self.head.init_weights()\n        else:\n            self.head = None\n        if loss != None:\n            self.loss = builder.build_loss(loss)\n        else:\n            self.loss = None\n    def forward(self, data_batch, mode='infer', **kwargs):\n        \"\"\"\n        1. Define how the model is going to run, from input to output.\n        2. Console of train, valid, test or infer step",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/framework/segment/base.py:31-59"
+    },
+    "489": {
+        "file_id": 53,
+        "content": "The code initializes a model by building the backbone, head, and loss components. In the forward function, it defines how the model processes input data for training or inference.",
+        "type": "comment"
+    },
+    "490": {
+        "file_id": 53,
+        "content": "        3. Set mode='infer' is used for saving inference model, refer to tools/export_model.py\n        \"\"\"\n        if mode == 'train':\n            return self.train_step(data_batch, **kwargs)\n        elif mode == 'valid':\n            return self.val_step(data_batch, **kwargs)\n        elif mode == 'test':\n            return self.test_step(data_batch, **kwargs)\n        elif mode == 'infer':\n            return self.infer_step(data_batch, **kwargs)\n        else:\n            raise NotImplementedError\n    @abstractmethod\n    def train_step(self, data_batch, **kwargs):\n        \"\"\"Training step.\n        \"\"\"\n        raise NotImplementedError\n    @abstractmethod\n    def val_step(self, data_batch, **kwargs):\n        \"\"\"Validating step.\n        \"\"\"\n        raise NotImplementedError\n    @abstractmethod\n    def test_step(self, data_batch, **kwargs):\n        \"\"\"Test step.\n        \"\"\"\n        raise NotImplementedError\n    @abstractmethod\n    def infer_step(self, data_batch, **kwargs):\n        \"\"\"Infer step.\n        \"\"\"\n        raise NotImplementedError",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/framework/segment/base.py:60-95"
+    },
+    "491": {
+        "file_id": 53,
+        "content": "This code defines a class with different step methods for training, validating, testing, and inference. The mode argument determines which method to execute based on the current task. Each step method is marked as an abstractmethod requiring subclass implementation.",
+        "type": "comment"
+    },
+    "492": {
+        "file_id": 54,
+        "content": "/applications/EIVideo/EIVideo/paddlevideo/modeling/framework/segment/manet_stage1.py",
+        "type": "filepath"
+    },
+    "493": {
+        "file_id": 54,
+        "content": "The code imports modules, defines a Manet class for video segmentation using PaddleVideo's Manet_Stage1 model, and implements training, inference, mask generation, parallel processing, and frame saving steps. It is for deep learning models, visualizations, and measuring time efficiency.",
+        "type": "summary"
+    },
+    "494": {
+        "file_id": 54,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nfrom EIVideo.paddlevideo.loader.builder import build_pipeline\nfrom EIVideo.paddlevideo.loader.pipelines import ToTensor_manet\nimport os\nimport timeit\nimport paddle\nfrom PIL import Image\nfrom davisinteractive.utils.scribbles import scribbles2mask, annotated_frames\nfrom paddle import nn\nfrom EIVideo.paddlevideo.utils import load\nfrom EIVideo.paddlevideo.utils.manet_utils import float_, _palette, damage_masks, long_, write_dict, rough_ROI",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/framework/segment/manet_stage1.py:1-26"
+    },
+    "495": {
+        "file_id": 54,
+        "content": "This code is importing necessary modules and functions from different locations, including image processing utilities and machine learning libraries. It also defines some specific functions related to the MANET model in PaddlePaddle. The code is part of a larger framework for video modeling and image segmentation tasks.",
+        "type": "comment"
+    },
+    "496": {
+        "file_id": 54,
+        "content": "from EIVideo.api import load_video, get_scribbles, submit_masks\nfrom ...builder import build_model\nfrom ...registry import SEGMENT\nfrom .base import BaseSegment\n# if cfg.MODEL.framework == \"Manet\":\n#     cfg_helper = {\"knns\": 1,\n#                   \"is_save_image\": True}\n#     cfg.update(cfg_helper)\n#     build_model(cfg['MODEL']).test_step(**cfg,\n#                                         weights=weights,\n#                                         parallel=False)\n#     return\n@SEGMENT.register()\nclass Manet(BaseSegment):\n    def __init__(self, backbone=None, head=None, **cfg):\n        super().__init__(backbone, head, **cfg)\n    def train_step(self, data_batch, step, **cfg):\n        pass\n    def val_step(self, data_batch, **kwargs):\n        pass\n    def infer_step(self, data_batch, **kwargs):\n        \"\"\"Define how the model is going to test, from input to output.\"\"\"\n        pass\n    def test_step(self, weights, parallel=True, is_save_image=True, **cfg):\n        # 1. Construct model.\n        cfg['MODEL'].head.pretrained = ''",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/framework/segment/manet_stage1.py:27-61"
+    },
+    "497": {
+        "file_id": 54,
+        "content": "The code is defining a class \"Manet\" that inherits from the BaseSegment class for video segmentation. It has train_step, val_step, infer_step, and test_step methods which are defined but not implemented. The class checks if the model configuration is Manet and then builds the model using build_model function before calling the test_step method with additional parameters like weights and parallel set to False.",
+        "type": "comment"
+    },
+    "498": {
+        "file_id": 54,
+        "content": "        cfg['MODEL'].head.test_mode = True\n        model = build_model(cfg['MODEL'])\n        if parallel:\n            model = paddle.DataParallel(model)\n        # 2. Construct data.\n        sequence = cfg[\"video_path\"].split('/')[-1].split('.')[0]\n        obj_nums = 1\n        images, _ = load_video(cfg[\"video_path\"], 480)\n        print(\"stage1 load_video success\")\n        # [195, 389, 238, 47, 244, 374, 175, 399]\n        # .shape: (502, 480, 600, 3)\n        report_save_dir = cfg.get(\"output_dir\",\n                                  f\"./output/{cfg['model_name']}\")\n        if not os.path.exists(report_save_dir):\n            os.makedirs(report_save_dir)\n            # Configuration used in the challenges\n        max_nb_interactions = 8  # Maximum number of interactions\n        # Interactive parameters\n        model.eval()\n        state_dicts_ = load(weights)['state_dict']\n        state_dicts = {}\n        for k, v in state_dicts_.items():\n            if 'num_batches_tracked' not in k:\n                state_dicts['head.' + k] = v",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/framework/segment/manet_stage1.py:62-87"
+    },
+    "499": {
+        "file_id": 54,
+        "content": "This code initializes the model with test mode enabled, builds it using a function, potentially makes it parallel, loads a video for data, prints \"stage1 load_video success\" message, creates a report save directory if it doesn't exist, sets the maximum number of interactions to 8, and evaluates the model.",
+        "type": "comment"
+    }
+}

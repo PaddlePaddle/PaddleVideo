@@ -1,0 +1,547 @@
+{
+    "1600": {
+        "file_id": 138,
+        "content": "        else:\n            self.skip = None\n        self.relu = nn.ReLU()\n        rep = []\n        filters = inplanes\n        if grow_first:\n            rep.append(self.relu)\n            rep.append(\n                SeparableConv2d(inplanes,\n                                planes,\n                                3,\n                                1,\n                                dilation,\n                                BatchNorm=BatchNorm))\n            rep.append(BatchNorm(planes))\n            filters = planes\n        for i in range(reps - 1):\n            rep.append(self.relu)\n            rep.append(\n                SeparableConv2d(filters,\n                                filters,\n                                3,\n                                1,\n                                dilation,\n                                BatchNorm=BatchNorm))\n            rep.append(BatchNorm(filters))\n        if not grow_first:\n            rep.append(self.relu)\n            rep.append(\n                SeparableConv2d(inplanes,\n                                planes,",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/backbone/xception.py:68-102"
+    },
+    "1601": {
+        "file_id": 138,
+        "content": "The code creates a backbone network with xception structure. It initializes the skip connection, adds a ReLU activation function, and appends layers of separable convolutions with batch normalization. The number of reps determines the number of such layers. If grow_first is True, it starts with a growth block; otherwise, it ends with one.",
+        "type": "comment"
+    },
+    "1602": {
+        "file_id": 138,
+        "content": "                                3,\n                                1,\n                                dilation,\n                                BatchNorm=BatchNorm))\n            rep.append(BatchNorm(planes))\n        if stride != 1:\n            rep.append(self.relu)\n            rep.append(\n                SeparableConv2d(planes, planes, 3, 2, BatchNorm=BatchNorm))\n            rep.append(BatchNorm(planes))\n        if stride == 1 and is_last:\n            rep.append(self.relu)\n            rep.append(\n                SeparableConv2d(planes, planes, 3, 1, BatchNorm=BatchNorm))\n            rep.append(BatchNorm(planes))\n        if not start_with_relu:\n            rep = rep[1:]\n        self.rep = nn.Sequential(*rep)\n    def forward(self, inp):\n        x = self.rep(inp)\n        if self.skip is not None:\n            skip = self.skip(inp)\n            skip = self.skipbn(skip)\n        else:\n            skip = inp\n        x = x + skip\n        return x\nclass AlignedXception(nn.Layer):\n    \"\"\"\n    Modified Alighed Xception\n    \"\"\"\n    def __init__(self, output_stride, BatchNorm, pretrained=True):",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/backbone/xception.py:103-144"
+    },
+    "1603": {
+        "file_id": 138,
+        "content": "This code defines a class for the AlignedXception network. It uses separable convolutions with batch normalization and optionally applies ReLU activations at different stages. The function forward performs inference by adding input skip connections and applying batch normalization to skip connections if present.",
+        "type": "comment"
+    },
+    "1604": {
+        "file_id": 138,
+        "content": "        super(AlignedXception, self).__init__()\n        if output_stride == 16:\n            entry_block3_stride = 2\n            middle_block_dilation = 1\n            exit_block_dilations = (1, 2)\n        elif output_stride == 8:\n            entry_block3_stride = 1\n            middle_block_dilation = 2\n            exit_block_dilations = (2, 4)\n        else:\n            raise NotImplementedError\n        # Entry flow\n        self.conv1 = nn.Conv2D(3, 32, 3, stride=2, padding=1, bias_attr=False)\n        self.bn1 = BatchNorm(32)\n        self.relu = nn.ReLU()\n        self.conv2 = nn.Conv2D(32, 64, 3, stride=1, padding=1, bias_attr=False)\n        self.bn2 = BatchNorm(64)\n        self.block1 = Block(64,\n                            128,\n                            reps=2,\n                            stride=2,\n                            BatchNorm=BatchNorm,\n                            start_with_relu=False)\n        self.block2 = Block(128,\n                            256,\n                            reps=2,\n                            stride=2,",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/backbone/xception.py:145-175"
+    },
+    "1605": {
+        "file_id": 138,
+        "content": "This code initializes an AlignedXception network. It sets parameters based on the output_stride, defines convolutional layers and batch normalization for entry flow, and instantiates two blocks with specified dimensions and repetitions.",
+        "type": "comment"
+    },
+    "1606": {
+        "file_id": 138,
+        "content": "                            BatchNorm=BatchNorm,\n                            start_with_relu=False,\n                            grow_first=True)\n        self.block3 = Block(256,\n                            728,\n                            reps=2,\n                            stride=entry_block3_stride,\n                            BatchNorm=BatchNorm,\n                            start_with_relu=True,\n                            grow_first=True,\n                            is_last=True)\n        # Middle flow\n        self.block4 = Block(728,\n                            728,\n                            reps=3,\n                            stride=1,\n                            dilation=middle_block_dilation,\n                            BatchNorm=BatchNorm,\n                            start_with_relu=True,\n                            grow_first=True)\n        self.block5 = Block(728,\n                            728,\n                            reps=3,\n                            stride=1,\n                            dilation=middle_block_dilation,",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/backbone/xception.py:176-201"
+    },
+    "1607": {
+        "file_id": 138,
+        "content": "The code defines the Xception backbone network, consisting of blocks for feature extraction. The first block (entry_block) has 3x3 convolutions and BatchNorm. The block3 has two repetitions with a stride and is the last block. Middle blocks (block4 and block5) have three repetitions with dilation applied to the filter. All blocks use BatchNorm, start with ReLU activation, and grow first with subsequent layers.",
+        "type": "comment"
+    },
+    "1608": {
+        "file_id": 138,
+        "content": "                            BatchNorm=BatchNorm,\n                            start_with_relu=True,\n                            grow_first=True)\n        self.block6 = Block(728,\n                            728,\n                            reps=3,\n                            stride=1,\n                            dilation=middle_block_dilation,\n                            BatchNorm=BatchNorm,\n                            start_with_relu=True,\n                            grow_first=True)\n        self.block7 = Block(728,\n                            728,\n                            reps=3,\n                            stride=1,\n                            dilation=middle_block_dilation,\n                            BatchNorm=BatchNorm,\n                            start_with_relu=True,\n                            grow_first=True)\n        self.block8 = Block(728,\n                            728,\n                            reps=3,\n                            stride=1,\n                            dilation=middle_block_dilation,",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/backbone/xception.py:202-225"
+    },
+    "1609": {
+        "file_id": 138,
+        "content": "The code defines several blocks (block4 to block8) using the Block class with specific parameters for number of input and output channels, repetitions, stride, dilation, BatchNorm implementation, starting with ReLU activation, and growing first. These blocks are used in a Xception network for image classification or detection tasks.",
+        "type": "comment"
+    },
+    "1610": {
+        "file_id": 138,
+        "content": "                            BatchNorm=BatchNorm,\n                            start_with_relu=True,\n                            grow_first=True)\n        self.block9 = Block(728,\n                            728,\n                            reps=3,\n                            stride=1,\n                            dilation=middle_block_dilation,\n                            BatchNorm=BatchNorm,\n                            start_with_relu=True,\n                            grow_first=True)\n        self.block10 = Block(728,\n                             728,\n                             reps=3,\n                             stride=1,\n                             dilation=middle_block_dilation,\n                             BatchNorm=BatchNorm,\n                             start_with_relu=True,\n                             grow_first=True)\n        self.block11 = Block(728,\n                             728,\n                             reps=3,\n                             stride=1,\n                             dilation=middle_block_dilation,",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/backbone/xception.py:226-249"
+    },
+    "1611": {
+        "file_id": 138,
+        "content": "The code defines three consecutive blocks (block9, block10, and block11) in a neural network architecture. Each block takes input and output channels of 728, with 3 repetitions of convolution and batch normalization layers, and an increasing dilation factor (middle_block_dilation). All blocks start with ReLU activation and grow the number of filters first.",
+        "type": "comment"
+    },
+    "1612": {
+        "file_id": 138,
+        "content": "                             BatchNorm=BatchNorm,\n                             start_with_relu=True,\n                             grow_first=True)\n        self.block12 = Block(728,\n                             728,\n                             reps=3,\n                             stride=1,\n                             dilation=middle_block_dilation,\n                             BatchNorm=BatchNorm,\n                             start_with_relu=True,\n                             grow_first=True)\n        self.block13 = Block(728,\n                             728,\n                             reps=3,\n                             stride=1,\n                             dilation=middle_block_dilation,\n                             BatchNorm=BatchNorm,\n                             start_with_relu=True,\n                             grow_first=True)\n        self.block14 = Block(728,\n                             728,\n                             reps=3,\n                             stride=1,\n                             dilation=middle_block_dilation,",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/backbone/xception.py:250-273"
+    },
+    "1613": {
+        "file_id": 138,
+        "content": "The code initializes four block instances, each with 728 input and output channels, performing a series of convolutions with 3 repetitions, a stride of 1, dilation determined by middle_block_dilation, using BatchNorm for normalization, starting with ReLU activation, and growing the first layer.",
+        "type": "comment"
+    },
+    "1614": {
+        "file_id": 138,
+        "content": "                             BatchNorm=BatchNorm,\n                             start_with_relu=True,\n                             grow_first=True)\n        self.block15 = Block(728,\n                             728,\n                             reps=3,\n                             stride=1,\n                             dilation=middle_block_dilation,\n                             BatchNorm=BatchNorm,\n                             start_with_relu=True,\n                             grow_first=True)\n        self.block16 = Block(728,\n                             728,\n                             reps=3,\n                             stride=1,\n                             dilation=middle_block_dilation,\n                             BatchNorm=BatchNorm,\n                             start_with_relu=True,\n                             grow_first=True)\n        self.block17 = Block(728,\n                             728,\n                             reps=3,\n                             stride=1,\n                             dilation=middle_block_dilation,",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/backbone/xception.py:274-297"
+    },
+    "1615": {
+        "file_id": 138,
+        "content": "The code initializes three blocks, each with 728 input and output channels, repeating the process 3 times, and applying BatchNormalization, starting with ReLU activation, and growing first. These blocks are part of the Xception network in the Ma-Net application for image classification tasks.",
+        "type": "comment"
+    },
+    "1616": {
+        "file_id": 138,
+        "content": "                             BatchNorm=BatchNorm,\n                             start_with_relu=True,\n                             grow_first=True)\n        self.block18 = Block(728,\n                             728,\n                             reps=3,\n                             stride=1,\n                             dilation=middle_block_dilation,\n                             BatchNorm=BatchNorm,\n                             start_with_relu=True,\n                             grow_first=True)\n        self.block19 = Block(728,\n                             728,\n                             reps=3,\n                             stride=1,\n                             dilation=middle_block_dilation,\n                             BatchNorm=BatchNorm,\n                             start_with_relu=True,\n                             grow_first=True)\n        # Exit flow\n        self.block20 = Block(728,\n                             1024,\n                             reps=2,\n                             stride=1,\n                             dilation=exit_block_dilations[0],",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/backbone/xception.py:298-323"
+    },
+    "1617": {
+        "file_id": 138,
+        "content": "The code defines several blocks (block17 to block20) using the Block class. Each block has a specific number of input and output channels, repetitions, stride, dilation rate, BatchNorm type, start with relu, and grow first parameters. The last block (block20) connects its output to the next layer in the network.",
+        "type": "comment"
+    },
+    "1618": {
+        "file_id": 138,
+        "content": "                             BatchNorm=BatchNorm,\n                             start_with_relu=True,\n                             grow_first=False,\n                             is_last=True)\n        self.conv3 = SeparableConv2d(1024,\n                                     1536,\n                                     3,\n                                     stride=1,\n                                     dilation=exit_block_dilations[1],\n                                     BatchNorm=BatchNorm)\n        self.bn3 = BatchNorm(1536)\n        self.conv4 = SeparableConv2d(1536,\n                                     1536,\n                                     3,\n                                     stride=1,\n                                     dilation=exit_block_dilations[1],\n                                     BatchNorm=BatchNorm)\n        self.bn4 = BatchNorm(1536)\n        self.conv5 = SeparableConv2d(1536,\n                                     2048,\n                                     3,\n                                     stride=1,",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/backbone/xception.py:324-348"
+    },
+    "1619": {
+        "file_id": 138,
+        "content": "This code defines a series of SeparableConv2d layers with associated BatchNorm layers in an Xception network. The layers have increasing output dimensions and are used for feature extraction and image classification tasks.",
+        "type": "comment"
+    },
+    "1620": {
+        "file_id": 138,
+        "content": "                                     dilation=exit_block_dilations[1],\n                                     BatchNorm=BatchNorm)\n        self.bn5 = BatchNorm(2048)\n        # Init weights\n        self._init_weight()\n        # Load pretrained model\n        if pretrained:\n            self._load_pretrained_model()\n    def forward(self, x):\n        # Entry flow\n        x = self.conv1(x)\n        x = self.bn1(x)\n        x = self.relu(x)\n        x = self.conv2(x)\n        x = self.bn2(x)\n        x = self.relu(x)\n        x = self.block1(x)\n        # add relu here\n        x = self.relu(x)\n        low_level_feat = x\n        x = self.block2(x)\n        x = self.block3(x)\n        # Middle flow\n        x = self.block4(x)\n        x = self.block5(x)\n        x = self.block6(x)\n        x = self.block7(x)\n        x = self.block8(x)\n        x = self.block9(x)\n        x = self.block10(x)\n        x = self.block11(x)\n        x = self.block12(x)\n        x = self.block13(x)\n        x = self.block14(x)\n        x = self.block15(x)\n        x = self.block16(x)",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/backbone/xception.py:349-390"
+    },
+    "1621": {
+        "file_id": 138,
+        "content": "The code defines a neural network model with 16 blocks and Batch Normalization. It initializes the weights, has an option to load pre-trained weights, and includes ReLU activation functions.",
+        "type": "comment"
+    },
+    "1622": {
+        "file_id": 138,
+        "content": "        x = self.block17(x)\n        x = self.block18(x)\n        x = self.block19(x)\n        # Exit flow\n        x = self.block20(x)\n        x = self.relu(x)\n        x = self.conv3(x)\n        x = self.bn3(x)\n        x = self.relu(x)\n        x = self.conv4(x)\n        x = self.bn4(x)\n        x = self.relu(x)\n        x = self.conv5(x)\n        x = self.bn5(x)\n        x = self.relu(x)\n        return x, low_level_feat\n    def _init_weight(self):\n        for m in self.sublayers():\n            if isinstance(m, nn.Conv2D):\n                n = m._kernel_size[0] * m._kernel_size[1] * m._out_channels\n                m.weight.normal_(0, math.sqrt(2. / n))\n            elif isinstance(m, nn.BatchNorm2D):\n                from utils.api import fill_\n                fill_(m.weight, 1)\n                from utils.api import zero_\n                zero_(m.bias)\n    def _load_pretrained_model(self):\n        import paddlehub as hub\n        pretrain_dict = hub.Module(name=\"xception71_imagenet\")\n        model_dict = {}\n        state_dict = self.state_dict()",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/backbone/xception.py:391-427"
+    },
+    "1623": {
+        "file_id": 138,
+        "content": "The code defines a neural network model, initializes its weights, and has methods for processing input and loading pre-trained models. The Xception model is used in image classification tasks. It consists of several convolutional layers with batch normalization and ReLU activation functions. The _init_weight method sets up the initial weights for the convolutional layers using a normal distribution. The _load_pretrained_model method allows loading a pre-trained Xception model from the PaddleHub library, which can be useful when transferring knowledge from an existing dataset to a new task.",
+        "type": "comment"
+    },
+    "1624": {
+        "file_id": 138,
+        "content": "        for k, v in pretrain_dict.items():\n            if k in model_dict:\n                if 'pointwise' in k:\n                    v = v.unsqueeze(-1).unsqueeze(-1)\n                if k.startswith('block11'):\n                    model_dict[k] = v\n                    model_dict[k.replace('block11', 'block12')] = v\n                    model_dict[k.replace('block11', 'block13')] = v\n                    model_dict[k.replace('block11', 'block14')] = v\n                    model_dict[k.replace('block11', 'block15')] = v\n                    model_dict[k.replace('block11', 'block16')] = v\n                    model_dict[k.replace('block11', 'block17')] = v\n                    model_dict[k.replace('block11', 'block18')] = v\n                    model_dict[k.replace('block11', 'block19')] = v\n                elif k.startswith('block12'):\n                    model_dict[k.replace('block12', 'block20')] = v\n                elif k.startswith('bn3'):\n                    model_dict[k] = v\n                    model_dict[k.replace('bn3', 'bn4')] = v",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/backbone/xception.py:429-447"
+    },
+    "1625": {
+        "file_id": 138,
+        "content": "The code iterates through the pre-trained dictionary, updating specific keys in the model_dict. It handles 'pointwise' layers by unsqueezing the input, and adjusts keys starting with 'block11', 'block12', or 'bn3' by replacing their suffixes to match corresponding blocks. This is likely a method for adapting pre-trained weights to match the target network's structure.",
+        "type": "comment"
+    },
+    "1626": {
+        "file_id": 138,
+        "content": "                elif k.startswith('conv4'):\n                    model_dict[k.replace('conv4', 'conv5')] = v\n                elif k.startswith('bn4'):\n                    model_dict[k.replace('bn4', 'bn5')] = v\n                else:\n                    model_dict[k] = v\n        state_dict.update(model_dict)\n        self.set_state_dict(state_dict)",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/backbone/xception.py:448-455"
+    },
+    "1627": {
+        "file_id": 138,
+        "content": "This code snippet renames 'conv4' and 'bn4' parameters to 'conv5' and 'bn5', respectively, before updating the model dictionary. The final state dictionary is then set as the model's state dictionary.",
+        "type": "comment"
+    },
+    "1628": {
+        "file_id": 139,
+        "content": "/applications/Ma-Net/networks/decoder.py",
+        "type": "filepath"
+    },
+    "1629": {
+        "file_id": 139,
+        "content": "Decoder neural network layer uses backbone features, 2D convolution, batch normalization, and ReLU activation for class prediction. The `build_decoder` function constructs a decoder network with specified number of classes, backbone architecture, and Batch Normalization implementation.",
+        "type": "summary"
+    },
+    "1630": {
+        "file_id": 139,
+        "content": "import math\nimport paddle\nimport paddle.nn as nn\nimport paddle.nn.functional as F\nfrom utils.api import kaiming_normal_\nclass Decoder(nn.Layer):\n    def __init__(self, num_classes, backbone, BatchNorm):\n        super(Decoder, self).__init__()\n        if backbone == 'resnet' or backbone == 'drn' or backbone == 'resnet_edge':\n            low_level_inplanes = 256\n        elif backbone == 'xception':\n            low_level_inplanes = 128\n        elif backbone == 'mobilenet':\n            low_level_inplanes = 24\n        else:\n            raise NotImplementedError\n        self.conv1 = nn.Conv2D(low_level_inplanes, 48, 1, bias_attr=False)\n        self.bn1 = BatchNorm(48)\n        self.relu = nn.ReLU(True)\n        self.last_conv = nn.Sequential(\n            nn.Conv2D(304,\n                      256,\n                      kernel_size=3,\n                      stride=1,\n                      padding=1,\n                      bias_attr=False), BatchNorm(256), nn.ReLU(True),\n            nn.Sequential(),\n            nn.Conv2D(256,\n                      256,",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/decoder.py:1-32"
+    },
+    "1631": {
+        "file_id": 139,
+        "content": "Decoder is a neural network layer that takes in features from backbone and outputs predicted classes. It initializes convolution layers with different input planes based on the specified backbone. It includes batch normalization, ReLU activation, and sequential convolutions for feature extraction.",
+        "type": "comment"
+    },
+    "1632": {
+        "file_id": 139,
+        "content": "                      kernel_size=3,\n                      stride=1,\n                      padding=1,\n                      bias_attr=False), BatchNorm(256), nn.ReLU(True),\n            nn.Sequential())\n        self._init_weight()\n    def forward(self, x, low_level_feat):\n        low_level_feat = self.conv1(low_level_feat)\n        low_level_feat = self.bn1(low_level_feat)\n        low_level_feat = self.relu(low_level_feat)\n        x = F.interpolate(x,\n                          size=low_level_feat.shape[2:],\n                          mode='bilinear',\n                          align_corners=True)\n        x = paddle.concat((x, low_level_feat), axis=1)\n        x = self.last_conv(x)\n        return x\n    def _init_weight(self):\n        for m in self.sublayers():\n            if isinstance(m, nn.Conv2D):\n                kaiming_normal_(m.weight)\n            elif isinstance(m, nn.BatchNorm2D):\n                from utils.api import fill_\n                fill_(m.weight, 1)\n                from utils.api import zero_\n                zero_(m.bias)",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/decoder.py:33-62"
+    },
+    "1633": {
+        "file_id": 139,
+        "content": "Decoder network with 2D convolution, batch normalization, and ReLU activation. Initializes weight using Kaiming Normal distribution.",
+        "type": "comment"
+    },
+    "1634": {
+        "file_id": 139,
+        "content": "def build_decoder(num_classes, backbone, BatchNorm):\n    return Decoder(num_classes, backbone, BatchNorm)",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/decoder.py:65-66"
+    },
+    "1635": {
+        "file_id": 139,
+        "content": "The function `build_decoder` takes parameters `num_classes`, `backbone`, and `BatchNorm` and returns an instance of the `Decoder` class. The purpose is to construct a decoder network for the specified number of classes, using the chosen backbone architecture and Batch Normalization implementation.",
+        "type": "comment"
+    },
+    "1636": {
+        "file_id": 140,
+        "content": "/applications/Ma-Net/networks/deeplab.py",
+        "type": "filepath"
+    },
+    "1637": {
+        "file_id": 140,
+        "content": "This code defines a `FrozenBatchNorm2d` class for batch normalization without updating statistics and a `DeepLab` class with backbone, ASPP module, decoder, and methods to freeze batch norm layers. It also provides a function that iterates through certain modules, yielding parameters requiring gradient updates for potentially applying different learning rates.",
+        "type": "summary"
+    },
+    "1638": {
+        "file_id": 140,
+        "content": "import paddle\nimport paddle.nn as nn\nimport paddle.nn.functional as F\nfrom networks.aspp import build_aspp\nfrom networks.decoder import build_decoder\nfrom networks.backbone import build_backbone\nclass FrozenBatchNorm2d(nn.Layer):\n    def __init__(self, n):\n        super(FrozenBatchNorm2d, self).__init__()\n        self.register_buffer(\"weight\", paddle.ones(n))\n        self.register_buffer(\"bias\", paddle.zeros(n))\n        self.register_buffer(\"running_mean\", paddle.zeros(n))\n        self.register_buffer(\"running_var\", paddle.ones(n))\n    def forward(self, x):\n        if x.dtype == paddle.float16:\n            self.weight = self.weight.half()\n            self.bias = self.bias.half()\n            self.running_mean = self.running_mean.half()\n            self.running_var = self.running_var.half()\n        scale = self.weight * self.running_var.rsqrt()\n        bias = self.bias - self.running_mean * scale\n        scale = scale.reshape(1, -1, 1, 1)\n        bias = bias.reshape(1, -1, 1, 1)\n        return x * scale + bias\nclass DeepLab(nn.Layer):",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/deeplab.py:1-31"
+    },
+    "1639": {
+        "file_id": 140,
+        "content": "The code defines a `FrozenBatchNorm2d` class that extends the `nn.Layer` and overrides the `forward()` function to perform batch normalization without updating statistics. The `DeepLab` class inherits from `nn.Layer` and serves as a backbone for the deeplab network architecture, incorporating a backbone network, ASPP module, and decoder.",
+        "type": "comment"
+    },
+    "1640": {
+        "file_id": 140,
+        "content": "    def __init__(self,\n                 backbone='resnet',\n                 output_stride=16,\n                 num_classes=21,\n                 sync_bn=True,\n                 freeze_bn=False):\n        super(DeepLab, self).__init__()\n        if backbone == 'drn':\n            output_stride = 8\n        if freeze_bn == True:\n            print(\"Use frozen BN in DeepLab\")\n            BatchNorm = FrozenBatchNorm2d\n        else:\n            BatchNorm = nn.BatchNorm2D\n        self.backbone = build_backbone(backbone, output_stride, BatchNorm)\n        self.aspp = build_aspp(backbone, output_stride, BatchNorm)\n        self.decoder = build_decoder(num_classes, backbone, BatchNorm)\n    def forward(self, input):\n        x, low_level_feat = self.backbone(input)\n        x = self.aspp(x)\n        x = self.decoder(x, low_level_feat)\n        return x\n    def freeze_bn(self):\n        for m in self.sublayers():\n            if isinstance(m, nn.BatchNorm2D):\n                m.eval()\n    def get_1x_lr_params(self):\n        modules = [self.backbone]",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/deeplab.py:32-64"
+    },
+    "1641": {
+        "file_id": 140,
+        "content": "This code defines the DeepLab class with an initializer that takes arguments for backbone, output stride, number of classes, and whether to freeze batch normalization layers. It also includes methods to freeze batch norm layers, retrieve parameters for 1x learning rate, and a forward pass function.",
+        "type": "comment"
+    },
+    "1642": {
+        "file_id": 140,
+        "content": "        for i in range(len(modules)):\n            for m in modules[i].named_modules():\n                if isinstance(m[1], nn.Conv2D) or isinstance(\n                        m[1], nn.BatchNorm2D):\n                    for p in m[1].parameters():\n                        if p.requires_grad:\n                            yield p\n    def get_10x_lr_params(self):\n        modules = [self.aspp, self.decoder]\n        for i in range(len(modules)):\n            for m in modules[i].named_modules():\n                if isinstance(m[1], nn.Conv2D) or isinstance(\n                        m[1], nn.BatchNorm2D):\n                    for p in m[1].parameters():\n                        if p.requires_grad:\n                            yield p",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/deeplab.py:65-81"
+    },
+    "1643": {
+        "file_id": 140,
+        "content": "This code defines a function that iterates through certain modules of the network, specifically looking for convolution and batch normalization layers. It then yields the parameters of these layers that require gradient updates. This process is used in both the main body and the get_10x_lr_params method to potentially apply different learning rates to specific parts of the model.",
+        "type": "comment"
+    },
+    "1644": {
+        "file_id": 141,
+        "content": "/applications/Ma-Net/networks/loss.py",
+        "type": "filepath"
+    },
+    "1645": {
+        "file_id": 141,
+        "content": "The given code defines a custom loss function, Added_CrossEntropyLoss, which extends nn.Layer class and optionally uses hard example mining for better training by computing the loss for top k percent pixels. This loss function is designed to improve performance in image classification tasks using a weighted sum of binary cross-entropy and pixel loss with top-k pixel selection.",
+        "type": "summary"
+    },
+    "1646": {
+        "file_id": 141,
+        "content": "import paddle\nimport paddle.nn as nn\nimport os\nclass Added_BCEWithLogitsLoss(nn.Layer):\n    def __init__(self,\n                 top_k_percent_pixels=None,\n                 hard_example_mining_step=100000):\n        super(Added_BCEWithLogitsLoss, self).__init__()\n        self.top_k_percent_pixels = top_k_percent_pixels\n        if top_k_percent_pixels is not None:\n            assert (top_k_percent_pixels > 0 and top_k_percent_pixels < 1)\n        self.hard_example_mining_step = hard_example_mining_step\n        if self.top_k_percent_pixels == None:\n            self.bceloss = nn.BCEWithLogitsLoss(reduction='mean')\n        else:\n            self.bceloss = nn.BCEWithLogitsLoss(reduction='none')\n    def forward(self, dic_tmp, y, step):\n        final_loss = 0\n        for seq_name in dic_tmp.keys():\n            pred_logits = dic_tmp[seq_name]\n            gts = y[seq_name]\n            if self.top_k_percent_pixels == None:\n                final_loss += self.bceloss(pred_logits, gts)\n            else:\n                # Only compute the loss for top k percent pixels.",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/loss.py:1-28"
+    },
+    "1647": {
+        "file_id": 141,
+        "content": "This code defines a custom loss function that extends `nn.Layer` and uses BCEWithLogitsLoss from PaddlePaddle. It has an optional argument for top_k_percent_pixels to compute the loss only for the top k percent of pixels. If top_k_percent_pixels is None, it computes the mean loss for all pixels. The function also has a hard_example_mining_step parameter that may be used in future implementations but currently unused.",
+        "type": "comment"
+    },
+    "1648": {
+        "file_id": 141,
+        "content": "                # First, compute the loss for all pixels. Note we do not put the loss\n                # to loss_collection and set reduction = None to keep the shape.\n                num_pixels = float(pred_logits.shape[2] * pred_logits.shape[3])\n                pred_logits = pred_logits.view(\n                    -1, pred_logits.shape[1],\n                    pred_logits.shape[2] * pred_logits.shape[3])\n                gts = gts.view(-1, gts.shape[1], gts.shape[2] * gts.shape[3])\n                pixel_losses = self.bceloss(pred_logits, gts)\n                if self.hard_example_mining_step == 0:\n                    top_k_pixels = int(self.top_k_percent_pixels * num_pixels)\n                else:\n                    ratio = min(1.0,\n                                step / float(self.hard_example_mining_step))\n                    top_k_pixels = int((ratio * self.top_k_percent_pixels +\n                                        (1.0 - ratio)) * num_pixels)\n                _, top_k_indices = paddle.topk(pixel_losses,",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/loss.py:29-44"
+    },
+    "1649": {
+        "file_id": 141,
+        "content": "Computes the loss for all pixels, without adding to loss_collection and keeps the shape. Then, based on hard example mining step, determines the number of top K pixels to consider.",
+        "type": "comment"
+    },
+    "1650": {
+        "file_id": 141,
+        "content": "                                               k=top_k_pixels,\n                                               axis=2)\n                final_loss += nn.BCEWithLogitsLoss(weight=top_k_indices,\n                                                   reduction='mean')(\n                                                       pred_logits, gts)\n        return final_loss\nclass Added_CrossEntropyLoss(nn.Layer):\n    def __init__(self,\n                 top_k_percent_pixels=None,\n                 hard_example_mining_step=100000):\n        super(Added_CrossEntropyLoss, self).__init__()\n        self.top_k_percent_pixels = top_k_percent_pixels\n        if top_k_percent_pixels is not None:\n            assert (top_k_percent_pixels > 0 and top_k_percent_pixels < 1)\n        self.hard_example_mining_step = hard_example_mining_step\n        if self.top_k_percent_pixels == None:\n            self.celoss = nn.CrossEntropyLoss(ignore_index=255,\n                                              reduction='mean')\n        else:\n            self.celoss = nn.CrossEntropyLoss(ignore_index=255,",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/loss.py:45-67"
+    },
+    "1651": {
+        "file_id": 141,
+        "content": "This code defines a custom loss function, Added_CrossEntropyLoss, that extends nn.Layer class. It has an optional parameter, top_k_percent_pixels, which determines whether to use hard example mining for better training. If this parameter is None, it falls back to using nn.CrossEntropyLoss with mean reduction. The code also initializes other attributes like self.top_k_percent_pixels and self.hard_example_mining_step based on the provided values.",
+        "type": "comment"
+    },
+    "1652": {
+        "file_id": 141,
+        "content": "                                              reduction='none')\n    def forward(self, dic_tmp, y, step):\n        final_loss = 0\n        for seq_name in dic_tmp.keys():\n            pred_logits = dic_tmp[seq_name]\n            gts = y[seq_name]\n            if self.top_k_percent_pixels == None:\n                final_loss += self.celoss(pred_logits, gts)\n            else:\n                # Only compute the loss for top k percent pixels.\n                # First, compute the loss for all pixels. Note we do not put the loss\n                # to loss_collection and set reduction = None to keep the shape.\n                num_pixels = float(pred_logits.shape[2] * pred_logits.shape[3])\n                pred_logits = pred_logits.reshape([\n                    pred_logits.shape[1],\n                    pred_logits.shape[2] * pred_logits.shape[3]\n                ]).transpose([1, 0])\n                gts = gts.reshape([gts.shape[1] * gts.shape[2]])\n                pixel_losses = self.celoss(pred_logits, gts).reshape([1, -1])",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/loss.py:68-87"
+    },
+    "1653": {
+        "file_id": 141,
+        "content": "Computes the loss for top k percent pixels by first computing the loss for all pixels, reshaping them, and then selecting only the top k percent.",
+        "type": "comment"
+    },
+    "1654": {
+        "file_id": 141,
+        "content": "                if self.hard_example_mining_step == 0:\n                    top_k_pixels = int(self.top_k_percent_pixels * num_pixels)\n                else:\n                    ratio = min(1.0,\n                                step / float(self.hard_example_mining_step))\n                    top_k_pixels = int((ratio * self.top_k_percent_pixels +\n                                        (1.0 - ratio)) * num_pixels)\n                top_k_loss, top_k_indices = paddle.topk(pixel_losses,\n                                                        k=top_k_pixels,\n                                                        axis=1)\n                final_loss += paddle.mean(top_k_loss)\n        return final_loss\nclass AddedEdge_CrossEntropyLoss(nn.Layer):\n    def __init__(self,\n                 top_k_percent_pixels=None,\n                 hard_example_mining_step=100000):\n        super(AddedEdge_CrossEntropyLoss, self).__init__()\n        self.top_k_percent_pixels = top_k_percent_pixels\n        if top_k_percent_pixels is not None:",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/loss.py:88-109"
+    },
+    "1655": {
+        "file_id": 141,
+        "content": "The code defines a class called \"AddedEdge_CrossEntropyLoss\" which extends the base Layer class. It calculates the cross-entropy loss for a classification task while implementing hard example mining and top-k pixel selection strategies to improve performance. The top_k_percent_pixels and hard_example_mining_step parameters control these strategies, with different behavior depending on the current step value. The code block provided calculates the final loss by averaging over the top-k losses.",
+        "type": "comment"
+    },
+    "1656": {
+        "file_id": 141,
+        "content": "            assert (top_k_percent_pixels > 0 and top_k_percent_pixels < 1)\n        self.hard_example_mining_step = hard_example_mining_step\n        self.celoss = None\n    def forward(self, pred_logits, gts, step):\n        pos_num = paddle.sum(gts == 1, dtype='float32')\n        neg_num = paddle.sum(gts == 0, dtype='float32')\n        weight_pos = neg_num / (pos_num + neg_num)\n        weight_neg = pos_num / (pos_num + neg_num)\n        weights = paddle.to_tensor([weight_neg, weight_pos])\n        if self.top_k_percent_pixels == None:\n            sig_pred_logits = paddle.nn.functional.sigmoid(pred_logits)\n            self.bceloss = nn.BCEWithLogitsLoss(pos_weight=weight_pos,\n                                                reduction='mean')\n            if paddle.sum(gts) == 0:\n                dcloss = 0\n            else:\n                dcloss = (paddle.sum(sig_pred_logits * sig_pred_logits) +\n                          paddle.sum(gts * gts)) / (\n                              paddle.sum(2 * sig_pred_logits * gts) + 1e-5)",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/loss.py:110-130"
+    },
+    "1657": {
+        "file_id": 141,
+        "content": "This code defines a class for a loss function with hard example mining step, top_k_percent_pixels and forward method. It calculates weights based on positive and negative numbers, and applies them to the BCEWithLogitsLoss if top_k_percent_pixels is None. The code also calculates the dcloss for cases where gts sum is 0.",
+        "type": "comment"
+    },
+    "1658": {
+        "file_id": 141,
+        "content": "            final_loss = 0.1 * self.bceloss(pred_logits, gts) + dcloss\n        else:\n            self.celoss = nn.CrossEntropyLoss(weight=weights,\n                                              ignore_index=255,\n                                              reduction='none')\n            num_pixels = float(pred_logits.shape[2] * pred_logits.shape[3])\n            pred_logits = pred_logits.view(\n                -1, pred_logits.shape[1],\n                pred_logits.shape[2] * pred_logits.shape[3])\n            gts = gts.view(-1, gts.shape[2] * gts.shape[3])\n            pixel_losses = self.celoss(pred_logits, gts)\n            if self.hard_example_mining_step == 0:\n                top_k_pixels = int(self.top_k_percent_pixels * num_pixels)\n            else:\n                ratio = min(1.0, step / float(self.hard_example_mining_step))\n                top_k_pixels = int((ratio * self.top_k_percent_pixels +\n                                    (1.0 - ratio)) * num_pixels)\n            top_k_loss, top_k_indices = paddle.topk(pixel_losses,",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/loss.py:131-148"
+    },
+    "1659": {
+        "file_id": 141,
+        "content": "The code calculates the final loss for an image classification task. If the step is not zero, it uses hard example mining to calculate the pixel losses and select top K pixels based on a ratio of the current step. The final_loss is a weighted sum of binary cross-entropy (bceloss) and pixel loss.",
+        "type": "comment"
+    },
+    "1660": {
+        "file_id": 141,
+        "content": "                                                    k=top_k_pixels,\n                                                    axis=1)\n            final_loss = paddle.mean(top_k_loss)\n        return final_loss",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/loss.py:149-153"
+    },
+    "1661": {
+        "file_id": 141,
+        "content": "This code calculates the mean loss value by taking top-k pixel values from input images, and then averages them. This can be useful in image recognition tasks where some pixels have higher importance or relevance.",
+        "type": "comment"
+    },
+    "1662": {
+        "file_id": 142,
+        "content": "/applications/Ma-Net/run.sh",
+        "type": "filepath"
+    },
+    "1663": {
+        "file_id": 142,
+        "content": "The code prepares an environment for training and testing a computer vision model using the DeeplabV3_coco pre-trained model on the DAVIS dataset. It sets parameters, saves intermediate results, and runs test.py for actual testing without IntSeg enabled.",
+        "type": "summary"
+    },
+    "1664": {
+        "file_id": 142,
+        "content": "PRETRAIN_MODEL='/home/lc/PaddleVideo/applications/Ma-Net/saved_model/DeeplabV3_coco.pdparams'\nVOS_SAVE_RESULT_DIR='/home/lc/PaddleVideo/applications/Ma-Net/saved_model/MaNet_davis2017_stage1.pdparams'\n#VOS_SAVE_RESULT_DIR='/home/lc/PaddleVideo/applications/Ma-Net/saved_model/stage1'\nINT_SAVE_RESULT_DIR='/home/lc/PaddleVideo/applications/Ma-Net/saved_model/MANet_davis2017.pdparams'\n#INT_SAVE_RESULT_DIR='/home/lc/PaddleVideo/applications/Ma-Net/saved_model/stage2'\nINT_RESULT_DIR='/home/lc/PaddleVideo/applications/Ma-Net/saved_model/result'\nRESCALE=416\nRANDOMCROP=416\nDATA_ROOT='/home/lc/PaddleVideo/data/DAVIS'\necho 'Stage1 training'\nCUDA_VISIBLE_DEVICE=3 python train_stage1.py --SAVE_RESULT_DIR $VOS_SAVE_RESULT_DIR --PRETRAINED_MODEL $PRETRAIN_MODEL --DATA_ROOT $DATA_ROOT --TRAIN_BATCH_SIZE 2 --DATA_RESCALE $RESCALE --DATA_RANDOMCROP $RANDOMCROP --TRAIN_LR 0.0007  --MODEL_MAX_LOCAL_DISTANCE 12\necho 'Stage2 training'\npython train_stage2.py --SAVE_RESULT_DIR $INT_SAVE_RESULT_DIR --SAVE_VOS_RESULT_DIR $",
+        "type": "code",
+        "location": "/applications/Ma-Net/run.sh:1-13"
+    },
+    "1665": {
+        "file_id": 142,
+        "content": "The code sets environment variables, then runs two training scripts for a computer vision model in stages. It uses pre-trained DeeplabV3_coco model, and saves intermediate and final results to specified directories. The model is trained with specific parameters on the DAVIS dataset.",
+        "type": "comment"
+    },
+    "1666": {
+        "file_id": 142,
+        "content": "VOS_SAVE_RESULT_DIR --DATA_ROOT $DATA_ROOT --DATA_RESCALE $RESCALE --DATA_RANDOMCROP $RANDOMCROP  --PRETRAINED_MODEL $PRETRAIN_MODEL\necho 'Testing'\npython test.py --DATA_ROOT $DATA_ROOT --SAVE_RESULT_DIR $INT_SAVE_RESULT_DIR  --RESULT_ROOT $INT_RESULT_DIR --MODEL_USEIntSeg False --TEST_MODE True",
+        "type": "code",
+        "location": "/applications/Ma-Net/run.sh:13-15"
+    },
+    "1667": {
+        "file_id": 142,
+        "content": "This code is setting up a testing environment for a video object segmentation task. It specifies the data root, save result directory, pre-trained model path and then executes a test.py script to perform the actual testing. The model is set to not use IntSeg and the TEST_MODE flag is set to True, indicating that this is indeed a testing run.",
+        "type": "comment"
+    },
+    "1668": {
+        "file_id": 143,
+        "content": "/applications/Ma-Net/test.py",
+        "type": "filepath"
+    },
+    "1669": {
+        "file_id": 143,
+        "content": "The code prepares for DAVIS2017 image processing, initializes variables, and utilizes PaddlePaddle for video object detection. It involves an interactive image classification system with 8 turns, optimizing scribble labels and filtering keys.",
+        "type": "summary"
+    },
+    "1670": {
+        "file_id": 143,
+        "content": "import cv2\nimport os\nimport json\nimport paddle\nfrom PIL import Image\nimport timeit\nimport numpy as np\nfrom paddle.vision import transforms\nfrom dataloaders.davis_2017_f import DAVIS2017_Feature_Extract\nimport dataloaders.custom_transforms_f as tr\nfrom davisinteractive.session import DavisInteractiveSession\nfrom networks.deeplab import DeepLab\nfrom networks.IntVOS import IntVOS\nimport time\nfrom davisinteractive.utils.scribbles import scribbles2mask, annotated_frames\nfrom config import cfg\nfrom paddle import nn\nfrom paddle.io import DataLoader\nfrom utils.api import float_, byte_\n@paddle.no_grad()\ndef main():\n    paddle.set_device(\"gpu:0\")\n    total_frame_num_dic = {}\n    #################\n    seqs = []\n    with open(os.path.join(cfg.DATA_ROOT, 'ImageSets', '2017',\n                           'val' + '.txt')) as f:\n        seqs_tmp = f.readlines()\n        seqs_tmp = list(map(lambda elem: elem.strip(), seqs_tmp))\n        seqs.extend(seqs_tmp)\n    h_w_dic = {}\n    for seq_name in seqs:\n        images = np.sort(\n            os.listdir(",
+        "type": "code",
+        "location": "/applications/Ma-Net/test.py:1-39"
+    },
+    "1671": {
+        "file_id": 143,
+        "content": "The code imports necessary libraries and defines functions for processing image data from the DAVIS2017 dataset. It sets up the required transforms, initializes the network models, and reads in the dataset sequences.",
+        "type": "comment"
+    },
+    "1672": {
+        "file_id": 143,
+        "content": "                os.path.join(cfg.DATA_ROOT, 'JPEGImages/480p/',\n                             seq_name.strip())))\n        total_frame_num_dic[seq_name] = len(images)\n        im_ = cv2.imread(\n            os.path.join(cfg.DATA_ROOT, 'JPEGImages/480p/', seq_name,\n                         '00000.jpg'))\n        im_ = np.array(im_, dtype=np.float32)\n        hh_, ww_ = im_.shape[:2]\n        h_w_dic[seq_name] = (hh_, ww_)\n    _seq_list_file = os.path.join(cfg.DATA_ROOT, 'ImageSets', '2017',\n                                  'v_a_l' + '_instances.txt')\n    seq_dict = json.load(open(_seq_list_file, 'r'))\n    ##################\n    seq_imgnum_dict_ = {}\n    seq_imgnum_dict = os.path.join(cfg.DATA_ROOT, 'ImageSets', '2017',\n                                   'val_imgnum.txt')\n    if os.path.isfile(seq_imgnum_dict):\n        seq_imgnum_dict_ = json.load(open(seq_imgnum_dict, 'r'))\n    else:\n        for seq in os.listdir(os.path.join(cfg.DATA_ROOT, 'JPEGImages/480p/')):\n            seq_imgnum_dict_[seq] = len(\n                os.listdir(os.path.join(cfg.DATA_ROOT, 'JPEGImages/480p/',",
+        "type": "code",
+        "location": "/applications/Ma-Net/test.py:40-62"
+    },
+    "1673": {
+        "file_id": 143,
+        "content": "This code reads a configuration file and initializes variables for video analysis. It loads image information from disk, checks if an existing imgnum dictionary is available, and if not, it populates it by iterating through directories and counting images.",
+        "type": "comment"
+    },
+    "1674": {
+        "file_id": 143,
+        "content": "                                        seq)))\n        with open(seq_imgnum_dict, 'w') as f:\n            json.dump(seq_imgnum_dict_, f)\n    ##################\n    is_save_image = False  # Save the predicted masks\n    report_save_dir = cfg.RESULT_ROOT\n    save_res_dir = cfg.SAVE_RESULT_DIR  # changed to path\n    if not os.path.exists(cfg.RESULT_ROOT):\n        os.makedirs(cfg.RESULT_ROOT)\n        # Configuration used in the challenges\n    max_nb_interactions = 8  # Maximum number of interactions\n    max_time_per_interaction = 30  # Maximum time per interaction per object\n    # Total time available to interact with a sequence and an initial set of scribbles\n    max_time = max_nb_interactions * max_time_per_interaction  # Maximum time per object\n    # Interactive parameters\n    subset = 'val'\n    host = 'localhost'  # 'localhost' for subsets train and val.\n    feature_extracter = DeepLab(backbone='resnet', freeze_bn=False)\n    model = IntVOS(cfg, feature_extracter)\n    print('model loading...')\n    saved_model_dict = save_res_dir",
+        "type": "code",
+        "location": "/applications/Ma-Net/test.py:63-87"
+    },
+    "1675": {
+        "file_id": 143,
+        "content": "Creating a dictionary of image numbers and saving it, setting save flags for predicted masks, checking if results directory exists and creating it if not, defining maximum interactive parameters, importing DeepLab model and Instant VOS model, and loading the saved model from specified location.",
+        "type": "comment"
+    },
+    "1676": {
+        "file_id": 143,
+        "content": "    pretrained_dict = paddle.load(saved_model_dict)\n    load_network(model, pretrained_dict)\n    print(f'model loading from {saved_model_dict} finished!')\n    model.eval()\n    inter_file = open(os.path.join(cfg.RESULT_ROOT, 'inter_file.txt'), 'w')\n    resized_h, resized_w = 480, 854\n    ###############################\n    composed_transforms = transforms.Compose(\n        [tr.Resize((resized_h, resized_w)),\n         tr.ToTensor()])\n    ###############################\n    seen_seq = []\n    n = 0\n    max_n = 1\n    with DavisInteractiveSession(host=host,\n                                 davis_root=cfg.DATA_ROOT,\n                                 subset=subset,\n                                 report_save_dir=report_save_dir,\n                                 max_nb_interactions=max_nb_interactions,\n                                 max_time=max_time,\n                                 metric_to_optimize='J') as sess:\n        while sess.next():\n            t_total = timeit.default_timer()\n            # Get the current iteration scribbles",
+        "type": "code",
+        "location": "/applications/Ma-Net/test.py:88-113"
+    },
+    "1677": {
+        "file_id": 143,
+        "content": "This code loads a pre-trained model, evaluates it, and initializes variables for processing scribbles. The code also defines a transform to resize images to specific dimensions, opens a file for writing, and sets up a DavisInteractiveSession object for iterating over interaction data. The session will continue until there are no more interactions left in the dataset.",
+        "type": "comment"
+    },
+    "1678": {
+        "file_id": 143,
+        "content": "            sequence, scribbles, first_scribble = sess.get_scribbles(\n                only_last=True)\n            h, w = h_w_dic[sequence]\n            if 'prev_label_storage' not in locals().keys():\n                prev_label_storage = paddle.zeros(\n                    [104, h, w])  # because the maximum length of frames is 104.\n            print(sequence)\n            h, w = h_w_dic[sequence]\n            if len(\n                    annotated_frames(scribbles)\n            ) == 0:  # if no scribbles return, keep masks in previous round\n                final_masks = prev_label_storage[:seq_imgnum_dict_[sequence]]\n                sess.submit_masks(final_masks.numpy())\n            else:\n                start_annotated_frame = annotated_frames(scribbles)[0]\n                pred_masks = []\n                pred_masks_reverse = []\n                if first_scribble:  # If in the first round, initialize memories\n                    n_interaction = 1\n                    eval_global_map_tmp_dic = {}\n                    local_map_dics = ({}, {})",
+        "type": "code",
+        "location": "/applications/Ma-Net/test.py:115-139"
+    },
+    "1679": {
+        "file_id": 143,
+        "content": "The code is retrieving scribbles and their corresponding sequence, image dimensions are assigned based on the dictionary h_w_dic. If there are no annotated frames from the scribbles, it returns previous masks and submits them. Otherwise, it initializes memories for the first round.",
+        "type": "comment"
+    },
+    "1680": {
+        "file_id": 143,
+        "content": "                    total_frame_num = total_frame_num_dic[sequence]\n                    obj_nums = seq_dict[sequence][-1]\n                else:\n                    n_interaction += 1\n                ##\n                inter_file.write(sequence + ' ' + 'interaction' +\n                                 str(n_interaction) + ' ' + 'frame' +\n                                 str(start_annotated_frame) + '\\n')\n                ##\n                ##########################Reference image process\n                if first_scribble:  # if in the first round, extract pixel embbedings.\n                    if sequence not in seen_seq:\n                        inter_turn = 1\n                        seen_seq.append(sequence)\n                        embedding_memory = []\n                        test_dataset = DAVIS2017_Feature_Extract(\n                            root=cfg.DATA_ROOT,\n                            transform=composed_transforms,\n                            seq_name=sequence)\n                        testloader = DataLoader(test_dataset,",
+        "type": "code",
+        "location": "/applications/Ma-Net/test.py:140-163"
+    },
+    "1681": {
+        "file_id": 143,
+        "content": "This code is part of an interaction detection process. It writes the interaction details to a file, including the sequence name, type, and frame number. It also checks if the sequence has been seen before and prepares embedding memory for reference image processing. The code uses DAVIS2017_Feature_Extract to extract pixel embeddings in the first round of annotations.",
+        "type": "comment"
+    },
+    "1682": {
+        "file_id": 143,
+        "content": "                                                batch_size=14,\n                                                shuffle=False,\n                                                num_workers=cfg.NUM_WORKER)\n                        for ii, sample in enumerate(testloader):\n                            imgs = sample['img1']\n                            frame_embedding = model.extract_feature(imgs)\n                            embedding_memory.append(frame_embedding)\n                        del frame_embedding\n                        embedding_memory = paddle.concat(embedding_memory, 0)\n                        _, _, emb_h, emb_w = embedding_memory.shape\n                        ref_frame_embedding = embedding_memory[\n                            start_annotated_frame]\n                        ref_frame_embedding = ref_frame_embedding.unsqueeze(0)\n                    else:\n                        inter_turn += 1\n                        ref_frame_embedding = embedding_memory[\n                            start_annotated_frame]",
+        "type": "code",
+        "location": "/applications/Ma-Net/test.py:164-182"
+    },
+    "1683": {
+        "file_id": 143,
+        "content": "This code is iterating through testloader and extracting frame embeddings for each image. The extracted embeddings are then concatenated to form a single embedding memory. If annotated frames are present, the reference frame embedding is extracted from the embedding memory.",
+        "type": "comment"
+    },
+    "1684": {
+        "file_id": 143,
+        "content": "                        ref_frame_embedding = ref_frame_embedding.unsqueeze(0)\n                else:\n                    ref_frame_embedding = embedding_memory[\n                        start_annotated_frame]\n                    ref_frame_embedding = ref_frame_embedding.unsqueeze(0)\n                ########\n                scribble_masks = scribbles2mask(scribbles, (emb_h, emb_w))\n                scribble_label = scribble_masks[start_annotated_frame]\n                scribble_sample = {'scribble_label': scribble_label}\n                scribble_sample = tr.ToTensor()(scribble_sample)\n                #                     print(ref_frame_embedding, ref_frame_embedding.shape)\n                scribble_label = scribble_sample['scribble_label']\n                scribble_label = scribble_label.unsqueeze(0)\n                ######\n                if is_save_image:\n                    ref_scribble_to_show = scribble_label.squeeze().numpy()\n                    im_ = Image.fromarray(\n                        ref_scribble_to_show.astype('uint8')).convert('P', )",
+        "type": "code",
+        "location": "/applications/Ma-Net/test.py:183-203"
+    },
+    "1685": {
+        "file_id": 143,
+        "content": "The code applies scribbles to an image using a mask and generates corresponding labels. It then creates a scribble sample and converts it into a tensor. If is_save_image is True, the scribble label image is saved as a PALETTE image.",
+        "type": "comment"
+    },
+    "1686": {
+        "file_id": 143,
+        "content": "                    im_.putpalette(_palette)\n                    ref_img_name = str(start_annotated_frame)\n                    if not os.path.exists(\n                            os.path.join(cfg.RESULT_ROOT, sequence,\n                                         'interactive' + str(n_interaction),\n                                         'turn' + str(inter_turn))):\n                        os.makedirs(\n                            os.path.join(cfg.RESULT_ROOT, sequence,\n                                         'interactive' + str(n_interaction),\n                                         'turn' + str(inter_turn)))\n                    im_.save(\n                        os.path.join(cfg.RESULT_ROOT, sequence,\n                                     'interactive' + str(n_interaction),\n                                     'turn' + str(inter_turn),\n                                     'inter_' + ref_img_name + '.png'))\n                scribble_label = scribble_label\n                #######\n                if first_scribble:",
+        "type": "code",
+        "location": "/applications/Ma-Net/test.py:204-224"
+    },
+    "1687": {
+        "file_id": 143,
+        "content": "This code segment saves a scribble image with the palette applied to a specific directory path based on input parameters. It first checks if the necessary directory exists and creates it if it doesn't, then proceeds to save the image within this directory. The 'first_scribble' variable is used in decision making further down the code.",
+        "type": "comment"
+    },
+    "1688": {
+        "file_id": 143,
+        "content": "                    prev_label = None\n                    prev_label_storage = paddle.zeros([104, h, w])\n                    prev_label_storage = prev_label_storage\n                else:\n                    prev_label = prev_label_storage[start_annotated_frame]\n                    prev_label = prev_label.unsqueeze(0).unsqueeze(0)\n                if not first_scribble and paddle.unique(\n                        scribble_label).shape[0] == 1:\n                    final_masks = prev_label_storage[:\n                                                     seq_imgnum_dict_[sequence]]\n                    sess.submit_masks(final_masks.numpy())\n                else:  ###inteaction segmentation head\n                    print('inteaction segmentation head')\n                    tmp_dic, local_map_dics = model.int_seghead(\n                        ref_frame_embedding=ref_frame_embedding,\n                        ref_scribble_label=scribble_label,\n                        prev_round_label=prev_label,\n                        global_map_tmp_dic=eval_global_map_tmp_dic,",
+        "type": "code",
+        "location": "/applications/Ma-Net/test.py:226-244"
+    },
+    "1689": {
+        "file_id": 143,
+        "content": "This code snippet initializes variables and checks for specific conditions in a segmentation model. It handles the previous label and label storage, updates them based on certain conditions, and submits the final masks to the session if necessary. The interaction segmentation head is printed as a comment.",
+        "type": "comment"
+    },
+    "1690": {
+        "file_id": 143,
+        "content": "                        local_map_dics=local_map_dics,\n                        interaction_num=n_interaction,\n                        seq_names=[sequence],\n                        gt_ids=paddle.to_tensor([obj_nums]),\n                        frame_num=[start_annotated_frame],\n                        first_inter=first_scribble)\n                    pred_label = tmp_dic[sequence]\n                    pred_label = nn.functional.interpolate(pred_label,\n                                                           size=(h, w),\n                                                           mode='bilinear',\n                                                           align_corners=True)\n                    pred_label = paddle.argmax(pred_label, axis=1)\n                    pred_masks.append(float_(pred_label))\n                    prev_label_storage[start_annotated_frame] = float_(\n                        pred_label[0])\n                    if is_save_image:  # save image\n                        pred_label_to_save = pred_label.squeeze(0).numpy()",
+        "type": "code",
+        "location": "/applications/Ma-Net/test.py:245-262"
+    },
+    "1691": {
+        "file_id": 143,
+        "content": "This code snippet is part of a PaddleVideo application called Ma-Net, which seems to be related to object detection and video analysis. The code creates a dictionary for input data, retrieves the predicted label from a temporal dictionary, applies interpolation to resize the label, selects the maximum value along an axis, appends the mask to a list of masks, stores the previous label at a specific frame, and saves the predicted label as a numpy array if needed.",
+        "type": "comment"
+    },
+    "1692": {
+        "file_id": 143,
+        "content": "                        im = Image.fromarray(\n                            pred_label_to_save.astype('uint8')).convert('P', )\n                        im.putpalette(_palette)\n                        imgname = str(start_annotated_frame)\n                        while len(imgname) < 5:\n                            imgname = '0' + imgname\n                        if not os.path.exists(\n                                os.path.join(cfg.RESULT_ROOT, sequence,\n                                             'interactive' + str(n_interaction),\n                                             'turn' + str(inter_turn))):\n                            os.makedirs(\n                                os.path.join(cfg.RESULT_ROOT, sequence,\n                                             'interactive' + str(n_interaction),\n                                             'turn' + str(inter_turn)))\n                        im.save(\n                            os.path.join(cfg.RESULT_ROOT, sequence,\n                                         'interactive' + str(n_interaction),",
+        "type": "code",
+        "location": "/applications/Ma-Net/test.py:263-279"
+    },
+    "1693": {
+        "file_id": 143,
+        "content": "This code snippet saves an interactive video frame as a labeled image. It first converts the predicted label to an array, then converts it into a format suitable for saving as an image with the 'P' mode and using a specific palette. The filename is created based on the current frame number and if the directory doesn't exist, it creates one. Finally, the labeled image is saved in the specified directory.",
+        "type": "comment"
+    },
+    "1694": {
+        "file_id": 143,
+        "content": "                                         'turn' + str(inter_turn),\n                                         imgname + '.png'))\n                    #######################################\n                    if first_scribble:\n                        scribble_label = rough_ROI(scribble_label)\n                    ##############################\n                    ref_prev_label = pred_label.unsqueeze(0)\n                    prev_label = pred_label.unsqueeze(0)\n                    prev_embedding = ref_frame_embedding\n                    #### Propagation ->\n                    for ii in range(start_annotated_frame + 1, total_frame_num):\n                        current_embedding = embedding_memory[ii]\n                        current_embedding = current_embedding.unsqueeze(0)\n                        prev_label = prev_label\n                        tmp_dic, eval_global_map_tmp_dic, local_map_dics = model.prop_seghead(\n                            ref_frame_embedding,\n                            prev_embedding,\n                            current_embedding,",
+        "type": "code",
+        "location": "/applications/Ma-Net/test.py:280-298"
+    },
+    "1695": {
+        "file_id": 143,
+        "content": "This code is part of a video object detection algorithm. It's using a pre-trained model to generate segmentation masks for each frame in the video. The 'turn' and 'imgname' are used as file names for saving images. It applies initial scribble_label if it's the first frame, then it updates previous label and embedding for propagating prediction to next frames. It uses the model's prop_seghead function to generate predictions for each frame's segmentation mask.",
+        "type": "comment"
+    },
+    "1696": {
+        "file_id": 143,
+        "content": "                            scribble_label,\n                            prev_label,\n                            normalize_nearest_neighbor_distances=True,\n                            use_local_map=True,\n                            seq_names=[sequence],\n                            gt_ids=paddle.to_tensor([obj_nums]),\n                            k_nearest_neighbors=cfg.KNNS,\n                            global_map_tmp_dic=eval_global_map_tmp_dic,\n                            local_map_dics=local_map_dics,\n                            interaction_num=n_interaction,\n                            start_annotated_frame=start_annotated_frame,\n                            frame_num=[ii],\n                            dynamic_seghead=model.dynamic_seghead)\n                        pred_label = tmp_dic[sequence]\n                        pred_label = nn.functional.interpolate(\n                            pred_label,\n                            size=(h, w),\n                            mode='bilinear',\n                            align_corners=True)",
+        "type": "code",
+        "location": "/applications/Ma-Net/test.py:299-318"
+    },
+    "1697": {
+        "file_id": 143,
+        "content": "Code snippet is calling a function, passing several arguments such as scribble_label, prev_label, and others. It assigns the returned value to pred_label after applying interpolation on it.",
+        "type": "comment"
+    },
+    "1698": {
+        "file_id": 143,
+        "content": "                        pred_label = paddle.argmax(pred_label, axis=1)\n                        pred_masks.append(float_(pred_label))\n                        prev_label = pred_label.unsqueeze(0)\n                        prev_embedding = current_embedding\n                        prev_label_storage[ii] = float_(pred_label[0])\n                        ####\n                        if is_save_image:\n                            pred_label_to_save = pred_label.squeeze(0).numpy()\n                            im = Image.fromarray(\n                                pred_label_to_save.astype('uint8')).convert(\n                                    'P', )\n                            im.putpalette(_palette)\n                            imgname = str(ii)\n                            while len(imgname) < 5:\n                                imgname = '0' + imgname\n                            if not os.path.exists(\n                                    os.path.join(\n                                        cfg.RESULT_ROOT, sequence,\n                                        'interactive' + str(n_interaction),",
+        "type": "code",
+        "location": "/applications/Ma-Net/test.py:320-338"
+    },
+    "1699": {
+        "file_id": 143,
+        "content": "Code snippet handles image saving for each prediction label in a loop, storing the prediction label as a numpy array and converting it to an image using Pillow library. It then sets the palette and saves the image with a sequence number and interaction number, creating directories if they don't exist.",
+        "type": "comment"
+    }
+}

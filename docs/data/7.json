@@ -1,0 +1,549 @@
+{
+    "700": {
+        "file_id": 66,
+        "content": "import os.path as osp\ndef load(file_name, model, **cfg):\n    if not osp.isfile(file_name):\n        raise IOError(f'{file_name} not exist')\n    try:\n        state_dicts_ = paddle.load(file_name)['state_dict']\n    except:\n        state_dicts_ = paddle.load(file_name)\n    state_dicts = {}\n    for k in model.keys():\n        if 'num_batches_tracked' not in k:\n            if ('head.' + k) not in state_dicts_.keys():\n                if k not in state_dicts_.keys():\n                    print(f'model -----{k} -------is not in pretrained')\n                else:\n                    state_dicts[k] = state_dicts_[k]\n            else:\n                state_dicts[k] = state_dicts_['head.' + k]\n    write_dict(state_dicts, 'state_dicts.txt', **cfg)\n    write_dict(model, 'model.txt', **cfg)\n    return state_dicts\n#####\ndef write_dict(state_dict, file_name, **cfg):\n    lines = []\n    tot = 0\n    for k, v in state_dict.items():\n        # 目前只发现了torch和paddle模型参数命名的这三种不一致\n        # 不一致1\n        if 'num_batches_tracked' in k:\n            tot += 1",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/manet_utils.py:239-272"
+    },
+    "701": {
+        "file_id": 66,
+        "content": "This code defines a function `load` that loads a pretrained model from a file. It checks if the file exists, then loads either the 'state_dict' or the entire dictionary depending on compatibility with the model keys. The function also filters out 'num_batches_tracked' and 'head.' before assigning the correct values to state_dicts. Finally, it writes both the modified state_dicts and model to separate text files.",
+        "type": "comment"
+    },
+    "702": {
+        "file_id": 66,
+        "content": "            continue\n        try:\n            line = str(k) + '\\t' + str(v.cpu().detach().numpy().shape) + '\\n'\n        except:\n            line = str(k) + '\\t' + str(v.shape) + '\\n'\n        lines.append(line)\n    # with open(cfg.get(\"output_dir\", f\"./output/{file_name}\"), 'w') as f:\n    #     f.writelines(lines)\n    # print('%d num_batches_tracked skipped' % tot)\ndef damage_masks(labels, shift=True, scale=True, rotate=True):\n    \"\"\"\n    Args:\n    labels: numpy array (batch_size * 1 * h * w)\n    \"\"\"\n    bs, _, h, w = labels.shape\n    labels = labels.transpose([0, 2, 3, 1])\n    labels = labels.numpy()\n    final_label = []\n    for i in range(bs):\n        label = labels[i]\n        damaged_label = damage_masks_np(label, shift, scale, rotate)\n        final_label.append(damaged_label)\n    final_label = np.array(final_label)\n    final_label = paddle.to_tensor(final_label)\n    final_label = final_label.transpose([0, 3, 1, 2])\n    return final_label\ndef damage_masks_np(labels, shift=True, scale=True, rotate=True):\n    \"\"\"Performs the actual mask damaging in numpy.",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/manet_utils.py:273-304"
+    },
+    "703": {
+        "file_id": 66,
+        "content": "The code defines two functions: `damage_masks` and `damage_masks_np`. Both functions take in a labels array, and apply damage to the masks by applying shift, scale, and rotate transformations. The output is returned as a tensor after being transposed. The functions are designed for PaddlePaddle and NumPy respectively, and the input must be of shape (batch_size * 1 * h * w).",
+        "type": "comment"
+    },
+    "704": {
+        "file_id": 66,
+        "content": "    Args:\n    labels: Int32 numpy array of shape (height, width, 1).\n    shift: Boolean, whether to damage the masks by shifting.\n    scale: Boolean, whether to damage the masks by scaling.\n    rotate: Boolean, whether to damage the masks by rotation.\n    dilate: Boolean, whether to damage the masks by dilation.\n    Returns:\n    The damaged version of labels.\n    \"\"\"\n    unique_labels = np.unique(labels)\n    unique_labels = np.setdiff1d(unique_labels, [0])\n    # Shuffle to get random depth ordering when combining together.\n    np.random.shuffle(unique_labels)\n    damaged_labels = np.zeros_like(labels)\n    for l in unique_labels:\n        obj_mask = (labels == l)\n        damaged_obj_mask = _damage_single_object_mask(obj_mask, shift, scale,\n                                                      rotate)\n        damaged_labels[damaged_obj_mask] = l\n    return damaged_labels\ndef _damage_single_object_mask(mask, shift, scale, rotate):\n    \"\"\"Performs mask damaging in numpy for a single object.\n    Args:\n    mask: Boolean numpy array of shape(height, width, 1).",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/manet_utils.py:305-330"
+    },
+    "705": {
+        "file_id": 66,
+        "content": "This function damages the input labels by randomly shifting, scaling, rotating, and dilating the object masks. It first extracts unique labels, then shuffles them before iterating through each unique label to generate a damaged version of the labels. The `_damage_single_object_mask` function is used internally for performing mask damage on a single object.",
+        "type": "comment"
+    },
+    "706": {
+        "file_id": 66,
+        "content": "    shift: Boolean, whether to damage the masks by shifting.\n    scale: Boolean, whether to damage the masks by scaling.\n    rotate: Boolean, whether to damage the masks by rotation.\n    dilate: Boolean, whether to damage the masks by dilation.\n    Returns:\n    The damaged version of mask.\n    \"\"\"\n    if shift:\n        mask = _shift_mask(mask)\n    if scale:\n        mask = _scale_mask(mask)\n    if rotate:\n        mask = _rotate_mask(mask)\n    return mask\ndef _shift_mask(mask, max_shift_factor=0.05):\n    \"\"\"Damages a mask for a single object by randomly shifting it in numpy.\n    Args:\n    mask: Boolean numpy array of shape(height, width, 1).\n    max_shift_factor: Float scalar, the maximum factor for random shifting.\n    Returns:\n    The shifted version of mask.\n    \"\"\"\n    nzy, nzx, _ = mask.nonzero()\n    h = nzy.max() - nzy.min()\n    w = nzx.max() - nzx.min()\n    size = np.sqrt(h * w)\n    offset = np.random.uniform(-size * max_shift_factor,\n                               size * max_shift_factor, 2)\n    shifted_mask = interpolation.shift(np.squeeze(mask, axis=2),",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/manet_utils.py:331-361"
+    },
+    "707": {
+        "file_id": 66,
+        "content": "This code appears to be part of a function that damages a mask for a single object by randomly shifting it in numpy. The function takes a Boolean numpy array as input and returns the shifted version of the mask. It also includes parameters for scaling, rotation, and dilation, but these operations are not defined in this snippet.",
+        "type": "comment"
+    },
+    "708": {
+        "file_id": 66,
+        "content": "                                       offset,\n                                       order=0).astype('bool')[..., np.newaxis]\n    return shifted_mask\ndef _scale_mask(mask, scale_amount=0.025):\n    \"\"\"Damages a mask for a single object by randomly scaling it in numpy.\n    Args:\n    mask: Boolean numpy array of shape(height, width, 1).\n    scale_amount: Float scalar, the maximum factor for random scaling.\n    Returns:\n    The scaled version of mask.\n    \"\"\"\n    nzy, nzx, _ = mask.nonzero()\n    cy = 0.5 * (nzy.max() - nzy.min())\n    cx = 0.5 * (nzx.max() - nzx.min())\n    scale_factor = np.random.uniform(1.0 - scale_amount, 1.0 + scale_amount)\n    shift = transform.SimilarityTransform(translation=[-cx, -cy])\n    inv_shift = transform.SimilarityTransform(translation=[cx, cy])\n    s = transform.SimilarityTransform(scale=[scale_factor, scale_factor])\n    m = (shift + (s + inv_shift)).inverse\n    scaled_mask = transform.warp(mask, m) > 0.5\n    return scaled_mask\ndef _rotate_mask(mask, max_rot_degrees=3.0):\n    \"\"\"Damages a mask for a single object by randomly rotating it in numpy.",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/manet_utils.py:362-388"
+    },
+    "709": {
+        "file_id": 66,
+        "content": "The code contains three functions: _shift_mask, _scale_mask, and _rotate_mask. These functions are used to randomly manipulate a binary mask by shifting, scaling, or rotating it for a single object. The purpose is to damage the mask to enhance the robustness of the AI system against different poses or scales of the object.",
+        "type": "comment"
+    },
+    "710": {
+        "file_id": 66,
+        "content": "    Args:\n    mask: Boolean numpy array of shape(height, width, 1).\n    max_rot_degrees: Float scalar, the maximum number of degrees to rotate.\n    Returns:\n    The scaled version of mask.\n    \"\"\"\n    cy = 0.5 * mask.shape[0]\n    cx = 0.5 * mask.shape[1]\n    rot_degrees = np.random.uniform(-max_rot_degrees, max_rot_degrees)\n    shift = transform.SimilarityTransform(translation=[-cx, -cy])\n    inv_shift = transform.SimilarityTransform(translation=[cx, cy])\n    r = transform.SimilarityTransform(rotation=np.deg2rad(rot_degrees))\n    m = (shift + (r + inv_shift)).inverse\n    scaled_mask = transform.warp(mask, m) > 0.5\n    return scaled_mask\nclass AverageMeter(object):\n    \"\"\"Computes and stores the average and current value\"\"\"\n    def __init__(self):\n        self.val = 0\n        self.avg = 0\n        self.sum = 0\n        self.count = 0\n    def reset(self):\n        self.val = 0\n        self.avg = 0\n        self.sum = 0\n        self.count = 0\n    def update(self, val, n=1):\n        self.val = val\n        self.sum += val * n",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/manet_utils.py:389-422"
+    },
+    "711": {
+        "file_id": 66,
+        "content": "This code defines a function that rotates and scales a binary mask. It first calculates the center coordinates of the mask, then generates a random rotation angle within a specified range, applies the transformation, and inverses it to get the final scaling transformation matrix. The result is a warped version of the mask where pixels above 0.5 are considered as true values. Additionally, there's an AverageMeter class that computes and stores average and current value for continuous metrics calculation.",
+        "type": "comment"
+    },
+    "712": {
+        "file_id": 66,
+        "content": "        self.count += n\n        self.avg = self.sum / self.count\nimport numpy as np\ndef label2colormap(label):\n    m = label.astype(np.uint8)\n    r, c = m.shape\n    cmap = np.zeros((r, c, 3), dtype=np.uint8)\n    cmap[:, :, 0] = (m & 1) << 7 | (m & 8) << 3 | (m & 64) >> 1\n    cmap[:, :, 1] = (m & 2) << 6 | (m & 16) << 2 | (m & 128) >> 2\n    cmap[:, :, 2] = (m & 4) << 5 | (m & 32) << 1\n    return cmap\ndef torch2paddle(data):\n    try:\n        import torch\n        if isinstance(data, dict):\n            np_data = {}\n            for k, v in data.items():\n                np_data[k] = paddle.to_tensor(v.detach().numpy())\n            return np_data\n        else:\n            return paddle.to_tensor(data.detach().numpy())\n    except:\n        pass\ndef fill_(tensor: Tensor, value):\n    return tensor.set_value(paddle.full_like(tensor, value))\ndef zero_(tensor: Tensor):\n    return tensor.set_value(paddle.zeros_like(tensor))\ndef float_(tensor: Tensor):\n    return paddle.to_tensor(tensor, dtype='float32')\ndef long_(tensor: Tensor):",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/manet_utils.py:423-466"
+    },
+    "713": {
+        "file_id": 66,
+        "content": "Code utilities for PaddleVideo: converts label to colormap, converts PyTorch data types to Paddle, fills tensor with a value, sets tensor value to zero, and casts tensor to float32 dtype.",
+        "type": "comment"
+    },
+    "714": {
+        "file_id": 66,
+        "content": "    return paddle.to_tensor(tensor, dtype='int64')\ndef int_(tensor: Tensor):\n    return paddle.to_tensor(tensor, dtype='int32')\ndef byte_(tensor: Tensor):\n    return paddle.to_tensor(tensor, dtype='bool')\nclass ToPILImage(BaseTransform):\n    def __init__(self, mode=None, keys=None):\n        super(ToPILImage, self).__init__(keys)\n    def _apply_image(self, pic):\n        \"\"\"\n        Args:\n            pic (Tensor|np.ndarray): Image to be converted to PIL Image.\n        Returns:\n            PIL: Converted image.\n        \"\"\"\n        if not (isinstance(pic, paddle.Tensor) or isinstance(pic, np.ndarray)):\n            raise TypeError('pic should be Tensor or ndarray. Got {}.'.format(\n                type(pic)))\n        elif isinstance(pic, paddle.Tensor):\n            if pic.ndimension() not in {2, 3}:\n                raise ValueError(\n                    'pic should be 2/3 dimensional. Got {} dimensions.'.format(\n                        pic.ndimension()))\n            elif pic.ndimension() == 2:\n                # if 2D image, add channel dimension (CHW)",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/manet_utils.py:467-500"
+    },
+    "715": {
+        "file_id": 66,
+        "content": "The code provides three functions for converting tensors to different data types: int64, int32, and bool. The class ToPILImage is used to convert images from Tensor or np.ndarray format to PIL Image. It checks the type of input pic and throws a TypeError if it's not a Tensor or ndarray. If pic has 2 or 3 dimensions, it adds a channel dimension for 2D images. If the number of dimensions is not 2 or 3, it raises a ValueError.",
+        "type": "comment"
+    },
+    "716": {
+        "file_id": 66,
+        "content": "                pic = pic.unsqueeze(0)\n        elif isinstance(pic, np.ndarray):\n            if pic.ndim not in {2, 3}:\n                raise ValueError(\n                    'pic should be 2/3 dimensional. Got {} dimensions.'.format(\n                        pic.ndim))\n            elif pic.ndim == 2:\n                # if 2D image, add channel dimension (HWC)\n                pic = np.expand_dims(pic, 2)\n        npimg = pic\n        if isinstance(pic, paddle.Tensor) and \"float\" in str(\n                pic.numpy().dtype) and self.mode != 'F':\n            pic = pic.mul(255).byte()\n        if isinstance(pic, paddle.Tensor):\n            npimg = np.transpose(pic.numpy(), (1, 2, 0))\n        if not isinstance(npimg, np.ndarray):\n            raise TypeError(\n                'Input pic must be a paddle.Tensor or NumPy ndarray, ' +\n                'not {}'.format(type(npimg)))\n        if npimg.shape[2] == 1:\n            expected_mode = None\n            npimg = npimg[:, :, 0]\n            if npimg.dtype == np.uint8:\n                expected_mode = 'L'",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/manet_utils.py:501-529"
+    },
+    "717": {
+        "file_id": 66,
+        "content": "This code is checking the input \"pic\" and adjusting its format to be compatible with the function. It first checks if it's a tensor or ndarray, then ensures that the image is 2D or 3D (adding channels if necessary) before converting it into NumPy ndarray format. Finally, it checks the data type and mode to further adjust the \"pic\" as needed. If any issue arises during this process, it raises an error with a descriptive message.",
+        "type": "comment"
+    },
+    "718": {
+        "file_id": 66,
+        "content": "            elif npimg.dtype == np.int16:\n                expected_mode = 'I;16'\n            elif npimg.dtype == np.int32:\n                expected_mode = 'I'\n            elif npimg.dtype == np.float32:\n                expected_mode = 'F'\n            if self.mode is not None and self.mode != expected_mode:\n                raise ValueError(\n                    \"Incorrect self.mode ({}) supplied for input type {}. Should be {}\"\n                    .format(self.mode, np.dtype, expected_mode))\n            self.mode = expected_mode\n        elif npimg.shape[2] == 2:\n            permitted_2_channel_modes = ['LA']\n            if self.mode is not None and self.mode not in permitted_2_channel_modes:\n                raise ValueError(\n                    \"Only self.modes {} are supported for 2D inputs\".format(\n                        permitted_2_channel_modes))\n            if self.mode is None and npimg.dtype == np.uint8:\n                self.mode = 'LA'\n        elif npimg.shape[2] == 4:\n            permitted_4_channel_modes = ['RGBA', 'CMYK', 'RGBX']",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/manet_utils.py:530-553"
+    },
+    "719": {
+        "file_id": 66,
+        "content": "This code is validating the input image's data type and dimensions to determine the appropriate mode for the image. It raises a ValueError if the supplied self.mode does not match the expected mode based on the input type, or if the number of channels in the image does not match permitted modes.",
+        "type": "comment"
+    },
+    "720": {
+        "file_id": 66,
+        "content": "            if self.mode is not None and self.mode not in permitted_4_channel_modes:\n                raise ValueError(\n                    \"Only self.modes {} are supported for 4D inputs\".format(\n                        permitted_4_channel_modes))\n            if self.mode is None and npimg.dtype == np.uint8:\n                self.mode = 'RGBA'\n        else:\n            permitted_3_channel_modes = ['RGB', 'YCbCr', 'HSV']\n            if self.mode is not None and self.mode not in permitted_3_channel_modes:\n                raise ValueError(\n                    \"Only self.modes {} are supported for 3D inputs\".format(\n                        permitted_3_channel_modes))\n            if self.mode is None and npimg.dtype == np.uint8:\n                self.mode = 'RGB'\n        if self.mode is None:\n            raise TypeError('Input type {} is not supported'.format(\n                npimg.dtype))\n        return Image.fromarray(npimg, mode=self.mode)\nclass Identity(nn.Layer):\n    r\"\"\"A placeholder identity operator that is argument-insensitive.",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/manet_utils.py:554-578"
+    },
+    "721": {
+        "file_id": 66,
+        "content": "The code snippet is part of a class function that checks the input image mode and data type to determine if it's compatible with the operation. If not, it raises an error or sets the mode accordingly. It also defines a placeholder identity operator class.",
+        "type": "comment"
+    },
+    "722": {
+        "file_id": 66,
+        "content": "    Args:\n        args: any argument (unused)\n        kwargs: any keyword argument (unused)\n    \"\"\"\n    def __init__(self, *args, **kwargs):\n        super(Identity, self).__init__()\n    def forward(self, input):\n        return input\ndef convert(data: dict, to, dtype=None):\n    assert isinstance(data, dict)\n    input = {}\n    for k, v in data.items():\n        if 'paddle' == to:\n            if isinstance(v, np.ndarray):\n                if dtype is not None:\n                    input[k] = paddle.to_tensor(v.astype(dtype))\n                else:\n                    input[k] = paddle.to_tensor(v)\n            else:\n                input[k] = v\n        elif 'torch' == to:\n            try:\n                import torch\n                if isinstance(v, np.ndarray):\n                    if dtype is not None:\n                        input[k] = torch.tensor(v.astype(dtype))\n                    else:\n                        input[k] = torch.tensor(v)\n                else:\n                    input[k] = v\n            except:\n                pass",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/manet_utils.py:580-615"
+    },
+    "723": {
+        "file_id": 66,
+        "content": "This code defines a class \"Identity\" with an empty forward function and a convert function that converts dictionary data between Paddle and Torch formats. If 'paddle' is given as the to parameter, it converts numpy arrays in the input dictionary to Paddle tensors. If 'torch' is given, it tries to import torch and converts numpy arrays or leaves unchanged non-numpy elements in the input dictionary to Torch tensors. Dtype can be used to specify a specific data type for tensor conversion.",
+        "type": "comment"
+    },
+    "724": {
+        "file_id": 66,
+        "content": "        else:\n            if isinstance(v, np.ndarray):\n                input[k] = v.astype(to)\n            else:\n                input[k] = v\n    return input\ndef clip_grad_norm_(parameters: _tensor_or_tensors,\n                    max_norm: float,\n                    norm_type: float = 2.0,\n                    error_if_nonfinite: bool = False) -> paddle.Tensor:\n    r\"\"\"Clips gradient norm of an iterable of parameters.\n    The norm is computed over all gradients together, as if they were\n    concatenated into a single vector. Gradients are modified in-place.\n    Args:\n        parameters (Iterable[Tensor] or Tensor): an iterable of Tensors or a\n            single Tensor that will have gradients normalized\n        max_norm (float or int): max norm of the gradients\n        norm_type (float or int): type of the used p-norm. Can be ``'inf'`` for\n            infinity norm.\n        error_if_nonfinite (bool): if True, an error is thrown if the total\n            norm of the gradients from :attr:``parameters`` is ``nan``,",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/manet_utils.py:616-640"
+    },
+    "725": {
+        "file_id": 66,
+        "content": "This function clips the gradient norm of an iterable of parameters. The norm is computed over all gradients together, as if they were concatenated into a single vector. Gradients are modified in-place. It takes arguments such as iterable of Tensors or a single Tensor that will have gradients normalized, max_norm (float or int) to set the maximum norm of the gradients, norm_type (float or int) for the type of used p-norm, and error_if_nonfinite (bool) to indicate whether an error should be thrown if total norm is nan.",
+        "type": "comment"
+    },
+    "726": {
+        "file_id": 66,
+        "content": "            ``inf``, or ``-inf``. Default: False (will switch to True in the future)\n    Returns:\n        Total norm of the parameters (viewed as a single vector).\n    \"\"\"\n    import time\n    if isinstance(parameters, paddle.Tensor):\n        parameters = [parameters]\n    parameters = [p for p in parameters if p.grad is not None]\n    detached_grads = [p.grad.detach() for p in parameters]\n    max_norm = float(max_norm)\n    norm_type = float(norm_type)\n    if len(parameters) == 0:\n        return paddle.to_tensor(0.)\n    # device = paddle.get_device()  # parameters[0].grad.device\n    if norm_type == inf:\n        norms = [p.abs().max() for p in parameters]\n        total_norm = norms[0] if len(norms) == 1 else paddle.max(\n            paddle.stack(norms))\n    else:\n        #         tik = time.time()\n        total_norm = paddle.norm(\n            paddle.stack([paddle.norm(g, norm_type) for g in detached_grads]),\n            norm_type)\n    #         total_norm = paddle.norm(paddle.stack([paddle.sqrt(paddle.sum(g*g)) for g in detached_grads]), norm_type)  # fixed.",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/manet_utils.py:641-666"
+    },
+    "727": {
+        "file_id": 66,
+        "content": "This function calculates the total norm of parameters (viewed as a single vector) and handles cases where parameters are tensors. It first checks if the parameter is a tensor, then selects only those with non-null gradients, detaches their gradients, and applies different norm types based on the input. If the norm type is infinity, it calculates maximum absolute values for each parameter; otherwise, it calculates the p-norm using provided parameters and detached gradients.",
+        "type": "comment"
+    },
+    "728": {
+        "file_id": 66,
+        "content": "    #         print(time.time() - tik)\n    if error_if_nonfinite and paddle.logical_or(total_norm.isnan(),\n                                                total_norm.isinf()):\n        raise RuntimeError(\n            f'The total norm of order {norm_type} for gradients from '\n            '`parameters` is non-finite, so it cannot be clipped. To disable '\n            'this error and scale the gradients by the non-finite norm anyway, '\n            'set `error_if_nonfinite=False`')\n    clip_coef = max_norm / (total_norm + 1e-6)\n    # Note: multiplying by the clamped coef is redundant when the coef is clamped to 1, but doing so\n    # avoids a `if clip_coef < 1:` conditional which can require a CPU <=> device synchronization\n    # when the gradients do not reside in CPU memory.\n    clip_coef_clamped = paddle.clip(clip_coef, max=1.0)\n    for i, p in enumerate(parameters):\n        #         p.set_value(paddle.multiply(p, clip_coef_clamped))\n        p.grad.set_value(detached_grads[i] * clip_coef_clamped)  # fixed",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/manet_utils.py:667-682"
+    },
+    "729": {
+        "file_id": 66,
+        "content": "This code checks if the total norm of gradients from `parameters` is non-finite. If it is, it raises a RuntimeError and suggests setting `error_if_nonfinite=False`. Then it calculates the clipping coefficient, performs a clip operation to ensure it's within the range (0, 1], and finally multiplies the gradients with this coefficient to scale them.",
+        "type": "comment"
+    },
+    "730": {
+        "file_id": 66,
+        "content": "    #         p.grad.detach().mul_(clip_coef_clamped\n    return total_norm\n# def max(a: paddle.Tensor, axis=0, keepdim=True):\n#     \"\"\"ndarray=numpy.array([[1, 2, 3, 4],\n#            [4, 3, 2, 1],\n#            [5, 6, 7, 8],\n#            [8, 7, 6, 5]])\n#     np.where(ndarray == np.max(ndarray))\n#     (array([2, 3]), array([3, 0]))\n#     ndarray[np.where(ndarray == np.max(ndarray))]\n#     array([8, 8])\n#     \"\"\"\n#     max_ = a.max(axis).unsqueeze(-1)\n#     index = paddle.argmax(a, axis=axis, keepdim=keepdim)\n#     max_ = max_.numpy()\n#     index = index.numpy()\n#     # index = paddle.argmax(a, axis=axis, keepdim=keepdim)[-1].flatten()\n#     return max_, index\ndef gather(tmp: paddle.Tensor, ind: paddle.Tensor):\n    shape = tmp.shape\n    tmp = paddle.to_tensor(tmp)\n    ind = paddle.to_tensor(ind)\n    if len(shape) == 2:\n        b = shape[0]\n        return concat([\n            reshape(paddle.gather(tmp[i, :], ind[i, :]), [1, -1])\n            for i in range(b)\n        ],\n                      axis=0)\n    elif len(shape) == 3:",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/manet_utils.py:683-716"
+    },
+    "731": {
+        "file_id": 66,
+        "content": "This code defines a function `max()` that finds the maximum values in a tensor and their corresponding indices. It also includes a `gather()` function that performs tensor gathering based on provided indices. The functions use PaddlePaddle library for Tensor operations.",
+        "type": "comment"
+    },
+    "732": {
+        "file_id": 66,
+        "content": "        out = []\n        for i in range(tmp.shape[0]):\n            _ = paddle.index_sample(tmp[i], ind[i])\n            out.append(_)\n        return paddle.to_tensor(out)\n    elif len(shape) == 4:\n        b, c, d = shape[:3]\n        return concat([\n            reshape(\n                concat([\n                    reshape(\n                        concat([\n                            reshape(\n                                paddle.gather(tmp[i, j, k, :], ind[i, j, k, :]),\n                                [1, -1]) for k in range(d)\n                        ],\n                               axis=0), [1, d, -1]) for j in range(c)\n                ],\n                       axis=0), [1, c, d, -1]) for i in range(b)\n        ],\n                      axis=0)\n    else:\n        pass\n# These no_grad_* functions are necessary as wrappers around the parts of these\n# functions that use `with torch.no_grad()`. The JIT doesn't support context\n# managers, so these need to be implemented as builtins. Using these wrappers\n# lets us keep those builtins small and re-usable.",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/manet_utils.py:717-745"
+    },
+    "733": {
+        "file_id": 66,
+        "content": "This function performs sampling and reshaping operations on tensors with different shapes. It handles cases where the tensor shape has 0, 1, or 4 dimensions. In case of a 4-dimensional tensor, it uses gather and concat functions to rearrange data according to the given indices. The no_grad_* functions are used as wrappers for parts that require `torch.no_grad()` context manager due to JIT's inability to handle context managers directly.",
+        "type": "comment"
+    },
+    "734": {
+        "file_id": 66,
+        "content": "def _no_grad_uniform_(tensor, a, b):\n    with paddle.no_grad():\n        tensor.set_value(paddle.uniform(tensor.shape, min=a, max=b))\n        return tensor\ndef _no_grad_normal_(tensor, mean, std):\n    with paddle.no_grad():\n        tensor.set_value(paddle.normal(shape=tensor.shape, mean=mean, std=std))\n        return tensor\ndef _no_grad_trunc_normal_(tensor, mean, std, a, b):\n    from scipy import special\n    # Method based on https://people.sc.fsu.edu/~jburkardt/presentations/truncated_normal.pdf\n    def norm_cdf(x):\n        # Computes standard normal cumulative distribution function\n        return (1. + math.erf(x / math.sqrt(2.))) / 2.\n    if (mean < a - 2 * std) or (mean > b + 2 * std):\n        warnings.warn(\n            \"mean is more than 2 std from [a, b] in nn.init.trunc_normal_. \"\n            \"The distribution of values may be incorrect.\",\n            stacklevel=2)\n    with paddle.no_grad():\n        # Values are generated by using a truncated uniform distribution and\n        # then using the inverse CDF for the normal distribution.",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/manet_utils.py:746-774"
+    },
+    "735": {
+        "file_id": 66,
+        "content": "This code defines three functions: `_no_grad_uniform_`, `_no_grad_normal_`, and `_no_grad_trunc_normal_`. These functions generate tensors with specific distributions while using gradient calculation, which helps in tensor initialization or randomization tasks. The first function generates uniformly distributed values within a defined range. The second function generates normally distributed values with specified mean and standard deviation. The third function generates truncated normal distribution values by combining uniform and normal distribution functions.",
+        "type": "comment"
+    },
+    "736": {
+        "file_id": 66,
+        "content": "        # Get upper and lower cdf values\n        l = norm_cdf((a - mean) / std)\n        u = norm_cdf((b - mean) / std)\n        # Uniformly fill tensor with values from [l, u], then translate to\n        # [2l-1, 2u-1].\n        tensor.set_value(\n            paddle.uniform(tensor.shape, min=2 * l - 1, max=2 * u - 1))\n        # tensor.uniform_(2 * l - 1, 2 * u - 1)\n        # Use inverse cdf transform for normal distribution to get truncated\n        # standard normal\n        # tensor.erfinv_()  # paddle 无\n        tensor.set_value(special.erfinv(tensor))\n        # Transform to proper mean, std\n        # tensor.mul_(std * math.sqrt(2.))\n        tensor.set_value(tensor.multiply(paddle.to_tensor(std * math.sqrt(2.))))\n        tensor.add_(mean)\n        # Clamp to ensure it's in the proper range\n        tensor.clip_(min=a, max=b)\n        return tensor\ndef _no_grad_fill_(tensor, val):\n    with paddle.no_grad():\n        tensor.set_value(paddle.full_like(tensor, fill_value=val))\n        return tensor\ndef _no_grad_zero_(tensor):",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/manet_utils.py:775-806"
+    },
+    "737": {
+        "file_id": 66,
+        "content": "This code snippet is used to generate random values within a specified range and then apply inverse cumulative distribution function (CDF) transforms to normalize the tensor. It uses PyTorch's `paddle` library for its operations. The result is then clamped between a minimum and maximum value, which are defined by the variables 'a' and 'b', respectively. This process ensures that the generated tensor falls within the desired range.",
+        "type": "comment"
+    },
+    "738": {
+        "file_id": 66,
+        "content": "    with paddle.no_grad():\n        tensor.set_value(paddle.zeros_like(tensor))\n        return tensor\ndef calculate_gain(nonlinearity, param=None):\n    r\"\"\"Return the recommended gain value for the given nonlinearity function.\n    The values are as follows:\n    ================= ====================================================\n    nonlinearity      gain\n    ================= ====================================================\n    Linear / Identity :math:`1`\n    Conv{1,2,3}D      :math:`1`\n    Sigmoid           :math:`1`\n    Tanh              :math:`\\frac{5}{3}`\n    ReLU              :math:`\\sqrt{2}`\n    Leaky Relu        :math:`\\sqrt{\\frac{2}{1 + \\text{negative\\_slope}^2}}`\n    SELU              :math:`\\frac{3}{4}`\n    ================= ====================================================\n    Args:\n        nonlinearity: the non-linear function (`nn.functional` name)\n        param: optional parameter for the non-linear function\n    Examples:\n        >>> gain = nn.init.calculate_gain('leaky_relu', 0.2)  # leaky_relu with negative_slope=0.2",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/manet_utils.py:807-833"
+    },
+    "739": {
+        "file_id": 66,
+        "content": "This function calculates the recommended gain value for a given nonlinearity function. The gain values depend on the function used, with different values assigned to functions like Linear/Identity (1), Sigmoid (1), Tanh (5/3), ReLU (sqrt(2)), Leaky Relu (sqrt((2/(1 + negative_slope^2))), SELU (3/4). The function takes nonlinearity and optional param as arguments, and returns the gain value.",
+        "type": "comment"
+    },
+    "740": {
+        "file_id": 66,
+        "content": "    \"\"\"\n    linear_fns = [\n        'linear', 'conv1d', 'conv2d', 'conv3d', 'conv_transpose1d',\n        'conv_transpose2d', 'conv_transpose3d'\n    ]\n    if nonlinearity in linear_fns or nonlinearity == 'sigmoid':\n        return 1\n    elif nonlinearity == 'tanh':\n        return 5.0 / 3\n    elif nonlinearity == 'relu':\n        return math.sqrt(2.0)\n    elif nonlinearity == 'leaky_relu':\n        if param is None:\n            negative_slope = 0.01\n        elif not isinstance(param, bool) and isinstance(\n                param, int) or isinstance(param, float):\n            # True/False are instances of int, hence check above\n            negative_slope = param\n        else:\n            raise ValueError(\n                \"negative_slope {} not a valid number\".format(param))\n        return math.sqrt(2.0 / (1 + negative_slope**2))\n    elif nonlinearity == 'selu':\n        return 3.0 / 4  # Value found empirically (https://github.com/pytorch/pytorch/pull/50664)\n    else:\n        raise ValueError(\"Unsupported nonlinearity {}\".format(nonlinearity))",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/manet_utils.py:834-859"
+    },
+    "741": {
+        "file_id": 66,
+        "content": "This code defines a function to map different nonlinearities (e.g., linear, sigmoid, tanh) to corresponding numerical values or exceptions when an unsupported nonlinearity is provided. It handles cases like linear, sigmoid, tanh, relu, leaky_relu, and selu, providing the appropriate values for each.",
+        "type": "comment"
+    },
+    "742": {
+        "file_id": 66,
+        "content": "def uniform_(tensor: Tensor, a: float = 0., b: float = 1.) -> Tensor:\n    r\"\"\"Fills the input Tensor with values drawn from the uniform\n    distribution :math:`\\mathcal{U}(a, b)`.\n    Args:\n        tensor: an n-dimensional `torch.Tensor`\n        a: the lower bound of the uniform distribution\n        b: the upper bound of the uniform distribution\n    Examples:\n        >>> w = torch.empty(3, 5)\n        >>> nn.init.uniform_(w)\n    \"\"\"\n    return _no_grad_uniform_(tensor, a, b)\ndef normal_(tensor: Tensor, mean: float = 0., std: float = 1.) -> Tensor:\n    r\"\"\"Fills the input Tensor with values drawn from the normal\n    distribution :math:`\\mathcal{N}(\\text{mean}, \\text{std}^2)`.\n    Args:\n        tensor: an n-dimensional `torch.Tensor`\n        mean: the mean of the normal distribution\n        std: the standard deviation of the normal distribution\n    Examples:\n        >>> w = torch.empty(3, 5)\n        >>> nn.init.normal_(w)\n    \"\"\"\n    return _no_grad_normal_(tensor, mean, std)\ndef trunc_normal_(tensor: Tensor,\n                  mean: float = 0.,",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/manet_utils.py:862-895"
+    },
+    "743": {
+        "file_id": 66,
+        "content": "These code snippets define functions to initialize a tensor with values drawn from a uniform or normal distribution. The `uniform_` function fills the input tensor with values from a uniform distribution, while `normal_` initializes it with values from a normal distribution. These functions can be used for various tasks such as initializing weights in a neural network.",
+        "type": "comment"
+    },
+    "744": {
+        "file_id": 66,
+        "content": "                  std: float = 1.,\n                  a: float = -2.,\n                  b: float = 2.) -> Tensor:\n    r\"\"\"Fills the input Tensor with values drawn from a truncated\n    normal distribution. The values are effectively drawn from the\n    normal distribution :math:`\\mathcal{N}(\\text{mean}, \\text{std}^2)`\n    with values outside :math:`[a, b]` redrawn until they are within\n    the bounds. The method used for generating the random values works\n    best when :math:`a \\leq \\text{mean} \\leq b`.\n    Args:\n        tensor: an n-dimensional `torch.Tensor`\n        mean: the mean of the normal distribution\n        std: the standard deviation of the normal distribution\n        a: the minimum cutoff value\n        b: the maximum cutoff value\n    Examples:\n        >>> w = torch.empty(3, 5)\n        >>> nn.init.trunc_normal_(w)\n    \"\"\"\n    return _no_grad_trunc_normal_(tensor, mean, std, a, b)\ndef constant_(tensor: Tensor, val: float) -> Tensor:\n    r\"\"\"Fills the input Tensor with the value :math:`\\text{val}`.\n    Args:",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/manet_utils.py:896-923"
+    },
+    "745": {
+        "file_id": 66,
+        "content": "This code snippet defines a function `trunc_normal_` that fills the input Tensor with values drawn from a truncated normal distribution. The values are within the range [a, b] and the method works best when a <= mean <= b. Additionally, it includes a separate function `constant_` which fills the input Tensor with a constant value val.",
+        "type": "comment"
+    },
+    "746": {
+        "file_id": 66,
+        "content": "        tensor: an n-dimensional `torch.Tensor`\n        val: the value to fill the tensor with\n    Examples:\n        >>> w = torch.empty(3, 5)\n        >>> nn.init.constant_(w, 0.3)\n    \"\"\"\n    return _no_grad_fill_(tensor, val)\ndef ones_(tensor: Tensor) -> Tensor:\n    r\"\"\"Fills the input Tensor with the scalar value `1`.\n    Args:\n        tensor: an n-dimensional `torch.Tensor`\n    Examples:\n        >>> w = torch.empty(3, 5)\n        >>> nn.init.ones_(w)\n    \"\"\"\n    return _no_grad_fill_(tensor, 1.)\ndef zeros_(tensor: Tensor) -> Tensor:\n    r\"\"\"Fills the input Tensor with the scalar value `0`.\n    Args:\n        tensor: an n-dimensional `torch.Tensor`\n    Examples:\n        >>> w = torch.empty(3, 5)\n        >>> nn.init.zeros_(w)\n    \"\"\"\n    return _no_grad_zero_(tensor)\ndef eye_(tensor):\n    r\"\"\"Fills the 2-dimensional input `Tensor` with the identity\n    matrix. Preserves the identity of the inputs in `Linear` layers, where as\n    many inputs are preserved as possible.\n    Args:\n        tensor: a 2-dimensional `torch.Tensor`",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/manet_utils.py:924-966"
+    },
+    "747": {
+        "file_id": 66,
+        "content": "These methods fill a tensor with specific values or an identity matrix for Linear layers. The `constant_()`, `ones_()`, and `zeros_()` functions fill the input tensor with constant, ones, or zeros respectively. The `eye_()` function fills a 2-dimensional tensor with an identity matrix while preserving the identities of inputs in Linear layers.",
+        "type": "comment"
+    },
+    "748": {
+        "file_id": 66,
+        "content": "    Examples:\n        >>> w = torch.empty(3, 5)\n        >>> nn.init.eye_(w)\n    \"\"\"\n    if tensor.ndimension() != 2:\n        raise ValueError(\"Only tensors with 2 dimensions are supported\")\n    with paddle.no_grad():\n        tensor.set_value(paddle.eye(*tensor.shape))\n    return tensor\ndef dirac_(tensor, groups=1):\n    r\"\"\"Fills the {3, 4, 5}-dimensional input `Tensor` with the Dirac\n    delta function. Preserves the identity of the inputs in `Convolutional`\n    layers, where as many input channels are preserved as possible. In case\n    of groups>1, each group of channels preserves identity\n    Args:\n        tensor: a {3, 4, 5}-dimensional `torch.Tensor`\n        groups (optional): number of groups in the conv layer (default: 1)\n    Examples:\n        >>> w = torch.empty(3, 16, 5, 5)\n        >>> nn.init.dirac_(w)\n        >>> w = torch.empty(3, 24, 5, 5)\n        >>> nn.init.dirac_(w, 3)\n    \"\"\"\n    dimensions = tensor.ndimension()\n    if dimensions not in [3, 4, 5]:\n        raise ValueError(\n            \"Only tensors with 3, 4, or 5 dimensions are supported\")",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/manet_utils.py:968-998"
+    },
+    "749": {
+        "file_id": 66,
+        "content": "The provided code defines two functions, `eye_` and `dirac_`, that initialize a tensor with specific values. The `eye_` function fills the 2D tensor with an identity matrix, while the `dirac_` function fills a 3D, 4D or 5D tensor with Dirac delta functions. It also takes an optional argument for groups in case of Convolutional layers. Both functions require the input tensor to have specific dimensions and raise a ValueError if not satisfied.",
+        "type": "comment"
+    },
+    "750": {
+        "file_id": 66,
+        "content": "    sizes = tensor.shape\n    if sizes[0] % groups != 0:\n        raise ValueError('dim 0 must be divisible by groups')\n    out_chans_per_grp = sizes[0] // groups\n    min_dim = min(out_chans_per_grp, sizes[1])\n    with paddle.no_grad():\n        tensor.zero_()\n        for g in range(groups):\n            for d in range(min_dim):\n                if dimensions == 3:  # Temporal convolution\n                    tensor[g * out_chans_per_grp + d, d,\n                           tensor.shape[2] // 2] = 1\n                elif dimensions == 4:  # Spatial convolution\n                    tensor[g * out_chans_per_grp + d, d, tensor.shape[2] // 2,\n                           tensor.shape[3] // 2] = 1\n                else:  # Volumetric convolution\n                    tensor[g * out_chans_per_grp + d, d, tensor.shape[2] // 2,\n                           tensor.shape[3] // 2, tensor.shape[4] // 2] = 1\n    return tensor\ndef _calculate_fan_in_and_fan_out(tensor):\n    dimensions = tensor.dim()\n    if dimensions < 2:\n        raise ValueError(",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/manet_utils.py:1000-1028"
+    },
+    "751": {
+        "file_id": 66,
+        "content": "This function initializes a tensor with ones in specific positions based on the provided dimensions (3 for temporal convolution, 4 for spatial convolution, and 5 for volumetric convolution). It checks if dim 0 is divisible by groups and raises an error if not. Then it calculates out_chans_per_grp and min_dim, and finally initializes the tensor using no_grad context manager.",
+        "type": "comment"
+    },
+    "752": {
+        "file_id": 66,
+        "content": "            \"Fan in and fan out can not be computed for tensor with fewer than 2 dimensions\"\n        )\n    num_input_fmaps = tensor.shape[1]  # .size(1)\n    num_output_fmaps = tensor.shape[0]  # .size(0)\n    receptive_field_size = 1\n    if tensor.dim() > 2:\n        for s in tensor.shape[2:]:\n            receptive_field_size *= s  # fixed\n    fan_in = num_input_fmaps * receptive_field_size\n    fan_out = num_output_fmaps * receptive_field_size\n    return fan_in, fan_out\ndef LongTensor(x):\n    return paddle.to_tensor(x, dtype='int64')\ndef IntTensor(x):\n    return paddle.to_tensor(x, dtype='int32')\ndef xavier_uniform_(tensor: Tensor, gain: float = 1.) -> Tensor:\n    r\"\"\"Fills the input `Tensor` with values according to the method\n    described in `Understanding the difficulty of training deep feedforward\n    neural networks` - Glorot, X. & Bengio, Y. (2010), using a uniform\n    distribution. The resulting tensor will have values sampled from\n    :math:`\\mathcal{U}(-a, a)` where\n    .. math::\n        a = \\text{gain} \\times \\sqrt{\\frac{6}{\\text{fan\\_in} + \\text{fan\\_out}}}",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/manet_utils.py:1029-1060"
+    },
+    "753": {
+        "file_id": 66,
+        "content": "Function to calculate fan_in and fan_out for tensor with dimensions greater than 2, compute the gain factor for Xavier uniform initialization, fill the input Tensor with values from a uniform distribution according to Glorot & Bengio (2010) method.",
+        "type": "comment"
+    },
+    "754": {
+        "file_id": 66,
+        "content": "    Also known as Glorot initialization.\n    Args:\n        tensor: an n-dimensional `torch.Tensor`\n        gain: an optional scaling factor\n    Examples:\n        >>> w = torch.empty(3, 5)\n        >>> nn.init.xavier_uniform_(w, gain=nn.init.calculate_gain('relu'))\n    \"\"\"\n    fan_in, fan_out = _calculate_fan_in_and_fan_out(tensor)\n    std = gain * math.sqrt(2.0 / float(fan_in + fan_out))\n    a = math.sqrt(3.0) * std  # Calculate uniform bounds from standard deviation\n    return _no_grad_uniform_(tensor, -a, a)\ndef xavier_normal_(tensor: Tensor, gain: float = 1.) -> Tensor:\n    r\"\"\"Fills the input `Tensor` with values according to the method\n    described in `Understanding the difficulty of training deep feedforward\n    neural networks` - Glorot, X. & Bengio, Y. (2010), using a normal\n    distribution. The resulting tensor will have values sampled from\n    :math:`\\mathcal{N}(0, \\text{std}^2)` where\n    .. math::\n        \\text{std} = \\text{gain} \\times \\sqrt{\\frac{2}{\\text{fan\\_in} + \\text{fan\\_out}}}\n    Also known as Glorot initialization.",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/manet_utils.py:1062-1089"
+    },
+    "755": {
+        "file_id": 66,
+        "content": "This code snippet is for initializing a Tensor with values from a normal distribution, using the Xavier/Glorot initialization method. It calculates the standard deviation based on the fan-in and fan-out of the tensor and applies it to uniformly fill the tensor within specified bounds.",
+        "type": "comment"
+    },
+    "756": {
+        "file_id": 66,
+        "content": "    Args:\n        tensor: an n-dimensional `torch.Tensor`\n        gain: an optional scaling factor\n    Examples:\n        >>> w = torch.empty(3, 5)\n        >>> nn.init.xavier_normal_(w)\n    \"\"\"\n    fan_in, fan_out = _calculate_fan_in_and_fan_out(tensor)\n    std = gain * math.sqrt(2.0 / float(fan_in + fan_out))\n    return _no_grad_normal_(tensor, 0., std)\ndef _calculate_correct_fan(tensor, mode):\n    mode = mode.lower()\n    valid_modes = ['fan_in', 'fan_out']\n    if mode not in valid_modes:\n        raise ValueError(\"Mode {} not supported, please use one of {}\".format(\n            mode, valid_modes))\n    fan_in, fan_out = _calculate_fan_in_and_fan_out(tensor)\n    return fan_in if mode == 'fan_in' else fan_out\ndef kaiming_uniform_(tensor, a=0, mode='fan_in', nonlinearity='leaky_relu'):\n    r\"\"\"Fills the input `Tensor` with values according to the method\n    described in `Delving deep into rectifiers: Surpassing human-level\n    performance on ImageNet classification` - He, K. et al. (2015), using a\n    uniform distribution. The resulting tensor will have values sampled from",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/manet_utils.py:1091-1120"
+    },
+    "757": {
+        "file_id": 66,
+        "content": "This code snippet is from the PyTorch library and provides functions for initializing tensors with Xavier normal distribution. It includes the `kaiming_uniform_` function that takes a tensor, gain factor, and optional parameters for fan-in/fan-out calculation or nonlinearity. The `_calculate_fan_in_and_fan_out` and `_calculate_correct_fan` functions help calculate the appropriate fan values based on input arguments.",
+        "type": "comment"
+    },
+    "758": {
+        "file_id": 66,
+        "content": "    :math:`\\mathcal{U}(-\\text{bound}, \\text{bound})` where\n    .. math::\n        \\text{bound} = \\text{gain} \\times \\sqrt{\\frac{3}{\\text{fan\\_mode}}}\n    Also known as He initialization.\n    Args:\n        tensor: an n-dimensional `torch.Tensor`\n        a: the negative slope of the rectifier used after this layer (only\n            used with ``'leaky_relu'``)\n        mode: either ``'fan_in'`` (default) or ``'fan_out'``. Choosing ``'fan_in'``\n            preserves the magnitude of the variance of the weights in the\n            forward pass. Choosing ``'fan_out'`` preserves the magnitudes in the\n            backwards pass.\n        nonlinearity: the non-linear function (`nn.functional` name),\n            recommended to use only with ``'relu'`` or ``'leaky_relu'`` (default).\n    Examples:\n        >>> w = torch.empty(3, 5)\n        >>> nn.init.kaiming_uniform_(w, mode='fan_in', nonlinearity='relu')\n    \"\"\"\n    fan = _calculate_correct_fan(tensor, mode)\n    gain = calculate_gain(nonlinearity, a)\n    std = gain / math.sqrt(fan)",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/manet_utils.py:1121-1145"
+    },
+    "759": {
+        "file_id": 66,
+        "content": "This function initializes a tensor with Kaiming uniform initialization, setting the standard deviation of the normal distribution to be equal to gain multiplied by the square root of 3 divided by fan mode. It's used for He initialization and applies nonlinearity based on the specified parameter.",
+        "type": "comment"
+    },
+    "760": {
+        "file_id": 66,
+        "content": "    bound = math.sqrt(\n        3.0) * std  # Calculate uniform bounds from standard deviation\n    with paddle.no_grad():\n        tensor.set_value(paddle.uniform(tensor.shape, min=-bound, max=bound))\n        return tensor\ndef kaiming_normal_(tensor, a=0, mode='fan_in', nonlinearity='leaky_relu'):\n    r\"\"\"Fills the input `Tensor` with values according to the method\n    described in `Delving deep into rectifiers: Surpassing human-level\n    performance on ImageNet classification` - He, K. et al. (2015), using a\n    normal distribution. The resulting tensor will have values sampled from\n    :math:`\\mathcal{N}(0, \\text{std}^2)` where\n    .. math::\n        \\text{std} = \\frac{\\text{gain}}{\\sqrt{\\text{fan\\_mode}}}\n    Also known as He initialization.\n    Args:\n        tensor: an n-dimensional `torch.Tensor`\n        a: the negative slope of the rectifier used after this layer (only\n            used with ``'leaky_relu'``)\n        mode: either ``'fan_in'`` (default) or ``'fan_out'``. Choosing ``'fan_in'``\n            preserves the magnitude of the variance of the weights in the",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/manet_utils.py:1146-1170"
+    },
+    "761": {
+        "file_id": 66,
+        "content": "This code initializes a tensor using the Kaiming normal method. It fills the input tensor with values sampled from a normal distribution, where std is calculated based on gain and fan_mode (fan_in by default). This initialization method is often used in neural networks to improve performance.",
+        "type": "comment"
+    },
+    "762": {
+        "file_id": 66,
+        "content": "            forward pass. Choosing ``'fan_out'`` preserves the magnitudes in the\n            backwards pass.\n        nonlinearity: the non-linear function (`nn.functional` name),\n            recommended to use only with ``'relu'`` or ``'leaky_relu'`` (default).\n    Examples:\n        >>> w = torch.empty(3, 5)\n        >>> kaiming_normal_(w, mode='fan_out', nonlinearity='relu')\n    \"\"\"\n    fan = _calculate_correct_fan(tensor, mode)\n    gain = calculate_gain(nonlinearity, a)\n    std = gain / math.sqrt(fan)\n    with paddle.no_grad():\n        tensor.set_value(paddle.normal(shape=tensor.shape, mean=0, std=std))\n        return tensor\ndef orthogonal_(tensor, gain=1):\n    r\"\"\"Fills the input `Tensor` with a (semi) orthogonal matrix, as\n    described in `Exact solutions to the nonlinear dynamics of learning in deep\n    linear neural networks` - Saxe, A. et al. (2013). The input tensor must have\n    at least 2 dimensions, and for tensors with more than 2 dimensions the\n    trailing dimensions are flattened.\n    Args:\n        tensor: an n-dimensional `torch.Tensor`, where :math:`n \\geq 2`",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/manet_utils.py:1171-1196"
+    },
+    "763": {
+        "file_id": 66,
+        "content": "These functions fill a tensor with either a (semi) orthogonal matrix or initialize weights using Kaiming normal distribution. The 'fan_out' and 'nonlinearity' parameters are used for the initialization process. These functions are inspired by research papers, one focusing on orthogonal matrices in deep linear neural networks and another on Kaiming normal distribution for weight initialization.",
+        "type": "comment"
+    },
+    "764": {
+        "file_id": 66,
+        "content": "        gain: optional scaling factor\n    Examples:\n        >>> w = torch.empty(3, 5)\n        >>> nn.init.orthogonal_(w)\n    \"\"\"\n    if tensor.ndimension() < 2:\n        raise ValueError(\"Only tensors with 2 or more dimensions are supported\")\n    rows = tensor.shape[0]  # .size(0)\n    cols = tensor.numel() // rows\n    flattened = tensor.new(rows, cols).normal_(0, 1)\n    if rows < cols:\n        flattened.t_()\n    # Compute the qr factorization\n    q, r = paddle.to_tensor(np.linalg.qr(flattened.numpy()))\n    # q, r = torch.qr(flattened)\n    # Make Q uniform according to https://arxiv.org/pdf/math-ph/0609050.pdf\n    d = paddle.diag(r, 0)\n    ph = d.sign()\n    q *= ph\n    if rows < cols:\n        q.t_()\n    with paddle.no_grad():\n        tensor.view_as(q).copy_(q)\n        tensor.mul_(gain)\n    return tensor\ndef sparse_(tensor, sparsity, std=0.01):\n    r\"\"\"Fills the 2D input `Tensor` as a sparse matrix, where the\n    non-zero elements will be drawn from the normal distribution\n    :math:`\\mathcal{N}(0, 0.01)`, as described in `Deep learning via",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/manet_utils.py:1197-1233"
+    },
+    "765": {
+        "file_id": 66,
+        "content": "This function initializes a 2D tensor with values drawn from the standard normal distribution, ensuring that at least a certain sparsity level is maintained. It uses QR factorization and scales the result by a given gain factor if specified.",
+        "type": "comment"
+    },
+    "766": {
+        "file_id": 66,
+        "content": "    Hessian-free optimization` - Martens, J. (2010).\n    Args:\n        tensor: an n-dimensional `torch.Tensor`\n        sparsity: The fraction of elements in each column to be set to zero\n        std: the standard deviation of the normal distribution used to generate\n            the non-zero values\n    Examples:\n        >>> w = torch.empty(3, 5)\n        >>> nn.init.sparse_(w, sparsity=0.1)\n    \"\"\"\n    if tensor.ndimension() != 2:\n        raise ValueError(\"Only tensors with 2 dimensions are supported\")\n    rows, cols = tensor.shape\n    num_zeros = int(math.ceil(sparsity * rows))\n    with paddle.no_grad():\n        tensor.normal_(0, std)\n        for col_idx in range(cols):\n            row_indices = paddle.randperm(rows)\n            zero_indices = row_indices[:num_zeros]\n            tensor[zero_indices, col_idx] = 0\n    return tensor\n# for backward compatibility\ndef _make_deprecate(meth):\n    new_name = meth.__name__\n    old_name = new_name[:-1]\n    def deprecated_init(*args, **kwargs):\n        warnings.warn(\n            \"nn.init.{} is now deprecated in favor of nn.init.{}.\".format(",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/manet_utils.py:1234-1268"
+    },
+    "767": {
+        "file_id": 66,
+        "content": "This code initializes a 2D torch.Tensor with a specified sparsity and standard deviation by setting some elements to zero while keeping others non-zero. It checks for tensor dimensions, normalizes values, assigns zeroes based on the input sparsity, and is compatible with both PyTorch and PaddlePaddle.",
+        "type": "comment"
+    },
+    "768": {
+        "file_id": 66,
+        "content": "                old_name, new_name),\n            stacklevel=2)\n        return meth(*args, **kwargs)\n    deprecated_init.__doc__ = r\"\"\"\n    {old_name}(...)\n    .. warning::\n        This method is now deprecated in favor of :func:`torch.nn.init.{new_name}`.\n    See :func:`~torch.nn.init.{new_name}` for details.\"\"\".format(\n        old_name=old_name, new_name=new_name)\n    deprecated_init.__name__ = old_name\n    return deprecated_init\n# uniform = _make_deprecate(uniform_)\n# normal = _make_deprecate(normal_)\n# constant = _make_deprecate(constant_)\n# eye = _make_deprecate(eye_)\n# dirac = _make_deprecate(dirac_)\n# xavier_uniform = _make_deprecate(xavier_uniform_)\n# xavier_normal = _make_deprecate(xavier_normal_)\n# kaiming_uniform = _make_deprecate(kaiming_uniform_)\n# kaiming_normal = _make_deprecate(kaiming_normal_)\n# orthogonal = _make_deprecate(orthogonal_)\n# sparse = _make_deprecate(sparse_)",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/manet_utils.py:1269-1295"
+    },
+    "769": {
+        "file_id": 66,
+        "content": "This code defines several deprecated initialization methods and creates their corresponding non-deprecated alternatives. The _make_deprecate function wraps the old functions with a warning that they are deprecated in favor of new Torch.nn.init functions, redirecting users to the new functions for more information.",
+        "type": "comment"
+    },
+    "770": {
+        "file_id": 67,
+        "content": "/applications/EIVideo/EIVideo/paddlevideo/utils/precise_bn.py",
+        "type": "filepath"
+    },
+    "771": {
+        "file_id": 67,
+        "content": "The precise_bn.py file in PaddlePaddle's EIVideo module contains a function called do_preciseBN, which recomputes batch normalization stats for improved accuracy by running the model multiple times with input data from the data_loader, updating BN layers with running averages for normalization.",
+        "type": "summary"
+    },
+    "772": {
+        "file_id": 67,
+        "content": "# copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport paddle\nimport itertools\nfrom EIVideo.paddlevideo.utils import get_logger\nlogger = get_logger(\"paddlevideo\")\n\"\"\"\nImplement precise bn, which is useful for improving accuracy.\n\"\"\"\n@paddle.no_grad()  # speed up and save CUDA memory\ndef do_preciseBN(model, data_loader, parallel, num_iters=200):\n    \"\"\"\n    Recompute and update the batch norm stats to make them more precise. During\n    training both BN stats and the weight are changing after every iteration, so",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/precise_bn.py:1-30"
+    },
+    "773": {
+        "file_id": 67,
+        "content": "The code provided is part of the PaddlePaddle framework for video applications, specifically the EIVideo module. This precise_bn.py file contains a function called do_preciseBN that recomputes and updates batch norm stats to improve accuracy. It does so by running the model with input data from the data_loader multiple times (num_iters) to make BN statistics more precise. The code also includes an import for paddle, itertools, and EIVideo's paddlevideo module.",
+        "type": "comment"
+    },
+    "774": {
+        "file_id": 67,
+        "content": "    the running average can not precisely reflect the actual stats of the\n    current model.\n    In this function, the BN stats are recomputed with fixed weights, to make\n    the running average more precise. Specifically, it computes the true average\n    of per-batch mean/variance instead of the running average.\n    This is useful to improve validation accuracy.\n    Args:\n        model: the model whose bn stats will be recomputed\n        data_loader: an iterator. Produce data as input to the model\n        num_iters: number of iterations to compute the stats.\n    Return:\n        the model with precise mean and variance in bn layers.\n    \"\"\"\n    bn_layers_list = [\n        m for m in model.sublayers()\n        if any((isinstance(m, bn_type)\n                for bn_type in (paddle.nn.BatchNorm1D, paddle.nn.BatchNorm2D,\n                                paddle.nn.BatchNorm3D))) and m.training\n    ]\n    if len(bn_layers_list) == 0:\n        return\n    # moving_mean=moving_mean*momentum+batch_mean*(1.−momentum)\n    # we set momentum=0. to get the true mean and variance during forward",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/precise_bn.py:31-54"
+    },
+    "775": {
+        "file_id": 67,
+        "content": "This code recomputes the batch normalization (BN) statistics with fixed weights for a given model, improving validation accuracy. It computes true average of per-batch mean/variance instead of running average. The code targets specific BN layers in the model and is applied when there are no such layers or if training is not enabled.",
+        "type": "comment"
+    },
+    "776": {
+        "file_id": 67,
+        "content": "    momentum_actual = [bn._momentum for bn in bn_layers_list]\n    for bn in bn_layers_list:\n        bn._momentum = 0.\n    running_mean = [paddle.zeros_like(bn._mean)\n                    for bn in bn_layers_list]  #pre-ignore\n    running_var = [paddle.zeros_like(bn._variance) for bn in bn_layers_list]\n    ind = -1\n    for ind, data in enumerate(itertools.islice(data_loader, num_iters)):\n        logger.info(\"doing precise BN {} / {}...\".format(ind + 1, num_iters))\n        if parallel:\n            model._layers.train_step(data)\n        else:\n            model.train_step(data)\n        for i, bn in enumerate(bn_layers_list):\n            # Accumulates the bn stats.\n            running_mean[i] += (bn._mean - running_mean[i]) / (ind + 1)\n            running_var[i] += (bn._variance - running_var[i]) / (ind + 1)\n    assert ind == num_iters - 1, (\n        \"update_bn_stats is meant to run for {} iterations, but the batch_sampler stops at {} iterations.\"\n        .format(num_iters, ind))\n    # Sets the precise bn stats.",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/precise_bn.py:55-80"
+    },
+    "777": {
+        "file_id": 67,
+        "content": "This code initializes the momentum of batch normalization (BN) layers to 0 and creates lists for running mean and variance. It then trains a model for a specified number of iterations, updating the BN statistics by accumulating the difference between current and running mean/variance. Finally, it asserts that the correct number of iterations were performed.",
+        "type": "comment"
+    },
+    "778": {
+        "file_id": 67,
+        "content": "    for i, bn in enumerate(bn_layers_list):\n        bn._mean.set_value(running_mean[i])\n        bn._variance.set_value(running_var[i])\n        bn._momentum = momentum_actual[i]",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/precise_bn.py:81-84"
+    },
+    "779": {
+        "file_id": 67,
+        "content": "This code is iterating through a list of batch normalization (BN) layers, setting their mean and variance values from a separate list, and updating their momentum value. This could be part of a model's training process where it updates the BN layers with running averages for normalization.",
+        "type": "comment"
+    },
+    "780": {
+        "file_id": 68,
+        "content": "/applications/EIVideo/EIVideo/paddlevideo/utils/profiler.py",
+        "type": "filepath"
+    },
+    "781": {
+        "file_id": 68,
+        "content": "This code initializes global profiling variables and defines the ProfilerOptions class for operator-level timing using PaddlePaddle's profiler. It also stops the profiler, checks for exit conditions, and increments _profiler_step_id.",
+        "type": "summary"
+    },
+    "782": {
+        "file_id": 68,
+        "content": "# copyright (c) 2021 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport sys\nimport paddle\n# A global variable to record the number of calling times for profiler\n# functions. It is used to specify the tracing range of training steps.\n_profiler_step_id = 0\n# A global variable to avoid parsing from string every time.\n_profiler_options = None\nclass ProfilerOptions(object):\n    \"\"\"\n    Use a string to initialize a ProfilerOptions.\n    The string should be in the format: \"key1=value1;key2=value;key3=value3\".",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/profiler.py:1-29"
+    },
+    "783": {
+        "file_id": 68,
+        "content": "This code is setting up a global variable to record the number of calling times for profiler functions and another global variable to avoid parsing from string every time. It also defines the ProfilerOptions class, which can be initialized using a string in the format \"key1=value1;key2=value;key3=value3\". This indicates that the code is part of PaddleVideo's EIVideo application and is related to profiling options and step ID management.",
+        "type": "comment"
+    },
+    "784": {
+        "file_id": 68,
+        "content": "    For example:\n      \"profile_path=model.profile\"\n      \"batch_range=[50, 60]; profile_path=model.profile\"\n      \"batch_range=[50, 60]; tracer_option=OpDetail; profile_path=model.profile\"\n    ProfilerOptions supports following key-value pair:\n      batch_range      - a integer list, e.g. [100, 110].\n      state            - a string, the optional values are 'CPU', 'GPU' or 'All'.\n      sorted_key       - a string, the optional values are 'calls', 'total',\n                         'max', 'min' or 'ave.\n      tracer_option    - a string, the optional values are 'Default', 'OpDetail',\n                         'AllOpDetail'.\n      profile_path     - a string, the path to save the serialized profile data,\n                         which can be used to generate a timeline.\n      exit_on_finished - a boolean.\n    \"\"\"\n    def __init__(self, options_str):\n        assert isinstance(options_str, str)\n        self._options = {\n            'batch_range': [10, 20],\n            'state': 'All',\n            'sorted_key': 'total',",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/profiler.py:30-52"
+    },
+    "785": {
+        "file_id": 68,
+        "content": "The code defines a class \"ProfilerOptions\" which takes in an options string and initializes its attributes. Options can include batch_range, state (CPU/GPU/All), sorted_key (calls/total/max/min/ave), tracer_option (Default/OpDetail/AllOpDetail), profile_path for storing serialized data, and exit_on_finished boolean flag.",
+        "type": "comment"
+    },
+    "786": {
+        "file_id": 68,
+        "content": "            'tracer_option': 'Default',\n            'profile_path': '/tmp/profile',\n            'exit_on_finished': True\n        }\n        self._parse_from_string(options_str)\n    def _parse_from_string(self, options_str):\n        for kv in options_str.replace(' ', '').split(';'):\n            key, value = kv.split('=')\n            if key == 'batch_range':\n                value_list = value.replace('[', '').replace(']', '').split(',')\n                value_list = list(map(int, value_list))\n                if len(value_list) >= 2 and value_list[0] >= 0 and value_list[\n                        1] > value_list[0]:\n                    self._options[key] = value_list\n            elif key == 'exit_on_finished':\n                self._options[key] = value.lower() in (\"yes\", \"true\", \"t\", \"1\")\n            elif key in [\n                    'state', 'sorted_key', 'tracer_option', 'profile_path'\n            ]:\n                self._options[key] = value\n    def __getitem__(self, name):\n        if self._options.get(name, None) is None:",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/profiler.py:53-76"
+    },
+    "787": {
+        "file_id": 68,
+        "content": "Class for parsing profile options from a string. It stores the batch range, tracer option, exit on finished status, state, sorted key, and profile path as options. The _parse_from_string function sets the values based on specific conditions: if the 'batch_range' is valid, 'exit_on_finished' is set to True if the value matches \"yes\", \"true\", \"t\", or \"1\", and other options are directly assigned from the string. If an option name is not found in the string, it returns None.",
+        "type": "comment"
+    },
+    "788": {
+        "file_id": 68,
+        "content": "            raise ValueError(\n                \"ProfilerOptions does not have an option named %s.\" % name)\n        return self._options[name]\ndef add_profiler_step(options_str=None):\n    \"\"\"\n    Enable the operator-level timing using PaddlePaddle's profiler.\n    The profiler uses a independent variable to count the profiler steps.\n    One call of this function is treated as a profiler step.\n    Args:\n      profiler_options - a string to initialize the ProfilerOptions.\n                         Default is None, and the profiler is disabled.\n    \"\"\"\n    if options_str is None:\n        return\n    global _profiler_step_id\n    global _profiler_options\n    if _profiler_options is None:\n        _profiler_options = ProfilerOptions(options_str)\n    if _profiler_step_id == _profiler_options['batch_range'][0]:\n        paddle.utils.profiler.start_profiler(_profiler_options['state'],\n                                             _profiler_options['tracer_option'])\n    elif _profiler_step_id == _profiler_options['batch_range'][1]:",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/profiler.py:77-104"
+    },
+    "789": {
+        "file_id": 68,
+        "content": "This function enables the operator-level timing using PaddlePaddle's profiler. It initializes the ProfilerOptions with a provided string and increments the global profiler step id. If the current step matches the start or end of the batch range in the options, it starts or stops the profiler respectively.",
+        "type": "comment"
+    },
+    "790": {
+        "file_id": 68,
+        "content": "        paddle.utils.profiler.stop_profiler(_profiler_options['sorted_key'],\n                                            _profiler_options['profile_path'])\n        if _profiler_options['exit_on_finished']:\n            sys.exit(0)\n    _profiler_step_id += 1",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/profiler.py:105-110"
+    },
+    "791": {
+        "file_id": 68,
+        "content": "This code snippet stops the profiler, checks if it should exit on finished, and increments _profiler_step_id.",
+        "type": "comment"
+    },
+    "792": {
+        "file_id": 69,
+        "content": "/applications/EIVideo/EIVideo/paddlevideo/utils/record.py",
+        "type": "filepath"
+    },
+    "793": {
+        "file_id": 69,
+        "content": "This code initializes a logger, defines functions for logging metrics such as loss and learning rate during training. It also creates a class for tracking various metrics with update method and logs batch metrics at specified batch IDs in log_batch function, while formatting log string with colors for clarity in video processing tasks.",
+        "type": "summary"
+    },
+    "794": {
+        "file_id": 69,
+        "content": "# copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nfrom collections import OrderedDict\nimport paddle\nfrom .logger import coloring, get_logger\nlogger = get_logger(\"paddlevideo\")\n__all__ = ['AverageMeter', 'build_record', 'log_batch', 'log_epoch']\ndef build_record(cfg):\n    framework_type = cfg.get('framework', '')\n    record_list = [\n        (\"loss\", AverageMeter('loss', '7.5f')),\n        (\"lr\", AverageMeter('lr', 'f', need_avg=False)),\n    ]\n    if 'Recognizer1D' in framework_type:  #TODO: required specify str in framework",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/record.py:1-32"
+    },
+    "795": {
+        "file_id": 69,
+        "content": "This code imports necessary libraries and defines functions for logging metrics such as loss, learning rate during training. It also initializes a logger with the name \"paddlevideo\" and specifies the available classes or functions that can be accessed from this file. The build_record function takes a configuration file and creates an ordered dictionary of metrics to record based on the framework type specified in the configuration file.",
+        "type": "comment"
+    },
+    "796": {
+        "file_id": 69,
+        "content": "        record_list.append((\"hit_at_one\", AverageMeter(\"hit_at_one\", '.5f')))\n        record_list.append((\"perr\", AverageMeter(\"perr\", '.5f')))\n        record_list.append((\"gap\", AverageMeter(\"gap\", '.5f')))\n    elif 'Recognizer' in framework_type:\n        record_list.append((\"top1\", AverageMeter(\"top1\", '.5f')))\n        record_list.append((\"top5\", AverageMeter(\"top5\", '.5f')))\n    elif 'FastRCNN' in framework_type:\n        record_list.append(\n            (\"recall@thr=0.5\", AverageMeter(\"recall@thr=0.5\", '.5f')))\n        record_list.append(\n            (\"prec@thr=0.5\", AverageMeter(\"prec@thr=0.5\", '.5f')))\n        record_list.append((\"recall@top3\", AverageMeter(\"recall@top3\", '.5f')))\n        record_list.append((\"prec@top3\", AverageMeter(\"prec@top3\", '.5f')))\n        record_list.append((\"recall@top5\", AverageMeter(\"recall@top5\", '.5f')))\n        record_list.append((\"prec@top5\", AverageMeter(\"prec@top5\", '.5f')))\n        record_list.append((\"mAP@0.5IOU\", AverageMeter(\"mAP@0.5IOU\", '.5f')))\n    elif 'DepthEstimator' in cfg.framework:",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/record.py:33-49"
+    },
+    "797": {
+        "file_id": 69,
+        "content": "This code is part of a function that handles recording different metrics for various framework types. It appends specific metric names and instances of the AverageMeter class to the record_list depending on the framework type. If 'Recognizer' is in the framework type, it records 'top1' and 'top5' metrics. If 'FastRCNN' is present, it records a series of recall and precision metrics along with mAP@0.5IOU. The function continues with more conditions for different framework types after this snippet.",
+        "type": "comment"
+    },
+    "798": {
+        "file_id": 69,
+        "content": "        record_list.append((\"abs_rel\", AverageMeter(\"abs_rel\", '.5f')))\n        record_list.append((\"sq_rel\", AverageMeter(\"sq_rel\", '.5f')))\n        record_list.append((\"rmse\", AverageMeter(\"rmse\", '.5f')))\n        record_list.append((\"rmse_log\", AverageMeter(\"rmse_log\", '.5f')))\n        record_list.append((\"a1\", AverageMeter(\"a1\", '.5f')))\n        record_list.append((\"a2\", AverageMeter(\"a2\", '.5f')))\n        record_list.append((\"a3\", AverageMeter(\"a3\", '.5f')))\n        record_list.append((\"losses_day\", AverageMeter(\"losses_day\", '.5f')))\n        record_list.append(\n            (\"losses_night\", AverageMeter(\"losses_night\", '.5f')))\n    record_list.append((\"batch_time\", AverageMeter('batch_cost', '.5f')))\n    record_list.append((\"reader_time\", AverageMeter('reader_cost', '.5f')))\n    record_list = OrderedDict(record_list)\n    return record_list\nclass AverageMeter(object):\n    \"\"\"\n    Computes and stores the average and current value\n    \"\"\"\n    def __init__(self, name='', fmt='f', need_avg=True):\n        self.name = name",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/record.py:50-72"
+    },
+    "799": {
+        "file_id": 69,
+        "content": "This code defines a list of metrics to be tracked and an AverageMeter class that computes and stores the average and current value for each metric. The list includes various metrics like \"abs_rel\", \"sq_rel\", \"rmse\", \"rmse_log\", \"a1\", \"a2\", \"a3\", \"losses_day\", \"losses_night\", \"batch_time\", and \"reader_time\". The list is then converted to an OrderedDict.",
+        "type": "comment"
+    }
+}

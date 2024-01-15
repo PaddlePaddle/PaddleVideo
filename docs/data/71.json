@@ -1,0 +1,548 @@
+{
+    "7100": {
+        "file_id": 516,
+        "content": "            self.resnet_like_top_max_pool = nn.MaxPool3D(kernel_size=(1, 3, 3), stride=(1, 2, 2),\n                                                         padding=(0, 1, 1))\n        if self.resnet_like_top:\n            in_filters = 32\n        elif self.use_resnet_features:\n            in_filters = 64\n        else:\n            in_filters = 3\n        self.SDDCNN = nn.LayerList(\n            [StackedDDCNNV2(in_filters=in_filters, n_blocks=S, filters=F,\n                            stochastic_depth_drop_prob=0.)] +\n            [StackedDDCNNV2(in_filters=(F * 2 ** (i - 1)) * 4, n_blocks=S, filters=F * 2 ** i) for i in range(1, L)]\n        )\n        self.frame_sim_layer = FrameSimilarity(\n            sum([(F * 2 ** i) * 4 for i in range(L)]), lookup_window=101, output_dim=128, similarity_dim=128,\n            use_bias=True\n        ) if use_frame_similarity else None\n        self.color_hist_layer = ColorHistograms(\n            lookup_window=101, output_dim=128\n        ) if use_color_histograms else None\n        self.dropout = nn.Dropout(dropout_rate) if dropout_rate is not None else None",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/transnetv2.py:485-508"
+    },
+    "7101": {
+        "file_id": 516,
+        "content": "This code initializes the model components of a TransNetv2 backbone. It sets up max pooling, creates a LayerList for SDDCNNV2 blocks, initializes frame similarity and color histogram layers based on flags, and includes dropout layer if needed.",
+        "type": "comment"
+    },
+    "7102": {
+        "file_id": 516,
+        "content": "        output_dim = ((F * 2 ** (L - 1)) * 4) * 3 * 6  # 3x6 for spatial dimensions\n        if use_frame_similarity: output_dim += 128\n        if use_color_histograms: output_dim += 128\n        self.use_mean_pooling = use_mean_pooling\n        self.has_downsample = False\n        if self.use_resnet_features or self.resnet_like_top or self.use_mean_pooling:\n            self.has_downsample = True\n        self.fc1 = nn.Linear(512 if self.has_downsample else output_dim, D,\n                             weight_attr=ParamAttr(initializer=nn.initializer.XavierUniform()),\n                             bias_attr=ParamAttr(initializer=nn.initializer.Constant(value=0.))\n                             )\n        self.frame_similarity_on_last_layer = frame_similarity_on_last_layer\n        self.cls_layer1 = nn.Linear(1152 if self.frame_similarity_on_last_layer else D, 1,\n                                    weight_attr=ParamAttr(initializer=nn.initializer.XavierUniform()),\n                                    bias_attr=ParamAttr(initializer=nn.initializer.Constant(value=0.))",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/transnetv2.py:510-526"
+    },
+    "7103": {
+        "file_id": 516,
+        "content": "This code initializes a neural network model with a linear layer (`self.fc1`) that takes an input dimension of 512 if certain conditions are met, otherwise it takes the output_dim calculated earlier. The layer has D output dimensions and uses Xavier uniform initialization for weights and constant initialization for biases. Additionally, there's another linear layer (`self.cls_layer1`) with 1 output dimension that is initialized with Xavier uniform initialization for weights and a constant value of 0 for biases. It takes an input dimension of either 1152 or D based on whether frame similarity is added to the last layer or not.",
+        "type": "comment"
+    },
+    "7104": {
+        "file_id": 516,
+        "content": "                                    )\n        self.cls_layer2 = nn.Linear(1152 if self.frame_similarity_on_last_layer else D, 1,\n                                    weight_attr=ParamAttr(initializer=nn.initializer.XavierUniform()),\n                                    bias_attr=ParamAttr(initializer=nn.initializer.Constant(value=0.))\n                                    ) if use_many_hot_targets else None\n        self.convex_comb_reg = ConvexCombinationRegularization(\n            in_filters=(F * 2 ** (L - 1) * 4)) if use_convex_comb_reg else None\n    def forward(self, inputs):\n        assert list(inputs.shape[2:]) == [27, 48, 3] and inputs.dtype == paddle.float32, \\\n            \"incorrect input type and/or shape\"\n        out_dict = {}\n        # shape [B, T, H, W, 3] to shape [B, 3, T, H, W]\n        x = inputs.transpose([0, 4, 1, 2, 3])\n        if self.use_resnet_features:\n            x = self.resnet_layers(x)\n        else:\n            x = x / 255.\n        inputs = inputs.clip(min=0).astype('uint8')\n        if self.resnet_like_top:",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/transnetv2.py:527-548"
+    },
+    "7105": {
+        "file_id": 516,
+        "content": "The code defines a model with two layers, a Linear layer and ConvexCombinationRegularization, depending on the use_many_hot_targets and use_convex_comb_reg parameters. The Linear layer has 1 output for each frame, unless frame_similarity_on_last_layer is set, in which case it has D outputs. If use_many_hot_targets is False, the layer is None. The forward function receives inputs of shape [B, T, H, W, 3] and performs transpose, resnet_features processing (if use_resnet_features=True), and normalization to apply the model layers. It also clips the input values between 0 and 255 before applying the regularization if use_convex_comb_reg is True.",
+        "type": "comment"
+    },
+    "7106": {
+        "file_id": 516,
+        "content": "            x = self.resnet_like_top_conv(x)\n            x = self.resnet_like_top_bn(x)\n            x = self.resnet_like_top_max_pool(x)\n        block_features = []\n        for block in self.SDDCNN:\n            x = block(x)\n            block_features.append(x)\n        if self.convex_comb_reg is not None:\n            out_dict[\"alphas\"], out_dict[\"comb_reg_loss\"] = self.convex_comb_reg(inputs.transpose([0, 4, 1, 2, 3]), x)\n        if self.use_mean_pooling:\n            x = paddle.mean(x, axis=[3, 4])\n            x = x.transpose([0, 2, 1])\n        else:\n            x = x.transpose([0, 2, 3, 4, 1])\n            x = x.reshape([x.shape[0], x.shape[1], x.shape[2]*x.shape[3]*x.shape[4]])\n        if self.frame_sim_layer is not None:\n            x = paddle.concat([self.frame_sim_layer(block_features), x], 2)\n        if self.color_hist_layer is not None:\n            x = paddle.concat([self.color_hist_layer(inputs), x], 2)\n        x = self.fc1(x)\n        x = functional.relu(x)\n        if self.dropout is not None:\n            x = self.dropout(x)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/transnetv2.py:549-571"
+    },
+    "7107": {
+        "file_id": 516,
+        "content": "This code performs feature extraction and pooling operations for a ConvNextV2 backbone model. It applies residual blocks, top convolutions, batch normalization, and max pooling to the input. Then it calculates convex combination regression if required. The code either applies mean pooling or 3D reshaping based on the use_mean_pooling flag. Finally, it concatenates frame similarity layer outputs and color histogram layer outputs before performing fully connected layer calculations and applying relu activation and dropout if necessary.",
+        "type": "comment"
+    },
+    "7108": {
+        "file_id": 516,
+        "content": "        if self.frame_sim_layer is not None and self.frame_similarity_on_last_layer:\n            x = paddle.concat([self.frame_sim_layer(block_features), x], 2)\n        one_hot = self.cls_layer1(x)\n        if self.cls_layer2 is not None:\n            out_dict[\"many_hot\"] = self.cls_layer2(x)\n        if len(out_dict) > 0:\n            return one_hot, out_dict\n        return one_hot",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/transnetv2.py:572-581"
+    },
+    "7109": {
+        "file_id": 516,
+        "content": "This code checks if the frame similarity layer and classifier layers are not None, then performs a concatenation operation on block features and x. It applies the classifier layer to the resulting output and optionally applies another classifier layer. The function returns one_hot and an optional out_dict if they exist.",
+        "type": "comment"
+    },
+    "7110": {
+        "file_id": 517,
+        "content": "/paddlevideo/modeling/backbones/vit.py",
+        "type": "filepath"
+    },
+    "7111": {
+        "file_id": 517,
+        "content": "The PaddleVideo code offers video processing functions, including a VisionTransformer class. It initializes and applies the model using parameters, transformations, and blocks while setting up components for future use.",
+        "type": "summary"
+    },
+    "7112": {
+        "file_id": 517,
+        "content": "# copyright (c) 2021 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nfrom collections.abc import Callable\nimport numpy as np\nimport paddle\nimport paddle.nn as nn\nimport paddle.nn.functional as F\nfrom paddle.nn.initializer import Constant\nfrom ...utils import load_ckpt\nfrom ..registry import BACKBONES\nfrom ..weight_init import trunc_normal_\n__all__ = ['VisionTransformer']\nzeros_ = Constant(value=0.)\nones_ = Constant(value=1.)\ndef to_2tuple(x):\n    return tuple([x] * 2)\ndef drop_path(x, drop_prob=0., training=False):",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/vit.py:1-37"
+    },
+    "7113": {
+        "file_id": 517,
+        "content": "This code snippet is from the PaddleVideo library and contains a copyright notice, license information, and several helper functions. The VisionTransformer class will be defined later in the file, which serves as a backbone model for video processing tasks. The code defines constants for zero and one values, a function to convert a single value into a tuple of length 2 (to_2tuple), and a drop path function that applies dropout to inputs with a specified probability during training.",
+        "type": "comment"
+    },
+    "7114": {
+        "file_id": 517,
+        "content": "    \"\"\"Drop paths (Stochastic Depth) per sample (when applied in main path of residual blocks).\n    the original name is misleading as 'Drop Connect' is a different form of dropout in a separate paper...\n    # issuecomment-532968956 ...\n    See discussion: https://github.com/tensorflow/tpu/issues/494\n    \"\"\"\n    if drop_prob == 0. or not training:\n        return x\n    keep_prob = paddle.to_tensor(1 - drop_prob, dtype=x.dtype)\n    shape = (paddle.shape(x)[0], ) + (1, ) * (x.ndim - 1)\n    random_tensor = keep_prob + paddle.rand(shape).astype(x.dtype)\n    random_tensor = paddle.floor(random_tensor)  # binarize\n    output = x.divide(keep_prob) * random_tensor\n    return output\nclass DropPath(nn.Layer):\n    \"\"\"Drop paths (Stochastic Depth) per sample  (when applied in main path of residual blocks).\n    \"\"\"\n    def __init__(self, drop_prob=None):\n        super(DropPath, self).__init__()\n        self.drop_prob = drop_prob\n    def forward(self, x):\n        return drop_path(x, self.drop_prob, self.training)\nclass Identity(nn.Layer):",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/vit.py:38-65"
+    },
+    "7115": {
+        "file_id": 517,
+        "content": "This code defines three classes: \"DropPath\", \"Identity\". The DropPath class implements dropout paths (Stochastic Depth) for each sample in the main path of residual blocks. It takes a single parameter, 'drop_prob', to control the probability of dropping out features. If 'drop_prob' is 0 or not training, it returns the input unchanged. The Identity class simply returns its input without any transformation.",
+        "type": "comment"
+    },
+    "7116": {
+        "file_id": 517,
+        "content": "    def __init__(self):\n        super(Identity, self).__init__()\n    def forward(self, input):\n        return input\nclass Mlp(nn.Layer):\n    def __init__(self,\n                 in_features,\n                 hidden_features=None,\n                 out_features=None,\n                 act_layer=nn.GELU,\n                 drop=0.0):\n        super().__init__()\n        out_features = out_features or in_features\n        hidden_features = hidden_features or in_features\n        self.fc1 = nn.Linear(in_features, hidden_features)\n        self.act = act_layer()\n        self.fc2 = nn.Linear(hidden_features, out_features)\n        self.drop = nn.Dropout(drop)\n    def forward(self, x):\n        x = self.fc1(x)\n        x = self.act(x)\n        x = self.drop(x)\n        x = self.fc2(x)\n        x = self.drop(x)\n        return x\nclass Attention(nn.Layer):\n    def __init__(self,\n                 dim,\n                 num_heads=8,\n                 qkv_bias=False,\n                 qk_scale=None,\n                 attn_drop=0.0,\n                 proj_drop=0.0):",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/vit.py:66-104"
+    },
+    "7117": {
+        "file_id": 517,
+        "content": "The code defines three classes: Identity, Mlp, and Attention. Identity is a simple class that returns its input unchanged. Mlp stands for Multilayer Perceptron, and it's a feed-forward neural network layer. Attention is a class for implementing attention mechanisms in the model. Both Mlp and Attention classes take inputs and return outputs after applying their respective operations.",
+        "type": "comment"
+    },
+    "7118": {
+        "file_id": 517,
+        "content": "        super().__init__()\n        self.num_heads = num_heads\n        head_dim = dim // num_heads\n        self.scale = qk_scale or head_dim**-0.5\n        self.qkv = nn.Linear(dim, dim * 3, bias_attr=qkv_bias)\n        self.proj = nn.Linear(dim, dim)\n        self.proj_drop = nn.Dropout(proj_drop)\n        self.attn_drop = nn.Dropout(attn_drop)\n    def forward(self, x):\n        N, C = x.shape[1:]\n        qkv = self.qkv(x).reshape(\n            (-1, N, 3, self.num_heads, C // self.num_heads)).transpose(\n                (2, 0, 3, 1, 4))\n        q, k, v = qkv[0], qkv[1], qkv[2]\n        attn = (q.matmul(k.transpose((0, 1, 3, 2)))) * self.scale\n        attn = nn.functional.softmax(attn, axis=-1)\n        attn = self.attn_drop(attn)\n        x = (attn.matmul(v)).transpose((0, 2, 1, 3)).reshape((-1, N, C))\n        x = self.proj(x)\n        x = self.proj_drop(x)\n        return x\nclass Block(nn.Layer):\n    def __init__(self,\n                 dim,\n                 num_heads,\n                 mlp_ratio=4.0,\n                 qkv_bias=False,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/vit.py:105-138"
+    },
+    "7119": {
+        "file_id": 517,
+        "content": "This code initializes a multi-head attention layer, and defines the forward pass. It reshapes input into query (Q), key (K), and value (V) matrices, calculates attention scores, applies dropout, and reconstructs output using residual connections and layer normalization. The `Block` class is also defined for building a Vision Transformer model.",
+        "type": "comment"
+    },
+    "7120": {
+        "file_id": 517,
+        "content": "                 qk_scale=None,\n                 drop=0.0,\n                 attn_drop=0.0,\n                 drop_path=0.1,\n                 act_layer=nn.GELU,\n                 norm_layer='nn.LayerNorm',\n                 epsilon=1e-5,\n                 attention_type='divided_space_time'):\n        super().__init__()\n        self.attention_type = attention_type\n        if isinstance(norm_layer, str):\n            self.norm1 = eval(norm_layer)(dim, epsilon=epsilon)\n        elif isinstance(norm_layer, Callable):\n            self.norm1 = norm_layer(dim, epsilon=epsilon)\n        else:\n            raise TypeError(\n                \"The norm_layer must be str or paddle.nn.layer.Layer class\")\n        self.attn = Attention(dim,\n                              num_heads=num_heads,\n                              qkv_bias=qkv_bias,\n                              qk_scale=qk_scale,\n                              attn_drop=attn_drop,\n                              proj_drop=drop)\n        # Temporal Attention Parameters\n        if self.attention_type == 'divided_space_time':",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/vit.py:139-166"
+    },
+    "7121": {
+        "file_id": 517,
+        "content": "This function is initializing a backbone model with specified parameters. It takes in arguments like attention_type, norm_layer, and others to define the model's layers, including its attention layer. If norm_layer is a string, it uses the given string as the normalization layer; if it's a Callable, it uses that function as the normalization layer. The code also checks if the attention type is 'divided_space_time'.",
+        "type": "comment"
+    },
+    "7122": {
+        "file_id": 517,
+        "content": "            if isinstance(norm_layer, str):\n                self.temporal_norm1 = eval(norm_layer)(dim, epsilon=epsilon)\n            elif isinstance(norm_layer, Callable):\n                self.temporal_norm1 = norm_layer(dim, epsilon=epsilon)\n            else:\n                raise TypeError(\n                    \"The norm_layer must be str or paddle.nn.layer.Layer class\")\n            self.temporal_attn = Attention(dim,\n                                           num_heads=num_heads,\n                                           qkv_bias=qkv_bias,\n                                           qk_scale=qk_scale,\n                                           attn_drop=attn_drop,\n                                           proj_drop=drop)\n            self.temporal_fc = nn.Linear(dim, dim)\n        # NOTE: drop path for stochastic depth, we shall see if this is better than dropout here\n        self.drop_path = DropPath(drop_path) if drop_path > 0. else Identity()\n        if isinstance(norm_layer, str):\n            self.norm2 = eval(norm_layer)(dim, epsilon=epsilon)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/vit.py:167-185"
+    },
+    "7123": {
+        "file_id": 517,
+        "content": "This code initializes the temporal normalization layer and attention mechanism for a Vision Transformer backbone. It also creates a linear layer and drop path, based on provided configurations. The norm_layer parameter can be a string representing the desired normalization layer or a Callable object. If not a valid type, it raises a TypeError.",
+        "type": "comment"
+    },
+    "7124": {
+        "file_id": 517,
+        "content": "        elif isinstance(norm_layer, Callable):\n            self.norm2 = norm_layer(dim, epsilon=epsilon)\n        else:\n            raise TypeError(\n                \"The norm_layer must be str or paddle.nn.layer.Layer class\")\n        mlp_hidden_dim = int(dim * mlp_ratio)\n        self.mlp = Mlp(in_features=dim,\n                       hidden_features=mlp_hidden_dim,\n                       act_layer=act_layer,\n                       drop=drop)\n    def forward(self, x, B, T, W):\n        num_spatial_tokens = (x.shape[1] - 1) // T\n        H = num_spatial_tokens // W\n        if self.attention_type in ['space_only', 'joint_space_time']:\n            x = x + self.drop_path(self.attn(self.norm1(x)))\n            x = x + self.drop_path(self.mlp(self.norm2(x)))\n            return x\n        elif self.attention_type == 'divided_space_time':\n            ########## Temporal ##########\n            xt = x[:, 1:, :]\n            _, _, _, _t, _m = B, H, W, T, xt.shape[-1]\n            xt = xt.reshape([-1, _t, _m])\n            res_temporal = self.drop_path(",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/vit.py:186-210"
+    },
+    "7125": {
+        "file_id": 517,
+        "content": "The code defines a class and its forward method. It sets the normalization layer, calculates the number of spatial tokens, checks the attention type, applies normalization and MLP layers to the input, and performs divided space-time attention.",
+        "type": "comment"
+    },
+    "7126": {
+        "file_id": 517,
+        "content": "                self.temporal_attn(self.temporal_norm1(xt)))\n            _, _h, _w, _t, _m = B, H, W, T, res_temporal.shape[-1]\n            res_temporal = res_temporal.reshape([-1, _h * _w * _t, _m])\n            res_temporal = self.temporal_fc(res_temporal)\n            xt = x[:, 1:, :] + res_temporal\n            ########## Spatial ##########\n            init_cls_token = x[:, 0, :].unsqueeze(1)\n            cls_token = init_cls_token.tile((1, T, 1))\n            _b, _t, _m = cls_token.shape\n            cls_token = cls_token.reshape([-1, _m]).unsqueeze(1)\n            xs = xt\n            _, _h, _w, _t, _m = B, H, W, T, xs.shape[-1]\n            xs = xs.reshape([-1, _h, _w, _t, _m]).transpose(\n                (0, 3, 1, 2, 4)).reshape([-1, _h * _w, _m])\n            xs = paddle.concat((cls_token, xs), axis=1)\n            res_spatial = self.drop_path(self.attn(self.norm1(xs)))\n            # Taking care of CLS token\n            cls_token = res_spatial[:, 0, :]\n            _, _t, _m = B, T, cls_token.shape[-1]\n            cls_token = cls_token.reshape([-1, _t, _m])",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/vit.py:211-235"
+    },
+    "7127": {
+        "file_id": 517,
+        "content": "This code performs spatial attention in the Vision Transformer model. It creates a cls_token, reshapes the input, concatenates it with the cls_token, and then passes it through a drop path and an attention layer. Finally, it extracts the cls_token for further use.",
+        "type": "comment"
+    },
+    "7128": {
+        "file_id": 517,
+        "content": "            # averaging for every frame\n            cls_token = paddle.mean(cls_token, axis=1, keepdim=True)\n            res_spatial = res_spatial[:, 1:, :]\n            _, _t, _h, _w, _m = B, T, H, W, res_spatial.shape[-1]\n            res_spatial = res_spatial.reshape([-1, _t, _h, _w, _m]).transpose(\n                (0, 2, 3, 1, 4)).reshape([-1, _h * _w * _t, _m])\n            res = res_spatial\n            x = xt\n            x = paddle.concat((init_cls_token, x), axis=1) + paddle.concat(\n                (cls_token, res), axis=1)\n            # Mlp\n            x = x + self.drop_path(self.mlp(self.norm2(x)))\n            return x\n        else:\n            raise NotImplementedError\nclass PatchEmbed(nn.Layer):\n    \"\"\" Image to Patch Embedding\n    \"\"\"\n    def __init__(self,\n                 img_size=224,\n                 patch_size=16,\n                 in_channels=3,\n                 embed_dim=768):\n        super().__init__()\n        img_size = to_2tuple(img_size)\n        patch_size = to_2tuple(patch_size)\n        num_patches = (img_size[1] // patch_size[1]) * (img_size[0] //",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/vit.py:236-267"
+    },
+    "7129": {
+        "file_id": 517,
+        "content": "This code performs averaging across frames, reshapes the spatial features, concatenates initial class token and input sequence, adds a drop path and MLP layer, and returns the output. It also defines PatchEmbed for image to patch embedding.",
+        "type": "comment"
+    },
+    "7130": {
+        "file_id": 517,
+        "content": "                                                        patch_size[0])\n        self.img_size = img_size\n        self.patch_size = patch_size\n        self.num_patches = num_patches\n        self.proj = nn.Conv2D(in_channels,\n                              embed_dim,\n                              kernel_size=patch_size,\n                              stride=patch_size)\n    def forward(self, x):\n        B, C, T, H, W = x.shape\n        assert H == self.img_size[0] and W == self.img_size[1], \\\n            f\"Input image size ({H}*{W}) doesn't match model ({self.img_size[0]}*{self.img_size[1]}).\"\n        x = x.transpose((0, 2, 1, 3, 4))\n        x = x.reshape([-1, C, H, W])\n        x = self.proj(x)\n        W = x.shape[-1]\n        x = x.flatten(2).transpose((0, 2, 1))\n        return x, T, W\n@BACKBONES.register()\nclass VisionTransformer(nn.Layer):\n    \"\"\" Vision Transformer with support for patch input\n    \"\"\"\n    def __init__(self,\n                 pretrained=None,\n                 img_size=224,\n                 patch_size=16,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/vit.py:268-298"
+    },
+    "7131": {
+        "file_id": 517,
+        "content": "The code defines a VisionTransformer class that takes input patches of an image. It initializes the model parameters such as img_size, patch_size and num_patches. The forward function performs the transformation by projecting the input into embedding space using a convolutional layer. If the input image size does not match the expected model size, it raises an assertion error. This class is registered with BACKBONES for future use.",
+        "type": "comment"
+    },
+    "7132": {
+        "file_id": 517,
+        "content": "                 in_channels=3,\n                 embed_dim=768,\n                 depth=12,\n                 num_heads=12,\n                 mlp_ratio=4,\n                 qkv_bias=False,\n                 qk_scale=None,\n                 drop_rate=0.,\n                 attn_drop_rate=0.,\n                 drop_path_rate=0.1,\n                 norm_layer='nn.LayerNorm',\n                 epsilon=1e-5,\n                 num_seg=8,\n                 attention_type='divided_space_time',\n                 **args):\n        super().__init__()\n        self.pretrained = pretrained\n        self.num_seg = num_seg\n        self.attention_type = attention_type\n        self.num_features = self.embed_dim = embed_dim\n        self.patch_embed = PatchEmbed(img_size=img_size,\n                                      patch_size=patch_size,\n                                      in_channels=in_channels,\n                                      embed_dim=embed_dim)\n        num_patches = self.patch_embed.num_patches\n        # Positional Embeddings\n        self.cls_token = self.create_parameter(shape=(1, 1, embed_dim),",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/vit.py:299-327"
+    },
+    "7133": {
+        "file_id": 517,
+        "content": "This code initializes a Vision Transformer (ViT) backbone model with specified parameters such as input dimensions, embedding dimension, depth, number of heads, mlp ratio, and attention type. The code sets up the patch embedding layer, creates a class token, and defines the number of patches based on the input size provided.",
+        "type": "comment"
+    },
+    "7134": {
+        "file_id": 517,
+        "content": "                                               default_initializer=zeros_)\n        self.pos_embed = self.create_parameter(shape=(1, num_patches + 1,\n                                                      embed_dim),\n                                               default_initializer=zeros_)\n        self.pos_drop = nn.Dropout(p=drop_rate)\n        if self.attention_type != 'space_only':\n            self.time_embed = self.create_parameter(shape=(1, num_seg,\n                                                           embed_dim),\n                                                    default_initializer=zeros_)\n            self.time_drop = nn.Dropout(p=drop_rate)\n        self.add_parameter(\"pos_embed\", self.pos_embed)\n        self.add_parameter(\"cls_token\", self.cls_token)\n        dpr = np.linspace(0, drop_path_rate, depth)\n        self.blocks = nn.LayerList([\n            Block(dim=embed_dim,\n                  num_heads=num_heads,\n                  mlp_ratio=mlp_ratio,\n                  qkv_bias=qkv_bias,\n                  qk_scale=qk_scale,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/vit.py:328-350"
+    },
+    "7135": {
+        "file_id": 517,
+        "content": "This code initializes various components of a vision transformer model, including positional embeddings (pos_embed), classification token (cls_token), and dropout layers (pos_drop, time_drop). It also creates a LayerList of blocks with specified dimensions and parameters.",
+        "type": "comment"
+    },
+    "7136": {
+        "file_id": 517,
+        "content": "                  drop=drop_rate,\n                  attn_drop=attn_drop_rate,\n                  drop_path=dpr[i],\n                  norm_layer=norm_layer,\n                  epsilon=epsilon,\n                  attention_type=self.attention_type) for i in range(depth)\n        ])\n        self.norm = eval(norm_layer)(embed_dim, epsilon=epsilon)\n    def init_weights(self):\n        \"\"\"First init model's weight\"\"\"\n        trunc_normal_(self.pos_embed, std=0.02)\n        trunc_normal_(self.cls_token, std=0.02)\n        self.apply(self._init_fn)\n        if self.attention_type == 'divided_space_time':\n            i = 0\n            for m in self.blocks.sublayers(include_self=True):\n                m_str = str(m)\n                if 'Block' in m_str:\n                    if i > 0:\n                        zeros_(m.temporal_fc.weight)\n                        zeros_(m.temporal_fc.bias)\n                    i += 1\n        \"\"\"Second, if provide pretrained ckpt, load it\"\"\"\n        if isinstance(\n                self.pretrained, str\n        ) and self.pretrained.strip() != \"\":  # load pretrained weights",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/vit.py:351-379"
+    },
+    "7137": {
+        "file_id": 517,
+        "content": "This code initializes a Vision Transformer (ViT) model. It creates a series of blocks with specified dimensions, applies normalization layers, and initializes the weight values using truncated normal distribution. Additionally, if pre-trained weights are provided, it loads them into the model.",
+        "type": "comment"
+    },
+    "7138": {
+        "file_id": 517,
+        "content": "            load_ckpt(self,\n                      self.pretrained,\n                      num_patches=self.patch_embed.num_patches,\n                      num_seg=self.num_seg,\n                      attention_type=self.attention_type)\n    def _init_fn(self, m):\n        if isinstance(m, nn.Linear):\n            trunc_normal_(m.weight)\n            if m.bias is not None:\n                zeros_(m.bias)\n        elif isinstance(m, nn.LayerNorm):\n            ones_(m.weight)\n            zeros_(m.bias)\n    def forward_features(self, x):\n        # B = x.shape[0]\n        B = paddle.shape(x)[0]\n        x, T, W = self.patch_embed(x)  # [BT,nH*nW,F]\n        cls_tokens = self.cls_token.expand((B * T, -1, -1))  # [1,1,F]->[BT,1,F]\n        x = paddle.concat((cls_tokens, x), axis=1)\n        pos_interp = (x.shape[1] != self.pos_embed.shape[1])\n        if pos_interp:\n            pos_embed = self.pos_embed\n            cls_pos_embed = pos_embed[0, 0, :].unsqueeze(0).unsqueeze(1)\n            other_pos_embed = pos_embed[0, 1:, :].unsqueeze(0).transpose(",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/vit.py:380-405"
+    },
+    "7139": {
+        "file_id": 517,
+        "content": "This code initializes the forward function of a Vision Transformer (ViT) model. It extracts features from input images, adds positional embeddings, and handles batch size changes. The trunc_normal_ and zeros_ functions are used to initialize weights and biases for layers like Linear and LayerNorm, respectively.",
+        "type": "comment"
+    },
+    "7140": {
+        "file_id": 517,
+        "content": "                (0, 2, 1))\n            P = int(other_pos_embed.shape[2]**0.5)\n            H = x.shape[1] // W\n            other_pos_embed = other_pos_embed.reshape([1, x.shape[2], P, P])\n            new_pos_embed = F.interpolate(other_pos_embed,\n                                          size=(H, W),\n                                          mode='nearest')\n            new_pos_embed = new_pos_embed.flatten(2)\n            new_pos_embed = new_pos_embed.transpose((0, 2, 1))\n            new_pos_embed = paddle.concat((cls_pos_embed, new_pos_embed),\n                                          axis=1)\n            x = x + new_pos_embed\n        else:\n            x = x + self.pos_embed\n        x = self.pos_drop(x)\n        # Time Embeddings\n        if self.attention_type != 'space_only':\n            cls_tokens = x[:B, 0, :].unsqueeze(1) if B > 0 else x.split(\n                T)[0].index_select(paddle.to_tensor([0]), axis=1)\n            x = x[:, 1:]\n            _, _n, _m = x.shape\n            _t = T\n            x = x.reshape([-1, _t, _n, _m]).transpose(",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/vit.py:406-430"
+    },
+    "7141": {
+        "file_id": 517,
+        "content": "The code is applying relative position embeddings to the input features (x) for a vision transformer model. It first checks if a specific flag is set, then interpolates other position embeddings based on the size of the input and adds them to class position embeddings. If the flag is not set, it simply adds the position embeddings from the model. Afterward, the code applies time embeddings if the attention type is not \"space_only\".",
+        "type": "comment"
+    },
+    "7142": {
+        "file_id": 517,
+        "content": "                (0, 2, 1, 3)).reshape([-1, _t, _m])\n            # Resizing time embeddings in case they don't match\n            time_interp = (T != self.time_embed.shape[1])\n            if time_interp:  # T' != T\n                time_embed = self.time_embed.transpose((0, 2, 1)).unsqueeze(0)\n                new_time_embed = F.interpolate(time_embed,\n                                               size=(T, x.shape[-1]),\n                                               mode='nearest').squeeze(0)\n                new_time_embed = new_time_embed.transpose((0, 2, 1))\n                x = x + new_time_embed\n            else:\n                x = x + self.time_embed\n            x = self.time_drop(x)\n            _, _t, _m = x.shape\n            x = x.reshape([-1, W * W * T, _m])\n            x = paddle.concat((cls_tokens, x), axis=1)\n        # Attention blocks\n        for blk in self.blocks:\n            x = blk(x, B, T, W)\n        # Predictions for space-only baseline\n        if self.attention_type == 'space_only':\n            _, _n, _m = x.shape",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/vit.py:431-455"
+    },
+    "7143": {
+        "file_id": 517,
+        "content": "This code performs time embeddings resizing and adds them to the input feature maps. It then flattens the tensor, concatenates class tokens, processes through attention blocks, and finally, for space-only attention type, it makes predictions.",
+        "type": "comment"
+    },
+    "7144": {
+        "file_id": 517,
+        "content": "            _t = T\n            x = x.reshape([-1, _t, _n, _m])\n            x = paddle.mean(x, 1)  # averaging predictions for every frame\n        x = self.norm(x)\n        return x[:, 0]  # [B,  embed_dim]\n    def forward(self, x):\n        x = self.forward_features(x)\n        return x",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/vit.py:456-465"
+    },
+    "7145": {
+        "file_id": 517,
+        "content": "This code snippet is part of a Vision Transformer (ViT) model implementation. The function averages predictions for every frame and applies normalization before returning the embeddings for each image in the input sequence.",
+        "type": "comment"
+    },
+    "7146": {
+        "file_id": 518,
+        "content": "/paddlevideo/modeling/backbones/vit_tweaks.py",
+        "type": "filepath"
+    },
+    "7147": {
+        "file_id": 518,
+        "content": "The PaddleVideo library's backbones code introduces the VisionTransformer_tweaks model with weight initialization, stochastic depth, spatial attention in ViT models, and transformer configurations. It is a time-based feature modification model that computes space-only predictions through attention blocks.",
+        "type": "summary"
+    },
+    "7148": {
+        "file_id": 518,
+        "content": "# copyright (c) 2021 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nfrom collections.abc import Callable\nimport numpy as np\nimport paddle\nimport paddle.nn as nn\nimport paddle.nn.functional as F\nfrom paddle import ParamAttr\nfrom paddle.nn.initializer import Constant\nfrom paddle.regularizer import L2Decay\nfrom ...utils import load_ckpt\nfrom ..registry import BACKBONES\nfrom ..weight_init import trunc_normal_\n__all__ = ['VisionTransformer_tweaks']\nzeros_ = Constant(value=0.)\nones_ = Constant(value=1.)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/vit_tweaks.py:1-32"
+    },
+    "7149": {
+        "file_id": 518,
+        "content": "This code is from the PaddleVideo library's backbones module and defines the VisionTransformer_tweaks model. It imports necessary libraries, sets constant values, and includes function definitions for weight initialization and regularizers. The BACKBONES registry is also defined to categorize the model type.",
+        "type": "comment"
+    },
+    "7150": {
+        "file_id": 518,
+        "content": "def to_2tuple(x):\n    return tuple([x] * 2)\ndef rand_bbox(size, lam):\n    \"\"\" rand_bbox \"\"\"\n    w = size[2]\n    h = size[3]\n    cut_rat = np.sqrt(1. - lam)\n    cut_w = np.int(w * cut_rat)\n    cut_h = np.int(h * cut_rat)\n    # uniform\n    cx = np.random.randint(w)\n    cy = np.random.randint(h)\n    bbx1 = np.clip(cx - cut_w // 2, 0, w)\n    bby1 = np.clip(cy - cut_h // 2, 0, h)\n    bbx2 = np.clip(cx + cut_w // 2, 0, w)\n    bby2 = np.clip(cy + cut_h // 2, 0, h)\n    return bbx1, bby1, bbx2, bby2\ndef drop_path(x, drop_prob=0., training=False):\n    \"\"\"Drop paths (Stochastic Depth) per sample (when applied in main path of residual blocks).\n    the original name is misleading as 'Drop Connect' is a different form of dropout in a separate paper...\n    # issuecomment-532968956 ...\n    See discussion: https://github.com/tensorflow/tpu/issues/494\n    \"\"\"\n    if drop_prob == 0. or not training:\n        return x\n    keep_prob = paddle.to_tensor(1 - drop_prob)\n    shape = (paddle.shape(x)[0], ) + (1, ) * (x.ndim - 1)\n    random_tensor = keep_prob + paddle.rand(shape, dtype=x.dtype)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/vit_tweaks.py:35-69"
+    },
+    "7151": {
+        "file_id": 518,
+        "content": "The code defines three functions. The \"to_2tuple\" function takes an input and returns a tuple with the same value repeated twice. The \"rand_bbox\" function generates random bounding box coordinates within the size of an image, given a specified probability. The \"drop_path\" function applies stochastic depth (dropout) to each sample in the main path of residual blocks with a specified dropout rate.",
+        "type": "comment"
+    },
+    "7152": {
+        "file_id": 518,
+        "content": "    random_tensor = paddle.floor(random_tensor)  # binarize\n    output = x.divide(keep_prob) * random_tensor\n    return output\nclass DropPath(nn.Layer):\n    \"\"\"Drop paths (Stochastic Depth) per sample  (when applied in main path of residual blocks).\n    \"\"\"\n    def __init__(self, drop_prob=None):\n        super(DropPath, self).__init__()\n        self.drop_prob = drop_prob\n    def forward(self, x):\n        return drop_path(x, self.drop_prob, self.training)\nclass Identity(nn.Layer):\n    def __init__(self):\n        super(Identity, self).__init__()\n    def forward(self, input):\n        return input\nclass Mlp(nn.Layer):\n    def __init__(self,\n                 in_features,\n                 hidden_features=None,\n                 out_features=None,\n                 act_layer=nn.GELU,\n                 drop=0.,\n                 wd_bias=True,\n                 lr_mult=1.0):\n        super().__init__()\n        out_features = out_features or in_features\n        hidden_features = hidden_features or in_features\n        self.fc1 = nn.Linear(in_features, hidden_features)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/vit_tweaks.py:70-107"
+    },
+    "7153": {
+        "file_id": 518,
+        "content": "This code defines a class called `Mlp` which is a fully connected layer with a middle layer and an output layer. It also includes an activation function (GELU by default) and a dropout layer (with drop probability specified). The class `DropPath` applies drop paths to stochastically mask layers during training, while the `Identity` class simply returns its input unchanged.",
+        "type": "comment"
+    },
+    "7154": {
+        "file_id": 518,
+        "content": "        self.act = act_layer()\n        self.fc2 = nn.Linear(hidden_features, out_features)\n        self.drop = nn.Dropout(drop)\n    def forward(self, x):\n        x = self.fc1(x)\n        x = self.act(x)\n        x = self.drop(x)\n        x = self.fc2(x)\n        x = self.drop(x)\n        return x\nclass Attention(nn.Layer):\n    def __init__(self,\n                 dim,\n                 num_heads=8,\n                 qkv_bias=False,\n                 qk_scale=None,\n                 attn_drop=0.,\n                 proj_drop=0.,\n                 wd_bias=True,\n                 lr_mult=1.0):\n        super().__init__()\n        self.num_heads = num_heads\n        head_dim = dim // num_heads\n        self.scale = qk_scale or head_dim**-0.5\n        self.qkv = nn.Linear(dim, dim * 3, bias_attr=qkv_bias)\n        self.proj = nn.Linear(dim, dim)\n        self.proj_drop = nn.Dropout(proj_drop)\n        self.attn_drop = nn.Dropout(attn_drop)\n    def forward(self, x):\n        N, C = x.shape[1:]\n        qkv = self.qkv(x).reshape(\n            (-1, N, 3, self.num_heads, C // self.num_heads)).transpose(",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/vit_tweaks.py:108-144"
+    },
+    "7155": {
+        "file_id": 518,
+        "content": "The code defines a neural network layer called \"Attention\" with several components including a Linear layer for the query-key-value (QKV) transform, and separate Dropout layers for the attention and projection operations. The forward function performs the multi-head self-attention operation on the input tensor x, reshaping it to apply the QKV transform, and then applying dropout for both the attention and projection steps before returning the result. This layer is commonly used in transformer models for processing sequential data.",
+        "type": "comment"
+    },
+    "7156": {
+        "file_id": 518,
+        "content": "                (2, 0, 3, 1, 4))\n        q, k, v = qkv[0], qkv[1], qkv[2]\n        attn = (q.matmul(k.transpose((0, 1, 3, 2)))) * self.scale\n        attn = nn.functional.softmax(attn, axis=-1)\n        attn = self.attn_drop(attn)\n        x = (attn.matmul(v)).transpose((0, 2, 1, 3)).reshape((-1, N, C))\n        x = self.proj(x)\n        x = self.proj_drop(x)\n        return x\nclass Block(nn.Layer):\n    def __init__(self,\n                 dim,\n                 num_heads,\n                 mlp_ratio=4.0,\n                 qkv_bias=False,\n                 qk_scale=None,\n                 drop=0.0,\n                 attn_drop=0.0,\n                 drop_path=0.1,\n                 act_layer=nn.GELU,\n                 norm_layer='nn.LayerNorm',\n                 epsilon=1e-5,\n                 attention_type='divided_space_time',\n                 wd_bias=True,\n                 lr_mult=1.0):\n        super().__init__()\n        self.attention_type = attention_type\n        if isinstance(norm_layer, str):\n            self.norm1 = eval(norm_layer)(dim, epsilon=epsilon)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/vit_tweaks.py:145-178"
+    },
+    "7157": {
+        "file_id": 518,
+        "content": "This code defines a `Block` class that implements an attention mechanism using query-key value (QKV) decomposition. The block also includes a multi-layer perceptron (MLP) layer and supports different attention types. The input dimensions, number of heads in the attention mechanism, and other parameters are passed to the constructor.",
+        "type": "comment"
+    },
+    "7158": {
+        "file_id": 518,
+        "content": "        elif isinstance(norm_layer, Callable):\n            self.norm1 = norm_layer(dim, epsilon=epsilon)\n        else:\n            raise TypeError(\n                \"The norm_layer must be str or paddle.nn.layer.Layer class\")\n        self.attn = Attention(dim,\n                              num_heads=num_heads,\n                              qkv_bias=qkv_bias,\n                              qk_scale=qk_scale,\n                              attn_drop=attn_drop,\n                              proj_drop=drop,\n                              wd_bias=wd_bias,\n                              lr_mult=lr_mult)\n        # Temporal Attention Parameters\n        if self.attention_type == 'divided_space_time':\n            if isinstance(norm_layer, str):\n                self.temporal_norm1 = eval(norm_layer)(dim, epsilon=epsilon)\n            elif isinstance(norm_layer, Callable):\n                self.temporal_norm1 = norm_layer(dim, epsilon=epsilon)\n            else:\n                raise TypeError(\n                    \"The norm_layer must be str or paddle.nn.layer.Layer class\")",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/vit_tweaks.py:179-202"
+    },
+    "7159": {
+        "file_id": 518,
+        "content": "This code checks the type of norm_layer and creates an instance of either a str or a paddle.nn.layer.Layer class for self.norm1. If no temporal attention is required, it raises a TypeError if norm_layer is neither a str nor a Callable. If divided space time attention is selected, it checks the type of norm_layer again and creates an instance of either a str or a paddle.nn.layer.Layer class for self.temporal_norm1.",
+        "type": "comment"
+    },
+    "7160": {
+        "file_id": 518,
+        "content": "            self.temporal_attn = Attention(dim,\n                                           num_heads=num_heads,\n                                           qkv_bias=qkv_bias,\n                                           qk_scale=qk_scale,\n                                           attn_drop=attn_drop,\n                                           proj_drop=drop,\n                                           wd_bias=wd_bias,\n                                           lr_mult=lr_mult)\n            self.temporal_fc = nn.Linear(dim, dim)\n        # NOTE: drop path for stochastic depth, we shall see if this is better than dropout here\n        self.drop_path = DropPath(drop_path) if drop_path > 0. else Identity()\n        if isinstance(norm_layer, str):\n            self.norm2 = eval(norm_layer)(dim, epsilon=epsilon)\n        elif isinstance(norm_layer, Callable):\n            self.norm2 = norm_layer(dim, epsilon=epsilon)\n        else:\n            raise TypeError(\n                \"The norm_layer must be str or paddle.nn.layer.Layer class\")",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/vit_tweaks.py:203-221"
+    },
+    "7161": {
+        "file_id": 518,
+        "content": "This code initializes the temporal attention module, a linear layer for temporal features, and a drop path for stochastic depth. It also handles norm_layer initialization according to its type.",
+        "type": "comment"
+    },
+    "7162": {
+        "file_id": 518,
+        "content": "        mlp_hidden_dim = int(dim * mlp_ratio)\n        self.mlp = Mlp(in_features=dim,\n                       hidden_features=mlp_hidden_dim,\n                       act_layer=act_layer,\n                       drop=drop,\n                       wd_bias=wd_bias,\n                       lr_mult=lr_mult)\n    def forward(self, x, B, T, W):\n        num_spatial_tokens = (x.shape[1] - 1) // T\n        H = num_spatial_tokens // W\n        if self.attention_type in ['space_only', 'joint_space_time']:\n            x = paddle.add(x, self.drop_path(self.attn(self.norm1(x))))\n            x = paddle.add(x, self.drop_path(self.mlp(self.norm2(x))))\n            return x\n        elif self.attention_type == 'divided_space_time':\n            ########## Temporal ##########\n            xt = x[:, 1:, :]\n            _, _, _, _t, _m = B, H, W, T, xt.shape[-1]\n            xt = xt.reshape([-1, _t, _m])\n            res_temporal = self.drop_path(\n                self.temporal_attn(self.temporal_norm1(xt)))\n            _, _h, _w, _t, _m = B, H, W, T, res_temporal.shape[-1]",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/vit_tweaks.py:223-247"
+    },
+    "7163": {
+        "file_id": 518,
+        "content": "Code defines a backbone for Vision Transformer (ViT) with tweaks and handles the forward pass. The MLP layer is added, and attention type can be space-only, joint space-time or divided space-time. In divided space-time, it also includes temporal attention.",
+        "type": "comment"
+    },
+    "7164": {
+        "file_id": 518,
+        "content": "            res_temporal = res_temporal.reshape([-1, _h * _w * _t, _m])\n            res_temporal = self.temporal_fc(res_temporal)\n            xt = paddle.add(x[:, 1:, :], res_temporal)\n            ########## Spatial ##########\n            init_cls_token = x[:, 0, :].unsqueeze(1)\n            cls_token = init_cls_token.tile((1, T, 1))\n            _b, _t, _m = cls_token.shape\n            cls_token = cls_token.reshape([-1, _m]).unsqueeze(1)\n            xs = xt\n            _, _h, _w, _t, _m = B, H, W, T, xs.shape[-1]\n            xs = xs.reshape([-1, _h, _w, _t, _m]).transpose(\n                (0, 3, 1, 2, 4)).reshape([-1, _h * _w, _m])\n            xs = paddle.concat((cls_token, xs), axis=1)\n            res_spatial = self.drop_path(self.attn(self.norm1(xs)))\n            # Taking care of CLS token\n            cls_token = res_spatial[:, 0, :]\n            _, _t, _m = B, T, cls_token.shape[-1]\n            cls_token = cls_token.reshape([-1, _t, _m])\n            # averaging for every frame\n            cls_token = paddle.mean(cls_token, axis=1, keepdim=True)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/vit_tweaks.py:248-271"
+    },
+    "7165": {
+        "file_id": 518,
+        "content": "This code performs spatial attention in a ViT model. It reshapes the input, concatenates the class token with the reshaped input, applies normalization and self-attention, and finally averages the class tokens for each frame to obtain a contextual representation.",
+        "type": "comment"
+    },
+    "7166": {
+        "file_id": 518,
+        "content": "            res_spatial = res_spatial[:, 1:, :]\n            _, _t, _h, _w, _m = B, T, H, W, res_spatial.shape[-1]\n            res_spatial = res_spatial.reshape([-1, _t, _h, _w, _m]).transpose(\n                (0, 2, 3, 1, 4)).reshape([-1, _h * _w * _t, _m])\n            res = res_spatial\n            x = xt\n            x = paddle.add(paddle.concat((init_cls_token, x), axis=1),\n                           paddle.concat((cls_token, res), axis=1))\n            # Mlp\n            x = paddle.add(x, self.drop_path(self.mlp(self.norm2(x))))\n            return x\n        else:\n            raise NotImplementedError\nclass PatchEmbed(nn.Layer):\n    \"\"\" Image to Patch Embedding\n    \"\"\"\n    def __init__(self,\n                 img_size=224,\n                 patch_size=16,\n                 in_channels=3,\n                 embed_dim=768,\n                 wd_bias=True,\n                 lr_mult=1.0):\n        super().__init__()\n        img_size = to_2tuple(img_size)\n        patch_size = to_2tuple(patch_size)\n        num_patches = (img_size[1] // patch_size[1]) * (img_size[0] //",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/vit_tweaks.py:273-302"
+    },
+    "7167": {
+        "file_id": 518,
+        "content": "This code is from the PaddleVideo library and defines a PatchEmbed class for image to patch embedding. It takes in parameters such as img_size, patch_size, in_channels, embed_dim, wd_bias, and lr_mult. The class performs image to patch embedding by dividing the input image into patches of specified size and flattening them into a 2D feature map. The code also includes a NotImplementedError for certain conditions, suggesting that some parts may not be fully implemented yet.",
+        "type": "comment"
+    },
+    "7168": {
+        "file_id": 518,
+        "content": "                                                        patch_size[0])\n        self.img_size = img_size\n        self.patch_size = patch_size\n        self.num_patches = num_patches\n        self.proj = nn.Conv2D(in_channels,\n                              embed_dim,\n                              kernel_size=patch_size,\n                              stride=patch_size)\n    def forward(self, x):\n        B, C, T, H, W = x.shape\n        assert H == self.img_size[0] and W == self.img_size[1], \\\n            f\"Input image size ({H}*{W}) doesn't match model ({self.img_size[0]}*{self.img_size[1]}).\"\n        x = x.transpose((0, 2, 1, 3, 4))  # [B,T,C,H,W]\n        x = x.reshape([-1, C, H, W])  # [BT,C,H,W]\n        x = self.proj(x)  # [BT,F,nH,nW]\n        W = x.shape[-1]\n        x = x.flatten(2).transpose((0, 2, 1))  # [BT,F,nHnW]\n        return x, T, W\n@BACKBONES.register()\nclass VisionTransformer_tweaks(nn.Layer):\n    \"\"\" Vision Transformer with support for patch input\n    \"\"\"\n    def __init__(self,\n                 pretrained=None,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/vit_tweaks.py:303-331"
+    },
+    "7169": {
+        "file_id": 518,
+        "content": "This code defines a VisionTransformer with patch input. The model takes an image of size img_size and divides it into patches of size patch_size, extracting features from each patch using the Conv2D layer. The forward method reshapes the input and passes it through the projection convolution. It then flattens the output and returns the result along with the number of patches (T) and the total number of image pixels (W).",
+        "type": "comment"
+    },
+    "7170": {
+        "file_id": 518,
+        "content": "                 img_size=224,\n                 patch_size=16,\n                 in_channels=3,\n                 embed_dim=768,\n                 depth=12,\n                 num_heads=12,\n                 mlp_ratio=4,\n                 qkv_bias=False,\n                 qk_scale=None,\n                 drop_rate=0.,\n                 attn_drop_rate=0.,\n                 drop_path_rate=0.1,\n                 norm_layer='nn.LayerNorm',\n                 epsilon=1e-5,\n                 num_seg=8,\n                 attention_type='divided_space_time',\n                 wd_bias=True,\n                 lr_mult_list=[1.0, 1.0, 1.0, 1.0, 1.0],\n                 **args):\n        super().__init__()\n        self.pretrained = pretrained\n        self.num_seg = num_seg\n        self.attention_type = attention_type\n        self.lr_mult_list = lr_mult_list\n        self.num_features = self.embed_dim = embed_dim\n        self.patch_embed = PatchEmbed(img_size=img_size,\n                                      patch_size=patch_size,\n                                      in_channels=in_channels,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/vit_tweaks.py:332-360"
+    },
+    "7171": {
+        "file_id": 518,
+        "content": "This code initializes a ViT (Vision Transformer) model with specified dimensions and parameters. It uses the PatchEmbed class to embed input images, sets the number of segments for attention, and defines the learning rate multipliers for each stage of the model. It also specifies whether to use pre-trained weights.",
+        "type": "comment"
+    },
+    "7172": {
+        "file_id": 518,
+        "content": "                                      embed_dim=embed_dim,\n                                      wd_bias=wd_bias,\n                                      lr_mult=self.lr_mult_list[0])\n        num_patches = self.patch_embed.num_patches\n        # Positional Embeddings\n        self.cls_token = self.create_parameter(\n            shape=(1, 1, embed_dim),\n            default_initializer=zeros_,\n            attr=ParamAttr(regularizer=L2Decay(0.0)))\n        self.pos_embed = self.create_parameter(\n            shape=(1, num_patches + 1, embed_dim),\n            default_initializer=zeros_,\n            attr=ParamAttr(regularizer=L2Decay(0.0)))\n        self.pos_drop = nn.Dropout(p=drop_rate)\n        if self.attention_type != 'space_only':\n            self.time_embed = self.create_parameter(\n                shape=(1, num_seg, embed_dim),\n                default_initializer=zeros_,\n                attr=ParamAttr(regularizer=L2Decay(0.0)))\n            self.time_drop = nn.Dropout(p=drop_rate)\n        self.add_parameter(\"pos_embed\", self.pos_embed)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/vit_tweaks.py:361-384"
+    },
+    "7173": {
+        "file_id": 518,
+        "content": "This code initializes the positional and time embeddings for a transformer model. It creates a cls_token, pos_embed and optionally time_embed with specified dimensions and regularizers. It also adds dropout layers for positional and temporal features, if needed.",
+        "type": "comment"
+    },
+    "7174": {
+        "file_id": 518,
+        "content": "        self.add_parameter(\"cls_token\", self.cls_token)\n        dpr = np.linspace(0, drop_path_rate, depth)\n        self.blocks = nn.LayerList([\n            Block(dim=embed_dim,\n                  num_heads=num_heads,\n                  mlp_ratio=mlp_ratio,\n                  qkv_bias=qkv_bias,\n                  qk_scale=qk_scale,\n                  drop=drop_rate,\n                  attn_drop=attn_drop_rate,\n                  drop_path=dpr[i],\n                  norm_layer=norm_layer,\n                  epsilon=epsilon,\n                  attention_type=self.attention_type,\n                  wd_bias=wd_bias,\n                  lr_mult=self.lr_mult_list[(i // 4) + 1]) for i in range(depth)\n        ])\n        self.norm = eval(norm_layer)(embed_dim, epsilon=epsilon)\n    def init_weights(self):\n        \"\"\"First init model's weight\"\"\"\n        trunc_normal_(self.pos_embed, std=0.02)\n        trunc_normal_(self.cls_token, std=0.02)\n        self.apply(self._init_fn)\n        if self.attention_type == 'divided_space_time':\n            i = 0",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/vit_tweaks.py:385-414"
+    },
+    "7175": {
+        "file_id": 518,
+        "content": "The code initializes a transformer model with blocks, adds parameters for position and classification tokens, creates a layer list of blocks with varying drop paths and attention types, and applies weight initialization to the positional embeddings, classification token, and layers.",
+        "type": "comment"
+    },
+    "7176": {
+        "file_id": 518,
+        "content": "            for m in self.blocks.sublayers(include_self=True):\n                m_str = str(m)\n                if 'Block' in m_str:\n                    if i > 0:\n                        zeros_(m.temporal_fc.weight)\n                        zeros_(m.temporal_fc.bias)\n                    i += 1\n        \"\"\"Second, if provide pretrained ckpt, load it\"\"\"\n        if isinstance(\n                self.pretrained, str\n        ) and self.pretrained.strip() != \"\":  # load pretrained weights\n            load_ckpt(self,\n                      self.pretrained,\n                      num_patches=self.patch_embed.num_patches,\n                      num_seg=self.num_seg,\n                      attention_type=self.attention_type)\n        elif self.pretrained is None or self.pretrained.strip() == \"\":\n            pass\n        else:\n            raise NotImplementedError\n    def _init_fn(self, m):\n        if isinstance(m, nn.Linear):\n            trunc_normal_(m.weight)\n            if m.bias is not None:\n                zeros_(m.bias)\n        elif isinstance(m, nn.LayerNorm):",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/vit_tweaks.py:415-441"
+    },
+    "7177": {
+        "file_id": 518,
+        "content": "Initializing the backbone network by iterating through each sublayer, setting temporal_fc weight and bias to zeros if it's a Block type. If pretrained weights are provided, load them after checking the input. Else, continue with no change or raise an error for unsupported inputs. Initialize the network parameters using truncated normal distribution for Linear layers and setting bias of LayerNorm layers to zero.",
+        "type": "comment"
+    },
+    "7178": {
+        "file_id": 518,
+        "content": "            ones_(m.weight)\n            zeros_(m.bias)\n    def forward_features(self, x):\n        # B = x.shape[0]\n        B = paddle.shape(x)[0]\n        x, T, W = self.patch_embed(x)  # [BT,nH*nW,F]\n        cls_tokens = self.cls_token.expand((B * T, -1, -1))  # [1,1,F]->[BT,1,F]\n        x = paddle.concat((cls_tokens, x), axis=1)\n        pos_interp = (x.shape[1] != self.pos_embed.shape[1])\n        if pos_interp:\n            pos_embed = self.pos_embed\n            cls_pos_embed = pos_embed[0, 0, :].unsqueeze(0).unsqueeze(1)\n            other_pos_embed = pos_embed[0, 1:, :].unsqueeze(0).transpose(\n                (0, 2, 1))\n            P = int(other_pos_embed.shape[2]**0.5)\n            H = x.shape[1] // W\n            other_pos_embed = other_pos_embed.reshape([1, x.shape[2], P, P])\n            new_pos_embed = F.interpolate(other_pos_embed,\n                                          size=(H, W),\n                                          mode='nearest')\n            new_pos_embed = new_pos_embed.flatten(2)\n            new_pos_embed = new_pos_embed.transpose((0, 2, 1))",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/vit_tweaks.py:442-464"
+    },
+    "7179": {
+        "file_id": 518,
+        "content": "This code snippet is part of a transformer model's forward pass implementation. It reshapes the positional embeddings to match the patch embedding dimension and performs interpolation if necessary, ensuring the correct size for the subsequent layers.",
+        "type": "comment"
+    },
+    "7180": {
+        "file_id": 518,
+        "content": "            new_pos_embed = paddle.concat((cls_pos_embed, new_pos_embed),\n                                          axis=1)\n            x = paddle.add(x, new_pos_embed)\n        else:\n            x = paddle.add(x, self.pos_embed)\n        x = self.pos_drop(x)\n        # Time Embeddings\n        if self.attention_type != 'space_only':\n            cls_tokens = x[:B, 0, :].unsqueeze(1) if B > 0 else x.split(\n                T)[0].index_select(paddle.to_tensor([0]), axis=1)\n            x = x[:, 1:]\n            _, _n, _m = x.shape\n            _t = T\n            x = x.reshape([-1, _t, _n, _m]).transpose(\n                (0, 2, 1, 3)).reshape([-1, _t, _m])\n            # Resizing time embeddings in case they don't match\n            time_interp = (T != self.time_embed.shape[1])\n            if time_interp:  # T' != T\n                time_embed = self.time_embed.transpose((0, 2, 1)).unsqueeze(0)\n                new_time_embed = F.interpolate(time_embed,\n                                               size=(T, x.shape[-1]),",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/vit_tweaks.py:465-487"
+    },
+    "7181": {
+        "file_id": 518,
+        "content": "This code is part of a vision transformer model. It concatenates the class position embeddings with new position embeddings, adds them to the input tensor, and applies positional dropout. If attention type is not \"space_only,\" it extracts time embeddings from the input tensor, reshapes them, interpolates time embeddings if their size doesn't match, and performs some operations on them.",
+        "type": "comment"
+    },
+    "7182": {
+        "file_id": 518,
+        "content": "                                               mode='nearest').squeeze(0)\n                new_time_embed = new_time_embed.transpose((0, 2, 1))\n                x = paddle.add(x, new_time_embed)\n            else:\n                x = paddle.add(x, self.time_embed)\n            x = self.time_drop(x)\n            _, _t, _m = x.shape\n            x = x.reshape([-1, W * W * T, _m])\n            x = paddle.concat((cls_tokens, x), axis=1)\n        # Attention blocks\n        for blk in self.blocks:\n            x = blk(x, B, T, W)\n        # Predictions for space-only baseline\n        if self.attention_type == 'space_only':\n            _, _n, _m = x.shape\n            _t = T\n            x = x.reshape([-1, _t, _n, _m])\n            x = paddle.mean(x, 1)  # averaging predictions for every frame\n        x = self.norm(x)\n        return x[:, 0]  # [B,  embed_dim]\n    def forward(self, x):\n        x = self.forward_features(x)\n        return x",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/vit_tweaks.py:488-515"
+    },
+    "7183": {
+        "file_id": 518,
+        "content": "This code performs time-based feature modification and passes the data through attention blocks for a Vision Transformer model. It also provides an option to compute space-only predictions by averaging predictions for every frame. The forward function applies the forward_features transformation before passing data through attention blocks and normalization.",
+        "type": "comment"
+    },
+    "7184": {
+        "file_id": 519,
+        "content": "/paddlevideo/modeling/backbones/yowo.py",
+        "type": "filepath"
+    },
+    "7185": {
+        "file_id": 519,
+        "content": "The CAM_Module and YOWO backbone model are for image processing and video classification respectively, using attention mechanism and convolutional layers. The code loads pretrain weights correctly and returns a Paddle Video YOWO model after processing input clips through backbones, CFAM, and convolutional layers.",
+        "type": "summary"
+    },
+    "7186": {
+        "file_id": 519,
+        "content": "# Copyright (c) 2021  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nfrom ..registry import BACKBONES\nfrom .darknet import Darknet\nfrom .resnext101 import ResNext101\nimport paddle.nn as nn\nimport paddle\nclass CAM_Module(nn.Layer):\n    def __init__(self, in_dim):\n        super(CAM_Module, self).__init__()\n        self.chanel_in = in_dim\n        temp = paddle.zeros([1], dtype='float32')\n        self.gamma = paddle.create_parameter(shape=temp.shape, dtype=str(temp.numpy().dtype),\n                                             default_initializer=paddle.nn.initializer.Assign(temp))",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/yowo.py:1-28"
+    },
+    "7187": {
+        "file_id": 519,
+        "content": "This code is a part of the PaddleVideo library and defines a custom layer called CAM_Module. It takes an input dimension as a parameter, initializes a gamma parameter, and inherits from nn.Layer. The class constructor creates a zero-dimensional tensor as the initial value for gamma using paddle.create_parameter function. This module is used in backbone architectures to enable Channel Attention Mechanism for image processing tasks.",
+        "type": "comment"
+    },
+    "7188": {
+        "file_id": 519,
+        "content": "        self.softmax = nn.Softmax(axis=-1)\n    def forward(self, x):\n        m_batchsize, C, height, width = x.shape\n        proj_query = paddle.reshape(x, [m_batchsize, C, -1])\n        proj_key = paddle.transpose(paddle.reshape(\n            x, [m_batchsize, C, -1]), perm=[0, 2, 1])\n        energy = paddle.bmm(proj_query, proj_key)\n        energy_new = paddle.expand_as(paddle.max(\n            energy, axis=-1, keepdim=True), energy) - energy\n        attention = self.softmax(energy_new)\n        proj_value = paddle.reshape(x, [m_batchsize, C, -1])\n        out = paddle.bmm(attention, proj_value)\n        out = out.reshape([m_batchsize, C, height, width])\n        out = self.gamma * out + x\n        return out\nclass CFAMBlock(nn.Layer):\n    def __init__(self, in_channels, out_channels):\n        super(CFAMBlock, self).__init__()\n        inter_channels = 1024\n        self.conv_bn_relu1 = nn.Sequential(nn.Conv2D(in_channels, inter_channels, kernel_size=1, bias_attr=False),\n                                           nn.BatchNorm2D(inter_channels),",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/yowo.py:29-53"
+    },
+    "7189": {
+        "file_id": 519,
+        "content": "The code defines a CFAMPBlock layer with a Channel-wise Attention Mechanism. It contains a convolution, batch normalization, and ReLU layers for the attention mechanism, followed by a gamma scaling and channel-wise attention calculation. The forward function performs the attention operation and scales the input using the attention map.",
+        "type": "comment"
+    },
+    "7190": {
+        "file_id": 519,
+        "content": "                                           nn.ReLU())\n        self.conv_bn_relu2 = nn.Sequential(nn.Conv2D(inter_channels, inter_channels, 3, padding=1, bias_attr=False),\n                                           nn.BatchNorm2D(inter_channels),\n                                           nn.ReLU())\n        self.sc = CAM_Module(inter_channels)\n        self.conv_bn_relu3 = nn.Sequential(nn.Conv2D(inter_channels, inter_channels, 3, padding=1, bias_attr=False),\n                                           nn.BatchNorm2D(inter_channels),\n                                           nn.ReLU())\n        self.conv_out = nn.Sequential(nn.Dropout2D(0.1), nn.Conv2D(\n            inter_channels, out_channels, 1, bias_attr=True))\n    def forward(self, x):\n        x = self.conv_bn_relu1(x)\n        x = self.conv_bn_relu2(x)\n        x = self.sc(x)\n        x = self.conv_bn_relu3(x)\n        output = self.conv_out(x)\n        return output\n@BACKBONES.register()\nclass YOWO(nn.Layer):\n    def __init__(self, num_class, pretrained_2d=None, pretrained_3d=None):",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/yowo.py:54-79"
+    },
+    "7191": {
+        "file_id": 519,
+        "content": "This code defines a YOWO backbone model, which is a neural network architecture for video classification tasks. It consists of several convolutional layers followed by batch normalization and ReLU activations. The CAM_Module is also included, which might be a custom attention mechanism. The output channels are adjusted based on the input size. Dropout regularization is applied to prevent overfitting.",
+        "type": "comment"
+    },
+    "7192": {
+        "file_id": 519,
+        "content": "        super(YOWO, self).__init__()\n        self.pretrained_2d = pretrained_2d\n        self.pretrained_3d = pretrained_3d\n        self.backbone_2d = Darknet()\n        self.backbone_3d = ResNext101()\n        self.num_ch_2d = 425\n        self.num_ch_3d = 2048\n        self.num_class = num_class\n        self.cfam = CFAMBlock(self.num_ch_2d + self.num_ch_3d, 1024)\n        self.conv_final = nn.Conv2D(\n            1024, 5 * (self.num_class + 4 + 1), kernel_size=1, bias_attr=False)\n        self.seen = 0\n    def init_weights(self):\n        if self.pretrained_2d is not None:\n            self.backbone_2d = self.load_pretrain_weight(\n                self.backbone_2d, self.pretrained_2d)\n        if self.pretrained_3d is not None:\n            self.backbone_3d = self.load_pretrain_weight(\n                self.backbone_3d, self.pretrained_3d)\n    def load_pretrain_weight(self, model, weights_path):\n        model_dict = model.state_dict()\n        param_state_dict = paddle.load(weights_path)\n        ignore_weights = set()\n        # hack: fit for faster rcnn. Pretrain weights contain prefix of 'backbone'",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/yowo.py:80-108"
+    },
+    "7193": {
+        "file_id": 519,
+        "content": "The code initializes a YOWO model with pre-trained 2D and 3D backbones, loads pre-trained weights if provided for both backbones, and has a method to initialize weights.",
+        "type": "comment"
+    },
+    "7194": {
+        "file_id": 519,
+        "content": "        # while res5 module is located in bbox_head.head. Replace the prefix of\n        # res5 with 'bbox_head.head' to load pretrain weights correctly.\n        for k in list(param_state_dict.keys()):\n            if 'backbone.res5' in k:\n                new_k = k.replace('backbone', 'bbox_head.head')\n                if new_k in model_dict.keys():\n                    value = param_state_dict.pop(k)\n                    param_state_dict[new_k] = value\n        for name, weight in param_state_dict.items():\n            if name in model_dict.keys():\n                if list(weight.shape) != list(model_dict[name].shape):\n                    print(\n                        '{} not used, shape {} unmatched with {} in model.'.format(\n                            name, weight.shape, list(model_dict[name].shape)))\n                    ignore_weights.add(name)\n            else:\n                print('Redundant weight {} and ignore it.'.format(name))\n                ignore_weights.add(name)\n        for weight in ignore_weights:",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/yowo.py:109-129"
+    },
+    "7195": {
+        "file_id": 519,
+        "content": "This code is replacing the prefix of 'res5' with 'bbox_head.head' in param_state_dict to load pretrain weights correctly. It then checks if the weight shapes match and adds redundant or unmatched weights to ignore_weights.",
+        "type": "comment"
+    },
+    "7196": {
+        "file_id": 519,
+        "content": "            param_state_dict.pop(weight, None)\n        model.set_dict(param_state_dict)\n        print('Finish loading model weights: {}'.format(weights_path))\n        return model\n    def forward(self, input):\n        x_3d = input  # Input clip\n        x_2d = input[:, :, -1, :, :]  # Last frame of the clip that is read\n        x_2d = self.backbone_2d(x_2d)\n        x_3d = self.backbone_3d(x_3d)\n        x_3d = paddle.squeeze(x_3d, axis=2)\n        x = paddle.concat([x_3d, x_2d], axis=1)\n        x = self.cfam(x)\n        out = self.conv_final(x)\n        return out",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/yowo.py:130-150"
+    },
+    "7197": {
+        "file_id": 519,
+        "content": "This function loads model weights from the specified path and returns a Paddle Video YOWO model. The model's `forward` method takes an input clip, separates it into 3D and 2D representations, passes them through their respective backbones, concatenates them together, and finally feeds it to CFAM and a convolutional layer for processing before returning the output.",
+        "type": "comment"
+    },
+    "7198": {
+        "file_id": 520,
+        "content": "/paddlevideo/modeling/bbox_utils.py",
+        "type": "filepath"
+    },
+    "7199": {
+        "file_id": 520,
+        "content": "This code calculates delta between bounding boxes, adjusts using weighted averages, provides functions for filtering, computing overlaps, generating anchor points, decoding YOLO boxes, and calculating IoU. It transforms coordinates, computes deltas, stacks results, calculates dimensions and center of rotated boxes, converts rectangles to polygons, and finds the best begin point for a coordinate.",
+        "type": "summary"
+    }
+}

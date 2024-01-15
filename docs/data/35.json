@@ -1,0 +1,544 @@
+{
+    "3500": {
+        "file_id": 299,
+        "content": "        self.seg_num = self.get_config_from_sec('model', 'seg_num')\n        self.seglen = self.get_config_from_sec('model', 'seglen')\n        self.image_mean = self.get_config_from_sec('model', 'image_mean')\n        self.image_std = self.get_config_from_sec('model', 'image_std')\n        self.num_layers = self.get_config_from_sec('model', 'num_layers')\n        self.num_epochs = self.get_config_from_sec('train', 'epoch')\n        self.total_videos = self.get_config_from_sec('train', 'total_videos')\n        self.base_learning_rate = self.get_config_from_sec(\n            'train', 'learning_rate')\n        self.learning_rate_decay = self.get_config_from_sec(\n            'train', 'learning_rate_decay')\n        self.l2_weight_decay = self.get_config_from_sec('train',\n                                                        'l2_weight_decay')\n        self.momentum = self.get_config_from_sec('train', 'momentum')\n        self.seg_num = self.get_config_from_sec(self.mode, 'seg_num',\n                                                self.seg_num)",
+        "type": "code",
+        "location": "/applications/VideoTag/models/tsn/tsn.py:35-52"
+    },
+    "3501": {
+        "file_id": 299,
+        "content": "This code initializes various parameters for the TSN model. It sets segment number, segment length, image mean and standard deviation, number of layers, training epochs, total videos, learning rate, learning rate decay, L2 weight decay, and momentum using get_config_from_sec method.",
+        "type": "comment"
+    },
+    "3502": {
+        "file_id": 299,
+        "content": "        self.target_size = self.get_config_from_sec(self.mode, 'target_size')\n        self.batch_size = self.get_config_from_sec(self.mode, 'batch_size')\n    def build_input(self, use_dataloader=True):\n        image_shape = [3, self.target_size, self.target_size]\n        image_shape[0] = image_shape[0] * self.seglen\n        image_shape = [None, self.seg_num] + image_shape\n        self.use_dataloader = use_dataloader\n        image = static.data(name='image', shape=image_shape, dtype='float32')\n        if self.mode != 'infer':\n            label = static.data(name='label', shape=[None, 1], dtype='int64')\n        else:\n            label = None\n        if use_dataloader:\n            assert self.mode != 'infer', \\\n                        'dataloader is not recommendated when infer, please set use_dataloader to be false.'\n            self.dataloader = paddle.io.DataLoader.from_generator(\n                feed_list=[image, label], capacity=4, iterable=True)\n        self.feature_input = [image]\n        self.label_input = label",
+        "type": "code",
+        "location": "/applications/VideoTag/models/tsn/tsn.py:53-75"
+    },
+    "3503": {
+        "file_id": 299,
+        "content": "The code initializes the target size and batch size, then defines a `build_input` function to create data tensors for the model's inputs. It generates image and label tensors with specified shapes and data types, and optionally creates a DataLoader for handling data if not in infer mode. The feature and label inputs are stored as separate lists.",
+        "type": "comment"
+    },
+    "3504": {
+        "file_id": 299,
+        "content": "    def create_model_args(self):\n        cfg = {}\n        cfg['layers'] = self.num_layers\n        cfg['class_dim'] = self.num_classes\n        cfg['seg_num'] = self.seg_num\n        return cfg\n    def build_model(self):\n        cfg = self.create_model_args()\n        videomodel = TSN_ResNet(layers=cfg['layers'],\n                                seg_num=cfg['seg_num'],\n                                is_training=(self.mode == 'train'),\n                                is_extractor=self.is_videotag)\n        out = videomodel.net(input=self.feature_input[0],\n                             class_dim=cfg['class_dim'])\n        self.network_outputs = [out]\n    def optimizer(self):\n        assert self.mode == 'train', \"optimizer only can be get in train mode\"\n        epoch_points = [self.num_epochs / 3, self.num_epochs * 2 / 3]\n        total_videos = self.total_videos\n        step = int(total_videos / self.batch_size + 1)\n        bd = [e * step for e in epoch_points]\n        base_lr = self.base_learning_rate\n        lr_decay = self.learning_rate_decay",
+        "type": "code",
+        "location": "/applications/VideoTag/models/tsn/tsn.py:77-101"
+    },
+    "3505": {
+        "file_id": 299,
+        "content": "The code defines a model with configurable parameters and builds the model instance. It also includes an optimizer function that adjusts learning rate based on epoch points and total videos.",
+        "type": "comment"
+    },
+    "3506": {
+        "file_id": 299,
+        "content": "        lr = [base_lr, base_lr * lr_decay, base_lr * lr_decay * lr_decay]\n        l2_weight_decay = self.l2_weight_decay\n        momentum = self.momentum\n        optimizer = paddle.optimizer.Momentum(\n            learning_rate=paddle.optimizer.lr.PiecewiseDecay(boundaries=bd,\n                                                       values=lr),\n            momentum=momentum,\n            weight_decay=paddle.regularizer.L2Decay(coeff=l2_weight_decay))\n        return optimizer\n    def loss(self):\n        assert self.mode != 'infer', \"invalid loss calculationg in infer mode\"\n        cost = paddle.nn.functional.cross_entropy(input=self.network_outputs[0], \\\n                           label=self.label_input, ignore_index=-1)\n        self.loss_ = paddle.mean(x=cost)\n        return self.loss_\n    def outputs(self):\n        return self.network_outputs\n    def feeds(self):\n        return self.feature_input if self.mode == 'infer' else self.feature_input + [\n            self.label_input\n        ]\n    def fetches(self):\n        if self.mode == 'train' or self.mode == 'valid':",
+        "type": "code",
+        "location": "/applications/VideoTag/models/tsn/tsn.py:102-129"
+    },
+    "3507": {
+        "file_id": 299,
+        "content": "This code defines a model for the VideoTag application. It creates an optimizer with a piecewise learning rate decay and L2 weight decay, calculates the loss using cross entropy, updates the loss value, returns the network outputs, and handles feeds and fetches based on the mode (train, valid or infer).",
+        "type": "comment"
+    },
+    "3508": {
+        "file_id": 299,
+        "content": "            losses = self.loss()\n            fetch_list = [losses, self.network_outputs[0], self.label_input]\n        elif self.mode == 'test':\n            losses = self.loss()\n            fetch_list = [losses, self.network_outputs[0], self.label_input]\n        elif self.mode == 'infer':\n            fetch_list = self.network_outputs\n        else:\n            raise NotImplementedError('mode {} not implemented'.format(\n                self.mode))\n        return fetch_list\n    def pretrain_info(self):\n        return None, None\n    def weights_info(self):\n        return None\n    def load_pretrain_params(self, exe, pretrain, prog):\n        def is_parameter(var):\n            return isinstance(var, paddle.framework.Parameter)\n        logger.info(\n            \"Load pretrain weights from {}, exclude fc layer.\".format(pretrain))\n        print(\"===pretrain===\", pretrain)\n        state_dict = paddle.static.load_program_state(pretrain)\n        dict_keys = list(state_dict.keys())\n        # remove fc layer when pretrain, because the number of classes in final fc may not match",
+        "type": "code",
+        "location": "/applications/VideoTag/models/tsn/tsn.py:130-159"
+    },
+    "3509": {
+        "file_id": 299,
+        "content": "This code defines a model with three modes: train, test, and infer. It returns the losses, network outputs, and label inputs in train and test modes, while only returning network outputs in infer mode. The function pretrain_info() returns no information, weights_info() also returns no info, and load_pretrain_params() loads pre-trained weights from a specific file while excluding the final fully connected (fc) layer.",
+        "type": "comment"
+    },
+    "3510": {
+        "file_id": 299,
+        "content": "        for name in dict_keys:\n            if \"fc_0\" in name:\n                del state_dict[name]\n                print('Delete {} from pretrained parameters. Do not load it'.\n                      format(name))\n        paddle.static.set_program_state(prog, state_dict)",
+        "type": "code",
+        "location": "/applications/VideoTag/models/tsn/tsn.py:160-165"
+    },
+    "3511": {
+        "file_id": 299,
+        "content": "The code is deleting specific keys from the pretrained parameters and then setting the program state with the updated dictionary. This could be done to avoid loading unnecessary or conflicting parameters during the model's execution.",
+        "type": "comment"
+    },
+    "3512": {
+        "file_id": 300,
+        "content": "/applications/VideoTag/models/tsn/tsn_res_model.py",
+        "type": "filepath"
+    },
+    "3513": {
+        "file_id": 300,
+        "content": "This code defines a `TSN_ResNet` class for creating Temporal Segment Network ResNet models in PaddlePaddle, using bottleneck_block function and performs adaptive average pooling, reshaping, and activation functions.",
+        "type": "summary"
+    },
+    "3514": {
+        "file_id": 300,
+        "content": "#  Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n#Licensed under the Apache License, Version 2.0 (the \"License\");\n#you may not use this file except in compliance with the License.\n#You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n#Unless required by applicable law or agreed to in writing, software\n#distributed under the License is distributed on an \"AS IS\" BASIS,\n#WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n#See the License for the specific language governing permissions and\n#limitations under the License.\nimport os\nimport time\nimport sys\nimport paddle\nimport paddle.static as static\nimport math\nclass TSN_ResNet():\n    def __init__(self,\n                 layers=50,\n                 seg_num=7,\n                 is_training=True,\n                 is_extractor=False):\n        self.layers = layers\n        self.seg_num = seg_num\n        self.is_training = is_training\n        self.is_extractor = is_extractor\n    def conv_bn_layer(self,",
+        "type": "code",
+        "location": "/applications/VideoTag/models/tsn/tsn_res_model.py:1-34"
+    },
+    "3515": {
+        "file_id": 300,
+        "content": "This code defines a class `TSN_ResNet` for creating a Temporal Segment Network ResNet model. It has parameters such as layers, segment number, training flag and extractor flag. The class contains a method `conv_bn_layer()` to create a convolution-batch normalization layer.",
+        "type": "comment"
+    },
+    "3516": {
+        "file_id": 300,
+        "content": "                      input,\n                      num_filters,\n                      filter_size,\n                      stride=1,\n                      groups=1,\n                      act=None,\n                      name=None):\n        conv = paddle.static.nn.conv2d(\n            input=input,\n            num_filters=num_filters,\n            filter_size=filter_size,\n            stride=stride,\n            padding=(filter_size - 1) // 2,\n            groups=groups,\n            param_attr=paddle.ParamAttr(name=name + \"_weights\"),\n            bias_attr=False)\n        if name == \"conv1\":\n            bn_name = \"bn_\" + name\n        else:\n            bn_name = \"bn\" + name[3:]\n        return paddle.static.nn.batch_norm(\n            input=conv,\n            act=act,\n            is_test=(not self.is_training),\n            param_attr=paddle.ParamAttr(name=bn_name + \"_scale\"),\n            bias_attr=paddle.ParamAttr(bn_name + '_offset'),\n            moving_mean_name=bn_name + \"_mean\",\n            moving_variance_name=bn_name + '_variance')",
+        "type": "code",
+        "location": "/applications/VideoTag/models/tsn/tsn_res_model.py:35-63"
+    },
+    "3517": {
+        "file_id": 300,
+        "content": "This function defines a convolutional layer and returns it after passing through a batch normalization layer. It takes input, number of filters, filter size, stride, groups (number of groups in the layers), activation function if any, and name as arguments. If the name is \"conv1\", the bn_name would be \"bn_conv1\" else, it would be \"bn0\", followed by the original name. The batch normalization layer takes input, activation function if any, whether it's in test mode or not, scale and offset attribute names for parameters, and names for moving mean and variance.",
+        "type": "comment"
+    },
+    "3518": {
+        "file_id": 300,
+        "content": "    def shortcut(self, input, ch_out, stride, name):\n        ch_in = input.shape[1]\n        if ch_in != ch_out or stride != 1:\n            return self.conv_bn_layer(input, ch_out, 1, stride, name=name)\n        else:\n            return input\n    def bottleneck_block(self, input, num_filters, stride, name):\n        conv0 = self.conv_bn_layer(input=input,\n                                   num_filters=num_filters,\n                                   filter_size=1,\n                                   act='relu',\n                                   name=name + \"_branch2a\")\n        conv1 = self.conv_bn_layer(input=conv0,\n                                   num_filters=num_filters,\n                                   filter_size=3,\n                                   stride=stride,\n                                   act='relu',\n                                   name=name + \"_branch2b\")\n        conv2 = self.conv_bn_layer(input=conv1,\n                                   num_filters=num_filters * 4,\n                                   filter_size=1,",
+        "type": "code",
+        "location": "/applications/VideoTag/models/tsn/tsn_res_model.py:65-86"
+    },
+    "3519": {
+        "file_id": 300,
+        "content": "This code defines two functions: 'shortcut' and 'bottleneck_block'. The shortcut function determines if input dimensions match the desired output, and returns either a convolution-batch normalization layer or the input itself. The bottleneck_block function applies two consecutive 1x1 and 3x3 convolutions with batch normalization and ReLU activations in between.",
+        "type": "comment"
+    },
+    "3520": {
+        "file_id": 300,
+        "content": "                                   act=None,\n                                   name=name + \"_branch2c\")\n        short = self.shortcut(input,\n                              num_filters * 4,\n                              stride,\n                              name=name + \"_branch1\")\n        return paddle.add(x=short, y=conv2)\n    def net(self, input, class_dim=101):\n        layers = self.layers\n        seg_num = self.seg_num\n        supported_layers = [50, 101, 152]\n        assert layers in supported_layers, \\\n            \"supported layers are {} but input layer is {}\".format(supported_layers, layers)\n        # reshape input\n        channels = input.shape[2]\n        short_size = input.shape[3]\n        input = paddle.reshape(\n            x=input, shape=[-1, channels, short_size, short_size])\n        if layers == 50:\n            depth = [3, 4, 6, 3]\n        elif layers == 101:\n            depth = [3, 4, 23, 3]\n        elif layers == 152:\n            depth = [3, 8, 36, 3]\n        num_filters = [64, 128, 256, 512]\n        conv = self.conv_bn_layer(input=input,",
+        "type": "code",
+        "location": "/applications/VideoTag/models/tsn/tsn_res_model.py:87-118"
+    },
+    "3521": {
+        "file_id": 300,
+        "content": "The code defines a function `net` that takes an input, performs operations based on the specified number of layers (50, 101 or 152), and reshapes the input. It then applies different configurations of convolutional and batch normalization layers to the input for each specified layer. The final output is the sum of two previous calculations (conv and short).",
+        "type": "comment"
+    },
+    "3522": {
+        "file_id": 300,
+        "content": "                                  num_filters=64,\n                                  filter_size=7,\n                                  stride=2,\n                                  act='relu',\n                                  name='conv1')\n        conv = paddle.nn.functional.max_pool2d(x=conv,\n                                   kernel_size=3,\n                                   stride=2,\n                                   padding=1)\n        for block in range(len(depth)):\n            for i in range(depth[block]):\n                if layers in [101, 152] and block == 2:\n                    if i == 0:\n                        conv_name = \"res\" + str(block + 2) + \"a\"\n                    else:\n                        conv_name = \"res\" + str(block + 2) + \"b\" + str(i)\n                else:\n                    conv_name = \"res\" + str(block + 2) + chr(97 + i)\n                conv = self.bottleneck_block(\n                    input=conv,\n                    num_filters=num_filters[block],\n                    stride=2 if i == 0 and block != 0 else 1,",
+        "type": "code",
+        "location": "/applications/VideoTag/models/tsn/tsn_res_model.py:119-142"
+    },
+    "3523": {
+        "file_id": 300,
+        "content": "This code defines a ResNet model with multiple convolutional layers and pooling operations. It uses the PaddlePaddle library and includes a bottleneck_block function for the residual blocks. The number of filters, filter size, and stride are defined based on the layer and depth.",
+        "type": "comment"
+    },
+    "3524": {
+        "file_id": 300,
+        "content": "                    name=conv_name)\n        pool = paddle.nn.functional.adaptive_avg_pool2d(x=conv, output_size=1)\n        feature = paddle.reshape(x=pool,\n                                       shape=[-1, seg_num, pool.shape[1]])\n        if self.is_extractor:\n            out = feature\n        else:\n            out = paddle.mean(x=feature, axis=1)\n            stdv = 1.0 / math.sqrt(pool.shape[1] * 1.0)\n            out = static.nn.fc(\n                x=out,\n                size=class_dim,\n                activation='softmax',\n                weight_attr=paddle.ParamAttr(\n                    initializer=paddle.nn.initializer.Uniform(low=-stdv, high=stdv)))\n        return out",
+        "type": "code",
+        "location": "/applications/VideoTag/models/tsn/tsn_res_model.py:143-161"
+    },
+    "3525": {
+        "file_id": 300,
+        "content": "This code performs adaptive average pooling, reshapes the feature map, and if not an extractor, calculates the mean along axis 1. Then, it applies a softmax activation function and returns the output.",
+        "type": "comment"
+    },
+    "3526": {
+        "file_id": 301,
+        "content": "/applications/VideoTag/models/utils.py",
+        "type": "filepath"
+    },
+    "3527": {
+        "file_id": 301,
+        "content": "This code imports modules, defines decompressing and downloading functions, ensures directory existence, deletes downloaded files post-decompression, and includes an AttrDict class for attribute access.",
+        "type": "summary"
+    },
+    "3528": {
+        "file_id": 301,
+        "content": "#  Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n#Licensed under the Apache License, Version 2.0 (the \"License\");\n#you may not use this file except in compliance with the License.\n#You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n#Unless required by applicable law or agreed to in writing, software\n#distributed under the License is distributed on an \"AS IS\" BASIS,\n#WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n#See the License for the specific language governing permissions and\n#limitations under the License.\nimport os\nimport wget\nimport tarfile\n__all__ = ['decompress', 'download', 'AttrDict']\ndef decompress(path):\n    t = tarfile.open(path)\n    t.extractall(path=os.path.split(path)[0])\n    t.close()\n    os.remove(path)\ndef download(url, path):\n    weight_dir = os.path.split(path)[0]\n    if not os.path.exists(weight_dir):\n        os.makedirs(weight_dir)\n    path = path + \".tar.gz\"\n    wget.download(url, path)\n    decompress(path)",
+        "type": "code",
+        "location": "/applications/VideoTag/models/utils.py:1-36"
+    },
+    "3529": {
+        "file_id": 301,
+        "content": "The code imports necessary modules and defines functions for decompressing and downloading files. It also ensures a directory exists before attempting to download a file, then deletes the downloaded file after decompression.",
+        "type": "comment"
+    },
+    "3530": {
+        "file_id": 301,
+        "content": "class AttrDict(dict):\n    def __getattr__(self, key):\n        return self[key]\n    def __setattr__(self, key, value):\n        if key in self.__dict__:\n            self.__dict__[key] = value\n        else:\n            self[key] = value",
+        "type": "code",
+        "location": "/applications/VideoTag/models/utils.py:39-47"
+    },
+    "3531": {
+        "file_id": 301,
+        "content": "This code defines an AttrDict class, which is a subclass of dict with additional getattr and setattr methods for accessing and modifying its elements as attributes.",
+        "type": "comment"
+    },
+    "3532": {
+        "file_id": 302,
+        "content": "/applications/VideoTag/predict.py",
+        "type": "filepath"
+    },
+    "3533": {
+        "file_id": 302,
+        "content": "The script initializes a larger application, sets up logging and imports modules, predicts video tags using PaddleVideo's models, configures parameters, builds the model, prepares inputs/outputs, runs inference, checks file existence, retrieves infer reader, sets up data feeder, fetches model outputs, collects results with video IDs, logs/saves average processing time, and checks GPU availability and version compatibility before running.",
+        "type": "summary"
+    },
+    "3534": {
+        "file_id": 302,
+        "content": "#  Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n#Licensed under the Apache License, Version 2.0 (the \"License\");\n#you may not use this file except in compliance with the License.\n#You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n#Unless required by applicable law or agreed to in writing, software\n#distributed under the License is distributed on an \"AS IS\" BASIS,\n#WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n#See the License for the specific language governing permissions and\n#limitations under the License.\nimport os\nimport sys\nimport time\nimport logging\nimport argparse\nimport ast\nimport numpy as np\nimport paddle\nimport paddle.static as static\ntry:\n    import cPickle as pickle\nexcept:\n    import pickle\nfrom utils.config_utils import *\nimport models\nfrom reader import get_reader\nfrom metrics import get_metrics\nfrom utils.utility import check_cuda\nfrom utils.utility import check_version\nlogging.root.handlers = []\nFORMAT = '[%(levelname)s: %(filename)s: %(lineno)4d]: %(message)s'",
+        "type": "code",
+        "location": "/applications/VideoTag/predict.py:1-37"
+    },
+    "3535": {
+        "file_id": 302,
+        "content": "This code appears to be an import and initialization script for a larger application. It sets up logging, imports various modules and libraries, checks the CUDA availability, and performs version checking. The code also includes licensing information and copyright notices.",
+        "type": "comment"
+    },
+    "3536": {
+        "file_id": 302,
+        "content": "logging.basicConfig(level=logging.DEBUG, format=FORMAT, stream=sys.stdout)\nlogger = logging.getLogger(__name__)\ndef parse_args():\n    parser = argparse.ArgumentParser()\n    parser.add_argument('--model_name',\n                        type=str,\n                        default='AttentionCluster',\n                        help='name of model to train.')\n    parser.add_argument('--config',\n                        type=str,\n                        default='configs/attention_cluster.txt',\n                        help='path to config file of model')\n    parser.add_argument('--use_gpu',\n                        type=ast.literal_eval,\n                        default=True,\n                        help='default use gpu.')\n    parser.add_argument(\n        '--weights',\n        type=str,\n        default='./data/checkpoints/AttentionLSTM_epoch9.pdparams',\n        help='weight path.')\n    parser.add_argument('--batch_size',\n                        type=int,\n                        default=1,\n                        help='sample number in a batch for inference.')",
+        "type": "code",
+        "location": "/applications/VideoTag/predict.py:38-64"
+    },
+    "3537": {
+        "file_id": 302,
+        "content": "The code imports logging, sets up a logger with debug level and configures the format. It then defines a function 'parse_args' that uses argparse to set default values for model name, config file path, whether to use GPU or not, weight path, and batch size for inference.",
+        "type": "comment"
+    },
+    "3538": {
+        "file_id": 302,
+        "content": "    parser.add_argument('--filelist',\n                        type=str,\n                        default=None,\n                        help='path to inferenece data file lists file.')\n    parser.add_argument('--log_interval',\n                        type=int,\n                        default=1,\n                        help='mini-batch interval to log.')\n    parser.add_argument('--infer_topk',\n                        type=int,\n                        default=20,\n                        help='topk predictions to restore.')\n    parser.add_argument('--save_dir',\n                        type=str,\n                        default=os.path.join('data', 'predict_results',\n                                             'attention_lstm'),\n                        help='directory to store results')\n    parser.add_argument('--video_path',\n                        type=str,\n                        default=None,\n                        help='directory to store results')\n    parser.add_argument('--label_file',\n                        type=str,",
+        "type": "code",
+        "location": "/applications/VideoTag/predict.py:65-87"
+    },
+    "3539": {
+        "file_id": 302,
+        "content": "This code snippet is part of a Python script for video tag prediction. It uses an argument parser to specify input files, log intervals, top k predictions and output directory. The default directories and paths are provided if no arguments are specified by the user.",
+        "type": "comment"
+    },
+    "3540": {
+        "file_id": 302,
+        "content": "                        default='label_3396.txt',\n                        help='chinese label file path')\n    args = parser.parse_args()\n    return args\ndef infer(args):\n    # parse config\n    config = parse_config(args.config)\n    infer_config = merge_configs(config, 'infer', vars(args))\n    print_configs(infer_config, \"Infer\")\n    infer_model = models.get_model(args.model_name, infer_config, mode='infer')\n    infer_model.build_input(use_dataloader=False)\n    infer_model.build_model()\n    infer_feeds = infer_model.feeds()\n    infer_outputs = infer_model.outputs()\n    place = paddle.CUDAPlace(0) if args.use_gpu else paddle.CPUPlace()\n    exe = static.Executor(place)\n    exe.run(static.default_startup_program())\n    filelist = args.filelist or infer_config.INFER.filelist\n    filepath = args.video_path or infer_config.INFER.get('filepath', '')\n    if filepath != '':\n        assert os.path.exists(filepath), \"{} not exist.\".format(filepath)\n    else:\n        assert os.path.exists(filelist), \"{} not exist.\".format(filelist)",
+        "type": "code",
+        "location": "/applications/VideoTag/predict.py:88-115"
+    },
+    "3541": {
+        "file_id": 302,
+        "content": "The code defines a function that takes arguments, parses the config file, and builds an inference model using PaddleVideo's models. It then builds the inputs and outputs of the model, sets up the Executor based on GPU availability, and runs the startup program. Finally, it checks if the video or filelist path exists before proceeding with the inference process.",
+        "type": "comment"
+    },
+    "3542": {
+        "file_id": 302,
+        "content": "    # get infer reader\n    infer_reader = get_reader(args.model_name.upper(), 'infer', infer_config)\n    if args.weights:\n        assert os.path.exists(\n            args.weights), \"Given weight dir {} not exist.\".format(args.weights)\n    # if no weight files specified, download weights from paddle\n    weights = args.weights or infer_model.get_weights()\n    infer_model.load_test_weights(exe, weights, static.default_main_program())\n    infer_feeder = paddle.fluid.DataFeeder(place=place, feed_list=infer_feeds)\n    fetch_list = infer_model.fetches()\n    infer_metrics = get_metrics(args.model_name.upper(), 'infer', infer_config)\n    infer_metrics.reset()\n    periods = []\n    cur_time = time.time()\n    for infer_iter, data in enumerate(infer_reader()):\n        data_feed_in = [items[:-1] for items in data]\n        video_id = [items[-1] for items in data]\n        infer_outs = exe.run(fetch_list=fetch_list,\n                             feed=infer_feeder.feed(data_feed_in))\n        infer_result_list = [item for item in infer_outs] + [video_id]",
+        "type": "code",
+        "location": "/applications/VideoTag/predict.py:117-141"
+    },
+    "3543": {
+        "file_id": 302,
+        "content": "This code retrieves an infer reader, checks and loads weights for the model, sets up a data feeder, fetches outputs from the model, and collects results with video IDs.",
+        "type": "comment"
+    },
+    "3544": {
+        "file_id": 302,
+        "content": "        prev_time = cur_time\n        cur_time = time.time()\n        period = cur_time - prev_time\n        periods.append(period)\n        infer_metrics.accumulate(infer_result_list)\n        if args.log_interval > 0 and infer_iter % args.log_interval == 0:\n            logger.info('Processed {} samples'.format(\n                (infer_iter + 1) * len(video_id)))\n    logger.info('[INFER] infer finished. average time: {}'.format(\n        np.mean(periods)))\n    if not os.path.isdir(args.save_dir):\n        os.makedirs(args.save_dir)\n    infer_metrics.finalize_and_log_out(savedir=args.save_dir,\n                                       label_file=args.label_file)\nif __name__ == \"__main__\":\n    args = parse_args()\n    # check whether the installed paddle is compiled with GPU\n    check_cuda(args.use_gpu)\n    check_version()\n    logger.info(args)\n    infer(args)",
+        "type": "code",
+        "location": "/applications/VideoTag/predict.py:143-171"
+    },
+    "3545": {
+        "file_id": 302,
+        "content": "The code calculates the average processing time for each sample, logs the information, and saves the final output. It uses a log interval to report progress, and the `infer_metrics` object accumulates data for logging and saving. The code also checks for GPU availability and version compatibility before running.",
+        "type": "comment"
+    },
+    "3546": {
+        "file_id": 303,
+        "content": "/applications/VideoTag/reader/__init__.py",
+        "type": "filepath"
+    },
+    "3547": {
+        "file_id": 303,
+        "content": "This code imports and registers two reader classes, FeatureReader and KineticsReader, with the names \"ATTENTIONLSTM\" and \"TSN\", respectively. The registration occurs in alphabetical order.",
+        "type": "summary"
+    },
+    "3548": {
+        "file_id": 303,
+        "content": "from .reader_utils import regist_reader, get_reader\nfrom .feature_reader import FeatureReader\nfrom .kinetics_reader import KineticsReader\n# regist reader, sort by alphabet\nregist_reader(\"ATTENTIONLSTM\", FeatureReader)\nregist_reader(\"TSN\", KineticsReader)",
+        "type": "code",
+        "location": "/applications/VideoTag/reader/__init__.py:1-7"
+    },
+    "3549": {
+        "file_id": 303,
+        "content": "This code imports and registers two reader classes, FeatureReader and KineticsReader, with the names \"ATTENTIONLSTM\" and \"TSN\", respectively. The registration occurs in alphabetical order.",
+        "type": "comment"
+    },
+    "3550": {
+        "file_id": 304,
+        "content": "/applications/VideoTag/reader/feature_reader.py",
+        "type": "filepath"
+    },
+    "3551": {
+        "file_id": 304,
+        "content": "The DataReader class handles YouTube-8M dataset using LSTM models, pickle for data loading, and supports various Python versions. It sets batch size, shuffles files if training mode is on, and reads video frames with labels/filenames into batches using one-hot encoding.",
+        "type": "summary"
+    },
+    "3552": {
+        "file_id": 304,
+        "content": "#  Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n#Licensed under the Apache License, Version 2.0 (the \"License\");\n#you may not use this file except in compliance with the License.\n#You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n#Unless required by applicable law or agreed to in writing, software\n#distributed under the License is distributed on an \"AS IS\" BASIS,\n#WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n#See the License for the specific language governing permissions and\n#limitations under the License.\nimport sys\nfrom .reader_utils import DataReader\ntry:\n    import cPickle as pickle\n    from cStringIO import StringIO\nexcept ImportError:\n    import pickle\n    from io import BytesIO\nimport numpy as np\nimport random\npython_ver = sys.version_info\nclass FeatureReader(DataReader):\n    \"\"\"\n    Data reader for youtube-8M dataset, which was stored as features extracted by prior networks\n    This is for the three models: lstm\n    dataset cfg: num_classes",
+        "type": "code",
+        "location": "/applications/VideoTag/reader/feature_reader.py:1-34"
+    },
+    "3553": {
+        "file_id": 304,
+        "content": "This code is for a DataReader class that handles the youtube-8M dataset. The features are extracted by prior networks, specifically for LSTM models. It uses pickle to load data and BytesIO for compatibility with different python versions.",
+        "type": "comment"
+    },
+    "3554": {
+        "file_id": 304,
+        "content": "                 batch_size\n                 list\n    \"\"\"\n    def __init__(self, name, mode, cfg):\n        self.name = name\n        self.mode = mode\n        self.num_classes = cfg.MODEL.num_classes\n        # set batch size and file list\n        self.batch_size = cfg[mode.upper()]['batch_size']\n        self.filelist = cfg[mode.upper()]['filelist']\n        self.seg_num = cfg.MODEL.get('seg_num', None)\n    def create_reader(self):\n        fl = open(self.filelist).readlines()\n        fl = [line.strip() for line in fl if line.strip() != '']\n        if self.mode == 'train':\n            random.shuffle(fl)\n        def reader():\n            batch_out = []\n            for item in fl:\n                fileinfo = item.split(' ')\n                filepath = fileinfo[0]\n                rgb = np.load(filepath, allow_pickle=True)\n                nframes = rgb.shape[0]\n                label = [int(i) for i in fileinfo[1:]]\n                one_hot_label = make_one_hot(label, self.num_classes)\n                if self.mode != 'infer':",
+        "type": "code",
+        "location": "/applications/VideoTag/reader/feature_reader.py:35-64"
+    },
+    "3555": {
+        "file_id": 304,
+        "content": "Initializes a feature reader object with specified name, mode and configuration. Sets batch size and file list from the configuration. Reads the file list, removes empty lines and shuffles if in training mode. Defines a nested function reader that iterates over each item in the file list, loads corresponding RGB data and labels, converts labels to one-hot format if not in inference mode, and returns them as batch outputs.",
+        "type": "comment"
+    },
+    "3556": {
+        "file_id": 304,
+        "content": "                    batch_out.append((rgb, one_hot_label))\n                else:\n                    batch_out.append((rgb, filepath.split('/')[-1]))\n                if len(batch_out) == self.batch_size:\n                    yield batch_out\n                    batch_out = []\n        return reader\ndef make_one_hot(label, dim=3862):\n    one_hot_label = np.zeros(dim)\n    one_hot_label = one_hot_label.astype(float)\n    for ind in label:\n        one_hot_label[int(ind)] = 1\n    return one_hot_label",
+        "type": "code",
+        "location": "/applications/VideoTag/reader/feature_reader.py:65-80"
+    },
+    "3557": {
+        "file_id": 304,
+        "content": "This code reads video frames and their labels/filenames into batches, using one-hot encoding for label conversion. The make_one_hot function creates a one-hot encoded vector from the given label.",
+        "type": "comment"
+    },
+    "3558": {
+        "file_id": 305,
+        "content": "/applications/VideoTag/reader/kinetics_reader.py",
+        "type": "filepath"
+    },
+    "3559": {
+        "file_id": 305,
+        "content": "The code introduces a \"KineticsReader\" class to efficiently read Kinetics dataset in mp4 and pkl formats, applying data augmentation for image/video classification tasks. It generates images for multi-threaded processing, and selects frames based on parameters for training or testing mode.",
+        "type": "summary"
+    },
+    "3560": {
+        "file_id": 305,
+        "content": "#  Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n#Licensed under the Apache License, Version 2.0 (the \"License\");\n#you may not use this file except in compliance with the License.\n#You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n#Unless required by applicable law or agreed to in writing, software\n#distributed under the License is distributed on an \"AS IS\" BASIS,\n#WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n#See the License for the specific language governing permissions and\n#limitations under the License.\nimport os\nimport sys\nimport cv2\nimport math\nimport random\nimport functools\ntry:\n    import cPickle as pickle\n    from cStringIO import StringIO\nexcept ImportError:\n    import pickle\n    from io import BytesIO\nimport numpy as np\nimport paddle\nfrom PIL import Image, ImageEnhance\nimport logging\nfrom .reader_utils import DataReader\nlogger = logging.getLogger(__name__)\npython_ver = sys.version_info\nclass VideoRecord(object):\n    '''\n    define a class method which used to describe the frames information of videos",
+        "type": "code",
+        "location": "/applications/VideoTag/reader/kinetics_reader.py:1-41"
+    },
+    "3561": {
+        "file_id": 305,
+        "content": "This code is from the PaddleVideo library's VideoTag application, specifically the kinetics_reader.py file. It imports necessary modules, defines a VideoRecord class to describe frames information of videos, and includes license and version details. The code seems to be part of a video processing framework for machine learning tasks, potentially in image or video classification.",
+        "type": "comment"
+    },
+    "3562": {
+        "file_id": 305,
+        "content": "    1. self._data[0] is the frames' path\n    2. self._data[1] is the number of frames\n    3. self._data[2] is the label of frames\n    '''\n    def __init__(self, row):\n        self._data = row\n    @property\n    def path(self):\n        return self._data[0]\n    @property\n    def num_frames(self):\n        return int(self._data[1])\n    @property\n    def label(self):\n        return int(self._data[2])\nclass KineticsReader(DataReader):\n    \"\"\"\n    Data reader for kinetics dataset of two format mp4 and pkl.\n    1. mp4, the original format of kinetics400\n    2. pkl, the mp4 was decoded previously and stored as pkl\n    In both case, load the data, and then get the frame data in the form of numpy and label as an integer.\n     dataset cfg: format\n                  num_classes\n                  seg_num\n                  short_size\n                  target_size\n                  num_reader_threads\n                  buf_size\n                  image_mean\n                  image_std\n                  batch_size\n                  list\n    \"\"\"",
+        "type": "code",
+        "location": "/applications/VideoTag/reader/kinetics_reader.py:42-79"
+    },
+    "3563": {
+        "file_id": 305,
+        "content": "This code defines a class \"KineticsReader\" for reading the Kinetics dataset in two formats: mp4 and pkl. It initializes with a row of data containing the frames' path, number of frames, and label. The class has properties for accessing these data elements. The code also specifies dataset configuration options.",
+        "type": "comment"
+    },
+    "3564": {
+        "file_id": 305,
+        "content": "    def __init__(self, name, mode, cfg):\n        super(KineticsReader, self).__init__(name, mode, cfg)\n        self.format = cfg.MODEL.format\n        self.num_classes = self.get_config_from_sec('model', 'num_classes')\n        self.seg_num = self.get_config_from_sec('model', 'seg_num')\n        self.seglen = self.get_config_from_sec('model', 'seglen')\n        self.seg_num = self.get_config_from_sec(mode, 'seg_num', self.seg_num)\n        self.short_size = self.get_config_from_sec(mode, 'short_size')\n        self.target_size = self.get_config_from_sec(mode, 'target_size')\n        self.num_reader_threads = self.get_config_from_sec(\n            mode, 'num_reader_threads')\n        self.buf_size = self.get_config_from_sec(mode, 'buf_size')\n        self.fix_random_seed = self.get_config_from_sec(mode, 'fix_random_seed')\n        self.img_mean = np.array(cfg.MODEL.image_mean).reshape(\n            [3, 1, 1]).astype(np.float32)\n        self.img_std = np.array(cfg.MODEL.image_std).reshape([3, 1, 1]).astype(\n            np.float32)",
+        "type": "code",
+        "location": "/applications/VideoTag/reader/kinetics_reader.py:80-98"
+    },
+    "3565": {
+        "file_id": 305,
+        "content": "This code initializes an object of the KineticsReader class, which takes in parameters like name, mode, and configuration (cfg). It retrieves various attributes from the configuration, such as number of classes, segmentation information, image sizes, reader threads, buffer size, and random seed. It also sets the mean and standard deviation values for image normalization.",
+        "type": "comment"
+    },
+    "3566": {
+        "file_id": 305,
+        "content": "        # set batch size and file list\n        self.batch_size = cfg[mode.upper()]['batch_size']\n        self.filelist = cfg[mode.upper()]['filelist']\n        if self.fix_random_seed:\n            random.seed(0)\n            np.random.seed(0)\n            self.num_reader_threads = 1\n    def create_reader(self):\n        assert os.path.exists(self.filelist), \\\n                    '{} not exist, please check the data list'.format(self.filelist)\n        _reader = self._reader_creator(self.filelist, self.mode, seg_num=self.seg_num, seglen = self.seglen, \\\n                         short_size = self.short_size, target_size = self.target_size, \\\n                         img_mean = self.img_mean, img_std = self.img_std, \\\n                         shuffle = (self.mode == 'train'), \\\n                         num_threads = self.num_reader_threads, \\\n                         buf_size = self.buf_size, format = self.format)\n        def _batch_reader():\n            batch_out = []\n            for imgs, label in _reader():\n                if imgs is None:",
+        "type": "code",
+        "location": "/applications/VideoTag/reader/kinetics_reader.py:99-121"
+    },
+    "3567": {
+        "file_id": 305,
+        "content": "This code sets the batch size and file list for a video reader. It also ensures random seeds are set, limits the number of reader threads to 1 if fixing random seed, asserts that the filelist exists, creates a video reader object using a provided creator function, and defines a batch_reader generator function to iterate over the reader's output.",
+        "type": "comment"
+    },
+    "3568": {
+        "file_id": 305,
+        "content": "                    continue\n                batch_out.append((imgs, label))\n                if len(batch_out) == self.batch_size:\n                    yield batch_out\n                    batch_out = []\n        return _batch_reader\n    def _reader_creator(self,\n                        file_list,\n                        mode,\n                        seg_num,\n                        seglen,\n                        short_size,\n                        target_size,\n                        img_mean,\n                        img_std,\n                        shuffle=False,\n                        num_threads=1,\n                        buf_size=1024,\n                        format='frames'):\n        def decode_mp4(sample, mode, seg_num, seglen, short_size, target_size,\n                       img_mean, img_std):\n            sample = sample[0].split(' ')\n            mp4_path = sample[0]\n            if mode == \"infer\":\n                label = mp4_path.split('/')[-1]\n            else:\n                label = int(sample[1])\n            try:",
+        "type": "code",
+        "location": "/applications/VideoTag/reader/kinetics_reader.py:122-151"
+    },
+    "3569": {
+        "file_id": 305,
+        "content": "This code defines a function `_reader_creator` that takes in various parameters and returns another function `decode_mp4`. The returned function reads video frames from MP4 files, extracts labels if necessary, and yields batches of images and labels based on batch size and other specified parameters.",
+        "type": "comment"
+    },
+    "3570": {
+        "file_id": 305,
+        "content": "                imgs = mp4_loader(mp4_path, seg_num, seglen, mode)\n                if len(imgs) < 1:\n                    logger.error('{} frame length {} less than 1.'.format(\n                        mp4_path, len(imgs)))\n                    return None, None\n            except:\n                logger.error('Error when loading {}'.format(mp4_path))\n                return None, None\n            return imgs_transform(imgs, mode, seg_num, seglen, \\\n                         short_size, target_size, img_mean, img_std, name = self.name), label\n        def decode_frames(sample, mode, seg_num, seglen, short_size,\n                          target_size, img_mean, img_std):\n            recode = VideoRecord(sample[0].split(' '))\n            frames_dir_path = recode.path\n            if mode == \"infer\":\n                label = frames_dir_path\n            else:\n                label = recode.label\n            try:\n                imgs = frames_loader(recode, seg_num, seglen, mode)\n                if len(imgs) < 1:\n                    logger.error('{} frame length {} less than 1.'.format(",
+        "type": "code",
+        "location": "/applications/VideoTag/reader/kinetics_reader.py:152-176"
+    },
+    "3571": {
+        "file_id": 305,
+        "content": "This code is defining two functions: `kinetics_reader` and `decode_frames`. The `kinetics_reader` function loads frames from a given MP4 file using `mp4_loader`, applies transformations if necessary, and returns the frames along with their corresponding labels. It also logs an error if the number of frames is less than 1. If an exception occurs during the process, it logs an error message as well. The `decode_frames` function loads frames from a specified directory (specified by the `recode` object) using the `frames_loader` function and returns the frames along with their labels. If the number of frames is less than 1, it logs an error; if an exception occurs, it also logs an error.",
+        "type": "comment"
+    },
+    "3572": {
+        "file_id": 305,
+        "content": "                        frames_dir_path, len(imgs)))\n                    return None, None\n            except:\n                logger.error('Error when loading {}'.format(frames_dir_path))\n                return None, None\n            return imgs_transform(imgs,\n                                  mode,\n                                  seg_num,\n                                  seglen,\n                                  short_size,\n                                  target_size,\n                                  img_mean,\n                                  img_std,\n                                  name=self.name), label\n        def reader_():\n            with open(file_list) as flist:\n                lines = [line.strip() for line in flist]\n                if shuffle:\n                    random.shuffle(lines)\n                for line in lines:\n                    file_path = line.strip()\n                    yield [file_path]\n        if format == 'frames':\n            decode_func = decode_frames\n        elif format == 'video':",
+        "type": "code",
+        "location": "/applications/VideoTag/reader/kinetics_reader.py:177-204"
+    },
+    "3573": {
+        "file_id": 305,
+        "content": "The code snippet is responsible for loading video frames from a specified directory and handling any errors that may occur during the process. It takes the frames directory path, image format (frames or video), segment number, sequence length, short size, target size, image mean, image standard deviation, and name as input parameters. The code also defines a function reader() to read the file list and shuffle its lines if necessary. Based on the specified format (frames or video), it calls the appropriate decoding function (decode_frames or decode_video).",
+        "type": "comment"
+    },
+    "3574": {
+        "file_id": 305,
+        "content": "            decode_func = decode_mp4\n        else:\n            raise (\"Not implemented format {}\".format(format))\n        mapper = functools.partial(decode_func,\n                                   mode=mode,\n                                   seg_num=seg_num,\n                                   seglen=seglen,\n                                   short_size=short_size,\n                                   target_size=target_size,\n                                   img_mean=img_mean,\n                                   img_std=img_std)\n        return paddle.reader.decorator.xmap_readers(mapper,\n                                     reader_,\n                                     num_threads,\n                                     buf_size,\n                                     order=True)\ndef imgs_transform(imgs,\n                   mode,\n                   seg_num,\n                   seglen,\n                   short_size,\n                   target_size,\n                   img_mean,\n                   img_std,\n                   name=''):",
+        "type": "code",
+        "location": "/applications/VideoTag/reader/kinetics_reader.py:205-233"
+    },
+    "3575": {
+        "file_id": 305,
+        "content": "This code selects a specific video format decoder function based on the input format. If the format is not recognized, it raises an error. It then applies transformations to the images using the selected function and returns them with additional functionality for efficient processing with multiple threads.",
+        "type": "comment"
+    },
+    "3576": {
+        "file_id": 305,
+        "content": "    imgs = group_scale(imgs, short_size)\n    np_imgs = np.array([np.array(img).astype('float32') for img in imgs])  #dhwc\n    if mode == 'train':\n        np_imgs = group_crop(np_imgs, target_size)\n        np_imgs = group_random_flip(np_imgs)\n    else:\n        np_imgs = group_crop(np_imgs, target_size, is_center=True)\n    np_imgs = np_imgs.transpose(0, 3, 1, 2) / 255  #dchw\n    np_imgs -= img_mean\n    np_imgs /= img_std\n    return np_imgs\ndef group_crop(np_imgs, target_size, is_center=True):\n    d, h, w, c = np_imgs.shape\n    th, tw = target_size, target_size\n    assert (w >= target_size) and (h >= target_size), \\\n          \"image width({}) and height({}) should be larger than crop size\".format(w, h, target_size)\n    if is_center:\n        h_off = int(round((h - th) / 2.))\n        w_off = int(round((w - tw) / 2.))\n    else:\n        w_off = random.randint(0, w - tw)\n        h_off = random.randint(0, h - th)\n    img_crop = np_imgs[:, h_off:h_off + target_size,\n                       w_off:w_off + target_size, :]\n    return img_crop",
+        "type": "code",
+        "location": "/applications/VideoTag/reader/kinetics_reader.py:234-266"
+    },
+    "3577": {
+        "file_id": 305,
+        "content": "This code reads images from a dataset and performs data augmentation by cropping, flipping, and normalization. It also checks if the image dimensions are larger than the target crop size before applying the crop operation. If in 'train' mode, it randomly crops the image. Otherwise, it centers the crop. The resulting images are then normalized by subtracting the mean pixel values and dividing by standard deviation for feature extraction.",
+        "type": "comment"
+    },
+    "3578": {
+        "file_id": 305,
+        "content": "def group_random_flip(np_imgs):\n    prob = random.random()\n    if prob < 0.5:\n        ret = np_imgs[:, :, ::-1, :]\n        return ret\n    else:\n        return np_imgs\ndef group_scale(imgs, target_size):\n    resized_imgs = []\n    for i in range(len(imgs)):\n        img = imgs[i]\n        w, h = img.size\n        if (w <= h and w == target_size) or (h <= w and h == target_size):\n            resized_imgs.append(img)\n            continue\n        if w < h:\n            ow = target_size\n            oh = int(target_size * 4.0 / 3.0)\n            resized_imgs.append(img.resize((ow, oh), Image.BILINEAR))\n        else:\n            oh = target_size\n            ow = int(target_size * 4.0 / 3.0)\n            resized_imgs.append(img.resize((ow, oh), Image.BILINEAR))\n    return resized_imgs\ndef mp4_loader(filepath, nsample, seglen, mode):\n    cap = cv2.VideoCapture(filepath)\n    videolen = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))\n    sampledFrames = []\n    for i in range(videolen):\n        ret, frame = cap.read()\n        # maybe first frame is empty",
+        "type": "code",
+        "location": "/applications/VideoTag/reader/kinetics_reader.py:269-305"
+    },
+    "3579": {
+        "file_id": 305,
+        "content": "The code defines three functions: \"group_random_flip\" flips the image horizontally with 50% probability, \"group_scale\" resizes images to a specified target size while maintaining aspect ratio, and \"mp4_loader\" loads frames from a video file for further processing.",
+        "type": "comment"
+    },
+    "3580": {
+        "file_id": 305,
+        "content": "        if ret == False:\n            continue\n        img = frame[:, :, ::-1]\n        sampledFrames.append(img)\n    average_dur = int(len(sampledFrames) / nsample)\n    imgs = []\n    for i in range(nsample):\n        idx = 0\n        if mode == 'train':\n            if average_dur >= seglen:\n                idx = random.randint(0, average_dur - seglen)\n                idx += i * average_dur\n            elif average_dur >= 1:\n                idx += i * average_dur\n            else:\n                idx = i\n        else:\n            if average_dur >= seglen:\n                idx = (average_dur - 1) // 2\n                idx += i * average_dur\n            elif average_dur >= 1:\n                idx += i * average_dur\n            else:\n                idx = i\n        for jj in range(idx, idx + seglen):\n            imgbuf = sampledFrames[int(jj % len(sampledFrames))]\n            img = Image.fromarray(imgbuf, mode='RGB')\n            imgs.append(img)\n    return imgs\ndef frames_loader(recode, nsample, seglen, mode):\n    imgpath, num_frames = recode.path, recode.num_frames",
+        "type": "code",
+        "location": "/applications/VideoTag/reader/kinetics_reader.py:306-340"
+    },
+    "3581": {
+        "file_id": 305,
+        "content": "This code reads video frames and selects a subset of them based on the provided parameters. It appends each frame in the specified sequence to sampledFrames, calculates average duration, then extracts the required number of frames with a given segment length from the list. The extracted frames are returned at the end.",
+        "type": "comment"
+    },
+    "3582": {
+        "file_id": 305,
+        "content": "    average_dur = int(num_frames / nsample)\n    imgs = []\n    for i in range(nsample):\n        idx = 0\n        if mode == 'train':\n            if average_dur >= seglen:\n                idx = random.randint(0, average_dur - seglen)\n                idx += i * average_dur\n            elif average_dur >= 1:\n                idx += i * average_dur\n            else:\n                idx = i\n        else:\n            if average_dur >= seglen:\n                idx = (average_dur - 1) // 2\n                idx += i * average_dur\n            elif average_dur >= 1:\n                idx += i * average_dur\n            else:\n                idx = i\n        for jj in range(idx, idx + seglen):\n            img = Image.open(\n                os.path.join(imgpath,\n                             'img_{:05d}.jpg'.format(jj + 1))).convert('RGB')\n            imgs.append(img)\n    return imgs",
+        "type": "code",
+        "location": "/applications/VideoTag/reader/kinetics_reader.py:341-367"
+    },
+    "3583": {
+        "file_id": 305,
+        "content": "This code calculates the average duration of video frames and then generates a set of images by randomly selecting start points based on the mode (train or test) and segment length. It opens each image file in RGB format, converts it, and adds it to the list of images returned at the end.",
+        "type": "comment"
+    },
+    "3584": {
+        "file_id": 306,
+        "content": "/applications/VideoTag/reader/reader_utils.py",
+        "type": "filepath"
+    },
+    "3585": {
+        "file_id": 306,
+        "content": "The code defines a `ReaderZoo` class with functions for registering and retrieving readers based on their name, mode, and configuration. A custom exception class is defined for reader not found errors.",
+        "type": "summary"
+    },
+    "3586": {
+        "file_id": 306,
+        "content": "#  Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n#Licensed under the Apache License, Version 2.0 (the \"License\");\n#you may not use this file except in compliance with the License.\n#You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n#Unless required by applicable law or agreed to in writing, software\n#distributed under the License is distributed on an \"AS IS\" BASIS,\n#WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n#See the License for the specific language governing permissions and\n#limitations under the License.\nimport pickle\nimport cv2\nimport numpy as np\nimport random\nclass ReaderNotFoundError(Exception):\n    \"Error: reader not found\"\n    def __init__(self, reader_name, avail_readers):\n        super(ReaderNotFoundError, self).__init__()\n        self.reader_name = reader_name\n        self.avail_readers = avail_readers\n    def __str__(self):\n        msg = \"Reader {} Not Found.\\nAvailiable readers:\\n\".format(\n            self.reader_name)",
+        "type": "code",
+        "location": "/applications/VideoTag/reader/reader_utils.py:1-31"
+    },
+    "3587": {
+        "file_id": 306,
+        "content": "Importing necessary libraries, defining custom exception class for reader not found error.",
+        "type": "comment"
+    },
+    "3588": {
+        "file_id": 306,
+        "content": "        for reader in self.avail_readers:\n            msg += \"  {}\\n\".format(reader)\n        return msg\nclass DataReader(object):\n    \"\"\"data reader for video input\"\"\"\n    def __init__(self, model_name, mode, cfg):\n        self.name = model_name\n        self.mode = mode\n        self.cfg = cfg\n    def create_reader(self):\n        \"\"\"Not implemented\"\"\"\n        pass\n    def get_config_from_sec(self, sec, item, default=None):\n        if sec.upper() not in self.cfg:\n            return default\n        return self.cfg[sec.upper()].get(item, default)\nclass ReaderZoo(object):\n    def __init__(self):\n        self.reader_zoo = {}\n    def regist(self, name, reader):\n        assert reader.__base__ == DataReader, \"Unknow model type {}\".format(\n            type(reader))\n        self.reader_zoo[name] = reader\n    def get(self, name, mode, cfg):\n        for k, v in self.reader_zoo.items():\n            if k == name:\n                return v(name, mode, cfg)\n        raise ReaderNotFoundError(name, self.reader_zoo.keys())\n# singleton reader_zoo",
+        "type": "code",
+        "location": "/applications/VideoTag/reader/reader_utils.py:32-70"
+    },
+    "3589": {
+        "file_id": 306,
+        "content": "The code defines a DataReader class for video input and a ReaderZoo class for registering and retrieving readers. The DataReader class has an init method for setting the model name, mode, and configuration, as well as a create_reader method that must be implemented by subclasses. The ReaderZoo class registers readers using the regist method and retrieves them based on name, mode, and configuration with the get method.",
+        "type": "comment"
+    },
+    "3590": {
+        "file_id": 306,
+        "content": "reader_zoo = ReaderZoo()\ndef regist_reader(name, reader):\n    reader_zoo.regist(name, reader)\ndef get_reader(name, mode, cfg):\n    reader_model = reader_zoo.get(name, mode, cfg)\n    return reader_model.create_reader()",
+        "type": "code",
+        "location": "/applications/VideoTag/reader/reader_utils.py:71-80"
+    },
+    "3591": {
+        "file_id": 306,
+        "content": "This code defines a class `ReaderZoo` and provides two functions `regist_reader` and `get_reader`. The `ReaderZoo` is used to register different types of readers and retrieve them based on their name, mode, and configuration.",
+        "type": "comment"
+    },
+    "3592": {
+        "file_id": 307,
+        "content": "/applications/VideoTag/train.py",
+        "type": "filepath"
+    },
+    "3593": {
+        "file_id": 307,
+        "content": "The code initializes models, checks CUDA availability and version, parses command line arguments, trains a video tagging model using data parallelism and saves if needed. The code also checks the version, logs arguments, creates a directory, and proceeds to train using those arguments.",
+        "type": "summary"
+    },
+    "3594": {
+        "file_id": 307,
+        "content": "#  Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n#Licensed under the Apache License, Version 2.0 (the \"License\");\n#you may not use this file except in compliance with the License.\n#You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n#Unless required by applicable law or agreed to in writing, software\n#distributed under the License is distributed on an \"AS IS\" BASIS,\n#WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n#See the License for the specific language governing permissions and\n#limitations under the License.\nimport os\nimport sys\nimport argparse\nimport ast\nimport logging\nimport paddle\nimport paddle.static as static\nfrom utils.train_utils import train_with_dataloader\nimport models\nfrom utils.config_utils import *\nfrom reader import get_reader\nfrom metrics import get_metrics\nfrom utils.utility import check_cuda\nfrom utils.utility import check_version\nlogging.root.handlers = []\nFORMAT = '[%(levelname)s: %(filename)s: %(lineno)4d]: %(message)s'",
+        "type": "code",
+        "location": "/applications/VideoTag/train.py:1-32"
+    },
+    "3595": {
+        "file_id": 307,
+        "content": "This code snippet contains the necessary import statements and license information for the VideoTag application in PaddleVideo. It also sets up the logging format and includes utility functions from other modules such as train_utils, config_utils, reader, metrics, and utility. The code checks if CUDA is available and verifies the PaddlePaddle version before proceeding with the training process.",
+        "type": "comment"
+    },
+    "3596": {
+        "file_id": 307,
+        "content": "logging.basicConfig(level=logging.INFO, format=FORMAT, stream=sys.stdout)\nlogger = logging.getLogger(__name__)\ndef parse_args():\n    parser = argparse.ArgumentParser(\"Paddle Video train script\")\n    parser.add_argument('--model_name',\n                        type=str,\n                        default='AttentionCluster',\n                        help='name of model to train.')\n    parser.add_argument('--config',\n                        type=str,\n                        default='configs/attention_cluster.txt',\n                        help='path to config file of model')\n    parser.add_argument(\n        '--batch_size',\n        type=int,\n        default=None,\n        help='training batch size. None to use config file setting.')\n    parser.add_argument(\n        '--learning_rate',\n        type=float,\n        default=None,\n        help='learning rate use for training. None to use config file setting.')\n    parser.add_argument('--pretrain',\n                        type=str,\n                        default=None,\n                        help='path to pretrain weights.')",
+        "type": "code",
+        "location": "/applications/VideoTag/train.py:33-60"
+    },
+    "3597": {
+        "file_id": 307,
+        "content": "This code block sets up logging, defines a function parse_args which uses argparse to create an argument parser for specifying model name, config file path, batch size, learning rate and pretrain weights. It provides default values for these arguments in case they are not specified by the user.",
+        "type": "comment"
+    },
+    "3598": {
+        "file_id": 307,
+        "content": "    parser.add_argument('--use_gpu',\n                        type=ast.literal_eval,\n                        default=True,\n                        help='default use gpu.')\n    parser.add_argument('--no_memory_optimize',\n                        action='store_true',\n                        default=False,\n                        help='whether to use memory optimize in train')\n    parser.add_argument('--epoch',\n                        type=int,\n                        default=None,\n                        help='epoch number, 0 for read from config file')\n    parser.add_argument('--valid_interval',\n                        type=int,\n                        default=1,\n                        help='validation epoch interval, 0 for no validation.')\n    parser.add_argument('--save_dir',\n                        type=str,\n                        default=os.path.join('data', 'checkpoints'),\n                        help='directory name to save train snapshoot')\n    parser.add_argument('--log_interval',\n                        type=int,",
+        "type": "code",
+        "location": "/applications/VideoTag/train.py:61-82"
+    },
+    "3599": {
+        "file_id": 307,
+        "content": "The code snippet is parsing command line arguments for a training program. The options include whether to use GPU, disable memory optimization, specify the epoch number, set validation interval, and provide a directory to save training snapshots.",
+        "type": "comment"
+    }
+}

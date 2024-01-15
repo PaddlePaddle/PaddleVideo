@@ -1,0 +1,550 @@
+{
+    "6700": {
+        "file_id": 505,
+        "content": "    def _construct_stem(self, dim_in, dim_out):\n        for pathway in range(len(dim_in)):\n            stem = ResNetBasicStem(dim_in[pathway], dim_out[pathway],\n                                   self.kernel[pathway], self.stride[pathway],\n                                   self.padding[pathway], self.eps,\n                                   self.norm_module)\n            self.add_sublayer(\"pathway{}_stem\".format(pathway), stem)\n    def forward(self, x):\n        assert (len(x) == self.num_pathways\n                ), \"Input tensor does not contain {} pathway\".format(\n                    self.num_pathways)\n        for pathway in range(len(x)):\n            m = getattr(self, \"pathway{}_stem\".format(pathway))\n            x[pathway] = m(x[pathway])\n        return x\nclass FuseFastToSlow(paddle.nn.Layer):\n    \"\"\"\n    Fuses the information from the Fast pathway to the Slow pathway. Given the\n    tensors from Slow pathway and Fast pathway, fuse information from Fast to\n    Slow, then return the fused tensors from Slow and Fast pathway in order.",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_slowfast.py:494-518"
+    },
+    "6701": {
+        "file_id": 505,
+        "content": "This code defines a class that constructs a stem for each pathway in ResNet, then applies it to the input tensors. The FuseFastToSlow class fuses information from the Fast pathway to the Slow pathway and returns the fused tensors in order.",
+        "type": "comment"
+    },
+    "6702": {
+        "file_id": 505,
+        "content": "    \"\"\"\n    def __init__(self,\n                 dim_in,\n                 fusion_conv_channel_ratio,\n                 fusion_kernel,\n                 alpha,\n                 fuse_bn_relu=1,\n                 eps=1e-5,\n                 norm_module=paddle.nn.BatchNorm3D):\n        \"\"\"\n        Args:\n            dim_in (int): the channel dimension of the input.\n            fusion_conv_channel_ratio (int): channel ratio for the convolution\n                used to fuse from Fast pathway to Slow pathway.\n            fusion_kernel (int): kernel size of the convolution used to fuse\n                from Fast pathway to Slow pathway.\n            alpha (int): the frame rate ratio between the Fast and Slow pathway.\n            eps (float): epsilon for batch norm.\n        \"\"\"\n        super(FuseFastToSlow, self).__init__()\n        self.fuse_bn_relu = fuse_bn_relu\n        fan = (dim_in * fusion_conv_channel_ratio) * (fusion_kernel * 1 * 1)\n        initializer_tmp = get_conv_init(fan)\n        self._conv_f2s = paddle.nn.Conv3D(\n            in_channels=dim_in,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_slowfast.py:519-544"
+    },
+    "6703": {
+        "file_id": 505,
+        "content": "This function initializes the FuseFastToSlow class, which takes in dimensions, fusion parameters, and other options. It sets up a convolutional layer to fuse information from the Fast pathway to the Slow pathway. It uses a specified channel ratio and kernel size for the convolution operation. The epsilon parameter is used for batch normalization.",
+        "type": "comment"
+    },
+    "6704": {
+        "file_id": 505,
+        "content": "            out_channels=dim_in * fusion_conv_channel_ratio,\n            kernel_size=[fusion_kernel, 1, 1],\n            stride=[alpha, 1, 1],\n            padding=[fusion_kernel // 2, 0, 0],\n            weight_attr=paddle.ParamAttr(initializer=initializer_tmp),\n            bias_attr=False)\n        self._bn = norm_module(num_features=dim_in * fusion_conv_channel_ratio,\n                               epsilon=eps,\n                               weight_attr=get_bn_param_attr(),\n                               bias_attr=get_bn_param_attr(bn_weight=0.0))\n    def forward(self, x):\n        x_s = x[0]\n        x_f = x[1]\n        fuse = self._conv_f2s(x_f)\n        #  TODO: For AVA, set fuse_bn_relu=1, check mAP's improve.\n        if self.fuse_bn_relu:\n            fuse = self._bn(fuse)\n            fuse = F.relu(fuse)\n        x_s_fuse = paddle.concat(x=[x_s, fuse], axis=1, name=None)\n        return [x_s_fuse, x_f]\n@BACKBONES.register()\nclass ResNetSlowFast(paddle.nn.Layer):\n    \"\"\"\n    SlowFast model builder for SlowFast network.",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_slowfast.py:545-572"
+    },
+    "6705": {
+        "file_id": 505,
+        "content": "This code defines a ResNetSlowFast model in PaddlePaddle, which is a variation of the SlowFast network. It includes a fusion convolution layer followed by batch normalization and ReLU activation if the fuse_bn_relu flag is set to True. The forward function performs concatenation of the input features and returns the result. This model is registered under BACKBONES for future use.",
+        "type": "comment"
+    },
+    "6706": {
+        "file_id": 505,
+        "content": "    Christoph Feichtenhofer, Haoqi Fan, Jitendra Malik, and Kaiming He.\n    \"Slowfast networks for video recognition.\"\n    https://arxiv.org/pdf/1812.03982.pdf\n    \"\"\"\n    def __init__(\n        self,\n        alpha,\n        beta,\n        bn_norm_type=\"batchnorm\",\n        bn_num_splits=1,\n        num_pathways=2,\n        depth=50,\n        num_groups=1,\n        input_channel_num=[3, 3],\n        width_per_group=64,\n        fusion_conv_channel_ratio=2,\n        fusion_kernel_sz=7,  #5?\n        pool_size_ratio=[[1, 1, 1], [1, 1, 1]],\n        fuse_bn_relu = 1,\n        spatial_strides = [[1, 1], [2, 2], [2, 2], [2, 2]],\n        use_pool_af_s2 = 1,\n    ):\n        \"\"\"\n        Args:\n            cfg (CfgNode): model building configs, details are in the\n                comments of the config file.\n        \"\"\"\n        super(ResNetSlowFast, self).__init__()\n        self.alpha = alpha  #8\n        self.beta = beta  #8\n        self.norm_module = get_norm(bn_norm_type, bn_num_splits)\n        self.num_pathways = num_pathways\n        self.depth = depth",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_slowfast.py:574-607"
+    },
+    "6707": {
+        "file_id": 505,
+        "content": "This code defines a class ResNetSlowFast, which is a variant of the ResNet architecture with slow and fast paths for video recognition. It takes various parameters such as alpha, beta, bn_norm_type, etc., to build the network. The class also includes methods for initializing the model with the given parameters.",
+        "type": "comment"
+    },
+    "6708": {
+        "file_id": 505,
+        "content": "        self.num_groups = num_groups\n        self.input_channel_num = input_channel_num\n        self.width_per_group = width_per_group\n        self.fusion_conv_channel_ratio = fusion_conv_channel_ratio\n        self.fusion_kernel_sz = fusion_kernel_sz  # NOTE: modify to 7 in 8*8, 5 in old implement\n        self.pool_size_ratio = pool_size_ratio\n        self.fuse_bn_relu = fuse_bn_relu\n        self.spatial_strides = spatial_strides\n        self.use_pool_af_s2 = use_pool_af_s2\n        self._construct_network()\n    def _construct_network(self):\n        \"\"\"\n        Builds a SlowFast model.\n        The first pathway is the Slow pathway\n        and the second pathway is the Fast pathway.\n        Args:\n            cfg (CfgNode): model building configs, details are in the\n                comments of the config file.\n        \"\"\"\n        temp_kernel = [\n            [[1], [5]],  # conv1 temporal kernel for slow and fast pathway.\n            [[1], [3]],  # res2 temporal kernel for slow and fast pathway.\n            [[1], [3]],  # res3 temporal kernel for slow and fast pathway.",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_slowfast.py:608-632"
+    },
+    "6709": {
+        "file_id": 505,
+        "content": "This code defines a SlowFast model for computer vision tasks. It takes in several parameters including the number of groups, input channel number, and others. The construct_network function builds the SlowFast model with separate pathways for Slow and Fast pathways using different temporal kernels.",
+        "type": "comment"
+    },
+    "6710": {
+        "file_id": 505,
+        "content": "            [[3], [3]],  # res4 temporal kernel for slow and fast pathway.\n            [[3], [3]],\n        ]  # res5 temporal kernel for slow and fast pathway.\n        self.s1 = VideoModelStem(\n            dim_in=self.input_channel_num,\n            dim_out=[self.width_per_group, self.width_per_group // self.beta],\n            kernel=[temp_kernel[0][0] + [7, 7], temp_kernel[0][1] + [7, 7]],\n            stride=[[1, 2, 2]] * 2,\n            padding=[\n                [temp_kernel[0][0][0] // 2, 3, 3],\n                [temp_kernel[0][1][0] // 2, 3, 3],\n            ],\n            norm_module=self.norm_module)\n        self.s1_fuse = FuseFastToSlow(\n            dim_in=self.width_per_group // self.beta,\n            fusion_conv_channel_ratio=self.fusion_conv_channel_ratio,\n            fusion_kernel=self.fusion_kernel_sz,\n            alpha=self.alpha,\n            norm_module=self.norm_module,\n            fuse_bn_relu=self.fuse_bn_relu)\n        # ResNet backbone\n        MODEL_STAGE_DEPTH = {50: (3, 4, 6, 3)}\n        (d2, d3, d4, d5) = MODEL_STAGE_DEPTH[self.depth]",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_slowfast.py:633-657"
+    },
+    "6711": {
+        "file_id": 505,
+        "content": "The code initializes a SlowFast ResNet backbone model. It defines temporal kernels for res4 and res5 pathways, creates a VideoModelStem layer with specific dimensions and parameters, and a FuseFastToSlow layer for fusion. The code also sets the model stage depth according to the chosen depth (50, 101, or 152).",
+        "type": "comment"
+    },
+    "6712": {
+        "file_id": 505,
+        "content": "        num_block_temp_kernel = [[3, 3], [4, 4], [6, 6], [3, 3]]\n        spatial_dilations = [[1, 1], [1, 1], [1, 1], [1, 1]]\n        spatial_strides = self.spatial_strides\n        #spatial_strides = [[1, 1], [2, 2], [2, 2], [2, 2]]\n        #spatial_strides = [[1, 1], [2, 2], [2, 2], [1, 1]] #TODO:check which value is FAIR's impliment\n        out_dim_ratio = self.beta // self.fusion_conv_channel_ratio  #4\n        dim_inner = self.width_per_group * self.num_groups  #64\n        self.s2 = ResStage(dim_in=[\n            self.width_per_group + self.width_per_group // out_dim_ratio,\n            self.width_per_group // self.beta,\n        ],\n                           dim_out=[\n                               self.width_per_group * 4,\n                               self.width_per_group * 4 // self.beta,\n                           ],\n                           dim_inner=[dim_inner, dim_inner // self.beta],\n                           temp_kernel_sizes=temp_kernel[1],\n                           stride=spatial_strides[0],",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_slowfast.py:659-678"
+    },
+    "6713": {
+        "file_id": 505,
+        "content": "This code defines a ResStage, which is a stage in the ResNet SlowFast model. It sets the dimensions and parameters for this stage including input and output widths, kernel sizes, and strides. The code also specifies temporary kernel sizes and spatial strides for this particular stage of the model.",
+        "type": "comment"
+    },
+    "6714": {
+        "file_id": 505,
+        "content": "                           num_blocks=[d2] * 2,\n                           num_groups=[self.num_groups] * 2,\n                           num_block_temp_kernel=num_block_temp_kernel[0],\n                           dilation=spatial_dilations[0],\n                           norm_module=self.norm_module)\n        self.s2_fuse = FuseFastToSlow(\n            dim_in=self.width_per_group * 4 // self.beta,\n            fusion_conv_channel_ratio=self.fusion_conv_channel_ratio,\n            fusion_kernel=self.fusion_kernel_sz,\n            alpha=self.alpha,\n            norm_module=self.norm_module,\n            fuse_bn_relu=self.fuse_bn_relu,\n        )\n        self.s3 = ResStage(\n            dim_in=[\n                self.width_per_group * 4 +\n                self.width_per_group * 4 // out_dim_ratio,\n                self.width_per_group * 4 // self.beta,\n            ],\n            dim_out=[\n                self.width_per_group * 8,\n                self.width_per_group * 8 // self.beta,\n            ],\n            dim_inner=[dim_inner * 2, dim_inner * 2 // self.beta],",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_slowfast.py:679-704"
+    },
+    "6715": {
+        "file_id": 505,
+        "content": "The code defines a resnet_slowfast model with two main components: s1 and s3. The s1 component consists of three branches, with the first two having 2x repeat_num_body blocks each, while the third has (2*repeat_num_body + 1) blocks. It also includes norm_module and spatial_dilations for the first branch. The s3 component contains a ResStage layer. The model uses parameters such as width_per_group, out_dim_ratio, dim_inner, repeat_num_body, alpha, beta, fusion_conv_channel_ratio, fusion_kernel_sz, norm_module, and fuse_bn_relu.",
+        "type": "comment"
+    },
+    "6716": {
+        "file_id": 505,
+        "content": "            temp_kernel_sizes=temp_kernel[2],\n            stride=spatial_strides[1],\n            num_blocks=[d3] * 2,\n            num_groups=[self.num_groups] * 2,\n            num_block_temp_kernel=num_block_temp_kernel[1],\n            dilation=spatial_dilations[1],\n            norm_module=self.norm_module,\n        )\n        self.s3_fuse = FuseFastToSlow(\n            dim_in=self.width_per_group * 8 // self.beta,\n            fusion_conv_channel_ratio=self.fusion_conv_channel_ratio,\n            fusion_kernel=self.fusion_kernel_sz,\n            alpha=self.alpha,\n            norm_module=self.norm_module,\n            fuse_bn_relu=self.fuse_bn_relu,\n        )\n        self.s4 = ResStage(\n            dim_in=[\n                self.width_per_group * 8 +\n                self.width_per_group * 8 // out_dim_ratio,\n                self.width_per_group * 8 // self.beta,\n            ],\n            dim_out=[\n                self.width_per_group * 16,\n                self.width_per_group * 16 // self.beta,\n            ],\n            dim_inner=[dim_inner * 4, dim_inner * 4 // self.beta],",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_slowfast.py:705-733"
+    },
+    "6717": {
+        "file_id": 505,
+        "content": "The code initializes and defines different layers for the ResNet SlowFast model. It includes operations such as creating convolutional layers, fusing fast to slow features, and defining a stage layer with specified input and output dimensions. The alpha, fusion_kernel_sz, out_dim_ratio, beta, dim_inner values are used to control the specifics of these operations.",
+        "type": "comment"
+    },
+    "6718": {
+        "file_id": 505,
+        "content": "            temp_kernel_sizes=temp_kernel[3],\n            stride=spatial_strides[2],\n            num_blocks=[d4] * 2,\n            num_groups=[self.num_groups] * 2,\n            num_block_temp_kernel=num_block_temp_kernel[2],\n            dilation=spatial_dilations[2],\n            norm_module=self.norm_module,\n        )\n        self.s4_fuse = FuseFastToSlow(\n            dim_in=self.width_per_group * 16 // self.beta,\n            fusion_conv_channel_ratio=self.fusion_conv_channel_ratio,\n            fusion_kernel=self.fusion_kernel_sz,\n            alpha=self.alpha,\n            norm_module=self.norm_module,\n            fuse_bn_relu=self.fuse_bn_relu,\n        )\n        self.s5 = ResStage(\n            dim_in=[\n                self.width_per_group * 16 +\n                self.width_per_group * 16 // out_dim_ratio,\n                self.width_per_group * 16 // self.beta,\n            ],\n            dim_out=[\n                self.width_per_group * 32,\n                self.width_per_group * 32 // self.beta,\n            ],\n            dim_inner=[dim_inner * 8, dim_inner * 8 // self.beta],",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_slowfast.py:734-762"
+    },
+    "6719": {
+        "file_id": 505,
+        "content": "The code defines the ResStage and FuseFastToSlow modules for a ResNet SlowFast model. It initializes these modules with specific dimensions and parameters, such as number of channels, fusion kernel size, alpha value, and dilation rates. These modules are used to extract features from the input and fuse them together for further processing in the network.",
+        "type": "comment"
+    },
+    "6720": {
+        "file_id": 505,
+        "content": "            temp_kernel_sizes=temp_kernel[4],\n            stride=spatial_strides[3],\n            num_blocks=[d5] * 2,\n            num_groups=[self.num_groups] * 2,\n            num_block_temp_kernel=num_block_temp_kernel[3],\n            dilation=spatial_dilations[3],\n            norm_module=self.norm_module,\n        )\n    def init_weights(self):\n        pass\n    def forward(self, x):\n        x = self.s1(x)  #VideoModelStem\n        x = self.s1_fuse(x)  #FuseFastToSlow\n        x = self.s2(x)  #ResStage\n        x = self.s2_fuse(x)\n        #  TODO: For AVA, set use_pool_af_s2=1, check mAP's improve.\n        if self.use_pool_af_s2:\n            for pathway in range(self.num_pathways):\n                x[pathway] = F.max_pool3d(x=x[pathway],\n                                          kernel_size=self.pool_size_ratio[pathway],\n                                          stride=self.pool_size_ratio[pathway],\n                                          padding=[0, 0, 0],\n                                          data_format=\"NCDHW\")",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_slowfast.py:763-788"
+    },
+    "6721": {
+        "file_id": 505,
+        "content": "This code defines a ResNet slowfast model with specified parameters, initializes the weights, and forwards the input data. It also includes an optional max-pooling operation for one of its stages (s2) depending on a flag value.",
+        "type": "comment"
+    },
+    "6722": {
+        "file_id": 505,
+        "content": "        x = self.s3(x)\n        x = self.s3_fuse(x)\n        x = self.s4(x)\n        x = self.s4_fuse(x)\n        x = self.s5(x)\n        return x",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_slowfast.py:790-795"
+    },
+    "6723": {
+        "file_id": 505,
+        "content": "This code snippet represents the final segment of a neural network model. It processes input data (x) through four sequential layers (s3, s4, and s5), then fuses their outputs before returning the result as output. Each layer is likely responsible for feature extraction or transformation at different levels of the network's architecture.",
+        "type": "comment"
+    },
+    "6724": {
+        "file_id": 506,
+        "content": "/paddlevideo/modeling/backbones/resnet_slowfast_MRI.py",
+        "type": "filepath"
+    },
+    "6725": {
+        "file_id": 506,
+        "content": "The PaddleVideo library includes functions for convolutional layers, ResBlock classes, Slow and Fast branches, and a VideoModelStem class to initialize a ResNet SlowFast model with MRI for video analysis.",
+        "type": "summary"
+    },
+    "6726": {
+        "file_id": 506,
+        "content": "# copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport paddle\nimport paddle.nn.functional as F\nfrom paddle.nn.initializer import KaimingNormal\nfrom ..registry import BACKBONES\nfrom paddlevideo.utils.multigrid import get_norm\nimport sys\nimport numpy as np\nimport paddle.distributed as dist\n# seed random seed\npaddle.framework.seed(0)\n# get init parameters for conv layer\ndef get_conv_init(fan_out):\n    return KaimingNormal(fan_in=fan_out)\ndef get_bn_param_attr(bn_weight=1.0, coeff=0.0):",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_slowfast_MRI.py:1-33"
+    },
+    "6727": {
+        "file_id": 506,
+        "content": "This code is part of the PaddleVideo library, licensed under Apache 2.0. It imports necessary modules and defines functions for initializing convolutional layers with KaimingNormal distribution. It also includes a function for batch normalization parameters and registers backbones in PaddlePaddle's registry. The code uses paddle, numpy, and other libraries for various functionalities such as seeding random numbers for reproducibility.",
+        "type": "comment"
+    },
+    "6728": {
+        "file_id": 506,
+        "content": "    param_attr = paddle.ParamAttr(\n        initializer=paddle.nn.initializer.Constant(bn_weight),\n        regularizer=paddle.regularizer.L2Decay(coeff))\n    return param_attr\n\"\"\"Video models.\"\"\"\nclass BottleneckTransform(paddle.nn.Layer):\n    \"\"\"\n    Bottleneck transformation: Tx1x1, 1x3x3, 1x1x1, where T is the size of\n        temporal kernel.\n    \"\"\"\n    def __init__(self,\n                 dim_in,\n                 dim_out,\n                 temp_kernel_size,\n                 stride,\n                 dim_inner,\n                 num_groups,\n                 stride_1x1=False,\n                 inplace_relu=True,\n                 eps=1e-5,\n                 dilation=1,\n                 norm_module=paddle.nn.BatchNorm3D):\n        \"\"\"\n        Args:\n            dim_in (int): the channel dimensions of the input.\n            dim_out (int): the channel dimension of the output.\n            temp_kernel_size (int): the temporal kernel sizes of the middle\n                convolution in the bottleneck.\n            stride (int): the stride of the bottleneck.",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_slowfast_MRI.py:34-66"
+    },
+    "6729": {
+        "file_id": 506,
+        "content": "This code defines a BottleneckTransform class, which is a layer for video models. It performs temporal convolutions with 1x1, 1x3x3, and 1x1x1 layers, where T is the size of the temporal kernel. The class takes various parameters such as dimension, stride, and kernel sizes.",
+        "type": "comment"
+    },
+    "6730": {
+        "file_id": 506,
+        "content": "            dim_inner (int): the inner dimension of the block.\n            num_groups (int): number of groups for the convolution. num_groups=1\n                is for standard ResNet like networks, and num_groups>1 is for\n                ResNeXt like networks.\n            stride_1x1 (bool): if True, apply stride to 1x1 conv, otherwise\n                apply stride to the 3x3 conv.\n            inplace_relu (bool): if True, calculate the relu on the original\n                input without allocating new memory.\n            eps (float): epsilon for batch norm.\n            dilation (int): size of dilation.\n        \"\"\"\n        super(BottleneckTransform, self).__init__()\n        self.temp_kernel_size = temp_kernel_size\n        self._inplace_relu = inplace_relu\n        self._eps = eps\n        self._stride_1x1 = stride_1x1\n        self.norm_module = norm_module\n        self._construct(dim_in, dim_out, stride, dim_inner, num_groups,\n                        dilation)\n    def _construct(self, dim_in, dim_out, stride, dim_inner, num_groups,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_slowfast_MRI.py:67-87"
+    },
+    "6731": {
+        "file_id": 506,
+        "content": "The code defines a class 'BottleneckTransform' with parameters for dimensions, stride, inner dimension, number of groups, and other attributes. It inherits from another class and initializes its own instance variables before constructing the model structure. The constructor method takes in various arguments to configure the bottleneck transformation block.",
+        "type": "comment"
+    },
+    "6732": {
+        "file_id": 506,
+        "content": "                   dilation):\n        str1x1, str3x3 = (stride, 1) if self._stride_1x1 else (1, stride)\n        fan = (dim_inner) * (self.temp_kernel_size * 1 * 1)\n        initializer_tmp = get_conv_init(fan)\n        self.a = paddle.nn.Conv3D(\n            in_channels=dim_in,\n            out_channels=dim_inner,\n            kernel_size=[self.temp_kernel_size, 1, 1],\n            stride=[1, str1x1, str1x1],\n            padding=[int(self.temp_kernel_size // 2), 0, 0],\n            weight_attr=paddle.ParamAttr(initializer=initializer_tmp),\n            bias_attr=False)\n        self.a_bn = self.norm_module(num_features=dim_inner,\n                                     epsilon=self._eps,\n                                     weight_attr=get_bn_param_attr(),\n                                     bias_attr=get_bn_param_attr(bn_weight=0.0))\n        # 1x3x3, BN, ReLU.\n        fan = (dim_inner) * (1 * 3 * 3)\n        initializer_tmp = get_conv_init(fan)\n        self.b = paddle.nn.Conv3D(\n            in_channels=dim_inner,\n            out_channels=dim_inner,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_slowfast_MRI.py:88-113"
+    },
+    "6733": {
+        "file_id": 506,
+        "content": "This code initializes two 3D convolutional layers with Batch Normalization and ReLU activation. The first layer has stride 1 for all dimensions, while the second layer has stride 1 for the first dimension and a different value (determined by _stride_1x1) for the remaining two dimensions. Both layers have specified kernel sizes, padding, and use custom initializers.",
+        "type": "comment"
+    },
+    "6734": {
+        "file_id": 506,
+        "content": "            kernel_size=[1, 3, 3],\n            stride=[1, str3x3, str3x3],\n            padding=[0, dilation, dilation],\n            groups=num_groups,\n            dilation=[1, dilation, dilation],\n            weight_attr=paddle.ParamAttr(initializer=initializer_tmp),\n            bias_attr=False)\n        self.b_bn = self.norm_module(num_features=dim_inner,\n                                     epsilon=self._eps,\n                                     weight_attr=get_bn_param_attr(),\n                                     bias_attr=get_bn_param_attr(bn_weight=0.0))\n        # 1x1x1, BN.\n        fan = (dim_out) * (1 * 1 * 1)\n        initializer_tmp = get_conv_init(fan)\n        self.c = paddle.nn.Conv3D(\n            in_channels=dim_inner,\n            out_channels=dim_out,\n            kernel_size=[1, 1, 1],\n            stride=[1, 1, 1],\n            padding=[0, 0, 0],\n            weight_attr=paddle.ParamAttr(initializer=initializer_tmp),\n            bias_attr=False)\n        self.c_bn = self.norm_module(\n            num_features=dim_out,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_slowfast_MRI.py:114-139"
+    },
+    "6735": {
+        "file_id": 506,
+        "content": "The code defines a Conv3D layer with 1x3x3 kernel, stride of str3x3, and dilation of dilation. It also includes a batch normalization (BN) module for the output. The BN module is applied to the output of the previous layer and has no bias. Finally, another Conv3D layer with 1x1x1 kernel and no BN is defined followed by another BN without a bias.",
+        "type": "comment"
+    },
+    "6736": {
+        "file_id": 506,
+        "content": "            epsilon=self._eps,\n            weight_attr=get_bn_param_attr(bn_weight=0.0),\n            bias_attr=get_bn_param_attr(bn_weight=0.0))\n    def forward(self, x):\n        # Branch2a.\n        x = self.a(x)\n        x = self.a_bn(x)\n        x = F.relu(x)\n        # Branch2b.\n        x = self.b(x)\n        x = self.b_bn(x)\n        x = F.relu(x)\n        # Branch2c\n        x = self.c(x)\n        x = self.c_bn(x)\n        return x\nclass ResBlock(paddle.nn.Layer):\n    \"\"\"\n    Residual block.\n    \"\"\"\n    def __init__(self,\n                 dim_in,\n                 dim_out,\n                 temp_kernel_size,\n                 stride,\n                 dim_inner,\n                 num_groups=1,\n                 stride_1x1=False,\n                 inplace_relu=True,\n                 eps=1e-5,\n                 dilation=1,\n                 norm_module=paddle.nn.BatchNorm3D):\n        \"\"\"\n        ResBlock class constructs redisual blocks. More details can be found in:\n            Kaiming He, Xiangyu Zhang, Shaoqing Ren, and Jian Sun.\n            \"Deep residual learning for image recognition.\"",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_slowfast_MRI.py:140-180"
+    },
+    "6737": {
+        "file_id": 506,
+        "content": "ResNetSlowFastMRI: A residual network model that adds Slow and Fast branches to extract temporal features. ResBlock is a residual block class used in the architecture, which utilizes BatchNorm3D for normalization and applies ReLU activations after each branch.",
+        "type": "comment"
+    },
+    "6738": {
+        "file_id": 506,
+        "content": "            https://arxiv.org/abs/1512.03385\n        Args:\n            dim_in (int): the channel dimensions of the input.\n            dim_out (int): the channel dimension of the output.\n            temp_kernel_size (int): the temporal kernel sizes of the middle\n                convolution in the bottleneck.\n            stride (int): the stride of the bottleneck.\n            trans_func (string): transform function to be used to construct the\n                bottleneck.\n            dim_inner (int): the inner dimension of the block.\n            num_groups (int): number of groups for the convolution. num_groups=1\n                is for standard ResNet like networks, and num_groups>1 is for\n                ResNeXt like networks.\n            stride_1x1 (bool): if True, apply stride to 1x1 conv, otherwise\n                apply stride to the 3x3 conv.\n            inplace_relu (bool): calculate the relu on the original input\n                without allocating new memory.\n            eps (float): epsilon for batch norm.",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_slowfast_MRI.py:181-198"
+    },
+    "6739": {
+        "file_id": 506,
+        "content": "This function defines a bottleneck for ResNet and ResNeXt-like networks with specified parameters. It takes channel dimensions, temporal kernel sizes, stride, transform function, inner dimension, number of groups, if applying stride to 1x1 conv, inplace relu calculation, and epsilon for batch norm as arguments.",
+        "type": "comment"
+    },
+    "6740": {
+        "file_id": 506,
+        "content": "            dilation (int): size of dilation.\n        \"\"\"\n        super(ResBlock, self).__init__()\n        self._inplace_relu = inplace_relu\n        self._eps = eps\n        self.norm_module = norm_module\n        self._construct(\n            dim_in,\n            dim_out,\n            temp_kernel_size,\n            stride,\n            dim_inner,\n            num_groups,\n            stride_1x1,\n            inplace_relu,\n            dilation,\n        )\n    def _construct(\n        self,\n        dim_in,\n        dim_out,\n        temp_kernel_size,\n        stride,\n        dim_inner,\n        num_groups,\n        stride_1x1,\n        inplace_relu,\n        dilation,\n    ):\n        # Use skip connection with projection if dim or res change.\n        if (dim_in != dim_out) or (stride != 1):\n            fan = (dim_out) * (1 * 1 * 1)\n            initializer_tmp = get_conv_init(fan)\n            self.branch1 = paddle.nn.Conv3D(\n                in_channels=dim_in,\n                out_channels=dim_out,\n                kernel_size=1,\n                stride=[1, stride, stride],",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_slowfast_MRI.py:199-237"
+    },
+    "6741": {
+        "file_id": 506,
+        "content": "This code defines a ResBlock class with skip connection, which performs convolution operations for image processing tasks. The constructor takes various parameters like dimensions, kernel size, stride, etc., and initializes the necessary components based on whether a skip connection is needed or not.",
+        "type": "comment"
+    },
+    "6742": {
+        "file_id": 506,
+        "content": "                padding=0,\n                weight_attr=paddle.ParamAttr(initializer=initializer_tmp),\n                bias_attr=False,\n                dilation=1)\n            self.branch1_bn = self.norm_module(\n                num_features=dim_out,\n                epsilon=self._eps,\n                weight_attr=get_bn_param_attr(),\n                bias_attr=get_bn_param_attr(bn_weight=0.0))\n        self.branch2 = BottleneckTransform(dim_in,\n                                           dim_out,\n                                           temp_kernel_size,\n                                           stride,\n                                           dim_inner,\n                                           num_groups,\n                                           stride_1x1=stride_1x1,\n                                           inplace_relu=inplace_relu,\n                                           dilation=dilation,\n                                           norm_module=self.norm_module)\n    def forward(self, x):\n        if hasattr(self, \"branch1\"):",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_slowfast_MRI.py:238-260"
+    },
+    "6743": {
+        "file_id": 506,
+        "content": "This code defines a ResNet SlowFast MRI model with batch normalization (BN) for the branch1 and a BottleneckTransform layer for branch2. The forward function checks if \"branch1\" exists, suggesting it may be conditionally defined elsewhere in the codebase.",
+        "type": "comment"
+    },
+    "6744": {
+        "file_id": 506,
+        "content": "            x1 = self.branch1(x)\n            x1 = self.branch1_bn(x1)\n            x2 = self.branch2(x)\n            x = paddle.add(x=x1, y=x2)\n        else:\n            x2 = self.branch2(x)\n            x = paddle.add(x=x, y=x2)\n        x = F.relu(x)\n        return x\nclass ResStage(paddle.nn.Layer):\n    \"\"\"\n    Stage of 3D ResNet. It expects to have one or more tensors as input for\n        multi-pathway (SlowFast) cases.  More details can be found here:\n        Christoph Feichtenhofer, Haoqi Fan, Jitendra Malik, and Kaiming He.\n        \"Slowfast networks for video recognition.\"\n        https://arxiv.org/pdf/1812.03982.pdf\n    \"\"\"\n    def __init__(self,\n                 dim_in,\n                 dim_out,\n                 stride,\n                 temp_kernel_sizes,\n                 num_blocks,\n                 dim_inner,\n                 num_groups,\n                 num_block_temp_kernel,\n                 dilation,\n                 stride_1x1=False,\n                 inplace_relu=True,\n                 norm_module=paddle.nn.BatchNorm3D):",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_slowfast_MRI.py:261-294"
+    },
+    "6745": {
+        "file_id": 506,
+        "content": "This code defines a ResStage class for 3D ResNet, which can handle multi-pathway cases in SlowFast networks. It consists of one or more tensors as input. The stage includes operations such as adding tensors and applying ReLU activation. It also has a branch1 and branch2 for different paths, with batch normalization applied to the first path.",
+        "type": "comment"
+    },
+    "6746": {
+        "file_id": 506,
+        "content": "        \"\"\"\n        The `__init__` method of any subclass should also contain these arguments.\n        ResStage builds p streams, where p can be greater or equal to one.\n        Args:\n            dim_in (list): list of p the channel dimensions of the input.\n                Different channel dimensions control the input dimension of\n                different pathways.\n            dim_out (list): list of p the channel dimensions of the output.\n                Different channel dimensions control the input dimension of\n                different pathways.\n            temp_kernel_sizes (list): list of the p temporal kernel sizes of the\n                convolution in the bottleneck. Different temp_kernel_sizes\n                control different pathway.\n            stride (list): list of the p strides of the bottleneck. Different\n                stride control different pathway.\n            num_blocks (list): list of p numbers of blocks for each of the\n                pathway.\n            dim_inner (list): list of the p inner channel dimensions of the",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_slowfast_MRI.py:295-312"
+    },
+    "6747": {
+        "file_id": 506,
+        "content": "The given code is the initialization method of a ResStage class in PaddleVideo. It accepts arguments such as dim_in, dim_out, temp_kernel_sizes, stride, and num_blocks to build p pathways with different channel dimensions, temporal kernel sizes, strides, and numbers of blocks for each pathway.",
+        "type": "comment"
+    },
+    "6748": {
+        "file_id": 506,
+        "content": "                input. Different channel dimensions control the input dimension\n                of different pathways.\n            num_groups (list): list of number of p groups for the convolution.\n                num_groups=1 is for standard ResNet like networks, and\n                num_groups>1 is for ResNeXt like networks.\n            num_block_temp_kernel (list): extent the temp_kernel_sizes to\n                num_block_temp_kernel blocks, then fill temporal kernel size\n                of 1 for the rest of the layers.\n            dilation (list): size of dilation for each pathway.\n        \"\"\"\n        super(ResStage, self).__init__()\n        assert all((num_block_temp_kernel[i] <= num_blocks[i]\n                    for i in range(len(temp_kernel_sizes))))\n        self.num_blocks = num_blocks\n        self.temp_kernel_sizes = [\n            (temp_kernel_sizes[i] * num_blocks[i])[:num_block_temp_kernel[i]] +\n            [1] * (num_blocks[i] - num_block_temp_kernel[i])\n            for i in range(len(temp_kernel_sizes))",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_slowfast_MRI.py:313-330"
+    },
+    "6749": {
+        "file_id": 506,
+        "content": "This function initializes a ResStage object, which is a layer of a network. It takes in parameters such as the number of blocks and temporal kernel sizes for each pathway, and asserts that the number of block_temp_kernel does not exceed the number of blocks. The temp_kernel_sizes are extended to num_block_temp_kernel blocks with temporal kernel size 1 for the rest of the layers.",
+        "type": "comment"
+    },
+    "6750": {
+        "file_id": 506,
+        "content": "        ]\n        assert (len({\n            len(dim_in),\n            len(dim_out),\n            len(temp_kernel_sizes),\n            len(stride),\n            len(num_blocks),\n            len(dim_inner),\n            len(num_groups),\n            len(num_block_temp_kernel),\n        }) == 1)\n        self.num_pathways = len(self.num_blocks)\n        self.norm_module = norm_module\n        self._construct(\n            dim_in,\n            dim_out,\n            stride,\n            dim_inner,\n            num_groups,\n            stride_1x1,\n            inplace_relu,\n            dilation,\n        )\n    def _construct(\n        self,\n        dim_in,\n        dim_out,\n        stride,\n        dim_inner,\n        num_groups,\n        stride_1x1,\n        inplace_relu,\n        dilation,\n    ):\n        for pathway in range(self.num_pathways):\n            for i in range(self.num_blocks[pathway]):\n                res_block = ResBlock(\n                    dim_in[pathway] if i == 0 else dim_out[pathway],\n                    dim_out[pathway],\n                    self.temp_kernel_sizes[pathway][i],",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_slowfast_MRI.py:331-372"
+    },
+    "6751": {
+        "file_id": 506,
+        "content": "The code creates an instance of a backbone network with adjustable pathways and blocks. It checks the input parameters' length, assigns the number of pathways, initializes a norm module, and calls a private method to construct the network structure. The _construct method loops through each pathway and block, creating ResBlock instances.",
+        "type": "comment"
+    },
+    "6752": {
+        "file_id": 506,
+        "content": "                    stride[pathway] if i == 0 else 1,\n                    dim_inner[pathway],\n                    num_groups[pathway],\n                    stride_1x1=stride_1x1,\n                    inplace_relu=inplace_relu,\n                    dilation=dilation[pathway],\n                    norm_module=self.norm_module)\n                self.add_sublayer(\"pathway{}_res{}\".format(pathway, i),\n                                  res_block)\n    def forward(self, inputs):\n        output = []\n        for pathway in range(self.num_pathways):\n            x = inputs[pathway]\n            for i in range(self.num_blocks[pathway]):\n                m = getattr(self, \"pathway{}_res{}\".format(pathway, i))\n                x = m(x)\n            output.append(x)\n        return output\nclass ResNetBasicStem(paddle.nn.Layer):\n    \"\"\"\n    ResNe(X)t 3D stem module.\n    Performs spatiotemporal Convolution, BN, and Relu following by a\n        spatiotemporal pooling.\n    \"\"\"\n    def __init__(self,\n                 dim_in,\n                 dim_out,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_slowfast_MRI.py:373-404"
+    },
+    "6753": {
+        "file_id": 506,
+        "content": "This code defines a ResNet backbone with SlowFast pathways, including stem module and residual blocks. It initializes the layers for each pathway and then defines a forward function to process inputs through the specified number of pathways and blocks. The ResNetBasicStem performs spatiotemporal convolution, batch normalization, and ReLU before pooling in the 3D stem module.",
+        "type": "comment"
+    },
+    "6754": {
+        "file_id": 506,
+        "content": "                 kernel,\n                 stride,\n                 padding,\n                 eps=1e-5,\n                 norm_module=paddle.nn.BatchNorm3D):\n        super(ResNetBasicStem, self).__init__()\n        self.kernel = kernel\n        self.stride = stride\n        self.padding = padding\n        self.eps = eps\n        self.norm_module = norm_module\n        self._construct_stem(dim_in, dim_out)\n    def _construct_stem(self, dim_in, dim_out):\n        fan = (dim_out) * (self.kernel[0] * self.kernel[1] * self.kernel[2])\n        initializer_tmp = get_conv_init(fan)\n        self._conv = paddle.nn.Conv3D(\n            in_channels=dim_in,\n            out_channels=dim_out,\n            kernel_size=self.kernel,\n            stride=self.stride,\n            padding=self.padding,\n            weight_attr=paddle.ParamAttr(initializer=initializer_tmp),\n            bias_attr=False)\n        self._bn = self.norm_module(num_features=dim_out,\n                                    epsilon=self.eps,\n                                    weight_attr=get_bn_param_attr(),",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_slowfast_MRI.py:405-432"
+    },
+    "6755": {
+        "file_id": 506,
+        "content": "This code defines a ResNetBasicStem class that initializes the stem of a ResNet network. The constructor takes parameters for kernel size, stride, padding, epsilon value, and norm module. The _construct_stem method creates a 3D convolutional layer with specified dimensions and uses an appropriate initializer for its weights. A batch normalization layer is also created using the provided norm module and epsilon value.",
+        "type": "comment"
+    },
+    "6756": {
+        "file_id": 506,
+        "content": "                                    bias_attr=get_bn_param_attr(bn_weight=0.0))\n    def forward(self, x):\n        x = self._conv(x)\n        x = self._bn(x)\n        x = F.relu(x)\n        x = F.max_pool3d(x=x,\n                         kernel_size=[1, 3, 3],\n                         stride=[1, 2, 2],\n                         padding=[0, 1, 1],\n                         data_format=\"NCDHW\")\n        return x\nclass VideoModelStem(paddle.nn.Layer):\n    \"\"\"\n    Video 3D stem module. Provides stem operations of Conv, BN, ReLU, MaxPool\n    on input data tensor for slow and fast pathways.\n    \"\"\"\n    def __init__(self,\n                 dim_in,\n                 dim_out,\n                 kernel,\n                 stride,\n                 padding,\n                 eps=1e-5,\n                 norm_module=paddle.nn.BatchNorm3D):\n        \"\"\"\n        Args:\n            dim_in (list): the list of channel dimensions of the inputs.\n            dim_out (list): the output dimension of the convolution in the stem\n                layer.\n            kernel (list): the kernels' size of the convolutions in the stem",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_slowfast_MRI.py:433-466"
+    },
+    "6757": {
+        "file_id": 506,
+        "content": "This code defines a video stem module for slow and fast pathways, performing Conv, BN, ReLU, MaxPool operations on input data tensors. The function takes dim_in, dim_out, kernel, stride, padding, eps, and norm_module as arguments.",
+        "type": "comment"
+    },
+    "6758": {
+        "file_id": 506,
+        "content": "                layers. Temporal kernel size, height kernel size, width kernel\n                size in order.\n            stride (list): the stride sizes of the convolutions in the stem\n                layer. Temporal kernel stride, height kernel size, width kernel\n                size in order.\n            padding (list): the paddings' sizes of the convolutions in the stem\n                layer. Temporal padding size, height padding size, width padding\n                size in order.\n            eps (float): epsilon for batch norm.\n        \"\"\"\n        super(VideoModelStem, self).__init__()\n        assert (len({\n            len(dim_in),\n            len(dim_out),\n            len(kernel),\n            len(stride),\n            len(padding),\n        }) == 1), \"Input pathway dimensions are not consistent.\"\n        self.num_pathways = len(dim_in)\n        self.kernel = kernel\n        self.stride = stride\n        self.padding = padding\n        self.eps = eps\n        self.norm_module = norm_module\n        self._construct_stem(dim_in, dim_out)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_slowfast_MRI.py:467-492"
+    },
+    "6759": {
+        "file_id": 506,
+        "content": "The code defines a class VideoModelStem with parameters for dimensions, kernel size, stride, padding, and epsilon for batch normalization. It checks for consistent input pathway dimensions and initializes instance variables before constructing the stem layer.",
+        "type": "comment"
+    },
+    "6760": {
+        "file_id": 506,
+        "content": "    def _construct_stem(self, dim_in, dim_out):\n        for pathway in range(len(dim_in)):\n            stem = ResNetBasicStem(dim_in[pathway], dim_out[pathway],\n                                   self.kernel[pathway], self.stride[pathway],\n                                   self.padding[pathway], self.eps,\n                                   self.norm_module)\n            self.add_sublayer(\"pathway{}_stem\".format(pathway), stem)\n    def forward(self, x):\n        assert (len(x) == self.num_pathways\n                ), \"Input tensor does not contain {} pathway\".format(\n                    self.num_pathways)\n        for pathway in range(len(x)):\n            m = getattr(self, \"pathway{}_stem\".format(pathway))\n            x[pathway] = m(x[pathway])\n        return x\nclass FuseFastToSlow(paddle.nn.Layer):\n    \"\"\"\n    Fuses the information from the Fast pathway to the Slow pathway. Given the\n    tensors from Slow pathway and Fast pathway, fuse information from Fast to\n    Slow, then return the fused tensors from Slow and Fast pathway in order.",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_slowfast_MRI.py:494-518"
+    },
+    "6761": {
+        "file_id": 506,
+        "content": "This code defines a class that constructs and fuses two pathways (slow and fast) in a video processing model. It initializes the stem layers for each pathway and then fuses the information from the fast pathway to the slow pathway. The input tensor should contain the specified number of pathways, and the output is returned as tensors from both pathways in order.",
+        "type": "comment"
+    },
+    "6762": {
+        "file_id": 506,
+        "content": "    \"\"\"\n    def __init__(self,\n                 dim_in,\n                 fusion_conv_channel_ratio,\n                 fusion_kernel,\n                 alpha,\n                 fuse_bn_relu=1,\n                 eps=1e-5,\n                 norm_module=paddle.nn.BatchNorm3D):\n        \"\"\"\n        Args:\n            dim_in (int): the channel dimension of the input.\n            fusion_conv_channel_ratio (int): channel ratio for the convolution\n                used to fuse from Fast pathway to Slow pathway.\n            fusion_kernel (int): kernel size of the convolution used to fuse\n                from Fast pathway to Slow pathway.\n            alpha (int): the frame rate ratio between the Fast and Slow pathway.\n            eps (float): epsilon for batch norm.\n        \"\"\"\n        super(FuseFastToSlow, self).__init__()\n        self.fuse_bn_relu = fuse_bn_relu\n        fan = (dim_in * fusion_conv_channel_ratio) * (fusion_kernel * 1 * 1)\n        initializer_tmp = get_conv_init(fan)\n        self._conv_f2s = paddle.nn.Conv3D(\n            in_channels=dim_in,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_slowfast_MRI.py:519-544"
+    },
+    "6763": {
+        "file_id": 506,
+        "content": "The code is initializing a class called FuseFastToSlow with parameters for input channel dimension, fusion convolution channel ratio, fusion kernel size, and frame rate ratio. It sets the number of channels in the 3D Convolution layer for fusing frames from Fast to Slow pathways based on given ratios. The fusion operation is performed using a Conv3D layer initialized with the given fan value.",
+        "type": "comment"
+    },
+    "6764": {
+        "file_id": 506,
+        "content": "            out_channels=dim_in * fusion_conv_channel_ratio,\n            kernel_size=[fusion_kernel, 1, 1],\n            stride=[alpha, 1, 1],\n            padding=[fusion_kernel // 2, 0, 0],\n            weight_attr=paddle.ParamAttr(initializer=initializer_tmp),\n            bias_attr=False)\n        self._bn = norm_module(num_features=dim_in * fusion_conv_channel_ratio,\n                               epsilon=eps,\n                               weight_attr=get_bn_param_attr(),\n                               bias_attr=get_bn_param_attr(bn_weight=0.0))\n    def forward(self, x):\n        x_s = x[0]\n        x_f = x[1]\n        fuse = self._conv_f2s(x_f)\n        #  TODO: For AVA, set fuse_bn_relu=1, check mAP's improve.\n        if self.fuse_bn_relu:\n            fuse = self._bn(fuse)\n            fuse = F.relu(fuse)\n        x_s_fuse = paddle.concat(x=[x_s, fuse], axis=1, name=None)\n        return [x_s_fuse, x_f]\n@BACKBONES.register()\nclass ResNetSlowFast_MRI(paddle.nn.Layer):\n    \"\"\"\n    SlowFast model builder for SlowFast network.",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_slowfast_MRI.py:545-572"
+    },
+    "6765": {
+        "file_id": 506,
+        "content": "This code defines a ResNetSlowFast_MRI model, which is a type of SlowFast network. It includes a fusion convolution layer and a batch normalization (BN) layer with optional ReLU activation after the fusion convolution. The forward method combines input x_s and x_f using concat before returning both inputs.",
+        "type": "comment"
+    },
+    "6766": {
+        "file_id": 506,
+        "content": "    Christoph Feichtenhofer, Haoqi Fan, Jitendra Malik, and Kaiming He.\n    \"Slowfast networks for video recognition.\"\n    https://arxiv.org/pdf/1812.03982.pdf\n    \"\"\"\n    def __init__(\n        self,\n        alpha,\n        beta,\n        bn_norm_type=\"batchnorm\",\n        bn_num_splits=1,\n        num_pathways=2,\n        depth=50,\n        num_groups=1,\n        input_channel_num=[1, 1],\n        width_per_group=64,\n        fusion_conv_channel_ratio=2,\n        fusion_kernel_sz=7,  #5?\n        pool_size_ratio=[[1, 1, 1], [1, 1, 1]],\n        fuse_bn_relu=1,\n        spatial_strides=[[1, 1], [2, 2], [2, 2], [2, 2]],\n        use_pool_af_s2=1,\n    ):\n        \"\"\"\n        Args:\n            cfg (CfgNode): model building configs, details are in the\n                comments of the config file.\n        \"\"\"\n        super(ResNetSlowFast_MRI, self).__init__()\n        self.alpha = alpha  #8\n        self.beta = beta  #8\n        self.norm_module = get_norm(bn_norm_type, bn_num_splits)\n        self.num_pathways = num_pathways\n        self.depth = depth",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_slowfast_MRI.py:574-607"
+    },
+    "6767": {
+        "file_id": 506,
+        "content": "This code initializes a ResNetSlowFast_MRI model with specified parameters, including alpha and beta values for the network architecture. The class extends from an existing superclass and includes properties like the norm module type, number of pathways, depth, group numbers, input channel numbers, width per group, fusion convolution channel ratio, pool size ratios, whether to use a pooling average operation at spatial stride 2, and spatial strides. The class also initializes these specified attributes for the model configuration.",
+        "type": "comment"
+    },
+    "6768": {
+        "file_id": 506,
+        "content": "        self.num_groups = num_groups\n        self.input_channel_num = input_channel_num\n        self.width_per_group = width_per_group\n        self.fusion_conv_channel_ratio = fusion_conv_channel_ratio\n        self.fusion_kernel_sz = fusion_kernel_sz  # NOTE: modify to 7 in 8*8, 5 in old implement\n        self.pool_size_ratio = pool_size_ratio\n        self.fuse_bn_relu = fuse_bn_relu\n        self.spatial_strides = spatial_strides\n        self.use_pool_af_s2 = use_pool_af_s2\n        self._construct_network()\n    def _construct_network(self):\n        \"\"\"\n        Builds a SlowFast model.\n        The first pathway is the Slow pathway\n        and the second pathway is the Fast pathway.\n        Args:\n            cfg (CfgNode): model building configs, details are in the\n                comments of the config file.\n        \"\"\"\n        temp_kernel = [\n            [[1], [5]],  # conv1 temporal kernel for slow and fast pathway.\n            [[1], [3]],  # res2 temporal kernel for slow and fast pathway.\n            [[1], [3]],  # res3 temporal kernel for slow and fast pathway.",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_slowfast_MRI.py:608-632"
+    },
+    "6769": {
+        "file_id": 506,
+        "content": "The code defines a SlowFast model with separate slow and fast pathways. The constructor sets parameters like input channel number, group number, fusion convolution channel ratio, and more. It also includes functions to build the network structure. The temporal kernels for each layer of both pathways are defined within the code.",
+        "type": "comment"
+    },
+    "6770": {
+        "file_id": 506,
+        "content": "            [[3], [3]],  # res4 temporal kernel for slow and fast pathway.\n            [[3], [3]],\n        ]  # res5 temporal kernel for slow and fast pathway.\n        self.s1 = VideoModelStem(\n            dim_in=self.input_channel_num,\n            dim_out=[self.width_per_group, self.width_per_group // self.beta],\n            kernel=[temp_kernel[0][0] + [7, 7], temp_kernel[0][1] + [7, 7]],\n            stride=[[1, 2, 2]] * 2,\n            padding=[\n                [temp_kernel[0][0][0] // 2, 3, 3],\n                [temp_kernel[0][1][0] // 2, 3, 3],\n            ],\n            norm_module=self.norm_module)\n        self.s1_fuse = FuseFastToSlow(\n            dim_in=self.width_per_group // self.beta,\n            fusion_conv_channel_ratio=self.fusion_conv_channel_ratio,\n            fusion_kernel=self.fusion_kernel_sz,\n            alpha=self.alpha,\n            norm_module=self.norm_module,\n            fuse_bn_relu=self.fuse_bn_relu)\n        # ResNet backbone\n        MODEL_STAGE_DEPTH = {50: (3, 4, 6, 3)}\n        (d2, d3, d4, d5) = MODEL_STAGE_DEPTH[self.depth]",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_slowfast_MRI.py:633-657"
+    },
+    "6771": {
+        "file_id": 506,
+        "content": "This code defines a ResNet backbone for the MRI dataset. It sets the temporal kernels for res4 and res5 pathways, initializes the video model stem (s1) with specified dimensions and stride, adds a fuseFastToSlow module for fusion, and defines model stage depth based on the chosen depth of ResNet.",
+        "type": "comment"
+    },
+    "6772": {
+        "file_id": 506,
+        "content": "        num_block_temp_kernel = [[3, 3], [4, 4], [6, 6], [3, 3]]\n        spatial_dilations = [[1, 1], [1, 1], [1, 1], [1, 1]]\n        spatial_strides = self.spatial_strides\n        #spatial_strides = [[1, 1], [2, 2], [2, 2], [2, 2]]\n        #spatial_strides = [[1, 1], [2, 2], [2, 2], [1, 1]] #TODO:check which value is FAIR's impliment\n        out_dim_ratio = self.beta // self.fusion_conv_channel_ratio  #4\n        dim_inner = self.width_per_group * self.num_groups  #64\n        self.s2 = ResStage(dim_in=[\n            self.width_per_group + self.width_per_group // out_dim_ratio,\n            self.width_per_group // self.beta,\n        ],\n                           dim_out=[\n                               self.width_per_group * 4,\n                               self.width_per_group * 4 // self.beta,\n                           ],\n                           dim_inner=[dim_inner, dim_inner // self.beta],\n                           temp_kernel_sizes=temp_kernel[1],\n                           stride=spatial_strides[0],",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_slowfast_MRI.py:659-678"
+    },
+    "6773": {
+        "file_id": 506,
+        "content": "The code is defining the parameters for a ResStage layer in a residual network model. It sets the input and output dimensions, inner dimensions, temporal kernel sizes, and stride values based on previously defined values from the function.",
+        "type": "comment"
+    },
+    "6774": {
+        "file_id": 506,
+        "content": "                           num_blocks=[d2] * 2,\n                           num_groups=[self.num_groups] * 2,\n                           num_block_temp_kernel=num_block_temp_kernel[0],\n                           dilation=spatial_dilations[0],\n                           norm_module=self.norm_module)\n        self.s2_fuse = FuseFastToSlow(\n            dim_in=self.width_per_group * 4 // self.beta,\n            fusion_conv_channel_ratio=self.fusion_conv_channel_ratio,\n            fusion_kernel=self.fusion_kernel_sz,\n            alpha=self.alpha,\n            norm_module=self.norm_module,\n            fuse_bn_relu=self.fuse_bn_relu,\n        )\n        self.s3 = ResStage(\n            dim_in=[\n                self.width_per_group * 4 +\n                self.width_per_group * 4 // out_dim_ratio,\n                self.width_per_group * 4 // self.beta,\n            ],\n            dim_out=[\n                self.width_per_group * 8,\n                self.width_per_group * 8 // self.beta,\n            ],\n            dim_inner=[dim_inner * 2, dim_inner * 2 // self.beta],",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_slowfast_MRI.py:679-704"
+    },
+    "6775": {
+        "file_id": 506,
+        "content": "The code initializes a ResNet SlowFast model with multiple layers and parameters. It creates two branches (slow and fast) for the network, each with its own set of layers and parameters. The slow branch has 2x more blocks than the fast branch, and both branches have identical group numbers and dilation rates. The code also initializes a fusing layer that combines features from the fast and slow branches and a stage for the third level of the network.",
+        "type": "comment"
+    },
+    "6776": {
+        "file_id": 506,
+        "content": "            temp_kernel_sizes=temp_kernel[2],\n            stride=spatial_strides[1],\n            num_blocks=[d3] * 2,\n            num_groups=[self.num_groups] * 2,\n            num_block_temp_kernel=num_block_temp_kernel[1],\n            dilation=spatial_dilations[1],\n            norm_module=self.norm_module,\n        )\n        self.s3_fuse = FuseFastToSlow(\n            dim_in=self.width_per_group * 8 // self.beta,\n            fusion_conv_channel_ratio=self.fusion_conv_channel_ratio,\n            fusion_kernel=self.fusion_kernel_sz,\n            alpha=self.alpha,\n            norm_module=self.norm_module,\n            fuse_bn_relu=self.fuse_bn_relu,\n        )\n        self.s4 = ResStage(\n            dim_in=[\n                self.width_per_group * 8 +\n                self.width_per_group * 8 // out_dim_ratio,\n                self.width_per_group * 8 // self.beta,\n            ],\n            dim_out=[\n                self.width_per_group * 16,\n                self.width_per_group * 16 // self.beta,\n            ],\n            dim_inner=[dim_inner * 4, dim_inner * 4 // self.beta],",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_slowfast_MRI.py:705-733"
+    },
+    "6777": {
+        "file_id": 506,
+        "content": "This code is initializing a ResNet SlowFast model for MRI. It creates an instance of the class, sets parameters like kernel sizes, strides, block numbers, group numbers, dilation rates, and normalization module. The model consists of multiple stages, including s1, s2, s3_fuse, and s4, each with different dimensions, inner dimensions, and configurations.",
+        "type": "comment"
+    },
+    "6778": {
+        "file_id": 506,
+        "content": "            temp_kernel_sizes=temp_kernel[3],\n            stride=spatial_strides[2],\n            num_blocks=[d4] * 2,\n            num_groups=[self.num_groups] * 2,\n            num_block_temp_kernel=num_block_temp_kernel[2],\n            dilation=spatial_dilations[2],\n            norm_module=self.norm_module,\n        )\n        self.s4_fuse = FuseFastToSlow(\n            dim_in=self.width_per_group * 16 // self.beta,\n            fusion_conv_channel_ratio=self.fusion_conv_channel_ratio,\n            fusion_kernel=self.fusion_kernel_sz,\n            alpha=self.alpha,\n            norm_module=self.norm_module,\n            fuse_bn_relu=self.fuse_bn_relu,\n        )\n        self.s5 = ResStage(\n            dim_in=[\n                self.width_per_group * 16 +\n                self.width_per_group * 16 // out_dim_ratio,\n                self.width_per_group * 16 // self.beta,\n            ],\n            dim_out=[\n                self.width_per_group * 32,\n                self.width_per_group * 32 // self.beta,\n            ],\n            dim_inner=[dim_inner * 8, dim_inner * 8 // self.beta],",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_slowfast_MRI.py:734-762"
+    },
+    "6779": {
+        "file_id": 506,
+        "content": "This code defines a ResNet SlowFast model with MRI for video analysis. It includes creating layers for stage 4, fusing fast and slow features, and defining the stage 5 layer with specific dimensions for input, output, and inner dimensions. The model utilizes group width, out_dim_ratio, beta, and dim_inner parameters to control its behavior.",
+        "type": "comment"
+    },
+    "6780": {
+        "file_id": 506,
+        "content": "            temp_kernel_sizes=temp_kernel[4],\n            stride=spatial_strides[3],\n            num_blocks=[d5] * 2,\n            num_groups=[self.num_groups] * 2,\n            num_block_temp_kernel=num_block_temp_kernel[3],\n            dilation=spatial_dilations[3],\n            norm_module=self.norm_module,\n        )\n    def init_weights(self):\n        pass\n    def forward(self, x):\n        x = self.s1(x)  #VideoModelStem\n        x = self.s1_fuse(x)  #FuseFastToSlow\n        x = self.s2(x)  #ResStage\n        x = self.s2_fuse(x)\n        #  TODO: For AVA, set use_pool_af_s2=1, check mAP's improve.\n        if self.use_pool_af_s2:\n            for pathway in range(self.num_pathways):\n                x[pathway] = F.max_pool3d(\n                    x=x[pathway],\n                    kernel_size=self.pool_size_ratio[pathway],\n                    stride=self.pool_size_ratio[pathway],\n                    padding=[0, 0, 0],\n                    data_format=\"NCDHW\")\n        x = self.s3(x)\n        x = self.s3_fuse(x)\n        x = self.s4(x)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_slowfast_MRI.py:763-793"
+    },
+    "6781": {
+        "file_id": 506,
+        "content": "This code initializes a 3D ResNet SlowFast model, sets the weights, and applies several stages of convolutions and fusions to process video input. The forward function sequentially passes the input through multiple stages, potentially applying max pooling for AVA if use_pool_af_s2 is True.",
+        "type": "comment"
+    },
+    "6782": {
+        "file_id": 506,
+        "content": "        x = self.s4_fuse(x)\n        x = self.s5(x)\n        return x",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_slowfast_MRI.py:794-796"
+    },
+    "6783": {
+        "file_id": 506,
+        "content": "This code snippet is part of a ResNet SlowFast model. It fuses the outputs from previous stages (s4), passes them through another stage (s5) and returns the result as output.",
+        "type": "comment"
+    },
+    "6784": {
+        "file_id": 507,
+        "content": "/paddlevideo/modeling/backbones/resnet_tsm.py",
+        "type": "filepath"
+    },
+    "6785": {
+        "file_id": 507,
+        "content": "The code initializes a ResNet-TSM backbone with convolutional layers and bottleneck blocks, but may be deprecated and needs data preparation changes for better compatibility.",
+        "type": "summary"
+    },
+    "6786": {
+        "file_id": 507,
+        "content": "# copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport paddle\nimport paddle.nn as nn\nfrom paddle.nn import (Conv2D, BatchNorm2D, Linear, Dropout, MaxPool2D,\n                       AvgPool2D)\nfrom paddle import ParamAttr\nimport paddle.nn.functional as F\nfrom paddle.regularizer import L2Decay\nfrom ..registry import BACKBONES\nfrom ..weight_init import weight_init_\nfrom ...utils import load_ckpt\nclass ConvBNLayer(nn.Layer):\n    \"\"\"Conv2D and BatchNorm2D layer.\n    Args:",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_tsm.py:1-30"
+    },
+    "6787": {
+        "file_id": 507,
+        "content": "This code snippet defines a ConvBNLayer class which combines a Conv2D and BatchNorm2D layer. It is imported from paddle.nn and will be used for creating convolutional neural network layers in the PaddlePaddle framework. The layer can be utilized to process image data or other types of spatial input data by applying convolution operations followed by batch normalization.",
+        "type": "comment"
+    },
+    "6788": {
+        "file_id": 507,
+        "content": "        in_channels (int): Number of channels for the input.\n        out_channels (int): Number of channels for the output.\n        kernel_size (int): Kernel size.\n        stride (int): Stride in the Conv2D layer. Default: 1.\n        groups (int): Groups in the Conv2D, Default: 1.\n        act (str): Indicate activation after BatchNorm2D layer.\n        name (str): the name of an instance of ConvBNLayer.\n    Note: weight and bias initialization include initialize values and name the restored parameters, values initialization are explicit declared in the ```init_weights``` method.\n    \"\"\"\n    def __init__(self,\n                 in_channels,\n                 out_channels,\n                 kernel_size,\n                 stride=1,\n                 groups=1,\n                 act=None,\n                 name=None,\n                 data_format=\"NCHW\"):\n        super(ConvBNLayer, self).__init__()\n        self._conv = Conv2D(in_channels=in_channels,\n                            out_channels=out_channels,\n                            kernel_size=kernel_size,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_tsm.py:31-53"
+    },
+    "6789": {
+        "file_id": 507,
+        "content": "This code defines a class called ConvBNLayer which inherits from an unspecified parent class. It takes in parameters such as number of input and output channels, kernel size, stride, groups, activation function, name, and data format for the Conv2D layer. The class initializes a Conv2D layer using these parameters and adds BatchNorm2D and ReLU layers after it. Weight and bias initialization values are named in the restore parameters, and they are explicitly declared in the init_weights method.",
+        "type": "comment"
+    },
+    "6790": {
+        "file_id": 507,
+        "content": "                            stride=stride,\n                            padding=(kernel_size - 1) // 2,\n                            groups=groups,\n                            weight_attr=ParamAttr(name=name + \"_weights\"),\n                            bias_attr=False,\n                            data_format=data_format)\n        if name == \"conv1\":\n            bn_name = \"bn_\" + name\n        else:\n            bn_name = \"bn\" + name[3:]\n        self._act = act\n        self._batch_norm = BatchNorm2D(\n            out_channels,\n            weight_attr=ParamAttr(name=bn_name + \"_scale\",\n                                  regularizer=L2Decay(0.0)),\n            bias_attr=ParamAttr(name=bn_name + \"_offset\",\n                                regularizer=L2Decay(0.0)),\n            data_format=data_format)\n    def forward(self, inputs):\n        y = self._conv(inputs)\n        y = self._batch_norm(y)\n        if self._act:\n            y = getattr(paddle.nn.functional, self._act)(y)\n        return y\nclass BottleneckBlock(nn.Layer):\n    def __init__(self,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_tsm.py:54-84"
+    },
+    "6791": {
+        "file_id": 507,
+        "content": "This code defines a BottleneckBlock class with a convolution layer, batch normalization, and optional activation function. The forward pass applies the convolution, batch normalization, and activation if present.",
+        "type": "comment"
+    },
+    "6792": {
+        "file_id": 507,
+        "content": "                 in_channels,\n                 out_channels,\n                 stride,\n                 shortcut=True,\n                 num_seg=8,\n                 name=None,\n                 data_format=\"NCHW\"):\n        super(BottleneckBlock, self).__init__()\n        self.data_format = data_format\n        self.conv0 = ConvBNLayer(in_channels=in_channels,\n                                 out_channels=out_channels,\n                                 kernel_size=1,\n                                 act=\"relu\",\n                                 name=name + \"_branch2a\",\n                                 data_format=data_format)\n        self.conv1 = ConvBNLayer(in_channels=out_channels,\n                                 out_channels=out_channels,\n                                 kernel_size=3,\n                                 stride=stride,\n                                 act=\"relu\",\n                                 name=name + \"_branch2b\",\n                                 data_format=data_format)\n        self.conv2 = ConvBNLayer(in_channels=out_channels,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_tsm.py:85-108"
+    },
+    "6793": {
+        "file_id": 507,
+        "content": "This code defines a class called BottleneckBlock, which is a part of a neural network model. It contains several ConvBNLayer objects for processing input data, with different parameters such as in_channels, out_channels, kernel_size, stride, and act (activation function). The class also has an attribute for data_format and initializes the ConvBNLayer objects with specific names.",
+        "type": "comment"
+    },
+    "6794": {
+        "file_id": 507,
+        "content": "                                 out_channels=out_channels * 4,\n                                 kernel_size=1,\n                                 act=None,\n                                 name=name + \"_branch2c\",\n                                 data_format=data_format)\n        if not shortcut:\n            self.short = ConvBNLayer(in_channels=in_channels,\n                                     out_channels=out_channels * 4,\n                                     kernel_size=1,\n                                     stride=stride,\n                                     name=name + \"_branch1\",\n                                     data_format=data_format)\n        self.shortcut = shortcut\n        self.num_seg = num_seg\n    def forward(self, inputs):\n        if paddle.is_compiled_with_custom_device('npu'):\n            x = inputs\n            seg_num = self.num_seg\n            shift_ratio = 1.0 / self.num_seg\n            shape = x.shape  #[N*T, C, H, W]\n            reshape_x = x.reshape(\n                (-1, seg_num, shape[1], shape[2], shape[3]))  #[N, T, C, H, W]",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_tsm.py:109-134"
+    },
+    "6795": {
+        "file_id": 507,
+        "content": "This code is initializing a ConvBNLayer and a shortcut connection for the TSM backbone. The layers have specific out_channels, kernel_size, stride, name, and data_format configurations. If a shortcut is not provided, it initializes another ConvBNLayer. The forward function reshapes input to have a shape of [N, T, C, H, W] for further processing.",
+        "type": "comment"
+    },
+    "6796": {
+        "file_id": 507,
+        "content": "            pad_x = F.pad(reshape_x, [\n                0,\n                0,\n                1,\n                1,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n            ])  #[N, T+2, C, H, W]\n            c1 = int(shape[1] * shift_ratio)\n            c2 = int(shape[1] * 2 * shift_ratio)\n            slice1 = pad_x[:, :seg_num, :c1, :, :]\n            slice2 = pad_x[:, 2:seg_num + 2, c1:c2, :, :]\n            slice3 = pad_x[:, 1:seg_num + 1, c2:, :, :]\n            concat_x = paddle.concat([slice1, slice2, slice3],\n                                     axis=2)  #[N, T, C, H, W]\n            shifts = concat_x.reshape(shape)\n        else:\n            shifts = F.temporal_shift(inputs,\n                                      self.num_seg,\n                                      1.0 / self.num_seg,\n                                      data_format=self.data_format)\n        y = self.conv0(shifts)\n        conv1 = self.conv1(y)\n        conv2 = self.conv2(conv1)\n        if self.shortcut:",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_tsm.py:135-164"
+    },
+    "6797": {
+        "file_id": 507,
+        "content": "This code performs temporal shift operation on the input tensor. If a certain condition is met, it pads and concatenates slices of the input tensor before performing the reshape and temporal shift operations. The resulting output is then passed through several convolutional layers.",
+        "type": "comment"
+    },
+    "6798": {
+        "file_id": 507,
+        "content": "            short = inputs\n        else:\n            short = self.short(inputs)\n        y = paddle.add(x=short, y=conv2)\n        return F.relu(y)\nclass BasicBlock(nn.Layer):\n    def __init__(self,\n                 in_channels,\n                 out_channels,\n                 stride,\n                 shortcut=True,\n                 name=None,\n                 data_format=\"NCHW\"):\n        super(BasicBlock, self).__init__()\n        self.stride = stride\n        self.conv0 = ConvBNLayer(\n            in_channels=in_channels,\n            out_channels=out_channels,\n            filter_size=3,\n            stride=stride,\n            act=\"relu\",\n            name=name + \"_branch2a\",\n            data_format=data_format,\n        )\n        self.conv1 = ConvBNLayer(\n            in_channels=out_channels,\n            out_channels=out_channels,\n            filter_size=3,\n            act=None,\n            name=name + \"_branch2b\",\n            data_format=data_format,\n        )\n        if not shortcut:\n            self.short = ConvBNLayer(\n                in_channels=in_channels,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_tsm.py:165-202"
+    },
+    "6799": {
+        "file_id": 507,
+        "content": "The code defines a BasicBlock class which is a residual block. It contains two 3x3 convolutional layers followed by BN and ReLU activations. If the shortcut connection is not used, it also includes an additional convolution layer for the shortcut path. The purpose of this residual block is to alleviate the problem of vanishing gradients in deeper networks.",
+        "type": "comment"
+    }
+}

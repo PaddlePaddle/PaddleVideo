@@ -1,0 +1,548 @@
+{
+    "6800": {
+        "file_id": 507,
+        "content": "                out_channels=out_channels,\n                filter_size=1,\n                stride=stride,\n                name=name + \"_branch1\",\n                data_format=data_format,\n            )\n        self.shortcut = shortcut\n    def forward(self, inputs):\n        y = self.conv0(inputs)\n        conv1 = self.conv1(y)\n        if self.shortcut:\n            short = inputs\n        else:\n            short = self.short(inputs)\n        y = paddle.add(short, conv1)\n        y = F.relu(y)\n        return y\n@BACKBONES.register()\nclass ResNetTSM(nn.Layer):\n    \"\"\"ResNet TSM backbone.\n    Args:\n        depth (int): Depth of resnet model.\n        pretrained (str): pretrained model. Default: None.\n    \"\"\"\n    def __init__(self, depth, num_seg=8, data_format=\"NCHW\", pretrained=None):\n        super(ResNetTSM, self).__init__()\n        self.pretrained = pretrained\n        self.layers = depth\n        self.num_seg = num_seg\n        self.data_format = data_format\n        supported_layers = [18, 34, 50, 101, 152]\n        assert self.layers in supported_layers, \\",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_tsm.py:203-241"
+    },
+    "6801": {
+        "file_id": 507,
+        "content": "The code defines a ResNet TSM backbone model with specified depth and data format. It consists of an initialization, a forward function for processing inputs, and the ability to be registered at BACKBONES. It also supports different layers like 18, 34, 50, 101, and 152.",
+        "type": "comment"
+    },
+    "6802": {
+        "file_id": 507,
+        "content": "            \"supported layers are {} but input layer is {}\".format(\n                supported_layers, self.layers)\n        if self.layers == 18:\n            depth = [2, 2, 2, 2]\n        elif self.layers == 34 or self.layers == 50:\n            depth = [3, 4, 6, 3]\n        elif self.layers == 101:\n            depth = [3, 4, 23, 3]\n        elif self.layers == 152:\n            depth = [3, 8, 36, 3]\n        in_channels = 64\n        out_channels = [64, 128, 256, 512]\n        self.conv = ConvBNLayer(in_channels=3,\n                                out_channels=64,\n                                kernel_size=7,\n                                stride=2,\n                                act=\"relu\",\n                                name=\"conv1\",\n                                data_format=self.data_format)\n        self.pool2D_max = MaxPool2D(\n            kernel_size=3,\n            stride=2,\n            padding=1,\n            data_format=self.data_format,\n        )\n        self.block_list = []\n        if self.layers >= 50:\n            for block in range(len(depth)):",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_tsm.py:242-273"
+    },
+    "6803": {
+        "file_id": 507,
+        "content": "This code initializes a ResNet-TSM backbone with different depth configurations based on the input layers. It includes a convolution layer, max pooling 2D layer, and a block list for deeper networks. The code checks if the layers are supported (18, 34, 50, 101, or 152) and assigns corresponding depth and number of channels accordingly.",
+        "type": "comment"
+    },
+    "6804": {
+        "file_id": 507,
+        "content": "                shortcut = False\n                for i in range(depth[block]):\n                    if self.layers in [101, 152] and block == 2:\n                        if i == 0:\n                            conv_name = \"res\" + str(block + 2) + \"a\"\n                        else:\n                            conv_name = \"res\" + str(block + 2) + \"b\" + str(i)\n                    else:\n                        conv_name = \"res\" + str(block + 2) + chr(97 + i)\n                    bottleneck_block = self.add_sublayer(\n                        conv_name,\n                        BottleneckBlock(\n                            in_channels=in_channels\n                            if i == 0 else out_channels[block] * 4,\n                            out_channels=out_channels[block],\n                            stride=2 if i == 0 and block != 0 else 1,\n                            num_seg=self.num_seg,\n                            shortcut=shortcut,\n                            name=conv_name,\n                            data_format=self.data_format))",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_tsm.py:274-293"
+    },
+    "6805": {
+        "file_id": 507,
+        "content": "Code creates bottleneck blocks for ResNet TSM architecture, varying the number of input channels based on layer index and configuration. It adds sublayers with specified parameters including number of segments and stride for each block.",
+        "type": "comment"
+    },
+    "6806": {
+        "file_id": 507,
+        "content": "                    in_channels = out_channels[block] * 4\n                    self.block_list.append(bottleneck_block)\n                    shortcut = True\n        else:\n            for block in range(len(depth)):\n                shortcut = False\n                for i in range(depth[block]):\n                    conv_name = \"res\" + str(block + 2) + chr(97 + i)\n                    basic_block = self.add_sublayer(\n                        conv_name,\n                        BasicBlock(\n                            in_channels=in_channels[block]\n                            if i == 0 else out_channels[block],\n                            out_channels=out_channels[block],\n                            stride=2 if i == 0 and block != 0 else 1,\n                            shortcut=shortcut,\n                            name=conv_name,\n                            data_format=self.data_format,\n                        ))\n                    self.block_list.append(basic_block)\n                    shortcut = True\n    def init_weights(self):",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_tsm.py:294-316"
+    },
+    "6807": {
+        "file_id": 507,
+        "content": "Code initializes a ResNet TSM model backbone, with block-specific in_channels and adds either bottleneck or basic blocks depending on the depth configuration. Init_weights function is also defined to initialize weights for the model.",
+        "type": "comment"
+    },
+    "6808": {
+        "file_id": 507,
+        "content": "        \"\"\"Initiate the parameters.\n        Note:\n            1. when indicate pretrained loading path, will load it to initiate backbone.\n            2. when not indicating pretrained loading path, will follow specific initialization initiate backbone. Always, Conv2D layer will be initiated by KaimingNormal function, and BatchNorm2d will be initiated by Constant function.\n            Please refer to https://www.paddlepaddle.org.cn/documentation/docs/en/develop/api/paddle/nn/initializer/kaiming/KaimingNormal_en.html\n        \"\"\"\n        #XXX: check bias!!! check pretrained!!!\n        if isinstance(self.pretrained, str) and self.pretrained.strip() != \"\":\n            load_ckpt(self, self.pretrained)\n        elif self.pretrained is None or self.pretrained.strip() == \"\":\n            for layer in self.sublayers():\n                if isinstance(layer, nn.Conv2D):\n                    #XXX: no bias\n                    weight_init_(layer, 'KaimingNormal')\n                elif isinstance(layer, nn.BatchNorm2D):",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_tsm.py:317-332"
+    },
+    "6809": {
+        "file_id": 507,
+        "content": "This code initializes parameters for a ResNet TSM backbone. If a pretrained loading path is provided, it loads the weights from that path; otherwise, it uses specific initialization functions for Conv2D and BatchNorm2d layers. No bias is used in Conv2D layers.",
+        "type": "comment"
+    },
+    "6810": {
+        "file_id": 507,
+        "content": "                    weight_init_(layer, 'Constant', value=1)\n    def forward(self, inputs):\n        \"\"\"Define how the backbone is going to run.\n        \"\"\"\n        #NOTE: (deprecated design) Already merge axis 0(batches) and axis 1(clips) before extracting feature phase,\n        # please refer to paddlevideo/modeling/framework/recognizers/recognizer2d.py#L27\n        #y = paddle.reshape(\n        #    inputs, [-1, inputs.shape[2], inputs.shape[3], inputs.shape[4]])\n        #NOTE: As paddlepaddle to_static method need a \"pure\" model to trim. It means from\n        #  1. the phase of generating data[images, label] from dataloader\n        #     to\n        #  2. last layer of a model, always is FC layer\n        y = self.conv(inputs)\n        y = self.pool2D_max(y)\n        for block in self.block_list:\n            y = block(y)\n        return y",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_tsm.py:333-353"
+    },
+    "6811": {
+        "file_id": 507,
+        "content": "This code defines a forward function for a backbone model. It uses convolution and pooling layers to extract features from input data. The comments indicate that this implementation may be deprecated, and the data preparation should be modified according to recognizer2d.py for better compatibility with paddlepaddle's to_static method.",
+        "type": "comment"
+    },
+    "6812": {
+        "file_id": 508,
+        "content": "/paddlevideo/modeling/backbones/resnet_tsm_MRI.py",
+        "type": "filepath"
+    },
+    "6813": {
+        "file_id": 508,
+        "content": "The code defines a ResNet-TSM model in PaddleVideo with Batch Normalization, Leaky ReLU activation, and optional shortcut connections for MRI applications, using ConvBNLayer and ResNetTSM_MRI classes.",
+        "type": "summary"
+    },
+    "6814": {
+        "file_id": 508,
+        "content": "# copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport numpy as np\nimport math\nimport sys\nimport paddle\nimport paddle.nn as nn\nfrom paddle.nn import (Conv2D, BatchNorm2D, Linear, Dropout, MaxPool2D,\n                       AvgPool2D)\nfrom paddle import ParamAttr\nimport paddle.nn.functional as F\nfrom ..registry import BACKBONES\nfrom ..weight_init import weight_init_\nfrom ...utils.save_load import load_ckpt\nfrom paddle.regularizer import L2Decay\nclass ConvBNLayer(nn.Layer):",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_tsm_MRI.py:1-32"
+    },
+    "6815": {
+        "file_id": 508,
+        "content": "This code is importing necessary libraries and defining a class for a Convolutional Batch Normalization Layer. It also provides information about copyright, license, and contact details of the PaddlePaddle Authors.",
+        "type": "comment"
+    },
+    "6816": {
+        "file_id": 508,
+        "content": "    \"\"\"Conv2D and BatchNorm2D layer.\n    Args:\n        in_channels (int): Number of channels for the input.\n        out_channels (int): Number of channels for the output.\n        kernel_size (int): Kernel size.\n        stride (int): Stride in the Conv2D layer. Default: 1.\n        groups (int): Groups in the Conv2D, Default: 1.\n        is_tweaks_mode (bool): switch for tweaks. Default: False.\n        act (str): Indicate activation after BatchNorm2D layer.\n        name (str): the name of an instance of ConvBNLayer.\n    Note: weight and bias initialization include initialize values and name the restored parameters, values initialization are explicit declared in the ```init_weights``` method.\n    \"\"\"\n    def __init__(self,\n                 in_channels,\n                 out_channels,\n                 kernel_size,\n                 stride=1,\n                 groups=1,\n                 is_tweaks_mode=False,\n                 act=None,\n                 name=None):\n        super(ConvBNLayer, self).__init__()\n        self.is_tweaks_mode = is_tweaks_mode",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_tsm_MRI.py:33-58"
+    },
+    "6817": {
+        "file_id": 508,
+        "content": "This code defines a ConvBNLayer class with various parameters such as in_channels, out_channels, kernel_size, stride, groups, is_tweaks_mode, act, and name. It inherits from the base class and initializes the layer's weights and biases using explicit declarations in the init_weights method.",
+        "type": "comment"
+    },
+    "6818": {
+        "file_id": 508,
+        "content": "        #ResNet-D 1/2:add a 2×2 average pooling layer with a stride of 2 before the convolution,\n        #             whose stride is changed to 1, works well in practice.\n        self._pool2d_avg = AvgPool2D(kernel_size=2,\n                                     stride=2,\n                                     padding=0,\n                                     ceil_mode=True)\n        self._conv = Conv2D(in_channels=in_channels,\n                            out_channels=out_channels,\n                            kernel_size=kernel_size,\n                            stride=stride,\n                            padding=(kernel_size - 1) // 2,\n                            groups=groups,\n                            weight_attr=ParamAttr(name=name + \"_weights\"),\n                            bias_attr=False)\n        if name == \"conv1\":\n            bn_name = \"bn_\" + name\n        else:\n            bn_name = \"bn\" + name[3:]\n        self._act = act\n        self._batch_norm = BatchNorm2D(\n            out_channels,\n            weight_attr=ParamAttr(name=bn_name + \"_scale\",",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_tsm_MRI.py:59-83"
+    },
+    "6819": {
+        "file_id": 508,
+        "content": "This code snippet initializes ResNet-D with a 2x2 average pooling layer followed by a convolution operation. The pooling layer has a stride of 2 and is changed to 1 later in practice. The convolution uses the specified parameters such as in_channels, out_channels, kernel size, stride, padding, groups, and names for weights and batch normalization.",
+        "type": "comment"
+    },
+    "6820": {
+        "file_id": 508,
+        "content": "                                  regularizer=L2Decay(0.0)),\n            bias_attr=ParamAttr(bn_name + \"_offset\", regularizer=L2Decay(0.0)))\n    def forward(self, inputs):\n        if self.is_tweaks_mode:\n            inputs = self._pool2d_avg(inputs)\n        y = self._conv(inputs)\n        y = self._batch_norm(y)\n        if self._act:\n            y = getattr(paddle.nn.functional, self._act)(y)\n        return y\nclass BottleneckBlock(nn.Layer):\n    def __init__(self,\n                 in_channels,\n                 out_channels,\n                 stride,\n                 shortcut=True,\n                 if_first=False,\n                 num_seg=8,\n                 name=None):\n        super(BottleneckBlock, self).__init__()\n        self.conv0 = ConvBNLayer(in_channels=in_channels,\n                                 out_channels=out_channels,\n                                 kernel_size=1,\n                                 act=\"leaky_relu\",\n                                 name=name + \"_branch2a\")\n        self.conv1 = ConvBNLayer(in_channels=out_channels,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_tsm_MRI.py:84-112"
+    },
+    "6821": {
+        "file_id": 508,
+        "content": "The code defines a class `ResNetTSM_MRI` which appears to be a backbone model for ResNet-TSM. It contains a forward function that applies pooling, convolution, batch normalization, and activation (if specified) to the inputs. The BottleneckBlock class is defined with options for stride, shortcut connection, number of segments, and name. It initializes a ConvBNLayer instance for the first branch, and another ConvBNLayer instance for the second branch.",
+        "type": "comment"
+    },
+    "6822": {
+        "file_id": 508,
+        "content": "                                 out_channels=out_channels,\n                                 kernel_size=3,\n                                 stride=stride,\n                                 act=\"leaky_relu\",\n                                 name=name + \"_branch2b\")\n        self.conv2 = ConvBNLayer(in_channels=out_channels,\n                                 out_channels=out_channels * 4,\n                                 kernel_size=1,\n                                 act=None,\n                                 name=name + \"_branch2c\")\n        if not shortcut:\n            self.short = ConvBNLayer(\n                in_channels=in_channels,\n                out_channels=out_channels * 4,\n                kernel_size=1,\n                stride=\n                1,  #ResNet-D 2/2:add a 2×2 average pooling layer with a stride of 2 before the convolution,\n                #             whose stride is changed to 1, works well in practice.\n                is_tweaks_mode=False if if_first else True,\n                name=name + \"_branch1\")",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_tsm_MRI.py:113-134"
+    },
+    "6823": {
+        "file_id": 508,
+        "content": "In this code, the function creates three ConvBNLayer instances: a \"branch2a\", \"branch2b\", and \"branch2c\". The \"branch2a\" instance is created with specified parameters. If shortcut is not set, an additional \"branch1\" instance (ConvBNLayer) is created with a 1x1 convolution layer and a stride of 1. This is explained to be useful in ResNet-D 2/2 configuration where a 2x2 average pooling layer with a stride of 2 is added before the convolution, which is later changed to 1 in practice.",
+        "type": "comment"
+    },
+    "6824": {
+        "file_id": 508,
+        "content": "        self.shortcut = shortcut\n        self.num_seg = num_seg\n    def forward(self, inputs):\n        shifts = F.temporal_shift(inputs, self.num_seg, 1.0 / self.num_seg)\n        y = self.conv0(shifts)\n        conv1 = self.conv1(y)\n        conv2 = self.conv2(conv1)\n        if self.shortcut:\n            short = inputs\n        else:\n            short = self.short(inputs)\n        y = paddle.add(x=short, y=conv2)\n        return F.leaky_relu(y)\nclass BasicBlock(nn.Layer):\n    def __init__(self,\n                 in_channels,\n                 out_channels,\n                 stride,\n                 shortcut=True,\n                 name=None):\n        super(BasicBlock, self).__init__()\n        self.stride = stride\n        self.conv0 = ConvBNLayer(in_channels=in_channels,\n                                 out_channels=out_channels,\n                                 filter_size=3,\n                                 stride=stride,\n                                 act=\"leaky_relu\",\n                                 name=name + \"_branch2a\")",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_tsm_MRI.py:136-166"
+    },
+    "6825": {
+        "file_id": 508,
+        "content": "The code defines a class for a ResNet-TSM backbone model, with the forward function applying temporal shifts and convolutions. The BasicBlock class is used for the basic building block of the network, with optional shortcut connections.",
+        "type": "comment"
+    },
+    "6826": {
+        "file_id": 508,
+        "content": "        self.conv1 = ConvBNLayer(in_channels=out_channels,\n                                 out_channels=out_channels,\n                                 filter_size=3,\n                                 act=None,\n                                 name=name + \"_branch2b\")\n        if not shortcut:\n            self.short = ConvBNLayer(in_channels=in_channels,\n                                     out_channels=out_channels,\n                                     filter_size=1,\n                                     stride=stride,\n                                     name=name + \"_branch1\")\n        self.shortcut = shortcut\n    def forward(self, inputs):\n        y = self.conv0(inputs)\n        conv1 = self.conv1(y)\n        if self.shortcut:\n            short = inputs\n        else:\n            short = self.short(inputs)\n        y = paddle.add(short, conv1)\n        y = F.leaky_relu(y)\n        return y\n@BACKBONES.register()\nclass ResNetTSM_MRI(nn.Layer):\n    \"\"\"ResNet TSM backbone.\n    Args:\n        depth (int): Depth of resnet model.",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_tsm_MRI.py:167-200"
+    },
+    "6827": {
+        "file_id": 508,
+        "content": "This code defines a ResNet TSM backbone model with Batch Normalization and Leaky ReLU activation. It includes a ConvBNLayer for the branch2b, and an optional shortcut connection depending on the input. The forward function performs convolution, adds the shortcut, applies leaky ReLU activation, and returns the result. The ResNetTSM_MRI class is registered with BACKBONES.",
+        "type": "comment"
+    },
+    "6828": {
+        "file_id": 508,
+        "content": "        pretrained (str): pretrained model. Default: None.\n    \"\"\"\n    def __init__(self, depth, num_seg=8, pretrained=None, in_channels=1):\n        super(ResNetTSM_MRI, self).__init__()\n        self.pretrained = pretrained\n        self.layers = depth\n        self.num_seg = num_seg\n        self.in_channels = in_channels\n        supported_layers = [18, 34, 50, 101, 152]\n        assert self.layers in supported_layers, \\\n            \"supported layers are {} but input layer is {}\".format(\n                supported_layers, self.layers)\n        if self.layers == 18:\n            depth = [2, 2, 2, 2]\n        elif self.layers == 34 or self.layers == 50:\n            depth = [3, 4, 6, 3]\n        elif self.layers == 101:\n            depth = [3, 4, 23, 3]\n        elif self.layers == 152:\n            depth = [3, 8, 36, 3]\n        in_channels = 64\n        out_channels = [64, 128, 256, 512]\n        #ResNet-C: use three 3x3 conv, replace, one 7x7 conv\n        self.conv1_1 = ConvBNLayer(in_channels=self.in_channels,\n                                   out_channels=32,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_tsm_MRI.py:201-229"
+    },
+    "6829": {
+        "file_id": 508,
+        "content": "This code defines a ResNetTSM_MRI class with parameters for depth, num_seg, pretrained (default None), and in_channels. It checks if the input layer is supported, sets the depth based on the input layer, sets out channels, and initializes ConvBNLayer instances accordingly.",
+        "type": "comment"
+    },
+    "6830": {
+        "file_id": 508,
+        "content": "                                   kernel_size=3,\n                                   stride=2,\n                                   act='leaky_relu',\n                                   name=\"conv1_1\")\n        self.conv1_2 = ConvBNLayer(in_channels=32,\n                                   out_channels=32,\n                                   kernel_size=3,\n                                   stride=1,\n                                   act='leaky_relu',\n                                   name=\"conv1_2\")\n        self.conv1_3 = ConvBNLayer(in_channels=32,\n                                   out_channels=64,\n                                   kernel_size=3,\n                                   stride=1,\n                                   act='leaky_relu',\n                                   name=\"conv1_3\")\n        self.pool2D_max = MaxPool2D(kernel_size=3, stride=2, padding=1)\n        self.block_list = []\n        if self.layers >= 50:\n            for block in range(len(depth)):\n                shortcut = False\n                for i in range(depth[block]):",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_tsm_MRI.py:230-252"
+    },
+    "6831": {
+        "file_id": 508,
+        "content": "This code defines the ResNet-TSM backbone architecture in PaddleVideo. It includes multiple ConvBNLayer instances for different stages of feature extraction and a MaxPool2D layer for downsampling. The depth of each block is specified by the provided depth list, with shortcut connections determined based on the number of layers specified.",
+        "type": "comment"
+    },
+    "6832": {
+        "file_id": 508,
+        "content": "                    if self.layers in [101, 152] and block == 2:\n                        if i == 0:\n                            conv_name = \"res\" + str(block + 2) + \"a\"\n                        else:\n                            conv_name = \"res\" + str(block + 2) + \"b\" + str(i)\n                    else:\n                        conv_name = \"res\" + str(block + 2) + chr(97 + i)\n                    bottleneck_block = self.add_sublayer(\n                        'bb_%d_%d' %\n                        (block, i),  #same with PaddleClas, for loading pretrain\n                        BottleneckBlock(\n                            in_channels=in_channels\n                            if i == 0 else out_channels[block] * 4,\n                            out_channels=out_channels[block],\n                            stride=2 if i == 0 and block != 0 else 1,\n                            num_seg=self.num_seg,\n                            shortcut=shortcut,\n                            if_first=block == i == 0,\n                            name=conv_name))",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_tsm_MRI.py:253-271"
+    },
+    "6833": {
+        "file_id": 508,
+        "content": "The code dynamically assigns a name to the BottleneckBlock based on its block and layer indices. If the layers are 101 or 152 at block 2, it further distinguishes between convolutions 'a' and 'b'. The 'bb_%d_%d' naming is used for loading pre-trained models. The BottleneckBlock parameters include in_channels based on if i == 0 or not, out_channels of the block, stride depending on if it's the first layer or not, num_seg for segmentation, shortcut type, and a flag for if it's the first layer.",
+        "type": "comment"
+    },
+    "6834": {
+        "file_id": 508,
+        "content": "                    in_channels = out_channels[block] * 4\n                    self.block_list.append(bottleneck_block)\n                    shortcut = True\n        else:\n            for block in range(len(depth)):\n                shortcut = False\n                for i in range(depth[block]):\n                    conv_name = \"res\" + str(block + 2) + chr(97 + i)\n                    basic_block = self.add_sublayer(\n                        conv_name,\n                        BasicBlock(in_channels=in_channels[block]\n                                   if i == 0 else out_channels[block],\n                                   out_channels=out_channels[block],\n                                   stride=2 if i == 0 and block != 0 else 1,\n                                   shortcut=shortcut,\n                                   name=conv_name))\n                    self.block_list.append(basic_block)\n                    shortcut = True\n    def init_weights(self):\n        \"\"\"Initiate the parameters.\n        Note:\n            1. when indicate pretrained loading path, will load it to initiate backbone.",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_tsm_MRI.py:272-294"
+    },
+    "6835": {
+        "file_id": 508,
+        "content": "This code defines a ResNet TSM backbone with multiple blocks and basic blocks. It dynamically creates convolutional layers using the add_sublayer function. The number of blocks and their configuration is defined by the input parameters \"depth\". Shortcuts are used between layers, and the function init_weights initializes the parameters of the backbone.",
+        "type": "comment"
+    },
+    "6836": {
+        "file_id": 508,
+        "content": "            2. when not indicating pretrained loading path, will follow specific initialization initiate backbone. Always, Conv2D layer will be initiated by KaimingNormal function, and BatchNorm2d will be initiated by Constant function.\n            Please refer to https://www.paddlepaddle.org.cn/documentation/docs/en/develop/api/paddle/nn/initializer/kaiming/KaimingNormal_en.html\n        \"\"\"\n        #XXX: check bias!!! check pretrained!!!\n        if isinstance(self.pretrained, str) and self.pretrained.strip() != \"\":\n            load_ckpt(self, self.pretrained)\n        elif self.pretrained is None or self.pretrained.strip() == \"\":\n            for layer in self.sublayers():\n                if isinstance(layer, nn.Conv2D):\n                    #XXX: no bias\n                    weight_init_(layer, 'KaimingNormal')\n                elif isinstance(layer, nn.BatchNorm2D):\n                    weight_init_(layer, 'Constant', value=1)\n    def forward(self, inputs):\n        \"\"\"Define how the backbone is going to run.",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_tsm_MRI.py:295-311"
+    },
+    "6837": {
+        "file_id": 508,
+        "content": "This code initializes the backbone of a neural network. If a pretrained path is not specified, it uses specific initialization methods for Conv2D and BatchNorm2d layers. The KaimingNormal function initializes the Conv2D layer, while the Constant function with value 1 initializes the BatchNorm2d layer.",
+        "type": "comment"
+    },
+    "6838": {
+        "file_id": 508,
+        "content": "        \"\"\"\n        #NOTE: Already merge axis 0(batches) and axis 1(channels) before extracting feature phase,\n        # please refer to paddlevideo/modeling/framework/recognizers/recognizer2d.py#L27\n        #y = paddle.reshape(\n        #    inputs, [-1, inputs.shape[2], inputs.shape[3], inputs.shape[4]])\n        ####ResNet-C: use three 3x3 conv, replace, one 7x7 conv\n        y = self.conv1_1(inputs)\n        y = self.conv1_2(y)\n        y = self.conv1_3(y)\n        y = self.pool2D_max(y)\n        for block in self.block_list:\n            y = block(y)\n        return y",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_tsm_MRI.py:313-327"
+    },
+    "6839": {
+        "file_id": 508,
+        "content": "Reshaping and applying convolutional layers, max pooling, and iterating through a list of blocks to perform operations on the input feature map.",
+        "type": "comment"
+    },
+    "6840": {
+        "file_id": 509,
+        "content": "/paddlevideo/modeling/backbones/resnet_tsn_MRI.py",
+        "type": "filepath"
+    },
+    "6841": {
+        "file_id": 509,
+        "content": "This code imports libraries, defines a ResNet-TSN model with basic and bottleneck blocks in PaddlePaddle, initializes weights for training, and outputs results.",
+        "type": "summary"
+    },
+    "6842": {
+        "file_id": 509,
+        "content": "# copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nfrom __future__ import absolute_import\nfrom __future__ import division\nfrom __future__ import print_function\nimport paddle\nfrom paddle import ParamAttr\nimport paddle.nn as nn\nimport paddle.nn.functional as F\nfrom paddle.regularizer import L2Decay\nfrom paddle.nn import Conv2D, BatchNorm\nfrom paddle.nn import MaxPool2D, AvgPool2D\nfrom ..registry import BACKBONES\nfrom ..weight_init import weight_init_\nfrom ...utils import load_ckpt",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_tsn_MRI.py:1-29"
+    },
+    "6843": {
+        "file_id": 509,
+        "content": "This code is for importing necessary libraries, defining a ResNet-TSN backbone model in PaddlePaddle, and registering it to the BACKBONES registry. It also includes license information and mentions function-level future imports for compatibility and division settings. The code initializes parameters, defines Conv2D, BatchNorm, MaxPool2D, AvgPool2D layers, and sets up weight initialization functions and loading checkpoints utilities.",
+        "type": "comment"
+    },
+    "6844": {
+        "file_id": 509,
+        "content": "__all__ = [\"ResNetTSN_MRI\"]\nclass ConvBNLayer(nn.Layer):\n    def __init__(self,\n                 in_channels,\n                 out_channels,\n                 kernel_size,\n                 stride=1,\n                 groups=1,\n                 is_tweaks_mode=False,\n                 act=None,\n                 lr_mult=1.0,\n                 name=None):\n        super(ConvBNLayer, self).__init__()\n        self.is_tweaks_mode = is_tweaks_mode\n        self._pool2d_avg = AvgPool2D(kernel_size=2,\n                                     stride=2,\n                                     padding=0,\n                                     ceil_mode=True)\n        self._conv = Conv2D(in_channels=in_channels,\n                            out_channels=out_channels,\n                            kernel_size=kernel_size,\n                            stride=stride,\n                            padding=(kernel_size - 1) // 2,\n                            groups=groups,\n                            weight_attr=ParamAttr(name=name + \"_weights\",\n                                                  learning_rate=lr_mult),",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_tsn_MRI.py:31-58"
+    },
+    "6845": {
+        "file_id": 509,
+        "content": "Defines a ConvBNLayer class with an average pooling layer and convolutional layer. The class takes input parameters for channels, kernel size, stride, groups, and more. It initializes the layers and sets is_tweaks_mode flag.",
+        "type": "comment"
+    },
+    "6846": {
+        "file_id": 509,
+        "content": "                            bias_attr=False)\n        if name == \"conv1\":\n            bn_name = \"bn_\" + name\n        else:\n            bn_name = \"bn\" + name[3:]\n        self._batch_norm = BatchNorm(\n            out_channels,\n            act=act,\n            param_attr=ParamAttr(name=bn_name + '_scale',\n                                 learning_rate=lr_mult,\n                                 regularizer=L2Decay(0.0)),\n            bias_attr=ParamAttr(bn_name + '_offset',\n                                learning_rate=lr_mult,\n                                regularizer=L2Decay(0.0)),\n            moving_mean_name=bn_name + '_mean',\n            moving_variance_name=bn_name + '_variance')\n    def forward(self, inputs):\n        if self.is_tweaks_mode:\n            inputs = self._pool2d_avg(inputs)\n        y = self._conv(inputs)\n        y = self._batch_norm(y)\n        return y\nclass BottleneckBlock(nn.Layer):\n    def __init__(self,\n                 in_channels,\n                 out_channels,\n                 stride,\n                 shortcut=True,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_tsn_MRI.py:59-89"
+    },
+    "6847": {
+        "file_id": 509,
+        "content": "This code defines a class for Resnet_TSN, which is a type of backbone model. It includes an initialization function that initializes the BatchNorm layer and a forward function that applies pooling (if in tweaks mode), convolution, and batch normalization to inputs. Additionally, there is a BottleneckBlock class defined for creating bottleneck blocks within the network.",
+        "type": "comment"
+    },
+    "6848": {
+        "file_id": 509,
+        "content": "                 if_first=False,\n                 lr_mult=1.0,\n                 name=None):\n        super(BottleneckBlock, self).__init__()\n        self.conv0 = ConvBNLayer(in_channels=in_channels,\n                                 out_channels=out_channels,\n                                 kernel_size=1,\n                                 act='relu',\n                                 lr_mult=lr_mult,\n                                 name=name + \"_branch2a\")\n        self.conv1 = ConvBNLayer(in_channels=out_channels,\n                                 out_channels=out_channels,\n                                 kernel_size=3,\n                                 stride=stride,\n                                 act='relu',\n                                 lr_mult=lr_mult,\n                                 name=name + \"_branch2b\")\n        self.conv2 = ConvBNLayer(in_channels=out_channels,\n                                 out_channels=out_channels * 4,\n                                 kernel_size=1,\n                                 act=None,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_tsn_MRI.py:90-111"
+    },
+    "6849": {
+        "file_id": 509,
+        "content": "The code defines a BottleneckBlock class, which is a layer in the ResNet model. It consists of three ConvBNLayer layers with different properties such as kernel size, stride, and activation functions. The class initializes these layers and takes input and output channel counts, learning rate multiplier, and name as parameters.",
+        "type": "comment"
+    },
+    "6850": {
+        "file_id": 509,
+        "content": "                                 lr_mult=lr_mult,\n                                 name=name + \"_branch2c\")\n        if not shortcut:\n            self.short = ConvBNLayer(in_channels=in_channels,\n                                     out_channels=out_channels * 4,\n                                     kernel_size=1,\n                                     stride=1,\n                                     is_tweaks_mode=False if if_first else True,\n                                     lr_mult=lr_mult,\n                                     name=name + \"_branch1\")\n        self.shortcut = shortcut\n    def forward(self, inputs):\n        y = self.conv0(inputs)\n        conv1 = self.conv1(y)\n        conv2 = self.conv2(conv1)\n        if self.shortcut:\n            short = inputs\n        else:\n            short = self.short(inputs)\n        y = paddle.add(x=short, y=conv2)\n        y = F.relu(y)\n        return y\nclass BasicBlock(nn.Layer):\n    def __init__(self,\n                 in_channels,\n                 out_channels,\n                 stride,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_tsn_MRI.py:112-144"
+    },
+    "6851": {
+        "file_id": 509,
+        "content": "The code defines a ResNet TSN backbone with two branches, where the first branch contains convolutional layers and the second branch has a shortcut connection. The forward function performs addition between the shortcut connection and the output of the convolutional layers. The BasicBlock class is a subclass for implementing basic building blocks.",
+        "type": "comment"
+    },
+    "6852": {
+        "file_id": 509,
+        "content": "                 shortcut=True,\n                 if_first=False,\n                 lr_mult=1.0,\n                 name=None):\n        super(BasicBlock, self).__init__()\n        self.stride = stride\n        self.conv0 = ConvBNLayer(in_channels=in_channels,\n                                 out_channels=out_channels,\n                                 kernel_size=3,\n                                 stride=stride,\n                                 act='relu',\n                                 lr_mult=lr_mult,\n                                 name=name + \"_branch2a\")\n        self.conv1 = ConvBNLayer(in_channels=out_channels,\n                                 out_channels=out_channels,\n                                 kernel_size=3,\n                                 act=None,\n                                 lr_mult=lr_mult,\n                                 name=name + \"_branch2b\")\n        if not shortcut:\n            self.short = ConvBNLayer(in_channels=in_channels,\n                                     out_channels=out_channels,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_tsn_MRI.py:145-167"
+    },
+    "6853": {
+        "file_id": 509,
+        "content": "This code defines a BasicBlock class in PaddleVideo for ResNet TSN MRI model. It has an input, output channels, and stride. The class initializes convolution layers (conv0 and conv1) with specified parameters. If shortcut is not set, it also includes a ConvBNLayer as the 'short' attribute.",
+        "type": "comment"
+    },
+    "6854": {
+        "file_id": 509,
+        "content": "                                     kernel_size=1,\n                                     stride=1,\n                                     is_tweaks_mode=False if if_first else True,\n                                     lr_mult=lr_mult,\n                                     name=name + \"_branch1\")\n        self.shortcut = shortcut\n    def forward(self, inputs):\n        y = self.conv0(inputs)\n        conv1 = self.conv1(y)\n        if self.shortcut:\n            short = inputs\n        else:\n            short = self.short(inputs)\n        y = paddle.add(x=short, y=conv1)\n        y = F.relu(y)\n        return y\n@BACKBONES.register()\nclass ResNetTSN_MRI(nn.Layer):\n    \"\"\"ResNetTweaksTSN backbone.\n    Args:\n        depth (int): Depth of resnet model.\n        pretrained (str): pretrained model. Default: None.\n    \"\"\"\n    def __init__(self,\n                 layers=50,\n                 pretrained=None,\n                 lr_mult_list=[1.0, 1.0, 1.0, 1.0, 1.0],\n                 in_channels=1):\n        super(ResNetTSN_MRI, self).__init__()",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_tsn_MRI.py:168-202"
+    },
+    "6855": {
+        "file_id": 509,
+        "content": "This code defines a ResNetTSN_MRI backbone with specified depth, pretrained model option, and learning rate multipliers for each layer. The forward function performs convolutions and shortcut connections, applying ReLU activation at the end. This backbone is registered in BACKBONES for use in the PaddleVideo library.",
+        "type": "comment"
+    },
+    "6856": {
+        "file_id": 509,
+        "content": "        self.pretrained = pretrained\n        self.layers = layers\n        supported_layers = [18, 34, 50, 101, 152, 200]\n        assert layers in supported_layers, \\\n            \"supported layers are {} but input layer is {}\".format(\n                supported_layers, layers)\n        self.lr_mult_list = lr_mult_list\n        self.in_channels = in_channels\n        assert isinstance(\n            self.lr_mult_list,\n            (list, tuple\n             )), \"lr_mult_list should be in (list, tuple) but got {}\".format(\n                 type(self.lr_mult_list))\n        assert len(\n            self.lr_mult_list\n        ) == 5, \"lr_mult_list length should should be 5 but got {}\".format(\n            len(self.lr_mult_list))\n        if layers == 18:\n            depth = [2, 2, 2, 2]\n        elif layers == 34 or layers == 50:\n            depth = [3, 4, 6, 3]\n        elif layers == 101:\n            depth = [3, 4, 23, 3]\n        elif layers == 152:\n            depth = [3, 8, 36, 3]\n        elif layers == 200:\n            depth = [3, 12, 48, 3]",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_tsn_MRI.py:204-232"
+    },
+    "6857": {
+        "file_id": 509,
+        "content": "This code initializes a ResNet TSN backbone model with specified layers, in_channels, and pretrained weight option. It supports specific layer options (18, 34, 50, 101, 152, 200) and checks if the input layer is within supported range. The code also ensures lr_mult_list is a list or tuple and has a length of 5. Depending on the layers, it assigns depth values for each block in the model.",
+        "type": "comment"
+    },
+    "6858": {
+        "file_id": 509,
+        "content": "        num_channels = [64, 256, 512, 1024\n                        ] if layers >= 50 else [64, 64, 128, 256]\n        num_filters = [64, 128, 256, 512]\n        self.conv1_1 = ConvBNLayer(in_channels=self.in_channels,\n                                   out_channels=32,\n                                   kernel_size=3,\n                                   stride=2,\n                                   act='relu',\n                                   lr_mult=self.lr_mult_list[0],\n                                   name=\"conv1_1\")\n        self.conv1_2 = ConvBNLayer(in_channels=32,\n                                   out_channels=32,\n                                   kernel_size=3,\n                                   stride=1,\n                                   act='relu',\n                                   lr_mult=self.lr_mult_list[0],\n                                   name=\"conv1_2\")\n        self.conv1_3 = ConvBNLayer(in_channels=32,\n                                   out_channels=64,\n                                   kernel_size=3,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_tsn_MRI.py:233-253"
+    },
+    "6859": {
+        "file_id": 509,
+        "content": "This code defines a ResNet model for Temporal Segment Networks (TSN) with multiple branch inputs. It initializes the layers of the network, including convolutional and batch normalization operations. The number of channels and filters used in each layer depend on the total number of layers specified. Different learning rate multipliers are assigned to each layer for efficient training.",
+        "type": "comment"
+    },
+    "6860": {
+        "file_id": 509,
+        "content": "                                   stride=1,\n                                   act='relu',\n                                   lr_mult=self.lr_mult_list[0],\n                                   name=\"conv1_3\")\n        self.pool2d_max = MaxPool2D(kernel_size=3, stride=2, padding=1)\n        self.block_list = []\n        if layers >= 50:\n            for block in range(len(depth)):\n                shortcut = False\n                for i in range(depth[block]):\n                    if layers in [101, 152, 200] and block == 2:\n                        if i == 0:\n                            conv_name = \"res\" + str(block + 2) + \"a\"\n                        else:\n                            conv_name = \"res\" + str(block + 2) + \"b\" + str(i)\n                    else:\n                        conv_name = \"res\" + str(block + 2) + chr(97 + i)\n                    bottleneck_block = self.add_sublayer(\n                        'bb_%d_%d' % (block, i),\n                        BottleneckBlock(\n                            in_channels=num_channels[block]",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_tsn_MRI.py:254-275"
+    },
+    "6861": {
+        "file_id": 509,
+        "content": "Initializing layers of ResNet-TSN with specified depth, creating bottleneck blocks for each layer. If layers are 101, 152 or 200 and block is 2, specific naming convention applied. BottleneckBlock is added as sublayer in a sequential manner.",
+        "type": "comment"
+    },
+    "6862": {
+        "file_id": 509,
+        "content": "                            if i == 0 else num_filters[block] * 4,\n                            out_channels=num_filters[block],\n                            stride=2 if i == 0 and block != 0 else 1,\n                            shortcut=shortcut,\n                            if_first=block == i == 0,\n                            lr_mult=self.lr_mult_list[block + 1],\n                            name=conv_name))\n                    self.block_list.append(bottleneck_block)\n                    shortcut = True\n        else:\n            for block in range(len(depth)):\n                shortcut = False\n                for i in range(depth[block]):\n                    conv_name = \"res\" + str(block + 2) + chr(97 + i)\n                    basic_block = self.add_sublayer(\n                        'bb_%d_%d' % (block, i),\n                        BasicBlock(in_channels=num_channels[block]\n                                   if i == 0 else num_filters[block],\n                                   out_channels=num_filters[block],",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_tsn_MRI.py:276-294"
+    },
+    "6863": {
+        "file_id": 509,
+        "content": "The code creates a ResNet TSN model with bottleneck and basic blocks. It initializes the block_list by adding each block, sets shortcut to True for the first block of each stage, and appends each block to block_list. The number of filters, out_channels, stride, and other parameters are determined based on the stage and block indexes. The name of each block is also specified according to its position in the network.",
+        "type": "comment"
+    },
+    "6864": {
+        "file_id": 509,
+        "content": "                                   stride=2 if i == 0 and block != 0 else 1,\n                                   shortcut=shortcut,\n                                   if_first=block == i == 0,\n                                   name=conv_name,\n                                   lr_mult=self.lr_mult_list[block + 1]))\n                    self.block_list.append(basic_block)\n                    shortcut = True\n    def init_weights(self):\n        \"\"\"Initiate the parameters.\n        Note:\n            1. when indicate pretrained loading path, will load it to initiate backbone.\n            2. when not indicating pretrained loading path, will follow specific initialization initiate backbone. Always, Conv2D layer will be\n            initiated by KaimingNormal function, and BatchNorm2d will be initiated by Constant function.\n            Please refer to https://www.paddlepaddle.org.cn/documentation/docs/en/develop/api/paddle/nn/initializer/kaiming/KaimingNormal_en.html\n        \"\"\"\n        # XXX: check bias!!! check pretrained!!!",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_tsn_MRI.py:295-311"
+    },
+    "6865": {
+        "file_id": 509,
+        "content": "This code initializes the weights of a ResNet TSN backbone model. It creates blocks with specified parameters and appends them to the block list. The `init_weights` function initializes the parameters based on whether pretrained loading path is indicated or not, following specific initialization functions for Conv2D and BatchNorm2d layers.",
+        "type": "comment"
+    },
+    "6866": {
+        "file_id": 509,
+        "content": "        if isinstance(self.pretrained, str) and self.pretrained.strip() != \"\":\n            load_ckpt(self, self.pretrained)\n        elif self.pretrained is None or self.pretrained.strip() == \"\":\n            for layer in self.sublayers():\n                if isinstance(layer, nn.Conv2D):\n                    # XXX: no bias\n                    weight_init_(layer, 'KaimingNormal')\n                elif isinstance(layer, nn.BatchNorm2D):\n                    weight_init_(layer, 'Constant', value=1)\n    def forward(self, inputs):\n        y = self.conv1_1(inputs)\n        y = self.conv1_2(y)\n        y = self.conv1_3(y)\n        y = self.pool2d_max(y)\n        for block in self.block_list:\n            y = block(y)\n        return y",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_tsn_MRI.py:313-331"
+    },
+    "6867": {
+        "file_id": 509,
+        "content": "This code is checking if the pretrained model path is provided and initializing weights for Conv2D and BatchNorm2D layers if not. The forward function performs convolutions, max pooling, and processes through blocks to output a result.",
+        "type": "comment"
+    },
+    "6868": {
+        "file_id": 510,
+        "content": "/paddlevideo/modeling/backbones/resnet_tweaks_tsm.py",
+        "type": "filepath"
+    },
+    "6869": {
+        "file_id": 510,
+        "content": "The code defines a TSM ResNet backbone class for feature extraction in Temporal Segment Networks, with customizable depth, segments, and pretrained options. It applies temporal shift modules and convolutions across various ResNet models (18-152 layers).",
+        "type": "summary"
+    },
+    "6870": {
+        "file_id": 510,
+        "content": "# copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport numpy as np\nimport math\nimport sys\nimport paddle\nimport paddle.nn as nn\nfrom paddle.nn import (Conv2D, BatchNorm2D, Linear, Dropout, MaxPool2D,\n                       AvgPool2D)\nfrom paddle import ParamAttr\nimport paddle.nn.functional as F\nfrom paddle.regularizer import L2Decay\nfrom ..registry import BACKBONES\nfrom ..weight_init import weight_init_\nfrom ...utils.save_load import load_ckpt\n# Download URL of pretrained model",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_tweaks_tsm.py:1-31"
+    },
+    "6871": {
+        "file_id": 510,
+        "content": "This code imports necessary libraries, defines a class for a TSM ResNet backbone, and includes functions for loading pre-trained models. The code also contains a license notice and copyright information.",
+        "type": "comment"
+    },
+    "6872": {
+        "file_id": 510,
+        "content": "# {\n# \"ResNet50_vd\":\n# \"wget https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_vd_ssld_v2_pretrained.pdparams\",\n# \"ResNet101_vd\":\n# \"https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ResNet101_vd_ssld_pretrained.pdparams\",\n# \"ResNet18_vd\":\n# \"https://paddle-imagenet-models-name.bj.bcebos.com/dygraph/legendary_models/ResNet18_vd_pretrained.pdparams\",\n# \"ResNet34_vd\":\n# \"https://paddle-imagenet-models-name.bj.bcebos.com/dygraph/ResNet34_vd_ssld_pretrained.pdparams\",\n# \"ResNet152_vd\":\n# \"https://paddle-imagenet-models-name.bj.bcebos.com/dygraph/legendary_models/ResNet152_vd_pretrained.pdparams\",\n# \"ResNet200_vd\":\n# \"https://paddle-imagenet-models-name.bj.bcebos.com/dygraph/legendary_models/ResNet200_vd_pretrained.pdparams\",\n# }\nclass ConvBNLayer(nn.Layer):\n    \"\"\"Conv2D and BatchNorm2D layer.\n    Args:\n        in_channels (int): Number of channels for the input.\n        out_channels (int): Number of channels for the output.\n        kernel_size (int): Kernel size.\n        stride (int): Stride in the Conv2D layer. Default: 1.",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_tweaks_tsm.py:32-54"
+    },
+    "6873": {
+        "file_id": 510,
+        "content": "This code defines a class called \"ConvBNLayer\" that combines Conv2D and BatchNorm2D layers, taking input and output channel counts, kernel size, and stride as arguments. It also includes a dictionary of pre-trained model URLs for ResNet variations.",
+        "type": "comment"
+    },
+    "6874": {
+        "file_id": 510,
+        "content": "        groups (int): Groups in the Conv2D, Default: 1.\n        is_tweaks_mode (bool): switch for tweaks. Default: False.\n        act (str): Indicate activation after BatchNorm2D layer.\n        name (str): the name of an instance of ConvBNLayer.\n    \"\"\"\n    def __init__(self,\n                 in_channels,\n                 out_channels,\n                 kernel_size,\n                 stride=1,\n                 groups=1,\n                 is_tweaks_mode=False,\n                 act=None,\n                 name=None):\n        super(ConvBNLayer, self).__init__()\n        self.is_tweaks_mode = is_tweaks_mode\n        #ResNet-D 1/2:add a 2×2 average pooling layer with a stride of 2 before the convolution,\n        #             whose stride is changed to 1, works well in practice.\n        self._pool2d_avg = AvgPool2D(kernel_size=2,\n                                     stride=2,\n                                     padding=0,\n                                     ceil_mode=True)\n        self._conv = Conv2D(in_channels=in_channels,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_tweaks_tsm.py:55-78"
+    },
+    "6875": {
+        "file_id": 510,
+        "content": "The code defines a class \"ConvBNLayer\" with parameters such as in_channels, out_channels, kernel_size, stride, groups, is_tweaks_mode, act, and name. It also adds an average pooling layer before the convolution for ResNet-D 1/2 tweak, which works well in practice.",
+        "type": "comment"
+    },
+    "6876": {
+        "file_id": 510,
+        "content": "                            out_channels=out_channels,\n                            kernel_size=kernel_size,\n                            stride=stride,\n                            padding=(kernel_size - 1) // 2,\n                            groups=groups,\n                            weight_attr=ParamAttr(name=name + \"_weights\"),\n                            bias_attr=False)\n        if name == \"conv1\":\n            bn_name = \"bn_\" + name\n        else:\n            bn_name = \"bn\" + name[3:]\n        self._act = act\n        self._batch_norm = BatchNorm2D(\n            out_channels,\n            weight_attr=ParamAttr(name=bn_name + \"_scale\",\n                                  regularizer=L2Decay(0.0)),\n            bias_attr=ParamAttr(bn_name + \"_offset\", regularizer=L2Decay(0.0)))\n    def forward(self, inputs):\n        if self.is_tweaks_mode:\n            inputs = self._pool2d_avg(inputs)\n        y = self._conv(inputs)\n        y = self._batch_norm(y)\n        if self._act:\n            y = getattr(paddle.nn.functional, self._act)(y)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_tweaks_tsm.py:79-105"
+    },
+    "6877": {
+        "file_id": 510,
+        "content": "This code defines a Convolutional Neural Network (CNN) layer with Batch Normalization and optionally activation function. The layer can have tweaks mode for pooling and average pooling operations. It also includes a forward method for passing inputs through the defined layers.",
+        "type": "comment"
+    },
+    "6878": {
+        "file_id": 510,
+        "content": "        return y\nclass BottleneckBlock(nn.Layer):\n    def __init__(self,\n                 in_channels,\n                 out_channels,\n                 stride,\n                 shortcut=True,\n                 if_first=False,\n                 num_seg=8,\n                 name=None):\n        super(BottleneckBlock, self).__init__()\n        self.conv0 = ConvBNLayer(in_channels=in_channels,\n                                 out_channels=out_channels,\n                                 kernel_size=1,\n                                 act=\"leaky_relu\",\n                                 name=name + \"_branch2a\")\n        self.conv1 = ConvBNLayer(in_channels=out_channels,\n                                 out_channels=out_channels,\n                                 kernel_size=3,\n                                 stride=stride,\n                                 act=\"leaky_relu\",\n                                 name=name + \"_branch2b\")\n        self.conv2 = ConvBNLayer(in_channels=out_channels,\n                                 out_channels=out_channels * 4,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_tweaks_tsm.py:106-132"
+    },
+    "6879": {
+        "file_id": 510,
+        "content": "The code defines a BottleneckBlock class with in_channels, out_channels, stride, shortcut (optional), if_first (boolean), and num_seg as parameters. It initializes ConvBNLayer objects for conv0, conv1, and conv2 layers. The BottleneckBlock is a part of the ResNet architecture with tweaks and TSM.",
+        "type": "comment"
+    },
+    "6880": {
+        "file_id": 510,
+        "content": "                                 kernel_size=1,\n                                 act=None,\n                                 name=name + \"_branch2c\")\n        if not shortcut:\n            self.short = ConvBNLayer(in_channels=in_channels,\n                                     out_channels=out_channels * 4,\n                                     kernel_size=1,\n                                     stride=1,\n                                     is_tweaks_mode=False if if_first else True,\n                                     name=name + \"_branch1\")\n        self.shortcut = shortcut\n        self.num_seg = num_seg\n    def forward(self, inputs):\n        if paddle.is_compiled_with_custom_device('npu'):\n            x = inputs\n            seg_num = self.num_seg\n            shift_ratio = 1.0 / self.num_seg\n            shape = x.shape  #[N*T, C, H, W]\n            reshape_x = x.reshape(\n                (-1, seg_num, shape[1], shape[2], shape[3]))  #[N, T, C, H, W]\n            pad_x = F.pad(reshape_x, [\n                0,\n                0,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_tweaks_tsm.py:133-159"
+    },
+    "6881": {
+        "file_id": 510,
+        "content": "This code defines a class with an initializer and a forward method. The initializer sets the number of segments (num_seg) and whether to use shortcut connection. The forward method reshapes input, pads it based on segment numbers, and likely performs some computations for Temporal Segment Networks.",
+        "type": "comment"
+    },
+    "6882": {
+        "file_id": 510,
+        "content": "                1,\n                1,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n            ])  #[N, T+2, C, H, W]\n            c1 = int(shape[1] * shift_ratio)\n            c2 = int(shape[1] * 2 * shift_ratio)\n            slice1 = pad_x[:, :seg_num, :c1, :, :]\n            slice2 = pad_x[:, 2:seg_num + 2, c1:c2, :, :]\n            slice3 = pad_x[:, 1:seg_num + 1, c2:, :, :]\n            concat_x = paddle.concat([slice1, slice2, slice3],\n                                     axis=2)  #[N, T, C, H, W]\n            shifts = concat_x.reshape(shape)\n        else:\n            shifts = F.temporal_shift(inputs, self.num_seg, 1.0 / self.num_seg)\n        y = self.conv0(shifts)\n        conv1 = self.conv1(y)\n        conv2 = self.conv2(conv1)\n        if self.shortcut:\n            short = inputs\n        else:\n            short = self.short(inputs)\n        y = paddle.add(x=short, y=conv2)\n        return F.leaky_relu(y)\nclass BasicBlock(nn.Layer):\n    def __init__(self,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_tweaks_tsm.py:160-192"
+    },
+    "6883": {
+        "file_id": 510,
+        "content": "This code defines a function and a class, both part of a ResNet backbone model. The function takes in an input tensor and applies temporal shifts, convolutions, and shortcut connections to form the output. The BasicBlock class initializes a basic block layer with convolutional layers and a shortcut connection.",
+        "type": "comment"
+    },
+    "6884": {
+        "file_id": 510,
+        "content": "                 in_channels,\n                 out_channels,\n                 stride,\n                 shortcut=True,\n                 num_seg=8,\n                 name=None):\n        super(BasicBlock, self).__init__()\n        self.stride = stride\n        self.num_seg = num_seg\n        self.conv0 = ConvBNLayer(in_channels=in_channels,\n                                 out_channels=out_channels,\n                                 kernel_size=3,\n                                 stride=stride,\n                                 act=\"leaky_relu\",\n                                 name=name + \"_branch2a\")\n        self.conv1 = ConvBNLayer(in_channels=out_channels,\n                                 out_channels=out_channels,\n                                 kernel_size=3,\n                                 act=None,\n                                 name=name + \"_branch2b\")\n        if not shortcut:\n            self.short = ConvBNLayer(in_channels=in_channels,\n                                     out_channels=out_channels,\n                                     kernel_size=1,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_tweaks_tsm.py:193-217"
+    },
+    "6885": {
+        "file_id": 510,
+        "content": "This code defines a BasicBlock class for ResNet TSM model, with parameters including input and output channels, stride, shortcut flag, and number of segments. It initializes instance variables and creates convolution layers (conv0, conv1) for feature extraction. If not using shortcut connections, it also initializes a short layer for residual connections.",
+        "type": "comment"
+    },
+    "6886": {
+        "file_id": 510,
+        "content": "                                     stride=stride,\n                                     name=name + \"_branch1\")\n        self.shortcut = shortcut\n    def forward(self, inputs):\n        # add temporal shift module\n        shifts = F.temporal_shift(inputs, self.num_seg, 1.0 / self.num_seg)\n        y = self.conv0(shifts)\n        conv1 = self.conv1(y)\n        if self.shortcut:\n            short = inputs\n        else:\n            short = self.short(inputs)\n        y = paddle.add(short, conv1)\n        y = F.leaky_relu(y)\n        return y\n@BACKBONES.register()\nclass ResNetTweaksTSM(nn.Layer):\n    \"\"\"ResNet TSM backbone.\n    Args:\n        depth (int): Depth of resnet model.\n        pretrained (str): pretrained model. Default: None.\n    \"\"\"\n    def __init__(self, depth, num_seg=8, pretrained=None):\n        super(ResNetTweaksTSM, self).__init__()\n        self.pretrained = pretrained\n        self.layers = depth\n        self.num_seg = num_seg\n        supported_layers = [18, 34, 50, 101, 152]\n        assert self.layers in supported_layers, \\",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_tweaks_tsm.py:218-253"
+    },
+    "6887": {
+        "file_id": 510,
+        "content": "The code defines a ResNet TSM backbone model. It has an init function that initializes the model with specified depth, number of segments, and pretrained options. The forward function applies temporal shift module, convolution, shortcut connection if applicable, and Leaky ReLU activation for feature extraction.",
+        "type": "comment"
+    },
+    "6888": {
+        "file_id": 510,
+        "content": "            \"supported layers are {} but input layer is {}\".format(\n                supported_layers, self.layers)\n        if self.layers == 18:\n            depth = [2, 2, 2, 2]\n        elif self.layers == 34 or self.layers == 50:\n            depth = [3, 4, 6, 3]\n        elif self.layers == 101:\n            depth = [3, 4, 23, 3]\n        elif self.layers == 152:\n            depth = [3, 8, 36, 3]\n        in_channels = 64\n        out_channels = [64, 128, 256, 512]\n        #ResNet-C: use three 3x3 conv, replace, one 7x7 conv\n        self.conv1_1 = ConvBNLayer(in_channels=3,\n                                   out_channels=32,\n                                   kernel_size=3,\n                                   stride=2,\n                                   act='leaky_relu',\n                                   name=\"conv1_1\")\n        self.conv1_2 = ConvBNLayer(in_channels=32,\n                                   out_channels=32,\n                                   kernel_size=3,\n                                   stride=1,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_tweaks_tsm.py:254-279"
+    },
+    "6889": {
+        "file_id": 510,
+        "content": "The code defines a ResNet model with different depths based on the specified number of layers. It initializes the layers, including a 7x7 convolution and multiple 3x3 convolutions, as well as Batch Normalization and Leaky ReLU activation functions. The model structure is determined by the input layer size, with supported layers ranging from 18 to 152.",
+        "type": "comment"
+    },
+    "6890": {
+        "file_id": 510,
+        "content": "                                   act='leaky_relu',\n                                   name=\"conv1_2\")\n        self.conv1_3 = ConvBNLayer(in_channels=32,\n                                   out_channels=64,\n                                   kernel_size=3,\n                                   stride=1,\n                                   act='leaky_relu',\n                                   name=\"conv1_3\")\n        self.pool2D_max = MaxPool2D(kernel_size=3, stride=2, padding=1)\n        self.block_list = []\n        if self.layers >= 50:\n            for block in range(len(depth)):\n                shortcut = False\n                for i in range(depth[block]):\n                    if self.layers in [101, 152] and block == 2:\n                        if i == 0:\n                            conv_name = \"res\" + str(block + 2) + \"a\"\n                        else:\n                            conv_name = \"res\" + str(block + 2) + \"b\" + str(i)\n                    else:\n                        conv_name = \"res\" + str(block + 2) + chr(97 + i)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_tweaks_tsm.py:280-301"
+    },
+    "6891": {
+        "file_id": 510,
+        "content": "This code defines a ResNet backbone with TSM tweaks. It includes convolutional layers, Batch Normalization, Leaky ReLU activation functions, and max pooling. The block_list is initialized and the structure of the network adapts depending on the specified layers.",
+        "type": "comment"
+    },
+    "6892": {
+        "file_id": 510,
+        "content": "                    bottleneck_block = self.add_sublayer(\n                        'bb_%d_%d' %\n                        (block, i),  #same with PaddleClas, for loading pretrain\n                        BottleneckBlock(\n                            in_channels=in_channels\n                            if i == 0 else out_channels[block] * 4,\n                            out_channels=out_channels[block],\n                            stride=2 if i == 0 and block != 0 else 1,\n                            num_seg=self.num_seg,\n                            shortcut=shortcut,\n                            if_first=block == i == 0,\n                            name=conv_name))\n                    in_channels = out_channels[block] * 4\n                    self.block_list.append(bottleneck_block)\n                    shortcut = True\n        else:\n            in_channels = [64, 64, 128, 256]\n            for block in range(len(depth)):\n                shortcut = False\n                for i in range(depth[block]):\n                    conv_name = \"res\" + str(block + 2) + chr(97 + i)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_tweaks_tsm.py:302-322"
+    },
+    "6893": {
+        "file_id": 510,
+        "content": "Iterates through ResNet blocks and Bottleneck blocks, assigning in_channels based on previous block's out_channels. Inserts each block into the block_list. Adjusts shortcut value accordingly. Initializes in_channels as 64 for specified blocks if depth is not defined.",
+        "type": "comment"
+    },
+    "6894": {
+        "file_id": 510,
+        "content": "                    basic_block = self.add_sublayer(\n                        conv_name,\n                        BasicBlock(in_channels=in_channels[block]\n                                   if i == 0 else out_channels[block],\n                                   out_channels=out_channels[block],\n                                   stride=2 if i == 0 and block != 0 else 1,\n                                   shortcut=shortcut,\n                                   num_seg=self.num_seg,\n                                   name=conv_name))\n                    self.block_list.append(basic_block)\n                    shortcut = True\n    def init_weights(self):\n        \"\"\"Initiate the parameters.\n        Note:\n            1. when indicate pretrained loading path, will load it to initiate backbone.\n            2. when not indicating pretrained loading path, will follow specific initialization initiate backbone. Always, Conv2D layer will be initiated by KaimingNormal function, and BatchNorm2d will be initiated by Constant function.",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_tweaks_tsm.py:323-339"
+    },
+    "6895": {
+        "file_id": 510,
+        "content": "This code defines a function for initializing weights in the ResNet TSMBackbone. It loads pre-trained weights if a loading path is specified or uses specific initialization methods otherwise, with Conv2D layers using KaimingNormal and BatchNorm2d layers using Constant initialization.",
+        "type": "comment"
+    },
+    "6896": {
+        "file_id": 510,
+        "content": "            Please refer to https://www.paddlepaddle.org.cn/documentation/docs/en/develop/api/paddle/nn/initializer/kaiming/KaimingNormal_en.html\n        \"\"\"\n        if isinstance(self.pretrained, str) and self.pretrained.strip() != \"\":\n            load_ckpt(self, self.pretrained)\n        elif self.pretrained is None or self.pretrained.strip() == \"\":\n            for layer in self.sublayers():\n                if isinstance(layer, nn.Conv2D):\n                    # no bias\n                    weight_init_(layer, 'KaimingNormal')\n                elif isinstance(layer, nn.BatchNorm2D):\n                    weight_init_(layer, 'Constant', value=1)\n    def forward(self, inputs):\n        \"\"\"Define how the backbone is going to run.\n        \"\"\"\n        y = self.conv1_1(inputs)\n        y = self.conv1_2(y)\n        y = self.conv1_3(y)\n        y = self.pool2D_max(y)\n        for block in self.block_list:\n            y = block(y)\n        return y",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_tweaks_tsm.py:340-362"
+    },
+    "6897": {
+        "file_id": 510,
+        "content": "This function initializes the backbone's weights, with Kaiming Normal distribution for Conv2D layers and constant value 1 for BatchNorm2D. The forward function defines how the backbone processes inputs through a series of convolutions and pooling, then passes the result to each block in the block_list.",
+        "type": "comment"
+    },
+    "6898": {
+        "file_id": 511,
+        "content": "/paddlevideo/modeling/backbones/resnet_tweaks_tsn.py",
+        "type": "filepath"
+    },
+    "6899": {
+        "file_id": 511,
+        "content": "PaddleVideo library contains ResNet TSN model backbones, licensed under Apache 2.0, includes ConvBNLayer, offers modified ResNet with BatchNorm and pooling layers, uses BottleneckBlock for deeper networks, and initializes configurable parameters with BasicBlock. The code constructs a ResNet backbone, performs forward pass through network, applies convolutions and pooling, and returns output after passing through each block in the block list using input lists to determine layers and filters while initializing model weights.",
+        "type": "summary"
+    }
+}

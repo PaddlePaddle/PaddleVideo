@@ -1,0 +1,541 @@
+{
+    "1900": {
+        "file_id": 150,
+        "content": "/applications/MultimodalVideoTag/README.md",
+        "type": "filepath"
+    },
+    "1901": {
+        "file_id": 150,
+        "content": "The code trains a multimodal video classification model using PaddlePaddle 2.0, incorporating text, video image, and audio data for tagging in multimodal scenarios. It focuses on training, evaluation, optimization, and use, with performance improvements through post-processing networks, faster training speeds, and stability enhancements. Three related papers are referenced: Attention Clusters for video classification, YouTube-8M as a large-scale benchmark, and Ernie's knowledge integration for enhanced representation.",
+        "type": "summary"
+    },
+    "1902": {
+        "file_id": 150,
+        "content": "# MutimodalVideoTag 多模态视频分类模型\n---\n## 内容\n- [模型简介](#模型简介)\n- [数据准备](#数据准备)\n- [模型训练](#模型训练)\n- [模型评估](#模型评估)\n- [模型推理](#模型推理)\n- [模型优化](#模型优化)\n- [模型部署](#模型部署)\n- [参考论文](#参考论文)\n## 模型简介\n该代码库用于多模态场景下视频分类任务，基于paddle2.0版本开发，模型基于真实短视频业务数据，融合文本、视频图像、音频三种模态进行视频多模标签分类，相比纯视频图像特征，显著提升高层语义标签效果。其原理示意如下图所示。\n<p align=\"center\">\n<img src=\"images/model.png\"  hspace='10'/> <br />\nMutimodalVideoTag 多模态视频分类模型示意图\n</p>\n- 数据处理：分别对视频三个模态的数据进行处理，对视频进行抽帧，获得图像序列；抽取视频的音频pcm 文件；收集视频标题，简单进行文本长度截断，一般取50个字。\n- 特征抽取：使用预训练的 ResNet 对图像抽取高层语义特征；使用预训练的VGGish网络抽取音频特征；文本方面使用[ERNIE 1.0](https://github.com/PaddlePaddle/ERNIE)抽取文本特征，无需预先抽取，支持视频分类模型finetune\n- 序列学习：分别使用独立的LSTM 对图像特征和音频特征进行序列学习，文本方面预训练模型对字符序列进行建模，在ernie 后接入一个textcnn 网络做下游任务的迁移学习。\n- 多模融合：文本具有显式的高层语义信息，将文本特征引入到LSTM pooling 过程指导图像和音频时序权重分配，进行交叉融合，最后将文本、音频、视频特征拼接。\n- 预测结果：分类器选用sigmoid 多标签分类器，支持视频多标签输出。\n## 数据准备\n数据方面提供已经抽取好图像、音频特征的特征文件，以及标题和标签信息，模型方面提供训练好checkpoint 文件，可进行finetune、模型评估、预测。\n```\nsh download.sh\n```\n数据文件包括抽取好特征的文件夹 `feature_files`，以及记录划分的txt 文件，格式如下\n```\n文件名 \\t 标题 \\t 标签\n18e9bf08a2fc7eaa4ee9215ab42ea827.mp4 叮叮来自肖宇梁肖宇梁rainco的特别起床铃声 拍人-帅哥,拍人-秀特效,明星周边-其他明星周边",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/README.md:1-37"
+    },
+    "1903": {
+        "file_id": 150,
+        "content": "This code is for training a multimodal video classification model using PaddlePaddle 2.0, which combines text, video image, and audio data for tagging in multimodal scenarios. The provided feature files and label information are used for training and prediction.",
+        "type": "comment"
+    },
+    "1904": {
+        "file_id": 150,
+        "content": "```\n##  模型训练\n模型训练过程有如下可调模式，可在根据数据集情况进行调整，在`conf/conf.txt` 文件中\n- ernie_freeze: 用于控制文本提特征的ernie 网络是否进行finetune，因为ernie 复杂度远大于图像、视频序列学习网络，因此在某些数据集上不好训练。\n- lstm_pool_mode: 用于控制lstm 序列池化的方式，默认是\"text_guide\"表示利用文本加强池化注意力权重，如果设置为空，则默认为自注意力的权重。\n```\nsh train.sh \n```\n##  模型评估\n模型对测试集进行评估，同时支持将checkpoint 模型转为inference 模型， 可用参数'save_only' 选项控制，设置即只用于做模型转换，得到inference 模型\n```\nsh eval_and_save_model.sh\n```\n##  模型推理\n通过上一步得到的inference 模型进行预测，结果默认阈值为0.5，存储到json 文件中，在`conf/conf.txt` 文件 `threshold` 参数进行控制多标签输出的阈值。\n```\nsh inference.sh\n```\n## 模型优化\n模型方面，主要在文本分支进行了实验，实验结果显示ERNIE 在多分支下不微调，而是使用后置网络进行微调，训练速度快，且稳定，同时attention 方面使用文本信息增强图像、音频的attention 学习能一定程度提升模型效果。\n| 模型                                                         | Hit@1 | Hit@2 |\n| ------------------------------------------------------------ | ----- | ----- |\n| 文本分支ERNIE 不finetune +self-attention                     | 71.07 | 83.72 |\n| 文本分支ERNIE 不finetune +textcnn finetune + self-attention  | 72.66 | 85.01 |\n| 文本分支ERNIE 不finetune +extcnn finetune + text-guide-attention | 73.29 | 85.59 |",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/README.md:38-65"
+    },
+    "1905": {
+        "file_id": 150,
+        "content": "This code is related to the PaddleVideo/applications/MultimodalVideoTag project, which focuses on training, evaluating, optimizing, and using a multimodal model for video tagging. The code snippet provides an overview of the steps involved in this process.\n\nTraining involves adjustable parameters like 'ernie_freeze' (for controlling whether text feature extraction from Ernie network should be fine-tuned) and 'lstm_pool_mode' (for controlling LSTM sequence pooling method). The training script is executed with 'sh train.sh'.\n\nEvaluation of the model on a test set is performed using 'sh eval_and_save_model.sh', which also supports converting checkpoint models into inference models with a 'save\\_only' option.\n\nInference, executed by 'sh inference.sh', uses the previously obtained inference model to make predictions, storing results in JSON format. The threshold for multi-label output can be adjusted using the 'conf/conf.txt' file's 'threshold' parameter.\n\nFinally, the code snippet mentions that experimentation has shown better performance for certain models and techniques in the text branch of the model, specifically mentioning gains from utilizing a post-processing network, faster training speeds, and improved stability. The table also shows how different combinations of these changes affect Hit@1 and Hit@2 metrics.",
+        "type": "comment"
+    },
+    "1906": {
+        "file_id": 150,
+        "content": "## 模型部署\n<div align=\"center\">\n  <img src=\"images/show.gif\" width=\"480px\"/><br>\n</div>\n## 参考论文\n- [Attention Clusters: Purely Attention Based Local Feature Integration for Video Classification](https://arxiv.org/abs/1711.09550), Xiang Long, Chuang Gan, Gerard de Melo, Jiajun Wu, Xiao Liu, Shilei Wen\n- [YouTube-8M: A Large-Scale Video Classification Benchmark](https://arxiv.org/abs/1609.08675), Sami Abu-El-Haija, Nisarg Kothari, Joonseok Lee, Paul Natsev, George Toderici, Balakrishnan Varadarajan, Sudheendra Vijayanarasimhan\n- [Ernie: Enhanced representation through knowledge integration](https://arxiv.org/abs/1904.09223), Sun, Yu and Wang, Shuohuan and Li, Yukun and Feng, Shikun and Chen, Xuyi and Zhang, Han and Tian, Xin and Zhu, Danxiang and Tian, Hao and Wu, Hua",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/README.md:67-77"
+    },
+    "1907": {
+        "file_id": 150,
+        "content": "The code is providing information about model deployment and referencing three related papers. The first paper introduces Attention Clusters for video classification, the second one presents YouTube-8M as a large-scale classification benchmark, and the third paper discusses Ernie's knowledge integration for enhanced representation.",
+        "type": "comment"
+    },
+    "1908": {
+        "file_id": 151,
+        "content": "/applications/MultimodalVideoTag/download.sh",
+        "type": "filepath"
+    },
+    "1909": {
+        "file_id": 151,
+        "content": "This script downloads the pre-trained ernie model, its corresponding checkpoints, and a test dataset using wget and tar commands for decompression.",
+        "type": "summary"
+    },
+    "1910": {
+        "file_id": 151,
+        "content": "# download ernie 1.0 model\nwget https://videotag.bj.bcebos.com/Applications/MultimodalVideoTag/model_pretrained_ernie.tar.gz\ntar -xzvf model_pretrained_ernie.tar.gz\n# download pretrain model\nwget https://videotag.bj.bcebos.com/Applications/MultimodalVideoTag/checkpoints_save.tar.gz\ntar -xzvf checkpoints_save.tar.gz\n# download test dataset\nwget https://videotag.bj.bcebos.com/Applications/MultimodalVideoTag/datasets.tar.gz\ntar -xzvf datasets.tar.gz",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/download.sh:1-11"
+    },
+    "1911": {
+        "file_id": 151,
+        "content": "This script downloads the pre-trained ernie model, its corresponding checkpoints, and a test dataset using wget and tar commands for decompression.",
+        "type": "comment"
+    },
+    "1912": {
+        "file_id": 152,
+        "content": "/applications/MultimodalVideoTag/eval_and_save_model.sh",
+        "type": "filepath"
+    },
+    "1913": {
+        "file_id": 152,
+        "content": "This code sets environment variables for GPU utilization and then runs the eval_and_save_model.py script in scenario_lib, evaluating a model named AttentionLstmErnie with provided configuration file and saving its parameters and inference models to specified directories. The \"--save_only\" flag is not used, so both evaluation and saving will occur.",
+        "type": "summary"
+    },
+    "1914": {
+        "file_id": 152,
+        "content": "# eval sh \nexport CUDA_VISIBLE_DEVICES=0\nexport FLAGS_eager_delete_tensor_gb=0.0\nexport FLAGS_sync_nccl_allreduce=1\nexport FLAGS_fast_eager_deletion_mode=1\nexport FLAGS_fraction_of_gpu_memory_to_use=0.5\nexport FLAGS_reallocate_gpu_memory_in_mb=0\nexport FLAGS_memory_fraction_of_eager_deletion=1\npython scenario_lib/eval_and_save_model.py --model_name=AttentionLstmErnie \\\n--config=./conf/conf.txt \\\n--save_model_param_dir=checkpoints_save \\\n--save_inference_model=inference_models_save \\\n# --save_only",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/eval_and_save_model.sh:1-13"
+    },
+    "1915": {
+        "file_id": 152,
+        "content": "This code sets environment variables for GPU utilization and then runs the eval_and_save_model.py script in scenario_lib, evaluating a model named AttentionLstmErnie with provided configuration file and saving its parameters and inference models to specified directories. The \"--save_only\" flag is not used, so both evaluation and saving will occur.",
+        "type": "comment"
+    },
+    "1916": {
+        "file_id": 153,
+        "content": "/applications/MultimodalVideoTag/inference.sh",
+        "type": "filepath"
+    },
+    "1917": {
+        "file_id": 153,
+        "content": "This script sets environment variables for GPU usage and then runs the \"inference.py\" Python script from the \"scenario_lib\" directory, specifying a model name (AttentionLstmErnie), configuration file path (./conf/conf.txt), saving inference models path (inference_models_save), and output file for results (output.json).",
+        "type": "summary"
+    },
+    "1918": {
+        "file_id": 153,
+        "content": "# inference sh \nexport CUDA_VISIBLE_DEVICES=0\nexport FLAGS_eager_delete_tensor_gb=0.0\nexport FLAGS_sync_nccl_allreduce=1\nexport FLAGS_fast_eager_deletion_mode=1\nexport FLAGS_fraction_of_gpu_memory_to_use=0.5\nexport FLAGS_reallocate_gpu_memory_in_mb=0\nexport FLAGS_memory_fraction_of_eager_deletion=1\npython scenario_lib/inference.py --model_name=AttentionLstmErnie \\\n--config=./conf/conf.txt \\\n--save_inference_model=inference_models_save \\\n--output='output.json'",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/inference.sh:1-12"
+    },
+    "1919": {
+        "file_id": 153,
+        "content": "This script sets environment variables for GPU usage and then runs the \"inference.py\" Python script from the \"scenario_lib\" directory, specifying a model name (AttentionLstmErnie), configuration file path (./conf/conf.txt), saving inference models path (inference_models_save), and output file for results (output.json).",
+        "type": "comment"
+    },
+    "1920": {
+        "file_id": 154,
+        "content": "/applications/MultimodalVideoTag/scenario_lib/accuracy_metrics.py",
+        "type": "filepath"
+    },
+    "1921": {
+        "file_id": 154,
+        "content": "The MetricsCalculator class calculates accuracy, average loss, and mean loss for multimodal video tagging models with various top-k values. It compares predictions to actual labels in a multilabel classification and logs the metrics using a logger.",
+        "type": "summary"
+    },
+    "1922": {
+        "file_id": 154,
+        "content": "#  Copyright (c) 2019 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nfrom __future__ import absolute_import\nfrom __future__ import unicode_literals\nfrom __future__ import print_function\nfrom __future__ import division\nimport numpy as np\nimport logging\nlogger = logging.getLogger(__name__)\nclass MetricsCalculator():\n    \"\"\"\n    MetricsCalculator\n    \"\"\"\n    def __init__(self, name, mode, metrics_args):\n        \"\"\"\n        init\n        \"\"\"\n        self.name = name\n        self.mode = mode  # 'train', 'val', 'test'",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/accuracy_metrics.py:1-35"
+    },
+    "1923": {
+        "file_id": 154,
+        "content": "This code imports necessary libraries and defines a class for calculating metrics. The MetricsCalculator class initializes with name, mode ('train', 'val', or 'test'), and metrics_args.",
+        "type": "comment"
+    },
+    "1924": {
+        "file_id": 154,
+        "content": "        self.acc_dict = {}\n        self.top_n_list = metrics_args.MODEL.top_n\n        self.num_classes = metrics_args.MODEL.num_classes\n        self.reset()\n    def reset(self):\n        \"\"\"\n        reset\n        \"\"\"\n        logger.info('Resetting {} metrics...'.format(self.mode))\n        for topk in self.top_n_list:\n            self.acc_dict['avg_acc%d' % (topk)] = 0.0\n        self.aggr_loss = 0.0\n        self.aggr_batch_size = 0\n    def finalize_metrics(self):\n        \"\"\"finalize_metrics\n        \"\"\"\n        for key, value in self.acc_dict.items():\n            self.acc_dict[key] = value / self.aggr_batch_size\n        self.aggr_loss = self.aggr_loss / self.aggr_batch_size\n    def get_computed_metrics(self):\n        \"\"\"get_computed_metrics\n        \"\"\"\n        acc_dict = {}\n        for key, value in self.acc_dict.items():\n            acc_dict[key] = value / self.aggr_batch_size\n        aggr_loss = self.aggr_loss / self.aggr_batch_size\n        return acc_dict, aggr_loss\n    def accumulate(self, loss, softmax, labels):",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/accuracy_metrics.py:36-68"
+    },
+    "1925": {
+        "file_id": 154,
+        "content": "This code initializes an AccuracyMetrics class with metrics arguments, resets the metrics values, finalizes and calculates the accuracy and average loss for each top-n value, and returns the computed metrics. The purpose is to measure the performance of a multimodal video tagging model.",
+        "type": "comment"
+    },
+    "1926": {
+        "file_id": 154,
+        "content": "        \"\"\"accumulate\n        \"\"\"\n        cur_batch_size = softmax.shape[0]\n        # if returned loss is None for e.g. test, just set loss to be 0.\n        if loss is None:\n            cur_loss = 0.\n        else:\n            cur_loss = np.mean(np.array(loss))  #\n        self.aggr_batch_size += cur_batch_size\n        self.aggr_loss += cur_loss * cur_batch_size\n        for top_k in self.top_n_list:\n            self.acc_dict['avg_acc%d' %\n                          (top_k)] += cur_batch_size * compute_topk_accuracy(\n                              softmax, labels, top_k=top_k) * 100.\n        return\n    def finalize_and_log_out(self, info=''):\n        \"\"\"finalize_and_log_out\n        \"\"\"\n        metrics_dict, loss = self.get_computed_metrics()\n        acc_str = []\n        for name, value in metrics_dict.items():\n            acc_str.append('{}:{},'.format('%s' % name, '%.2f' % value))\n        acc_str = '\\t'.join(acc_str)\n        logger.info(info +\n                    '\\tLoss: {},\\t{}'.format('%.6f' % loss, '%s' % acc_str))",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/accuracy_metrics.py:69-95"
+    },
+    "1927": {
+        "file_id": 154,
+        "content": "This code snippet is part of a class that accumulates metrics for video tagging. It computes the mean loss, average accuracy for different top k values, and then logs these metrics in an informative format using a logger.",
+        "type": "comment"
+    },
+    "1928": {
+        "file_id": 154,
+        "content": "        return\ndef compute_topk_correct_hits_multilabel(top_k, preds, labels):\n    '''Compute the number of corret hits'''\n    batch_size = preds.shape[0]\n    top_k_preds = np.zeros((batch_size, 10), dtype=np.float32)\n    for i in range(batch_size):\n        top_k_preds[i, :] = np.argsort(-preds[i, :])[:10]\n    correctness = np.zeros(batch_size, dtype=np.float32)\n    for i in range(batch_size):\n        correc_sum = 0\n        for label_id in range(len(labels[i])):\n            label_hit = labels[i][label_id]\n            if label_hit == 0 or label_hit < 0.1:\n                continue\n            if label_id in top_k_preds[i, :top_k].astype(np.int32).tolist():\n                # correc_sum += 1\n                correc_sum = 1\n                break\n        correctness[i] = correc_sum\n    correct_hits = sum(correctness)\n    return correct_hits\ndef compute_topk_correct_hits(top_k, preds, labels):\n    '''Compute the number of corret hits'''\n    batch_size = preds.shape[0]\n    top_k_preds = np.zeros((batch_size, top_k), dtype=np.float32)",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/accuracy_metrics.py:96-125"
+    },
+    "1929": {
+        "file_id": 154,
+        "content": "This code computes the number of correct hits for a given top_k in multilabel classification, where it calculates the top_k predictions and checks if any of them match with the actual labels. It returns the total number of correct hits across all samples in the batch.",
+        "type": "comment"
+    },
+    "1930": {
+        "file_id": 154,
+        "content": "    for i in range(batch_size):\n        top_k_preds[i, :] = np.argsort(-preds[i, :])[:top_k]\n    correctness = np.zeros(batch_size, dtype=np.int32)\n    for i in range(batch_size):\n        if labels[i] in top_k_preds[i, :].astype(np.int32).tolist():\n            correctness[i] = 1\n    correct_hits = sum(correctness)\n    return correct_hits\ndef compute_topk_accuracy(softmax, labels, top_k):\n    \"\"\"compute_topk_accuracy\n    \"\"\"\n    computed_metrics = {}\n    assert labels.shape[0] == softmax.shape[0], \"Batch size mismatch.\"\n    aggr_batch_size = labels.shape[0]\n    # aggr_top_k_correct_hits = compute_topk_correct_hits(top_k, softmax, labels)\n    aggr_top_k_correct_hits = compute_topk_correct_hits_multilabel(\n        top_k, softmax, labels)\n    # normalize results\n    computed_metrics = \\\n        float(aggr_top_k_correct_hits) / aggr_batch_size\n    return computed_metrics\nif __name__ == \"__main__\":\n    pred = np.array([[0.5, 0.2, 0.3, 0, 0]])\n    label = np.array([[0.5, 0.5, 0, 0, 0]])\n    print('pred:  ', pred)\n    print('label:  ', label)",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/accuracy_metrics.py:126-158"
+    },
+    "1931": {
+        "file_id": 154,
+        "content": "This code calculates the top-k accuracy for a batch of predictions and labels. It first computes the top-k predictions and then checks if the ground truth label is within the top-k predictions. The function returns the number of correct hits divided by the batch size to obtain the accuracy. The main section demonstrates usage with example data.",
+        "type": "comment"
+    },
+    "1932": {
+        "file_id": 154,
+        "content": "    print('Top 1 hits', compute_topk_correct_hits_multilabel(1, pred, label))\n    print('Top 5 hits', compute_topk_correct_hits_multilabel(5, pred, label))",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/accuracy_metrics.py:159-160"
+    },
+    "1933": {
+        "file_id": 154,
+        "content": "Computing top-1 and top-5 hits for multilabel prediction using compute_topk_correct_hits_multilabel function.",
+        "type": "comment"
+    },
+    "1934": {
+        "file_id": 155,
+        "content": "/applications/MultimodalVideoTag/scenario_lib/config.py",
+        "type": "filepath"
+    },
+    "1935": {
+        "file_id": 155,
+        "content": "This code defines a config parser and provides two functions for parsing, merging, setting, and printing configuration in different sections. The code handles section validity and updates values when merging.",
+        "type": "summary"
+    },
+    "1936": {
+        "file_id": 155,
+        "content": "\"\"\"\nconfig parser\n\"\"\"\ntry:\n    from configparser import ConfigParser\nexcept BaseException:\n    from ConfigParser import ConfigParser\nfrom utils import AttrDict\nimport logging\nlogger = logging.getLogger(__name__)\nCONFIG_SECS = [\n    'train',\n    'valid',\n    'test',\n    'infer',\n]\ndef parse_config(cfg_file):\n    \"\"\"parse_config\n    \"\"\"\n    parser = ConfigParser()\n    cfg = AttrDict()\n    parser.read(cfg_file)\n    for sec in parser.sections():\n        sec_dict = AttrDict()\n        for k, v in parser.items(sec):\n            try:\n                v = eval(v)\n            except BaseException:\n                pass\n            setattr(sec_dict, k, v)\n        setattr(cfg, sec.upper(), sec_dict)\n    return cfg\ndef merge_configs(cfg, sec, args_dict):\n    \"\"\"merge_configs\n    \"\"\"\n    assert sec in CONFIG_SECS, \"invalid config section {}\".format(sec)\n    sec_dict = getattr(cfg, sec.upper())\n    for k, v in args_dict.items():\n        if v is None:\n            continue\n        # try:\n        #     if hasattr(sec_dict, k):\n        #         setattr(sec_dict, k, v)",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/config.py:1-52"
+    },
+    "1937": {
+        "file_id": 155,
+        "content": "This code defines a config parser and provides two functions: `parse_config` and `merge_configs`. The `parse_config` function reads a configuration file and returns an `AttrDict` object containing the parsed configurations for different sections ('train', 'valid', 'test', 'infer'). The `merge_configs` function takes an existing configuration object, a section name, and an optional dictionary of arguments to merge into the configuration. It checks if the section is valid before attempting to merge the new arguments. If a value is None, it is ignored during the merging process.",
+        "type": "comment"
+    },
+    "1938": {
+        "file_id": 155,
+        "content": "        # except BaseException:\n        #     pass\n        if k in sec_dict:\n            setattr(sec_dict, k, v)\n    return cfg\ndef print_configs(cfg, mode):\n    \"\"\"print_configs\n    \"\"\"\n    logger.info(\"---------------- {:>5} Arguments ----------------\".format(mode))\n    for sec, sec_items in cfg.items():\n        if isinstance(sec_items, dict) is True:\n            logger.info(\"{}:\".format(sec))\n            for k, v in sec_items.items():\n                logger.info(\"    {}:{}\".format(k, v))\n        else:\n            logger.info(\"{}:{}\".format(sec, sec_items))\n    logger.info(\"-------------------------------------------------\")",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/config.py:53-71"
+    },
+    "1939": {
+        "file_id": 155,
+        "content": "This code defines two functions, `set_config` and `print_configs`. The `set_config` function takes a dictionary (cfg) as input, iterates through its keys and values, and sets the value for each key in the configuration dictionary (sec_dict). If the key already exists in sec_dict, it updates its value. Finally, the function returns the updated configuration dictionary. The `print_configs` function prints out the configuration in a formatted way using the logger module. It iterates through the sections and their corresponding values in the configuration dictionary and logs them to the console with proper indentation and section names.",
+        "type": "comment"
+    },
+    "1940": {
+        "file_id": 156,
+        "content": "/applications/MultimodalVideoTag/scenario_lib/datareader/__init__.py",
+        "type": "filepath"
+    },
+    "1941": {
+        "file_id": 156,
+        "content": "This code imports and registers a reader named \"ATTENTIONLSTMERNIE\" from the FeatureReader class, following alphabetical order. It is part of the PaddleVideo MultimodalVideoTag project, likely for video feature extraction or analysis.",
+        "type": "summary"
+    },
+    "1942": {
+        "file_id": 156,
+        "content": "#!/usr/bin/env python\n# coding=utf-8\n\"\"\"\nCopyright 2021 Baidu.com, Inc. All Rights Reserved\nDescription: \nAuthors: wanghewei(wanghewei@baidu.com)\nLastEditors: wanghewei(wanghewei@baidu.com)\nDate: 2021-11-26 16:31:59\n\"\"\"\nfrom .reader_utils import regist_reader, get_reader\nfrom .feature_reader import FeatureReader\n# regist reader, sort by alphabet\nregist_reader(\"ATTENTIONLSTMERNIE\", FeatureReader)",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/datareader/__init__.py:1-13"
+    },
+    "1943": {
+        "file_id": 156,
+        "content": "This code imports and registers a reader named \"ATTENTIONLSTMERNIE\" from the FeatureReader class, following alphabetical order. It is part of the PaddleVideo MultimodalVideoTag project, likely for video feature extraction or analysis.",
+        "type": "comment"
+    },
+    "1944": {
+        "file_id": 157,
+        "content": "/applications/MultimodalVideoTag/scenario_lib/datareader/ernie_task_reader.py",
+        "type": "filepath"
+    },
+    "1945": {
+        "file_id": 157,
+        "content": "This code initializes a reader class for PaddleVideo's MultimodalVideoTag application, preprocesses text, formats input sequences for BERT/ERNIE models, creates Record objects, generates batches with padding, and handles data generation for ERNIE models.",
+        "type": "summary"
+    },
+    "1946": {
+        "file_id": 157,
+        "content": "\"\"\"\nernie reader\n\"\"\"\n#   Copyright (c) 2019 PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nfrom __future__ import absolute_import\nfrom __future__ import division\nfrom __future__ import print_function\nfrom __future__ import unicode_literals\nfrom __future__ import absolute_import\nimport sys\nimport os\nimport json\nimport random\nimport logging\nimport numpy as np\nimport six\nfrom io import open\nfrom collections import namedtuple\nfrom .tokenization import FullTokenizer, convert_to_unicode\nlog = logging.getLogger(__name__)",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/datareader/ernie_task_reader.py:1-35"
+    },
+    "1947": {
+        "file_id": 157,
+        "content": "This code is for the \"ernie\" reader, a part of PaddleVideo's MultimodalVideoTag application. It includes licensing information and various import statements for different functionalities like file handling, JSON parsing, random number generation, logging, numpy operations, and namedtuple creation. The log variable is initialized for error reporting.",
+        "type": "comment"
+    },
+    "1948": {
+        "file_id": 157,
+        "content": "if six.PY3:\n    import io\n    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')\n    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')\ndef csv_reader(fd, delimiter='\\t'):\n    \"\"\"csv_reader\n    \"\"\"\n    def gen():\n        \"\"\"gen\n        \"\"\"\n        for i in fd:\n            yield i.rstrip('\\n').split(delimiter)\n    return gen()\nclass BaseReader(object):\n    \"\"\"BaseReader\n    \"\"\"\n    def __init__(self,\n                 vocab_path,\n                 label_map_config=None,\n                 max_seq_len=512,\n                 do_lower_case=True,\n                 in_tokens=False,\n                 is_inference=False,\n                 random_seed=None,\n                 tokenizer=\"FullTokenizer\",\n                 is_classify=True,\n                 is_regression=False,\n                 for_cn=True,\n                 task_id=0):\n        self.max_seq_len = max_seq_len\n        self.tokenizer = FullTokenizer(vocab_file=vocab_path,\n                                       do_lower_case=do_lower_case)\n        self.vocab = self.tokenizer.vocab",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/datareader/ernie_task_reader.py:37-74"
+    },
+    "1949": {
+        "file_id": 157,
+        "content": "This code snippet defines a `BaseReader` class which initializes an object with various parameters related to text preprocessing, including maximum sequence length, tokenizer, and other properties. It also includes a utility function `csv_reader` that reads data from files in CSV format. The code adjusts the Python output stream encoding if running on Python 3, ensuring consistent text handling across all outputs.",
+        "type": "comment"
+    },
+    "1950": {
+        "file_id": 157,
+        "content": "        self.pad_id = self.vocab[\"[PAD]\"]\n        self.cls_id = self.vocab[\"[CLS]\"]\n        self.sep_id = self.vocab[\"[SEP]\"]\n        self.in_tokens = in_tokens\n        self.is_inference = is_inference\n        self.for_cn = for_cn\n        self.task_id = task_id\n        np.random.seed(random_seed)\n        self.is_classify = is_classify\n        self.is_regression = is_regression\n        self.current_example = 0\n        self.current_epoch = 0\n        self.num_examples = 0\n        if label_map_config:\n            with open(label_map_config, encoding='utf8') as f:\n                self.label_map = json.load(f)\n        else:\n            self.label_map = None\n    def _truncate_seq_pair(self, tokens_a, tokens_b, max_length):\n        \"\"\"Truncates a sequence pair in place to the maximum length.\"\"\"\n        # This is a simple heuristic which will always truncate the longer sequence\n        # one token at a time. This makes more sense than truncating an equal percent\n        # of tokens from each, since if one sequence is very short then each token",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/datareader/ernie_task_reader.py:75-102"
+    },
+    "1951": {
+        "file_id": 157,
+        "content": "This code initializes various attributes of the class and sets up some configurations for tokenizing input data. It also loads a label map from a file if provided, or sets it to None otherwise. The \"_truncate_seq_pair\" function truncates sequence pairs in place to the maximum length specified.",
+        "type": "comment"
+    },
+    "1952": {
+        "file_id": 157,
+        "content": "        # that's truncated likely contains more information than a longer sequence.\n        while True:\n            total_length = len(tokens_a) + len(tokens_b)\n            if total_length <= max_length:\n                break\n            if len(tokens_a) > len(tokens_b):\n                tokens_a.pop()\n            else:\n                tokens_b.pop()\n    def _convert_example_to_record(self, example, max_seq_length, tokenizer):\n        \"\"\"Converts a single `Example` into a single `Record`.\"\"\"\n        text_a = convert_to_unicode(example.text_a)\n        tokens_a = tokenizer.tokenize(text_a)\n        tokens_b = None\n        has_text_b = False\n        if isinstance(example, dict):\n            has_text_b = \"text_b\" in example.keys()\n        else:\n            has_text_b = \"text_b\" in example._fields\n        if has_text_b:\n            text_b = convert_to_unicode(example.text_b)\n            tokens_b = tokenizer.tokenize(text_b)\n        if tokens_b:\n            # Modifies `tokens_a` and `tokens_b` in place so that the total",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/datareader/ernie_task_reader.py:103-131"
+    },
+    "1953": {
+        "file_id": 157,
+        "content": "This function converts an example into a record. It tokenizes text_a and optionally text_b, then truncates the sequences if they exceed max_seq_length by popping tokens from either tokens_a or tokens_b.",
+        "type": "comment"
+    },
+    "1954": {
+        "file_id": 157,
+        "content": "            # length is less than the specified length.\n            # Account for [CLS], [SEP], [SEP] with \"- 3\"\n            self._truncate_seq_pair(tokens_a, tokens_b, max_seq_length - 3)\n        else:\n            # Account for [CLS] and [SEP] with \"- 2\"\n            if len(tokens_a) > max_seq_length - 2:\n                tokens_a = tokens_a[0:(max_seq_length - 2)]\n        # The convention in BERT/ERNIE is:\n        # (a) For sequence pairs:\n        #  tokens:   [CLS] is this jack ##son ##ville ? [SEP] no it is not . [SEP]\n        #  type_ids: 0     0  0    0    0     0       0 0     1  1  1  1   1 1\n        # (b) For single sequences:\n        #  tokens:   [CLS] the dog is hairy . [SEP]\n        #  type_ids: 0     0   0   0  0     0 0\n        #\n        # Where \"type_ids\" are used to indicate whether this is the first\n        # sequence or the second sequence. The embedding vectors for `type=0` and\n        # `type=1` were learned during pre-training and are added to the wordpiece\n        # embedding vector (and position vector). This is not *strictly* necessary",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/datareader/ernie_task_reader.py:132-151"
+    },
+    "1955": {
+        "file_id": 157,
+        "content": "The code ensures that the input sequences for BERT/ERNIE models are formatted correctly. If the sequence length is less than the specified maximum length, it accounts for [CLS], [SEP], and [SEP] tokens with adjustments. If the sequence length exceeds the limit, it truncates the longer token sequence accordingly. The code also assigns type_ids to indicate whether it's the first or second sequence, as these are used in the model's embedding vectors.",
+        "type": "comment"
+    },
+    "1956": {
+        "file_id": 157,
+        "content": "        # since the [SEP] token unambiguously separates the sequences, but it makes\n        # it easier for the model to learn the concept of sequences.\n        #\n        # For classification tasks, the first vector (corresponding to [CLS]) is\n        # used as as the \"sentence vector\". Note that this only makes sense because\n        # the entire model is fine-tuned.\n        tokens = []\n        text_type_ids = []\n        tokens.append(\"[CLS]\")\n        text_type_ids.append(0)\n        for token in tokens_a:\n            tokens.append(token)\n            text_type_ids.append(0)\n        tokens.append(\"[SEP]\")\n        text_type_ids.append(0)\n        if tokens_b:\n            for token in tokens_b:\n                tokens.append(token)\n                text_type_ids.append(1)\n            tokens.append(\"[SEP]\")\n            text_type_ids.append(1)\n        token_ids = tokenizer.convert_tokens_to_ids(tokens)\n        position_ids = list(range(len(token_ids)))\n        if self.is_inference:\n            Record = namedtuple('Record',",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/datareader/ernie_task_reader.py:152-179"
+    },
+    "1957": {
+        "file_id": 157,
+        "content": "This code prepares input data for the ERNIE model by combining tokens from two input sequences (tokens_a and tokens_b) into a single sequence. It appends \"[CLS]\" at the start, \"[SEP]\" to separate the sequences, and assigns text_type_id 0 or 1 based on the source sequence. The code also converts the tokens to token ids and generates position ids for the input data. This is specifically designed for classification tasks where the \"[CLS]\" vector represents the overall sentence vector after fine-tuning the entire model.",
+        "type": "comment"
+    },
+    "1958": {
+        "file_id": 157,
+        "content": "                                ['token_ids', 'text_type_ids', 'position_ids'])\n            record = Record(token_ids=token_ids,\n                            text_type_ids=text_type_ids,\n                            position_ids=position_ids)\n        else:\n            if self.label_map:\n                label_id = self.label_map[example.label]\n            else:\n                label_id = example.label\n            Record = namedtuple('Record', [\n                'token_ids', 'text_type_ids', 'position_ids', 'label_id', 'qid'\n            ])\n            qid = None\n            if \"qid\" in example._fields:\n                qid = example.qid\n            record = Record(token_ids=token_ids,\n                            text_type_ids=text_type_ids,\n                            position_ids=position_ids,\n                            label_id=label_id,\n                            qid=qid)\n        return record\n    def _prepare_batch_data(self, examples, batch_size, phase=None):\n        \"\"\"generate batch records\"\"\"\n        batch_records, max_len = [], 0",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/datareader/ernie_task_reader.py:180-207"
+    },
+    "1959": {
+        "file_id": 157,
+        "content": "This code defines a function to create a \"Record\" object, which contains token_ids, text_type_ids, position_ids (possibly label_id and qid depending on the example). It also includes another function _prepare_batch_data that generates batch records from examples. The batch size and phase are also taken as parameters in this function.",
+        "type": "comment"
+    },
+    "1960": {
+        "file_id": 157,
+        "content": "        for index, example in enumerate(examples):\n            if phase == \"train\":\n                self.current_example = index\n            record = self._convert_example_to_record(example, self.max_seq_len,\n                                                     self.tokenizer)\n            max_len = max(max_len, len(record.token_ids))\n            if self.in_tokens:\n                to_append = (len(batch_records) + 1) * max_len <= batch_size\n            else:\n                to_append = len(batch_records) < batch_size\n            if to_append:\n                batch_records.append(record)\n            else:\n                yield self._pad_batch_records(batch_records)\n                batch_records, max_len = [record], len(record.token_ids)\n        if batch_records:\n            yield self._pad_batch_records(batch_records)\nclass ExtractEmbeddingReader(BaseReader):\n    \"\"\"\n    data prepare for getting erine embedding \n    \"\"\"\n    def _pad_batch_records(self, batch_records):\n        \"\"\"\n        对字标号，位置标号特征进行固定长度补全\n        batch_records 包含多条文本的标号",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/datareader/ernie_task_reader.py:208-235"
+    },
+    "1961": {
+        "file_id": 157,
+        "content": "This code iterates through examples and converts them to records. It then appends the records to a batch and pads the batch with zeros if it reaches the maximum size. It yields batches of records, ensuring that each batch is padded to the same length before being passed to the next step in the process. This class inherits from BaseReader and is used for getting Ernie embedding. The method _pad_batch_records pads the batch with zeros if it exceeds the maximum size, ensuring all batches are of equal length.",
+        "type": "comment"
+    },
+    "1962": {
+        "file_id": 157,
+        "content": "        return [字标号列表，文本类型列表，位置特征列表，任务标号列表，掩码列表]\n        \"\"\"\n        batch_token_ids = [record.token_ids for record in batch_records]\n        batch_text_type_ids = [\n            record.text_type_ids for record in batch_records\n        ]\n        batch_position_ids = [record.position_ids for record in batch_records]\n        # padding\n        padded_token_ids, input_mask, seq_lens = pad_batch_data(\n            batch_token_ids,\n            pad_idx=self.pad_id,\n            return_input_mask=True,\n            return_seq_lens=True,\n            max_len=self.max_seq_len)\n        padded_text_type_ids = pad_batch_data(batch_text_type_ids,\n                                              pad_idx=self.pad_id,\n                                              max_len=self.max_seq_len)\n        padded_position_ids = pad_batch_data(batch_position_ids,\n                                             pad_idx=self.pad_id,\n                                             max_len=self.max_seq_len)\n        padded_task_ids = np.ones_like(padded_token_ids,",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/datareader/ernie_task_reader.py:236-257"
+    },
+    "1963": {
+        "file_id": 157,
+        "content": "This code is processing a batch of records and padding token ids, text type ids, position ids, and task ids for an ERNIE (Enhanced Refined Network with Incremental Learning and Exploration) model. The processed data will be used as input for the model.",
+        "type": "comment"
+    },
+    "1964": {
+        "file_id": 157,
+        "content": "                                       dtype=\"int64\") * self.task_id\n        return_list = [\n            padded_token_ids, padded_text_type_ids, padded_position_ids,\n            padded_task_ids, input_mask\n        ]\n        return return_list\n    def data_generate_from_text(self, text):\n        \"\"\"\n        trans text to idx\n        input single text\n        return 5*maxlen*1\n        \"\"\"\n        Example = namedtuple('Example', ['text_a', 'label'])\n        example = Example(text, 0)\n        records = [\n            self._convert_example_to_record(example, self.max_seq_len,\n                                            self.tokenizer)\n        ]\n        pad_records = self._pad_batch_records(records)\n        text_one_hot = np.concatenate(pad_records, axis=0).astype('int64')\n        return text_one_hot\ndef pad_batch_data(insts,\n                   pad_idx=0,\n                   max_len=None,\n                   return_pos=False,\n                   return_input_mask=False,\n                   return_max_len=False,\n                   return_num_token=False,",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/datareader/ernie_task_reader.py:258-289"
+    },
+    "1965": {
+        "file_id": 157,
+        "content": "This code is related to text processing and data generation for a specific task reader. It converts input texts into indexed representations and pads the data to ensure consistent sequence lengths. The function `data_generate_from_text` takes in a single text, converts it into a record, pads the batch of records, and returns the resulting one-hot encoded text representation. The `pad_batch_data` function is used for padding other types of data as well.",
+        "type": "comment"
+    },
+    "1966": {
+        "file_id": 157,
+        "content": "                   return_seq_lens=False):\n    \"\"\"\n    Pad the instances to the max sequence length in batch, and generate the\n    corresponding position data and attention bias.\n    \"\"\"\n    return_list = []\n    if max_len is None:\n        max_len = max(len(inst) for inst in insts)\n    # Any token included in dict can be used to pad, since the paddings' loss\n    # will be masked out by weights and make no effect on parameter gradients.\n    inst_data = np.array(\n        [inst + list([pad_idx] * (max_len - len(inst))) for inst in insts])\n    return_list += [inst_data.astype(\"int64\").reshape([-1, max_len, 1])]\n    # position data\n    if return_pos:\n        inst_pos = np.array([\n            list(range(0, len(inst))) + [pad_idx] * (max_len - len(inst))\n            for inst in insts\n        ])\n        return_list += [inst_pos.astype(\"int64\").reshape([-1, max_len, 1])]\n    if return_input_mask:\n        # This is used to avoid attention on paddings.\n        input_mask_data = np.array(\n            [[1] * len(inst) + [0] * (max_len - len(inst)) for inst in insts])",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/datareader/ernie_task_reader.py:290-317"
+    },
+    "1967": {
+        "file_id": 157,
+        "content": "This function pads instances to the maximum sequence length in a batch. It first calculates the max_len based on instance lengths and then adds padding to shorter instances if necessary. It creates a 3D tensor of input data, position data (if required), and attention masks (if required). These tensors are added to a return list before being returned by the function. The padding is used to make no effect on parameter gradients by being masked out with weights.",
+        "type": "comment"
+    },
+    "1968": {
+        "file_id": 157,
+        "content": "        input_mask_data = np.expand_dims(input_mask_data, axis=-1)\n        return_list += [input_mask_data.astype(\"float32\")]\n    if return_max_len:\n        return_list += [max_len]\n    if return_num_token:\n        num_token = 0\n        for inst in insts:\n            num_token += len(inst)\n        return_list += [num_token]\n    if return_seq_lens:\n        seq_lens = np.array([len(inst) for inst in insts])\n        return_list += [seq_lens.astype(\"int64\").reshape([-1])]\n    return return_list if len(return_list) > 1 else return_list[0]",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/datareader/ernie_task_reader.py:318-334"
+    },
+    "1969": {
+        "file_id": 157,
+        "content": "This code prepares a return list by adding various elements like input_mask_data, max_len (if required), number of tokens (if required), and sequence lengths (if required) before returning the final list.",
+        "type": "comment"
+    },
+    "1970": {
+        "file_id": 158,
+        "content": "/applications/MultimodalVideoTag/scenario_lib/datareader/feature_reader.py",
+        "type": "filepath"
+    },
+    "1971": {
+        "file_id": 158,
+        "content": "The FeatureReader class, a DataReader subclass, reads video features using LSTM, attention cluster, and NextVlad models for YouTube-8M dataset. It handles multimodal data loading, exception handling, label manipulation, soft labels generation, and batch input feature creation. A function loads words and their indices from a file into a dictionary.",
+        "type": "summary"
+    },
+    "1972": {
+        "file_id": 158,
+        "content": "\"\"\"\nfeature reader\n\"\"\"\n#  Copyright (c) 2019 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport sys\ntry:\n    import cPickle as pickle\n    from cStringIO import StringIO\nexcept ImportError:\n    import pickle\n    from io import BytesIO\nimport numpy as np\nimport random\nimport os\nimport traceback\nimport pickle\npython_ver = sys.version_info\nfrom collections import defaultdict\nimport pandas as pd\nfrom .ernie_task_reader import ExtractEmbeddingReader\nfrom .reader_utils import DataReader\nclass FeatureReader(DataReader):",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/datareader/feature_reader.py:1-39"
+    },
+    "1973": {
+        "file_id": 158,
+        "content": "FeatureReader class is a subclass of DataReader, which reads video features from files using Pickle. It uses pandas and includes ExtractEmbeddingReader to read Ernie tasks and provides data reader functions for train/test splits.",
+        "type": "comment"
+    },
+    "1974": {
+        "file_id": 158,
+        "content": "    \"\"\"\n    Data reader for youtube-8M dataset, which was stored as features extracted by prior networks\n    This is for the three models: lstm, attention cluster, nextvlad\n    dataset cfg: num_classes\n                 batch_size\n                 list\n                 NextVlad only: eigen_file\n    \"\"\"\n    def __init__(self, name, mode, cfg):\n        \"\"\"\n        init\n        \"\"\"\n        self.name = name\n        self.mode = mode\n        self.num_classes = cfg.MODEL.num_classes\n        # set batch size and file list\n        self.batch_size = cfg[mode.upper()]['batch_size']\n        self.filelist = cfg[mode.upper()]['filelist']\n        self.eigen_file = cfg.MODEL.get('eigen_file', None)\n        self.num_seg = cfg.MODEL.get('num_seg', None)\n        self.loss_type = cfg.TRAIN['loss_type']\n        vocab_file = os.path.join(cfg.TRAIN.ernie_pretrain_dict_path,\n                                  'vocab.txt')\n        self.ernie_reader = ExtractEmbeddingReader(\n            vocab_path=vocab_file,\n            max_seq_len=cfg.MODEL.text_max_len,",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/datareader/feature_reader.py:40-67"
+    },
+    "1975": {
+        "file_id": 158,
+        "content": "The code initializes a data reader for YouTube-8M dataset, which contains features extracted by prior networks. It supports three models: LSTM, attention cluster, and NextVlad. The constructor takes the name, mode (train or test), and configuration parameters as inputs. It sets the batch size, file list, eigen_file (for NextVlad only), number of segments (num_seg), loss type, and initializes an ExtractEmbeddingReader using a vocab.txt file and maximum sequence length (text_max_len).",
+        "type": "comment"
+    },
+    "1976": {
+        "file_id": 158,
+        "content": "            do_lower_case=True)\n        url_title_label_file = cfg[mode.upper()]['url_title_label_file']\n        self.class_dict = load_class_file(cfg.MODEL.class_name_file)\n        self.url_title_info = load_video_file(url_title_label_file,\n                                              self.class_dict, mode)\n    def create_reader(self):\n        \"\"\"\n        create reader\n        \"\"\"\n        url_list = list(self.url_title_info.keys())\n        if self.mode == 'train':\n            random.shuffle(url_list)\n        def reader():\n            \"\"\"reader\n            \"\"\"\n            batch_out = []\n            for url in url_list:\n                try:\n                    filepath = os.path.join(\n                        self.filelist,\n                        url.split('/')[-1].split('.')[0] + '.pkl')\n                    if os.path.exists(filepath) is False:\n                        continue\n                    if python_ver < (3, 0):\n                        record = pickle.load(open(filepath, 'rb'))\n                    else:",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/datareader/feature_reader.py:68-95"
+    },
+    "1977": {
+        "file_id": 158,
+        "content": "The code loads a class dictionary and a video file information based on the given configuration. It then creates a reader function that iterates through the URLs, checks if a file exists for each URL, and skips if it doesn't. If the file exists, it loads the data (pickle format) using the appropriate pickle version for Python < 3.0 or >= 3.0.",
+        "type": "comment"
+    },
+    "1978": {
+        "file_id": 158,
+        "content": "                        record = pickle.load(open(filepath, 'rb'),\n                                             encoding='iso-8859-1')\n                    text_raw = self.url_title_info[url]['title']\n                    rgb = record['feature']['image_pkl'].astype(float)\n                    if record['feature']['audio_pkl'].shape[0] == 0:\n                        audio_pkl = np.zeros((10, 128))\n                        audio = audio_pkl.astype(float)\n                    else:\n                        audio = record['feature']['audio_pkl'].astype(float)\n                    text_one_hot = self.ernie_reader.data_generate_from_text(\n                        str(text_raw))\n                    video = record['video']\n                    if self.mode != 'infer':\n                        label = self.url_title_info[url]['label']\n                        label = [int(w) for w in label]\n                        if self.loss_type == 'sigmoid':\n                            label = make_one_hot(label, self.num_classes)\n                        elif self.loss_type == 'softmax':",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/datareader/feature_reader.py:96-113"
+    },
+    "1979": {
+        "file_id": 158,
+        "content": "This code reads data from a file, prepares and processes it into various formats. It first loads the record from a file with pickle, then extracts text, RGB image data, and audio data (defaulting to zeroes if no audio is present). The code also generates one-hot encoding for the text using the ernie_reader. It obtains the video data and depending on the mode, assigns labels either as one-hot or softmax based on the loss type specified.",
+        "type": "comment"
+    },
+    "1980": {
+        "file_id": 158,
+        "content": "                            label = make_one_soft_hot(label, self.num_classes,\n                                                      False)\n                        batch_out.append((rgb, audio, text_one_hot, label))\n                    else:\n                        batch_out.append((rgb, audio, text_one_hot, video))\n                    if len(batch_out) == self.batch_size:\n                        yield batch_out\n                        batch_out = []\n                except Exception as e:\n                    print(\"warning: load data {} failed, {}\".format(\n                        filepath, str(e)))\n                    traceback.print_exc()\n                    continue\n# if self.mode == 'infer' and len(batch_out) > 0:\n            if len(batch_out) > 0:\n                yield batch_out\n        return reader\n    def get_config_from_sec(self, sec, item, default=None):\n        \"\"\"get_config_from_sec\n        \"\"\"\n        if sec.upper() not in self.cfg:\n            return default\n        return self.cfg[sec.upper()].get(item, default)",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/datareader/feature_reader.py:114-140"
+    },
+    "1981": {
+        "file_id": 158,
+        "content": "This code is part of a data reader for multimodal video tagging. It reads in RGB images, audio clips, and text one-hot vectors, then appends them to a batch. If a label is available, it converts the label to a softmax output; otherwise, it yields the video itself. The code handles exceptions during data loading and allows for inferencing. Configuration values are retrieved using get_config_from_sec function.",
+        "type": "comment"
+    },
+    "1982": {
+        "file_id": 158,
+        "content": "def load_video_file(label_file, class_dict, mode='train'):\n    \"\"\"\n    labelfile formate: URL \\t title \\t label1,label2\n    return dict\n    \"\"\"\n    data = pd.read_csv(label_file, sep='\\t', header=None)\n    url_info_dict = defaultdict(dict)\n    for index, row in data.iterrows():\n        url = row[0]\n        if url in url_info_dict:\n            continue\n        if pd.isna(row[1]):\n            title = \"\"\n        else:\n            title = str(row[1])\n        if mode == 'infer':\n            url_info_dict[url] = {'title': title}\n        else:\n            if pd.isna(row[2]):\n                continue\n            labels = row[2].split(',')\n            labels_idx = [class_dict[w] for w in labels if w in class_dict]\n            if len(labels_idx) < 1:\n                continue\n            if url not in url_info_dict:\n                url_info_dict[url] = {'label': labels_idx, 'title': title}\n    print('load video %d' % (len(url_info_dict)))\n    return url_info_dict\ndef dequantize(feat_vector, max_quantized_value=2., min_quantized_value=-2.):",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/datareader/feature_reader.py:143-173"
+    },
+    "1983": {
+        "file_id": 158,
+        "content": "This code defines a function load_video_file() that reads a label file in tab-separated format and stores the URLs, titles, and labels into a dictionary called url_info_dict. It also contains another function dequantize(), but this one is not used in the current code block. The load_video_file() function checks for NA values and splits the labels by comma before processing. If 'mode' is set to 'infer', it only stores title information; otherwise, it processes the labels. Finally, it prints the number of processed videos and returns the url_info_dict dictionary.",
+        "type": "comment"
+    },
+    "1984": {
+        "file_id": 158,
+        "content": "    \"\"\"\n    Dequantize the feature from the byte format to the float format\n    \"\"\"\n    assert max_quantized_value > min_quantized_value\n    quantized_range = max_quantized_value - min_quantized_value\n    scalar = quantized_range / 255.0\n    bias = (quantized_range / 512.0) + min_quantized_value\n    return feat_vector * scalar + bias\nepsilon = 0.1\nsmmoth_score = (1.0 / float(210)) * epsilon\ndef label_smmoth(label_one_hot_vector):\n    \"\"\"\n    label_smmoth\n    \"\"\"\n    global smmoth_score\n    for i in range(len(label_one_hot_vector)):\n        if label_one_hot_vector[i] == 0:\n            label_one_hot_vector[i] = smmoth_score\n    return label_one_hot_vector\ndef make_one_soft_hot(label, dim=15, label_smmoth=False):\n    \"\"\"\n    make_one_soft_hot\n    \"\"\"\n    one_hot_soft_label = np.zeros(dim)\n    one_hot_soft_label = one_hot_soft_label.astype(float)\n    # multi-labelis\n    # label smmoth\n    if label_smmoth:\n        one_hot_soft_label = label_smmoth(one_hot_soft_label)\n    label_len = len(label)\n    prob = (1 - np.sum(one_hot_soft_label)) / float(label_len)",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/datareader/feature_reader.py:174-212"
+    },
+    "1985": {
+        "file_id": 158,
+        "content": "This code contains a series of functions for handling and manipulating label data. The 'feature_reader' function dequantizes feature values, while the 'label_smmoth' function modifies a one-hot label vector by replacing zeros with a specific smoothness value. The 'make_one_soft_hot' function creates a one-hot soft label based on the input label and applies label smoothing if specified.",
+        "type": "comment"
+    },
+    "1986": {
+        "file_id": 158,
+        "content": "    for ind in label:\n        one_hot_soft_label[ind] += prob\n    #one_hot_soft_label = label_smmoth(one_hot_soft_label)\n    return one_hot_soft_label\ndef make_one_hot(label, dim=15):\n    \"\"\"\n    make_one_hot\n    \"\"\"\n    one_hot_soft_label = np.zeros(dim)\n    one_hot_soft_label = one_hot_soft_label.astype(float)\n    for ind in label:\n        one_hot_soft_label[ind] = 1\n    return one_hot_soft_label\ndef generate_random_idx(feature_len, num_seg):\n    \"\"\"\n    generate_random_idx\n    \"\"\"\n    idxs = []\n    stride = float(feature_len) / num_seg\n    for i in range(num_seg):\n        pos = (i + np.random.random()) * stride\n        idxs.append(min(feature_len - 1, int(pos)))\n    return idxs\ndef get_batch_ernie_input_feature(reader, texts):\n    \"\"\"\n    get_batch_ernie_input_feature\n    \"\"\"\n    result_list = reader.data_generate_from_texts(texts)\n    result_trans = []\n    for i in range(len(texts)):\n        result_trans.append([result_list[0][i],\\\n                             result_list[1][i],\n                             result_list[2][i],",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/datareader/feature_reader.py:213-251"
+    },
+    "1987": {
+        "file_id": 158,
+        "content": "This code defines several functions for generating one-hot labels, creating random indices, and getting batch input features for a specific application. It uses numpy arrays for efficient operations and handling multidimensional data. The functions can be used in the context of multimodal video analysis, where labels, text inputs, and other data are processed for further processing or model training.",
+        "type": "comment"
+    },
+    "1988": {
+        "file_id": 158,
+        "content": "                             result_list[3][i],\n                             result_list[4][i]])\n    return np.array(result_trans)\ndef load_class_file(class_file):\n    \"\"\"\n    load_class_file\n    \"\"\"\n    class_lines = open(class_file, 'r', encoding='utf8').readlines()\n    class_dict = {}\n    for i, line in enumerate(class_lines):\n        tmp = line.strip().split('\\t')\n        word = tmp[0]\n        index = str(i)\n        if len(tmp) == 2:\n            index = tmp[1]\n        class_dict[word] = index\n    return class_dict\nif __name__ == '__main__':\n    pass",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/datareader/feature_reader.py:252-274"
+    },
+    "1989": {
+        "file_id": 158,
+        "content": "The code contains a function that loads and returns a dictionary containing words and their corresponding indices from a class file. The function reads the lines of the file, removes any leading or trailing whitespace, splits the line based on tabs, assigns the first element as the word and the second element as the index (if available), then adds these key-value pairs to a dictionary. This dictionary is returned as the result.",
+        "type": "comment"
+    },
+    "1990": {
+        "file_id": 159,
+        "content": "/applications/MultimodalVideoTag/scenario_lib/datareader/reader_utils.py",
+        "type": "filepath"
+    },
+    "1991": {
+        "file_id": 159,
+        "content": "The code defines a custom exception \"ReaderNotFoundError\" and manages reader instances using a singleton ReaderZoo object. The `regist_reader` function registers new readers, while the `get_reader` function retrieves and returns an instance of the requested reader based on name, mode, and configuration.",
+        "type": "summary"
+    },
+    "1992": {
+        "file_id": 159,
+        "content": "\"\"\"\nreader utils\n\"\"\"\n#  Copyright (c) 2019 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nclass ReaderNotFoundError(Exception):\n    \"Error: reader not found\"\n    def __init__(self, reader_name, avail_readers):\n        super(ReaderNotFoundError, self).__init__()\n        self.reader_name = reader_name\n        self.avail_readers = avail_readers\n    def __str__(self):\n        msg = \"Reader {} Not Found.\\nAvailiable readers:\\n\".format(\n            self.reader_name)\n        for reader in self.avail_readers:",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/datareader/reader_utils.py:1-30"
+    },
+    "1993": {
+        "file_id": 159,
+        "content": "The code defines a class \"ReaderNotFoundError\" which is an exception to handle situations when a reader is not found. It takes the name of the missing reader and a list of available readers as arguments, and provides a formatted error message with the missing reader's name and a list of available readers. This can be useful for raising custom errors in cases where the required reader cannot be found or is not compatible with the provided options.",
+        "type": "comment"
+    },
+    "1994": {
+        "file_id": 159,
+        "content": "            msg += \"  {}\\n\".format(reader)\n        return msg\nclass DataReader(object):\n    \"\"\"data reader for video input\"\"\"\n    def __init__(self, model_name, mode, cfg):\n        self.name = model_name\n        self.mode = mode\n        self.cfg = cfg\n    def create_reader(self):\n        \"\"\"Not implemented\"\"\"\n        pass\n    def get_config_from_sec(self, sec, item, default=None):\n        \"\"\"get_config_from_sec\n        \"\"\"\n        if sec.upper() not in self.cfg:\n            return default\n        return self.cfg[sec.upper()].get(item, default)\nclass ReaderZoo(object):\n    \"\"\"ReaderZoo\n    \"\"\"\n    def __init__(self):\n        self.reader_zoo = {}\n    def regist(self, name, reader):\n        \"\"\"regist\n        \"\"\"\n        assert reader.__base__ == DataReader, \"Unknow model type {}\".format(\n            type(reader))\n        self.reader_zoo[name] = reader\n    def get(self, name, mode, cfg):\n        \"\"\"get\n        \"\"\"\n        for k, v in self.reader_zoo.items():\n            if k == name:\n                return v(name, mode, cfg)",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/datareader/reader_utils.py:31-73"
+    },
+    "1995": {
+        "file_id": 159,
+        "content": "This code defines classes for data readers and a reader registry. The `DataReader` class is a base class for different video input data readers, while the `ReaderZoo` class manages a dictionary of registered readers. The code snippet includes methods to register readers and retrieve them by name, mode, and configuration.",
+        "type": "comment"
+    },
+    "1996": {
+        "file_id": 159,
+        "content": "        raise ReaderNotFoundError(name, self.reader_zoo.keys())\n# singleton reader_zoo\nreader_zoo = ReaderZoo()\ndef regist_reader(name, reader):\n    \"\"\"regist_reader\n    \"\"\"\n    reader_zoo.regist(name, reader)\ndef get_reader(name, mode, cfg):\n    \"\"\"get_reader\n    \"\"\"\n    reader_model = reader_zoo.get(name, mode, cfg)\n    return reader_model.create_reader()",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/datareader/reader_utils.py:74-91"
+    },
+    "1997": {
+        "file_id": 159,
+        "content": "This code snippet is responsible for managing reader instances, using a singleton ReaderZoo object. The `regist_reader` function allows registration of new readers, while the `get_reader` function retrieves and returns an instance of the requested reader based on the provided name, mode, and configuration.",
+        "type": "comment"
+    },
+    "1998": {
+        "file_id": 160,
+        "content": "/applications/MultimodalVideoTag/scenario_lib/datareader/tokenization.py",
+        "type": "filepath"
+    },
+    "1999": {
+        "file_id": 160,
+        "content": "This code provides text to Unicode conversion and printable encoding functions, with tokenization classes for Chinese characters, punctuation splitting, and WordpieceTokenizing, preparing the text for further processing.",
+        "type": "summary"
+    }
+}
