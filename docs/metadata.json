@@ -12,7 +12,7 @@
         "1": {
             "filepath": "/README.md",
             "entry_id": 4,
-            "language_id": "plain-text"
+            "language_id": "markdown"
         },
         "2": {
             "filepath": "/README_en.md",
@@ -32,7 +32,7 @@
         "5": {
             "filepath": "/applications/Anti-UAV/README.md",
             "entry_id": 32,
-            "language_id": "markdown"
+            "language_id": "plain-text"
         },
         "6": {
             "filepath": "/applications/Anti-UAV/get_image_label.py",
@@ -992,7 +992,7 @@
         "197": {
             "filepath": "/applications/TableTennis/ActionRecognition/README.md",
             "entry_id": 2570,
-            "language_id": "plain-text"
+            "language_id": "markdown"
         },
         "198": {
             "filepath": "/applications/TableTennis/datasets/script/submission_format_transfer.py",
@@ -1422,7 +1422,7 @@
         "283": {
             "filepath": "/applications/VideoTag/README.md",
             "entry_id": 3326,
-            "language_id": "markdown"
+            "language_id": "plain-text"
         },
         "284": {
             "filepath": "/applications/VideoTag/Run.md",
@@ -1622,22 +1622,22 @@
         "323": {
             "filepath": "/deploy/cpp_infer/include/postprocess_op.h",
             "entry_id": 3808,
-            "language_id": "header"
+            "language_id": "c++"
         },
         "324": {
             "filepath": "/deploy/cpp_infer/include/preprocess_op.h",
             "entry_id": 3814,
-            "language_id": "c++"
+            "language_id": "header"
         },
         "325": {
             "filepath": "/deploy/cpp_infer/include/utility.h",
             "entry_id": 3820,
-            "language_id": "c++"
+            "language_id": "c"
         },
         "326": {
             "filepath": "/deploy/cpp_infer/include/video_rec.h",
             "entry_id": 3826,
-            "language_id": "header"
+            "language_id": "c"
         },
         "327": {
             "filepath": "/deploy/cpp_infer/readme.md",
@@ -1842,7 +1842,7 @@
         "367": {
             "filepath": "/english_documents/model_zoo/README.md",
             "entry_id": 4294,
-            "language_id": "markdown"
+            "language_id": "plain-text"
         },
         "368": {
             "filepath": "/english_documents/model_zoo/detection/SlowFast_FasterRCNN_en.md",
@@ -2282,7 +2282,7 @@
         "455": {
             "filepath": "/paddlevideo/metrics/ava_evaluation/README.md",
             "entry_id": 5570,
-            "language_id": "plain-text"
+            "language_id": "markdown"
         },
         "456": {
             "filepath": "/paddlevideo/metrics/ava_evaluation/metrics.py",
@@ -3152,7 +3152,7 @@
         "629": {
             "filepath": "/test_tipc/README.md",
             "entry_id": 8496,
-            "language_id": "plain-text"
+            "language_id": "markdown"
         },
         "630": {
             "filepath": "/test_tipc/benchmark_train.sh",
