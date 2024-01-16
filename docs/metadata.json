@@ -12,7 +12,7 @@
         "1": {
             "filepath": "/README.md",
             "entry_id": 4,
-            "language_id": "plain-text"
+            "language_id": "markdown"
         },
         "2": {
             "filepath": "/README_en.md",
@@ -32,7 +32,7 @@
         "5": {
             "filepath": "/applications/Anti-UAV/README.md",
             "entry_id": 32,
-            "language_id": "plain-text"
+            "language_id": "markdown"
         },
         "6": {
             "filepath": "/applications/Anti-UAV/get_image_label.py",
@@ -147,7 +147,7 @@
         "28": {
             "filepath": "/applications/EIVideo/EIVideo/README.MD",
             "entry_id": 282,
-            "language_id": "plain-text"
+            "language_id": "markdown"
         },
         "29": {
             "filepath": "/applications/EIVideo/EIVideo/__init__.py",
@@ -437,7 +437,7 @@
         "86": {
             "filepath": "/applications/EIVideo/README.md",
             "entry_id": 926,
-            "language_id": "markdown"
+            "language_id": "plain-text"
         },
         "87": {
             "filepath": "/applications/EIVideo/resources/QT/demo.ui",
@@ -452,7 +452,7 @@
         "89": {
             "filepath": "/applications/FightRecognition/README.md",
             "entry_id": 956,
-            "language_id": "markdown"
+            "language_id": "plain-text"
         },
         "90": {
             "filepath": "/applications/FigureSkating/README.md",
@@ -462,7 +462,7 @@
         "91": {
             "filepath": "/applications/FootballAction/README.md",
             "entry_id": 980,
-            "language_id": "plain-text"
+            "language_id": "markdown"
         },
         "92": {
             "filepath": "/applications/FootballAction/checkpoints/download.sh",
@@ -757,7 +757,7 @@
         "150": {
             "filepath": "/applications/MultimodalVideoTag/README.md",
             "entry_id": 1900,
-            "language_id": "markdown"
+            "language_id": "plain-text"
         },
         "151": {
             "filepath": "/applications/MultimodalVideoTag/download.sh",
@@ -867,12 +867,12 @@
         "172": {
             "filepath": "/applications/README.md",
             "entry_id": 2210,
-            "language_id": "markdown"
+            "language_id": "plain-text"
         },
         "173": {
             "filepath": "/applications/T2VLAD/README.md",
             "entry_id": 2214,
-            "language_id": "plain-text"
+            "language_id": "markdown"
         },
         "174": {
             "filepath": "/applications/T2VLAD/README_en.md",
@@ -992,7 +992,7 @@
         "197": {
             "filepath": "/applications/TableTennis/ActionRecognition/README.md",
             "entry_id": 2570,
-            "language_id": "markdown"
+            "language_id": "plain-text"
         },
         "198": {
             "filepath": "/applications/TableTennis/datasets/script/submission_format_transfer.py",
@@ -1572,7 +1572,7 @@
         "313": {
             "filepath": "/benchmark/TimeSformer/README.md",
             "entry_id": 3680,
-            "language_id": "plain-text"
+            "language_id": "markdown"
         },
         "314": {
             "filepath": "/benchmark/TimeSformer/run_all.sh",
@@ -1622,7 +1622,7 @@
         "323": {
             "filepath": "/deploy/cpp_infer/include/postprocess_op.h",
             "entry_id": 3808,
-            "language_id": "c++"
+            "language_id": "c"
         },
         "324": {
             "filepath": "/deploy/cpp_infer/include/preprocess_op.h",
@@ -1632,7 +1632,7 @@
         "325": {
             "filepath": "/deploy/cpp_infer/include/utility.h",
             "entry_id": 3820,
-            "language_id": "c"
+            "language_id": "header"
         },
         "326": {
             "filepath": "/deploy/cpp_infer/include/video_rec.h",
@@ -2282,7 +2282,7 @@
         "455": {
             "filepath": "/paddlevideo/metrics/ava_evaluation/README.md",
             "entry_id": 5570,
-            "language_id": "markdown"
+            "language_id": "plain-text"
         },
         "456": {
             "filepath": "/paddlevideo/metrics/ava_evaluation/metrics.py",
