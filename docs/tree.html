@@ -1101,86 +1101,99 @@
 <li><a class="file_link" href="index.html?q=/paddlevideo/modeling/losses/__init__.py" id="/paddlevideo/modeling/losses/__init__.py"><code>&UnderBar;&UnderBar;init&UnderBar;&UnderBar;&period;py</code></a> <em>Imports diverse losses for PaddleVideo tasks.</em></li>
 <li><a class="file_link" href="index.html?q=/paddlevideo/modeling/losses/actbert_loss.py" id="/paddlevideo/modeling/losses/actbert_loss.py"><code>actbert&UnderBar;loss&period;py</code></a> <em>ActBert loss function code</em></li>
 <li><a class="file_link" href="index.html?q=/paddlevideo/modeling/losses/asrf_loss.py" id="/paddlevideo/modeling/losses/asrf_loss.py"><code>asrf&UnderBar;loss&period;py</code></a> <em>Custom video modeling loss functions defined</em></li>
-<li><a class="file_link" href="index.html?q=/paddlevideo/modeling/losses/base.py" id="/paddlevideo/modeling/losses/base.py"><code>base&period;py</code></a> <em>Base loss function class for PaddlePaddle. </li>
+<li><a class="file_link" href="index.html?q=/paddlevideo/modeling/losses/base.py" id="/paddlevideo/modeling/losses/base.py"><code>base&period;py</code></a> <em>Base loss function class for PaddlePaddle.</em></li>
+<li><a class="file_link" href="index.html?q=/paddlevideo/modeling/losses/bmn_loss.py" id="/paddlevideo/modeling/losses/bmn_loss.py"><code>bmn&UnderBar;loss&period;py</code></a> <em>BMN loss function, PaddleVideo.</em></li>
+<li><a class="file_link" href="index.html?q=/paddlevideo/modeling/losses/cross_entropy_loss.py" id="/paddlevideo/modeling/losses/cross_entropy_loss.py"><code>cross&UnderBar;entropy&UnderBar;loss&period;py</code></a> <em>Custom PaddlePaddle loss for classification tasks</em></li>
+<li><a class="file_link" href="index.html?q=/paddlevideo/modeling/losses/depth_loss.py" id="/paddlevideo/modeling/losses/depth_loss.py"><code>depth&UnderBar;loss&period;py</code></a> <em>Calculates depth losses for disparity tasks.</em></li>
+<li><a class="file_link" href="index.html?q=/paddlevideo/modeling/losses/distillation_loss.py" id="/paddlevideo/modeling/losses/distillation_loss.py"><code>distillation&UnderBar;loss&period;py</code></a> <em>Distillation loss, KL divergence, CrossEntropy, weighted average.</em></li>
+<li><a class="file_link" href="index.html?q=/paddlevideo/modeling/losses/transnetv2_loss.py" id="/paddlevideo/modeling/losses/transnetv2_loss.py"><code>transnetv2&UnderBar;loss&period;py</code></a> <em>TransNetV2 loss calculation class</em></li>
+<li><a class="file_link" href="index.html?q=/paddlevideo/modeling/losses/yowo_loss.py" id="/paddlevideo/modeling/losses/yowo_loss.py"><code>yowo&UnderBar;loss&period;py</code></a> <em>Optimize hard examples, YOLOv3-style losses for bounding box location, confidence, classification on GPU.</em></li>
+</ul>
+</li>
+<li><a class="file_link" href="index.html?q=/paddlevideo/modeling/registry.py" id="/paddlevideo/modeling/registry.py"><code>registry&period;py</code></a> <em>Model registration for efficient organization.</em></li>
+<li><span hierarchy="3" class="expanded" onclick="toggleVisibility(this)" ><strong class="directory" id="/paddlevideo/modeling/samplers/"><code>samplers</code></strong> <em>Licensing, RandomSampler: Balanced bbox sampling.</em></span><ul>
+<li><a class="file_link" href="index.html?q=/paddlevideo/modeling/samplers/__init__.py" id="/paddlevideo/modeling/samplers/__init__.py"><code>&UnderBar;&UnderBar;init&UnderBar;&UnderBar;&period;py</code></a> <em>Licensing, RandomSampler import.</em></li>
+<li><a class="file_link" href="index.html?q=/paddlevideo/modeling/samplers/random_sampler.py" id="/paddlevideo/modeling/samplers/random_sampler.py"><code>random&UnderBar;sampler&period;py</code></a> <em>RandomSampler: Balanced positive-negative bbox sampling.</em></li>
+</ul>
+</li>
+<li><a class="file_link" href="index.html?q=/paddlevideo/modeling/weight_init.py" id="/paddlevideo/modeling/weight_init.py"><code>weight&UnderBar;init&period;py</code></a> <em>Initialize layer weights in PaddlePaddle.</em></li>
+</ul>
+</li>
+<li><span hierarchy="2" class="expanded" onclick="toggleVisibility(this)" ><strong class="directory" id="/paddlevideo/solver/"><code>solver</code></strong> <em>Optimizer and learning rate schedulers for PaddleVideo.</em></span><ul>
+<li><a class="file_link" href="index.html?q=/paddlevideo/solver/__init__.py" id="/paddlevideo/solver/__init__.py"><code>&UnderBar;&UnderBar;init&UnderBar;&UnderBar;&period;py</code></a> <em>Imports optimizer and learning rate functions under Apache 2.0 license.</em></li>
+<li><a class="file_link" href="index.html?q=/paddlevideo/solver/custom_lr.py" id="/paddlevideo/solver/custom_lr.py"><code>custom&UnderBar;lr&period;py</code></a> <em>Custom warmup &amp; decay schedulers for PaddleVideo.</em></li>
+<li><a class="file_link" href="index.html?q=/paddlevideo/solver/lr.py" id="/paddlevideo/solver/lr.py"><code>lr&period;py</code></a> <em>Learning rate scheduler construction.</em></li>
+<li><a class="file_link" href="index.html?q=/paddlevideo/solver/optimizer.py" id="/paddlevideo/solver/optimizer.py"><code>optimizer&period;py</code></a> <em>Initializes optimizer configurations, handles decay and creates optimizer.</em></li>
+</ul>
+</li>
+<li><span hierarchy="2" class="expanded" onclick="toggleVisibility(this)" ><strong class="directory" id="/paddlevideo/tasks/"><code>tasks</code></strong> <em>Trains PaddleVideo models with various tasks and configurations.</em></span><ul>
+<li><a class="file_link" href="index.html?q=/paddlevideo/tasks/__init__.py" id="/paddlevideo/tasks/__init__.py"><code>&UnderBar;&UnderBar;init&UnderBar;&UnderBar;&period;py</code></a> <em>PaddleVideo tasks module initialization file</em></li>
+<li><a class="file_link" href="index.html?q=/paddlevideo/tasks/test.py" id="/paddlevideo/tasks/test.py"><code>test&period;py</code></a> <em>Test PaddlePaddle models in parallel</em></li>
+<li><a class="file_link" href="index.html?q=/paddlevideo/tasks/train.py" id="/paddlevideo/tasks/train.py"><code>train&period;py</code></a> <em>Train PaddlePaddle's Distributed Model with AMP, Log, Evaluate, and Save.</em></li>
+<li><a class="file_link" href="index.html?q=/paddlevideo/tasks/train_dali.py" id="/paddlevideo/tasks/train_dali.py"><code>train&UnderBar;dali&period;py</code></a> <em>Trains DALI TSN model with optimization steps, logs metrics.</em></li>
+<li><a class="file_link" href="index.html?q=/paddlevideo/tasks/train_multigrid.py" id="/paddlevideo/tasks/train_multigrid.py"><code>train&UnderBar;multigrid&period;py</code></a> <em>Trains PaddleVideo models with multigrid configuration.</em></li>
+</ul>
+</li>
+<li><span hierarchy="2" class="expanded" onclick="toggleVisibility(this)" ><strong class="directory" id="/paddlevideo/utils/"><code>utils</code></strong> <em>PaddleVideo ML &amp; video utilities.</em></span><ul>
+<li><a class="file_link" href="index.html?q=/paddlevideo/utils/__init__.py" id="/paddlevideo/utils/__init__.py"><code>&UnderBar;&UnderBar;init&UnderBar;&UnderBar;&period;py</code></a> <em>PaddleVideo utils initialization.</em></li>
+<li><a class="file_link" href="index.html?q=/paddlevideo/utils/build_utils.py" id="/paddlevideo/utils/build_utils.py"><code>build&UnderBar;utils&period;py</code></a> <em>Build utility function for object creation from config and registry.</em></li>
+<li><a class="file_link" href="index.html?q=/paddlevideo/utils/config.py" id="/paddlevideo/utils/config.py"><code>config&period;py</code></a> <em>Configure and load YAML files with AttrDict, logger, visualization support.</em></li>
+<li><a class="file_link" href="index.html?q=/paddlevideo/utils/dist_utils.py" id="/paddlevideo/utils/dist_utils.py"><code>dist&UnderBar;utils&period;py</code></a> <em>Distributed computing utilities for PaddleVideo.</em></li>
+<li><a class="file_link" href="index.html?q=/paddlevideo/utils/logger.py" id="/paddlevideo/utils/logger.py"><code>logger&period;py</code></a> <em>PaddleVideo's colorful logger setup with non-propagation.</em></li>
+<li><span hierarchy="3" class="expanded" onclick="toggleVisibility(this)" ><strong class="directory" id="/paddlevideo/utils/multigrid/"><code>multigrid</code></strong> <em>Multigrid utility functions for Paddle Video.</em></span><ul>
+<li><a class="file_link" href="index.html?q=/paddlevideo/utils/multigrid/__init__.py" id="/paddlevideo/utils/multigrid/__init__.py"><code>&UnderBar;&UnderBar;init&UnderBar;&UnderBar;&period;py</code></a> <em>Imports useful functions from PaddleVideo library.</em></li>
+<li><a class="file_link" href="index.html?q=/paddlevideo/utils/multigrid/batchnorm_helper.py" id="/paddlevideo/utils/multigrid/batchnorm_helper.py"><code>batchnorm&UnderBar;helper&period;py</code></a> <em>BatchNorm3D helper for PyTorch</em></li>
+<li><a class="file_link" href="index.html?q=/paddlevideo/utils/multigrid/interval_helper.py" id="/paddlevideo/utils/multigrid/interval_helper.py"><code>interval&UnderBar;helper&period;py</code></a> <em>Determine evaluation epoch using multigrid schedule</em></li>
+<li><a class="file_link" href="index.html?q=/paddlevideo/utils/multigrid/multigrid.py" id="/paddlevideo/utils/multigrid/multigrid.py"><code>multigrid&period;py</code></a> <em>Manages multigrid training schedules.</em></li>
+<li><a class="file_link" href="index.html?q=/paddlevideo/utils/multigrid/save_load_helper.py" id="/paddlevideo/utils/multigrid/save_load_helper.py"><code>save&UnderBar;load&UnderBar;helper&period;py</code></a> <em>Ensures state dict consistency and loads pre-trained weights.</em></li>
+<li><a class="file_link" href="index.html?q=/paddlevideo/utils/multigrid/short_sampler.py" id="/paddlevideo/utils/multigrid/short_sampler.py"><code>short&UnderBar;sampler&period;py</code></a> <em>DistributedShortSampler: Efficient Distributed Data Loading</em></li>
+</ul>
+</li>
+<li><a class="file_link" href="index.html?q=/paddlevideo/utils/precise_bn.py" id="/paddlevideo/utils/precise_bn.py"><code>precise&UnderBar;bn&period;py</code></a> <em>Precise Batch Normalization for faster training</em></li>
+<li><a class="file_link" href="index.html?q=/paddlevideo/utils/profiler.py" id="/paddlevideo/utils/profiler.py"><code>profiler&period;py</code></a> <em>PaddleVideo Profiler: Performance Analysis and Optimization Tool</em></li>
+<li><a class="file_link" href="index.html?q=/paddlevideo/utils/record.py" id="/paddlevideo/utils/record.py"><code>record&period;py</code></a> <em>Records metrics, calculates means, logs progress in training processes.</em></li>
+<li><a class="file_link" href="index.html?q=/paddlevideo/utils/registry.py" id="/paddlevideo/utils/registry.py"><code>registry&period;py</code></a> <em>Registry for mapping names to objects with registration and retrieval methods.</em></li>
+<li><a class="file_link" href="index.html?q=/paddlevideo/utils/save_load.py" id="/paddlevideo/utils/save_load.py"><code>save&UnderBar;load&period;py</code></a> <em>Save/load functions for PaddlePaddle models.</em></li>
+</ul>
+</li>
+<li><a class="file_link" href="index.html?q=/paddlevideo/version.py" id="/paddlevideo/version.py"><code>version&period;py</code></a> <em>PaddleVideo version 0.0.1, Apache License 2.0</em></li>
+</ul>
+</li>
+<li><a class="file_link" href="index.html?q=/README.md" id="/README.md"><code>README&period;md</code></a> <em>Advanced video processing library with deployment support</em></li>
+<li><a class="file_link" href="index.html?q=/README_en.md" id="/README_en.md"><code>README&UnderBar;en&period;md</code></a> <em>Deep learning library for video processing</em></li>
+<li><a class="file_link" href="index.html?q=/run.sh" id="/run.sh"><code>run&period;sh</code></a> <em>Trains deep learning models for computer vision tasks using PaddlePaddle.</em></li>
+<li><a class="file_link" href="index.html?q=/setup.py" id="/setup.py"><code>setup&period;py</code></a> <em>PaddleVideo setup: PaddlePaddle-powered video tool, Python 3.7.</em></li>
+<li><span hierarchy="1" class="expanded" onclick="toggleVisibility(this)" ><strong class="directory" id="/test_tipc/"><code>test&UnderBar;tipc</code></strong> <em>Test Paddle Video, GPU/CPU benchmarking.</em></span><ul>
+<li><a class="file_link" href="index.html?q=/test_tipc/benchmark_train.sh" id="/test_tipc/benchmark_train.sh"><code>benchmark&UnderBar;train&period;sh</code></a> <em>Benchmarks PaddleVideo model, adjusting batch sizes and precisions for performance.</em></li>
+<li><a class="file_link" href="index.html?q=/test_tipc/common_func.sh" id="/test_tipc/common_func.sh"><code>common&UnderBar;func&period;sh</code></a> <em>Common function script for parsing, setting, and status checking.</em></li>
+<li><a class="file_link" href="index.html?q=/test_tipc/compare_results.py" id="/test_tipc/compare_results.py"><code>compare&UnderBar;results&period;py</code></a> <em>Compares log results with ground truth for testing.</em></li>
+<li><a class="file_link" href="index.html?q=/test_tipc/extract_loss.py" id="/test_tipc/extract_loss.py"><code>extract&UnderBar;loss&period;py</code></a> <em>Extracts and processes expressions for calculations.</em></li>
+<li><a class="file_link" href="index.html?q=/test_tipc/prepare.sh" id="/test_tipc/prepare.sh"><code>prepare&period;sh</code></a> <em>Prepare PaddlePaddle's video models, handle data &amp; install packages</em></li>
+<li><a class="file_link" href="index.html?q=/test_tipc/README.md" id="/test_tipc/README.md"><code>README&period;md</code></a> <em>TIPC-supported PaddleVideo tutorials and features.</em></li>
+<li><a class="file_link" href="index.html?q=/test_tipc/test_inference_cpp.sh" id="/test_tipc/test_inference_cpp.sh"><code>test&UnderBar;inference&UnderBar;cpp&period;sh</code></a> <em>PaddleVideo model inference tests with MKLDNN or float point precision.</em></li>
+<li><a class="file_link" href="index.html?q=/test_tipc/test_paddle2onnx.sh" id="/test_tipc/test_paddle2onnx.sh"><code>test&UnderBar;paddle2onnx&period;sh</code></a> <em>Convert PaddlePaddle to ONNX.</em></li>
+<li><a class="file_link" href="index.html?q=/test_tipc/test_ptq_inference_python.sh" id="/test_tipc/test_ptq_inference_python.sh"><code>test&UnderBar;ptq&UnderBar;inference&UnderBar;python&period;sh</code></a> <em>Script for PaddleVideo model inference tests on GPUs/CPUs with varied batch sizes.</em></li>
+<li><a class="file_link" href="index.html?q=/test_tipc/test_serving_infer_cpp.sh" id="/test_tipc/test_serving_infer_cpp.sh"><code>test&UnderBar;serving&UnderBar;infer&UnderBar;cpp&period;sh</code></a> <em>Bash script initializes model, serves via Python/C++, tests web function with IFS separation.</em></li>
+<li><a class="file_link" href="index.html?q=/test_tipc/test_serving_infer_python.sh" id="/test_tipc/test_serving_infer_python.sh"><code>test&UnderBar;serving&UnderBar;infer&UnderBar;python&period;sh</code></a> <em>Configures model serving, sets up API server, transfers model, and handles cleanup tasks.</em></li>
+<li><a class="file_link" href="index.html?q=/test_tipc/test_train_dy2static_python.sh" id="/test_tipc/test_train_dy2static_python.sh"><code>test&UnderBar;train&UnderBar;dy2static&UnderBar;python&period;sh</code></a> <em>Trains and analyzes two models, compares losses, logs differences.</em></li>
+<li><a class="file_link" href="index.html?q=/test_tipc/test_train_inference_python.sh" id="/test_tipc/test_train_inference_python.sh"><code>test&UnderBar;train&UnderBar;inference&UnderBar;python&period;sh</code></a> <em>Efficient PaddleVideo model training and evaluation.</em></li>
+<li><a class="file_link" href="index.html?q=/test_tipc/test_train_inference_python_npu.sh" id="/test_tipc/test_train_inference_python_npu.sh"><code>test&UnderBar;train&UnderBar;inference&UnderBar;python&UnderBar;npu&period;sh</code></a> <em>Update config for NPU, disable MKLDNN on non-x86_64, set Python to 3.9, change exec script to "npu".</em></li>
+<li><a class="file_link" href="index.html?q=/test_tipc/test_train_inference_python_xpu.sh" id="/test_tipc/test_train_inference_python_xpu.sh"><code>test&UnderBar;train&UnderBar;inference&UnderBar;python&UnderBar;xpu&period;sh</code></a> <em>XPU PaddleVideo script with Python 3.9 NPU, logs start.</em></li>
+</ul>
+</li>
+<li><span hierarchy="1" class="expanded" onclick="toggleVisibility(this)" ><strong class="directory" id="/tools/"><code>tools</code></strong> <em>Video Modeling Tools</em></span><ul>
+<li><a class="file_link" href="index.html?q=/tools/__init__.py" id="/tools/__init__.py"><code>&UnderBar;&UnderBar;init&UnderBar;&UnderBar;&period;py</code></a> <em>Imports and defines package contents.</em></li>
+<li><a class="file_link" href="index.html?q=/tools/ava_predict.py" id="/tools/ava_predict.py"><code>ava&UnderBar;predict&period;py</code></a> <em>AVA model prediction with PaddleVideo and OpenCV.</em></li>
+<li><a class="file_link" href="index.html?q=/tools/export_model.py" id="/tools/export_model.py"><code>export&UnderBar;model&period;py</code></a> <em>Export PaddleVideo model functions.</em></li>
+<li><a class="file_link" href="index.html?q=/tools/predict.py" id="/tools/predict.py"><code>predict&period;py</code></a> <em>Paddle Video Tool: Predict with TensorRT YOWO</em></li>
+<li><a class="file_link" href="index.html?q=/tools/summary.py" id="/tools/summary.py"><code>summary&period;py</code></a> <em>PaddleVideo model construction and evaluation.</em></li>
+<li><a class="file_link" href="index.html?q=/tools/utils.py" id="/tools/utils.py"><code>utils&period;py</code></a> <em>PaddleVideo tools for inference, detection, and pose estimation</em></li>
+<li><a class="file_link" href="index.html?q=/tools/wheel.py" id="/tools/wheel.py"><code>wheel&period;py</code></a> <em>Wheel.py: Downloads, initializes, and iterates model results for video label prediction.</em></li>
 </ul>
 </li>
 </ul>
 </li>
 </ul>
-</li>
-</ul>
-</li>
-</ul>
-<p>Brief: PaddlePaddle base loss init &amp; forward pass support.</em>
-                - <a class="file_link" href="index.html?q=/paddlevideo/modeling/losses/bmn_loss.py" id="/paddlevideo/modeling/losses/bmn_loss.py"><code>bmn&UnderBar;loss&period;py</code></a> <em>BMN loss function, PaddleVideo.</em>
-                - <a class="file_link" href="index.html?q=/paddlevideo/modeling/losses/cross_entropy_loss.py" id="/paddlevideo/modeling/losses/cross_entropy_loss.py"><code>cross&UnderBar;entropy&UnderBar;loss&period;py</code></a> <em>Custom PaddlePaddle loss for classification tasks</em>
-                - <a class="file_link" href="index.html?q=/paddlevideo/modeling/losses/depth_loss.py" id="/paddlevideo/modeling/losses/depth_loss.py"><code>depth&UnderBar;loss&period;py</code></a> <em>Calculates depth losses for disparity tasks.</em>
-                - <a class="file_link" href="index.html?q=/paddlevideo/modeling/losses/distillation_loss.py" id="/paddlevideo/modeling/losses/distillation_loss.py"><code>distillation&UnderBar;loss&period;py</code></a> <em>Distillation loss, KL divergence, CrossEntropy, weighted average.</em>
-                - <a class="file_link" href="index.html?q=/paddlevideo/modeling/losses/transnetv2_loss.py" id="/paddlevideo/modeling/losses/transnetv2_loss.py"><code>transnetv2&UnderBar;loss&period;py</code></a> <em>TransNetV2 loss calculation class</em>
-                - <a class="file_link" href="index.html?q=/paddlevideo/modeling/losses/yowo_loss.py" id="/paddlevideo/modeling/losses/yowo_loss.py"><code>yowo&UnderBar;loss&period;py</code></a> <em>Optimize hard examples, YOLOv3-style losses for bounding box location, confidence, classification on GPU.</em>
-            - <a class="file_link" href="index.html?q=/paddlevideo/modeling/registry.py" id="/paddlevideo/modeling/registry.py"><code>registry&period;py</code></a> <em>Model registration for efficient organization.</em>
-            - <span hierarchy="3" class="expanded" onclick="toggleVisibility(this)" ><strong class="directory" id="/paddlevideo/modeling/samplers/"><code>samplers</code></strong> <em>Licensing, RandomSampler: Balanced bbox sampling.</em></span>
-                - <a class="file_link" href="index.html?q=/paddlevideo/modeling/samplers/__init__.py" id="/paddlevideo/modeling/samplers/__init__.py"><code>&UnderBar;&UnderBar;init&UnderBar;&UnderBar;&period;py</code></a> <em>Licensing, RandomSampler import.</em>
-                - <a class="file_link" href="index.html?q=/paddlevideo/modeling/samplers/random_sampler.py" id="/paddlevideo/modeling/samplers/random_sampler.py"><code>random&UnderBar;sampler&period;py</code></a> <em>RandomSampler: Balanced positive-negative bbox sampling.</em>
-            - <a class="file_link" href="index.html?q=/paddlevideo/modeling/weight_init.py" id="/paddlevideo/modeling/weight_init.py"><code>weight&UnderBar;init&period;py</code></a> <em>Initialize layer weights in PaddlePaddle.</em>
-        - <span hierarchy="2" class="expanded" onclick="toggleVisibility(this)" ><strong class="directory" id="/paddlevideo/solver/"><code>solver</code></strong> <em>Optimizer and learning rate schedulers for PaddleVideo.</em></span>
-            - <a class="file_link" href="index.html?q=/paddlevideo/solver/__init__.py" id="/paddlevideo/solver/__init__.py"><code>&UnderBar;&UnderBar;init&UnderBar;&UnderBar;&period;py</code></a> <em>Imports optimizer and learning rate functions under Apache 2.0 license.</em>
-            - <a class="file_link" href="index.html?q=/paddlevideo/solver/custom_lr.py" id="/paddlevideo/solver/custom_lr.py"><code>custom&UnderBar;lr&period;py</code></a> <em>Custom warmup &amp; decay schedulers for PaddleVideo.</em>
-            - <a class="file_link" href="index.html?q=/paddlevideo/solver/lr.py" id="/paddlevideo/solver/lr.py"><code>lr&period;py</code></a> <em>Learning rate scheduler construction.</em>
-            - <a class="file_link" href="index.html?q=/paddlevideo/solver/optimizer.py" id="/paddlevideo/solver/optimizer.py"><code>optimizer&period;py</code></a> <em>Initializes optimizer configurations, handles decay and creates optimizer.</em>
-        - <span hierarchy="2" class="expanded" onclick="toggleVisibility(this)" ><strong class="directory" id="/paddlevideo/tasks/"><code>tasks</code></strong> <em>Trains PaddleVideo models with various tasks and configurations.</em></span>
-            - <a class="file_link" href="index.html?q=/paddlevideo/tasks/__init__.py" id="/paddlevideo/tasks/__init__.py"><code>&UnderBar;&UnderBar;init&UnderBar;&UnderBar;&period;py</code></a> <em>PaddleVideo tasks module initialization file</em>
-            - <a class="file_link" href="index.html?q=/paddlevideo/tasks/test.py" id="/paddlevideo/tasks/test.py"><code>test&period;py</code></a> <em>Test PaddlePaddle models in parallel</em>
-            - <a class="file_link" href="index.html?q=/paddlevideo/tasks/train.py" id="/paddlevideo/tasks/train.py"><code>train&period;py</code></a> <em>Train PaddlePaddle's Distributed Model with AMP, Log, Evaluate, and Save.</em>
-            - <a class="file_link" href="index.html?q=/paddlevideo/tasks/train_dali.py" id="/paddlevideo/tasks/train_dali.py"><code>train&UnderBar;dali&period;py</code></a> <em>Trains DALI TSN model with optimization steps, logs metrics.</em>
-            - <a class="file_link" href="index.html?q=/paddlevideo/tasks/train_multigrid.py" id="/paddlevideo/tasks/train_multigrid.py"><code>train&UnderBar;multigrid&period;py</code></a> <em>Trains PaddleVideo models with multigrid configuration.</em>
-        - <span hierarchy="2" class="expanded" onclick="toggleVisibility(this)" ><strong class="directory" id="/paddlevideo/utils/"><code>utils</code></strong> <em>PaddleVideo ML &amp; video utilities.</em></span>
-            - <a class="file_link" href="index.html?q=/paddlevideo/utils/__init__.py" id="/paddlevideo/utils/__init__.py"><code>&UnderBar;&UnderBar;init&UnderBar;&UnderBar;&period;py</code></a> <em>PaddleVideo utils initialization.</em>
-            - <a class="file_link" href="index.html?q=/paddlevideo/utils/build_utils.py" id="/paddlevideo/utils/build_utils.py"><code>build&UnderBar;utils&period;py</code></a> <em>Build utility function for object creation from config and registry.</em>
-            - <a class="file_link" href="index.html?q=/paddlevideo/utils/config.py" id="/paddlevideo/utils/config.py"><code>config&period;py</code></a> <em>Configure and load YAML files with AttrDict, logger, visualization support.</em>
-            - <a class="file_link" href="index.html?q=/paddlevideo/utils/dist_utils.py" id="/paddlevideo/utils/dist_utils.py"><code>dist&UnderBar;utils&period;py</code></a> <em>Distributed computing utilities for PaddleVideo.</em>
-            - <a class="file_link" href="index.html?q=/paddlevideo/utils/logger.py" id="/paddlevideo/utils/logger.py"><code>logger&period;py</code></a> <em>PaddleVideo's colorful logger setup with non-propagation.</em>
-            - <span hierarchy="3" class="expanded" onclick="toggleVisibility(this)" ><strong class="directory" id="/paddlevideo/utils/multigrid/"><code>multigrid</code></strong> <em>Multigrid utility functions for Paddle Video.</em></span>
-                - <a class="file_link" href="index.html?q=/paddlevideo/utils/multigrid/__init__.py" id="/paddlevideo/utils/multigrid/__init__.py"><code>&UnderBar;&UnderBar;init&UnderBar;&UnderBar;&period;py</code></a> <em>Imports useful functions from PaddleVideo library.</em>
-                - <a class="file_link" href="index.html?q=/paddlevideo/utils/multigrid/batchnorm_helper.py" id="/paddlevideo/utils/multigrid/batchnorm_helper.py"><code>batchnorm&UnderBar;helper&period;py</code></a> <em>BatchNorm3D helper for PyTorch</em>
-                - <a class="file_link" href="index.html?q=/paddlevideo/utils/multigrid/interval_helper.py" id="/paddlevideo/utils/multigrid/interval_helper.py"><code>interval&UnderBar;helper&period;py</code></a> <em>Determine evaluation epoch using multigrid schedule</em>
-                - <a class="file_link" href="index.html?q=/paddlevideo/utils/multigrid/multigrid.py" id="/paddlevideo/utils/multigrid/multigrid.py"><code>multigrid&period;py</code></a> <em>Manages multigrid training schedules.</em>
-                - <a class="file_link" href="index.html?q=/paddlevideo/utils/multigrid/save_load_helper.py" id="/paddlevideo/utils/multigrid/save_load_helper.py"><code>save&UnderBar;load&UnderBar;helper&period;py</code></a> <em>Ensures state dict consistency and loads pre-trained weights.</em>
-                - <a class="file_link" href="index.html?q=/paddlevideo/utils/multigrid/short_sampler.py" id="/paddlevideo/utils/multigrid/short_sampler.py"><code>short&UnderBar;sampler&period;py</code></a> <em>DistributedShortSampler: Efficient Distributed Data Loading</em>
-            - <a class="file_link" href="index.html?q=/paddlevideo/utils/precise_bn.py" id="/paddlevideo/utils/precise_bn.py"><code>precise&UnderBar;bn&period;py</code></a> <em>Precise Batch Normalization for faster training</em>
-            - <a class="file_link" href="index.html?q=/paddlevideo/utils/profiler.py" id="/paddlevideo/utils/profiler.py"><code>profiler&period;py</code></a> <em>PaddleVideo Profiler: Performance Analysis and Optimization Tool</em>
-            - <a class="file_link" href="index.html?q=/paddlevideo/utils/record.py" id="/paddlevideo/utils/record.py"><code>record&period;py</code></a> <em>Records metrics, calculates means, logs progress in training processes.</em>
-            - <a class="file_link" href="index.html?q=/paddlevideo/utils/registry.py" id="/paddlevideo/utils/registry.py"><code>registry&period;py</code></a> <em>Registry for mapping names to objects with registration and retrieval methods.</em>
-            - <a class="file_link" href="index.html?q=/paddlevideo/utils/save_load.py" id="/paddlevideo/utils/save_load.py"><code>save&UnderBar;load&period;py</code></a> <em>Save/load functions for PaddlePaddle models.</em>
-        - <a class="file_link" href="index.html?q=/paddlevideo/version.py" id="/paddlevideo/version.py"><code>version&period;py</code></a> <em>PaddleVideo version 0.0.1, Apache License 2.0</em>
-    - <a class="file_link" href="index.html?q=/README.md" id="/README.md"><code>README&period;md</code></a> <em>Advanced video processing library with deployment support</em>
-    - <a class="file_link" href="index.html?q=/README_en.md" id="/README_en.md"><code>README&UnderBar;en&period;md</code></a> <em>Deep learning library for video processing</em>
-    - <a class="file_link" href="index.html?q=/run.sh" id="/run.sh"><code>run&period;sh</code></a> <em>Trains deep learning models for computer vision tasks using PaddlePaddle.</em>
-    - <a class="file_link" href="index.html?q=/setup.py" id="/setup.py"><code>setup&period;py</code></a> <em>PaddleVideo setup: PaddlePaddle-powered video tool, Python 3.7.</em>
-    - <span hierarchy="1" class="expanded" onclick="toggleVisibility(this)" ><strong class="directory" id="/test_tipc/"><code>test&UnderBar;tipc</code></strong> <em>Test Paddle Video, GPU/CPU benchmarking.</em></span>
-        - <a class="file_link" href="index.html?q=/test_tipc/benchmark_train.sh" id="/test_tipc/benchmark_train.sh"><code>benchmark&UnderBar;train&period;sh</code></a> <em>Benchmarks PaddleVideo model, adjusting batch sizes and precisions for performance.</em>
-        - <a class="file_link" href="index.html?q=/test_tipc/common_func.sh" id="/test_tipc/common_func.sh"><code>common&UnderBar;func&period;sh</code></a> <em>Common function script for parsing, setting, and status checking.</em>
-        - <a class="file_link" href="index.html?q=/test_tipc/compare_results.py" id="/test_tipc/compare_results.py"><code>compare&UnderBar;results&period;py</code></a> <em>Compares log results with ground truth for testing.</em>
-        - <a class="file_link" href="index.html?q=/test_tipc/extract_loss.py" id="/test_tipc/extract_loss.py"><code>extract&UnderBar;loss&period;py</code></a> <em>Extracts and processes expressions for calculations.</em>
-        - <a class="file_link" href="index.html?q=/test_tipc/prepare.sh" id="/test_tipc/prepare.sh"><code>prepare&period;sh</code></a> <em>Prepare PaddlePaddle's video models, handle data &amp; install packages</em>
-        - <a class="file_link" href="index.html?q=/test_tipc/README.md" id="/test_tipc/README.md"><code>README&period;md</code></a> <em>TIPC-supported PaddleVideo tutorials and features.</em>
-        - <a class="file_link" href="index.html?q=/test_tipc/test_inference_cpp.sh" id="/test_tipc/test_inference_cpp.sh"><code>test&UnderBar;inference&UnderBar;cpp&period;sh</code></a> <em>PaddleVideo model inference tests with MKLDNN or float point precision.</em>
-        - <a class="file_link" href="index.html?q=/test_tipc/test_paddle2onnx.sh" id="/test_tipc/test_paddle2onnx.sh"><code>test&UnderBar;paddle2onnx&period;sh</code></a> <em>Convert PaddlePaddle to ONNX.</em>
-        - <a class="file_link" href="index.html?q=/test_tipc/test_ptq_inference_python.sh" id="/test_tipc/test_ptq_inference_python.sh"><code>test&UnderBar;ptq&UnderBar;inference&UnderBar;python&period;sh</code></a> <em>Script for PaddleVideo model inference tests on GPUs/CPUs with varied batch sizes.</em>
-        - <a class="file_link" href="index.html?q=/test_tipc/test_serving_infer_cpp.sh" id="/test_tipc/test_serving_infer_cpp.sh"><code>test&UnderBar;serving&UnderBar;infer&UnderBar;cpp&period;sh</code></a> <em>Bash script initializes model, serves via Python/C++, tests web function with IFS separation.</em>
-        - <a class="file_link" href="index.html?q=/test_tipc/test_serving_infer_python.sh" id="/test_tipc/test_serving_infer_python.sh"><code>test&UnderBar;serving&UnderBar;infer&UnderBar;python&period;sh</code></a> <em>Configures model serving, sets up API server, transfers model, and handles cleanup tasks.</em>
-        - <a class="file_link" href="index.html?q=/test_tipc/test_train_dy2static_python.sh" id="/test_tipc/test_train_dy2static_python.sh"><code>test&UnderBar;train&UnderBar;dy2static&UnderBar;python&period;sh</code></a> <em>Trains and analyzes two models, compares losses, logs differences.</em>
-        - <a class="file_link" href="index.html?q=/test_tipc/test_train_inference_python.sh" id="/test_tipc/test_train_inference_python.sh"><code>test&UnderBar;train&UnderBar;inference&UnderBar;python&period;sh</code></a> <em>Efficient PaddleVideo model training and evaluation.</em>
-        - <a class="file_link" href="index.html?q=/test_tipc/test_train_inference_python_npu.sh" id="/test_tipc/test_train_inference_python_npu.sh"><code>test&UnderBar;train&UnderBar;inference&UnderBar;python&UnderBar;npu&period;sh</code></a> <em>Update config for NPU, disable MKLDNN on non-x86_64, set Python to 3.9, change exec script to "npu".</em>
-        - <a class="file_link" href="index.html?q=/test_tipc/test_train_inference_python_xpu.sh" id="/test_tipc/test_train_inference_python_xpu.sh"><code>test&UnderBar;train&UnderBar;inference&UnderBar;python&UnderBar;xpu&period;sh</code></a> <em>XPU PaddleVideo script with Python 3.9 NPU, logs start.</em>
-    - <span hierarchy="1" class="expanded" onclick="toggleVisibility(this)" ><strong class="directory" id="/tools/"><code>tools</code></strong> <em>Video Modeling Tools</em></span>
-        - <a class="file_link" href="index.html?q=/tools/__init__.py" id="/tools/__init__.py"><code>&UnderBar;&UnderBar;init&UnderBar;&UnderBar;&period;py</code></a> <em>Imports and defines package contents.</em>
-        - <a class="file_link" href="index.html?q=/tools/ava_predict.py" id="/tools/ava_predict.py"><code>ava&UnderBar;predict&period;py</code></a> <em>AVA model prediction with PaddleVideo and OpenCV.</em>
-        - <a class="file_link" href="index.html?q=/tools/export_model.py" id="/tools/export_model.py"><code>export&UnderBar;model&period;py</code></a> <em>Export PaddleVideo model functions.</em>
-        - <a class="file_link" href="index.html?q=/tools/predict.py" id="/tools/predict.py"><code>predict&period;py</code></a> <em>Paddle Video Tool: Predict with TensorRT YOWO</em>
-        - <a class="file_link" href="index.html?q=/tools/summary.py" id="/tools/summary.py"><code>summary&period;py</code></a> <em>PaddleVideo model construction and evaluation.</em>
-        - <a class="file_link" href="index.html?q=/tools/utils.py" id="/tools/utils.py"><code>utils&period;py</code></a> <em>PaddleVideo tools for inference, detection, and pose estimation</em>
-        - <a class="file_link" href="index.html?q=/tools/wheel.py" id="/tools/wheel.py"><code>wheel&period;py</code></a> <em>Wheel.py: Downloads, initializes, and iterates model results for video label prediction.</em></p>
     </article>
     <script type="text/javascript">
         function getQueryParams() {

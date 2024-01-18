@@ -437,7 +437,7 @@
         "86": {
             "filepath": "/applications/EIVideo/README.md",
             "entry_id": 926,
-            "language_id": "plain-text"
+            "language_id": "markdown"
         },
         "87": {
             "filepath": "/applications/EIVideo/resources/QT/demo.ui",
@@ -857,7 +857,7 @@
         "170": {
             "filepath": "/applications/PPHuman/README.md",
             "entry_id": 2188,
-            "language_id": "plain-text"
+            "language_id": "markdown"
         },
         "171": {
             "filepath": "/applications/PPHuman/datasets/prepare_dataset.py",
@@ -872,7 +872,7 @@
         "173": {
             "filepath": "/applications/T2VLAD/README.md",
             "entry_id": 2214,
-            "language_id": "markdown"
+            "language_id": "plain-text"
         },
         "174": {
             "filepath": "/applications/T2VLAD/README_en.md",
@@ -1572,7 +1572,7 @@
         "313": {
             "filepath": "/benchmark/TimeSformer/README.md",
             "entry_id": 3680,
-            "language_id": "markdown"
+            "language_id": "plain-text"
         },
         "314": {
             "filepath": "/benchmark/TimeSformer/run_all.sh",
@@ -1622,7 +1622,7 @@
         "323": {
             "filepath": "/deploy/cpp_infer/include/postprocess_op.h",
             "entry_id": 3808,
-            "language_id": "header"
+            "language_id": "c"
         },
         "324": {
             "filepath": "/deploy/cpp_infer/include/preprocess_op.h",
@@ -1632,12 +1632,12 @@
         "325": {
             "filepath": "/deploy/cpp_infer/include/utility.h",
             "entry_id": 3820,
-            "language_id": "header"
+            "language_id": "c++"
         },
         "326": {
             "filepath": "/deploy/cpp_infer/include/video_rec.h",
             "entry_id": 3826,
-            "language_id": "c++"
+            "language_id": "c"
         },
         "327": {
             "filepath": "/deploy/cpp_infer/readme.md",
@@ -1792,7 +1792,7 @@
         "357": {
             "filepath": "/english_documents/dataset/README.md",
             "entry_id": 4216,
-            "language_id": "plain-text"
+            "language_id": "markdown"
         },
         "358": {
             "filepath": "/english_documents/dataset/SegmentationDataset.md",
@@ -3152,7 +3152,7 @@
         "629": {
             "filepath": "/test_tipc/README.md",
             "entry_id": 8496,
-            "language_id": "markdown"
+            "language_id": "plain-text"
         },
         "630": {
             "filepath": "/test_tipc/benchmark_train.sh",
