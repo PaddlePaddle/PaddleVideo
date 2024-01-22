@@ -27,12 +27,12 @@
         "4": {
             "filepath": "/applications/AbnormalActionDetection/README.md",
             "entry_id": 24,
-            "language_id": "plain-text"
+            "language_id": "markdown"
         },
         "5": {
             "filepath": "/applications/Anti-UAV/README.md",
             "entry_id": 32,
-            "language_id": "markdown"
+            "language_id": "plain-text"
         },
         "6": {
             "filepath": "/applications/Anti-UAV/get_image_label.py",
@@ -42,7 +42,7 @@
         "7": {
             "filepath": "/applications/BasketballAction/README.md",
             "entry_id": 54,
-            "language_id": "plain-text"
+            "language_id": "markdown"
         },
         "8": {
             "filepath": "/applications/BasketballAction/predict/action_detect/action.py",
@@ -457,7 +457,7 @@
         "90": {
             "filepath": "/applications/FigureSkating/README.md",
             "entry_id": 974,
-            "language_id": "markdown"
+            "language_id": "plain-text"
         },
         "91": {
             "filepath": "/applications/FootballAction/README.md",
@@ -622,7 +622,7 @@
         "123": {
             "filepath": "/applications/Ma-Net/README.md",
             "entry_id": 1314,
-            "language_id": "plain-text"
+            "language_id": "markdown"
         },
         "124": {
             "filepath": "/applications/Ma-Net/README_cn.md",
@@ -857,7 +857,7 @@
         "170": {
             "filepath": "/applications/PPHuman/README.md",
             "entry_id": 2188,
-            "language_id": "plain-text"
+            "language_id": "markdown"
         },
         "171": {
             "filepath": "/applications/PPHuman/datasets/prepare_dataset.py",
@@ -867,7 +867,7 @@
         "172": {
             "filepath": "/applications/README.md",
             "entry_id": 2210,
-            "language_id": "markdown"
+            "language_id": "plain-text"
         },
         "173": {
             "filepath": "/applications/T2VLAD/README.md",
@@ -1422,7 +1422,7 @@
         "283": {
             "filepath": "/applications/VideoTag/README.md",
             "entry_id": 3326,
-            "language_id": "markdown"
+            "language_id": "plain-text"
         },
         "284": {
             "filepath": "/applications/VideoTag/Run.md",
@@ -1622,7 +1622,7 @@
         "323": {
             "filepath": "/deploy/cpp_infer/include/postprocess_op.h",
             "entry_id": 3808,
-            "language_id": "header"
+            "language_id": "c"
         },
         "324": {
             "filepath": "/deploy/cpp_infer/include/preprocess_op.h",
@@ -1632,12 +1632,12 @@
         "325": {
             "filepath": "/deploy/cpp_infer/include/utility.h",
             "entry_id": 3820,
-            "language_id": "c"
+            "language_id": "header"
         },
         "326": {
             "filepath": "/deploy/cpp_infer/include/video_rec.h",
             "entry_id": 3826,
-            "language_id": "c++"
+            "language_id": "c"
         },
         "327": {
             "filepath": "/deploy/cpp_infer/readme.md",
@@ -2282,7 +2282,7 @@
         "455": {
             "filepath": "/paddlevideo/metrics/ava_evaluation/README.md",
             "entry_id": 5570,
-            "language_id": "markdown"
+            "language_id": "plain-text"
         },
         "456": {
             "filepath": "/paddlevideo/metrics/ava_evaluation/metrics.py",
