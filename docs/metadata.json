@@ -12,7 +12,7 @@
         "1": {
             "filepath": "/README.md",
             "entry_id": 4,
-            "language_id": "plain-text"
+            "language_id": "markdown"
         },
         "2": {
             "filepath": "/README_en.md",
@@ -27,7 +27,7 @@
         "4": {
             "filepath": "/applications/AbnormalActionDetection/README.md",
             "entry_id": 24,
-            "language_id": "plain-text"
+            "language_id": "markdown"
         },
         "5": {
             "filepath": "/applications/Anti-UAV/README.md",
@@ -42,7 +42,7 @@
         "7": {
             "filepath": "/applications/BasketballAction/README.md",
             "entry_id": 54,
-            "language_id": "markdown"
+            "language_id": "plain-text"
         },
         "8": {
             "filepath": "/applications/BasketballAction/predict/action_detect/action.py",
@@ -147,7 +147,7 @@
         "28": {
             "filepath": "/applications/EIVideo/EIVideo/README.MD",
             "entry_id": 282,
-            "language_id": "plain-text"
+            "language_id": "markdown"
         },
         "29": {
             "filepath": "/applications/EIVideo/EIVideo/__init__.py",
@@ -452,7 +452,7 @@
         "89": {
             "filepath": "/applications/FightRecognition/README.md",
             "entry_id": 956,
-            "language_id": "plain-text"
+            "language_id": "markdown"
         },
         "90": {
             "filepath": "/applications/FigureSkating/README.md",
@@ -867,12 +867,12 @@
         "172": {
             "filepath": "/applications/README.md",
             "entry_id": 2210,
-            "language_id": "plain-text"
+            "language_id": "markdown"
         },
         "173": {
             "filepath": "/applications/T2VLAD/README.md",
             "entry_id": 2214,
-            "language_id": "plain-text"
+            "language_id": "markdown"
         },
         "174": {
             "filepath": "/applications/T2VLAD/README_en.md",
@@ -992,7 +992,7 @@
         "197": {
             "filepath": "/applications/TableTennis/ActionRecognition/README.md",
             "entry_id": 2570,
-            "language_id": "plain-text"
+            "language_id": "markdown"
         },
         "198": {
             "filepath": "/applications/TableTennis/datasets/script/submission_format_transfer.py",
@@ -1117,7 +1117,7 @@
         "222": {
             "filepath": "/applications/VideoQualityAssessment/README.md",
             "entry_id": 2798,
-            "language_id": "plain-text"
+            "language_id": "markdown"
         },
         "223": {
             "filepath": "/applications/VideoQualityAssessment/main.py",
@@ -1622,12 +1622,12 @@
         "323": {
             "filepath": "/deploy/cpp_infer/include/postprocess_op.h",
             "entry_id": 3808,
-            "language_id": "c++"
+            "language_id": "header"
         },
         "324": {
             "filepath": "/deploy/cpp_infer/include/preprocess_op.h",
             "entry_id": 3814,
-            "language_id": "c"
+            "language_id": "header"
         },
         "325": {
             "filepath": "/deploy/cpp_infer/include/utility.h",
@@ -1637,7 +1637,7 @@
         "326": {
             "filepath": "/deploy/cpp_infer/include/video_rec.h",
             "entry_id": 3826,
-            "language_id": "header"
+            "language_id": "c++"
         },
         "327": {
             "filepath": "/deploy/cpp_infer/readme.md",
