@@ -27,7 +27,7 @@
         "4": {
             "filepath": "/applications/AbnormalActionDetection/README.md",
             "entry_id": 24,
-            "language_id": "markdown"
+            "language_id": "plain-text"
         },
         "5": {
             "filepath": "/applications/Anti-UAV/README.md",
@@ -42,7 +42,7 @@
         "7": {
             "filepath": "/applications/BasketballAction/README.md",
             "entry_id": 54,
-            "language_id": "plain-text"
+            "language_id": "markdown"
         },
         "8": {
             "filepath": "/applications/BasketballAction/predict/action_detect/action.py",
@@ -437,7 +437,7 @@
         "86": {
             "filepath": "/applications/EIVideo/README.md",
             "entry_id": 926,
-            "language_id": "plain-text"
+            "language_id": "markdown"
         },
         "87": {
             "filepath": "/applications/EIVideo/resources/QT/demo.ui",
@@ -457,7 +457,7 @@
         "90": {
             "filepath": "/applications/FigureSkating/README.md",
             "entry_id": 974,
-            "language_id": "plain-text"
+            "language_id": "markdown"
         },
         "91": {
             "filepath": "/applications/FootballAction/README.md",
@@ -757,7 +757,7 @@
         "150": {
             "filepath": "/applications/MultimodalVideoTag/README.md",
             "entry_id": 1900,
-            "language_id": "plain-text"
+            "language_id": "markdown"
         },
         "151": {
             "filepath": "/applications/MultimodalVideoTag/download.sh",
@@ -872,7 +872,7 @@
         "173": {
             "filepath": "/applications/T2VLAD/README.md",
             "entry_id": 2214,
-            "language_id": "markdown"
+            "language_id": "plain-text"
         },
         "174": {
             "filepath": "/applications/T2VLAD/README_en.md",
@@ -992,7 +992,7 @@
         "197": {
             "filepath": "/applications/TableTennis/ActionRecognition/README.md",
             "entry_id": 2570,
-            "language_id": "markdown"
+            "language_id": "plain-text"
         },
         "198": {
             "filepath": "/applications/TableTennis/datasets/script/submission_format_transfer.py",
@@ -1422,7 +1422,7 @@
         "283": {
             "filepath": "/applications/VideoTag/README.md",
             "entry_id": 3326,
-            "language_id": "markdown"
+            "language_id": "plain-text"
         },
         "284": {
             "filepath": "/applications/VideoTag/Run.md",
@@ -1572,7 +1572,7 @@
         "313": {
             "filepath": "/benchmark/TimeSformer/README.md",
             "entry_id": 3680,
-            "language_id": "markdown"
+            "language_id": "plain-text"
         },
         "314": {
             "filepath": "/benchmark/TimeSformer/run_all.sh",
@@ -1627,12 +1627,12 @@
         "324": {
             "filepath": "/deploy/cpp_infer/include/preprocess_op.h",
             "entry_id": 3814,
-            "language_id": "header"
+            "language_id": "c++"
         },
         "325": {
             "filepath": "/deploy/cpp_infer/include/utility.h",
             "entry_id": 3820,
-            "language_id": "header"
+            "language_id": "c"
         },
         "326": {
             "filepath": "/deploy/cpp_infer/include/video_rec.h",
@@ -1842,7 +1842,7 @@
         "367": {
             "filepath": "/english_documents/model_zoo/README.md",
             "entry_id": 4294,
-            "language_id": "markdown"
+            "language_id": "plain-text"
         },
         "368": {
             "filepath": "/english_documents/model_zoo/detection/SlowFast_FasterRCNN_en.md",
@@ -2282,7 +2282,7 @@
         "455": {
             "filepath": "/paddlevideo/metrics/ava_evaluation/README.md",
             "entry_id": 5570,
-            "language_id": "plain-text"
+            "language_id": "markdown"
         },
         "456": {
             "filepath": "/paddlevideo/metrics/ava_evaluation/metrics.py",
@@ -3152,7 +3152,7 @@
         "629": {
             "filepath": "/test_tipc/README.md",
             "entry_id": 8496,
-            "language_id": "markdown"
+            "language_id": "plain-text"
         },
         "630": {
             "filepath": "/test_tipc/benchmark_train.sh",
